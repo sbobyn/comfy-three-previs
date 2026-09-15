@@ -11,10 +11,13 @@
     "check": "pnpm typecheck && pnpm build"
   },
   "devDependencies": {
+    "@types/node": "^26.6.0",
     "@types/three": "^0.185.0",
+    "@types/ws": "^8.18.1",
     "prettier": "3.6.2",
     "three": "0.185.1",
     "typescript": "^5.9.3",
-    "vite": "^7.1.0"
+    "vite": "^7.1.0",
+    "ws": "^8.21.3"
   }
 }
