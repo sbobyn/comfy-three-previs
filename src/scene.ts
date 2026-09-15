@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 export type Stage = {
   target: THREE.Object3D;
+  ghost: THREE.Object3D;
   render: () => void;
   dispose: () => void;
 };
@@ -32,6 +33,14 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   target.add(new THREE.AxesHelper(1.6));
   scene.add(target);
 
+  // Unsmoothed reference drawn in the same place, so the lag and tremor that
+  // smoothing removes are visible directly rather than inferred.
+  const ghost = new THREE.Mesh(
+    new THREE.BoxGeometry(1.06, 1.86, 0.26),
+    new THREE.MeshBasicMaterial({ color: 0xff7a45, wireframe: true, transparent: true, opacity: 0.55 }),
+  );
+  scene.add(ghost);
+
   const grid = new THREE.GridHelper(10, 10, 0x3a3a4a, 0x24242e);
   grid.position.y = -1.6;
   scene.add(grid);
@@ -47,6 +56,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
 
   return {
     target,
+    ghost,
     render: () => renderer.render(scene, camera),
     dispose: () => {
       window.removeEventListener("resize", resize);
