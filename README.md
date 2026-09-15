@@ -4,7 +4,20 @@ R&D prototype: use a phone as a virtual camera head — stream device orientatio
 to a Three.js scene, record it as a take, and eventually drive a GenDirector
 camera's rotation while a motion path drives its position.
 
-Status: boilerplate only (spinning cube). No phone transport yet.
+Status: orientation streams from an iPhone to the desktop scene. No smoothing or
+take recording yet.
+
+## Measured — 2026-09-15, iPhone over a cloudflared quick tunnel
+
+| | |
+|---|---|
+| rate | 60 Hz (iOS `deviceorientation` cap) |
+| latency | 12.3 ms (echo-ping RTT/2) |
+| jitter | 1.0 – 2.9 ms |
+| drift | 0.3° over 60 s, phone stationary |
+
+The tunnel is in that path — traffic reaches the phone via a Cloudflare edge and
+back — so this is a pessimistic figure; a direct LAN link would be lower.
 
 ## Commands
 
