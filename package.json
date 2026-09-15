@@ -1,0 +1,20 @@
+{
+  "name": "three-vcam",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.18.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5187",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm typecheck && pnpm build"
+  },
+  "devDependencies": {
+    "@types/three": "^0.185.0",
+    "prettier": "3.6.2",
+    "three": "0.185.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0"
+  }
+}
