@@ -54,6 +54,29 @@ export class YawZero {
   }
 }
 
+export type Grip = "portrait" | "landscape-left" | "landscape-right";
+
+const gripRoll: Record<Grip, number> = {
+  portrait: 0,
+  "landscape-left": Math.PI / 2,
+  "landscape-right": -Math.PI / 2,
+};
+
+const gripQuaternion = new THREE.Quaternion();
+const viewAxis = new THREE.Vector3(0, 0, 1);
+
+/**
+ * A fixed roll about the view axis declaring how the operator holds the device —
+ * the rig equivalent of mounting a camera body sideways. Unlike the screen
+ * orientation term this deliberately omits, it is a chosen constant, not a
+ * reaction to the browser rotating, so it never fights the operator's own roll.
+ */
+export function applyGrip(q: THREE.Quaternion, grip: Grip): THREE.Quaternion {
+  const roll = gripRoll[grip];
+  if (roll === 0) return q;
+  return q.multiply(gripQuaternion.setFromAxisAngle(viewAxis, roll));
+}
+
 type PermissionRequestable = {
   requestPermission?: () => Promise<"granted" | "denied" | "prompt">;
 };

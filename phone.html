@@ -48,6 +48,14 @@
         flex-direction: column;
         gap: 10px;
       }
+      select {
+        padding: 14px;
+        font: inherit;
+        color: #e6e6f0;
+        background: #26263a;
+        border: 1px solid #3a3a52;
+        border-radius: 12px;
+      }
       button {
         padding: 18px;
         font: inherit;
@@ -80,6 +88,12 @@
       </dl>
     </div>
     <div class="controls">
+      <label for="grip" style="color: #9a9ab0">Grip</label>
+      <select id="grip">
+        <option value="portrait">Portrait — upright</option>
+        <option value="landscape-left">Landscape — rotated left</option>
+        <option value="landscape-right">Landscape — rotated right</option>
+      </select>
       <button id="enable">Enable Motion</button>
       <button id="zero" disabled>Re-zero</button>
     </div>

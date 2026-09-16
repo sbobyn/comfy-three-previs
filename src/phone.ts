@@ -1,5 +1,11 @@
 import { element } from "./dom";
-import { onDeviceQuaternion, requestMotionPermission, YawZero } from "./orientation";
+import {
+  applyGrip,
+  onDeviceQuaternion,
+  requestMotionPermission,
+  YawZero,
+  type Grip,
+} from "./orientation";
 import { relayUrl, type PhoneMessage, type ViewerMessage } from "./protocol";
 
 const enableButton = element<HTMLButtonElement>("enable");
@@ -7,6 +13,7 @@ const zeroButton = element<HTMLButtonElement>("zero");
 const linkField = element("link");
 const sensorField = element("sensor");
 const sentField = element("sent");
+const gripSelect = element<HTMLSelectElement>("grip");
 
 const yawZero = new YawZero();
 let socket: WebSocket | null = null;
@@ -49,6 +56,9 @@ enableButton.addEventListener("click", async () => {
   }
 
   onDeviceQuaternion((q) => {
+    // Grip is a body-mount constant, so it applies before the re-zero that
+    // decides which way the operator is pointing.
+    applyGrip(q, gripSelect.value as Grip);
     if (pendingZero) {
       yawZero.capture(q);
       pendingZero = false;
