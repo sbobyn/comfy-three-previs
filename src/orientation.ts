@@ -1,9 +1,7 @@
 import * as THREE from "three";
 
-const zee = new THREE.Vector3(0, 0, 1);
 const up = new THREE.Vector3(0, 1, 0);
 const euler = new THREE.Euler();
-const screenQuat = new THREE.Quaternion();
 
 // -90° about X: maps "phone held upright, screen toward you" into camera space,
 // where the camera looks down -Z.
@@ -11,15 +9,20 @@ const deviceToCamera = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5
 
 /**
  * alpha/beta/gamma are intrinsic Z-X'-Y'' rotations, so they cannot be assigned
- * to an Euler directly — the YXZ order, the negated gamma and the two trailing
- * quaternions are all load-bearing.
+ * to an Euler directly — the YXZ order and the negated gamma are load-bearing.
+ *
+ * Deliberately omits the `screen.orientation.angle` term that
+ * DeviceOrientationControls applies. That term is for treating the phone as a
+ * window you look through, where the view should stay upright as the device
+ * rotates. Here the phone is a camera body, so rolling it into landscape is an
+ * intentional camera roll and cancelling it would discard the operator's input.
+ * Do not add it back.
  */
 export function deviceQuaternion(
   target: THREE.Quaternion,
   alphaDeg: number,
   betaDeg: number,
   gammaDeg: number,
-  screenDeg: number,
 ): THREE.Quaternion {
   euler.set(
     THREE.MathUtils.degToRad(betaDeg),
@@ -29,7 +32,6 @@ export function deviceQuaternion(
   );
   target.setFromEuler(euler);
   target.multiply(deviceToCamera);
-  target.multiply(screenQuat.setFromAxisAngle(zee, -THREE.MathUtils.degToRad(screenDeg)));
   return target;
 }
 
@@ -63,10 +65,6 @@ export async function requestMotionPermission(): Promise<boolean> {
   return (await ctor.requestPermission()) === "granted";
 }
 
-export function screenAngle(): number {
-  return screen.orientation?.angle ?? 0;
-}
-
 /** Attaches a deviceorientation listener; returns a detach function. */
 export function onDeviceQuaternion(
   handler: (q: THREE.Quaternion, event: DeviceOrientationEvent) => void,
@@ -74,7 +72,7 @@ export function onDeviceQuaternion(
   const quaternion = new THREE.Quaternion();
   const listener = (event: DeviceOrientationEvent): void => {
     if (event.alpha === null || event.beta === null || event.gamma === null) return;
-    deviceQuaternion(quaternion, event.alpha, event.beta, event.gamma, screenAngle());
+    deviceQuaternion(quaternion, event.alpha, event.beta, event.gamma);
     handler(quaternion, event);
   };
   window.addEventListener("deviceorientation", listener);
