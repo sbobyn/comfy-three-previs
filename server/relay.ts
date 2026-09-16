@@ -1,7 +1,15 @@
 import type { Server as HttpServer } from "node:http";
 import type { Http2SecureServer } from "node:http2";
 import { WebSocketServer, type WebSocket } from "ws";
-import { RELAY_PATH, REPLACED_BY_NEWER } from "../src/protocol";
+import { EVICTED_BY_VIEWER, RELAY_PATH, REPLACED_BY_NEWER } from "../src/protocol";
+
+function parseKind(text: string): string | null {
+  try {
+    return (JSON.parse(text) as { t?: string }).t ?? null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Attaches to Vite's own HTTP server so the phone page and the socket share one
@@ -35,9 +43,17 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer): void {
         const text = raw.toString();
         if (isPhone) {
           for (const viewer of viewers) viewer.send(text);
-        } else {
-          phone?.send(text);
+          return;
         }
+        // The relay is otherwise a dumb pipe, but a kick has to be acted on here
+        // rather than forwarded — the point is to hang up on a controller that
+        // may already be unresponsive.
+        if (parseKind(text) === "kick") {
+          phone?.close(EVICTED_BY_VIEWER, "disconnected from the viewer");
+          phone = null;
+          return;
+        }
+        phone?.send(text);
       });
 
       ws.on("close", () => {

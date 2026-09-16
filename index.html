@@ -58,23 +58,28 @@
       #cameraLabel {
         left: calc(50% + 16px);
       }
-      .panel {
+      /* One scrolling column, so panels can never overlap each other as they
+         grow or the window gets shorter. */
+      #leftColumn {
         position: fixed;
         left: 16px;
+        top: 16px;
+        bottom: 84px;
+        width: 250px;
         z-index: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+      }
+      .panel {
+        flex-shrink: 0;
         padding: 14px 16px;
         background: rgba(18, 18, 26, 0.85);
         border: 1px solid #2c2c40;
         border-radius: 10px;
         backdrop-filter: blur(8px);
-      }
-      #hud {
-        top: 16px;
-        min-width: 236px;
-      }
-      #controls {
-        bottom: 88px;
-        width: 248px;
       }
       h1 {
         margin: 0 0 10px;
@@ -216,6 +221,7 @@
     <div class="viewLabel" id="worldLabel">world · drag to orbit</div>
     <div class="viewLabel" id="cameraLabel">camera</div>
 
+    <div id="leftColumn">
     <div class="panel" id="hud">
       <h1>vcam link</h1>
       <dl>
@@ -237,6 +243,7 @@
         <dd id="lag">—</dd>
       </dl>
       <button id="mark">Mark drift baseline</button>
+      <button id="kick">Disconnect controller</button>
       <div class="legend">
         <i class="swatch" style="background: #4f8cff"></i>smoothed
         <i class="swatch" style="background: #ff7a45; margin-left: 10px"></i>raw
@@ -282,6 +289,7 @@
           ><input type="checkbox" id="loop" checked /> loop playback</label
         >
       </div>
+    </div>
     </div>
 
     <div id="transport">

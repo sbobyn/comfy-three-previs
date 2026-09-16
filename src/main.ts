@@ -20,6 +20,7 @@ const fields = {
   takeDuration: element("takeDuration"),
 };
 const markButton = element<HTMLButtonElement>("mark");
+const kickButton = element<HTMLButtonElement>("kick");
 const recordButton = element<HTMLButtonElement>("record");
 const playButton = element<HTMLButtonElement>("play");
 const loopToggle = element<HTMLInputElement>("loop");
@@ -215,6 +216,8 @@ markButton.addEventListener("click", () => {
   markYaw = yawDeg;
   markAt = performance.now();
 });
+
+kickButton.addEventListener("click", () => send({ t: "kick" }));
 
 function updateHud(): void {
   const now = performance.now();

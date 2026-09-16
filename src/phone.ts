@@ -6,7 +6,13 @@ import {
   YawZero,
   type Grip,
 } from "./orientation";
-import { relayUrl, REPLACED_BY_NEWER, type PhoneMessage, type ViewerMessage } from "./protocol";
+import {
+  EVICTED_BY_VIEWER,
+  relayUrl,
+  REPLACED_BY_NEWER,
+  type PhoneMessage,
+  type ViewerMessage,
+} from "./protocol";
 
 const enableButton = element<HTMLButtonElement>("enable");
 const zeroButton = element<HTMLButtonElement>("zero");
@@ -42,6 +48,10 @@ function connect(): void {
     socket = null;
     if (event.code === REPLACED_BY_NEWER) {
       linkField.textContent = "another controller took over — reload to reclaim";
+      return;
+    }
+    if (event.code === EVICTED_BY_VIEWER) {
+      linkField.textContent = "disconnected from the desktop — reload to reconnect";
       return;
     }
     linkField.textContent = "reconnecting…";
