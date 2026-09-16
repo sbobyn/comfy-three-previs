@@ -2,111 +2,159 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>three-vcam · phone</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <title>three-vcam · camera</title>
     <style>
       :root {
         color-scheme: dark;
       }
+      html,
       body {
         margin: 0;
-        min-height: 100dvh;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        gap: 24px;
-        padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
-        box-sizing: border-box;
-        background: #0e0e12;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
         color: #e6e6f0;
-        font: 15px/1.5 ui-sans-serif, system-ui, sans-serif;
+        font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
         -webkit-user-select: none;
         user-select: none;
+        overscroll-behavior: none;
       }
-      h1 {
-        margin: 0;
-        font-size: 17px;
-        font-weight: 600;
-        letter-spacing: 0.02em;
+      #scene {
+        display: block;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
       }
-      dl {
-        margin: 0;
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 8px 16px;
-        font-variant-numeric: tabular-nums;
-      }
-      dt {
+
+      #status {
+        position: fixed;
+        top: calc(10px + env(safe-area-inset-top));
+        left: calc(14px + env(safe-area-inset-left));
         color: #9a9ab0;
+        pointer-events: none;
+        text-shadow: 0 1px 3px #000;
       }
-      dd {
-        margin: 0;
-        text-align: right;
+      #status b {
+        color: #ff5a5a;
+        font-weight: 600;
       }
-      .controls {
+
+      /* Centred card: shown before motion is granted, and again if the slot is
+         taken, so reclaiming never needs a page reload. */
+      #start {
+        position: fixed;
+        inset: 0;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 24px;
+        background: rgba(8, 8, 12, 0.82);
+        backdrop-filter: blur(6px);
       }
+      #start[hidden] {
+        display: none;
+      }
+      #start h1 {
+        margin: 0;
+        font-size: 15px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #9a9ab0;
+      }
+      #start .field {
+        width: min(340px, 100%);
+      }
+
+      #bar {
+        position: fixed;
+        left: calc(14px + env(safe-area-inset-left));
+        right: calc(14px + env(safe-area-inset-right));
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        background: rgba(10, 10, 14, 0.72);
+        border: 1px solid #2c2c40;
+        border-radius: 14px;
+        backdrop-filter: blur(8px);
+      }
+      #bar[hidden] {
+        display: none;
+      }
+      #zoom {
+        flex: 1;
+        min-width: 80px;
+      }
+      #zoomValue {
+        min-width: 58px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
       input[type="range"] {
-        width: 100%;
-        height: 42px;
+        height: 40px;
         margin: 0;
         accent-color: #4f8cff;
       }
+      button,
       select {
-        padding: 14px;
+        padding: 12px 14px;
         font: inherit;
         color: #e6e6f0;
         background: #26263a;
         border: 1px solid #3a3a52;
-        border-radius: 12px;
-      }
-      button {
-        padding: 18px;
-        font: inherit;
-        font-weight: 600;
-        color: #e6e6f0;
-        background: #26263a;
-        border: 1px solid #3a3a52;
-        border-radius: 12px;
+        border-radius: 10px;
         touch-action: manipulation;
       }
-      button#zero {
+      select {
+        width: 100%;
+      }
+      #enable {
+        width: min(340px, 100%);
+        padding: 18px;
+        font-weight: 600;
         background: #2f4a86;
         border-color: #4f8cff;
       }
       button:disabled {
         opacity: 0.4;
       }
+      .ghost {
+        background: rgba(38, 38, 58, 0.6);
+      }
     </style>
   </head>
   <body>
-    <div>
-      <h1>three-vcam controller</h1>
-      <dl>
-        <dt>Link</dt>
-        <dd id="link">connecting…</dd>
-        <dt>Sensor</dt>
-        <dd id="sensor">not enabled</dd>
-        <dt>Sent</dt>
-        <dd id="sent">0</dd>
-      </dl>
-    </div>
-    <div class="controls">
-      <label for="zoom" style="color: #9a9ab0"
-        >Zoom<span id="zoomValue" style="float: right; color: #e6e6f0">35 mm</span></label
-      >
-      <input type="range" id="zoom" min="0" max="1" step="0.001" value="0.368" />
-      <label for="grip" style="color: #9a9ab0">Grip</label>
-      <select id="grip">
-        <option value="portrait">Portrait — upright</option>
-        <option value="landscape-left">Landscape — rotated left</option>
-        <option value="landscape-right">Landscape — rotated right</option>
-      </select>
+    <canvas id="scene"></canvas>
+
+    <div id="status"><span id="link">connecting…</span> · <span id="sensor">sensor off</span></div>
+
+    <div id="start">
+      <h1>three-vcam camera</h1>
+      <div class="field">
+        <select id="grip">
+          <option value="portrait">Portrait — upright</option>
+          <option value="landscape-left">Landscape — rotated left</option>
+          <option value="landscape-right">Landscape — rotated right</option>
+        </select>
+      </div>
       <button id="enable">Enable Motion</button>
-      <button id="zero" disabled>Re-zero</button>
     </div>
+
+    <div id="bar" hidden>
+      <button id="zero" class="ghost">Re-zero</button>
+      <input type="range" id="zoom" min="0" max="1" step="0.001" value="0.368" />
+      <span id="zoomValue">35 mm</span>
+      <button id="chrome" class="ghost">Hide</button>
+    </div>
+
     <script type="module" src="/src/phone.ts"></script>
   </body>
 </html>

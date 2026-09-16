@@ -167,6 +167,25 @@ shotDuration.addEventListener("input", () => {
 });
 applyDemo(demos[0]);
 
+let lastRig = "";
+
+/**
+ * Pushes only what the phone cannot derive locally. Diffed rather than sent on a
+ * timer, so a parked rig costs nothing and a moving one updates every frame.
+ */
+function sendRig(): void {
+  const payload = JSON.stringify({
+    t: "rig",
+    demo: demo.id,
+    u: dollyU,
+    format: formatSelect.value === "fill" ? null : Number(formatSelect.value),
+    settings,
+  });
+  if (payload === lastRig) return;
+  lastRig = payload;
+  if (socket?.readyState === WebSocket.OPEN) socket.send(payload);
+}
+
 function send(message: ViewerMessage): void {
   if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
 }
@@ -180,6 +199,9 @@ function connect(): void {
     if (message.t === "presence") {
       controllerPresent = message.controller;
       kickButton.disabled = !controllerPresent;
+      // A newly attached phone has no rig state, and the diff would otherwise
+      // suppress the next send until something happened to change.
+      if (controllerPresent) lastRig = "";
       return;
     }
 
@@ -372,6 +394,7 @@ const animate = (): void => {
   euler.setFromQuaternion(raw, "YXZ");
   yawDeg = THREE.MathUtils.radToDeg(euler.y);
 
+  sendRig();
   studio.render();
   requestAnimationFrame(animate);
 };

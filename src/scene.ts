@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { Demo } from "./demos";
+import { demoById, type Demo } from "./demos";
 import { FILM_GAUGE } from "./lens";
 
 // Helpers live on their own layer so the world view can show the rig while the
@@ -239,6 +239,80 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
       window.removeEventListener("resize", resize);
       controls.dispose();
       renderer.dispose();
+    },
+  };
+}
+
+export type Viewfinder = {
+  camera: THREE.PerspectiveCamera;
+  setRig: (demoId: string, u: number) => void;
+  setFocalLength: (mm: number) => void;
+  setFormat: (aspect: number | null) => void;
+  render: () => void;
+};
+
+/**
+ * The same set, rendered on the phone from the operator's own sensor rather than
+ * a round trip. Because the device knows where it is pointing before the desktop
+ * does, this viewfinder leads the desktop view instead of lagging it — which no
+ * video feed of the desktop could do.
+ */
+export function createViewfinder(canvas: HTMLCanvasElement): Viewfinder {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setScissorTest(true);
+  renderer.setClearColor(0x000000);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0e0e12);
+  scene.fog = new THREE.Fog(0x0e0e12, 45, 170);
+  buildSet(scene);
+
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.5, 300);
+  camera.filmGauge = FILM_GAUGE;
+  camera.position.copy(PARKED);
+
+  let focalLength = 35;
+  let format: number | null = 16 / 9;
+
+  const resize = (): void => {
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
+  };
+  window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", resize);
+  resize();
+
+  return {
+    camera,
+    setRig: (demoId: string, u: number) => {
+      const path = demoById(demoId).path;
+      if (path) path.getPointAt(Math.min(1, Math.max(0, u)), camera.position);
+      else camera.position.copy(PARKED);
+    },
+    setFocalLength: (mm: number) => {
+      focalLength = mm;
+    },
+    setFormat: (aspect: number | null) => {
+      format = aspect;
+    },
+    render: () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const frameHeight = format === null ? height : Math.min(height, width / format);
+      const frameWidth = format === null ? width : frameHeight * format;
+      const x = (width - frameWidth) / 2;
+      const y = (height - frameHeight) / 2;
+
+      camera.aspect = frameWidth / frameHeight;
+      camera.setFocalLength(focalLength);
+
+      renderer.setViewport(0, 0, width, height);
+      renderer.setScissor(0, 0, width, height);
+      renderer.clear();
+
+      renderer.setViewport(x, y, frameWidth, frameHeight);
+      renderer.setScissor(x, y, frameWidth, frameHeight);
+      renderer.render(scene, camera);
     },
   };
 }

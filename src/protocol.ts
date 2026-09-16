@@ -23,7 +23,24 @@ export type PhoneMessage =
  */
 export type ViewerInbound = PhoneMessage | { t: "presence"; controller: boolean };
 
-export type ViewerMessage = { t: "ping"; id: number } | { t: "kick" };
+import type { SmoothingSettings } from "./smoothing";
+
+/**
+ * Rig state the phone cannot know on its own. Orientation, zoom and the
+ * smoothing chain all stay local to the device, so its viewfinder never waits on
+ * the network; only the dolly, the chosen demo, the delivery format and the
+ * smoothing parameters have to travel.
+ */
+export type ViewerMessage =
+  | { t: "ping"; id: number }
+  | { t: "kick" }
+  | {
+      t: "rig";
+      demo: string;
+      u: number;
+      format: number | null;
+      settings: SmoothingSettings;
+    };
 
 export function relayUrl(role: "phone" | "viewer"): string {
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
