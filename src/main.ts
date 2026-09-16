@@ -5,7 +5,7 @@ import { horizontalFov, mmToSlider, sliderToMm } from "./lens";
 import { relayUrl, type ViewerInbound, type ViewerMessage } from "./protocol";
 import { OrientationSmoother, defaultSettings } from "./smoothing";
 import { Take } from "./take";
-import { demoById, demos, type Demo } from "./demos";
+import { addFlownDemo, demoById, demos, type Demo, type FlightSample } from "./demos";
 import { defaultFlightSettings, Drone, type FlightInput, type FlightSettings } from "./flight";
 
 const canvas = element<HTMLCanvasElement>("scene");
@@ -40,6 +40,8 @@ const focalSlider = element<HTMLInputElement>("focal");
 const focalValue = element("focalValue");
 const formatSelect = element<HTMLSelectElement>("format");
 const lensPresets = element("lensPresets");
+const flightRecordButton = element<HTMLButtonElement>("flightRecord");
+const flightInfo = element("flightInfo");
 
 const studio = createStudio(canvas, element("worldPane"));
 const smoother = new OrientationSmoother();
@@ -58,6 +60,10 @@ const PILOT_KEYS = new Set(["KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "Spa
 function isPiloting(): boolean {
   return demo.id === "pilot";
 }
+
+/** Non-null while a flight is being recorded. */
+let flightSamples: FlightSample[] | null = null;
+let flightStartedAt = 0;
 const euler = new THREE.Euler();
 
 let socket: WebSocket | null = null;
@@ -202,12 +208,41 @@ function applyDemo(next: Demo): void {
   const movable = demo.path !== null;
   shotPlayButton.disabled = !movable;
   scrub.disabled = !movable;
+  flightRecordButton.disabled = !isPiloting();
   if (movable) {
-    shotDuration.value = String(demo.duration);
-    shotDurationValue.textContent = `${demo.duration} s`;
+    // Defaults to the recorded length so a flown move replays at the speed it
+    // was flown; changing it afterwards is a deliberate retime.
+    const seconds = Math.min(60, Math.max(1, demo.duration));
+    shotDuration.value = String(seconds);
+    shotDurationValue.textContent = `${seconds.toFixed(1)} s`;
   }
   setDolly(0);
 }
+
+flightRecordButton.addEventListener("click", () => {
+  if (flightSamples) {
+    const samples = flightSamples;
+    flightSamples = null;
+    flightRecordButton.textContent = "Record flight";
+    if (samples.length < 3) return;
+
+    // The flown track joins the built-in paths, so the gimbal pass needs no
+    // further plumbing — select it and operate orientation over it.
+    const flown = addFlownDemo(samples);
+    const option = document.createElement("option");
+    option.value = flown.id;
+    option.textContent = flown.label;
+    demoSelect.append(option);
+    demoSelect.value = flown.id;
+    applyDemo(flown);
+    return;
+  }
+
+  if (!isPiloting()) return;
+  flightSamples = [];
+  flightStartedAt = performance.now();
+  flightRecordButton.textContent = "Stop flight";
+});
 
 demoSelect.addEventListener("change", () => applyDemo(demoById(demoSelect.value)));
 shotPlayButton.addEventListener("click", () => {
@@ -390,6 +425,12 @@ function updateHud(): void {
     ? `${studio.pov.position.y.toFixed(1)} m`
     : "—";
 
+  flightInfo.textContent = flightSamples
+    ? `recording · ${flightSamples.length} samples · ${((now - flightStartedAt) / 1000).toFixed(1)} s`
+    : isPiloting()
+      ? "ready to record"
+      : "pilot mode only";
+
   fields.takeCount.textContent = String(take.count);
   fields.takeDuration.textContent =
     take.count > 0 ? `${(take.duration / 1000).toFixed(1)} s` : "—";
@@ -431,6 +472,12 @@ const animate = (): void => {
   } else if (isPiloting()) {
     drone.update(readFlightInput(), dt, flight);
     studio.setCameraPosition(drone.position);
+    if (flightSamples) {
+      flightSamples.push({
+        t: (now - flightStartedAt) / 1000,
+        p: [drone.position.x, drone.position.y, drone.position.z],
+      });
+    }
   } else if (dollyPlaying && demo.path) {
     const seconds = Number(shotDuration.value);
     const next = dollyU + dt / seconds;

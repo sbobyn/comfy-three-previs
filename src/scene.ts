@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { Demo } from "./demos";
+import type { Demo, PathSource } from "./demos";
 import { FILM_GAUGE } from "./lens";
 
 // Helpers live on their own layer so the world view can show the rig while the
@@ -147,11 +147,11 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.update();
 
-  let path: THREE.Curve<THREE.Vector3> | null = null;
+  let path: PathSource | null = null;
   let pathLine: THREE.Line | null = null;
 
   const setDollyProgress = (u: number): void => {
-    if (path) path.getPointAt(Math.min(1, Math.max(0, u)), pov.position);
+    if (path) path.sample(u, pov.position);
     else pov.position.copy(PARKED);
     rawPov.position.copy(pov.position);
   };
@@ -166,7 +166,7 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     path = demo.path;
     if (path) {
       pathLine = new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints(path.getPoints(240)),
+        new THREE.BufferGeometry().setFromPoints(path.points(240)),
         new THREE.LineBasicMaterial({ color: 0x5ad1a0 }),
       );
       pathLine.layers.set(HELPER_LAYER);

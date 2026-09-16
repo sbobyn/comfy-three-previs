@@ -8,8 +8,8 @@ Status: orientation streams from an iPhone and aims a real camera, shown in a
 split view — orbitable world view on the left with the rig and its frustum, the
 camera's own view on the right. Adjustable deshake/inertia smoothing, lens and
 delivery-format selection, and take recording. A demo selector switches between a locked-off camera, keyboard-piloted
-free flight with drone dynamics, and dolly, arc and crane paths with a transport
-to play and scrub the move — so the full
+free flight with drone dynamics, flown takes recorded as replayable position
+sources, and dolly, arc and crane paths with a transport to play and scrub — so the full
 premise, operating a camera while the base travels, is now testable.
 
 ## Measured — 2026-09-15, iPhone over a cloudflared quick tunnel
