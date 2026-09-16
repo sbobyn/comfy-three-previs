@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { demoById, type Demo } from "./demos";
+import type { Demo } from "./demos";
 import { FILM_GAUGE } from "./lens";
 
 // Helpers live on their own layer so the world view can show the rig while the
@@ -14,6 +14,8 @@ export type Studio = {
   setDemo: (demo: Demo) => void;
   /** 0..1 along the current demo's path; ignored when the demo has none. */
   setDollyProgress: (u: number) => void;
+  /** Places the rig directly, for sources that are not a path. */
+  setCameraPosition: (position: THREE.Vector3) => void;
   /** Full-frame focal length in mm. */
   setFocalLength: (mm: number) => void;
   /** Target frame aspect, or null to fill the pane. */
@@ -228,6 +230,10 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     },
     setDemo,
     setDollyProgress,
+    setCameraPosition: (position: THREE.Vector3) => {
+      pov.position.copy(position);
+      rawPov.position.copy(position);
+    },
     setFocalLength: (mm: number) => {
       focalLength = mm;
     },
@@ -245,7 +251,7 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
 
 export type Viewfinder = {
   camera: THREE.PerspectiveCamera;
-  setRig: (demoId: string, u: number) => void;
+  setPosition: (x: number, y: number, z: number) => void;
   setFocalLength: (mm: number) => void;
   setFormat: (aspect: number | null) => void;
   render: () => void;
@@ -284,10 +290,8 @@ export function createViewfinder(canvas: HTMLCanvasElement): Viewfinder {
 
   return {
     camera,
-    setRig: (demoId: string, u: number) => {
-      const path = demoById(demoId).path;
-      if (path) path.getPointAt(Math.min(1, Math.max(0, u)), camera.position);
-      else camera.position.copy(PARKED);
+    setPosition: (x: number, y: number, z: number) => {
+      camera.position.set(x, y, z);
     },
     setFocalLength: (mm: number) => {
       focalLength = mm;

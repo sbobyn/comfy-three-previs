@@ -22,6 +22,9 @@ function arcAroundSubject(): THREE.CatmullRomCurve3 {
 
 export const demos: Demo[] = [
   { id: "locked", label: "Locked off", path: null, duration: 0 },
+  // Position comes from the flight model rather than a path; the transport has
+  // nothing to play, which is why this carries no curve.
+  { id: "pilot", label: "Pilot · free flight", path: null, duration: 0 },
   {
     id: "track",
     label: "Dolly · straight track",

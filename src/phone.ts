@@ -44,6 +44,7 @@ let pendingZero = false;
 let hasSample = false;
 let chromeHidden = false;
 let lastFrame = performance.now();
+let desktopAim: [number, number, number, number] | null = null;
 
 function refreshChrome(): void {
   startCard.hidden = motionEnabled && !detached;
@@ -79,11 +80,13 @@ function connect(): void {
     const message = JSON.parse(String(event.data)) as ViewerMessage;
 
     if (message.t === "rig") {
-      // Only what the device cannot derive locally: everything to do with
-      // aiming stays on this side of the link.
+      // Only what the device cannot derive locally. Aiming normally stays on
+      // this side of the link; `aim` is set when the desktop owns it instead,
+      // which turns this page into an FPV monitor rather than the controller.
       settings = message.settings;
-      viewfinder.setRig(message.demo, message.u);
+      viewfinder.setPosition(message.pos[0], message.pos[1], message.pos[2]);
       viewfinder.setFormat(message.format);
+      desktopAim = message.aim;
       return;
     }
 
@@ -179,7 +182,9 @@ const animate = (): void => {
   const dt = (now - lastFrame) / 1000;
   lastFrame = now;
 
-  if (hasSample) {
+  if (desktopAim) {
+    viewfinder.camera.quaternion.set(desktopAim[0], desktopAim[1], desktopAim[2], desktopAim[3]);
+  } else if (hasSample) {
     // The same filter the desktop runs, over the same samples, so the viewfinder
     // shows the shot being recorded rather than a shakier version of it.
     smoother.apply(raw, dt, settings, smoothed);

@@ -262,6 +262,10 @@
         <dd id="yaw">—</dd>
         <dt>drift</dt>
         <dd id="drift">—</dd>
+        <dt>speed</dt>
+        <dd id="speed">—</dd>
+        <dt>altitude</dt>
+        <dd id="altitude">—</dd>
         <dt>lag</dt>
         <dd id="lag">—</dd>
       </dl>
@@ -297,6 +301,35 @@
           <option value="fill">Fill pane</option>
         </select>
       </label>
+    </div>
+
+    <div class="panel" id="flight">
+      <h1>flight · pilot mode</h1>
+      <label class="slider"
+        >mass<span id="responseTimeValue">550 ms</span>
+        <input type="range" id="responseTime" min="0.05" max="2" step="0.05" value="0.55" />
+      </label>
+      <label class="slider"
+        >max speed<span id="maxSpeedValue">9 m/s</span>
+        <input type="range" id="maxSpeed" min="1" max="30" step="1" value="9" />
+      </label>
+      <label class="slider"
+        >climb speed<span id="climbSpeedValue">4 m/s</span>
+        <input type="range" id="climbSpeed" min="1" max="15" step="1" value="4" />
+      </label>
+      <label class="slider"
+        >yaw rate<span id="yawRateValue">80°/s</span>
+        <input type="range" id="yawRate" min="10" max="180" step="5" value="80" />
+      </label>
+      <label class="slider"
+        >bank<span id="bankValue">16°</span>
+        <input type="range" id="bank" min="0" max="45" step="1" value="16" />
+      </label>
+      <label class="slider"
+        >camera tilt<span id="tiltValue">-8°</span>
+        <input type="range" id="tilt" min="-60" max="30" step="1" value="-8" />
+      </label>
+      <div class="legend">W A S D · Q E yaw · Space / Shift climb</div>
     </div>
 
     <div class="panel" id="controls">

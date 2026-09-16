@@ -36,8 +36,11 @@ export type ViewerMessage =
   | { t: "kick" }
   | {
       t: "rig";
-      demo: string;
-      u: number;
+      /** World position, sent outright so any source works — path or flown. */
+      pos: [number, number, number];
+      /** Set while the desktop owns aiming, as when piloting; null hands aiming
+       *  back to the device's own sensor. */
+      aim: [number, number, number, number] | null;
       format: number | null;
       settings: SmoothingSettings;
     };

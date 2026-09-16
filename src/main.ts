@@ -6,6 +6,7 @@ import { relayUrl, type ViewerInbound, type ViewerMessage } from "./protocol";
 import { OrientationSmoother, defaultSettings } from "./smoothing";
 import { Take } from "./take";
 import { demoById, demos, type Demo } from "./demos";
+import { defaultFlightSettings, Drone, type FlightInput, type FlightSettings } from "./flight";
 
 const canvas = element<HTMLCanvasElement>("scene");
 const fields = {
@@ -16,6 +17,8 @@ const fields = {
   jitter: element("jitter"),
   yaw: element("yaw"),
   drift: element("drift"),
+  speed: element("speed"),
+  altitude: element("altitude"),
   lag: element("lag"),
   takeCount: element("takeCount"),
   takeDuration: element("takeDuration"),
@@ -45,6 +48,16 @@ const take = new Take();
 
 const raw = new THREE.Quaternion();
 const smoothed = new THREE.Quaternion();
+const aim = new THREE.Quaternion();
+
+const drone = new Drone();
+const flight = defaultFlightSettings();
+const heldKeys = new Set<string>();
+const PILOT_KEYS = new Set(["KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "Space", "ShiftLeft"]);
+
+function isPiloting(): boolean {
+  return demo.id === "pilot";
+}
 const euler = new THREE.Euler();
 
 let socket: WebSocket | null = null;
@@ -86,6 +99,49 @@ function bindToggle(id: keyof typeof settings): void {
   };
   input.addEventListener("change", sync);
   sync();
+}
+
+function bindFlight(id: keyof FlightSettings, format: (value: number) => string): void {
+  const input = element<HTMLInputElement>(id);
+  const readout = element(`${id}Value`);
+  const sync = (): void => {
+    const value = Number(input.value);
+    (flight[id] as number) = value;
+    readout.textContent = format(value);
+  };
+  input.addEventListener("input", sync);
+  sync();
+}
+
+bindFlight("maxSpeed", (v) => `${v.toFixed(0)} m/s`);
+bindFlight("climbSpeed", (v) => `${v.toFixed(0)} m/s`);
+bindFlight("responseTime", (v) => `${Math.round(v * 1000)} ms`);
+bindFlight("yawRate", (v) => `${v.toFixed(0)}°/s`);
+bindFlight("bank", (v) => `${v.toFixed(0)}°`);
+bindFlight("tilt", (v) => `${v.toFixed(0)}°`);
+
+// Keys are tracked rather than acted on directly, so several can be held at
+// once and a stuck key cannot survive the window losing focus.
+const typingInto = (target: EventTarget | null): boolean =>
+  target instanceof HTMLElement && ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName);
+
+window.addEventListener("keydown", (event) => {
+  if (typingInto(event.target)) return;
+  heldKeys.add(event.code);
+  if (isPiloting() && PILOT_KEYS.has(event.code)) event.preventDefault();
+});
+window.addEventListener("keyup", (event) => heldKeys.delete(event.code));
+window.addEventListener("blur", () => heldKeys.clear());
+
+function readFlightInput(): FlightInput {
+  const axis = (positive: string, negative: string): number =>
+    (heldKeys.has(positive) ? 1 : 0) - (heldKeys.has(negative) ? 1 : 0);
+  return {
+    forward: axis("KeyW", "KeyS"),
+    lateral: axis("KeyD", "KeyA"),
+    vertical: axis("Space", "ShiftLeft"),
+    yaw: axis("KeyE", "KeyQ"),
+  };
 }
 
 bindSlider("minCutoff", (v) => `${v.toFixed(2)} Hz`);
@@ -174,10 +230,12 @@ let lastRig = "";
  * timer, so a parked rig costs nothing and a moving one updates every frame.
  */
 function sendRig(): void {
+  const { x, y, z } = studio.pov.position;
+  const round = (value: number): number => Math.round(value * 1000) / 1000;
   const payload = JSON.stringify({
     t: "rig",
-    demo: demo.id,
-    u: dollyU,
+    pos: [round(x), round(y), round(z)],
+    aim: isPiloting() ? [aim.x, aim.y, aim.z, aim.w] : null,
     format: formatSelect.value === "fill" ? null : Number(formatSelect.value),
     settings,
   });
@@ -327,6 +385,11 @@ function updateHud(): void {
     fields.drift.textContent = "—";
   }
 
+  fields.speed.textContent = isPiloting() ? `${drone.speed.toFixed(1)} m/s` : "—";
+  fields.altitude.textContent = isPiloting()
+    ? `${studio.pov.position.y.toFixed(1)} m`
+    : "—";
+
   fields.takeCount.textContent = String(take.count);
   fields.takeDuration.textContent =
     take.count > 0 ? `${(take.duration / 1000).toFixed(1)} s` : "—";
@@ -365,6 +428,9 @@ const animate = (): void => {
       setDolly(head.u);
       setFocalTarget(Math.round(head.mm), true);
     }
+  } else if (isPiloting()) {
+    drone.update(readFlightInput(), dt, flight);
+    studio.setCameraPosition(drone.position);
   } else if (dollyPlaying && demo.path) {
     const seconds = Number(shotDuration.value);
     const next = dollyU + dt / seconds;
@@ -387,9 +453,17 @@ const animate = (): void => {
   studio.setFocalLength(focalCurrent);
 
   smoother.apply(raw, dt, settings, smoothed);
-  studio.pov.quaternion.copy(smoothed);
-  studio.rawPov.quaternion.copy(raw);
-  studio.setRawVisible(ghostToggle.checked);
+  if (isPiloting()) {
+    // The pilot pass owns aiming: its orientation is a flying aid, replaced
+    // wholesale by the gimbal pass afterwards.
+    drone.orientation(aim, flight);
+    studio.pov.quaternion.copy(aim);
+    studio.rawPov.quaternion.copy(aim);
+  } else {
+    studio.pov.quaternion.copy(smoothed);
+    studio.rawPov.quaternion.copy(raw);
+  }
+  studio.setRawVisible(ghostToggle.checked && !isPiloting());
 
   euler.setFromQuaternion(raw, "YXZ");
   yawDeg = THREE.MathUtils.radToDeg(euler.y);
