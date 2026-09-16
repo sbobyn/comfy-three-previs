@@ -14,6 +14,14 @@ export type PhoneMessage =
   | { t: "q"; q: [number, number, number, number] }
   | { t: "pong"; id: number };
 
+/**
+ * What a viewer receives: the phone's own messages, plus controller presence
+ * from the relay. Presence cannot be inferred from sample flow — a controller
+ * that holds the slot without enabling its sensors sends nothing at all, which
+ * is precisely when the viewer needs to know it is there.
+ */
+export type ViewerInbound = PhoneMessage | { t: "presence"; controller: boolean };
+
 export type ViewerMessage = { t: "ping"; id: number } | { t: "kick" };
 
 export function relayUrl(role: "phone" | "viewer"): string {

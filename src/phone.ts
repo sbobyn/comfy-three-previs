@@ -25,16 +25,33 @@ const yawZero = new YawZero();
 let socket: WebSocket | null = null;
 let sent = 0;
 let pendingZero = false;
+let motionEnabled = false;
+let detached = false;
+
+function refreshPrimary(): void {
+  if (!motionEnabled) {
+    enableButton.textContent = "Enable Motion";
+    enableButton.disabled = false;
+  } else if (detached) {
+    enableButton.textContent = "Reconnect";
+    enableButton.disabled = false;
+  } else {
+    enableButton.textContent = "Streaming";
+    enableButton.disabled = true;
+  }
+}
 
 function send(message: PhoneMessage): void {
   if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
 }
 
 function connect(): void {
+  detached = false;
   socket = new WebSocket(relayUrl("phone"));
 
   socket.addEventListener("open", () => {
     linkField.textContent = "connected";
+    refreshPrimary();
   });
 
   socket.addEventListener("message", (event) => {
@@ -46,49 +63,59 @@ function connect(): void {
 
   socket.addEventListener("close", (event) => {
     socket = null;
-    if (event.code === REPLACED_BY_NEWER) {
-      linkField.textContent = "another controller took over — reload to reclaim";
-      return;
-    }
-    if (event.code === EVICTED_BY_VIEWER) {
-      linkField.textContent = "disconnected from the desktop — reload to reconnect";
+    if (event.code === REPLACED_BY_NEWER || event.code === EVICTED_BY_VIEWER) {
+      // A deliberate handover. Staying down stops two controllers evicting each
+      // other in a loop, but the sensor listener and its permission survive, so
+      // taking the slot back is one tap rather than a reload.
+      detached = true;
+      linkField.textContent =
+        event.code === EVICTED_BY_VIEWER ? "released by the desktop" : "another controller took over";
+      refreshPrimary();
       return;
     }
     linkField.textContent = "reconnecting…";
+    refreshPrimary();
     setTimeout(connect, 1000);
   });
 }
 
 enableButton.addEventListener("click", async () => {
-  enableButton.disabled = true;
-  sensorField.textContent = "requesting…";
+  if (!motionEnabled) {
+    enableButton.disabled = true;
+    sensorField.textContent = "requesting…";
 
-  if (!(await requestMotionPermission())) {
-    sensorField.textContent = "permission denied";
-    enableButton.disabled = false;
-    return;
+    if (!(await requestMotionPermission())) {
+      sensorField.textContent = "permission denied";
+      refreshPrimary();
+      return;
+    }
+
+    onDeviceQuaternion((q) => {
+      // Grip is a body-mount constant, so it applies before the re-zero that
+      // decides which way the operator is pointing.
+      applyGrip(q, gripSelect.value as Grip);
+      if (pendingZero) {
+        yawZero.capture(q);
+        pendingZero = false;
+      }
+      yawZero.apply(q);
+      send({ t: "q", q: [q.x, q.y, q.z, q.w] });
+      sent += 1;
+      if (sent % 10 === 0) sentField.textContent = String(sent);
+    });
+
+    motionEnabled = true;
+    zeroButton.disabled = false;
+    sensorField.textContent = "streaming";
   }
 
-  onDeviceQuaternion((q) => {
-    // Grip is a body-mount constant, so it applies before the re-zero that
-    // decides which way the operator is pointing.
-    applyGrip(q, gripSelect.value as Grip);
-    if (pendingZero) {
-      yawZero.capture(q);
-      pendingZero = false;
-    }
-    yawZero.apply(q);
-    send({ t: "q", q: [q.x, q.y, q.z, q.w] });
-    sent += 1;
-    if (sent % 10 === 0) sentField.textContent = String(sent);
-  });
-
-  zeroButton.disabled = false;
-  sensorField.textContent = "streaming";
+  if (!socket) connect();
+  refreshPrimary();
 });
 
 zeroButton.addEventListener("click", () => {
   pendingZero = true;
 });
 
+refreshPrimary();
 connect();

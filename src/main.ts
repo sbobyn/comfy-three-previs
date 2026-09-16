@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { element } from "./dom";
 import { createStudio } from "./scene";
-import { relayUrl, type PhoneMessage, type ViewerMessage } from "./protocol";
+import { relayUrl, type ViewerInbound, type ViewerMessage } from "./protocol";
 import { OrientationSmoother, defaultSettings } from "./smoothing";
 import { Take } from "./take";
 import { demoById, demos, type Demo } from "./demos";
@@ -55,6 +55,7 @@ let playingFrom = Number.NaN;
 let demo: Demo = demos[0];
 let dollyU = 0;
 let dollyPlaying = false;
+let controllerPresent = false;
 
 let nextPingId = 0;
 const pendingPings = new Map<number, number>();
@@ -141,7 +142,13 @@ function connect(): void {
   socket = new WebSocket(relayUrl("viewer"));
 
   socket.addEventListener("message", (event) => {
-    const message = JSON.parse(String(event.data)) as PhoneMessage;
+    const message = JSON.parse(String(event.data)) as ViewerInbound;
+
+    if (message.t === "presence") {
+      controllerPresent = message.controller;
+      kickButton.disabled = !controllerPresent;
+      return;
+    }
 
     if (message.t === "pong") {
       const sentAt = pendingPings.get(message.id);
@@ -168,6 +175,8 @@ function connect(): void {
 
   socket.addEventListener("close", () => {
     socket = null;
+    controllerPresent = false;
+    kickButton.disabled = true;
     setTimeout(connect, 1000);
   });
 }
@@ -224,7 +233,15 @@ function updateHud(): void {
 
   arrivals = arrivals.filter((t) => now - t < 1000);
   const live = lastArrival !== 0 && now - lastArrival < 1000;
-  fields.link.textContent = live ? "streaming" : socket ? "waiting" : "offline";
+  // "connected, idle" is its own state on purpose: a controller holding the slot
+  // without streaming looks identical to no controller if you only watch samples.
+  fields.link.textContent = !socket
+    ? "offline"
+    : live
+      ? "streaming"
+      : controllerPresent
+        ? "connected, idle"
+        : "none";
   fields.rate.textContent = live ? `${arrivals.length} Hz` : "—";
   fields.latency.textContent = Number.isNaN(halfRtt) ? "—" : `${halfRtt.toFixed(1)} ms`;
 

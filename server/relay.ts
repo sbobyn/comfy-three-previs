@@ -21,6 +21,12 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer): void {
   const viewers = new Set<WebSocket>();
   let phone: WebSocket | null = null;
 
+  const presence = (): string => JSON.stringify({ t: "presence", controller: phone !== null });
+  const broadcastPresence = (): void => {
+    const text = presence();
+    for (const viewer of viewers) viewer.send(text);
+  };
+
   console.log(`[vcam] relay attached at ${RELAY_PATH}`);
 
   httpServer.on("upgrade", (request, socket, head) => {
@@ -35,8 +41,10 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer): void {
       if (isPhone) {
         phone?.close(REPLACED_BY_NEWER, "replaced by a newer controller");
         phone = ws;
+        broadcastPresence();
       } else {
         viewers.add(ws);
+        ws.send(presence());
       }
 
       ws.on("message", (raw) => {
@@ -51,6 +59,7 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer): void {
         if (parseKind(text) === "kick") {
           phone?.close(EVICTED_BY_VIEWER, "disconnected from the viewer");
           phone = null;
+          broadcastPresence();
           return;
         }
         phone?.send(text);
@@ -58,7 +67,10 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer): void {
 
       ws.on("close", () => {
         if (isPhone) {
-          if (phone === ws) phone = null;
+          if (phone === ws) {
+            phone = null;
+            broadcastPresence();
+          }
         } else {
           viewers.delete(ws);
         }
