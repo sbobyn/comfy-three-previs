@@ -4,7 +4,7 @@ R&D prototype: use a phone as a virtual camera head — stream device orientatio
 to a Three.js scene, record it as a take, and eventually drive a GenDirector
 camera's rotation while a motion path drives its position.
 
-Status: orientation streams from an iPhone and aims a real camera, shown in a
+Status: aimed by phone, mouse drag or the flight model, shown in a
 split view — orbitable world view on the left with the rig and its frustum, the
 camera's own view on the right. Adjustable deshake/inertia smoothing, lens and
 delivery-format selection, and take recording. A demo selector switches between a locked-off camera, keyboard-piloted

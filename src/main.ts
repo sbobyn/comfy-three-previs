@@ -44,6 +44,10 @@ const lensPresets = element("lensPresets");
 const flightRecordButton = element<HTMLButtonElement>("flightRecord");
 const flightInfo = element("flightInfo");
 const padInfo = element("padInfo");
+const aimSourceSelect = element<HTMLSelectElement>("aimSource");
+const mouseSens = element<HTMLInputElement>("mouseSens");
+const mouseSensValue = element("mouseSensValue");
+const cameraPane = element("cameraPane");
 
 const studio = createStudio(canvas, element("worldPane"));
 const smoother = new OrientationSmoother();
@@ -67,6 +71,51 @@ function isPiloting(): boolean {
 /** Non-null while a flight is being recorded. */
 let flightSamples: FlightSample[] | null = null;
 let flightStartedAt = 0;
+
+let mouseYaw = 0;
+let mousePitch = 0;
+let dragging = false;
+let lastPointerX = 0;
+let lastPointerY = 0;
+
+const usingMouseAim = (): boolean => aimSourceSelect.value === "mouse";
+/** True when aiming is driven here rather than by the device's own sensor. */
+const desktopOwnsAim = (): boolean => isPiloting() || usingMouseAim();
+
+function syncAimSource(): void {
+  cameraPane.classList.toggle("aiming", usingMouseAim());
+}
+aimSourceSelect.addEventListener("change", syncAimSource);
+syncAimSource();
+
+mouseSens.addEventListener("input", () => {
+  mouseSensValue.textContent = Number(mouseSens.value).toFixed(2);
+});
+
+// Dragged like a stick rather than like the image: pulling right pans right, so
+// the control matches the phone it stands in for.
+cameraPane.addEventListener("pointerdown", (event) => {
+  dragging = true;
+  lastPointerX = event.clientX;
+  lastPointerY = event.clientY;
+  cameraPane.setPointerCapture(event.pointerId);
+});
+cameraPane.addEventListener("pointermove", (event) => {
+  if (!dragging) return;
+  const sensitivity = Number(mouseSens.value);
+  mouseYaw -= (event.clientX - lastPointerX) * sensitivity;
+  mousePitch = Math.min(
+    85,
+    Math.max(-85, mousePitch - (event.clientY - lastPointerY) * sensitivity),
+  );
+  lastPointerX = event.clientX;
+  lastPointerY = event.clientY;
+});
+const endDrag = (): void => {
+  dragging = false;
+};
+cameraPane.addEventListener("pointerup", endDrag);
+cameraPane.addEventListener("pointercancel", endDrag);
 const euler = new THREE.Euler();
 
 let socket: WebSocket | null = null;
@@ -301,7 +350,7 @@ function sendRig(): void {
   const payload = JSON.stringify({
     t: "rig",
     pos: [round(x), round(y), round(z)],
-    aim: isPiloting() ? [aim.x, aim.y, aim.z, aim.w] : null,
+    aim: desktopOwnsAim() ? [aim.x, aim.y, aim.z, aim.w] : null,
     format: formatSelect.value === "fill" ? null : Number(formatSelect.value),
     settings,
   });
@@ -355,9 +404,10 @@ function connect(): void {
 
     // Playback owns the raw stream while it runs, but the link metrics above
     // stay live so the HUD keeps reporting the phone.
-    if (Number.isNaN(playingFrom)) {
+    // Recording happens in the frame loop so it captures whatever is aiming,
+    // not only the phone.
+    if (Number.isNaN(playingFrom) && !usingMouseAim()) {
       raw.set(message.q[0], message.q[1], message.q[2], message.q[3]);
-      take.push(now, raw, dollyU, focalTarget);
     }
   });
 
@@ -533,6 +583,15 @@ const animate = (): void => {
   focalCurrent += (focalTarget - focalCurrent) * zoomBlend;
   studio.setFocalLength(focalCurrent);
 
+  if (usingMouseAim() && Number.isNaN(playingFrom)) {
+    euler.set(THREE.MathUtils.degToRad(mousePitch), THREE.MathUtils.degToRad(mouseYaw), 0, "YXZ");
+    raw.setFromEuler(euler);
+  }
+
+  if (take.isRecording && Number.isNaN(playingFrom)) {
+    take.push(now, raw, dollyU, focalTarget);
+  }
+
   smoother.apply(raw, dt, settings, smoothed);
   if (isPiloting()) {
     // The pilot pass owns aiming: its orientation is a flying aid, replaced
@@ -543,6 +602,7 @@ const animate = (): void => {
   } else {
     studio.pov.quaternion.copy(smoothed);
     studio.rawPov.quaternion.copy(raw);
+    aim.copy(smoothed);
   }
   studio.setRawVisible(ghostToggle.checked && !isPiloting());
 

@@ -32,6 +32,21 @@
       #worldPane:active {
         cursor: grabbing;
       }
+      /* Only claims pointer events while the mouse is the aim source, so it
+         never sits in front of the camera view otherwise. */
+      #cameraPane {
+        position: fixed;
+        inset: 0 0 0 50%;
+        z-index: 1;
+        cursor: grab;
+        display: none;
+      }
+      #cameraPane.aiming {
+        display: block;
+      }
+      #cameraPane:active {
+        cursor: grabbing;
+      }
       #seam {
         position: fixed;
         top: 0;
@@ -169,6 +184,16 @@
         background: #2f4a86;
         border-color: #4f8cff;
       }
+      #aimPanel select {
+        width: 100%;
+        margin-top: 4px;
+        padding: 6px 8px;
+        font: inherit;
+        color: #e6e6f0;
+        background: #26263a;
+        border: 1px solid #3a3a52;
+        border-radius: 8px;
+      }
       #lens select {
         width: 100%;
         margin-top: 4px;
@@ -240,6 +265,7 @@
   <body>
     <canvas id="scene"></canvas>
     <div id="worldPane"></div>
+    <div id="cameraPane"></div>
     <div id="seam"></div>
     <div class="viewLabel" id="worldLabel">world · drag to orbit</div>
     <div class="viewLabel" id="cameraLabel">camera</div>
@@ -346,6 +372,22 @@
         W A S D · Q E yaw · Space / Shift climb<br />Mode 2 sticks: left climb/yaw,
         right forward/lateral
       </div>
+    </div>
+
+    <div class="panel" id="aimPanel">
+      <h1>aim</h1>
+      <label class="slider"
+        >source
+        <select id="aimSource">
+          <option value="phone">Phone</option>
+          <option value="mouse">Mouse / trackpad drag</option>
+        </select>
+      </label>
+      <label class="slider"
+        >drag sensitivity<span id="mouseSensValue">0.12</span>
+        <input type="range" id="mouseSens" min="0.02" max="0.5" step="0.01" value="0.12" />
+      </label>
+      <div class="legend">Drag in the camera view to pan and tilt.</div>
     </div>
 
     <div class="panel" id="controls">
