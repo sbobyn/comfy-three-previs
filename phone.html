@@ -67,9 +67,6 @@
         text-transform: uppercase;
         color: #9a9ab0;
       }
-      #start .field {
-        width: min(340px, 100%);
-      }
 
       #bar {
         position: fixed;
@@ -77,8 +74,9 @@
         right: calc(14px + env(safe-area-inset-right));
         bottom: calc(12px + env(safe-area-inset-bottom));
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         padding: 10px 12px;
         background: rgba(10, 10, 14, 0.72);
         border: 1px solid #2c2c40;
@@ -113,8 +111,9 @@
         border-radius: 10px;
         touch-action: manipulation;
       }
-      select {
-        width: 100%;
+      #bar select {
+        padding: 12px 8px;
+        flex-shrink: 0;
       }
       #enable {
         width: min(340px, 100%);
@@ -138,17 +137,15 @@
 
     <div id="start">
       <h1>three-vcam camera</h1>
-      <div class="field">
-        <select id="grip">
-          <option value="portrait">Portrait — upright</option>
-          <option value="landscape-left">Landscape — rotated left</option>
-          <option value="landscape-right">Landscape — rotated right</option>
-        </select>
-      </div>
       <button id="enable">Enable Motion</button>
     </div>
 
     <div id="bar" hidden>
+      <select id="grip" title="How the phone is held">
+        <option value="portrait">Portrait</option>
+        <option value="landscape-left">Landscape ↺</option>
+        <option value="landscape-right">Landscape ↻</option>
+      </select>
       <button id="zero" class="ghost">Re-zero</button>
       <input type="range" id="zoom" min="0" max="1" step="0.001" value="0.368" />
       <span id="zoomValue">35 mm</span>
