@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { element } from "./dom";
-import { createStudio } from "./scene";
+import { createStudio, horizontalFov } from "./scene";
 import { relayUrl, type ViewerInbound, type ViewerMessage } from "./protocol";
 import { OrientationSmoother, defaultSettings } from "./smoothing";
 import { Take } from "./take";
@@ -32,6 +32,10 @@ const scrubValue = element("scrubValue");
 const shotDuration = element<HTMLInputElement>("shotDuration");
 const shotDurationValue = element("shotDurationValue");
 const shotLoop = element<HTMLInputElement>("shotLoop");
+const focalSlider = element<HTMLInputElement>("focal");
+const focalValue = element("focalValue");
+const formatSelect = element<HTMLSelectElement>("format");
+const lensPresets = element("lensPresets");
 
 const studio = createStudio(canvas, element("worldPane"));
 const smoother = new OrientationSmoother();
@@ -86,6 +90,37 @@ bindSlider("beta", (v) => v.toFixed(3));
 bindSlider("halfLife", (v) => `${Math.round(v * 1000)} ms`);
 bindToggle("deshake");
 bindToggle("inertia");
+
+// Focal length is perceived logarithmically — a linear slider would spend most
+// of its travel between 200mm and 300mm, where the difference barely reads.
+const MIN_MM = 10;
+const MM_RANGE = 30;
+
+function applyFocalLength(mm: number): void {
+  const rounded = Math.round(mm);
+  studio.setFocalLength(rounded);
+  focalValue.textContent = `${rounded} mm · ${horizontalFov(rounded).toFixed(0)}°`;
+  lensPresets.querySelectorAll<HTMLButtonElement>("button").forEach((preset) => {
+    preset.classList.toggle("active", Number(preset.dataset.mm) === rounded);
+  });
+}
+
+focalSlider.addEventListener("input", () => {
+  applyFocalLength(MIN_MM * Math.pow(MM_RANGE, Number(focalSlider.value)));
+});
+
+lensPresets.addEventListener("click", (event) => {
+  const mm = Number((event.target as HTMLElement).dataset.mm);
+  if (!mm) return;
+  focalSlider.value = String(Math.log(mm / MIN_MM) / Math.log(MM_RANGE));
+  applyFocalLength(mm);
+});
+
+formatSelect.addEventListener("change", () => {
+  studio.setFormat(formatSelect.value === "fill" ? null : Number(formatSelect.value));
+});
+
+applyFocalLength(MIN_MM * Math.pow(MM_RANGE, Number(focalSlider.value)));
 
 for (const entry of demos) {
   const option = document.createElement("option");
@@ -158,6 +193,10 @@ function connect(): void {
       }
       return;
     }
+
+    // Ignore anything else: the relay's vocabulary can grow, and a viewer left
+    // open from an older build should go quiet rather than throw every frame.
+    if (message.t !== "q") return;
 
     const now = performance.now();
     arrivals.push(now);

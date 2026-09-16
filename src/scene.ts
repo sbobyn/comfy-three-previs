@@ -13,11 +13,26 @@ export type Studio = {
   setDemo: (demo: Demo) => void;
   /** 0..1 along the current demo's path; ignored when the demo has none. */
   setDollyProgress: (u: number) => void;
+  /** Full-frame focal length in mm. */
+  setFocalLength: (mm: number) => void;
+  /** Target frame aspect, or null to fill the pane. */
+  setFormat: (aspect: number | null) => void;
   render: () => void;
   dispose: () => void;
 };
 
 const PARKED = new THREE.Vector3(0, 1.7, 0);
+
+/**
+ * Full-frame sensor width. Three derives film height by dividing this by the
+ * aspect, so horizontal field of view depends only on focal length — a 50mm
+ * stays a 50mm when the window is resized, which a fixed vertical FOV would not.
+ */
+const FILM_GAUGE = 36;
+
+export function horizontalFov(mm: number): number {
+  return THREE.MathUtils.radToDeg(2 * Math.atan(FILM_GAUGE / 2 / mm));
+}
 
 /** A small body so the rig reads as a camera in the world view, not just lines. */
 function cameraBody(color: number): THREE.Object3D {
@@ -88,6 +103,10 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setScissorTest(true);
+  renderer.setClearColor(0x07070a);
+
+  let focalLength = 35;
+  let format: number | null = 16 / 9;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0e0e12);
@@ -95,6 +114,7 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
   buildSet(scene);
 
   const pov = new THREE.PerspectiveCamera(40, 1, 0.5, 300);
+  pov.filmGauge = FILM_GAUGE;
   pov.position.copy(PARKED);
   // Added to the scene so the body mesh below travels with it; the body sits on
   // the helper layer, so the camera never renders its own housing.
@@ -102,6 +122,7 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
   pov.add(cameraBody(0x4f8cff));
 
   const rawPov = new THREE.PerspectiveCamera(40, 1, 0.5, 300);
+  rawPov.filmGauge = FILM_GAUGE;
   rawPov.position.copy(pov.position);
   scene.add(rawPov);
 
@@ -174,12 +195,20 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     const height = window.innerHeight;
     const split = Math.round(width / 2);
 
+    // Letterbox the camera view to the delivery format: composition judged at
+    // the wrong aspect is composition judged for a different shot.
+    const paneWidth = width - split;
+    const frameHeight = format === null ? height : Math.min(height, paneWidth / format);
+    const frameWidth = format === null ? paneWidth : frameHeight * format;
+    const frameX = split + (paneWidth - frameWidth) / 2;
+    const frameY = (height - frameHeight) / 2;
+
     world.aspect = split / height;
     world.updateProjectionMatrix();
-    pov.aspect = (width - split) / height;
-    pov.updateProjectionMatrix();
+    pov.aspect = frameWidth / frameHeight;
+    pov.setFocalLength(focalLength);
     rawPov.aspect = pov.aspect;
-    rawPov.updateProjectionMatrix();
+    rawPov.setFocalLength(focalLength);
 
     // Helpers read the camera matrices, so refresh those before updating them.
     pov.updateMatrixWorld(true);
@@ -191,8 +220,12 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     renderer.setScissor(0, 0, split, height);
     renderer.render(scene, world);
 
-    renderer.setViewport(split, 0, width - split, height);
-    renderer.setScissor(split, 0, width - split, height);
+    renderer.setViewport(split, 0, paneWidth, height);
+    renderer.setScissor(split, 0, paneWidth, height);
+    renderer.clear();
+
+    renderer.setViewport(frameX, frameY, frameWidth, frameHeight);
+    renderer.setScissor(frameX, frameY, frameWidth, frameHeight);
     renderer.render(scene, pov);
   };
 
@@ -204,6 +237,12 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     },
     setDemo,
     setDollyProgress,
+    setFocalLength: (mm: number) => {
+      focalLength = mm;
+    },
+    setFormat: (aspect: number | null) => {
+      format = aspect;
+    },
     render,
     dispose: () => {
       window.removeEventListener("resize", resize);

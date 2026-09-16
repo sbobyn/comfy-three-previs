@@ -6,8 +6,8 @@ camera's rotation while a motion path drives its position.
 
 Status: orientation streams from an iPhone and aims a real camera, shown in a
 split view — orbitable world view on the left with the rig and its frustum, the
-camera's own view on the right. Adjustable deshake/inertia smoothing and take
-recording. A demo selector switches between a locked-off camera and dolly, arc
+camera's own view on the right. Adjustable deshake/inertia smoothing, lens and
+delivery-format selection, and take recording. A demo selector switches between a locked-off camera and dolly, arc
 and crane paths, with a transport to play and scrub the move — so the full
 premise, operating a camera while the base travels, is now testable.
 
