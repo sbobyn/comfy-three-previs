@@ -1,7 +1,7 @@
 import type { Server as HttpServer } from "node:http";
 import type { Http2SecureServer } from "node:http2";
 import { WebSocketServer, type WebSocket } from "ws";
-import { RELAY_PATH } from "../src/protocol";
+import { RELAY_PATH, REPLACED_BY_NEWER } from "../src/protocol";
 
 /**
  * Attaches to Vite's own HTTP server so the phone page and the socket share one
@@ -25,7 +25,7 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer): void {
       const isPhone = url.searchParams.get("role") === "phone";
 
       if (isPhone) {
-        phone?.close(4000, "replaced by a newer phone");
+        phone?.close(REPLACED_BY_NEWER, "replaced by a newer controller");
         phone = ws;
       } else {
         viewers.add(ws);

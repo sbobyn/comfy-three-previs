@@ -6,7 +6,7 @@ import {
   YawZero,
   type Grip,
 } from "./orientation";
-import { relayUrl, type PhoneMessage, type ViewerMessage } from "./protocol";
+import { relayUrl, REPLACED_BY_NEWER, type PhoneMessage, type ViewerMessage } from "./protocol";
 
 const enableButton = element<HTMLButtonElement>("enable");
 const zeroButton = element<HTMLButtonElement>("zero");
@@ -38,9 +38,13 @@ function connect(): void {
     if (message.t === "ping") send({ t: "pong", id: message.id });
   });
 
-  socket.addEventListener("close", () => {
-    linkField.textContent = "reconnecting…";
+  socket.addEventListener("close", (event) => {
     socket = null;
+    if (event.code === REPLACED_BY_NEWER) {
+      linkField.textContent = "another controller took over — reload to reclaim";
+      return;
+    }
+    linkField.textContent = "reconnecting…";
     setTimeout(connect, 1000);
   });
 }
