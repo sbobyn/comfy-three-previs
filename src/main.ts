@@ -4,6 +4,7 @@ import { createStudio } from "./scene";
 import { relayUrl, type PhoneMessage, type ViewerMessage } from "./protocol";
 import { OrientationSmoother, defaultSettings } from "./smoothing";
 import { Take } from "./take";
+import { demoById, demos, type Demo } from "./demos";
 
 const canvas = element<HTMLCanvasElement>("scene");
 const fields = {
@@ -23,6 +24,13 @@ const recordButton = element<HTMLButtonElement>("record");
 const playButton = element<HTMLButtonElement>("play");
 const loopToggle = element<HTMLInputElement>("loop");
 const ghostToggle = element<HTMLInputElement>("showGhost");
+const demoSelect = element<HTMLSelectElement>("demo");
+const shotPlayButton = element<HTMLButtonElement>("shotPlay");
+const scrub = element<HTMLInputElement>("scrub");
+const scrubValue = element("scrubValue");
+const shotDuration = element<HTMLInputElement>("shotDuration");
+const shotDurationValue = element("shotDurationValue");
+const shotLoop = element<HTMLInputElement>("shotLoop");
 
 const studio = createStudio(canvas, element("worldPane"));
 const smoother = new OrientationSmoother();
@@ -43,6 +51,9 @@ let yawDeg = Number.NaN;
 let markYaw = Number.NaN;
 let markAt = 0;
 let playingFrom = Number.NaN;
+let demo: Demo = demos[0];
+let dollyU = 0;
+let dollyPlaying = false;
 
 let nextPingId = 0;
 const pendingPings = new Map<number, number>();
@@ -74,6 +85,53 @@ bindSlider("halfLife", (v) => `${Math.round(v * 1000)} ms`);
 bindToggle("deshake");
 bindToggle("inertia");
 
+for (const entry of demos) {
+  const option = document.createElement("option");
+  option.value = entry.id;
+  option.textContent = entry.label;
+  demoSelect.append(option);
+}
+
+function setDolly(u: number): void {
+  dollyU = Math.min(1, Math.max(0, u));
+  studio.setDollyProgress(dollyU);
+  scrub.value = String(dollyU);
+  scrubValue.textContent = dollyU.toFixed(2);
+}
+
+function pauseShot(): void {
+  dollyPlaying = false;
+  shotPlayButton.textContent = "Play";
+}
+
+function applyDemo(next: Demo): void {
+  demo = next;
+  studio.setDemo(demo);
+  pauseShot();
+  const movable = demo.path !== null;
+  shotPlayButton.disabled = !movable;
+  scrub.disabled = !movable;
+  if (movable) {
+    shotDuration.value = String(demo.duration);
+    shotDurationValue.textContent = `${demo.duration} s`;
+  }
+  setDolly(0);
+}
+
+demoSelect.addEventListener("change", () => applyDemo(demoById(demoSelect.value)));
+shotPlayButton.addEventListener("click", () => {
+  dollyPlaying = !dollyPlaying;
+  shotPlayButton.textContent = dollyPlaying ? "Pause" : "Play";
+});
+scrub.addEventListener("input", () => {
+  pauseShot();
+  setDolly(Number(scrub.value));
+});
+shotDuration.addEventListener("input", () => {
+  shotDurationValue.textContent = `${shotDuration.value} s`;
+});
+applyDemo(demos[0]);
+
 function send(message: ViewerMessage): void {
   if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
 }
@@ -103,7 +161,7 @@ function connect(): void {
     // stay live so the HUD keeps reporting the phone.
     if (Number.isNaN(playingFrom)) {
       raw.set(message.q[0], message.q[1], message.q[2], message.q[3]);
-      take.push(now, raw);
+      take.push(now, raw, dollyU);
     }
   });
 
@@ -216,7 +274,21 @@ const animate = (): void => {
         stopPlayback();
       }
     }
-    take.sampleAt(Math.min(elapsed, take.duration), raw);
+    // A take replays the whole shot: the dolly position recorded with each
+    // sample, not just the head movement.
+    const recordedU = take.sampleAt(Math.min(elapsed, take.duration), raw);
+    if (!Number.isNaN(recordedU)) setDolly(recordedU);
+  } else if (dollyPlaying && demo.path) {
+    const seconds = Number(shotDuration.value);
+    const next = dollyU + dt / seconds;
+    if (next < 1) {
+      setDolly(next);
+    } else if (shotLoop.checked) {
+      setDolly(next - 1);
+    } else {
+      setDolly(1);
+      pauseShot();
+    }
   }
 
   smoother.apply(raw, dt, settings, smoothed);

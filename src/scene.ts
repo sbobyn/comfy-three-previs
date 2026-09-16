@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import type { Demo } from "./demos";
 
 // Helpers live on their own layer so the world view can show the rig while the
 // camera view stays clean — an operator must not see their own frustum.
@@ -9,9 +10,14 @@ export type Studio = {
   pov: THREE.PerspectiveCamera;
   rawPov: THREE.PerspectiveCamera;
   setRawVisible: (visible: boolean) => void;
+  setDemo: (demo: Demo) => void;
+  /** 0..1 along the current demo's path; ignored when the demo has none. */
+  setDollyProgress: (u: number) => void;
   render: () => void;
   dispose: () => void;
 };
+
+const PARKED = new THREE.Vector3(0, 1.7, 0);
 
 /** A small body so the rig reads as a camera in the world view, not just lines. */
 function cameraBody(color: number): THREE.Object3D {
@@ -89,7 +95,7 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
   buildSet(scene);
 
   const pov = new THREE.PerspectiveCamera(40, 1, 0.5, 300);
-  pov.position.set(0, 1.7, 0);
+  pov.position.copy(PARKED);
   // Added to the scene so the body mesh below travels with it; the body sits on
   // the helper layer, so the camera never renders its own housing.
   scene.add(pov);
@@ -126,6 +132,34 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
   controls.dampingFactor = 0.08;
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.update();
+
+  let path: THREE.Curve<THREE.Vector3> | null = null;
+  let pathLine: THREE.Line | null = null;
+
+  const setDollyProgress = (u: number): void => {
+    if (path) path.getPointAt(Math.min(1, Math.max(0, u)), pov.position);
+    else pov.position.copy(PARKED);
+    rawPov.position.copy(pov.position);
+  };
+
+  const setDemo = (demo: Demo): void => {
+    if (pathLine) {
+      scene.remove(pathLine);
+      pathLine.geometry.dispose();
+      (pathLine.material as THREE.Material).dispose();
+      pathLine = null;
+    }
+    path = demo.path;
+    if (path) {
+      pathLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(path.getPoints(240)),
+        new THREE.LineBasicMaterial({ color: 0x5ad1a0 }),
+      );
+      pathLine.layers.set(HELPER_LAYER);
+      scene.add(pathLine);
+    }
+    setDollyProgress(0);
+  };
 
   const resize = (): void => {
     renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -168,6 +202,8 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     setRawVisible: (visible: boolean) => {
       rawHelper.visible = visible;
     },
+    setDemo,
+    setDollyProgress,
     render,
     dispose: () => {
       window.removeEventListener("resize", resize);
