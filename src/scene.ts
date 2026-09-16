@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { Demo } from "./demos";
+import { FILM_GAUGE } from "./lens";
 
 // Helpers live on their own layer so the world view can show the rig while the
 // camera view stays clean — an operator must not see their own frustum.
@@ -23,16 +24,6 @@ export type Studio = {
 
 const PARKED = new THREE.Vector3(0, 1.7, 0);
 
-/**
- * Full-frame sensor width. Three derives film height by dividing this by the
- * aspect, so horizontal field of view depends only on focal length — a 50mm
- * stays a 50mm when the window is resized, which a fixed vertical FOV would not.
- */
-const FILM_GAUGE = 36;
-
-export function horizontalFov(mm: number): number {
-  return THREE.MathUtils.radToDeg(2 * Math.atan(FILM_GAUGE / 2 / mm));
-}
 
 /** A small body so the rig reads as a camera in the world view, not just lines. */
 function cameraBody(color: number): THREE.Object3D {

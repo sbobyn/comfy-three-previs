@@ -48,6 +48,12 @@
         flex-direction: column;
         gap: 10px;
       }
+      input[type="range"] {
+        width: 100%;
+        height: 42px;
+        margin: 0;
+        accent-color: #4f8cff;
+      }
       select {
         padding: 14px;
         font: inherit;
@@ -88,6 +94,10 @@
       </dl>
     </div>
     <div class="controls">
+      <label for="zoom" style="color: #9a9ab0"
+        >Zoom<span id="zoomValue" style="float: right; color: #e6e6f0">35 mm</span></label
+      >
+      <input type="range" id="zoom" min="0" max="1" step="0.001" value="0.368" />
       <label for="grip" style="color: #9a9ab0">Grip</label>
       <select id="grip">
         <option value="portrait">Portrait — upright</option>

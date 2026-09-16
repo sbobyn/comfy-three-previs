@@ -12,6 +12,7 @@ export const EVICTED_BY_VIEWER = 4001;
 
 export type PhoneMessage =
   | { t: "q"; q: [number, number, number, number] }
+  | { t: "lens"; mm: number }
   | { t: "pong"; id: number };
 
 /**

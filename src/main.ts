@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { element } from "./dom";
-import { createStudio, horizontalFov } from "./scene";
+import { createStudio } from "./scene";
+import { horizontalFov, mmToSlider, sliderToMm } from "./lens";
 import { relayUrl, type ViewerInbound, type ViewerMessage } from "./protocol";
 import { OrientationSmoother, defaultSettings } from "./smoothing";
 import { Take } from "./take";
@@ -60,6 +61,8 @@ let demo: Demo = demos[0];
 let dollyU = 0;
 let dollyPlaying = false;
 let controllerPresent = false;
+let focalTarget = -1;
+let focalCurrent = 35;
 
 let nextPingId = 0;
 const pendingPings = new Map<number, number>();
@@ -91,36 +94,31 @@ bindSlider("halfLife", (v) => `${Math.round(v * 1000)} ms`);
 bindToggle("deshake");
 bindToggle("inertia");
 
-// Focal length is perceived logarithmically — a linear slider would spend most
-// of its travel between 200mm and 300mm, where the difference barely reads.
-const MIN_MM = 10;
-const MM_RANGE = 30;
-
-function applyFocalLength(mm: number): void {
-  const rounded = Math.round(mm);
-  studio.setFocalLength(rounded);
-  focalValue.textContent = `${rounded} mm · ${horizontalFov(rounded).toFixed(0)}°`;
+/** Whoever moved the lens last wins — the phone, the desktop, or a take. */
+function setFocalTarget(mm: number, syncSlider: boolean): void {
+  if (mm === focalTarget) return;
+  focalTarget = mm;
+  focalValue.textContent = `${mm} mm · ${horizontalFov(mm).toFixed(0)}°`;
   lensPresets.querySelectorAll<HTMLButtonElement>("button").forEach((preset) => {
-    preset.classList.toggle("active", Number(preset.dataset.mm) === rounded);
+    preset.classList.toggle("active", Number(preset.dataset.mm) === mm);
   });
+  if (syncSlider) focalSlider.value = String(mmToSlider(mm));
 }
 
 focalSlider.addEventListener("input", () => {
-  applyFocalLength(MIN_MM * Math.pow(MM_RANGE, Number(focalSlider.value)));
+  setFocalTarget(sliderToMm(Number(focalSlider.value)), false);
 });
 
 lensPresets.addEventListener("click", (event) => {
   const mm = Number((event.target as HTMLElement).dataset.mm);
-  if (!mm) return;
-  focalSlider.value = String(Math.log(mm / MIN_MM) / Math.log(MM_RANGE));
-  applyFocalLength(mm);
+  if (mm) setFocalTarget(mm, true);
 });
 
 formatSelect.addEventListener("change", () => {
   studio.setFormat(formatSelect.value === "fill" ? null : Number(formatSelect.value));
 });
 
-applyFocalLength(MIN_MM * Math.pow(MM_RANGE, Number(focalSlider.value)));
+setFocalTarget(sliderToMm(Number(focalSlider.value)), false);
 
 for (const entry of demos) {
   const option = document.createElement("option");
@@ -185,6 +183,11 @@ function connect(): void {
       return;
     }
 
+    if (message.t === "lens") {
+      setFocalTarget(message.mm, true);
+      return;
+    }
+
     if (message.t === "pong") {
       const sentAt = pendingPings.get(message.id);
       if (sentAt !== undefined) {
@@ -208,7 +211,7 @@ function connect(): void {
     // stay live so the HUD keeps reporting the phone.
     if (Number.isNaN(playingFrom)) {
       raw.set(message.q[0], message.q[1], message.q[2], message.q[3]);
-      take.push(now, raw, dollyU);
+      take.push(now, raw, dollyU, focalTarget);
     }
   });
 
@@ -333,10 +336,13 @@ const animate = (): void => {
         stopPlayback();
       }
     }
-    // A take replays the whole shot: the dolly position recorded with each
-    // sample, not just the head movement.
-    const recordedU = take.sampleAt(Math.min(elapsed, take.duration), raw);
-    if (!Number.isNaN(recordedU)) setDolly(recordedU);
+    // A take replays the whole shot: the dolly position and lens recorded with
+    // each sample, not just the head movement.
+    const head = take.sampleAt(Math.min(elapsed, take.duration), raw);
+    if (head) {
+      setDolly(head.u);
+      setFocalTarget(Math.round(head.mm), true);
+    }
   } else if (dollyPlaying && demo.path) {
     const seconds = Number(shotDuration.value);
     const next = dollyU + dt / seconds;
@@ -349,6 +355,14 @@ const animate = (): void => {
       pauseShot();
     }
   }
+
+  // A thumb dragging a slider is steppy, so the zoom mechanism gets the same
+  // mass the head has: with inertia on, a zoom ramps instead of jumping.
+  const zoomBlend = settings.inertia
+    ? 1 - Math.pow(2, -dt / Math.max(settings.halfLife, 0.001))
+    : 1;
+  focalCurrent += (focalTarget - focalCurrent) * zoomBlend;
+  studio.setFocalLength(focalCurrent);
 
   smoother.apply(raw, dt, settings, smoothed);
   studio.pov.quaternion.copy(smoothed);

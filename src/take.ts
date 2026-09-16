@@ -1,13 +1,20 @@
 import * as THREE from "three";
 
-type Sample = { t: number; q: [number, number, number, number]; u: number };
+type Sample = {
+  t: number;
+  q: [number, number, number, number];
+  u: number;
+  mm: number;
+};
+
+export type Playhead = { u: number; mm: number };
 
 /**
- * Stores raw, unsmoothed samples plus the dolly position they were shot at.
- * Smoothing is applied downstream on playback so the same recorded move can be
- * replayed through different settings; the dolly position travels with each
- * sample because replaying head movement against the wrong base position would
- * reproduce a different shot entirely.
+ * Stores raw, unsmoothed samples plus the rig state they were shot at. Smoothing
+ * is applied downstream on playback so the same recorded move can be replayed
+ * through different settings, but dolly position and focal length travel with
+ * each sample: a zoom and a dolly move are part of the shot, and replaying head
+ * movement without them would reproduce something the operator never performed.
  */
 export class Take {
   private samples: Sample[] = [];
@@ -37,22 +44,22 @@ export class Take {
     this.recording = false;
   }
 
-  push(now: number, q: THREE.Quaternion, u: number): void {
+  push(now: number, q: THREE.Quaternion, u: number, mm: number): void {
     if (!this.recording) return;
-    this.samples.push({ t: now - this.startedAt, q: [q.x, q.y, q.z, q.w], u });
+    this.samples.push({ t: now - this.startedAt, q: [q.x, q.y, q.z, q.w], u, mm });
   }
 
   rewind(): void {
     this.cursor = 0;
   }
 
-  /** Writes orientation into `out` and returns the dolly position, or NaN if empty. */
-  sampleAt(time: number, out: THREE.Quaternion): number {
-    if (this.samples.length === 0) return Number.NaN;
+  /** Writes orientation into `out` and returns the rig state at that instant. */
+  sampleAt(time: number, out: THREE.Quaternion): Playhead | null {
+    if (this.samples.length === 0) return null;
     if (time <= 0) {
       const first = this.samples[0];
       out.set(first.q[0], first.q[1], first.q[2], first.q[3]);
-      return first.u;
+      return { u: first.u, mm: first.mm };
     }
 
     if (this.cursor >= this.samples.length - 1 || this.samples[this.cursor].t > time) {
@@ -66,10 +73,10 @@ export class Take {
     const b = this.samples[this.cursor + 1] ?? a;
     const span = b.t - a.t;
     out.set(a.q[0], a.q[1], a.q[2], a.q[3]);
-    if (span <= 0) return a.u;
+    if (span <= 0) return { u: a.u, mm: a.mm };
 
     const mix = Math.min(1, (time - a.t) / span);
     out.slerp(new THREE.Quaternion(b.q[0], b.q[1], b.q[2], b.q[3]), mix);
-    return a.u + (b.u - a.u) * mix;
+    return { u: a.u + (b.u - a.u) * mix, mm: a.mm + (b.mm - a.mm) * mix };
   }
 }

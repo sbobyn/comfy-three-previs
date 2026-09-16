@@ -1,4 +1,5 @@
 import { element } from "./dom";
+import { sliderToMm } from "./lens";
 import {
   applyGrip,
   onDeviceQuaternion,
@@ -20,6 +21,8 @@ const linkField = element("link");
 const sensorField = element("sensor");
 const sentField = element("sent");
 const gripSelect = element<HTMLSelectElement>("grip");
+const zoomSlider = element<HTMLInputElement>("zoom");
+const zoomValue = element("zoomValue");
 
 const yawZero = new YawZero();
 let socket: WebSocket | null = null;
@@ -45,12 +48,23 @@ function send(message: PhoneMessage): void {
   if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
 }
 
+function sendLens(): void {
+  const mm = sliderToMm(Number(zoomSlider.value));
+  zoomValue.textContent = `${mm} mm`;
+  send({ t: "lens", mm });
+}
+
+zoomSlider.addEventListener("input", sendLens);
+
 function connect(): void {
   detached = false;
   socket = new WebSocket(relayUrl("phone"));
 
   socket.addEventListener("open", () => {
     linkField.textContent = "connected";
+    // Announce the lens on connect so the desktop adopts the operator's setting
+    // rather than whatever it happened to be showing.
+    sendLens();
     refreshPrimary();
   });
 
