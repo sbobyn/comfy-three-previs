@@ -329,11 +329,23 @@
         >camera tilt<span id="tiltValue">-8°</span>
         <input type="range" id="tilt" min="-60" max="30" step="1" value="-8" />
       </label>
+      <label class="slider"
+        >stick deadzone<span id="deadzoneValue">0.08</span>
+        <input type="range" id="deadzone" min="0" max="0.4" step="0.01" value="0.08" />
+      </label>
+      <label class="slider"
+        >stick expo<span id="expoValue">0.45</span>
+        <input type="range" id="expo" min="0" max="1" step="0.05" value="0.45" />
+      </label>
+      <div class="legend" id="padInfo">gamepad: none</div>
       <div class="row">
         <button id="flightRecord" disabled>Record flight</button>
       </div>
       <div class="legend" id="flightInfo">pilot mode only</div>
-      <div class="legend">W A S D · Q E yaw · Space / Shift climb</div>
+      <div class="legend">
+        W A S D · Q E yaw · Space / Shift climb<br />Mode 2 sticks: left climb/yaw,
+        right forward/lateral
+      </div>
     </div>
 
     <div class="panel" id="controls">

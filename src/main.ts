@@ -7,6 +7,7 @@ import { OrientationSmoother, defaultSettings } from "./smoothing";
 import { Take } from "./take";
 import { addFlownDemo, demoById, demos, type Demo, type FlightSample } from "./demos";
 import { defaultFlightSettings, Drone, type FlightInput, type FlightSettings } from "./flight";
+import { activeGamepad, defaultStickSettings, readGamepad, type StickSettings } from "./gamepad";
 
 const canvas = element<HTMLCanvasElement>("scene");
 const fields = {
@@ -42,6 +43,7 @@ const formatSelect = element<HTMLSelectElement>("format");
 const lensPresets = element("lensPresets");
 const flightRecordButton = element<HTMLButtonElement>("flightRecord");
 const flightInfo = element("flightInfo");
+const padInfo = element("padInfo");
 
 const studio = createStudio(canvas, element("worldPane"));
 const smoother = new OrientationSmoother();
@@ -54,6 +56,7 @@ const aim = new THREE.Quaternion();
 
 const drone = new Drone();
 const flight = defaultFlightSettings();
+const sticks = defaultStickSettings();
 const heldKeys = new Set<string>();
 const PILOT_KEYS = new Set(["KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "Space", "ShiftLeft"]);
 
@@ -119,6 +122,21 @@ function bindFlight(id: keyof FlightSettings, format: (value: number) => string)
   sync();
 }
 
+function bindSticks(id: keyof StickSettings, format: (value: number) => string): void {
+  const input = element<HTMLInputElement>(id);
+  const readout = element(`${id}Value`);
+  const sync = (): void => {
+    const value = Number(input.value);
+    (sticks[id] as number) = value;
+    readout.textContent = format(value);
+  };
+  input.addEventListener("input", sync);
+  sync();
+}
+
+bindSticks("deadzone", (v) => v.toFixed(2));
+bindSticks("expo", (v) => v.toFixed(2));
+
 bindFlight("maxSpeed", (v) => `${v.toFixed(0)} m/s`);
 bindFlight("climbSpeed", (v) => `${v.toFixed(0)} m/s`);
 bindFlight("responseTime", (v) => `${Math.round(v * 1000)} ms`);
@@ -139,14 +157,27 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("keyup", (event) => heldKeys.delete(event.code));
 window.addEventListener("blur", () => heldKeys.clear());
 
+const clampAxis = (value: number): number => Math.min(1, Math.max(-1, value));
+
+/** Keys and sticks sum, so either can fly and neither locks the other out. */
 function readFlightInput(): FlightInput {
   const axis = (positive: string, negative: string): number =>
     (heldKeys.has(positive) ? 1 : 0) - (heldKeys.has(negative) ? 1 : 0);
-  return {
+
+  const keyboard: FlightInput = {
     forward: axis("KeyW", "KeyS"),
     lateral: axis("KeyD", "KeyA"),
     vertical: axis("Space", "ShiftLeft"),
     yaw: axis("KeyE", "KeyQ"),
+  };
+
+  const pad = readGamepad(sticks);
+  if (!pad) return keyboard;
+  return {
+    forward: clampAxis(keyboard.forward + pad.forward),
+    lateral: clampAxis(keyboard.lateral + pad.lateral),
+    vertical: clampAxis(keyboard.vertical + pad.vertical),
+    yaw: clampAxis(keyboard.yaw + pad.yaw),
   };
 }
 
@@ -424,6 +455,9 @@ function updateHud(): void {
   fields.altitude.textContent = isPiloting()
     ? `${studio.pov.position.y.toFixed(1)} m`
     : "—";
+
+  const pad = activeGamepad();
+  padInfo.textContent = pad ? `gamepad: ${pad.id.slice(0, 30)}` : "gamepad: none";
 
   flightInfo.textContent = flightSamples
     ? `recording · ${flightSamples.length} samples · ${((now - flightStartedAt) / 1000).toFixed(1)} s`
