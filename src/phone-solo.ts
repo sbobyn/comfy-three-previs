@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { element } from "./dom";
-import { createStage } from "./scene";
+import { createSoloStage } from "./scene";
 import { onDeviceQuaternion, requestMotionPermission, YawZero } from "./orientation";
 
 const canvas = element<HTMLCanvasElement>("scene");
@@ -8,7 +8,7 @@ const enableButton = element<HTMLButtonElement>("enable");
 const zeroButton = element<HTMLButtonElement>("zero");
 const status = element("status");
 
-const stage = createStage(canvas);
+const stage = createSoloStage(canvas);
 const yawZero = new YawZero();
 const euler = new THREE.Euler();
 

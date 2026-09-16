@@ -22,22 +22,59 @@
         width: 100%;
         height: 100%;
       }
+      /* Transparent hit region: OrbitControls must only claim the world half. */
+      #worldPane {
+        position: fixed;
+        inset: 0 50% 0 0;
+        z-index: 1;
+        cursor: grab;
+      }
+      #worldPane:active {
+        cursor: grabbing;
+      }
+      #seam {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        background: #33334a;
+        z-index: 2;
+        pointer-events: none;
+      }
+      .viewLabel {
+        position: fixed;
+        bottom: 16px;
+        z-index: 2;
+        pointer-events: none;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 11px;
+        color: #6e6e88;
+      }
+      #worldLabel {
+        left: 16px;
+      }
+      #cameraLabel {
+        left: calc(50% + 16px);
+      }
       .panel {
         position: fixed;
-        top: 16px;
+        left: 16px;
+        z-index: 3;
         padding: 14px 16px;
-        background: rgba(18, 18, 26, 0.82);
+        background: rgba(18, 18, 26, 0.85);
         border: 1px solid #2c2c40;
         border-radius: 10px;
         backdrop-filter: blur(8px);
       }
       #hud {
-        left: 16px;
-        min-width: 240px;
+        top: 16px;
+        min-width: 236px;
       }
       #controls {
-        right: 16px;
-        width: 260px;
+        bottom: 44px;
+        width: 248px;
       }
       h1 {
         margin: 0 0 10px;
@@ -48,7 +85,7 @@
         color: #9a9ab0;
       }
       h2 {
-        margin: 16px 0 8px;
+        margin: 14px 0 6px;
         font-size: 12px;
         font-weight: 600;
         color: #e6e6f0;
@@ -57,13 +94,13 @@
         gap: 8px;
       }
       h2:first-of-type {
-        margin-top: 4px;
+        margin-top: 2px;
       }
       dl {
         margin: 0;
         display: grid;
         grid-template-columns: auto 1fr;
-        gap: 5px 16px;
+        gap: 4px 16px;
         font-variant-numeric: tabular-nums;
       }
       dt {
@@ -75,7 +112,7 @@
       }
       label.slider {
         display: block;
-        margin: 9px 0;
+        margin: 8px 0;
         color: #9a9ab0;
       }
       label.slider span {
@@ -85,14 +122,14 @@
       }
       input[type="range"] {
         width: 100%;
-        margin: 4px 0 0;
+        margin: 3px 0 0;
         accent-color: #4f8cff;
       }
       input[type="checkbox"] {
         accent-color: #4f8cff;
       }
       button {
-        padding: 8px;
+        padding: 7px;
         font: inherit;
         color: #e6e6f0;
         background: #26263a;
@@ -105,19 +142,18 @@
       .row {
         display: flex;
         gap: 8px;
-        margin-top: 10px;
+        margin-top: 9px;
       }
       .row button {
         flex: 1;
       }
       #hud button {
         width: 100%;
-        margin-top: 12px;
+        margin-top: 10px;
       }
       .legend {
-        margin-top: 12px;
+        margin-top: 10px;
         color: #6e6e88;
-        line-height: 1.7;
       }
       .swatch {
         display: inline-block;
@@ -125,12 +161,12 @@
         height: 9px;
         margin-right: 6px;
         border-radius: 2px;
-        vertical-align: baseline;
       }
       #hint {
         position: fixed;
         bottom: 16px;
-        left: 16px;
+        right: 16px;
+        z-index: 2;
         color: #6e6e88;
       }
       #hint a {
@@ -140,6 +176,10 @@
   </head>
   <body>
     <canvas id="scene"></canvas>
+    <div id="worldPane"></div>
+    <div id="seam"></div>
+    <div class="viewLabel" id="worldLabel">world · drag to orbit</div>
+    <div class="viewLabel" id="cameraLabel">camera</div>
 
     <div class="panel" id="hud">
       <h1>vcam link</h1>
@@ -163,8 +203,8 @@
       </dl>
       <button id="mark">Mark drift baseline</button>
       <div class="legend">
-        <div><i class="swatch" style="background: #4f8cff"></i>smoothed</div>
-        <div><i class="swatch" style="background: #ff7a45"></i>raw</div>
+        <i class="swatch" style="background: #4f8cff"></i>smoothed
+        <i class="swatch" style="background: #ff7a45; margin-left: 10px"></i>raw
       </div>
     </div>
 
@@ -187,9 +227,11 @@
         <input type="range" id="halfLife" min="0.005" max="0.5" step="0.005" value="0.08" />
       </label>
 
-      <h2><input type="checkbox" id="showGhost" checked /><label for="showGhost">Show raw</label></h2>
+      <h2>
+        <input type="checkbox" id="showGhost" checked /><label for="showGhost">Show raw frustum</label>
+      </h2>
 
-      <h1 style="margin-top: 18px">take</h1>
+      <h1 style="margin-top: 16px">take</h1>
       <dl>
         <dt>samples</dt>
         <dd id="takeCount">0</dd>
@@ -201,13 +243,15 @@
         <button id="play" disabled>Play</button>
       </div>
       <div class="row">
-        <label style="color: #9a9ab0"><input type="checkbox" id="loop" checked /> loop playback</label>
+        <label style="color: #9a9ab0"
+          ><input type="checkbox" id="loop" checked /> loop playback</label
+        >
       </div>
     </div>
 
     <div id="hint">
-      open <a href="/phone.html">/phone.html</a> on the device ·
-      <a href="/phone-solo.html">/phone-solo.html</a> to test sensors alone
+      <a href="/phone.html">/phone.html</a> on the device ·
+      <a href="/phone-solo.html">/phone-solo.html</a> for sensors alone
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

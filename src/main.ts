@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { element } from "./dom";
-import { createStage } from "./scene";
+import { createStudio } from "./scene";
 import { relayUrl, type PhoneMessage, type ViewerMessage } from "./protocol";
 import { OrientationSmoother, defaultSettings } from "./smoothing";
 import { Take } from "./take";
@@ -24,7 +24,7 @@ const playButton = element<HTMLButtonElement>("play");
 const loopToggle = element<HTMLInputElement>("loop");
 const ghostToggle = element<HTMLInputElement>("showGhost");
 
-const stage = createStage(canvas);
+const studio = createStudio(canvas, element("worldPane"));
 const smoother = new OrientationSmoother();
 const settings = defaultSettings();
 const take = new Take();
@@ -220,14 +220,14 @@ const animate = (): void => {
   }
 
   smoother.apply(raw, dt, settings, smoothed);
-  stage.target.quaternion.copy(smoothed);
-  stage.ghost.quaternion.copy(raw);
-  stage.ghost.visible = ghostToggle.checked;
+  studio.pov.quaternion.copy(smoothed);
+  studio.rawPov.quaternion.copy(raw);
+  studio.setRawVisible(ghostToggle.checked);
 
   euler.setFromQuaternion(raw, "YXZ");
   yawDeg = THREE.MathUtils.radToDeg(euler.y);
 
-  stage.render();
+  studio.render();
   requestAnimationFrame(animate);
 };
 animate();
