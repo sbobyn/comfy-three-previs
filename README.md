@@ -4,8 +4,10 @@ R&D prototype: use a phone as a virtual camera head — stream device orientatio
 to a Three.js scene, record it as a take, and eventually drive a GenDirector
 camera's rotation while a motion path drives its position.
 
-Status: orientation streams from an iPhone to the desktop scene. No smoothing or
-take recording yet.
+Status: orientation streams from an iPhone to the desktop scene, with adjustable
+deshake/inertia smoothing and raw take recording. Still drives a stand-in object,
+not an actual camera, and there is no motion path yet — so the premise (operating
+a camera during a dolly move) is not yet testable.
 
 ## Measured — 2026-09-15, iPhone over a cloudflared quick tunnel
 
