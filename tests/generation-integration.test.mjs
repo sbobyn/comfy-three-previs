@@ -3,7 +3,7 @@
 // Blender, Comfy, network, GPU, downloads or cleanup/deletion runs here.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -195,6 +195,29 @@ test('simulation: replacing an approved quote clears consent before awaiting the
   assert.equal(h.state.submissions.length, 1); assert.equal(h.state.submissions[0].prompt_id, second.id);
   assert.equal(h.routes.state().jobs.find(job => job.id === first.id).status, 'quoted');
   assert.equal(ui.el('approve').checked, false);
+});
+
+test('simulation: quote prices the prepared video and render settings never reset its mapping', async t => {
+  const workflow={...definition(),task:'transform-video',pricing:{ratePerSecond:0.126,creditsPerSecond:26.59},graph:{
+    '1':{class_type:'LoadVideo',inputs:{file:'author.mp4'}},
+    '2':{class_type:'KlingOmniProEditVideoNode',inputs:{video:['1',0],model_name:'kling-video-o1',resolution:'720p'}},
+    '3':{class_type:'SaveVideo',inputs:{video:['2',0]}},
+    '4':{class_type:'LoadImage',inputs:{image:'author.png'}}
+  },inputs:{sourceVideo:{nodeId:'1',input:'file'},firstFrame:{nodeId:'4',input:'image'}},outputs:[{nodeId:'3',mediaType:'video/mp4'}]};
+  const h=await fixture(t,{workflow}),ids=[randomUUID(),randomUUID()];
+  await mkdir(join(h.root,'assets'));
+  for(const id of ids)await writeFile(join(h.root,'assets',id+'.mp4'),Buffer.from('SIMULATED video'));
+  await h.project.mutate(h.project.get().revision,p=>{p.assets=ids.map((id,i)=>({id,kind:'video',source:'blender',shotId:'shot',version:i+1,url:'/assets/'+id+'.mp4',mimeType:'video/mp4',sha256:hashBytes(Buffer.from('SIMULATED video')),width:1280,height:720,duration:i?8:3,fps:24,frameCount:i?192:72,audio:false,requestRevision:1,binding:sourceBinding}));});
+  const ui=await browserFixture(h);
+  ui.role('sourceVideo').change('asset:'+ids[1]);assert.equal(ui.el('asset').value,ids[1]);
+  ui.el('asset').value=ids[0]; // A stale player must never determine the quote.
+  ui.el('fps').input('12');assert.equal(ui.role('sourceVideo').value,'asset:'+ids[1]);
+  await ui.el('prepare').click();
+  assert.match(ui.el('status').textContent,/Prepared exact request/);
+  assert.equal(h.routes.state().jobs[0].sources.sourceVideo.id,ids[1]);
+  assert.match(ui.el('quote').textContent,/\$1\.008 USD/);assert.match(ui.el('quote').textContent,/212\.72 Comfy credits/);
+  assert.equal(h.state.submissions.length,0);
+  ui.el('asset').change(ids[0]);assert.equal(ui.role('sourceVideo').value,'asset:'+ids[0]);
 });
 
 test('simulation: failed quote replacement leaves the previous request unapproved and disabled', async t => {

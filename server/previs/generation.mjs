@@ -2,7 +2,7 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
-import { createBackend, backendSnapshot, safeMediaLocation } from './backends.mjs';
+import { createBackend, backendSnapshot, backendTransportKey, safeMediaLocation } from './backends.mjs';
 import { assertNoSecrets, hashBytes, hashValue, validateWorkflowDefinition, legacyWorkflowDefinition, validateGraph, workflowCost, validateApproval } from './workflows.mjs';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -168,7 +168,7 @@ export async function openGeneration(root, project, options = {}) {
     if (saved.workflowBindingId !== input.workflowBindingId) fail('Request UUID belongs to another binding', 409);
     if (!draft(saved)) return saved;
     if (saved.status !== 'quoted') fail('Prepare and quote this request before submission', 409);
-    if ([...jobs.values()].some(job => job.id !== id && active(job) && hashValue(job.backend) === hashValue(saved.backend))) fail('Resolve the existing backend request before another submission; uncertainty must never cause a retry', 409);
+    if ([...jobs.values()].some(job => job.id !== id && active(job) && backendTransportKey(job.backend) === backendTransportKey(saved.backend))) fail('Resolve the existing backend request before another submission; uncertainty must never cause a retry', 409);
     const current = await resolve(input);
     if (saved.fingerprint !== current.fingerprint) {
       await persist({ ...saved, status: 'invalidated', validation: current.validation, message: 'Graph, inputs, project, backend, pricing or live schema changed. Prepare and approve a new quote.' });

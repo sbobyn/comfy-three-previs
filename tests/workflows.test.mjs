@@ -8,7 +8,7 @@ import { randomUUID } from 'node:crypto';
 import { openProject } from '../server/previs/store.mjs';
 import { atomicJson } from '../server/previs/atomic.mjs';
 import { validateWorkflowDefinition, validateGraph, hashValue, hashBytes, workflowCost, validateApproval, assertNoSecrets } from '../server/previs/workflows.mjs';
-import { createBackend, backendSnapshot, safeMediaLocation } from '../server/previs/backends.mjs';
+import { createBackend, backendSnapshot, backendTransportKey, safeMediaLocation } from '../server/previs/backends.mjs';
 import { openGeneration, declaredOutputs, validateAssetConstraints } from '../server/previs/generation.mjs';
 
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==', 'base64');
@@ -203,6 +203,23 @@ test('default checkpoint blocks paid/unknown execution even after explicit unkno
   const approval = approve(quoted); approval.allowance.allowUnknownCharges = true; approval.allowance.maxAmount = 20;
   await assert.rejects(generation.submit({ ...input, approval }), /disabled at this checkpoint/);
   assert.equal(f.state.submits, 0); assert.equal(f.state.uploads, 0);
+});
+
+test('unresolved transport lock survives display aliases, loopback aliases and restart', async () => {
+  for(const kind of ['local','cloud']){
+    const f=await fixture();f.state.ambiguous=true;
+    let generation=await openGeneration(f.root,f.project,{backendFactory:f.backendFactory,allowPaid:true});
+    const first={...f.input(),backend:{kind,...(kind==='local'?{url:'http://localhost:8188'}:{})}},quote=await generation.quote(first);
+    const approval={approved:true,fingerprint:quote.fingerprint,allowance:{currency:'USD',maxAmount:1,allowUnknownCharges:true}};
+    assert.equal((await generation.submit({...first,approval})).status,'uncertain');
+    generation=await openGeneration(f.root,f.project,{backendFactory:f.backendFactory,allowPaid:true});
+    for(const url of kind==='local'?['http://127.0.0.1:8188','http://[::1]:8188']:['https://cloud.comfy.org']){
+      const next={...f.input(),backend:{kind,url,id:'another-label'}},q=await generation.quote(next);
+      await assert.rejects(generation.submit({...next,approval:{...approval,fingerprint:q.fingerprint}}),/existing backend request/);
+    }
+    assert.equal(f.state.submits,1);assert.equal(f.state.uploads,1);
+  }
+  assert.notEqual(backendTransportKey({url:'http://localhost:8188'}),backendTransportKey({url:'http://localhost:8189'}));
 });
 
 test('journal write failure prevents dispatch; restart during dispatch becomes uncertain', async () => {

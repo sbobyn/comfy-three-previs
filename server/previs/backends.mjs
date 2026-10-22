@@ -18,6 +18,13 @@ export function backendSnapshot(input = {}) {
   return Object.freeze({ id, kind, url, apiVersion: kind === 'cloud' ? 'cloud-v1' : 'comfyui', deprecated: kind === 'cloud' });
 }
 
+// Display labels must never split the unresolved-operation lock for one service.
+export function backendTransportKey(input) {
+  const backend = backendSnapshot(input), url = new URL(backend.url);
+  if (backend.kind === 'local') url.hostname = '127.0.0.1';
+  return `${backend.kind}:${url.origin}`;
+}
+
 export function safeMediaLocation(value) {
   if (!value || value.type !== 'output' || typeof value.filename !== 'string' || !/^[^/\\\x00-\x1f:?#%]{1,240}$/.test(value.filename) || ['.', '..'].includes(value.filename) || typeof value.subfolder !== 'string' || /[\\\x00-\x1f:?#%]/.test(value.subfolder) || value.subfolder.startsWith('/') || value.subfolder.split('/').some(part => ['.', '..'].includes(part))) throw Error('Invalid backend media location');
   return { filename: value.filename, subfolder: value.subfolder, type: 'output' };

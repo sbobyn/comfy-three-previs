@@ -16,15 +16,16 @@ async function action(fn:()=>Promise<void>) {if(busy)return;busy=true;try{await 
 function pickedShot() {return project.shots.find((s:Data)=>s.id===select('shot').value);}
 function pickedAsset() {return (project.assets||[]).find((a:Data)=>a.id===select('asset').value);}
 function describe(a:Data) {return `${a.width}×${a.height} · ${a.frameCount} frames · ${a.fpsRational||a.fps} fps · ${a.duration.toFixed(3)} s · ${a.audio?'audio present':'silent'} · source revision ${a.requestRevision}`;}
-function showSource() {
+function showSource(updateBindings = true) {
   const a=pickedAsset();if(a){video('source').src=a.url;el('asset-detail').textContent=`Version ${a.version} · ${describe(a)}${a.provenance?.recordedDuration!==undefined?` · recorded ${a.provenance.recordedDuration.toFixed(3)} s, final sample ${a.provenance.sampledEndTime.toFixed(3)} s`:''}`;}else{video('source').removeAttribute('src');el('asset-detail').textContent='Render or export a video for this shot.';}
-  renderBindings();invalidate();
+  if(updateBindings)renderBindings();invalidate();
 }
+function syncPrimarySource(){const value=(roles.sourceVideo||roles.controlVideo)?.value;if(value?.startsWith('asset:')&&Array.from(select('asset').options).some(o=>o.value===value.slice(6))){select('asset').value=value.slice(6);showSource(false);}}
+function showRenderTiming(){const s=pickedShot();if(!s)return;const count=s.binding.end-s.binding.start+1;el('render-timing').textContent=`${count} selected source frames → ${(count/Number(field('fps').value)).toFixed(3)} s at chosen output FPS. Rebind exact scene/camera/range from Shots.`;}
 function showShot() {
   const s=pickedShot();if(!s)return;
   el('shot-detail').textContent=`${s.binding.source} owns ${s.binding.scene} / ${s.binding.camera} · frames ${s.binding.start}–${s.binding.end} · source ${s.binding.fps} fps`;
-  const count=s.binding.end-s.binding.start+1;
-  el('render-timing').textContent=`${count} selected source frames → ${(count/Number(field('fps').value)).toFixed(3)} s at chosen output FPS. Rebind exact scene/camera/range from Shots.`;
+  showRenderTiming();
   el<HTMLButtonElement>('render-video').disabled=s.binding.source!=='blender';el<HTMLButtonElement>('preview').disabled=s.binding.source!=='blender';
   const previous=select('asset').value;
   select('asset').replaceChildren(...(project.assets||[]).filter((a:Data)=>a.shotId===s.id&&a.kind==='video'&&a.source!=='comfy').map((a:Data)=>option(a.id,`Version ${a.version} · ${a.source} · ${a.duration}s · ${a.width}×${a.height}`)));
@@ -50,7 +51,7 @@ function restoreBinding() {
   field('prompt').value=b.prompt||'';
   for(const [role,asset]of Object.entries(b.assetBindings||{})as[string,Data][])if(roles[role])roles[role].value=asset.assetId?'asset:'+asset.assetId:'render:'+asset.renderId;
   for(const [name,value]of Object.entries(b.parameters||{})){const c=parameters[name];if(!c)continue;if(c instanceof HTMLSelectElement&&!Array.from(c.options).some(o=>o.value===String(value)))c.append(option(String(value),`${value} — unavailable`));if(c.type==='checkbox')(c as HTMLInputElement).checked=Boolean(value);else c.value=String(value);}
-  invalidate();el('status').textContent='Saved shot bindings and parameters restored. Prepare a fresh quote before running.';
+  syncPrimarySource();invalidate();el('status').textContent='Saved shot bindings and parameters restored. Prepare a fresh quote before running.';
 }
 function renderBindings() {
   el('asset-bindings').replaceChildren();for(const key of Object.keys(roles))delete roles[key];
@@ -60,7 +61,7 @@ function renderBindings() {
     for(const a of project?.assets||[])if(a.kind===kind)s.append(option('asset:'+a.id,`${a.source} · ${a.shotId===pickedShot()?.id?'this shot':'other shot'} · v${a.version||1} · ${a.width||''}×${a.height||''} · ${a.id.slice(0,8)}`));
     if(kind==='image')for(const r of project?.renders||[])s.append(option('render:'+r.id,`${r.source} preview · ${r.width}×${r.height} · ${r.id.slice(0,8)}`));
     if(['sourceVideo','controlVideo'].includes(role)&&pickedAsset())s.value='asset:'+pickedAsset().id;
-    s.onchange=invalidate;roles[role]=s;el('asset-bindings').append(label(`${role}${mapping.pass?' ('+mapping.pass+')':''} → ${mapping.nodeId}.${mapping.input}`,s));
+    s.onchange=()=>{syncPrimarySource();invalidate();};roles[role]=s;el('asset-bindings').append(label(`${role}${mapping.pass?' ('+mapping.pass+')':''} → ${mapping.nodeId}.${mapping.input}`,s));
   }
 }
 function schemaFields(node:Data) {
@@ -121,9 +122,9 @@ function showComparison(){
   el<HTMLButtonElement>('review').disabled=false;
 }
 select('comparison-output').onchange=showComparison;
-select('shot').onchange=showShot;select('asset').onchange=showSource;select('task').onchange=workflowPicker;select('workflow').onchange=()=>{definition=allDefinitions().find(d=>d.id===select('workflow').value);imported=false;showDefinition();};
+select('shot').onchange=showShot;select('asset').onchange=()=>{for(const role of ['sourceVideo','controlVideo'])if(roles[role])roles[role].value='asset:'+select('asset').value;showSource(false);};select('task').onchange=workflowPicker;select('workflow').onchange=()=>{definition=allDefinitions().find(d=>d.id===select('workflow').value);imported=false;showDefinition();};
 select('backend').onchange=()=>{schema={};el('endpoint-label').hidden=select('backend').value!=='local';el('compatibility').textContent='Backend changed. Revalidate; graph and model are unchanged.';invalidate();};
-field('endpoint').oninput=invalidate;field('prompt').oninput=invalidate;for(const id of ['width','height','fps'])field(id).oninput=()=>{showShot();invalidate();};
+field('endpoint').oninput=invalidate;field('prompt').oninput=invalidate;for(const id of ['width','height','fps'])field(id).oninput=()=>{showRenderTiming();invalidate();};
 el('inspect').onclick=()=>action(async()=>{const r=await api('generation/inspect',{backend:backend()});schema=r.objectInfo;el('compatibility').textContent=`${Object.keys(schema).length} live node schemas · ${r.message}`;renderParameters(true);invalidate();});
 el('preview').onclick=()=>action(async()=>{el('status').textContent='Rendering framing preview…';const r=await api('render',{revision:project.revision,shotId:pickedShot().id});project=r.project;const image=project.renders.at(-1);el<HTMLImageElement>('framing').src='/renders/'+image.id+'.png';el('framing').hidden=false;invalidate();el('status').textContent='Framing preview saved.';});
 el('render-video').onclick=()=>action(async()=>{el('status').textContent='Rendering animation through Blender MCP; keep Blender idle. A lost connection does not cancel it.';const r=await api('video/blender',{revision:project.revision,shotId:pickedShot().id,width:Number(field('width').value),height:Number(field('height').value),fps:Number(field('fps').value)});project=r.project;showShot();select('asset').value=r.asset.id;showSource();el('status').textContent='Verified animation saved. '+describe(r.asset);});
@@ -137,7 +138,8 @@ el('prepare').onclick=()=>action(async()=>{
   prepared=(await api('generation/quote',requestInput)).job;
   const pricedNode=prepared!.preparedGraph?.['2']?.inputs;
   const priced=definition!.pricing?.ratePerSecond&&pricedNode?.model_name==='kling-video-o1'&&pricedNode?.resolution==='720p';
-  const estimate=priced&&pickedAsset()?`\nPublished partner estimate: $${(definition!.pricing.ratePerSecond*pickedAsset().duration).toFixed(3)} USD (${definition!.pricing.ratePerSecond}/s at 720p); ${(definition!.pricing.creditsPerSecond*pickedAsset().duration).toFixed(2)} Comfy credits. Cloud overhead/credit conversion unknown. This is not a total or provider spending cap.`:definition!.pricing?.ratePerSecond?'\nThe published estimate does not cover these model/resolution settings. Obtain a new quote.':'';
+  const pricedSource=prepared!.sources.sourceVideo;
+  const estimate=priced&&pricedSource?`\nBound source v${pricedSource.version}: ${describe(pricedSource)}.\nPublished partner estimate: $${(definition!.pricing.ratePerSecond*pricedSource.duration).toFixed(3)} USD (${definition!.pricing.ratePerSecond}/s at 720p); ${(definition!.pricing.creditsPerSecond*pricedSource.duration).toFixed(2)} Comfy credits. Cloud overhead/credit conversion unknown. This is not a total or provider spending cap.`:definition!.pricing?.ratePerSecond?'\nThe published estimate does not cover these model/resolution settings. Obtain a new quote.':'';
   el('quote').textContent=`${prepared!.validation.compatible?'Schema compatible':'Unavailable requirements'}\n${prepared!.validation.issues.map((i:Data)=>i.message).join('\n')}\nCost: ${prepared!.quote.status==='known'?'$'+prepared!.quote.amount+' USD': 'unknown total — quote approval required'}\n${prepared!.quote.reason}${estimate}\nApproval fingerprint: ${prepared!.fingerprint}`;
   el('request').textContent=JSON.stringify(prepared,null,2);state=await api('generation');drawJobs();submitReady();el('status').textContent='Prepared exact request. Nothing submitted.';
 });
