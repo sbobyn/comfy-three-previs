@@ -23,6 +23,7 @@ export default defineConfig({
         main: "index.html",
         previs: "previs.html",
         comfy: "comfy.html",
+        transfer: "transfer.html",
         phone: "phone.html",
         phoneSolo: "phone-solo.html",
       },

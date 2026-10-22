@@ -10,6 +10,7 @@ import { randomUUID } from 'node:crypto';
 import { openOperations } from './operations.mjs';
 import { lockProject } from './lock.mjs';
 import { openComfy, validateWorkflow } from './comfy.mjs';
+import { cameraTransfer, transferCode, verifyTransfer } from './transfer.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -60,6 +61,35 @@ const server = createServer(async (req, res) => {
       if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       const input = await body(req);
       const result = await serial(async () => {
+        if (url.pathname === '/api/transfer') {
+          if (!/^[a-f0-9-]{36}$/.test(input.requestId || '') || input.disposableProject !== true) fail('Confirm a disposable Blender project and provide a transfer request UUID');
+          const existing = project.get().transfers?.find(t => t.id === input.requestId);
+          if (existing) { if (existing.sourceShotId !== input.shotId) fail('Transfer request belongs to another shot', 409); return { project: project.get(), transfer: existing }; }
+          let operationId = null, transferred = null;
+          try {
+            const saved = await project.mutate(input.revision, async p => {
+              const shot = p.shots.find(s => s.id === input.shotId);
+              const payload = cameraTransfer(shot);
+              await refreshBlender();
+              if (!catalog.file || input.catalogToken !== catalog.token) fail('Refresh the saved disposable Blender project before transfer', 409);
+              const identity = { file: catalog.file, shotId: shot.id, revision: p.revision, requestId: input.requestId };
+              operationId = await operations.begin('transfer-camera', identity);
+              transferred = await blender.execute(transferCode(payload, identity));
+              const verification = verifyTransfer(payload, transferred);
+              const targetShotId = randomUUID();
+              const binding = { source: 'blender', file: catalog.file, scene: transferred.scene, camera: transferred.camera, fps: 24, start: 1, end: payload.end, frame: 1 };
+              const transfer = { id: input.requestId, sourceShotId: shot.id, targetShotId, requestRevision: p.revision, binding, manifest: payload, verification, targetChecks: transferred.checks, fileSaved: false, createdAt: new Date().toISOString() };
+              (p.transfers ||= []).push(transfer);
+              p.scenes.push({ id: randomUUID(), owner: 'blender', file: catalog.file, name: binding.scene, transferredFrom: shot.id });
+              p.shots.push({ id: targetShotId, title: shot.title + ' · transferred camera', binding, renders: [], transferId: transfer.id, limitation: 'Camera only. Add geometry in Blender before rendering. Save the disposable Blender project yourself to persist the new scene.' });
+            });
+            await operations.finish(operationId, 'completed', { scene: transferred.scene, savedRevision: saved.revision });
+            return { project: saved, transfer: saved.transfers.find(t => t.id === input.requestId) };
+          } catch (error) {
+            if (operationId && operations.get()?.status === 'running') await operations.finish(operationId, blender.uncertain ? 'uncertain' : 'failed', { reason: error.message, retainedScene: transferred?.scene });
+            throw error;
+          }
+        }
         if (url.pathname === '/api/comfy/inspect') return { readiness: await comfy.inspect() };
         if (url.pathname === '/api/comfy/bind') return { project: await project.mutate(input.revision, async p => {
           const render = p.renders.find(r => r.id === input.renderId);

@@ -234,7 +234,7 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
       capture.setSize(640, 360);
       const camera = pov.clone();
       camera.aspect = 16 / 9;
-      camera.updateProjectionMatrix();
+      camera.setFocalLength(focalLength);
       capture.render(scene, camera);
       const png = capture.domElement.toDataURL("image/png");
       capture.dispose();

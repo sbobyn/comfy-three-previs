@@ -1,6 +1,6 @@
 import './previs.css';
 type Scene = { name: string; fps: number; start: number; end: number; cameras: string[] };
-type Project = { renders: { id: string; binding: { camera: string; frame: number }; pass: string; source: string; requestRevision?: number }[]; revision: number; shots: { id: string; title: string; binding: { source: string; scene: string; camera: string; frame: number; fps: number; start: number; end: number }; renders: string[] }[] };
+type Project = { renders: { id: string; binding: { camera: string; frame: number }; pass: string; source: string; requestRevision?: number }[]; revision: number; shots: { id: string; title: string; limitation?: string; binding: { source: string; scene: string; camera: string; frame: number; fps: number; start: number; end: number }; renders: string[] }[] };
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const scene = el<HTMLSelectElement>('scene'), camera = el<HTMLSelectElement>('camera');
 let catalog: { file: string; token: string; scenes: Scene[] } | null = null;
@@ -37,7 +37,7 @@ function draw() {
     const card = document.createElement('article'), title = document.createElement('h3'), detail = document.createElement('p'), button = document.createElement('button');
     card.id = 'shot-' + shot.id; title.textContent = shot.title; detail.textContent = `${shot.binding.scene} / ${shot.binding.camera} · ${shot.binding.fps} fps · ${shot.binding.start}–${shot.binding.end} · preview ${shot.binding.frame}`;
     button.textContent = 'Render & save preview'; button.onclick = () => action(async () => { el('status').textContent = 'Rendering through Blender MCP…'; project = (await api('render', { revision: project.revision, shotId: shot.id })).project; draw(); el('status').textContent = 'Preview saved against shot.'; });
-    card.append(title, detail);
+    card.append(title, detail); if (shot.limitation) { const limit = document.createElement('p'); limit.textContent = shot.limitation; card.append(limit); }
     if (shot.binding.source === 'blender') {
       const edit = document.createElement('button'); edit.textContent = 'Rebind camera / range';
       edit.onclick = () => action(async () => {
