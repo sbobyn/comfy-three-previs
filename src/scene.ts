@@ -8,7 +8,7 @@ import { FILM_GAUGE } from "./lens";
 const HELPER_LAYER = 1;
 
 export type Studio = {
-  capture: () => string;
+  capture: (width?: number, height?: number) => string;
   subjectPosition: () => number[];
   setSubjectPosition: (position: number[]) => void;
   pov: THREE.PerspectiveCamera;
@@ -229,15 +229,16 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
   return {
     subjectPosition: () => scene.getObjectByName("previs-subject")!.position.toArray(),
     setSubjectPosition: (position: number[]) => { scene.getObjectByName("previs-subject")!.position.fromArray(position); },
-    capture: () => {
+    capture: (width = 640, height = 360) => {
       const capture = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-      capture.setSize(640, 360);
+      capture.setSize(width, height);
       const camera = pov.clone();
-      camera.aspect = 16 / 9;
+      camera.aspect = width / height;
       camera.setFocalLength(focalLength);
       capture.render(scene, camera);
       const png = capture.domElement.toDataURL("image/png");
       capture.dispose();
+      capture.forceContextLoss();
       return png;
     },
     pov,

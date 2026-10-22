@@ -192,3 +192,12 @@ test('simulation: actual TS export supports a single saved pose and restores alr
   assert.equal(h.requests[0].input.frameCount, 1);
   assert.match(h.status.textContent, /Video saved: 1 frames/);
 });
+
+test('simulation: scrubbing applies the selected time before transport synchronization', async () => {
+  const h = await fixture();
+  h.timeline.input(1 / 24);
+  samePose(h.snapshot(), { p:[2,2,2], q:[0,Math.sin(Math.PI/8),0,Math.cos(Math.PI/8)], mm:45 });
+  assert.equal(Number(h.timeline.value), 1 / 24);
+  h.timeline.input(2 / 24);
+  samePose(h.snapshot(), last);
+});

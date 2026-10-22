@@ -91,7 +91,8 @@ export async function openGeneration(root, project, options = {}) {
     } else if (options.readAsset) bytes = await options.readAsset(structuredClone(asset));
     else {
       safeMediaLocation({ filename: asset.filename, subfolder: '', type: 'output' });
-      bytes = await readFile(join(root, 'assets', asset.filename));
+      const collection=asset.mime==='image/png'&&uuid.test(asset.id)&&asset.url===`/renders/${asset.id}.png`?'renders':'assets';
+      bytes = await readFile(join(root, collection, asset.filename));
     }
     bytes = Buffer.from(bytes);
     if (!bytes.length || bytes.length > (options.maxMediaBytes || 512 * 1024 * 1024)) fail('Source asset has an unsupported size');
@@ -115,6 +116,7 @@ export async function openGeneration(root, project, options = {}) {
       if (name === 'prompt') {
         if (binding.prompt !== undefined) {
           if (typeof binding.prompt !== 'string') fail('Prompt must be a string');
+          if (Number.isInteger(definition.constraints.promptMaxLength) && binding.prompt.length > definition.constraints.promptMaxLength) fail('Prompt exceeds workflow maximum length');
           graph[mapping.nodeId].inputs[mapping.input] = binding.prompt;
         }
         continue;
@@ -147,6 +149,7 @@ export async function openGeneration(root, project, options = {}) {
     const validation = validateGraph(graph, inspected.objectInfo, { deferredInputs });
     for (const output of definition.outputs) if (inspected.objectInfo[graph[output.nodeId].class_type]?.output_node !== true) validation.issues.push({ code: 'unsupported-output', nodeId: output.nodeId, message: 'Declared output is not an output node in the live schema' });
     for (const classType of definition.backendRequirements.nodes || []) if (!inspected.objectInfo[classType]) validation.issues.push({ code: 'missing-node', classType, message: `Backend requirement ${classType} is unavailable` });
+    if (definition.constraints.timingChange && binding.acceptTimingChange !== true) validation.issues.push({code:'timing-review',message:'Explicit timing/framing acknowledgment required: '+definition.constraints.timingChange});
     validation.compatible = !validation.issues.length;
     const quote = workflowCost(graph, inspected.objectInfo, selection);
     const context = { requestId: identity(input), projectId: p.id, requestRevision: p.revision, shotId: shot.id, shot, workflowBindingId: binding.id, binding, definition, definitionHash: definition.definitionHash, graphHash: definition.graphHash, preparedGraph: graph, sources, references: p.references || [], backend: selection, schemaHash: validation.schemaHash, quote };

@@ -46,7 +46,7 @@ function draw() {
         if (Array.from(camera.options).some(o => o.value === shot.binding.camera)) camera.value = shot.binding.camera;
         for (const key of ['start','end','frame'] as const) el<HTMLInputElement>(key).value = String(shot.binding[key]);
         el('save').textContent = 'Save new binding'; el('cancel-binding').hidden = false; el('status').textContent = 'Choose the replacement binding. Existing previews keep their original provenance.';
-      }); card.append(button, edit);
+      }); const video = document.createElement('a'); video.href = '/generation.html?shot=' + shot.id; video.textContent = 'Render video & choose workflow'; card.append(button, edit, video);
     }
     else { const open = document.createElement('a'); open.href = '/index.html?shot=' + shot.id; open.textContent = 'Open saved camera & motion'; card.append(open); }
     if (shot.renders.length) { const handoff = document.createElement('a'); handoff.href = '/api/handoff?shot=' + shot.id; handoff.download = 'previs-handoff.json'; handoff.textContent = 'Download asset handoff'; handoff.style.display = 'block'; card.append(handoff); }

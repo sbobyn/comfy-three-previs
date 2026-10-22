@@ -3,3 +3,13 @@
 #recovery{padding:14px;border:1px solid #dba561;border-radius:6px;color:#f5d9ae}input[type=checkbox]{display:inline;width:auto;margin-right:8px}article button+button{margin-left:8px}#cancel-binding{margin-top:8px}
 
 nav{display:flex;gap:20px;flex-wrap:wrap}.notice{padding:14px;border:1px solid #6e98b3;border-radius:8px}.preview-image{width:100%;border-radius:6px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}fieldset{border:1px solid #415165;border-radius:6px;margin-top:16px}#jobs article>a{display:block;margin:12px 0}.note{overflow-wrap:anywhere}
+
+[hidden] { display: none !important; }
+textarea { width: 100%; box-sizing: border-box; color: inherit; background: #0e1721; border: 1px solid #435363; border-radius: 6px; padding: 10px; font: inherit; }
+video { background: #080d12; border-radius: 8px; }
+pre { overflow-wrap: anywhere; font-size: 12px; }
+#parameters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+#mapping { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+.generation .layout{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:900px){.generation .layout{grid-template-columns:1fr}}

@@ -11,6 +11,9 @@ import { openOperations } from './operations.mjs';
 import { lockProject } from './lock.mjs';
 import { openComfy, validateWorkflow } from './comfy.mjs';
 import { cameraTransfer, transferCode, verifyTransfer } from './transfer.mjs';
+import { releaseFrameStage } from './video.mjs';
+import { videoRoutes } from './video-routes.mjs';
+import { generationRoutes } from './generation-routes.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -20,6 +23,8 @@ const project = await openProject(data);
 const blender = new BlenderMcp();
 const operations = await openOperations(data);
 const comfy = await openComfy(data, project);
+const generation = await generationRoutes(data,project);
+const videos = videoRoutes({data,project,blender,operations,refreshBlender});
 let connectionError = null;
 async function refreshBlender() {
   operations.assertIdle();
@@ -46,6 +51,7 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
+    if (req.method === 'GET' && url.pathname === '/api/generation') return send(generation.state());
     if (req.method === 'GET' && url.pathname === '/api/project') return send({ project: project.get(), catalog, blender: blenderReadiness(), comfyJobs: comfy.list() });
     if (req.method === 'GET' && url.pathname === '/api/readiness') return send({ blender: blenderReadiness(), comfy: comfy.readiness(), browser: { available: true, scope: 'Editable camera-study set' } });
     if (req.method === 'GET' && url.pathname === '/api/comfy/jobs') return send({ jobs: comfy.list() });
@@ -61,6 +67,8 @@ const server = createServer(async (req, res) => {
       if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       const input = await body(req);
       const result = await serial(async () => {
+        if (url.pathname.startsWith('/api/generation/')) return generation.route(url.pathname,input);
+        if (url.pathname.startsWith('/api/video/')) return videos(url.pathname,input);
         if (url.pathname === '/api/transfer') {
           if (!/^[a-f0-9-]{36}$/.test(input.requestId || '') || input.disposableProject !== true) fail('Confirm a disposable Blender project and provide a transfer request UUID');
           const existing = project.get().transfers?.find(t => t.id === input.requestId);
@@ -101,7 +109,7 @@ const server = createServer(async (req, res) => {
         if (url.pathname === '/api/comfy/track') return { job: await comfy.track(input.jobId), project: project.get() };
         if (url.pathname === '/api/comfy/reconcile') return { job: await comfy.reconcile(input), project: project.get() };
         if (url.pathname === '/api/blender/refresh') return refreshBlender();
-        if (url.pathname === '/api/blender/reconcile') { const operation = await operations.reconcile(input); blender.reconcile(); catalog = null; return { operation }; }
+        if (url.pathname === '/api/blender/reconcile') { const operation = await operations.reconcile(input); blender.reconcile(); if(operation.kind==='render-video'&&operation.details?.stage?.directory)releaseFrameStage(operation.details.stage.directory); catalog = null; return { operation }; }
         if (url.pathname === '/api/shots') return { project: await project.mutate(input.revision, async p => {
           if (!input.catalogToken) fail('Refresh Blender and use the displayed catalog token', 409);
           await refreshBlender();
@@ -152,13 +160,18 @@ const server = createServer(async (req, res) => {
     if (req.method !== 'GET') fail('Method not allowed', 405);
     let file;
     if (/^\/renders\/[a-f0-9-]{36}\.png$/.test(url.pathname)) file = join(data, url.pathname);
+    else if (/^\/assets\/[a-f0-9-]{36}\.(mp4|webm|mov|mkv|png)$/.test(url.pathname)) file = join(data,url.pathname);
     else {
       const path = url.pathname === '/' ? '/previs.html' : url.pathname;
       file = resolve(root, 'dist', '.' + decodeURIComponent(path));
       if (!file.startsWith(join(root, 'dist') + '/')) fail('Invalid path', 403);
     }
     const bytes = await readFile(file);
-    res.writeHead(200, { 'Content-Type': ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(bytes);
+    const media = ['.mp4','.webm','.mov','.mkv'].includes(extname(file));
+    const range = media && req.headers.range?.match(/^bytes=(\d+)-(\d*)$/);
+    const start = range ? Number(range[1]) : 0, end = range ? Math.min(bytes.length-1, range[2] ? Number(range[2]) : bytes.length-1) : bytes.length-1;
+    if (range && (start > end || start >= bytes.length)) { res.writeHead(416,{'Content-Range':`bytes */${bytes.length}`}); return res.end(); }
+    res.writeHead(range ? 206 : 200, { ...(media ? {'Accept-Ranges':'bytes','Content-Length':end-start+1,...(range ? {'Content-Range':`bytes ${start}-${end}/${bytes.length}`} : {})} : {}), 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(range ? bytes.subarray(start,end+1) : bytes);
   } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
 attachRelay(server);

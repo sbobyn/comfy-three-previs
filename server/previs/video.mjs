@@ -232,7 +232,7 @@ export async function saveVideoAsset({ root, project, revision, shotId, file, me
     const copied = await open(assetPath, 'r');
     try { for await (const chunk of copied.createReadStream({ autoClose: false })) sha256.update(chunk); }
     finally { await copied.close(); }
-    asset = { id, kind: 'video', version: 1 + Math.max(0, ...(p.assets || []).filter(a => a.kind === 'video' && a.shotId === shotId).map(a => a.version || 1)), shotId, source: sourceBinding.source, binding: sourceBinding, requestRevision: revision, ...verified, mimeType: 'video/mp4', url: `/assets/${id}.mp4`, sha256: sha256.digest('hex'), provenance: sourceProvenance, timing: { sourceFps: sourceBinding.fps, outputFps: verified.fps, outputFpsRational: verified.fpsRational, frameCount: verified.frameCount, duration: verified.duration, sampling: sourceBinding.source === 'blender' ? 'one-output-frame-per-source-frame' : 'saved-browser-motion' }, createdAt: new Date().toISOString() };
+    asset = { id, kind: 'video', pass: 'beauty', version: 1 + Math.max(0, ...(p.assets || []).filter(a => a.kind === 'video' && a.shotId === shotId).map(a => a.version || 1)), shotId, source: sourceBinding.source, binding: sourceBinding, requestRevision: revision, ...verified, mimeType: 'video/mp4', url: `/assets/${id}.mp4`, sha256: sha256.digest('hex'), provenance: sourceProvenance, timing: { sourceFps: sourceBinding.fps, outputFps: verified.fps, outputFpsRational: verified.fpsRational, frameCount: verified.frameCount, duration: verified.duration, sampling: sourceBinding.source === 'blender' ? 'one-output-frame-per-source-frame' : 'saved-browser-motion' }, createdAt: new Date().toISOString() };
     (p.assets ||= []).push(asset);
   });
   return { project: saved, asset: structuredClone(asset) };

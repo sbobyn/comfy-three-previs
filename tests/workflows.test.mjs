@@ -279,3 +279,17 @@ test('lost Cloud acceptance never guesses a prompt ID or resubmits', async () =>
   assert.equal((await generation.track(input.requestId)).status, 'uncertain');
   await generation.submit({ ...input, approval }); assert.equal(f.state.submits, 1);
 });
+
+test('declared timing/framing changes require a fresh explicit binding acknowledgment', async () => {
+  const f=await fixture();
+  await f.project.mutate(f.project.get().revision,p=>{p.workflowDefinitions[0].constraints={timingChange:'73 frames at 24 fps; 832×480'};});
+  const generation=await openGeneration(f.root,f.project,{backendFactory:f.backendFactory});
+  const before=await generation.quote(f.input());
+  assert.equal(before.validation.compatible,false);
+  assert.equal(before.validation.issues.at(-1).code,'timing-review');
+  await f.project.mutate(f.project.get().revision,p=>{p.workflowBindings[0].acceptTimingChange=true;});
+  const after=await generation.quote(f.input());
+  assert.equal(after.validation.compatible,true);
+  assert.notEqual(after.fingerprint,before.fingerprint);
+  assert.equal(f.state.submits,0);
+});
