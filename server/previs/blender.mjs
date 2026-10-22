@@ -21,9 +21,14 @@ def previs_render():
     r = s.render
     old = (s.camera, s.frame_current, s.frame_subframe, r.filepath, r.resolution_x, r.resolution_y, r.resolution_percentage, r.image_settings.file_format, r.image_settings.color_mode, r.use_file_extension, r.use_compositing, r.use_sequencer, r.use_border, r.use_crop_to_border, r.pixel_aspect_x, r.pixel_aspect_y)
     markers = [(m, m.camera) for m in s.timeline_markers if m.camera]
+    window = bpy.context.window
+    original_scene, original_view_layer = window.scene, window.view_layer
     fd, path = tempfile.mkstemp(suffix='.png')
     os.close(fd)
     try:
+        # Blender copies the context frame when rendering an explicitly named
+        # non-active scene. Establish the target context before setting its frame.
+        window.scene = s
         for marker, original_camera in markers: marker.camera = None
         s.frame_set(binding['frame'])
         s.camera = camera
@@ -41,8 +46,11 @@ def previs_render():
         r.pixel_aspect_x = 1
         r.pixel_aspect_y = 1
         try:
-            bpy.ops.render.render(write_still=True, scene=s.name)
-            with open(path, 'rb') as f: image = base64.b64encode(f.read()).decode('ascii')
+            status = bpy.ops.render.render(write_still=True, scene=s.name)
+            if 'FINISHED' not in status: raise RuntimeError('Blender did not finish the render')
+            with open(path, 'rb') as f: image_bytes = f.read()
+            if len(image_bytes) < 24 or not image_bytes.startswith(bytes([137,80,78,71,13,10,26,10])): raise RuntimeError('Blender did not produce a PNG')
+            image = base64.b64encode(image_bytes).decode('ascii')
             result = {'ok': True, 'png': image, 'width': 640, 'height': 360, 'binding': binding}
         except Exception as error:
             result = {'ok': False, 'error': 'Render failed: ' + str(error)[:400]}
@@ -51,6 +59,8 @@ def previs_render():
         s.frame_set(frame, subframe=subframe)
         for marker, marker_camera in markers: marker.camera = marker_camera
         s.camera = original_camera
+        window.scene = original_scene
+        window.view_layer = original_view_layer
         if os.path.exists(path): os.unlink(path)
     return result
 ${print('previs_render()')}
