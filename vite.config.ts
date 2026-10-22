@@ -21,6 +21,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "index.html",
+        previs: "previs.html",
         phone: "phone.html",
         phoneSolo: "phone-solo.html",
       },

@@ -8,6 +8,9 @@ import { FILM_GAUGE } from "./lens";
 const HELPER_LAYER = 1;
 
 export type Studio = {
+  capture: () => string;
+  subjectPosition: () => number[];
+  setSubjectPosition: (position: number[]) => void;
   pov: THREE.PerspectiveCamera;
   rawPov: THREE.PerspectiveCamera;
   setRawVisible: (visible: boolean) => void;
@@ -62,6 +65,7 @@ function buildSet(scene: THREE.Scene): void {
     new THREE.TorusKnotGeometry(1.1, 0.34, 180, 28),
     new THREE.MeshStandardMaterial({ color: 0x4f8cff, roughness: 0.3, metalness: 0.2 }),
   );
+  subject.name = "previs-subject";
   subject.position.set(0, 2.2, -11);
   scene.add(subject);
 
@@ -223,6 +227,19 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
   };
 
   return {
+    subjectPosition: () => scene.getObjectByName("previs-subject")!.position.toArray(),
+    setSubjectPosition: (position: number[]) => { scene.getObjectByName("previs-subject")!.position.fromArray(position); },
+    capture: () => {
+      const capture = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+      capture.setSize(640, 360);
+      const camera = pov.clone();
+      camera.aspect = 16 / 9;
+      camera.updateProjectionMatrix();
+      capture.render(scene, camera);
+      const png = capture.domElement.toDataURL("image/png");
+      capture.dispose();
+      return png;
+    },
     pov,
     rawPov,
     setRawVisible: (visible: boolean) => {

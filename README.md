@@ -1,3 +1,9 @@
+# Comfy Previs — standalone continuation
+
+The standalone app and first Blender MCP/browser shot journey live on this topic branch. See [setup, architecture, evidence and limits](docs/standalone-previs.md). Build with `pnpm check`, test with `pnpm test`, then `pnpm start` and open port 5190.
+
+The original camera-prototype README follows.
+
 # three-vcam
 
 R&D prototype: use a phone as a virtual camera head — stream device orientation

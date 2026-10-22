@@ -17,7 +17,7 @@ function parseKind(text: string): string | null {
  * hardcoded LAN address.
  */
 export function attachRelay(httpServer: HttpServer | Http2SecureServer): void {
-  const wss = new WebSocketServer({ noServer: true });
+  const wss = new WebSocketServer({ noServer: true, maxPayload: 65536 });
   const viewers = new Set<WebSocket>();
   let phone: WebSocket | null = null;
 
@@ -35,6 +35,11 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer): void {
     // to its own upgrade listener untouched.
     if (url.pathname !== RELAY_PATH) return;
 
+    if (request.headers.origin) {
+      try {
+        if (new URL(request.headers.origin).host !== request.headers.host) { socket.destroy(); return; }
+      } catch { socket.destroy(); return; }
+    }
     wss.handleUpgrade(request, socket, head, (ws) => {
       const isPhone = url.searchParams.get("role") === "phone";
 

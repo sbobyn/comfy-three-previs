@@ -1,3 +1,4 @@
+import { installPrevisCamera } from "./previs-camera";
 import * as THREE from "three";
 import { element } from "./dom";
 import { createStudio } from "./scene";
@@ -50,6 +51,7 @@ const mouseSensValue = element("mouseSensValue");
 const cameraPane = element("cameraPane");
 
 const studio = createStudio(canvas, element("worldPane"));
+const updatePrevisCamera = installPrevisCamera(studio);
 const smoother = new OrientationSmoother();
 const settings = defaultSettings();
 const take = new Take();
@@ -610,6 +612,7 @@ const animate = (): void => {
   yawDeg = THREE.MathUtils.radToDeg(euler.y);
 
   sendRig();
+  updatePrevisCamera();
   studio.render();
   requestAnimationFrame(animate);
 };
