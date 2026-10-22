@@ -15,6 +15,12 @@ pnpm start
 
 Open **http://127.0.0.1:5190**. `PREVIS_DATA_DIR` chooses a project folder (default `.previs`); keep the entire folder, including renders and operation/job receipts, to recover your project. `PORT` selects another local port. `pnpm dev` builds and starts this same complete app; rebuild after editing browser code. `pnpm dev:camera` is the inherited camera-only Vite development server on 5187 and does not provide project APIs.
 
+### Configure Comfy Cloud
+
+Copy `.env.example` to `.env` beside `package.json` if `.env` does not already exist. Add your key after `COMFY_CLOUD_API_KEY=` in that local file; keep `PREVIS_ALLOW_PAID=0`. On macOS/Linux, run `chmod 600 .env` to restrict file access. `.env` is gitignored; never add the key to a workflow, project, browser field or chat.
+
+Restart with `pnpm start`, then open **Setup & readiness → Check Cloud access**. This inspects available nodes without submitting a job. `pnpm start` and `pnpm dev` load `.env` at startup using Node's built-in loader; existing shell variables take precedence. The app still starts when `.env` is absent. Adding a key does not approve paid generation: that separately requires a reviewed quote, deliberate enablement and a matching per-request approval. See [Cloud credential setup](docs/standalone-previs.md#cloud-credentials).
+
 ## Three deliberate paths
 
 - **Work in Blender:** connect through the actual Blender MCP server/addon, inspect exact scene/camera/timing, bind a shot, render a local beauty PNG, save and recover it. Blender owns its file; Previs restores settings and does not save that file.

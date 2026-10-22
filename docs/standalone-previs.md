@@ -8,6 +8,17 @@ Requires Node 22.12+ and pnpm 10. Install with `pnpm install --frozen-lockfile`,
 
 The server locks its project folder. Graceful shutdown releases that lock. After a crash, the server checks the recorded PID and archives a dead process's lock automatically. A live owner is refused; never remove its lock. Atomic saves and revision checks protect against simultaneous UI/agent edits. Media are immutable previews and versioned video/result assets. Keep the complete project folder, including assets, renders, generation-jobs, comfy-jobs and Blender operation receipts.
 
+## Cloud credentials
+
+1. Copy `.env.example` to `.env` in the checkout root if that file does not already exist. Preserve any existing settings. On macOS/Linux, restrict access with `chmod 600 .env`.
+2. Open `.env` locally and fill in `COMFY_CLOUD_API_KEY=` with your Comfy Cloud API key. Keep `PREVIS_ALLOW_PAID=0` for connection checks. Do not prefix credentials with `VITE_`, put them in graph/project JSON, or enter them in chat.
+3. Stop and restart the app with `pnpm start`, retaining the same `PREVIS_DATA_DIR` and Blender settings. A running server does not reload credentials automatically. Existing shell variables override `.env`; unset an outdated shell value if you intend to use the file instead.
+4. Open **Setup & readiness → Check Cloud access**. This reads Cloud's node schemas without uploading media or submitting a job. A missing key is reported locally; HTTP401 means the configured credential was not accepted.
+
+`.env` is ignored by Git; `.env.example` contains only empty credentials and safe defaults. Only the server consumes `COMFY_CLOUD_API_KEY`; it is injected into authenticated requests, never returned in project/job records. The Node22 startup command uses `--env-file-if-exists=.env`, so installation remains usable without Cloud. `pnpm dev` uses the same startup path. Launching `node server/previs/server.mjs` directly does **not** load the file; use `pnpm start`, or supply the same Node flag from the checkout root. Agent clients connect to the running Previs server and do not need the Cloud key.
+
+A valid credential does not authorize charges. Keep paid execution disabled until the exact backend, source assets, workflow, settings, known/unknown costs and spending allowance have been reviewed. Deliberately enabling `PREVIS_ALLOW_PAID=1` after approval still requires a matching per-request approval fingerprint. Do not enable it merely to test connectivity. Local Partner Nodes use the separate optional `COMFY_API_KEY`; ordinary local computation needs no key.
+
 ## Blender MCP
 
 Selected upstream: https://github.com/ahujasid/mcp-for-blender (formerly ahujasid/blender-mcp), package **2.2.2**, commit **5a3618fccb2d982d0dd61e7a1879912c3100073b**, MIT. Python >=3.10; upstream dependencies mcp >=1.26,<2 and httpx >=0.27. Use matching `addon.py` from that commit, installed using Blender's addon UI, and enable its server. Upstream supports a running GUI Blender, not background `-b` mode.
