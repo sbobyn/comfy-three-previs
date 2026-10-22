@@ -150,7 +150,9 @@ export function validateGraph(graph, objectInfo, { deferredInputs = [] } = {}) {
   return { compatible: !issues.length, issues, defaults, schemaHash: hashValue(schemaForHash) };
 }
 
-const safeNativeModules = { LoadImage: 'nodes', SaveImage: 'nodes', ImageInvert: 'nodes', LoadVideo: 'comfy_extras.nodes_video', GetVideoComponents: 'comfy_extras.nodes_video', CreateVideo: 'comfy_extras.nodes_video', SaveVideo: 'comfy_extras.nodes_video' };
+// Cost classification is about upstream local operations, never model names.
+// Custom replacements, API markers, pricing badges and Cloud stay unknown.
+const safeNativeModules = { LoadImage: 'nodes', SaveImage: 'nodes', ImageInvert: 'nodes', ImageScale: 'nodes', CheckpointLoaderSimple: 'nodes', CLIPTextEncode: 'nodes', VAEEncode: 'nodes', KSampler: 'nodes', VAEDecode: 'nodes', LoadVideo: 'comfy_extras.nodes_video', GetVideoComponents: 'comfy_extras.nodes_video', CreateVideo: 'comfy_extras.nodes_video', SaveVideo: 'comfy_extras.nodes_video' };
 export function workflowCost(graph, objectInfo, backend) {
   const nodes = Object.entries(graph).map(([nodeId, node]) => {
     const schema = objectInfo[node.class_type];
@@ -158,7 +160,7 @@ export function workflowCost(graph, objectInfo, backend) {
     return { nodeId, classType: node.class_type, status: native ? 'known' : 'unknown', amount: native ? 0 : null, apiNode: schema?.api_node === true, priceBadge: schema?.price_badge || null };
   });
   const free = backend.kind === 'local' && nodes.every(node => node.status === 'known');
-  return { status: free ? 'known' : 'unknown', amount: free ? 0 : null, currency: 'USD', nodes, reason: free ? 'Known native media operations on ordinary local ComfyUI; no billed API nodes.' : 'Custom/model/API node or Cloud charges are not a verified total. Imported pricing is provenance, not authorization.' };
+  return { status: free ? 'known' : 'unknown', amount: free ? 0 : null, currency: 'USD', nodes, reason: free ? 'Known upstream operations on ordinary local ComfyUI; no billed API nodes. Local hardware/electricity cost is not priced.' : 'Custom/unqualified/API node or Cloud charges are not a verified total. Imported pricing is provenance, not authorization.' };
 }
 
 export function validateApproval(approval, fingerprint, quote) {

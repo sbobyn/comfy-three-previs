@@ -106,6 +106,20 @@ test('secret-bearing graphs and export metadata are rejected without echoing cre
   for (const url of ['http://example.com', 'https://127.0.0.1:8188', 'http://localhost:8188/path', 'http://user:pass@127.0.0.1:8188']) assert.throws(() => backendSnapshot({ kind: 'local', url }));
 });
 
+test('native local inference has no API fee without trusting model names or imported prices', () => {
+  const graph = Object.fromEntries(['CheckpointLoaderSimple','ImageScale','CLIPTextEncode','VAEEncode','KSampler','VAEDecode'].map((class_type,i)=>[String(i),{class_type,inputs:{}}]));
+  graph['0'].inputs.ckpt_name='private-studio-model.safetensors';
+  const info=Object.fromEntries(Object.values(graph).map(n=>[n.class_type,{python_module:'nodes'}]));
+  assert.equal(workflowCost(graph,info,{kind:'local'}).amount,0);
+  assert.equal(workflowCost(graph,info,{kind:'cloud'}).status,'unknown');
+  for(const change of [{python_module:'custom_nodes.sampler'},{api_node:true},{price_badge:{label:'billable'}}]){
+    const changed=structuredClone(info);Object.assign(changed.KSampler,change);
+    assert.equal(workflowCost(graph,changed,{kind:'local'}).status,'unknown');
+  }
+  delete info.KSampler;
+  assert.equal(workflowCost(graph,info,{kind:'local'}).status,'unknown');
+});
+
 async function fixture() {
   const root = await mkdtemp(join(tmpdir(), 'previs-generation-')), project = await openProject(root), image = await project.image(png);
   await project.mutate(project.get().revision, p => {
