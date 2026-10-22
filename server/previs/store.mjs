@@ -1,6 +1,7 @@
-import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { atomicJson } from './atomic.mjs';
 
 export async function openProject(root) {
   await mkdir(join(root, 'renders'), { recursive: true });
@@ -9,7 +10,7 @@ export async function openProject(root) {
   try { project = JSON.parse(await readFile(file, 'utf8')); }
   catch (e) { if (e.code !== 'ENOENT') throw e; project = { version: 1, id: randomUUID(), revision: 0, title: 'My previs project', scenes: [], shots: [], references: [], renders: [], workflowBindings: [] }; }
   if (project.version !== 1) throw Error('Unsupported project version');
-  async function save(next) { await writeFile(file + '.tmp', JSON.stringify(next, null, 2)); await rename(file + '.tmp', file); project = next; return structuredClone(project); }
+  async function save(next) { await atomicJson(file, next); project = next; return structuredClone(project); }
   if (!project.revision) await save({ ...project, revision: 1 });
   let chain = Promise.resolve();
   return {
@@ -29,7 +30,11 @@ export async function openProject(root) {
     },
   };
 }
+export function sameBinding(a, b) {
+  return a && b && ['source', 'file', 'scene', 'camera', 'fps', 'start', 'end', 'frame'].every(key => a[key] === b[key]);
+}
 export function validateBinding(input, catalog) {
+  if (!input || typeof input !== 'object') throw Error('Choose a Blender scene and camera');
   const scene = catalog?.scenes.find(s => s.name === input.scene);
   if (!scene || !scene.cameras.includes(input.camera)) throw Error('Refresh Blender and choose an existing scene and camera');
   for (const key of ['frame', 'start', 'end']) if (!Number.isInteger(input[key]) || input[key] < scene.start || input[key] > scene.end) throw Error('Frames must be integers within the Blender scene range');

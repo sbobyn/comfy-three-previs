@@ -51,7 +51,16 @@ const mouseSensValue = element("mouseSensValue");
 const cameraPane = element("cameraPane");
 
 const studio = createStudio(canvas, element("worldPane"));
-const updatePrevisCamera = installPrevisCamera(studio);
+const updatePrevisCamera = installPrevisCamera(studio, (pose) => {
+  stopPlayback(); pauseShot(); demoSelect.value = "locked"; applyDemo(demoById("locked"));
+  raw.fromArray(pose.q); smoothed.copy(raw); smoother.reset(raw);
+  const rotation = new THREE.Euler().setFromQuaternion(raw, "YXZ");
+  mousePitch = THREE.MathUtils.radToDeg(rotation.x); mouseYaw = THREE.MathUtils.radToDeg(rotation.y); mouseRoll = rotation.z;
+  aimSourceSelect.value = "mouse"; syncAimSource();
+  studio.setCameraPosition(new THREE.Vector3().fromArray(pose.p));
+  studio.pov.quaternion.copy(raw); studio.rawPov.quaternion.copy(raw);
+  focalCurrent = pose.mm; setFocalTarget(pose.mm, true); studio.setFocalLength(pose.mm);
+});
 const smoother = new OrientationSmoother();
 const settings = defaultSettings();
 const take = new Take();
@@ -76,6 +85,7 @@ let flightStartedAt = 0;
 
 let mouseYaw = 0;
 let mousePitch = 0;
+let mouseRoll = 0;
 let dragging = false;
 let lastPointerX = 0;
 let lastPointerY = 0;
@@ -87,6 +97,7 @@ const desktopOwnsAim = (): boolean => isPiloting() || usingMouseAim();
 function syncAimSource(): void {
   cameraPane.classList.toggle("aiming", usingMouseAim());
 }
+aimSourceSelect.value = "mouse";
 aimSourceSelect.addEventListener("change", syncAimSource);
 syncAimSource();
 
@@ -586,7 +597,7 @@ const animate = (): void => {
   studio.setFocalLength(focalCurrent);
 
   if (usingMouseAim() && Number.isNaN(playingFrom)) {
-    euler.set(THREE.MathUtils.degToRad(mousePitch), THREE.MathUtils.degToRad(mouseYaw), 0, "YXZ");
+    euler.set(THREE.MathUtils.degToRad(mousePitch), THREE.MathUtils.degToRad(mouseYaw), mouseRoll, "YXZ");
     raw.setFromEuler(euler);
   }
 

@@ -253,6 +253,8 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     },
     setFocalLength: (mm: number) => {
       focalLength = mm;
+      pov.setFocalLength(mm);
+      rawPov.setFocalLength(mm);
     },
     setFormat: (aspect: number | null) => {
       format = aspect;
