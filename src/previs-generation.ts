@@ -18,7 +18,7 @@ function pickedAsset() {return (project.assets||[]).find((a:Data)=>a.id===select
 function describe(a:Data) {return `${a.width}×${a.height} · ${a.frameCount} frames · ${a.fpsRational||a.fps} fps · ${a.duration.toFixed(3)} s · ${a.audio?'audio present':'silent'} · source revision ${a.requestRevision}`;}
 function ownership(binding:Data={},snapshot?:Data,lenses?:Data[]){const mm=snapshot?.camera?.mm;const values=lenses?.map(l=>l.mm).filter(Number.isFinite)||[];const lens=values.length?`${Math.min(...values)}–${Math.max(...values)} mm across captured frames`:mm?`${mm} mm at saved pose; recorded lenses may vary`:'lens not captured in this asset';return `${binding.source==='blender'?'Blender':'Browser'} owns ${binding.scene||'camera-study set'} / ${binding.camera||'camera'} · frames ${binding.start??'?'}–${binding.end??'?'} · source ${binding.fps??'?'} fps · ${lens}${binding.file?' · '+binding.file:''}`;}
 function showSource(updateBindings = true) {
-  const a=pickedAsset();video('source').hidden=!a;if(a){video('source').src=a.url;el('asset-detail').textContent=`Captured source · version ${a.version} · ${describe(a)}. ${ownership(a.binding,a.provenance?.browserSnapshot,a.provenance?.render?.cameraLenses)}${a.provenance?.recordedDuration!==undefined?` · recorded ${a.provenance.recordedDuration.toFixed(3)} s, final sample ${a.provenance.sampledEndTime.toFixed(3)} s`:''}`;}else{video('source').removeAttribute('src');el('asset-detail').textContent='Render or export a video for this shot.';}
+  const a=pickedAsset();video('source').hidden=!a;if(a){video('source').src=a.url;el('asset-detail').textContent=`Selected ${a.source==='comfy'?'Comfy result':'capture'} · version ${a.version} · ${describe(a)}. Authored origin: ${ownership(a.binding,a.provenance?.browserSnapshot,a.provenance?.render?.cameraLenses)}${a.provenance?.recordedDuration!==undefined?` · recorded ${a.provenance.recordedDuration.toFixed(3)} s, final sample ${a.provenance.sampledEndTime.toFixed(3)} s`:''}`;}else{video('source').removeAttribute('src');el('asset-detail').textContent='Render or export a video for this shot.';}
   if(updateBindings)renderBindings();invalidate();
 }
 function syncPrimarySource(){const value=(roles.sourceVideo||roles.controlVideo)?.value;if(value?.startsWith('asset:')&&Array.from(select('asset').options).some(o=>o.value===value.slice(6))){select('asset').value=value.slice(6);showSource(false);}}
@@ -30,7 +30,7 @@ function showShot() {
   showRenderTiming();
   el<HTMLButtonElement>('render-video').disabled=s.binding.source!=='blender';el<HTMLButtonElement>('preview').disabled=s.binding.source!=='blender';
   const previous=select('asset').value;
-  select('asset').replaceChildren(...(project.assets||[]).filter((a:Data)=>a.shotId===s.id&&a.kind==='video'&&a.source!=='comfy').map((a:Data)=>option(a.id,`Version ${a.version} · ${a.source} · ${a.duration}s · ${a.width}×${a.height}`)));
+  select('asset').replaceChildren(...(project.assets||[]).filter((a:Data)=>a.shotId===s.id&&a.kind==='video').map((a:Data)=>option(a.id,`Version ${a.version} · ${a.source} · ${a.duration}s · ${a.width}×${a.height} · ${a.id.slice(0,8)}`)));
   if(Array.from(select('asset').options).some(o=>o.value===previous))select('asset').value=previous;showSource();
 }
 function allDefinitions():Data[] {return [...(state?.presets||[]),...(project?.workflowDefinitions||[])];}
@@ -54,7 +54,7 @@ function restoreBinding() {
   field('prompt').value=b.prompt||'';
   for(const [role,asset]of Object.entries(b.assetBindings||{})as[string,Data][])if(roles[role])roles[role].value=asset.assetId?'asset:'+asset.assetId:'render:'+asset.renderId;
   for(const [name,value]of Object.entries(b.parameters||{})){const c=parameters[name];if(!c)continue;if(c instanceof HTMLSelectElement&&!Array.from(c.options).some(o=>o.value===String(value)))c.append(option(String(value),`${value} — unavailable`));if(c.type==='checkbox')(c as HTMLInputElement).checked=Boolean(value);else c.value=String(value);}
-  syncPrimarySource();invalidate();el('status').textContent='Saved shot bindings and parameters restored. Prepare a fresh quote before running.';
+  field('accept-timing').checked=false;showTiming();syncPrimarySource();invalidate();el('status').textContent='Saved shot bindings and parameters restored. Prepare a fresh quote before running.';
 }
 function renderBindings() {
   el('asset-bindings').replaceChildren();for(const key of Object.keys(roles))delete roles[key];
@@ -62,7 +62,7 @@ function renderBindings() {
   for(const [role,mapping] of Object.entries(definition?.inputs||{}) as [string,Data][]){
     if(role==='prompt')continue;const s=document.createElement('select');s.setAttribute('aria-label',role+' asset');s.append(option('','Choose explicitly'));
     const kind=['sourceVideo','controlVideo'].includes(role)?'video':role==='audio'?'audio':'image';
-    for(const a of project?.assets||[])if(a.kind===kind)s.append(option('asset:'+a.id,`${a.source} · ${a.shotId===pickedShot()?.id?'this shot':'other shot'} · v${a.version||1} · ${a.width||''}×${a.height||''} · ${a.id.slice(0,8)}`));
+    for(const a of project?.assets||[])if(a.kind===kind&&(!['sourceVideo','controlVideo','firstFrame'].includes(role)||a.shotId===pickedShot()?.id))s.append(option('asset:'+a.id,`${a.source} · ${a.shotId===pickedShot()?.id?'this shot':'other shot'} · v${a.version||1} · ${a.width||''}×${a.height||''} · ${a.id.slice(0,8)}`));
     if(kind==='image')for(const r of project?.renders||[])s.append(option('render:'+r.id,`${r.source} preview · ${r.width}×${r.height} · ${r.id.slice(0,8)}`));
     if(['sourceVideo','controlVideo'].includes(role)&&pickedAsset())s.value='asset:'+pickedAsset().id;
     s.onchange=()=>{syncPrimarySource();invalidate();};roles[role]=s;el('asset-bindings').append(label(`${({sourceVideo:'Source video',controlVideo:'Control video',firstFrame:'First frame',lastFrame:'Last frame',referenceImage:'Reference image',image:'Image',audio:'Audio'}as Data)[role]||role}${mapping.pass?' ('+mapping.pass+')':''}`,s));
@@ -120,7 +120,8 @@ function drawJobs(){el('jobs').replaceChildren();for(const job of state.jobs||[]
   if(job.results?.length){const compare=document.createElement('button');compare.textContent='Compare source / result';compare.onclick=()=>compareJob(job);box.append(compare);}el('jobs').append(box);
 }}
 function compareJob(job:Data){
-  reviewedJob=job;select('comparison-output').replaceChildren(...job.results.map((r:Data)=>option(r.id,`Node ${r.nodeId} · ${r.mimeType} · ${r.id.slice(0,8)}`)));showComparison();
+  const previous=reviewedJob?.id===job.id?select('comparison-output').value:undefined;
+  reviewedJob=job;select('comparison-output').replaceChildren(...job.results.map((r:Data)=>option(r.id,`${r.mimeType} · ${r.id.slice(0,8)}`)));if(previous&&job.results.some((r:Data)=>r.id===previous))select('comparison-output').value=previous;showComparison();
 }
 function showComparison(){
   const job=reviewedJob;if(!job)return;
@@ -128,6 +129,7 @@ function showComparison(){
   const result=job.results.find((r:Data)=>r.id===select('comparison-output').value);if(!result)return;
   el('comparison-empty').hidden=true;
   el('comparison-detail').textContent=`${job.definition.title||job.definition.id} · ${job.backend.kind} · request revision ${job.requestRevision}. Original input v${source?.version||1}, capture revision ${source?.requestRevision??'unknown'}: ${ownership(source?.binding,source?.provenance?.browserSnapshot,source?.provenance?.render?.cameraLenses)}.`;
+  el('comparison-prompt').textContent='Saved prompt: '+(job.binding?.prompt||'No prompt used.');el('comparison-request').textContent=JSON.stringify(job,null,2);
   for(const [id,asset]of [['compare-source',source],['compare-result',result]]as[string,Data|undefined][]){const v=video(id),img=el<HTMLImageElement>(id+'-image');v.pause();v.hidden=asset?.kind!=='video';img.hidden=asset?.kind!=='image';v.removeAttribute('src');img.removeAttribute('src');if(asset?.kind==='video')v.src=asset.url;else if(asset?.kind==='image')img.src=asset.url||'/renders/'+asset.id+'.png';}
   field('seek').max=String(Math.max(source?.duration||0,result.duration||0));field('seek').value='0';
   const hasVideo=source?.kind==='video'||result.kind==='video';for(const id of ['play-both','pause-both','seek'])field(id).disabled=!hasVideo;

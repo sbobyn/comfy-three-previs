@@ -45,6 +45,7 @@ function draw() {
         await connect(); editingShotId = shot.id; el<HTMLInputElement>('title').value = shot.title;
         if (catalog?.scenes.some(s => s.name === shot.binding.scene)) scene.value = shot.binding.scene; chooseScene();
         if (Array.from(camera.options).some(o => o.value === shot.binding.camera)) camera.value = shot.binding.camera;
+        cameraDetail();
         for (const key of ['start','end','frame'] as const) el<HTMLInputElement>(key).value = String(shot.binding[key]);
         el('save').textContent = 'Save new binding'; el('cancel-binding').hidden = false; el('status').textContent = 'Choose the replacement binding. Existing previews keep their original provenance.';
       }); const video = document.createElement('a'); video.href = '/generation.html?shot=' + shot.id; video.textContent = 'Render video & choose workflow'; card.append(button, edit, video);

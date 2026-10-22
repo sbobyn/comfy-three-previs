@@ -207,7 +207,7 @@ test('simulation: quote prices the prepared video and render settings never rese
   const h=await fixture(t,{workflow}),ids=[randomUUID(),randomUUID()];
   await mkdir(join(h.root,'assets'));
   for(const id of ids)await writeFile(join(h.root,'assets',id+'.mp4'),Buffer.from('SIMULATED video'));
-  await h.project.mutate(h.project.get().revision,p=>{p.assets=ids.map((id,i)=>({id,kind:'video',source:'blender',shotId:'shot',version:i+1,url:'/assets/'+id+'.mp4',mimeType:'video/mp4',sha256:hashBytes(Buffer.from('SIMULATED video')),width:1280,height:720,duration:i?8:3,fps:24,frameCount:i?192:72,audio:false,requestRevision:1,binding:sourceBinding}));});
+  await h.project.mutate(h.project.get().revision,p=>{p.assets=ids.map((id,i)=>({id,kind:'video',source:i?'comfy':'blender',shotId:'shot',version:i+1,url:'/assets/'+id+'.mp4',mimeType:'video/mp4',sha256:hashBytes(Buffer.from('SIMULATED video')),width:1280,height:720,duration:i?8:3,fps:24,frameCount:i?192:72,audio:false,requestRevision:1,binding:sourceBinding}));});
   const ui=await browserFixture(h);
   ui.role('sourceVideo').change('asset:'+ids[1]);assert.equal(ui.el('asset').value,ids[1]);
   ui.el('asset').value=ids[0]; // A stale player must never determine the quote.
@@ -368,7 +368,25 @@ test('simulation: timing disclosure follows mapped values and invalidates its ac
   assert.match(ui.el('timing-description').textContent,/73 frames \/ 24 fps = 3.041667 s/);
   ui.el('accept-timing').change(true);ui.parameter('Timing · frames').change('121');ui.parameter('Timing · fps').change('12');
   assert.equal(ui.el('accept-timing').checked,false);assert.match(ui.el('timing-description').textContent,/121 frames \/ 12 fps = 10.083333 s/);
+  await ui.el('prepare').click();await ui.el('reload').click();
+  assert.match(ui.el('timing-description').textContent,/73 frames \/ 24 fps/);
+  ui.el('accept-timing').change(true);await ui.el('restore-binding').click();
+  assert.equal(ui.el('accept-timing').checked,false);assert.match(ui.el('timing-description').textContent,/121 frames \/ 12 fps = 10.083333 s/);
   assert.equal(h.state.submissions.length,0);
+});
+
+test('simulation: rebinding a saved camera refreshes its inspected lens metadata', async () => {
+  const source=await readFile(new URL('../src/previs.ts',import.meta.url),'utf8'),html=await readFile(new URL('../previs.html',import.meta.url),'utf8');
+  const elements=new Map();for(const[,tag,id]of html.matchAll(/<(\w+)\b[^>]*\bid="([^"]+)"[^>]*>/g))elements.set(id,tag==='select'?new Select():new Element(tag));
+  const project={revision:1,shots:[{id:'shot',title:'Telephoto',binding:{source:'blender',scene:'Scene',camera:'Long',fps:24,start:1,end:24,frame:1},renders:[]}],renders:[]};
+  const catalog={file:'/fixture.blend',token:'fixture',scenes:[{name:'Scene',fps:24,start:1,end:24,cameras:['Wide','Long'],cameraDetails:{Wide:{type:'PERSP',mm:24,sensorWidth:36,frame:1},Long:{type:'PERSP',mm:85,sensorWidth:36,frame:1}}}]};
+  runInNewContext(ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,{
+    exports:{},require(){},setInterval(){},document:{getElementById:id=>elements.get(id),createElement:tag=>tag==='select'?new Select():new Element(tag),querySelectorAll:()=>[]},
+    fetch:async path=>({ok:true,json:async()=>path==='/api/project'?{project}:path==='/api/readiness'?{blender:{}}:{catalog,serverInfo:{name:'Simulated MCP'}}})
+  });
+  await new Promise(resolve=>setImmediate(resolve));
+  await descendants(elements.get('shots')).find(e=>e.textContent==='Rebind camera / range').click();
+  assert.equal(elements.get('camera').value,'Long');assert.match(elements.get('camera-detail').textContent,/85 mm/);assert.doesNotMatch(elements.get('camera-detail').textContent,/24 mm/);
 });
 
 test('simulation: live inspection retains a user-selected LoRA missing from both author and backend choices', async t => {
