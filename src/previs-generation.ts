@@ -33,7 +33,7 @@ function showShot() {
 function allDefinitions():Data[] {return [...(state?.presets||[]),...(project?.workflowDefinitions||[])];}
 function workflowPicker() {
   const previous=select('workflow').value, list=allDefinitions().filter(d=>d.task===select('task').value);
-  select('workflow').replaceChildren(...list.map(d=>option(d.id,d.title||d.id)));
+  select('workflow').replaceChildren(...list.map(d=>option(d.id,`${d.title||d.id} · ${state.presets.some((s:Data)=>s.id===d.id)?'built-in':'saved preset'}`)));
   if(list.some(d=>d.id===previous))select('workflow').value=previous;
   definition=list.find(d=>d.id===select('workflow').value);imported=false;showDefinition();
 }
