@@ -68,7 +68,7 @@ def previs_transfer():
     s['previs_transfer_id']=identity['requestId']
     s['previs_source_shot']=identity['shotId']
     s['previs_request_revision']=identity['revision']
-    old_scene=bpy.context.window.scene
+    old_scene,old_view_layer=bpy.context.window.scene,bpy.context.window.view_layer
     try:
         bpy.context.window.scene=s
         s.unit_settings.system='METRIC'
@@ -117,6 +117,7 @@ def previs_transfer():
         return {'ok':False,'error':'Transfer incomplete: '+str(error)[:400]+'. Inspect retained new scene; no retry or cleanup was performed.','scene':s.name}
     finally:
         bpy.context.window.scene=old_scene
+        bpy.context.window.view_layer=old_view_layer
 print('PREVIS_JSON:'+json.dumps(previs_transfer()))
 `;
 }
