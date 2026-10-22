@@ -49,7 +49,7 @@ function restoreBinding() {
   const b=savedBinding();if(!b)return;
   field('prompt').value=b.prompt||'';
   for(const [role,asset]of Object.entries(b.assetBindings||{})as[string,Data][])if(roles[role])roles[role].value=asset.assetId?'asset:'+asset.assetId:'render:'+asset.renderId;
-  for(const [name,value]of Object.entries(b.parameters||{})){const c=parameters[name];if(!c)continue;if(c.type==='checkbox')(c as HTMLInputElement).checked=Boolean(value);else c.value=String(value);}
+  for(const [name,value]of Object.entries(b.parameters||{})){const c=parameters[name];if(!c)continue;if(c instanceof HTMLSelectElement&&!Array.from(c.options).some(o=>o.value===String(value)))c.append(option(String(value),`${value} — unavailable`));if(c.type==='checkbox')(c as HTMLInputElement).checked=Boolean(value);else c.value=String(value);}
   invalidate();el('status').textContent='Saved shot bindings and parameters restored. Prepare a fresh quote before running.';
 }
 function renderBindings() {
