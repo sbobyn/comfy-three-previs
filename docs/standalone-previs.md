@@ -40,7 +40,7 @@ This is a fixed editable camera-study set, not a general world editor. Existing 
 
 Version 1 stores project identity/revision/title; scenes with explicit `owner`; shots with source, scene/camera identity and timing; immutable renders; and reserved references/workflowBindings collections. Blender shots point to authoritative files; browser shots persist the small browser-set state and resolved motion. No automatic bidirectional scene synchronization is implied.
 
-Download PNGs and the explicit asset handoff JSON from a shot. Rebinding preserves historical images with their original bindings; the manifest includes only previews matching the current binding. It includes source, timing, image URLs and supported pass. Only beauty stills are supported; requesting another pass is rejected, never substituted. This is an input manifest, not a Comfy workflow graph or executed job. Workflow selection/binding, generation and output review remain the next integration slice. No paid calls are made.
+Download PNGs and the explicit asset handoff JSON from a shot. Rebinding preserves historical images with their original bindings; the manifest includes only previews matching the current binding. It includes source, timing, image URLs and supported pass. Only beauty stills are supported; requesting another pass is rejected, never substituted. This is an input manifest, not a Comfy workflow graph or executed job. The local passthrough path below supports explicit workflow binding and returned output review. AI workflow execution remains outside this release. No paid calls are made.
 
 ## Bring your own agent
 
@@ -60,3 +60,21 @@ Local validation: `pnpm check` (TypeScript and browser/relay builds), `pnpm test
 Real UI proof uses disposable data and a separate Blender 4.5.4 GUI instance with the official pinned addon on an isolated port. It connects, inspects a saved scene, saves a camera shot, renders/display/saves a 640×360 PNG, and restores that shot/render after a server restart. Browser proof moves the subject, records a dolly path, saves 362 motion samples and a beauty image, then reopens the saved shot. A further actual MCP render with crop enabled and nonsquare pixels in the source returned exactly 640×360; all recorded settings restored and the source .blend SHA-256 remained unchanged. Focused integration rereview found no remaining blocker after the timeout, crop and range fixes. This is local workflow proof, not release or hardware qualification.
 
 Overnight hardening evidence: 10 automated tests (fault injection is labeled simulated) include interrupted dispatch/restart with no duplicate operation, stale catalogs, explicit reconciliation, failed journal writes, and rebind provenance. Actual upstream MCP proof restored camera markers and frame/subframe as well as render settings; file/scene/camera/FPS/range refusals stayed recoverable. Real browser UI proof saved a moved subject and 58 camera-motion samples, reopened the exact capture pose, and replayed to the recorded final pose.
+
+## Real local Comfy handoff
+
+Start an existing local Comfy instance, then use **Local Comfy handoff** or **Use this render in local Comfy**. Default backend is `http://127.0.0.1:8000`; set `PREVIS_COMFY_URL` for another loopback HTTP port. Cloud hosts, credentials and URL paths are refused. No global Comfy configuration is changed.
+
+1. Choose a saved render. Select the example graph or import an API-format JSON graph (not a Comfy UI-format workflow).
+2. Explicitly select the `LoadImage.image` input and declare every `SaveImage` output; save the binding.
+3. Inspect backend compatibility. The app checks native node schemas and queue state. A busy queue is refused; coordinate ownership before submitting.
+4. Submit local passthrough once. The app uploads a uniquely named input, preserves the authored graph, and submits a clone with only the selected image filename replaced. The SaveImage filename prefix remains as authored.
+5. Track the exact prompt ID. Only declared PNG outputs are collected, attached to the originating shot and request revision, and retained after restart. Rebinding a shot does not change that output provenance.
+
+This release accepts exactly one native `LoadImage` and one to eight native `SaveImage` nodes consuming its IMAGE output. It is a transport/binding/output proof, **not AI generation**. Custom, model, paid/API and cloud nodes are rejected; no models are installed. Native passthrough may discard alpha through LoadImage's IMAGE output; it is not a promise of byte-identical file copying. Backend PNG metadata may differ.
+
+Durable receipts live in `comfy-jobs/` beside `project.json`. Prompt UUID and request revision persist before submission. Repeating the same request UUID only returns its receipt. Restart or a lost response never resubmits. Tracking checks queue/history and verifies prompt identity, correlation and submitted graph before collecting. If a prompt is absent, the UI explains the uncertainty; inspect backend history and outputs. Explicitly closing an unresolved receipt requires both operator acknowledgments and an empty backend queue. Closing records **unknown outcome**, does not cancel or retry, and preserves evidence. Later submission is a separate deliberate request.
+
+The project MCP facade exposes readiness, local compatibility inspection, workflow binding, single submission and exact-job tracking to any compatible agent. The same allowlist, revision checks and receipts apply as in the UI. Recovery acknowledgments remain deliberate operator actions in the UI.
+
+Real evidence: Comfy UI 0.38.0 at a coordinated local instance accepted the native passthrough from a real Blender preview. Declared output returned at 640×360 with identical RGB pixels, attached at request revision 5, and survived app restart. Automated HTTP simulations separately verify lost acceptance responses, uppercase UUID replay, history identity refusal, undeclared-output exclusion, provenance after shot rebinding, idempotent attachment and explicit uncertain receipt closure. They are not additional real Comfy runs.

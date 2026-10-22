@@ -9,6 +9,7 @@ import { openProject, validateBinding, validateBrowser, sameBinding } from './st
 import { randomUUID } from 'node:crypto';
 import { openOperations } from './operations.mjs';
 import { lockProject } from './lock.mjs';
+import { openComfy, validateWorkflow } from './comfy.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -17,6 +18,7 @@ const releaseLock = await lockProject(data);
 const project = await openProject(data);
 const blender = new BlenderMcp();
 const operations = await openOperations(data);
+const comfy = await openComfy(data, project);
 let connectionError = null;
 async function refreshBlender() {
   operations.assertIdle();
@@ -43,13 +45,14 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
-    if (req.method === 'GET' && url.pathname === '/api/project') return send({ project: project.get(), catalog, blender: blenderReadiness() });
-    if (req.method === 'GET' && url.pathname === '/api/readiness') return send({ blender: blenderReadiness(), browser: { available: true, scope: 'Editable camera-study set' } });
+    if (req.method === 'GET' && url.pathname === '/api/project') return send({ project: project.get(), catalog, blender: blenderReadiness(), comfyJobs: comfy.list() });
+    if (req.method === 'GET' && url.pathname === '/api/readiness') return send({ blender: blenderReadiness(), comfy: comfy.readiness(), browser: { available: true, scope: 'Editable camera-study set' } });
+    if (req.method === 'GET' && url.pathname === '/api/comfy/jobs') return send({ jobs: comfy.list() });
     if (req.method === 'GET' && url.pathname === '/api/handoff') {
       const p = project.get(), shot = p.shots.find(s => s.id === url.searchParams.get('shot'));
       if (!shot) fail('Shot not found', 404);
       if ((url.searchParams.get('pass') || 'beauty') !== 'beauty') fail('Only beauty is supported. Depth/pose/other guides are unavailable; no beauty substitution.');
-      const images = p.renders.filter(r => r.shotId === shot.id && sameBinding(r.binding, shot.binding)).map(r => ({ id: r.id, pass: r.pass, width: r.width, height: r.height, url: `/renders/${r.id}.png`, source: r.source, binding: r.binding, requestRevision: r.requestRevision }));
+      const images = p.renders.filter(r => r.shotId === shot.id && r.pass === 'beauty' && sameBinding(r.binding, shot.binding)).map(r => ({ id: r.id, pass: r.pass, width: r.width, height: r.height, url: `/renders/${r.id}.png`, source: r.source, binding: r.binding, requestRevision: r.requestRevision }));
       if (!images.length) fail('Render a preview for the current binding before exporting a handoff. Historical images retain their original camera and timing.');
       return send({ version: 1, kind: 'previs-explicit-assets', projectId: p.id, shotId: shot.id, timing: shot.binding, images, workflowBinding: null, execution: 'not-submitted', limitation: 'Beauty stills only. A compatible image-input workflow must be selected separately. No depth, pose, video, or automatic scene transfer.' });
     }
@@ -57,6 +60,16 @@ const server = createServer(async (req, res) => {
       if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       const input = await body(req);
       const result = await serial(async () => {
+        if (url.pathname === '/api/comfy/inspect') return { readiness: await comfy.inspect() };
+        if (url.pathname === '/api/comfy/bind') return { project: await project.mutate(input.revision, async p => {
+          const render = p.renders.find(r => r.id === input.renderId);
+          if (!render?.binding) fail('Choose a saved render with provenance');
+          const workflow = validateWorkflow(input.graph, input.imageNodeId, input.outputNodeIds);
+          p.workflowBindings.push({ id: randomUUID(), title: String(input.title || 'Local passthrough').slice(0, 160), renderId: render.id, shotId: render.shotId, sourceBinding: render.binding, ...workflow, createdAt: new Date().toISOString() });
+        }) };
+        if (url.pathname === '/api/comfy/submit') return { job: await comfy.submit(input), project: project.get() };
+        if (url.pathname === '/api/comfy/track') return { job: await comfy.track(input.jobId), project: project.get() };
+        if (url.pathname === '/api/comfy/reconcile') return { job: await comfy.reconcile(input), project: project.get() };
         if (url.pathname === '/api/blender/refresh') return refreshBlender();
         if (url.pathname === '/api/blender/reconcile') { const operation = await operations.reconcile(input); blender.reconcile(); catalog = null; return { operation }; }
         if (url.pathname === '/api/shots') return { project: await project.mutate(input.revision, async p => {
