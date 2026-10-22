@@ -283,7 +283,7 @@ test('declared output boundary rejects path traversal and mismatched formats bef
   assert.throws(() => declaredOutputs(d, { '99': { images: [{ filename: 'out.png', subfolder: '', type: 'output' }] } }));
 });
 
-test('Cloud official v1 deprecated wire contract, env-only auth, keyed history and credential-free redirect', async () => {
+test('Cloud v1 wire contract uses job details, env-only auth and credential-free redirect', async () => {
   const calls = [], key = 'SIMULATED-in-memory-test-credential', promptId = randomUUID(), requestId = randomUUID();
   const fetch = async (url, init) => {
     calls.push({ url, init });
@@ -294,7 +294,7 @@ test('Cloud official v1 deprecated wire contract, env-only auth, keyed history a
     if (path === '/api/object_info') return json(schema);
     if (path === '/api/upload/image') { assert.ok(init.body instanceof FormData); assert.equal(init.headers['Content-Type'], undefined); return json({ name: 'contenthash.png', subfolder: '', type: 'input' }); }
     if (path === '/api/prompt') { const body = JSON.parse(init.body); assert.equal(body.prompt_id, undefined); assert.equal(body.extra_data.api_key_comfy_org, key); assert.deepEqual(body.prompt, graph); return json({ prompt_id: promptId }); }
-    if (path === '/api/history_v2/' + promptId) return json({ [promptId]: { prompt: { prompt_id: promptId, prompt: graph, extra_data: { previs: { requestId }, api_key_comfy_org: key } }, status: { completed: true }, outputs: {} } });
+    if (path === '/api/jobs/' + promptId) return json({ id:promptId,status:'completed',workflow: { prompt: graph, extra_data: { previs: { requestId }, api_key_comfy_org: key } }, execution_status: { completed: true }, outputs: {} });
     if (path === '/api/view') { assert.equal(init.redirect, 'manual'); return new Response(null, { status: 302, headers: { Location: 'https://storage.example.test/signed-output' } }); }
     throw Error('Unexpected test endpoint ' + path);
   };
@@ -304,11 +304,25 @@ test('Cloud official v1 deprecated wire contract, env-only auth, keyed history a
   assert.equal((await backend.upload(png, { filename: 'input.png', subfolder: 'previs/test', mime: 'image/png' })).value, 'contenthash.png');
   assert.deepEqual(await backend.submit({ graph, requestId, projectId: 'project', partnerNodes: true }), { promptId });
   const history = await backend.history(promptId);
+  assert.equal(history.promptId,promptId);assert.deepEqual(history.graph,graph);assert.deepEqual(history.status,{completed:true,status_str:'success'});
   assert.equal(history.requestId, requestId); assert.ok(!JSON.stringify(history).includes(key));
   assert.deepEqual(await backend.view({ filename: 'out.png', subfolder: '', type: 'output' }), png);
   assert.ok(!JSON.stringify(backend.snapshot).includes(key)); assert.equal(calls.length, 6);
   const absent = createBackend({ kind: 'cloud' }, { fetch: () => { throw Error('must not call'); }, env: {} });
   await assert.rejects(absent.inspect(), /COMFY_CLOUD_API_KEY/);
+});
+
+test('Cloud job details distinguish pending, failed, cancelled, absent and inconsistent responses', async () => {
+  const id=randomUUID();let response;
+  const backend=createBackend({kind:'cloud'},{env:{COMFY_CLOUD_API_KEY:'SIMULATED'},fetch:async()=>new Response(JSON.stringify(response),{status:response?200:404})});
+  assert.equal(await backend.history(id),null);
+  response={id,status:'pending'};assert.equal(await backend.history(id),null);
+  for(const [status,expected]of [['pending','pending'],['in_progress','in_progress'],['failed','error'],['cancelled','cancelled']]){
+    response={id,status,workflow:{prompt:graph,extra_data:{previs:{requestId:id}}},outputs:{}};
+    assert.deepEqual((await backend.history(id)).status,{completed:false,status_str:expected});
+  }
+  response.status='completed';response.execution_status={completed:false};assert.equal((await backend.history(id)).status.completed,false);
+  response.status='unexpected';await assert.rejects(backend.history(id),/Unknown Cloud job status/);
 });
 
 test('lost Cloud acceptance never guesses a prompt ID or resubmits', async () => {

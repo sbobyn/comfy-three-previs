@@ -4,7 +4,7 @@ import { assertNoSecrets } from './workflows.mjs';
 // Official Cloud v1 (deprecated) contract, checked 2026-10-22:
 // https://docs.comfy.org/development/cloud/api-reference
 // https://docs.comfy.org/openapi-cloud.yaml
-// /api/history_v2/{id} returns object prompts, unlike local tuple history.
+// /api/jobs/{id} replaces deprecated history_v2; workflow contains prompt/extra_data.
 // /api/view redirects must never forward X-API-Key to the storage host.
 export function backendSnapshot(input = {}) {
   assertNoSecrets(input);
@@ -102,12 +102,20 @@ export function createBackend(input, options = {}) {
     async history(promptId) {
       if (typeof promptId !== 'string' || !/^[\w-]{1,128}$/.test(promptId)) throw Error('A known backend prompt ID is required');
       let history;
-      try { history = await json(`${cloud ? '/history_v2/' : '/history/'}${encodeURIComponent(promptId)}`); }
+      try { history = await json(`${cloud ? '/jobs/' : '/history/'}${encodeURIComponent(promptId)}`); }
       catch (error) { if (error.httpStatus === 404) return null; throw error; }
+      if (cloud) {
+        if (!history.workflow) return null;
+        // Never return/persist the raw workflow wrapper: extra_data can carry auth.
+        const status = history.status;
+        if (!['pending','in_progress','completed','failed','cancelled'].includes(status)) throw Error('Unknown Cloud job status');
+        return { promptId: history.id, graph: history.workflow.prompt, requestId: history.workflow.extra_data?.previs?.requestId,
+          status: { completed: status === 'completed' && history.execution_status?.completed !== false, status_str: status === 'failed' ? 'error' : status === 'cancelled' ? 'cancelled' : status === 'completed' ? 'success' : status }, outputs: history.outputs };
+      }
       const entry = history[promptId];
       if (!entry) return null;
       const prompt = entry.prompt;
-      return { promptId: cloud ? prompt?.prompt_id : prompt?.[1], graph: cloud ? prompt?.prompt : prompt?.[2], requestId: (cloud ? prompt?.extra_data : prompt?.[3])?.previs?.requestId, status: entry.status, outputs: entry.outputs };
+      return { promptId: prompt?.[1], graph: prompt?.[2], requestId: prompt?.[3]?.previs?.requestId, status: entry.status, outputs: entry.outputs };
     },
     async view(location) {
       const query = new URLSearchParams(safeMediaLocation(location));
