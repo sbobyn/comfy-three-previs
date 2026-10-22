@@ -1,11 +1,12 @@
 # Real-app walkthrough and hero-video outline
 
-Aim for 60–90 seconds of actual app footage, using disposable project data. Keep labels visible. Show a successful local workflow, then end on the returned output. Do not imply that passthrough is generated footage.
+Target 60–90 seconds. Use only the disposable project and distinguish rendered input, native processing and any future AI result.
 
-1. **0–15 s — Direct the browser camera.** Open the camera-study set. Move the subject, operate a short camera move with existing controls, record it and save a new shot/beauty. Label: “Browser camera study · editable subject + recorded camera.”
-2. **15–30 s — Recover the shot.** Return to shots and reopen the saved camera. Replay briefly; show the saved pose and motion. Label: “Saved shot · reopened and replayed.”
-3. **30–50 s — Use Blender.** Inspect the actual Blender MCP connection, show selected scene/camera/frame/range, and render a local preview. Label: “Blender preview · real local render.”
-4. **50–75 s — Carry it through local Comfy.** Select the saved render, choose the native example/API graph, explicitly bind LoadImage and declare SaveImage output. Inspect compatibility and submit once. Show the persisted prompt and returned image attached to the shot. Label: “Local Comfy passthrough · no AI generation.”
-5. **Optional closing insert — Deliberate transfer.** Show the camera-only transfer receipt and first/middle/last checks. Label: “Camera-only transfer · geometry omitted · save target in Blender.”
+1. Direct the camera in the browser camera-study set, move the subject, record a short take and save. Reopen and replay it. Label “Browser camera recording”.
+2. Inspect Blender through actual MCP. Show the authoritative scene, camera, range and source FPS. Preview framing, render animation, show the verified versioned clip. Label “Blender rendered input —72 frames,24fps,3seconds”.
+3. Show separate Task / Workflow / Backend choices. Import the native video graph, map sourceVideo and declared output, inspect local schemas, quote $0, run once and collect. Label “Local video processing —not AI generation”.
+4. Show aligned source/result playback, dimensions, FPS, frame count, duration and audio. Save review of the selected output.
+5. Show the proposed Kling full-video edit, exact prompt/settings and draft fees. Stop at missing Cloud validation/approval. Label “AI video request —not submitted”.
+6. After explicit paid approval and a successful real generation, replace the final segment with that collected output and its recorded review. Judge camera path, composition, motion, temporal consistency, requested appearance and timing. Never use existing generated footage as evidence of this request.
 
-No existing generated footage is used in this demonstration. If added later, label it separately with its provenance and do not present it as output from the passthrough graph. Hero edit proposal: use a clean browser camera move as the opening, cut to the saved-shot grid, then to the real Blender render and local handoff. Keep the public launch gated on source licensing and publication approval.
+Current input and local output are playable. T3 recording failed with `Preview automation recordingStart timed out after 15000ms.` and the preview host then disconnected; Chrome fallback completed the real browser journey and visual inspection. A new concise full walkthrough recording remains pending. Existing historical transport recordings must keep their original labels. Hero edit: open with the camera move, cut to the saved shot and source clip, then a clearly labeled input/result comparison. Launch still requires Cloud qualification, approved AI output review, inherited provenance clearance and separate publication approval.

@@ -1,6 +1,6 @@
-# Standalone release checkpoint
+# Historical standalone transport checkpoint
 
-Private candidate, October 22, 2026. The standalone app is the product; future Otter integration would be a separate consumer. Preserved Otter work remains on hold.
+Historical baseline through 0ad0cde, October 22, 2026. The corrected video release requirements and current qualification are in [video-checkpoint.md](video-checkpoint.md). The standalone app is the product; future Otter integration would be a separate consumer. Preserved Otter work remains on hold.
 
 ## Working and exercised
 
@@ -17,7 +17,7 @@ Automated gates cover optimistic revisions/save conflicts, project restart, HTTP
 ## Release boundaries
 
 - Browser-only, Blender-only and deliberate camera-transfer paths have independent ownership. Blender remains authoritative for Blender-authored data.
-- No paid/cloud execution, model/API/custom nodes, new model downloads or Comfy auth work.
+- This baseline did not include AI/cloud/custom workflow execution. The current release requires real AI video and both Cloud/local backends; see the video checkpoint. No paid run or model download is authorized automatically.
 - No depth/pose guide passes, generic world editor, broad geometry/material conversion, physics, world generation/import or round-trip synchronization.
 - No phone/gamepad qualification, installers, cross-platform packaging or unattended Blender installation. Setup names exact prerequisites and does not edit global agent config.
 - Blender transfer persists a project receipt and target binding, but saving the actual `.blend` remains the operator's explicit action.
@@ -25,6 +25,6 @@ Automated gates cover optimistic revisions/save conflicts, project restart, HTTP
 
 ## Publication decisions
 
-The inherited three-vcam source has no tracked source license. Steven must confirm ownership/provenance and choose an explicit copyright/license grant before redistribution. A separate publication approval is still required. No license grant has been invented. Dependency/upstream notices must be retained as applicable; upstream Blender MCP is MIT and remains a pinned external dependency. These decisions do not block private use or implementation.
+The inherited three-vcam source has no tracked source license. Steven has chosen MIT for original standalone code. Ownership/provenance of inherited portions still needs confirmation before redistribution. A separate publication approval is still required. No license grant has been invented. Dependency/upstream notices must be retained as applicable; upstream Blender MCP is MIT and remains a pinned external dependency. These decisions do not block private use or implementation.
 
 A separate committed checkout passed frozen offline installation with pnpm 10.18.0 on Node 22.23.2 (28 cached packages, zero downloads), typecheck/build and all 14 tests. It started independently and displayed the expected missing-Blender setup guidance. pnpm reported ignored esbuild lifecycle scripts; the installed platform binary built successfully. Final candidate identity and recording are recorded with local evidence and in the morning report. No push, publication, paid calls or live project changes are part of this checkpoint.

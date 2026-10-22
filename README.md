@@ -21,8 +21,9 @@ Open **http://127.0.0.1:5190**. `PREVIS_DATA_DIR` chooses a project folder (defa
 - **Work in the browser:** move the subject in the fixed camera-study set, operate and record the camera, save a new shot and preview, reopen, scrub and replay. Blender is optional.
 - **Transfer supported content:** camera-only transfer into a uniquely named new scene in a disposable Blender project. Positions, orientations and lens animation transfer at 24 fps; geometry is omitted. Save the target file in Blender yourself.
 
-**Transport baseline (implemented)** binds a saved render to an imported API-format workflow or included example. The existing transport test accepts native LoadImage → SaveImage only: inspect compatibility, submit once, track the saved prompt ID, and collect declared outputs against the originating shot and request revision. This is **passthrough, not AI generation**. No models, paid/API nodes, custom nodes or cloud execution are enabled.
+**Video workflows (private candidate):** render a bounded Blender animation through actual MCP, or export a saved browser recording, into immutable MP4 shot versions. In **Video workflows**, choose Task / Workflow / Backend separately, import an API graph, explicitly map media/prompt/outputs, inspect live node/model choices, edit mapped parameters and LoRAs, prepare a quote, submit once when authorized, and collect/compare declared outputs. Paid execution is disabled by default. Existing image passthrough remains a transport test, not AI generation.
 
+Real local evidence includes a user-imported native video-processing graph, returned video and saved comparison review. LoRA import/edit/reload/preparation is verified without inference. Cloud's adapter is implemented against its **deprecated v1** contract; live Cloud validation is blocked by an unavailable credential. **No AI video result has been generated or qualified yet.**
 Use the in-app **Setup & readiness** page, then read [setup, architecture and recovery](docs/standalone-previs.md), [release boundaries and evidence](docs/release-checkpoint.md), and the [walkthrough outline](docs/demo-outline.md).
 
 ## Release boundaries
