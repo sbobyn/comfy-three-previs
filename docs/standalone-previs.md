@@ -1,6 +1,6 @@
 # Standalone Comfy Previs — first local slice
 
-This topic branch extends the existing three-vcam application from `b37ebb01d1232165f48a718673f9d6b4cf2836be`. It does not use Otter's server, editor, library, assistant, account, or launcher. Keep this branch private; release licensing remains unresolved for the original three-vcam source.
+This topic branch extends the existing three-vcam application from `b37ebb01d1232165f48a718673f9d6b4cf2836be`. It does not use Otter's server, editor, library, assistant, account, or launcher. Keep this branch private. Our code is now MIT licensed; inherited provenance caveats are listed in THIRD_PARTY_NOTICES.md.
 
 ## Run
 
@@ -40,7 +40,7 @@ This is a fixed editable camera-study set, not a general world editor. Existing 
 
 Version 1 stores project identity/revision/title; scenes with explicit `owner`; shots with source, scene/camera identity and timing; immutable renders; workflow bindings and transfer receipts, with references reserved for a later slice. Blender shots point to authoritative files; browser shots persist the small browser-set state and resolved motion. No automatic bidirectional scene synchronization is implied.
 
-Download PNGs and the explicit asset handoff JSON from a shot. Rebinding preserves historical images with their original bindings; the manifest includes only previews matching the current binding. It includes source, timing, image URLs and supported pass. Only beauty stills are supported; requesting another pass is rejected, never substituted. This is an input manifest, not a Comfy workflow graph or executed job. The local passthrough path below supports explicit workflow binding and returned output review. AI workflow execution remains outside this release. No paid calls are made.
+Download PNGs and the explicit asset handoff JSON from a shot. Rebinding preserves historical images with their original bindings; the manifest includes only previews matching the current binding. It includes source, timing, image URLs and supported pass. Only beauty stills are supported; requesting another pass is rejected, never substituted. This is an input manifest, not a Comfy workflow graph or executed job. The local passthrough path below supports explicit workflow binding and returned output review. Real AI video execution is a release requirement. This section describes the earlier transport baseline; see video-checkpoint.md for the corrected scope. Paid execution requires an exact quote and explicit approval.
 
 ## Bring your own agent
 
@@ -71,7 +71,7 @@ Start an existing local Comfy instance, then use **Local Comfy handoff** or **Us
 4. Submit local passthrough once. The app uploads a uniquely named input, preserves the authored graph, and submits a clone with only the selected image filename replaced. The SaveImage filename prefix remains as authored.
 5. Track the exact prompt ID. Only declared PNG outputs are collected, attached to the originating shot and request revision, and retained after restart. Rebinding a shot does not change that output provenance.
 
-This release accepts exactly one native `LoadImage` and one to eight native `SaveImage` nodes consuming its IMAGE output. It is a transport/binding/output proof, **not AI generation**. Custom, model, paid/API and cloud nodes are rejected; no models are installed. Native passthrough may discard alpha through LoadImage's IMAGE output; it is not a promise of byte-identical file copying. Backend PNG metadata may differ.
+This earlier transport baseline accepts exactly one native `LoadImage` and one to eight native `SaveImage` nodes consuming its IMAGE output. It is a transport/binding/output proof, **not AI generation**. Custom, model, paid/API and cloud nodes are rejected; no models are installed. Native passthrough may discard alpha through LoadImage's IMAGE output; it is not a promise of byte-identical file copying. Backend PNG metadata may differ.
 
 Durable receipts live in `comfy-jobs/` beside `project.json`. Prompt UUID and request revision persist before submission. Repeating the same request UUID only returns its receipt. Restart or a lost response never resubmits. Tracking checks queue/history and verifies prompt identity, correlation and submitted graph before collecting. If a prompt is absent, the UI explains the uncertainty; inspect backend history and outputs. Explicitly closing an unresolved receipt requires both operator acknowledgments and an empty backend queue. Closing records **unknown outcome**, does not cancel or retry, and preserves evidence. Later submission is a separate deliberate request.
 
