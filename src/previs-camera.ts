@@ -23,7 +23,8 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
     input.oninput = () => { const p = studio.subjectPosition(); p[index] = Number(input.value); studio.setSubjectPosition(p); };
     label.append(input); panel.append(label);
   }
-  panel.append(record, play, timeline, save, exportVideo, status, position); document.body.append(panel);
+  const delivery = document.createElement('small'); delivery.textContent = 'Video export: 640×360, 16:9, 24 fps, at most 5 seconds. Format guides do not change export framing.';
+  panel.append(record, play, timeline, save, exportVideo, status, position, delivery); document.body.append(panel);
   let savedShotId: string | undefined;
   let exporting = false;
   let frames: CameraFrame[] = [], recording = false, started = 0, playing = false, playhead = 0, previousTime = performance.now();

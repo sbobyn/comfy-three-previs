@@ -342,7 +342,33 @@ test('simulation: comparison switches between image and video outputs without re
   assert.equal(ui.el('compare-source').paused, false); assert.equal(ui.el('compare-result').paused, false);
   ui.el('seek').input('3'); await ui.el('play-both').click();
   assert.equal(ui.el('compare-source').currentTime, 3); assert.equal(ui.el('compare-source').paused, false);
-  assert.equal(ui.el('compare-result').currentTime, 1); assert.equal(ui.el('compare-result').paused, true);
+  assert.equal(ui.el('compare-result').currentTime, 2); assert.equal(ui.el('compare-result').paused, true);
+  assert.match(ui.el('playback-position').textContent,/Result 2.000 s · ended/);
+});
+
+test('simulation: comparison has an empty state, exact downloads and output-scoped saved notes after reload', async t => {
+  const h=await fixture(t),job=await h.complete(),ui=await browserFixture(h);
+  assert.equal(ui.el('comparison-empty').hidden,false);assert.equal(ui.el('compare-source').hidden,true);assert.equal(ui.el('play-both').disabled,true);
+  ui.compare();assert.equal(ui.el('comparison-empty').hidden,true);
+  assert.equal(ui.el('source-download').href,'/renders/'+h.image.id+'.png');assert.equal(ui.el('result-download').href,job.results[0].url);
+  assert.match(ui.el('comparison-detail').textContent,/Source camera/);assert.doesNotMatch(ui.el('comparison-detail').textContent,/Rebound camera/);
+  ui.el('review-notes').value='Reviewed first output';await ui.el('review').click();
+  ui.el('comparison-output').change(job.results[1].id);assert.equal(ui.el('review-notes').value,'');
+  ui.el('review-notes').value='Unsaved second output';ui.el('comparison-output').change(job.results[0].id);
+  assert.equal(ui.el('review-notes').value,'Reviewed first output');
+  await ui.el('reload').click();assert.equal(ui.el('review-notes').value,'Reviewed first output');
+  assert.match(ui.el('saved-review').textContent,/Saved review/);assert.equal(h.state.submissions.length,1);
+});
+
+test('simulation: timing disclosure follows mapped values and invalidates its acknowledgment', async t => {
+  const workflow=definition();workflow.graph['8']={class_type:'Timing',inputs:{frames:73,fps:24,width:832,height:480}};
+  workflow.parameters={frames:{nodeId:'8',input:'frames'},fps:{nodeId:'8',input:'fps'}};
+  workflow.constraints={timingChange:'Review configured timing',outputTiming:{frameCount:{nodeId:'8',input:'frames'},fps:{nodeId:'8',input:'fps'},width:{nodeId:'8',input:'width'},height:{nodeId:'8',input:'height'}}};
+  const h=await fixture(t,{workflow}),ui=await browserFixture(h);
+  assert.match(ui.el('timing-description').textContent,/73 frames \/ 24 fps = 3.041667 s/);
+  ui.el('accept-timing').change(true);ui.parameter('Timing · frames').change('121');ui.parameter('Timing · fps').change('12');
+  assert.equal(ui.el('accept-timing').checked,false);assert.match(ui.el('timing-description').textContent,/121 frames \/ 12 fps = 10.083333 s/);
+  assert.equal(h.state.submissions.length,0);
 });
 
 test('simulation: live inspection retains a user-selected LoRA missing from both author and backend choices', async t => {

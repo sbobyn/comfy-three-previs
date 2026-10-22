@@ -236,6 +236,17 @@ test('journal write failure prevents dispatch; restart during dispatch becomes u
   assert.equal((await restarted.submit(input)).status, 'uncertain'); assert.equal(f.state.submits, 0);
 });
 
+test('uncertain recovery requires both acknowledgments and an idle backend without retrying', async () => {
+  const f=await fixture();f.state.ambiguous=true;
+  const generation=await openGeneration(f.root,f.project,{backendFactory:f.backendFactory}),input=f.input(),q=await generation.quote(input);
+  await generation.submit({...input,approval:approve(q)});
+  for(const ack of [{},{backendIdle:true},{historyReviewed:true}])await assert.rejects(generation.reconcile({jobId:input.requestId,...ack}),/Confirm the exact uncertain request/);
+  f.state.queueBusy=true;await assert.rejects(generation.reconcile({jobId:input.requestId,backendIdle:true,historyReviewed:true}),/queue must be empty/);
+  f.state.queueBusy=false;const closed=await generation.reconcile({jobId:input.requestId,backendIdle:true,historyReviewed:true});
+  assert.equal(closed.status,'closed');assert.match(closed.message,/Outcome remains unknown/);
+  assert.equal((await generation.submit(input)).status,'closed');assert.equal(f.state.submits,1);
+});
+
 test('actual asset shape, source hashes and constraints, video probe before save and timing preserved', async () => {
   const f = await fixture(), bytes = Buffer.from('SIMULATED video bytes'), id = randomUUID();
   await mkdir(join(f.root, 'assets'));

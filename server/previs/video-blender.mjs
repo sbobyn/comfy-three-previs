@@ -43,18 +43,20 @@ def previs_animation():
         r.use_compositing = r.use_sequencer = r.use_border = r.use_crop_to_border = False
         r.use_multiview = r.use_stamp = r.use_overwrite = r.use_placeholder = False
         r.pixel_aspect_x = r.pixel_aspect_y = 1
+        camera_lenses = []
         for index, source_frame in enumerate(range(binding['start'], binding['end'] + 1)):
             path = os.path.join(directory, 'frame-%06d.png' % index)
             if os.path.lexists(path): raise RuntimeError('Frame output already exists')
             s.frame_set(source_frame, subframe=0.0)
             s.camera = camera
+            camera_lenses.append({'frame': source_frame, 'type': camera.data.type, 'mm': camera.data.lens if camera.data.type == 'PERSP' else None, 'sensorWidth': camera.data.sensor_width, 'sensorHeight': camera.data.sensor_height, 'sensorFit': camera.data.sensor_fit, 'orthoScale': camera.data.ortho_scale})
             r.filepath = path
             status = bpy.ops.render.render(write_still=True, scene=s.name)
             if 'FINISHED' not in status: raise RuntimeError('Blender did not finish the render')
             if os.path.islink(path) or not os.path.isfile(path) or not 33 <= os.path.getsize(path) <= output['maxFrameBytes']: raise RuntimeError('Blender did not produce a bounded PNG frame')
             with open(path, 'rb') as f: header = f.read(24)
             if header[:8] != bytes([137,80,78,71,13,10,26,10]) or header[12:16] != b'IHDR' or struct.unpack('>II', header[16:24]) != (output['width'], output['height']): raise RuntimeError('Blender produced unexpected frame dimensions')
-        result = {'ok': True, 'binding': binding, 'width': output['width'], 'height': output['height'], 'fps': output['fps'], 'fpsRational': output['fpsRational'], 'frameCount': output['frameCount'], 'duration': output['duration'], 'sourceFps': binding['fps'], 'sampling': 'one-output-frame-per-source-frame', 'fileSaved': False}
+        result = {'ok': True, 'binding': binding, 'width': output['width'], 'height': output['height'], 'fps': output['fps'], 'fpsRational': output['fpsRational'], 'frameCount': output['frameCount'], 'duration': output['duration'], 'sourceFps': binding['fps'], 'sampling': 'one-output-frame-per-source-frame', 'fileSaved': False, 'cameraLenses': camera_lenses}
     except Exception as error:
         result = {'ok': False, 'error': 'Animation render failed: ' + str(error)[:400]}
     finally:

@@ -194,6 +194,7 @@ class Scene:
     def __init__(self, name):
         self.name = name
         self.objects = {'Selected': N(name='Selected', type='CAMERA'), 'Original': N(name='Original', type='CAMERA'), 'Marker': N(name='Marker', type='CAMERA')}
+        self.objects['Selected'].data = N(type='PERSP', lens=50, sensor_width=36, sensor_height=24, sensor_fit='AUTO', ortho_scale=6)
         self.camera = self.objects['Original']
         self.frame_start, self.frame_end, self.frame_current, self.frame_subframe = 1, 90, 7, 0.25
         self.timeline_markers = [N(camera=self.objects['Marker']), N(camera=None)]
@@ -201,6 +202,7 @@ class Scene:
     def frame_set(self, frame, subframe=0):
         if getattr(self, 'fail_restore', False) and frame == 7: raise RuntimeError('simulated restoration failure')
         self.frame_current, self.frame_subframe = frame, subframe
+        if 'Selected' in self.objects: self.objects['Selected'].data.lens = 50 + frame
         for marker in self.timeline_markers:
             if marker.camera: self.camera = marker.camera
 class Window:
@@ -270,6 +272,8 @@ test('fixed Python restores render state, context, camera markers and frame/subf
       if (mode === 'success') {
         assert.deepEqual(state.observed.map(v => v.frame), [3, 4, 5]);
         assert.deepEqual(result.binding, binding); assert.equal(result.fps, 24); assert.equal(result.sourceFps, 30);
+        assert.deepEqual(result.cameraLenses.map(l => [l.frame,l.mm]), [[3,53],[4,54],[5,55]]);
+        assert.equal(result.cameraLenses[0].sensorWidth,36);
         assert.equal(result.duration, 3 / 24); assert.equal(result.stateRestored, true); assert.equal(result.fileSaved, false);
       } else if (mode.startsWith('stale')) assert.equal(state.observed.length, 0);
       else assert.equal(result.stateRestored, true);

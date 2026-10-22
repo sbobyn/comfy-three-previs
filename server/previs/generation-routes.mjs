@@ -45,7 +45,7 @@ export async function generationRoutes(data, project) {
     if(path==='/api/generation/quote')return {job:await generation.quote(input)};
     if(path==='/api/generation/submit')return {job:await generation.submit(input)};
     if(path==='/api/generation/track'){const job=await generation.track(input.jobId);await attach(job);return {job,project:project.get()};}
-    if(path==='/api/generation/reconcile')return {job:await generation.reconcile(input)};
+    if(path==='/api/generation/reconcile'){const job=await generation.reconcile(input);await attach(job);return {job,project:project.get()};}
     if(path==='/api/generation/review'){
       const job=generation.get(input.jobId);
       if(job.status!=='completed'||input.visuallyReviewed!==true||!String(input.notes||'').trim())throw Error('Review the completed output and record observations first');

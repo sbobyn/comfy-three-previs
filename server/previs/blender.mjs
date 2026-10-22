@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 const print = expression => `print("PREVIS_JSON:" + json.dumps(${expression}))`;
 export const inspectCode = `import bpy, json
-${print(`{"file": bpy.data.filepath, "activeScene": bpy.context.scene.name, "scenes": [{"name": s.name, "fps": s.render.fps / s.render.fps_base, "start": s.frame_start, "end": s.frame_end, "frame": s.frame_current, "activeCamera": s.camera.name if s.camera else None, "cameras": [o.name for o in s.objects if o.type == 'CAMERA']} for s in bpy.data.scenes]}`)}
+${print(`{"file": bpy.data.filepath, "activeScene": bpy.context.scene.name, "scenes": [{"name": s.name, "fps": s.render.fps / s.render.fps_base, "start": s.frame_start, "end": s.frame_end, "frame": s.frame_current, "activeCamera": s.camera.name if s.camera else None, "cameras": [o.name for o in s.objects if o.type == 'CAMERA'], "cameraDetails": {o.name: {"type": o.data.type, "mm": o.data.lens if o.data.type == 'PERSP' else None, "sensorWidth": o.data.sensor_width, "frame": s.frame_current, "mayAnimate": bool(o.data.animation_data)} for o in s.objects if o.type == 'CAMERA'}} for s in bpy.data.scenes]}`)}
 `;
 export function catalogToken(catalog) {
   // Ignore playhead/active camera; only the binding identity and timing matter.

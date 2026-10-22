@@ -16,15 +16,17 @@ async function action(fn:()=>Promise<void>) {if(busy)return;busy=true;try{await 
 function pickedShot() {return project.shots.find((s:Data)=>s.id===select('shot').value);}
 function pickedAsset() {return (project.assets||[]).find((a:Data)=>a.id===select('asset').value);}
 function describe(a:Data) {return `${a.width}×${a.height} · ${a.frameCount} frames · ${a.fpsRational||a.fps} fps · ${a.duration.toFixed(3)} s · ${a.audio?'audio present':'silent'} · source revision ${a.requestRevision}`;}
+function ownership(binding:Data={},snapshot?:Data,lenses?:Data[]){const mm=snapshot?.camera?.mm;const values=lenses?.map(l=>l.mm).filter(Number.isFinite)||[];const lens=values.length?`${Math.min(...values)}–${Math.max(...values)} mm across captured frames`:mm?`${mm} mm at saved pose; recorded lenses may vary`:'lens not captured in this asset';return `${binding.source==='blender'?'Blender':'Browser'} owns ${binding.scene||'camera-study set'} / ${binding.camera||'camera'} · frames ${binding.start??'?'}–${binding.end??'?'} · source ${binding.fps??'?'} fps · ${lens}${binding.file?' · '+binding.file:''}`;}
 function showSource(updateBindings = true) {
-  const a=pickedAsset();if(a){video('source').src=a.url;el('asset-detail').textContent=`Version ${a.version} · ${describe(a)}${a.provenance?.recordedDuration!==undefined?` · recorded ${a.provenance.recordedDuration.toFixed(3)} s, final sample ${a.provenance.sampledEndTime.toFixed(3)} s`:''}`;}else{video('source').removeAttribute('src');el('asset-detail').textContent='Render or export a video for this shot.';}
+  const a=pickedAsset();video('source').hidden=!a;if(a){video('source').src=a.url;el('asset-detail').textContent=`Captured source · version ${a.version} · ${describe(a)}. ${ownership(a.binding,a.provenance?.browserSnapshot,a.provenance?.render?.cameraLenses)}${a.provenance?.recordedDuration!==undefined?` · recorded ${a.provenance.recordedDuration.toFixed(3)} s, final sample ${a.provenance.sampledEndTime.toFixed(3)} s`:''}`;}else{video('source').removeAttribute('src');el('asset-detail').textContent='Render or export a video for this shot.';}
   if(updateBindings)renderBindings();invalidate();
 }
 function syncPrimarySource(){const value=(roles.sourceVideo||roles.controlVideo)?.value;if(value?.startsWith('asset:')&&Array.from(select('asset').options).some(o=>o.value===value.slice(6))){select('asset').value=value.slice(6);showSource(false);}}
 function showRenderTiming(){const s=pickedShot();if(!s)return;const count=s.binding.end-s.binding.start+1;el('render-timing').textContent=`${count} selected source frames → ${(count/Number(field('fps').value)).toFixed(3)} s at chosen output FPS. Rebind exact scene/camera/range from Shots.`;}
 function showShot() {
   const s=pickedShot();if(!s)return;
-  el('shot-detail').textContent=`${s.binding.source} owns ${s.binding.scene} / ${s.binding.camera} · frames ${s.binding.start}–${s.binding.end} · source ${s.binding.fps} fps`;
+  el('shot-detail').textContent=`Current shot · ${s.title}. ${ownership(s.binding,s.browser)}. Blender-authored content stays in Blender; browser shots use the camera-study set.`;
+  el('framing').hidden=true;el('framing').removeAttribute('src');
   showRenderTiming();
   el<HTMLButtonElement>('render-video').disabled=s.binding.source!=='blender';el<HTMLButtonElement>('preview').disabled=s.binding.source!=='blender';
   const previous=select('asset').value;
@@ -34,15 +36,16 @@ function showShot() {
 function allDefinitions():Data[] {return [...(state?.presets||[]),...(project?.workflowDefinitions||[])];}
 function workflowPicker() {
   const previous=select('workflow').value, list=allDefinitions().filter(d=>d.task===select('task').value);
-  select('workflow').replaceChildren(...list.map(d=>option(d.id,`${d.title||d.id} · ${state.presets.some((s:Data)=>s.id===d.id)?'built-in':'saved preset'}`)));
+  select('workflow').replaceChildren(...list.map(d=>option(d.id,`${d.title||d.id} · ${state.presets.some((s:Data)=>s.id===d.id)?'built-in':'saved preset '+d.id.slice(0,8)}`)));
   if(list.some(d=>d.id===previous))select('workflow').value=previous;
   definition=list.find(d=>d.id===select('workflow').value);imported=false;showDefinition();
 }
 function showDefinition() {
+  el('task-detail').textContent=({'transform-video':'Edit the whole supplied clip. A frame-by-frame image workflow may flicker; temporal consistency and camera adherence must be reviewed.','control-video':'Generate using motion or structure guides, such as edge, depth or pose video. Appearance may change.','first-frame':'Animate a still image. The original camera-motion clip is not supplied.','passthrough':'Transport or native processing only; this does not establish AI generation.'}as Data)[select('task').value]||'';
   el('workflow-detail').textContent=definition?`${definition.description||definition.title||''} · ${definition.verification?.status||'imported'}`:'Import a workflow for this task.';
   el('author-graph').textContent=JSON.stringify(definition?.graph||{},null,2);
   el('timing-change').hidden=!definition?.constraints?.timingChange;el('timing-description').textContent=definition?.constraints?.timingChange||'';field('accept-timing').checked=false;
-  renderBindings();renderParameters();invalidate();
+  renderBindings();renderParameters();showTiming();invalidate();
   el<HTMLButtonElement>('restore-binding').disabled=!savedBinding();
 }
 function savedBinding() { return [...(project?.workflowBindings||[])].reverse().find((b:Data)=>b.definitionId===definition?.id&&b.shotId===pickedShot()?.id); }
@@ -55,13 +58,14 @@ function restoreBinding() {
 }
 function renderBindings() {
   el('asset-bindings').replaceChildren();for(const key of Object.keys(roles))delete roles[key];
+  el('binding-mappings').textContent=JSON.stringify({inputs:definition?.inputs||{},parameters:definition?.parameters||{},outputs:definition?.outputs||[]},null,2);
   for(const [role,mapping] of Object.entries(definition?.inputs||{}) as [string,Data][]){
     if(role==='prompt')continue;const s=document.createElement('select');s.setAttribute('aria-label',role+' asset');s.append(option('','Choose explicitly'));
     const kind=['sourceVideo','controlVideo'].includes(role)?'video':role==='audio'?'audio':'image';
     for(const a of project?.assets||[])if(a.kind===kind)s.append(option('asset:'+a.id,`${a.source} · ${a.shotId===pickedShot()?.id?'this shot':'other shot'} · v${a.version||1} · ${a.width||''}×${a.height||''} · ${a.id.slice(0,8)}`));
     if(kind==='image')for(const r of project?.renders||[])s.append(option('render:'+r.id,`${r.source} preview · ${r.width}×${r.height} · ${r.id.slice(0,8)}`));
     if(['sourceVideo','controlVideo'].includes(role)&&pickedAsset())s.value='asset:'+pickedAsset().id;
-    s.onchange=()=>{syncPrimarySource();invalidate();};roles[role]=s;el('asset-bindings').append(label(`${role}${mapping.pass?' ('+mapping.pass+')':''} → ${mapping.nodeId}.${mapping.input}`,s));
+    s.onchange=()=>{syncPrimarySource();invalidate();};roles[role]=s;el('asset-bindings').append(label(`${({sourceVideo:'Source video',controlVideo:'Control video',firstFrame:'First frame',lastFrame:'Last frame',referenceImage:'Reference image',image:'Image',audio:'Audio'}as Data)[role]||role}${mapping.pass?' ('+mapping.pass+')':''}`,s));
   }
 }
 function schemaFields(node:Data) {
@@ -78,9 +82,11 @@ function renderParameters(preserve = false) {
     else{const c=document.createElement('input');c.type=typeof value==='boolean'?'checkbox':typeof value==='number'?'number':'text';if(c.type==='checkbox')c.checked=value;else c.value=String(value??'');if(c.type==='number')c.step='any';control=c;}
     control.dataset.valueType=typeof value;control.setAttribute('aria-label',m.label||`${node.class_type} · ${m.input}`);
     if(preserve && old[name]!==undefined){if(control instanceof HTMLSelectElement&&!Array.from(control.options).some(o=>o.value===String(old[name])))control.append(option(String(old[name]),`${old[name]} — unavailable`));if(control.type==='checkbox')(control as HTMLInputElement).checked=Boolean(old[name]);else control.value=String(old[name]);}
-    control.onchange=invalidate;parameters[name]=control;el('parameters').append(label(m.label||`${node.class_type} · ${m.input}`,control));
+    const readable=m.label&&!/^\d+ · /.test(m.label)?m.label:`${m.input.replaceAll('_',' ')} · ${node._meta?.title||node.class_type}`;
+    control.onchange=()=>{field('accept-timing').checked=false;showTiming();invalidate();};parameters[name]=control;el('parameters').append(label(readable,control));
   }
 }
+function showTiming(graph?:Data){const timing=definition?.constraints?.outputTiming;let text=definition?.constraints?.timingChange||'';if(timing){const value=(key:string)=>{const m=timing[key];if(!m)return NaN;const entry=Object.entries(definition?.parameters||{}).find(([,p])=>(p as Data).nodeId===m.nodeId&&(p as Data).input===m.input);return Number(graph?.[m.nodeId]?.inputs[m.input]??(entry&&parameters[entry[0]]?.value)??definition?.graph[m.nodeId]?.inputs[m.input]);};const frames=value('frameCount'),fps=value('fps');text+=` Configured output: ${value('width')}×${value('height')}, ${frames} frames / ${fps} fps = ${(frames/fps).toFixed(6)} s.`;}el('timing-description').textContent=text;}
 function importedMapping() {
   if(!definition)return;const d=definition;el('mapping').replaceChildren();
   const targets=Object.entries(d.graph).flatMap(([id,n]:[string,any])=>Object.keys(n.inputs).map(input=>({id,input,text:`${id} · ${n.class_type}.${input}`})));
@@ -103,11 +109,16 @@ function importedMapping() {
 }
 async function ensurePreset() {
   if(!definition)throw Error('Choose or import a mapped workflow');if(imported)throw Error('Save the imported mappings and declared outputs first');
-  if(!project.workflowDefinitions?.some((d:Data)=>d.id===definition!.id)){const saved=await api('generation/preset',{revision:project.revision,definition});project=saved.project;definition=saved.definition;}
+  if(!project.workflowDefinitions?.some((d:Data)=>d.id===definition!.id)){const saved=await api('generation/preset',{revision:project.revision,definition});project=saved.project;definition=saved.definition;select('workflow').append(option(definition!.id,`${definition!.title||definition!.id} · saved preset ${definition!.id.slice(0,8)}`));select('workflow').value=definition!.id;}
 }
 function submitReady(){el<HTMLButtonElement>('submit').disabled=!prepared?.validation?.compatible||!field('approve').checked||(!(prepared.quote.status==='known'&&prepared.quote.amount===0)&&!state.paidExecutionEnabled);}
-async function reload(){const r=await api('project');project=r.project;state=await api('generation');const selected=select('shot').value||new URLSearchParams(location.search).get('shot');select('shot').replaceChildren(...project.shots.map((s:Data)=>option(s.id,s.title)));if(selected)select('shot').value=selected;showShot();workflowPicker();drawJobs();el('status').textContent=`Project revision ${project.revision} · original assets retained`;}
-function drawJobs(){el('jobs').replaceChildren();for(const job of state.jobs||[]){const box=document.createElement('article'),p=document.createElement('p');p.textContent=`${job.definition.title||job.definition.id} · ${job.backend.kind} · ${job.status} · request revision ${job.requestRevision} · ${job.id}`;box.append(p);const track=document.createElement('button');track.textContent='Track exact job';track.onclick=()=>action(async()=>{await api('generation/track',{jobId:job.id});await reload();});box.append(track);if(job.results?.length){const compare=document.createElement('button');compare.textContent='Compare source / result';compare.onclick=()=>compareJob(job);box.append(compare);}el('jobs').append(box);}}
+async function reload(){const r=await api('project');project=r.project;state=await api('generation');const selected=select('shot').value||new URLSearchParams(location.search).get('shot');select('shot').replaceChildren(...project.shots.map((s:Data)=>option(s.id,s.title)));if(selected)select('shot').value=selected;showShot();workflowPicker();drawJobs();const restored=state.jobs.find((j:Data)=>j.id===(reviewedJob?.id||new URLSearchParams(location.search).get('job'))&&j.results?.length);if(restored)compareJob(restored);el('status').textContent=`Project revision ${project.revision} · original assets retained`;}
+function drawJobs(){el('jobs').replaceChildren();for(const job of state.jobs||[]){
+  const box=document.createElement('article'),p=document.createElement('p'),message=document.createElement('p');p.textContent=`${job.definition.title||job.definition.id} · ${job.backend.kind} · ${job.status} · request revision ${job.requestRevision} · ${job.id}`;message.textContent=`${job.message||''}${job.failure?' · '+job.failure.phase+': '+(job.failure.message||'Inspect backend and track this identity'):''} · Backend job: ${job.promptId||'not known'}`;box.append(p,message);
+  const track=document.createElement('button');track.textContent='Track exact job';track.onclick=()=>action(async()=>{const r=await api('generation/track',{jobId:job.id});await reload();el('status').textContent=r.job.message||r.job.status;});if(!['failed','closed'].includes(job.status))box.append(track);
+  if(job.status==='uncertain'){const recovery=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Recover an unknown outcome · no retry';recovery.append(summary);const idle=document.createElement('input'),history=document.createElement('input');idle.type=history.type='checkbox';recovery.append(label('I confirmed the backend is idle',idle),label('I reviewed backend history and outputs; the outcome may remain unknown',history));const close=document.createElement('button');close.textContent='Close this receipt · no retry';close.onclick=()=>action(async()=>{const r=await api('generation/reconcile',{jobId:job.id,backendIdle:idle.checked,historyReviewed:history.checked});await reload();el('status').textContent=r.job.message;});recovery.append(close);box.append(recovery);}
+  if(job.results?.length){const compare=document.createElement('button');compare.textContent='Compare source / result';compare.onclick=()=>compareJob(job);box.append(compare);}el('jobs').append(box);
+}}
 function compareJob(job:Data){
   reviewedJob=job;select('comparison-output').replaceChildren(...job.results.map((r:Data)=>option(r.id,`Node ${r.nodeId} · ${r.mimeType} · ${r.id.slice(0,8)}`)));showComparison();
 }
@@ -115,8 +126,14 @@ function showComparison(){
   const job=reviewedJob;if(!job)return;
   const source=job.sources.sourceVideo||job.sources.controlVideo||job.sources.firstFrame||job.sources.image||job.sources.referenceImage;
   const result=job.results.find((r:Data)=>r.id===select('comparison-output').value);if(!result)return;
+  el('comparison-empty').hidden=true;
+  el('comparison-detail').textContent=`${job.definition.title||job.definition.id} · ${job.backend.kind} · request revision ${job.requestRevision}. Original input v${source?.version||1}, capture revision ${source?.requestRevision??'unknown'}: ${ownership(source?.binding,source?.provenance?.browserSnapshot,source?.provenance?.render?.cameraLenses)}.`;
   for(const [id,asset]of [['compare-source',source],['compare-result',result]]as[string,Data|undefined][]){const v=video(id),img=el<HTMLImageElement>(id+'-image');v.pause();v.hidden=asset?.kind!=='video';img.hidden=asset?.kind!=='image';v.removeAttribute('src');img.removeAttribute('src');if(asset?.kind==='video')v.src=asset.url;else if(asset?.kind==='image')img.src=asset.url||'/renders/'+asset.id+'.png';}
   field('seek').max=String(Math.max(source?.duration||0,result.duration||0));field('seek').value='0';
+  const hasVideo=source?.kind==='video'||result.kind==='video';for(const id of ['play-both','pause-both','seek'])field(id).disabled=!hasVideo;
+  for(const [id,asset]of [['source-download',source],['result-download',result]]as[string,Data|undefined][]){const a=el<HTMLAnchorElement>(id);a.hidden=!asset;a.href=asset?.url||(asset?'/renders/'+asset.id+'.png':'');a.download=asset?.filename||asset?.id||'';}
+  const review=[...(project.reviews||[])].reverse().find((r:Data)=>r.jobId===job.id&&r.resultIds.includes(result.id));field('review-notes').value=review?.notes||'';el('saved-review').textContent=review?`Saved review · ${review.createdAt}`:'No saved review for this output.';
+  el('playback-position').textContent='Aligned playback starts at 0 seconds; each clip retains its own end.';
   const keys=source?.kind==='video'&&result.kind==='video'?['width','height','fps','frameCount','duration','audio']:['width','height'];
   el('differences').textContent=keys.map(k=>`${k}: ${source?.[k]??'none'} → ${result[k]}${source?.[k]!==result[k]?' CHANGED':''}`).join(' · ')+(source?.kind==='video'&&result.kind==='video'?'. Playback uses shared seconds; no stretching, trimming, interpolation or repeated frames. A shorter clip ends at its own duration.':'. A still image has no camera-motion timing to compare. Review the selected output; no timing fit is applied.');
   el<HTMLButtonElement>('review').disabled=false;
@@ -136,6 +153,7 @@ el('prepare').onclick=()=>action(async()=>{
   const binding=await api('generation/bind',{revision:project.revision,definitionId:definition!.id,shotId:pickedShot().id,assetBindings,prompt:field('prompt').value,parameters:values,acceptTimingChange:field('accept-timing').checked});project=binding.project;
   requestInput={requestId:crypto.randomUUID(),revision:project.revision,workflowBindingId:binding.workflowBindingId,backend:backend()};
   prepared=(await api('generation/quote',requestInput)).job;
+  showTiming(prepared!.preparedGraph);
   const pricedNode=prepared!.preparedGraph?.['2']?.inputs;
   const priced=definition!.pricing?.ratePerSecond&&pricedNode?.model_name==='kling-video-o1'&&pricedNode?.resolution==='720p';
   const pricedSource=prepared!.sources.sourceVideo;
@@ -148,9 +166,11 @@ el('restore-binding').onclick=restoreBinding;
 field('approve').onchange=submitReady;
 el('submit').onclick=()=>action(async()=>{if(!prepared||!requestInput)throw Error('Prepare a fresh quote');const r=await api('generation/submit',{...requestInput,approval:{approved:field('approve').checked,fingerprint:prepared.fingerprint,allowance:{currency:'USD',maxAmount:Number(field('allowance').value),allowUnknownCharges:field('unknown').checked}}});el('status').textContent=r.job.message;state=await api('generation');drawJobs();field('approve').checked=false;submitReady();});
 el('reload').onclick=()=>action(reload);
-el('play-both').onclick=()=>action(async()=>{const t=Number(field('seek').value);for(const id of ['compare-source','compare-result']){const v=video(id);if(t<v.duration){v.currentTime=t;await v.play();}else v.pause();}});
+function seekComparison(){const t=Number(field('seek').value),positions:string[]=[];for(const id of ['compare-source','compare-result']){const v=video(id);v.pause();if(!v.hidden&&Number.isFinite(v.duration)){v.currentTime=Math.min(t,v.duration);positions.push(`${id==='compare-source'?'Source':'Result'} ${v.currentTime.toFixed(3)} s${t>=v.duration?' · ended':''}`);}}el('playback-position').textContent=positions.join(' / ');}
+el('play-both').onclick=()=>action(async()=>{seekComparison();const t=Number(field('seek').value);for(const id of ['compare-source','compare-result']){const v=video(id);if(!v.hidden&&t<v.duration)await v.play();}});
 el('pause-both').onclick=()=>{video('compare-source').pause();video('compare-result').pause();};
-field('seek').oninput=()=>{for(const id of ['compare-source','compare-result']){const v=video(id),t=Number(field('seek').value);v.pause();if(t<=v.duration)v.currentTime=t;}};
+field('seek').oninput=seekComparison;
+for(const id of ['compare-source','compare-result'])video(id).onended=()=>{el('playback-position').textContent=`${id==='compare-source'?'Source':'Result'} ended at ${video(id).duration.toFixed(3)} s. Each clip stops at its own duration.`;};
 el('review').onclick=()=>action(async()=>{if(!reviewedJob)throw Error('Choose a completed comparison');project=(await api('generation/review',{revision:project.revision,jobId:reviewedJob.id,resultIds:[select('comparison-output').value],visuallyReviewed:true,notes:field('review-notes').value})).project;el('status').textContent='Visual review saved against exact output identities.';});
 el('endpoint-label').hidden=select('backend').value!=='local';
 field('prompt').value='Transform the blue ceramic sphere into a luminous amber glass planet with swirling golden clouds. Keep the gold orbital ring, pedestal, camera dolly, perspective, framing, object positions and background parallax from the source video. Cinematic studio lighting, stable geometry, consistent materials, no added camera motion, no cuts, no text.';
