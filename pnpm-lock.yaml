@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      ws:
+        specifier: ^8.21.3
+        version: 8.21.3
     devDependencies:
       '@types/node':
         specifier: ^26.6.0
@@ -29,9 +33,6 @@ importers:
       vite:
         specifier: ^7.1.0
         version: 7.3.6(@types/node@26.6.0)
-      ws:
-        specifier: ^8.21.3
-        version: 8.21.3
 
 packages:
 

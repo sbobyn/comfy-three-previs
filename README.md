@@ -1,51 +1,32 @@
-# Comfy Previs — standalone continuation
+# Comfy Previs
 
-The standalone app and first Blender MCP/browser shot journey live on this topic branch. See [setup, architecture, evidence and limits](docs/standalone-previs.md). Build with `pnpm check`, test with `pnpm test`, then `pnpm start` and open port 5190.
+A private, standalone camera-study and Blender preview app. No Otter server, editor, library, account, assistant or launcher is required.
 
-The original camera-prototype README follows.
+## Run locally
 
-# three-vcam
+Requires **Node 22.12+** and **pnpm 10.18.0**. Install those prerequisites separately; the app does not change global agent configuration.
 
-R&D prototype: use a phone as a virtual camera head — stream device orientation
-to a Three.js scene, record it as a take, and eventually drive a GenDirector
-camera's rotation while a motion path drives its position.
-
-Status: aimed by phone, mouse drag or the flight model, shown in a
-split view — orbitable world view on the left with the rig and its frustum, the
-camera's own view on the right. Adjustable deshake/inertia smoothing, lens and
-delivery-format selection, and take recording. A demo selector switches between a locked-off camera, keyboard-piloted
-free flight with drone dynamics, flown takes recorded as replayable position
-sources, and dolly, arc and crane paths with a transport to play and scrub — so the full
-premise, operating a camera while the base travels, is now testable.
-
-## Measured — 2026-09-15, iPhone over a cloudflared quick tunnel
-
-| | |
-|---|---|
-| rate | 60 Hz (iOS `deviceorientation` cap) |
-| latency | 12.3 ms (echo-ping RTT/2) |
-| jitter | 1.0 – 2.9 ms |
-| drift | 0.3° over 60 s, phone stationary |
-
-The tunnel is in that path — traffic reaches the phone via a Cloudflare edge and
-back — so this is a pessimistic figure; a direct LAN link would be lower.
-
-## Commands
-
-```bash
-pnpm install
-pnpm dev        # http://127.0.0.1:5187
-pnpm check      # typecheck + build
+```sh
+pnpm install --frozen-lockfile
+pnpm check
+pnpm test
+pnpm start
 ```
 
-## Design notes
+Open **http://127.0.0.1:5190**. `PREVIS_DATA_DIR` chooses a project folder (default `.previs`); keep the entire folder, including renders and operation/job receipts, to recover your project. `PORT` selects another local port. `pnpm dev` builds and starts this same complete app; rebuild after editing browser code. `pnpm dev:camera` is the inherited camera-only Vite development server on 5187 and does not provide project APIs.
 
-- **Relative orientation + re-zero**, not absolute/compass. iOS `alpha` is not
-  true north and magnetometer yaw drifts; a re-zero control makes whatever
-  direction the operator is comfortable holding become scene-forward.
-- **Secure context is required** for `DeviceOrientationEvent` on the phone, so
-  the phone page cannot be served over plain LAN HTTP. For prototyping, tunnel
-  the dev server (e.g. `cloudflared tunnel --url http://127.0.0.1:5187`) rather
-  than installing a local CA on the device.
-- Success bar to measure before trusting any of this: glass-to-glass latency,
-  jitter at rest, and yaw drift over 60s.
+## Three deliberate paths
+
+- **Work in Blender:** connect through the actual Blender MCP server/addon, inspect exact scene/camera/timing, bind a shot, render a local beauty PNG, save and recover it. Blender owns its file; Previs restores settings and does not save that file.
+- **Work in the browser:** move the subject in the fixed camera-study set, operate and record the camera, save a new shot and preview, reopen, scrub and replay. Blender is optional.
+- **Transfer supported content:** camera-only transfer into a uniquely named new scene in a disposable Blender project. Positions, orientations and lens animation transfer at 24 fps; geometry is omitted. Save the target file in Blender yourself.
+
+**Local Comfy handoff** binds a saved render to an imported API-format workflow or included example. The first release accepts native LoadImage → SaveImage only: inspect compatibility, submit once, track the saved prompt ID, and collect declared outputs against the originating shot and request revision. This is **passthrough, not AI generation**. No models, paid/API nodes, custom nodes or cloud execution are enabled.
+
+Use the in-app **Setup & readiness** page, then read [setup, architecture and recovery](docs/standalone-previs.md), [release boundaries and evidence](docs/release-checkpoint.md), and the [walkthrough outline](docs/demo-outline.md).
+
+## Release boundaries
+
+Beauty stills only. No depth/pose passes, broad asset conversion, general world editor, physics, generated footage or Comfy authentication. Browser authoring uses the camera-study set. Phone/gamepad code is inherited; current hardware behavior is unqualified. [Historical prototype notes](docs/three-vcam-history.md) are evidence of earlier work, not current qualification.
+
+Keep this repository private. The inherited three-vcam source has no tracked license grant. Publication requires Steven's confirmation of source ownership and intended copyright/license, plus separate publication approval. Private implementation does not grant redistribution rights.

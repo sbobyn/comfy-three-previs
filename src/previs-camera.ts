@@ -13,7 +13,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   const play = document.createElement('button'); play.textContent = 'Replay motion';
   const timeline = document.createElement('input'); timeline.type = 'range'; timeline.min = '0'; timeline.max = '0'; timeline.step = String(1 / 24); timeline.setAttribute('aria-label', 'Recorded motion time');
   const position = document.createElement('output'); position.setAttribute('aria-label', 'Current camera');
-  const save = document.createElement('button'); save.textContent = 'Save shot & beauty';
+  const save = document.createElement('button'); save.textContent = 'Save new shot & beauty';
   const status = document.createElement('span'); status.textContent = 'Browser scene · no Blender required';
   panel.append(link, title);
   for (const [axis, index] of [['X', 0], ['Y', 1], ['Z', 2]] as const) {
