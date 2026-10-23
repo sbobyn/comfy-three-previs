@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 import * as THREE from 'three';
 import ts from 'typescript';
+import * as delivery from '../shared/browser-delivery.mjs';
 
 // Simulation: execute the actual TS adapter with a small DOM/studio and fake HTTP.
 // No browser, renderer, server, Blender or Comfy process runs in these tests.
@@ -26,8 +27,8 @@ class Element {
     const all = this.children.flatMap(child => [child, ...child.querySelectorAll('*')]);
     if (selector === '*') return all;
     if (selector === 'input[type=number]') return all.filter(child => child.tag === 'input' && child.type === 'number');
-    assert.equal(selector, 'input,button');
-    return all.filter(child => child.tag === 'input' || child.tag === 'button');
+    assert.ok(['input,button','input,button,select'].includes(selector));
+    return all.filter(child => ['input','button',...(selector.endsWith('select')?['select']:[])].includes(child.tag));
   }
   click() { if (!this.disabled) return this.onclick?.(); }
   input(value) { if (!this.disabled) { this.value = String(value); return this.oninput?.(); } }
@@ -45,7 +46,7 @@ function samePose(actual, expected) {
   close(actual.p, expected.p); close(actual.q, expected.q); close([actual.mm], [expected.mm]);
 }
 
-async function fixture({ frames = [first, last], onFrame, failAt, abortFails = false } = {}) {
+async function fixture({ frames = [first, last], onFrame, failAt, abortFails = false, settings } = {}) {
   const body = new Element('body'), pov = new THREE.PerspectiveCamera();
   let subject = [0, 0, 0], now = 0, reads = 0;
   const captures = [], requests = [], adopted = [];
@@ -62,7 +63,7 @@ async function fixture({ frames = [first, last], onFrame, failAt, abortFails = f
       return 'data:image/png;base64,' + Buffer.from(JSON.stringify(capture)).toString('base64');
     },
   };
-  const project = { revision: 7, shots: [{ id: 'saved', title: 'Saved camera', binding: { source: 'three' }, browser: { camera: first, frames, subject: savedSubject, sceneVersion: 1 } }] };
+  const project = { revision: 7, shots: [{ id: 'saved', title: 'Saved camera', binding: { source: 'three' }, browser: { camera: first, frames, subject: savedSubject, sceneVersion: 1, ...(settings?{delivery:settings}:{}) } }] };
   const exportProject = structuredClone(project);
   const response = (data, ok = true) => ({ ok, json: async () => data });
   const fetch = async (path, options) => {
@@ -86,8 +87,8 @@ async function fixture({ frames = [first, last], onFrame, failAt, abortFails = f
   const exports = {};
   runInNewContext(compiled, {
     exports,
-    require(name) { assert.equal(name, 'three'); return THREE; },
-    document: { body, createElement: tag => new Element(tag) },
+    require(name) { if(name==='../shared/browser-delivery.mjs')return delivery;assert.equal(name, 'three'); return THREE; },
+    document: { body, createElement: tag => new Element(tag),querySelectorAll:selector=>body.querySelectorAll(selector) },
     performance: { now: () => now }, location: { search: '?shot=saved' },
     URLSearchParams, structuredClone, fetch,
   }, { filename: 'previs-camera.simulation.cjs' });
@@ -98,12 +99,14 @@ async function fixture({ frames = [first, last], onFrame, failAt, abortFails = f
   const status = elements.find(element => element.tag === 'span');
   assert.equal(status.textContent, 'Restored browser shot');
   return {
-    studio, tick, snapshot, captures, requests, adopted, exportProject, status,
-    controls: panel.querySelectorAll('input,button'),
+    studio, tick, snapshot, captures, requests, adopted, exportProject, status,shortMove:exports.shortCameraMove,
+    controls: panel.querySelectorAll('input,button,select'),
     record: button('Record shot'), play: button('Replay motion'), exportVideo: button('Export saved motion video'),
     title: elements.find(element => element.attributes['aria-label'] === 'Previs shot title'),
     timeline: elements.find(element => element.type === 'range'),
     subjectInput: elements.find(element => element.attributes['aria-label'] === 'Subject X'),
+    resolution:elements.find(element=>element.attributes['aria-label']==='Delivery resolution'),
+    plan:elements.find(element=>element.attributes['aria-label']==='Delivery plan'),
     setTime: value => { now = value; },
   };
 }
@@ -200,4 +203,31 @@ test('simulation: scrubbing applies the selected time before transport synchroni
   assert.equal(Number(h.timeline.value), 1 / 24);
   h.timeline.input(2 / 24);
   samePose(h.snapshot(), last);
+});
+
+test('simulation: saved 720p delivery renders each saved pose at native target dimensions', async()=>{
+  const h=await fixture({settings:{width:1280,height:720,fps:24,aspect:'16:9'}});
+  assert.equal(h.resolution.value,'1280');assert.match(h.plan.textContent,/1280×720/);
+  await h.exportVideo.click();
+  assert.equal(h.requests[0].input.width,1280);assert.equal(h.requests[0].input.height,720);
+  assert.equal(h.captures.length,3);assert.ok(h.captures.every(c=>c.width===1280&&c.height===720));
+  samePose(h.captures[0],first);samePose(h.captures.at(-1),last);
+});
+
+test('simulation: changed delivery or unsupported recording length fails before capture/stage allocation',async()=>{
+  const changed=await fixture();changed.resolution.value='1280';await changed.exportVideo.click();
+  assert.match(changed.status.textContent,/Save a new shot/);assert.equal(changed.requests.length,0);assert.equal(changed.captures.length,0);
+  const long=await fixture({frames:[first,{...last,t:5}]});await long.exportVideo.click();
+  assert.match(long.status.textContent,/121 frames.*three-second preset/);assert.equal(long.requests.length,0);assert.equal(long.captures.length,0);
+});
+
+test('short camera moves have 72 exact delivery samples, normalized poses and a three-second video plan',async()=>{
+  const h=await fixture();
+  for(const kind of ['dolly','crane']){
+    const samples=h.shortMove(kind,[0,2.2,-11],35);
+    assert.equal(samples.length,72);assert.equal(samples[0].t,0);assert.equal(samples.at(-1).t,71/24);
+    assert.equal(delivery.browserVideoPlan(samples,{width:1280,height:720,fps:24}).duration,3);
+    assert.notDeepEqual(samples[0].p,samples.at(-1).p);
+    samples.forEach((f,i)=>{assert.equal(f.t,i/24);assert.ok(Math.abs(Math.hypot(...f.q)-1)<1e-10);assert.equal(f.mm,35);});
+  }
 });

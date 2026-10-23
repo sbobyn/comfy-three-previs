@@ -20,7 +20,7 @@ async function readiness() {
     ? 'Missing MCP command. Follow setup to install the matching addon and configure the upstream MCP process. Browser work remains available.'
     : current?.status === 'running' ? 'Blender operation running. Keep external edits idle; disconnecting will not cancel it.'
     : uncertain ? current.reason
-    : blender.error || (blender.process ? `MCP process ready · addon ${blender.addon}. Refresh after external edits.` : 'MCP configured. Connect to inspect the addon and current file.');
+    : (blender.error || (blender.process ? `MCP process ready · addon ${blender.addon}. Refresh after external edits.` : 'MCP configured. Connect to inspect the addon and current file.'))+' Saved shots and comparisons remain available. To reconnect, open Blender, enable/start its MCP addon, then Connect / refresh here; the project needs no restart.';
 }
 async function action(fn: () => Promise<void>) {
   if (busy) return;
@@ -57,7 +57,7 @@ function draw() {
   }
 }
 async function connect() { const r = await api('blender/refresh', {}); catalog = r.catalog; options(scene, catalog!.scenes.map(s => s.name)); chooseScene();cameraDetail(); el('connection').textContent = `${r.serverInfo.name} · ${catalog!.file || 'Unsaved file — save in Blender first'}`; el('status').textContent = 'Scene state refreshed.'; }
-async function reload() { const result = await api('project'); project = result.project; draw(); el('status').textContent = `Project restored · revision ${project.revision}`; }
+async function reload() { const result = await api('project'); project = result.project; draw(); const state=await api('generation');const recorded=state.jobs.find((j:{id:string;status:string;results?:unknown[]})=>j.id==='1c706a23-064a-4dcc-9f4e-2c6ec6ed8a3b'&&j.status==='completed'&&j.results?.length);el('recorded-comparison').hidden=!recorded;if(recorded)el('recorded-detail').textContent='Recorded Kling O1 run: rendered source, amber-glass result and saved visual review. The result is one frame longer; original timing remains visible. This link opens the saved job.';el('status').textContent = `Project restored · revision ${project.revision}`; }
 el('refresh').onclick = () => action(reload);
 el('connect').onclick = () => action(connect);
 el('save').onclick = () => action(async () => { const binding = { scene: scene.value, camera: camera.value, ...Object.fromEntries(['frame','start','end'].map(k => [k, Number(el<HTMLInputElement>(k).value)])) }; project = (await api('shots', { revision: project.revision, shotId: editingShotId, title: el<HTMLInputElement>('title').value, catalogToken: catalog?.token, binding })).project; draw(); editingShotId = undefined; el('save').textContent = 'Save shot'; el('cancel-binding').hidden = true; el('status').textContent = 'Shot saved. Ready to render.'; });

@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
+import { browserDelivery } from '../../shared/browser-delivery.mjs';
 
 export async function openProject(root) {
   await mkdir(join(root, 'renders'), { recursive: true });
@@ -47,5 +48,5 @@ export function validateBrowser(input) {
   const vector = (v, n) => Array.isArray(v) && v.length === n && v.every(x => Number.isFinite(x) && Math.abs(x) < 100000);
   const frame = f => f && Number.isFinite(f.t) && f.t >= 0 && f.t <= 61 && vector(f.p, 3) && vector(f.q, 4) && Math.abs(Math.hypot(...f.q) - 1) < 0.01 && Number.isFinite(f.mm) && f.mm >= 1 && f.mm <= 2000;
   if (!vector(input.subject, 3) || !frame(input.camera) || !Array.isArray(input.frames) || input.frames.length > 1500 || !input.frames.every((f, i) => frame(f) && (!i || f.t > input.frames[i - 1].t))) throw Error('Invalid browser camera recording');
-  return { subject: input.subject, camera: input.camera, frames: input.frames, sceneVersion: 1 };
+  return { subject: input.subject, camera: input.camera, frames: input.frames, sceneVersion: 1, ...(input.delivery ? { delivery: browserDelivery(input.delivery) } : {}) };
 }

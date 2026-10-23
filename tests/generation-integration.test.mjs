@@ -127,7 +127,7 @@ function deferred() {
   let resolve; const promise = new Promise(done => { resolve = done; });
   return { promise, resolve };
 }
-async function browserFixture(h, { intercept } = {}) {
+async function browserFixture(h, { intercept, search = '?shot=shot' } = {}) {
   const elements = new Map(), createElement = tag => tag === 'select' ? new Select() : new Element(tag);
   // Use the actual page IDs, initial field values and disabled/hidden states.
   for (const [, tag, attributes, id] of html.matchAll(/<(\w+)\b([^>]*\bid="([^"]+)"[^>]*)>/g)) {
@@ -158,11 +158,11 @@ async function browserFixture(h, { intercept } = {}) {
   runInNewContext(compiled, {
     exports: {}, require(name) { assert.equal(name, './previs.css'); },
     document: { getElementById: el, createElement, createTextNode: text => Object.assign(new Element('text'), { textContent: text }) },
-    HTMLSelectElement: Select, location: { search: '?shot=shot' }, URLSearchParams,
+    HTMLSelectElement: Select, location: { search }, URLSearchParams,
     crypto: { randomUUID }, fetch,
   }, { filename: 'previs-generation.simulation.cjs' });
   await new Promise(resolve => setImmediate(resolve));
-  assert.match(el('status').textContent, /^Project revision/);
+  assert.match(el('status').textContent, search.includes('job=missing')?/This saved comparison is not in the open project/:/^Project revision/);
   el('workflow').change(h.workflow.id);
   const role = name => descendants(el('asset-bindings')).find(e => e.attributes['aria-label'] === name + ' asset');
   role('firstFrame').change('render:' + h.image.id);
@@ -463,4 +463,11 @@ test('simulation: prompt maximum accepts the boundary and rejects an overlong pr
   const overlong = await h.bind({ prompt: '123456' });
   await assert.rejects(h.route('quote', overlong), /Prompt exceeds workflow maximum length/);
   assert.equal(h.state.calls.length, calls); assert.equal(h.state.uploads.length, 0); assert.equal(h.state.submissions.length, 0);
+});
+
+
+test('simulation: absent private comparison gives a recovery instruction rather than selecting a QA result',async t=>{
+  const h=await fixture(t),ui=await browserFixture(h,{search:'?shot=shot&job=missing'});
+  assert.match(ui.el('status').textContent,/complete project folder/);
+  assert.equal(ui.el('comparison-empty').hidden,false);assert.equal(ui.el('submit').disabled,true);
 });

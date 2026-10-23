@@ -1,5 +1,6 @@
 import { createFrameStage, writeFrame, encodeFrames, saveVideoAsset, releaseFrameStage, videoReadiness } from './video.mjs';
 import { animationCode } from './video-blender.mjs';
+import { browserVideoPlan } from '../../shared/browser-delivery.mjs';
 
 export function videoRoutes({ data, project, blender, operations, refreshBlender }) {
   const browserStages = new Map();
@@ -39,11 +40,12 @@ export function videoRoutes({ data, project, blender, operations, refreshBlender
       const p = project.get(), shot = p.shots.find(s => s.id === input.shotId);
       if (input.revision !== p.revision) throw Error('Project changed. Reopen the saved browser shot.');
       if (shot?.binding.source !== 'three' || !shot.browser?.frames?.length) throw Error('Choose a saved browser recording');
-      const duration = shot.browser.frames.at(-1).t, expectedCount = Math.floor(duration * Number(input.fps)) + 1;
-      if (input.frameCount !== expectedCount) throw Error('Frame count must sample the complete saved motion on the selected FPS grid');
+      const plan = browserVideoPlan(shot.browser.frames, shot.browser.delivery);
+      if (input.frameCount !== plan.frameCount) throw Error('Frame count must sample the complete saved motion on the selected FPS grid');
+      if (['width','height','fps'].some(key => input[key] !== plan[key])) throw Error('Delivery differs from the saved shot. Save a new shot with the selected delivery settings before exporting.');
       const stage = await createFrameStage(input);
       browserStages.set(stage.id,{stage,shot,revision:p.revision,touched:Date.now()});
-      return {stage:{id:stage.id,width:stage.width,height:stage.height,fps:stage.fps,frameCount:stage.frameCount,duration:stage.duration,recordedDuration:duration,sampledEndTime:(stage.frameCount-1)/stage.fps}};
+      return {stage:{id:stage.id,...plan}};
     }
     if (path.startsWith('/api/video/browser/')) {
       const record = browserStages.get(input.stageId);
@@ -53,7 +55,7 @@ export function videoRoutes({ data, project, blender, operations, refreshBlender
       if (path.endsWith('/finish')) {
         try {
         const {file,metadata}=await encodeFrames(stage);
-        const result=await saveVideoAsset({root:data,project,revision,shotId:shot.id,file,metadata,binding:shot.binding,provenance:{browserSnapshot:shot.browser,sceneVersion:shot.browser.sceneVersion,pass:'beauty',recordedDuration:shot.browser.frames.at(-1).t,sampledEndTime:(stage.frameCount-1)/stage.fps,sampling:'fixed-time saved-motion interpolation; no real-time recording'}});
+        const result=await saveVideoAsset({root:data,project,revision,shotId:shot.id,file,metadata,binding:shot.binding,provenance:{browserSnapshot:shot.browser,sceneVersion:shot.browser.sceneVersion,delivery:browserVideoPlan(shot.browser.frames,shot.browser.delivery),renderer:'Three.js native-resolution render',pass:'beauty',recordedDuration:shot.browser.frames.at(-1).t,sampledEndTime:(stage.frameCount-1)/stage.fps,sampling:'fixed-time saved-motion interpolation; no real-time recording'}});
         return result;
         } finally { release(stage.id); }
       }

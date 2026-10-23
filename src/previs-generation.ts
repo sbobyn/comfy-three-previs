@@ -22,16 +22,16 @@ function showSource(updateBindings = true) {
   if(updateBindings)renderBindings();invalidate();
 }
 function syncPrimarySource(){const value=(roles.sourceVideo||roles.controlVideo)?.value;if(value?.startsWith('asset:')&&Array.from(select('asset').options).some(o=>o.value===value.slice(6))){select('asset').value=value.slice(6);showSource(false);}}
-function showRenderTiming(){const s=pickedShot();if(!s)return;const count=s.binding.end-s.binding.start+1;el('render-timing').textContent=`${count} selected source frames → ${(count/Number(field('fps').value)).toFixed(3)} s at chosen output FPS. Rebind exact scene/camera/range from Shots.`;}
+function showRenderTiming(){const s=pickedShot();if(!s)return;const count=s.binding.end-s.binding.start+1;el('render-timing').textContent=s.binding.source==='three'?`Browser shot: open the saved camera studio to render its recorded motion at the saved delivery settings. Choose the exact exported version below.`:`${count} selected source frames → ${(count/Number(field('fps').value)).toFixed(3)} s at chosen output FPS. Rebind exact scene/camera/range from Shots.`;}
 function showShot() {
   const s=pickedShot();if(!s)return;
   el('shot-detail').textContent=`Current shot · ${s.title}. ${ownership(s.binding,s.browser)}. Blender-authored content stays in Blender; browser shots use the camera-study set.`;
   el('framing').hidden=true;el('framing').removeAttribute('src');
   showRenderTiming();
   el<HTMLButtonElement>('render-video').disabled=s.binding.source!=='blender';el<HTMLButtonElement>('preview').disabled=s.binding.source!=='blender';
-  const previous=select('asset').value;
+  const previous=select('asset').value||new URLSearchParams(location.search).get('asset');
   select('asset').replaceChildren(...(project.assets||[]).filter((a:Data)=>a.shotId===s.id&&a.kind==='video').map((a:Data)=>option(a.id,`Version ${a.version} · ${a.source} · ${a.duration}s · ${a.width}×${a.height} · ${a.id.slice(0,8)}`)));
-  if(Array.from(select('asset').options).some(o=>o.value===previous))select('asset').value=previous;showSource();
+  if(previous&&Array.from(select('asset').options).some(o=>o.value===previous))select('asset').value=previous;showSource();
 }
 function allDefinitions():Data[] {return [...(state?.presets||[]),...(project?.workflowDefinitions||[])];}
 function workflowPicker() {
@@ -112,7 +112,7 @@ async function ensurePreset() {
   if(!project.workflowDefinitions?.some((d:Data)=>d.id===definition!.id)){const saved=await api('generation/preset',{revision:project.revision,definition});project=saved.project;definition=saved.definition;select('workflow').append(option(definition!.id,`${definition!.title||definition!.id} · saved preset ${definition!.id.slice(0,8)}`));select('workflow').value=definition!.id;}
 }
 function submitReady(){el<HTMLButtonElement>('submit').disabled=!prepared?.validation?.compatible||!field('approve').checked||(!(prepared.quote.status==='known'&&prepared.quote.amount===0)&&!state.paidExecutionEnabled);}
-async function reload(){const r=await api('project');project=r.project;state=await api('generation');const selected=select('shot').value||new URLSearchParams(location.search).get('shot');select('shot').replaceChildren(...project.shots.map((s:Data)=>option(s.id,s.title)));if(selected)select('shot').value=selected;showShot();workflowPicker();drawJobs();const restored=state.jobs.find((j:Data)=>j.id===(reviewedJob?.id||new URLSearchParams(location.search).get('job'))&&j.results?.length);if(restored)compareJob(restored);el('status').textContent=`Project revision ${project.revision} · original assets retained`;}
+async function reload(){const r=await api('project');project=r.project;state=await api('generation');const query=new URLSearchParams(location.search),selected=select('shot').value||query.get('shot');select('shot').replaceChildren(...project.shots.map((s:Data)=>option(s.id,s.title)));if(selected)select('shot').value=selected;showShot();workflowPicker();drawJobs();const requestedJob=reviewedJob?.id||query.get('job'),restored=state.jobs.find((j:Data)=>j.id===requestedJob&&j.results?.length);if(restored)compareJob(restored);el('status').textContent=requestedJob&&!state.jobs.some((j:Data)=>j.id===requestedJob)?'This saved comparison is not in the open project. Open its complete project folder, including assets and generation receipts; your current shots remain available.':`Project revision ${project.revision} · original assets retained`;}
 function drawJobs(){el('jobs').replaceChildren();for(const job of state.jobs||[]){
   const box=document.createElement('article'),p=document.createElement('p'),message=document.createElement('p');p.textContent=`${job.definition.title||job.definition.id} · ${job.backend.kind} · ${job.status} · request revision ${job.requestRevision} · ${job.id}`;message.textContent=`${job.message||''}${job.failure?' · '+job.failure.phase+': '+(job.failure.message||'Inspect backend and track this identity'):''} · Backend job: ${job.promptId||'not known'}`;box.append(p,message);
   const track=document.createElement('button');track.textContent='Track exact job';track.onclick=()=>action(async()=>{const r=await api('generation/track',{jobId:job.id});await reload();el('status').textContent=r.job.message||r.job.status;});if(!['failed','closed'].includes(job.status))box.append(track);
@@ -160,7 +160,7 @@ el('prepare').onclick=()=>action(async()=>{
   const priced=definition!.pricing?.ratePerSecond&&pricedNode?.model_name==='kling-video-o1'&&pricedNode?.resolution==='720p';
   const pricedSource=prepared!.sources.sourceVideo;
   const estimate=priced&&pricedSource?`\nBound source v${pricedSource.version}: ${describe(pricedSource)}.\nPublished partner estimate: $${(definition!.pricing.ratePerSecond*pricedSource.duration).toFixed(3)} USD (${definition!.pricing.ratePerSecond}/s at 720p); ${(definition!.pricing.creditsPerSecond*pricedSource.duration).toFixed(2)} Comfy credits. Cloud overhead/credit conversion unknown. This is not a total or provider spending cap.`:definition!.pricing?.ratePerSecond?'\nThe published estimate does not cover these model/resolution settings. Obtain a new quote.':'';
-  el('quote').textContent=`${prepared!.validation.compatible?'Schema compatible':'Unavailable requirements'}\n${prepared!.validation.issues.map((i:Data)=>i.message).join('\n')}\nCost: ${prepared!.quote.status==='known'?'$'+prepared!.quote.amount+' USD': 'unknown total — quote approval required'}\n${prepared!.quote.reason}${estimate}\nApproval fingerprint: ${prepared!.fingerprint}`;
+  el('quote').textContent=`${prepared!.validation.compatible?'Schema compatible':'Unavailable requirements'}\n${prepared!.validation.issues.map((i:Data)=>i.message+(i.value!==undefined?' · Required: '+JSON.stringify(i.value):'')).join('\n')}\nCost: ${prepared!.quote.status==='known'?'$'+prepared!.quote.amount+' USD': 'unknown total — quote approval required'}\n${prepared!.quote.reason}${estimate}\nApproval fingerprint: ${prepared!.fingerprint}`;
   el('request').textContent=JSON.stringify(prepared,null,2);state=await api('generation');drawJobs();submitReady();el('status').textContent='Prepared exact request. Nothing submitted.';
 });
 field('accept-timing').onchange=invalidate;

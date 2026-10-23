@@ -98,6 +98,7 @@ function buildSet(scene: THREE.Scene): void {
 
 export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement): Studio {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  let captureRenderer: THREE.WebGLRenderer | undefined;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setScissorTest(true);
   renderer.setClearColor(0x07070a);
@@ -230,15 +231,15 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     subjectPosition: () => scene.getObjectByName("previs-subject")!.position.toArray(),
     setSubjectPosition: (position: number[]) => { scene.getObjectByName("previs-subject")!.position.fromArray(position); },
     capture: (width = 640, height = 360) => {
-      const capture = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+      const capture = captureRenderer ||= new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+      capture.setPixelRatio(1);
       capture.setSize(width, height);
+      if (capture.domElement.width !== width || capture.domElement.height !== height) throw Error('The browser could not allocate the requested render resolution.');
       const camera = pov.clone();
       camera.aspect = width / height;
       camera.setFocalLength(focalLength);
       capture.render(scene, camera);
       const png = capture.domElement.toDataURL("image/png");
-      capture.dispose();
-      capture.forceContextLoss();
       return png;
     },
     pov,
@@ -264,6 +265,8 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     dispose: () => {
       window.removeEventListener("resize", resize);
       controls.dispose();
+      captureRenderer?.dispose();
+      captureRenderer?.forceContextLoss();
       renderer.dispose();
     },
   };

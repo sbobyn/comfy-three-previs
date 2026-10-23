@@ -16,9 +16,9 @@ const camera = { t: 0, p: [0, 1, 4], q: [0, 0, 0, 1], mm: 35 };
 const browser = { camera, frames: [camera, { ...camera, t: 1 / 24, p: [2, 3, 0] }], subject: [1, 2, -11], sceneVersion: 1 };
 const browserBinding = { source: 'three', scene: 'Camera study', camera: 'Operated camera', fps: 24, start: 0, end: 1, frame: 0 };
 const blenderBinding = { source: 'blender', file: '/simulation.blend', scene: 'Target', camera: 'Selected', start: 1, end: 2, frame: 1, fps: 24 };
-const options = { width: 16, height: 16, fps: 24, frameCount: 2 };
+const options = { width: 640, height: 360, fps: 24, frameCount: 2 };
 
-function png() {
+function png(width=options.width,height=options.height) {
   const chunk = (name, bytes) => {
     const body = Buffer.concat([Buffer.from(name), bytes]);
     let crc = 0xffffffff;
@@ -30,9 +30,9 @@ function png() {
     size.writeUInt32BE(bytes.length); checksum.writeUInt32BE((crc ^ 0xffffffff) >>> 0);
     return Buffer.concat([size, body, checksum]);
   };
-  const header = Buffer.alloc(13), rows = Buffer.alloc(16 * 49, 60);
-  header.writeUInt32BE(16); header.writeUInt32BE(16, 4); header[8] = 8; header[9] = 2;
-  for (let y = 0; y < 16; y++) rows[y * 49] = 0;
+  const header = Buffer.alloc(13), stride=width*3+1,rows = Buffer.alloc(height * stride, 60);
+  header.writeUInt32BE(width); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = 2;
+  for (let y = 0; y < height; y++) rows[y * stride] = 0;
   return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', header), chunk('IDAT', deflateSync(rows)), chunk('IEND', Buffer.alloc(0))]);
 }
 const frame = png(), encodedPng = frame.toString('base64');
@@ -206,8 +206,9 @@ test('simulation: browser abort and expiry never release an uncertain Blender st
     for (const browserStage of browsers) await h.abort(browserStage);
   }
   // A delayed simulated Blender writer still owns its capability after expiry.
-  await writeFrame({ directory: stage.directory, index: 0, bytes: frame });
-  assert.deepEqual(await readFile(join(stage.directory, 'frame-000000.png')), frame);
+  const blenderFrame=png(16,16);
+  await writeFrame({ directory: stage.directory, index: 0, bytes: blenderFrame });
+  assert.deepEqual(await readFile(join(stage.directory, 'frame-000000.png')), blenderFrame);
   assert.equal(executed, 1); assert.equal(operation.status, 'uncertain');
   assert.deepEqual(h.project.get().assets, []);
 });
