@@ -1,14 +1,12 @@
-# Real-app walkthrough and hero-video outline
+# First-use walkthrough · 23 October
 
-Target 60–90 seconds. Use only the disposable project and distinguish rendered input, native processing and the collected Kling AI result. Replay the existing receipts and assets; recording this demo does not authorize another submission.
+Target40–60seconds, real Chrome UI. All work uses the disposable review-project copy. No provider upload, submission, paid footage or inference rerun.
 
-1. Direct the camera in the browser camera-study set, move the subject, record a short take and save. Reopen and replay it. Label “Browser camera recording”.
-2. Inspect Blender through actual MCP. Show the authoritative scene, camera, range and source FPS. Preview framing, render animation, show the verified versioned clip. Label “Blender rendered input —72 frames,24fps,3seconds”.
-3. Show separate Task / Workflow / Backend choices, the saved imported SD1.5 graph, exact source binding, installed checkpoint and sampler settings. Inspect local schemas, then open the already completed local result. Label “Local AI — framewise SD1.5; temporal quality rejected”. Do not submit again.
-4. Show aligned source/result playback, dimensions, FPS, frame count, duration and audio. Save review of the selected output.
-5. Show the saved Kling full-video edit request, authenticated Cloud compatibility, exact prompt/settings and its one-request approval. Distinguish the $0.378 partner estimate, $1 local allowance and ~$0.419934 billed workspace usage; exact-job attribution/finality remains unverified. Label “Kling O1 —one approved Cloud generation”. Do not click Run.
-6. Show the collected amber-glass output beside its rendered input and the saved review. Broad camera motion/parallax follows the source; orb proportions, ring/pedestal detail and lighting change. Show the explicit73-versus72-frame difference (3.041667 versus3.000seconds), with unchanged24fps/1280×720/no audio. Label “Original timing difference retained”. The reviewed result is asset `7416f999-83a6-40a7-916d-cb096b61415a` from job `1c706a23-064a-4dcc-9f4e-2c6ec6ed8a3b`.
+1. Workspace: show Browser first / Existing Blender / Recorded comparison as separate starting routes.
+2. Start the three-second dolly, show720p/16:9/24fps/72frames/3seconds. Replay the actual camera motion; save and reopen the new shot.
+3. Export directly at1280×720. Show saved delivery and the exact captured asset. Report observed export time separately from this edited recording.
+4. Open that exact video in workflows; show task, Kling preset and Cloud separately, prompt, live compatibility and prepared source/estimate. Stop before upload/submission.
+5. Open the retained Kling comparison, play original source/result, show one-frame timing difference and restored notes. Label “Recorded Cloud result — no new generation”.
+6. Optionally show earlier local SD1.5 notes: “Framewise AI — temporal quality rejected”. Blender closed is a supported review state; do not simulate a live render.
 
-A [52-second real Chrome walkthrough](../.evidence/review-20261022/previs-hands-on-walkthrough.mp4) now shows browser direction/save/reopen/replay/export, actual Blender inspection and preview rendering, settings and the retained local/Cloud comparisons. It uses actual tab screenshots encoded locally, with idle gaps shortened; it is not a runtime/performance benchmark. T3 recording timed out twice; native app recording lacked permission. No paid footage was rerun. The original three-second Blender source and73-frame Kling output remain untouched.
-
-Hero edit: open with the camera move, cut to the saved shot and source clip, then the labeled Cloud input/result comparison. Present the local framewise example as a candid qualification limit, not launch-quality video. [Review pack](review-pack.md) contains the current release boundaries and user review route. Hold feature expansion for feedback.
+[Updated recording](../.evidence/first-use-20261023/first-use-walkthrough.mp4) uses actual tab screenshots encoded with FFmpeg and shortened idle gaps; it is not a runtime benchmark. [Earlier52-second walkthrough](../.evidence/review-20261022/previs-hands-on-walkthrough.mp4) separately documents the original actual Blender inspection/rendering and saved AI results. [Review pack](review-pack.md) lists exact IDs, qualification limits and final gates. Aesthetic redesign and creative starter expansion await hands-on feedback.

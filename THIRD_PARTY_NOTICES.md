@@ -30,6 +30,8 @@ The three-vcam baseline b37ebb01d1232165f48a718673f9d6b4cf2836be contains no tra
 - `tsconfig.json`
 - `vite.config.ts`
 
+**Precise owner question before distribution:** Steven, are the inherited portions of all 23 baseline paths above wholly yours to grant under MIT? If any portion originated elsewhere, identify its upstream source, author and applicable license/permission so the correct grant and attribution can be retained. Git authorship alone does not answer this question.
+
 The original README is retained in docs/three-vcam-history.md with the same provenance caveat. No Otter/FSL code was copied into this standalone project. No Story Studio files were copied. Generated user projects, imported workflows/models/LoRAs, and media are not automatically licensed under this project's MIT grant.
 
 ## Dependencies and external programs

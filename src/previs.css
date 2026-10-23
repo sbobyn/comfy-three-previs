@@ -12,4 +12,7 @@ pre { overflow-wrap: anywhere; font-size: 12px; }
 #mapping { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
 .generation .layout{grid-template-columns:repeat(2,minmax(0,1fr))}
+.layout.starters{grid-template-columns:repeat(3,minmax(0,1fr))}
+.starters a{display:inline-block;max-width:100%}
 @media(max-width:900px){.generation .layout{grid-template-columns:1fr}}
+@media(max-width:900px){.layout.starters{grid-template-columns:1fr}}

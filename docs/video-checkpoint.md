@@ -1,6 +1,6 @@
 # Video workflow checkpoint — private candidate
 
-The standalone app is the product; Otter remains a separate possible consumer. Candidate: `candidate/standalone-previs-video-20261022`, integrating topic `feat/previs-video-workflows` from standalone baseline `0ad0cde`. MIT applies to original Previs code; see THIRD_PARTY_NOTICES.md for inherited ownership exceptions. One separately approved paid Cloud request completed. No push, publication or new model download has occurred.
+The standalone app is the product; Otter remains a separate possible consumer. Current first-use candidate: `candidate/standalone-previs-first-use-20261023`, extending preserved review baseline `candidate/standalone-previs-video-20261022` at `1d08fd0`. MIT applies to original Previs code; see THIRD_PARTY_NOTICES.md for inherited ownership exceptions. One separately approved paid Cloud request completed. No push, publication or new model download has occurred.
 
 ## Release requirement and current state
 
@@ -9,7 +9,7 @@ Release requires camera-controlled rendered video → real AI video workflow →
 | Capability | Evidence | Remaining boundary |
 | --- | --- | --- |
 | Blender animation through actual upstream MCP | Real disposable Blender scene,72frames,1280×720,24fps,3.000seconds,silent H.264; original file hash unchanged | Bounded beauty capture only, source file never saved |
-| Browser save/reopen/replay/export | Real Chrome UI operated take; two immutable18-frame640×360,24fps exports have identical hashes and saved snapshot provenance | Fixed camera-study set;0.734s recording samples through0.70833s, encoded0.750s; endpoint quantization displayed |
+| Browser save/reopen/replay/export | Real Chrome short-move starter → saved/reopened720p delivery → native1280×720 export,72frames/24fps/3s → exact Kling request prepared | Fixed camera-study set; no upload/submission; manual off-grid sample timing disclosed; details in review pack |
 | Imported local video workflow | Actual LoadVideo→GetVideoComponents→ImageInvert→CreateVideo→SaveVideo, user-imported IDs101–105; completed and reviewed in app | Native inversion, **not AI generation**; no model registry addition |
 | Returned-media comparison | Real output1280×720,72frames,24fps,3s,silent; aligned playback and selected-output review | No stretching, trimming, interpolation or audio removal |
 | Imported LoRA chain/settings | UI import, live choices, changed strengths/filename, saved binding, reload/restore and prepared graph; author graph unchanged | Configuration proof only; disconnected test chain, no LoRA inference or base-model qualification |
@@ -21,7 +21,7 @@ Release requires camera-controlled rendered video → real AI video workflow →
 
 Browser and stdio MCP → one standalone HTTP server/project revision queue. Blender operations use actual pinned mcp-for-blender2.2.2 and fixed scripts, with a durable operation written before dispatch. Blender owns its authored file. Browser shots own saved camera-study snapshots. Both create immutable versioned assets consumed by capability definitions. Definitions/author graph, prepared clone, binding, source hashes, shot snapshot, backend/schema and quote live in durable generation receipts. Local and Cloud upload/dispatch/history/output adapters are separate. No graph or model changes occur on backend selection.
 
-One lead owns app5190, disposable Blender addon9887, browser and any shared Comfy jobs. Local8000 is an existing shared Comfy instance: inspect/coordinate its queue, never interrupt it. Tests use disposable data and simulated transports unless explicitly labeled real media encoding. Detailed current SHA, process IDs, data paths, commands and unresolved tasks are retained locally in `.evidence/video/CURRENT.md` (not committed). Keep original assets and all retained stages.
+One lead owns the first-use preview5193, browser and any authorized render work. The prior5190 review preview and library are preserved; this checkpoint does not start Blender or any AI inference. Local8000 is an existing shared Comfy instance: inspect/coordinate its queue, never interrupt it. Tests use disposable data and simulated transports unless explicitly labeled real media encoding. Detailed current SHA, process IDs, data paths, commands and unresolved tasks are retained locally in `.evidence/video/CURRENT.md` (not committed). Keep original assets and all retained stages.
 
 The held Otter branch `a48ffb8c` stays unmerged and unmodified; no cherry-pick or code reuse is agreed. Any future Otter consumption is through independent files only: a self-contained GLB or exact copied video plus a relative manifest, with hashes and immutable source bindings/revisions. Otter's proposed `otter-scene/1` and `otter-drop/1` contracts are not implemented Previs exporters. Imports must not require MCP, a Previs account or its server. Declare the supported snapshot subset and source versus output FPS; the original Blender file remains authoritative, with no lossless round-trip claim.
 

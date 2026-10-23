@@ -1,20 +1,20 @@
-# Hands-on review checkpoint · 22 October 2026
+# First-use review checkpoint · 23 October 2026
 
 Standalone Previs is ready for a private workflow review, **not a release-quality local temporal-video claim**. Feature expansion stops here for Steven's feedback. The preserved Kling run is never rerun by these review links. Paid execution remains disabled.
 
-Candidate: `candidate/standalone-previs-video-20261022`. Implementation through `87ce898`; the exact integrated SHA and final gate results are stamped in the local [checkpoint](../.evidence/review-20261022/checkpoint.json) after integration. Preview: **http://127.0.0.1:5190**. Keep the complete project directory and receipts together.
+Candidate: `candidate/standalone-previs-first-use-20261023`, extending preserved `candidate/standalone-previs-video-20261022` at `1d08fd0`. The exact integrated SHA, final gates and process ownership are stamped in the local [checkpoint](../.evidence/first-use-20261023/checkpoint.json). Preview: **http://127.0.0.1:5193**. It opens a disposable full-library copy; the original seven assets, three reviews and receipts remain unchanged. Parent and scoped agents used **GPT-6.1 Sol High**. No AI dispatch, provider upload, weights download or billing poll ran tonight.
 
 ## Five-minute review route
 
-1. Open the [saved Kling comparison](http://127.0.0.1:5190/generation.html?job=1c706a23-064a-4dcc-9f4e-2c6ec6ed8a3b). Scroll to Jobs & comparison, play both, and inspect the saved prompt, request settings and review. At 3.02 seconds, the source explicitly ends at 3.000 while the result continues. Downloads preserve original bytes.
-2. Open the [local AI comparison](http://127.0.0.1:5190/generation.html?job=7f8725a2-88ce-46c2-acfb-71cc0cddf54b). This is genuine SD1.5 inference on every source frame. Its review explicitly rejects appearance/temporal quality; it is not a temporal video model. Reload to confirm the saved review returns.
-3. Open the [new saved browser dolly](http://127.0.0.1:5190/index.html?shot=8869111c-53a4-4181-9529-1fc53fb7e870). Replay and scrub. For a new take, move the subject, operate a camera move for 3–4 seconds, save a new shot, reopen and export. Browser exports are 640×360, 16:9, 24 fps, at most 120 frames; format guides do not change delivery framing.
-4. In [Shots & Blender](http://127.0.0.1:5190/), connect/refresh and inspect `Previs Video Study / Study Camera`, 40 mm at inspected frame 1, frames 1–72 at 24 fps. Blender remains authoritative. A new preview was rendered during this checkpoint; the original three-second video remains version 1. Historical video lenses are honestly labeled unavailable; new animation captures record lenses per frame.
-5. In Video workflows, choose Task, Workflow and Backend separately. The saved SD1.5 preset restores the original settings; Advanced exposes mappings and the untouched graph. Inspecting local or Cloud schemas does not submit. Do not click Run for another demonstration.
+1. Open the [workspace](http://127.0.0.1:5193/) and choose **Start a three-second dolly**. Replay the unsaved 72-pose sequence. The starting delivery is1280×720,16:9,24fps,3.000seconds; the lightweight option remains640×360. Save a new shot, reopen and check delivery settings. Export renders directly at the selected resolution. [Clean setup and the three starting routes](first-use.md) work without private media or Blender.
+2. Open [tonight's exact browser capture](http://127.0.0.1:5193/generation.html?shot=de791bb0-2584-4b1d-9214-25527a0cb7bb&asset=3f51c51b-c1ab-4b31-bdf4-54ac572f7447). Asset `3f51c51b-c1ab-4b31-bdf4-54ac572f7447`, SHA256 `5792147916d0fb9cbc3ac835f7041d03ae7971c93b44b96ba405e7dce0e40bac`, is72frames/24fps/3s/silent1280×720. It took **1.1seconds** to render/upload locally/encode on this Chrome/Mac, not a portable performance guarantee. First/middle/last native PNGs and actual playback show steady knot framing and changing landmark parallax. Metadata alone did not establish this finding. [Native motion samples](../.evidence/first-use-20261023/browser-native-motion-contact.png) are shown at50%; original720pPNGs are retained.
+3. Choose Task / Workflow / Backend separately. Tonight's Kling request `630ca5a4-7d07-4e86-a1a2-a0c5a1d0ff74` passed live Cloud schema validation and stopped **quoted**, with no upload/dispatch. Its source hash, player, timing and$0.378partner-estimate basis agree. [Prepared evidence](../.evidence/first-use-20261023/browser-kling-prepared-proof.json) and [UI proof](../.evidence/first-use-20261023/browser-kling-prepared.jpg) retain that checkpoint. Loading saved shot settings restores the mapped prompt/parameters; a page reload requires a fresh preparation before any approval. Do not run a new generation for this review.
+4. Open the [recorded Kling comparison](http://127.0.0.1:5193/generation.html?job=1c706a23-064a-4dcc-9f4e-2c6ec6ed8a3b). Play, seek to3.02s and inspect the restored review: source ends3.000s while result continues to3.041667s. Original bytes remain downloadable. This is private saved review material, not a bundled clean-install template. No user's project or QA probe is selected as the showcase by title/order.
+5. Open the [quality-rejected local AI comparison](http://127.0.0.1:5193/generation.html?job=7f8725a2-88ce-46c2-acfb-71cc0cddf54b). All72frames underwent SD1.5 inference in the earlier run; it remains a framewise test, not temporal qualification. Blender is not needed for any saved comparison. For new Blender work, open your own scene and use the explicit Blender-first route. Camera-only transfer still omits geometry.
 
-[52-second real-app walkthrough](../.evidence/review-20261022/previs-hands-on-walkthrough.mp4) · [comparison screenshot](../.evidence/review-20261022/review-ready-cloud-comparison.jpg) · [local paired samples](../.evidence/review-20261022/local-source-result-samples.png).
+[Updated short Chrome walkthrough](../.evidence/first-use-20261023/first-use-walkthrough.mp4) · [720p export screenshot](../.evidence/first-use-20261023/browser-720p-export.jpg) · [earlier complete walkthrough](../.evidence/review-20261022/previs-hands-on-walkthrough.mp4).
 
-Recording method: actual Chrome tab screenshot frames encoded locally with FFmpeg; idle gaps shortened. It shows browser direction/save/reopen/replay/export, actual Blender inspection and preview rendering, saved settings and existing local/Cloud comparisons. It is an edited UI recording, not an inference-runtime or playback-performance benchmark. No new paid footage. T3 recording previously timed out twice; native app recording lacked permission. Source and result assets themselves are unedited.
+Recordings use actual Chrome screenshot frames encoded locally, with idle gaps shortened. They are edited UI demonstrations, not export/inference benchmarks. T3 snapshot timed out twice again, so Chrome was used. The source clips/results remain unedited. Tonight did not perform Blender or AI inference. The prior scene file may be absent or Blender closed; saved media remains available and reconnect instructions explain how to resume live work.
 
 ## Workflow and architecture
 
@@ -22,7 +22,7 @@ Recording method: actual Chrome tab screenshot frames encoded locally with FFmpe
 flowchart LR
   B[Blender-owned scene] --> M[Actual Blender MCP]
   M --> R[Bound camera and range render]
-  T[Browser camera-study snapshot] --> E[Recorded motion export]
+  T[Browser camera-study snapshot + saved delivery] --> E[Native360p or720p motion render]
   R --> A[Immutable versioned shot video]
   E --> A
   A --> W[Task + preset or imported API graph]
@@ -57,9 +57,9 @@ Blender-only works with existing scenes; browser-only requires no Blender; combi
 | Imported native video inversion, local | Live compatible | Native processing | Reviewed; transport/collection proof, not AI. |
 | Wan VACE 1.3B edge control | Cloud compatible; local missing 3 weights | None | No speed, quality or hardware qualification. Timing/framing disclosure follows actual settings. |
 | Imported LoRA chains | Preserved and prepared; missing filenames reported | No LoRA inference | Configuration/edit/reload proof only; no insertion or model substitution. |
-| Blender beauty animation / browser motion export | Bounded contracts | Real media captures | Original timing/provenance retained. Depth/pose passes deferred. |
+| Blender beauty animation / browser motion export | Bounded contracts | Earlier Blender captures; tonight native720p browser render and playback | Saved delivery,72-frame timing, exact source and revision persist. Depth/pose passes deferred. |
 
-Shipped authoring content: one browser set (movable blue torus knot, ground, pillars/landmarks), with Locked off, Pilot, straight dolly, arc dolly and crane choices. These are five camera modes in one set. Default 12–16-second paths exceed the five-second export limit: record a short segment. The sphere/ring Blender demo exists locally; it is not a shipped template picker. Built-in AI definitions are Kling and VACE; there is no built-in first-frame preset. Browser 360p exports do not satisfy Kling's declared 720-pixel minimum height. Phone/gamepad code is not hardware qualification.
+Shipped authoring content: one browser set (movable blue torus knot, ground, pillars/landmarks), with Locked off, Pilot, straight dolly, arc dolly and crane choices. These are five camera modes in one set. The new three-second dolly/crane sequences fit the export limit. Longer12–16-second controller-study paths remain available; record a shorter take for export. The sphere/ring Blender demo exists locally; it is not a shipped template picker. Built-in AI definitions are Kling and VACE; there is no built-in first-frame preset. Browser720p captures satisfy Kling's declared dimensions;360p remains a lightweight option that does not satisfy its minimum height. Phone/gamepad code is not hardware qualification.
 
 ## Local AI evidence and remaining dependency gap
 
@@ -75,7 +75,7 @@ The installed inventory contains SD1.5 and Qwen image/edit weights, not a suitab
 | `umt5_xxl_fp8_e4m3fn_scaled.safetensors` | 6,735,906,897 | `text_encoders/` |
 | `wan_2.1_vae.safetensors` | 253,815,318 | `vae/` |
 
-Total **11.30 GB / 10.52 GiB**, plus working outputs and possible download/cache duplication. Runtime, MPS support and peak memory for this exact graph remain unmeasured; weights alone are not a RAM estimate. No download is authorized. A genuine temporal control-video test remains a release blocker.
+Total **11.30 GB / 10.52 GiB**, plus working outputs and possible download/cache duplication. Runtime, MPS support and peak memory for this exact graph remain unmeasured; weights alone are not a RAM estimate. No download is authorized. A genuine temporal control-video test remains a release blocker. The [bounded49-frame proposal](local-temporal-test.md) provides exact graph/node/files, Mac uncertainties,~25GBworking/cache budget, operator stop conditions and separate approval requirements. Only read-only live schema/system checks ran tonight; the proposal reports exactly three missing weights.
 
 ## Kling billing and Cloud support
 
@@ -96,12 +96,12 @@ Temporary support decision for this private checkpoint: retain the existing v1 a
 
 MIT covers our original code; dependency notices remain. The specific unresolved distribution issue is inherited three-vcam material: 20 baseline commits attributed to `sbobyn`, no tracked baseline license. Authorship metadata is not ownership proof. Steven must confirm ownership of those portions or identify upstream grants. See [third-party notices](../THIRD_PARTY_NOTICES.md). Publication still needs separate approval.
 
-Final gates: `pnpm check`, `pnpm test`, `git diff --check`; clean committed checkout: `pnpm install --offline --frozen-lockfile`. Exact results and SHA are in the linked checkpoint. Tests are simulations except marked real FFmpeg tests; real Chrome/MCP/Comfy evidence is named separately above. UI and stdio MCP read the same project and job identities. No new paid execution or automatic retries.
+Final gates: `pnpm check`, `pnpm test`, `git diff --check`; clean committed checkout: `pnpm install --offline --frozen-lockfile`. Exact results and SHA are in the linked checkpoint. Tests are simulations except marked real FFmpeg tests; tonight’s real Chrome render/Cloud read-only validation is separate from earlier MCP/Comfy execution evidence. Independent correctness review of51a36ab reported noP1/P2, passed54relevant tests and two additional simulations. Baseline packaging passed72tests onNode25; final minimum-version gates run separately onNode22.23.2. UI and stdio MCP read the same project and job identities. No new paid execution or automatic retries.
 
 Three highest-impact polish candidates, pending hands-on feedback:
 
 1. A simpler shot-centered route between camera studio, render and comparison, with fewer long forms.
-2. Short browser move presets and selectable delivery resolution, with framing limits visible before recording.
+2. A calmer camera workbench that separates the main saved-shot transport from advanced controller-study controls, following Steven’s feedback.
 3. Compact workflow parameter groups and clearer job progress, keeping full imported graph controls in Advanced.
 
 Remaining release gates: qualified temporal local-video model/result; inherited ownership clearance; public Cloud compatibility/support decision and separate publication authorization. Exact Kling billing attribution remains an accounting follow-up, not a reason to rerun it.
