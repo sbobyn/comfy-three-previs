@@ -209,7 +209,7 @@ bindFlight("tilt", (v) => `${v.toFixed(0)}°`);
 // Keys are tracked rather than acted on directly, so several can be held at
 // once and a stuck key cannot survive the window losing focus.
 const typingInto = (target: EventTarget | null): boolean =>
-  target instanceof HTMLElement && ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName);
+  target instanceof HTMLElement && ["INPUT", "SELECT", "TEXTAREA", "BUTTON", "SUMMARY", "A"].includes(target.tagName);
 
 window.addEventListener("keydown", (event) => {
   if (typingInto(event.target)) return;
@@ -256,6 +256,7 @@ function setFocalTarget(mm: number, syncSlider: boolean): void {
   focalValue.textContent = `${mm} mm · ${horizontalFov(mm).toFixed(0)}°`;
   lensPresets.querySelectorAll<HTMLButtonElement>("button").forEach((preset) => {
     preset.classList.toggle("active", Number(preset.dataset.mm) === mm);
+    preset.setAttribute("aria-pressed", String(Number(preset.dataset.mm) === mm));
   });
   if (syncSlider) focalSlider.value = String(mmToSlider(mm));
 }

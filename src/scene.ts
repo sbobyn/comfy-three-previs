@@ -180,8 +180,13 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     setDollyProgress(0);
   };
 
+  const stage = canvas.parentElement!;
+  let renderedWidth = 0, renderedHeight = 0;
   const resize = (): void => {
-    renderer.setSize(window.innerWidth, window.innerHeight, false);
+    const { width, height } = stage.getBoundingClientRect();
+    if (width !== renderedWidth || height !== renderedHeight) {
+      renderer.setSize(width, height, false); renderedWidth = width; renderedHeight = height;
+    }
   };
   window.addEventListener("resize", resize);
   resize();
@@ -189,9 +194,9 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
   const render = (): void => {
     controls.update();
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const split = Math.round(width / 2);
+    resize();
+    const width = renderedWidth, height = renderedHeight;
+    const split = Math.round(worldPane.getBoundingClientRect().width);
 
     // Letterbox the camera view to the delivery format: composition judged at
     // the wrong aspect is composition judged for a different shot.
@@ -201,8 +206,7 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     const frameX = split + (paneWidth - frameWidth) / 2;
     const frameY = (height - frameHeight) / 2;
 
-    world.aspect = split / height;
-    world.updateProjectionMatrix();
+    if (split > 0) { world.aspect = split / height; world.updateProjectionMatrix(); }
     pov.aspect = frameWidth / frameHeight;
     pov.setFocalLength(focalLength);
     rawPov.aspect = pov.aspect;
@@ -214,9 +218,11 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
     povHelper.update();
     rawHelper.update();
 
-    renderer.setViewport(0, 0, split, height);
-    renderer.setScissor(0, 0, split, height);
-    renderer.render(scene, world);
+    if (split > 0) {
+      renderer.setViewport(0, 0, split, height);
+      renderer.setScissor(0, 0, split, height);
+      renderer.render(scene, world);
+    }
 
     renderer.setViewport(split, 0, paneWidth, height);
     renderer.setScissor(split, 0, paneWidth, height);

@@ -39,7 +39,7 @@ function draw() {
   el('shots').replaceChildren(); el('empty').hidden = project.shots.length > 0;
   for (const shot of project.shots) {
     const card = document.createElement('article'), title = document.createElement('h3'), detail = document.createElement('p'), button = document.createElement('button');
-    card.id = 'shot-' + shot.id; title.textContent = shot.title; detail.textContent = `${shot.binding.source==='blender'?'Blender-owned':'Browser-owned camera-study set'} · ${shot.binding.scene} / ${shot.binding.camera} · ${shot.binding.fps} fps · ${shot.binding.start}–${shot.binding.end} · preview ${shot.binding.frame}`;
+    card.id = 'shot-' + shot.id; card.dataset.source=shot.binding.source; detail.className='note'; title.textContent = shot.title; detail.textContent = `${shot.binding.source==='blender'?'Blender-owned':'Browser-owned camera-study set'} · ${shot.binding.scene} / ${shot.binding.camera} · ${shot.binding.fps} fps · ${shot.binding.start}–${shot.binding.end} · preview ${shot.binding.frame}`;
     button.dataset.blenderLive='true';button.textContent = 'Render & save preview'; button.onclick = () => action(async () => { el('status').textContent = 'Rendering through Blender MCP…'; project = (await api('render', { revision: project.revision, shotId: shot.id })).project; draw(); el('status').textContent = 'Preview saved against shot.'; });
     card.append(title, detail); if (shot.limitation) { const limit = document.createElement('p'); limit.textContent = shot.limitation; card.append(limit); }
     if (shot.binding.source === 'blender') {

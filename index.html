@@ -4,305 +4,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Comfy Previs · camera study</title>
-    <style>
-      :root {
-        color-scheme: dark;
-      }
-      html,
-      body {
-        margin: 0;
-        height: 100%;
-        background: #0e0e12;
-        overflow: hidden;
-        font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-        color: #e6e6f0;
-      }
-      #scene {
-        display: block;
-        width: 100%;
-        height: 100%;
-      }
-      /* Transparent hit region: OrbitControls must only claim the world half. */
-      #worldPane {
-        position: fixed;
-        inset: 0 50% 0 0;
-        z-index: 1;
-        cursor: grab;
-      }
-      #worldPane:active {
-        cursor: grabbing;
-      }
-      /* Only claims pointer events while the mouse is the aim source, so it
-         never sits in front of the camera view otherwise. */
-      #cameraPane {
-        position: fixed;
-        inset: 0 0 0 50%;
-        z-index: 1;
-        cursor: grab;
-        display: none;
-      }
-      #cameraPane.aiming {
-        display: block;
-      }
-      #cameraPane:active {
-        cursor: grabbing;
-      }
-      #seam {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 50%;
-        width: 1px;
-        background: #33334a;
-        z-index: 2;
-        pointer-events: none;
-      }
-      .viewLabel {
-        position: fixed;
-        bottom: 60px;
-        z-index: 2;
-        pointer-events: none;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        font-size: 11px;
-        color: #6e6e88;
-      }
-      #worldLabel {
-        left: 16px;
-      }
-      #cameraLabel {
-        left: calc(50% + 16px);
-      }
-      /* One scrolling column, so panels can never overlap each other as they
-         grow or the window gets shorter. */
-      #leftColumn {
-        position: fixed;
-        left: 16px;
-        top: 16px;
-        bottom: 84px;
-        width: 250px;
-        z-index: 3;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        overflow-y: auto;
-        scrollbar-width: thin;
-      }
-      .panel {
-        flex-shrink: 0;
-        padding: 14px 16px;
-        background: rgba(18, 18, 26, 0.85);
-        border: 1px solid #2c2c40;
-        border-radius: 10px;
-        backdrop-filter: blur(8px);
-      }
-      h1 {
-        margin: 0 0 10px;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #9a9ab0;
-      }
-      h2 {
-        margin: 14px 0 6px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #e6e6f0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      h2:first-of-type {
-        margin-top: 2px;
-      }
-      dl {
-        margin: 0;
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 4px 16px;
-        font-variant-numeric: tabular-nums;
-      }
-      dt {
-        color: #9a9ab0;
-      }
-      dd {
-        margin: 0;
-        text-align: right;
-      }
-      label.slider {
-        display: block;
-        margin: 8px 0;
-        color: #9a9ab0;
-      }
-      label.slider span {
-        float: right;
-        color: #e6e6f0;
-        font-variant-numeric: tabular-nums;
-      }
-      input[type="range"] {
-        width: 100%;
-        margin: 3px 0 0;
-        accent-color: #4f8cff;
-      }
-      input[type="checkbox"] {
-        accent-color: #4f8cff;
-      }
-      button {
-        padding: 7px;
-        font: inherit;
-        color: #e6e6f0;
-        background: #26263a;
-        border: 1px solid #3a3a52;
-        border-radius: 8px;
-      }
-      button:disabled {
-        opacity: 0.4;
-      }
-      .row {
-        display: flex;
-        gap: 8px;
-        margin-top: 9px;
-      }
-      .row button {
-        flex: 1;
-      }
-      #hud button {
-        width: 100%;
-        margin-top: 10px;
-      }
-      .presets {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 4px;
-      }
-      .presets button {
-        padding: 6px 0;
-        font-size: 12px;
-      }
-      .presets button.active {
-        background: #2f4a86;
-        border-color: #4f8cff;
-      }
-      #aimPanel select {
-        width: 100%;
-        margin-top: 4px;
-        padding: 6px 8px;
-        font: inherit;
-        color: #e6e6f0;
-        background: #26263a;
-        border: 1px solid #3a3a52;
-        border-radius: 8px;
-      }
-      #lens select {
-        width: 100%;
-        margin-top: 4px;
-        padding: 6px 8px;
-        font: inherit;
-        color: #e6e6f0;
-        background: #26263a;
-        border: 1px solid #3a3a52;
-        border-radius: 8px;
-      }
-      .legend {
-        margin-top: 10px;
-        color: #6e6e88;
-      }
-      .swatch {
-        display: inline-block;
-        width: 9px;
-        height: 9px;
-        margin-right: 6px;
-        border-radius: 2px;
-      }
-      #transport {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 4;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 9px 16px;
-        background: rgba(14, 14, 18, 0.94);
-        border-top: 1px solid #2c2c40;
-        backdrop-filter: blur(8px);
-      }
-      select {
-        padding: 7px 8px;
-        font: inherit;
-        color: #e6e6f0;
-        background: #26263a;
-        border: 1px solid #3a3a52;
-        border-radius: 8px;
-      }
-      #shotPlay {
-        min-width: 74px;
-      }
-      #scrub {
-        flex: 1;
-        min-width: 120px;
-      }
-      #transport label {
-        color: #9a9ab0;
-        white-space: nowrap;
-      }
-      #transport .value {
-        color: #e6e6f0;
-        font-variant-numeric: tabular-nums;
-      }
-      #hint {
-        margin-left: auto;
-        color: #6e6e88;
-        white-space: nowrap;
-      }
-      #hint a {
-        color: #4f8cff;
-      }
-    </style>
+    <link rel="stylesheet" href="/src/previs.css" />
+    <link rel="stylesheet" href="/src/previs-camera.css" />
   </head>
-  <body>
+  <body class="camera-studio">
+    <header class="studio-header"><div><small>PREVIS / CAMERA STUDIO</small><h1>Frame a shot</h1></div><p class="owner-badge">Browser scene · camera-study set</p><nav><a href="/">Scenes & shots</a><a href="/generation.html">Video workflows</a><a href="/setup.html">Setup</a></nav></header>
+    <div id="studio-stage">
     <canvas id="scene"></canvas>
     <div id="worldPane"></div>
     <div id="cameraPane"></div>
     <div id="seam"></div>
     <div class="viewLabel" id="worldLabel">world · drag to orbit</div>
-    <div class="viewLabel" id="cameraLabel">camera</div>
+    <div class="viewLabel" id="cameraLabel">Camera · framing guide</div>
 
-    <div id="leftColumn">
-    <div class="panel" id="hud">
-      <h1>vcam link</h1>
-      <dl>
-        <dt>source</dt>
-        <dd id="source">live</dd>
-        <dt>phone</dt>
-        <dd id="link">waiting</dd>
-        <dt>rate</dt>
-        <dd id="rate">—</dd>
-        <dt>latency</dt>
-        <dd id="latency">—</dd>
-        <dt>jitter</dt>
-        <dd id="jitter">—</dd>
-        <dt>yaw</dt>
-        <dd id="yaw">—</dd>
-        <dt>drift</dt>
-        <dd id="drift">—</dd>
-        <dt>speed</dt>
-        <dd id="speed">—</dd>
-        <dt>altitude</dt>
-        <dd id="altitude">—</dd>
-        <dt>lag</dt>
-        <dd id="lag">—</dd>
-      </dl>
-      <button id="mark">Mark drift baseline</button>
-      <button id="kick" disabled>Disconnect controller</button>
-      <div class="legend">
-        <i class="swatch" style="background: #4f8cff"></i>smoothed
-        <i class="swatch" style="background: #ff7a45; margin-left: 10px"></i>raw
-      </div>
     </div>
-
+    <aside id="leftColumn" aria-label="Camera inspector"><div id="previsMount"></div>
     <div class="panel" id="lens">
       <h1>lens</h1>
       <div class="presets" id="lensPresets">
@@ -329,7 +45,23 @@
       </label>
     </div>
 
-    <div class="panel" id="flight">
+    <div class="panel" id="aimPanel">
+      <h1>aim</h1>
+      <label class="slider"
+        >source
+        <select id="aimSource">
+          <option value="phone">Phone</option>
+          <option value="mouse">Mouse / trackpad drag</option>
+        </select>
+      </label>
+      <label class="slider"
+        >drag sensitivity<span id="mouseSensValue">0.12</span>
+        <input type="range" id="mouseSens" min="0.02" max="0.5" step="0.01" value="0.12" />
+      </label>
+      <div class="legend">Drag in the camera view to pan and tilt.</div>
+    </div>
+
+<details class="panel"><summary>Advanced · pilot, smoothing & devices</summary>    <div class="panel" id="flight">
       <h1>flight · pilot mode</h1>
       <label class="slider"
         >mass<span id="responseTimeValue">550 ms</span>
@@ -374,22 +106,6 @@
       </div>
     </div>
 
-    <div class="panel" id="aimPanel">
-      <h1>aim</h1>
-      <label class="slider"
-        >source
-        <select id="aimSource">
-          <option value="phone">Phone</option>
-          <option value="mouse">Mouse / trackpad drag</option>
-        </select>
-      </label>
-      <label class="slider"
-        >drag sensitivity<span id="mouseSensValue">0.12</span>
-        <input type="range" id="mouseSens" min="0.02" max="0.5" step="0.01" value="0.12" />
-      </label>
-      <div class="legend">Drag in the camera view to pan and tilt.</div>
-    </div>
-
     <div class="panel" id="controls">
       <h1>smoothing</h1>
 
@@ -430,9 +146,40 @@
         >
       </div>
     </div>
+    <div class="panel" id="hud">
+      <h1>vcam link</h1>
+      <dl>
+        <dt>source</dt>
+        <dd id="source">live</dd>
+        <dt>phone</dt>
+        <dd id="link">waiting</dd>
+        <dt>rate</dt>
+        <dd id="rate">—</dd>
+        <dt>latency</dt>
+        <dd id="latency">—</dd>
+        <dt>jitter</dt>
+        <dd id="jitter">—</dd>
+        <dt>yaw</dt>
+        <dd id="yaw">—</dd>
+        <dt>drift</dt>
+        <dd id="drift">—</dd>
+        <dt>speed</dt>
+        <dd id="speed">—</dd>
+        <dt>altitude</dt>
+        <dd id="altitude">—</dd>
+        <dt>lag</dt>
+        <dd id="lag">—</dd>
+      </dl>
+      <button id="mark">Mark drift baseline</button>
+      <button id="kick" disabled>Disconnect controller</button>
+      <div class="legend">
+        <i class="swatch" style="background: #4f8cff"></i>smoothed
+        <i class="swatch" style="background: #ff7a45; margin-left: 10px"></i>raw
+      </div>
     </div>
 
-    <div id="transport">
+</details>
+    <details class="panel"><summary>Advanced · controller path studies</summary><p class="note">These longer studies are separate from the saved shot below. Record and save a supported short take before exporting.</p><div id="transport">
       <select id="demo"></select>
       <button id="shotPlay" disabled>Play</button>
       <input type="range" id="scrub" min="0" max="1" step="0.0005" value="0" disabled />
@@ -456,6 +203,8 @@
         <a href="/phone-solo.html">/phone-solo.html</a> for sensors alone
       </div>
     </div>
+    </details></aside>
+    <div id="motionMount"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

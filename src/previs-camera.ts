@@ -18,15 +18,14 @@ export function shortCameraMove(kind: string, subject: number[], mm: number): Ca
 // camera and supplies saved playback after that controller has updated each frame.
 export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraFrame) => void): () => void {
   const panel = document.createElement('div');
-  panel.style.cssText = 'position:fixed;top:12px;left:280px;right:12px;z-index:30;background:#15212ef2;padding:12px;border:1px solid #6b8ca8;border-radius:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:#eee;font:13px system-ui';
-  const link = document.createElement('a'); link.href = '/'; link.textContent = '← Previs shots'; link.style.color = '#b4dbf7';
+  panel.className = 'previs-camera';
   const title = document.createElement('input'); title.value = 'Camera study'; title.setAttribute('aria-label', 'Previs shot title');
   const record = document.createElement('button'); record.textContent = 'Record shot';
   const play = document.createElement('button'); play.textContent = 'Replay motion';
   const timeline = document.createElement('input'); timeline.type = 'range'; timeline.min = '0'; timeline.max = '0'; timeline.step = String(1 / 24); timeline.setAttribute('aria-label', 'Recorded motion time');
-  const position = document.createElement('output'); position.setAttribute('aria-label', 'Current camera');
+  const position = document.createElement('output'); position.setAttribute('aria-label', 'Current camera'); position.setAttribute('aria-live','off');
   const exportVideo = document.createElement('button'); exportVideo.textContent = 'Export saved motion video';
-  const workflowLink = document.createElement('a'); workflowLink.hidden = true; workflowLink.style.color = '#b4dbf7';
+  const workflowLink = document.createElement('a'); workflowLink.hidden = true; workflowLink.className = 'button-link primary';
   const preset = document.createElement('select'); preset.setAttribute('aria-label', 'Short camera move');
   for (const [value,text] of [['dolly','Three-second dolly · 72 frames'],['crane','Three-second crane · 72 frames']]) { const o=document.createElement('option');o.value=value;o.textContent=text;preset.append(o); } preset.value='dolly';
   const usePreset = document.createElement('button'); usePreset.textContent = 'Use short move';
@@ -35,15 +34,29 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   const save = document.createElement('button'); save.textContent = 'Save new shot & beauty';
   const savedDetail=document.createElement('small');savedDetail.setAttribute('aria-label','Saved export source');
   const status = document.createElement('span'); status.textContent = 'Browser scene · no Blender required';
-  panel.append(link, title);
+  const inspector = document.createElement('div'); inspector.className='camera-controls';
+  const heading=document.createElement('h2');heading.textContent='Shot inspector';
+  const labelled=(text:string,control:HTMLElement)=>{const label=document.createElement('label');label.textContent=text;label.append(control);return label;};
+  inspector.append(heading,labelled('Shot title',title));
+  const subjectFields=document.createElement('div');subjectFields.className='frames';
   for (const [axis, index] of [['X', 0], ['Y', 1], ['Z', 2]] as const) {
     const label = document.createElement('label'); label.textContent = 'Subject ' + axis;
-    const input = document.createElement('input'); input.type = 'number'; input.step = '0.5'; input.style.width = '60px'; input.value = String(studio.subjectPosition()[index]); input.setAttribute('aria-label', 'Subject ' + axis);
+    const input = document.createElement('input'); input.type = 'number'; input.step = '0.5'; input.value = String(studio.subjectPosition()[index]); input.setAttribute('aria-label', 'Subject ' + axis);
     input.oninput = () => { const p = studio.subjectPosition(); p[index] = Number(input.value); studio.setSubjectPosition(p); };
-    label.append(input); panel.append(label);
+    label.append(input); subjectFields.append(label);
   }
   const delivery = document.createElement('small'); delivery.setAttribute('aria-label','Delivery plan');
-  panel.append(preset, usePreset, resolution, record, play, timeline, save, exportVideo, workflowLink, status, position, delivery, savedDetail); document.body.append(panel);
+  inspector.append(subjectFields,labelled('Short camera move',preset),usePreset,labelled('Delivery resolution',resolution),save,exportVideo,workflowLink,delivery);
+  const provenance=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Saved export source · Advanced';provenance.append(summary,savedDetail);inspector.append(provenance);
+  const transport=document.createElement('div');transport.className='motion-transport';
+  const transportButtons=document.createElement('div');transportButtons.className='row';transportButtons.append(record,play);
+  const transportReadout=document.createElement('div');transportReadout.className='transport-readout';transportReadout.append(status,position);
+  status.setAttribute('role','status');timeline.setAttribute('title','Scrub saved camera motion');
+  transport.append(transportButtons,timeline,transportReadout);
+  save.className='primary';exportVideo.className='export-action';
+  panel.append(inspector,transport);document.body.append(panel);
+  // Keep the adapter usable without page mounts (including agent simulations).
+  document.getElementById?.('previsMount')?.append(inspector);document.getElementById?.('motionMount')?.append(transport);
   let savedShotId: string | undefined;
   const showSaved = (shot:any,revision:number) => {savedDetail.textContent=`Export source: saved shot ${shot.id.slice(0,8)} · saved at revision ${shot.createdRevision??'not recorded'} · opened project revision ${revision}. Export always uses this saved scene, subject and camera motion. Live pose/subject edits are not included; save a new shot to capture changes.`;};
   let exporting = false;
@@ -98,7 +111,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
     const shot = project.shots.find((s: { id: string }) => s.id === shotId);
     if (!shot || shot.binding.source !== 'three') throw Error('Browser shot unavailable');
     savedShotId = shot.id;showSaved(shot,project.revision); title.value = shot.title; frames = shot.browser.frames; resolution.value=String(browserDelivery(shot.browser.delivery).width);studio.setSubjectPosition(shot.browser.subject); adoptCamera(shot.browser.camera); apply(shot.browser.camera); syncTransport();
-    panel.querySelectorAll<HTMLInputElement>('input[type=number]').forEach((input, i) => input.value = String(shot.browser.subject[i]));
+    inspector.querySelectorAll<HTMLInputElement>('input[type=number]').forEach((input, i) => input.value = String(shot.browser.subject[i]));
     status.textContent = 'Restored browser shot';
   }).catch(e => status.textContent = e.message);
   exportVideo.onclick = async () => {

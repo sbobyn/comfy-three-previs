@@ -541,3 +541,24 @@ for(const phase of ['bind','quote','refresh'])test('simulation: input edits duri
   hold=false;await ui.el('prepare').click();
   const latest=h.routes.state().jobs.find(j=>j.binding.prompt==='Changed while request is pending');assert.ok(latest);assert.equal(latest.status,'quoted');
 });
+
+test('simulation: workbench views retain exact source/request state and comparison identity', async t => {
+  const h = await fixture(t); await h.complete();
+  const ui = await browserFixture(h);
+  await ui.el('prepare').click();
+  const request = ui.el('request').textContent, prompt = ui.el('prompt').value;
+  ui.compare();
+  assert.equal(ui.el('source-panel').hidden, true);
+  assert.equal(ui.el('request-panel').hidden, true);
+  assert.equal(ui.el('comparison-panel').hidden, false);
+  assert.equal(ui.el('compare-view').attributes['aria-pressed'], 'true');
+  const output = ui.el('comparison-output').value;
+  ui.el('source-view').click();
+  assert.equal(ui.el('source-panel').hidden, false);
+  assert.equal(ui.el('request-panel').hidden, false);
+  assert.equal(ui.el('request').textContent, request);
+  assert.equal(ui.el('prompt').value, prompt);
+  ui.el('compare-view').click();
+  assert.equal(ui.el('comparison-output').value, output);
+  assert.equal(ui.el('source-view').attributes['aria-pressed'], 'false');
+});
