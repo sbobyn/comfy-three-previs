@@ -120,3 +120,5 @@ summary:hover { color: var(--yellow); }
 .current-shot-context { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 4px; }
 
 .generation #status { position: sticky; top: 0; z-index: 10; background: var(--ink); border-bottom: 1px solid var(--line); }
+
+#unknown-jobs { border-color: var(--warning); color: var(--white); }

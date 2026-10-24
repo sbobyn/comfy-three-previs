@@ -562,3 +562,16 @@ test('simulation: workbench views retain exact source/request state and comparis
   assert.equal(ui.el('comparison-output').value, output);
   assert.equal(ui.el('source-view').attributes['aria-pressed'], 'false');
 });
+
+test('simulation: unknown outcomes stay visible and opening recovery never dispatches or reconciles', async t => {
+  const h = await fixture(t); const completed = await h.complete();
+  const originalState = h.routes.state;
+  h.routes.state = () => ({...originalState(), jobs: [{...completed, status:'uncertain', results:[], message:'Simulated acceptance unknown', failure:{phase:'submitting'}}]});
+  const ui = await browserFixture(h);
+  assert.equal(ui.el('unknown-jobs').hidden, false);
+  assert.match(ui.el('unknown-jobs').textContent, /UNKNOWN OUTCOME.*Do not submit again/);
+  assert.equal(ui.el('job-history').open, true);
+  assert.match(ui.el('job-summary').textContent, /1 UNKNOWN OUTCOME/);
+  ui.el('compare-view').click(); ui.el('source-view').click(); await ui.el('reload').click();
+  assert.equal(ui.requests.filter(r => /submit|reconcile|track/.test(r.path)).length, 0);
+});
