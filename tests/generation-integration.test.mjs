@@ -524,9 +524,9 @@ test('simulation: a newly rendered Blender source remains selected across full p
 });
 
 
-for(const phase of ['bind','quote'])test('simulation: input edits during '+phase+' never re-enable stale request approval',async t=>{
+for(const phase of ['bind','quote','refresh'])test('simulation: input edits during '+phase+' never re-enable stale request approval',async t=>{
   const h=await fixture(t),entered=deferred(),resume=deferred();let hold=false;
-  const ui=await browserFixture(h,{intercept:async path=>{if(hold&&path==='/api/generation/'+phase){entered.resolve();await resume.promise;}}});
+  const ui=await browserFixture(h,{intercept:async path=>{if(hold&&path===(phase==='refresh'?'/api/generation':'/api/generation/'+phase)){entered.resolve();await resume.promise;}}});
   hold=true;const preparing=ui.el('prepare').click();await entered.promise;
   try{
     assert.equal(ui.el('workspace-controls').disabled,true,'native fieldset prevents ordinary user edits while action is pending');
