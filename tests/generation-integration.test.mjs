@@ -508,3 +508,17 @@ test('simulation: missing comparison output never substitutes the first candidat
   ui.el('comparison-output').change(job.results[1].id);
   assert.equal(ui.el('result-download').href,job.results[1].url);assert.equal(ui.el('review').disabled,false);
 });
+
+
+test('simulation: a newly rendered Blender source remains selected across full page refresh',async t=>{
+  const h=await fixture(t),id=randomUUID(),asset={id,kind:'video',source:'blender',shotId:'shot',version:1,url:'/assets/'+id+'.mp4',width:1280,height:720,frameCount:72,fps:24,duration:3,audio:false,requestRevision:1,binding:sourceBinding};
+  const route=h.routes.route;t.mock.method(h.routes,'route',async(path,input)=>{
+    if(path!=='/api/video/blender')return route(path,input);
+    const project=await h.project.mutate(input.revision,p=>p.assets.push(asset));return{project,asset};
+  });
+  const ui=await browserFixture(h);await ui.el('render-video').click();
+  assert.equal(ui.el('asset').value,id);assert.equal(new URLSearchParams(ui.location.search).get('asset'),id);
+  const reopened=await browserFixture(h,{search:ui.location.search});
+  assert.equal(reopened.el('asset').value,id);assert.equal(reopened.el('source').src,asset.url);
+  assert.equal(h.state.submissions.length,0);
+});
