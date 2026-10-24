@@ -12,7 +12,7 @@
     <div id="studio-stage">
     <canvas id="scene"></canvas>
     <div id="worldPane"></div>
-    <div id="cameraPane"></div>
+    <div id="cameraPane" tabindex="0" aria-label="Camera view · drag to aim; focus for pilot keys"></div>
     <div id="seam"></div>
     <div class="viewLabel" id="worldLabel">world · drag to orbit</div>
     <div class="viewLabel" id="cameraLabel">Camera · framing guide</div>
@@ -101,7 +101,7 @@
       </div>
       <div class="legend" id="flightInfo">pilot mode only</div>
       <div class="legend">
-        W A S D · Q E yaw · Space / Shift climb<br />Mode 2 sticks: left climb/yaw,
+        W A S D · Q E yaw · Space / Shift climb<br />Focus the camera view for Space to climb; Space activates focused controls.<br />Mode 2 sticks: left climb/yaw,
         right forward/lateral
       </div>
     </div>

@@ -1,5 +1,5 @@
-.camera-studio { height: 100dvh; display: grid; grid-template-columns: minmax(0,1fr) 340px; grid-template-rows: 76px minmax(0,1fr) auto; grid-template-areas: "header header" "stage inspector" "motion inspector"; overflow: hidden; background: var(--media); }
-.studio-header { grid-area: header; padding: 12px 20px; background: var(--ink); gap: 16px; }
+.camera-studio { height: 100dvh; display: grid; grid-template-columns: minmax(0,1fr) 340px; grid-template-rows: auto minmax(0,1fr) auto; grid-template-areas: "header header" "stage inspector" "motion inspector"; overflow: hidden; background: var(--media); }
+.studio-header { min-height: 76px; grid-area: header; padding: 12px 20px; background: var(--ink); gap: 16px; }
 .studio-header h1 { font-size: 20px; margin: 2px 0; }
 .studio-header small { font-size: 11px; }
 .studio-header p { margin: 0 auto 0 16px; }
@@ -42,6 +42,6 @@ dt { color: var(--canvas); } dd { margin: 0; text-align: right; font-variant-num
 .transport-readout { grid-column: 1/-1; display: flex; gap: 8px 24px; flex-wrap: wrap; font-size: 12px; color: var(--canvas); }
 .transport-readout output { margin-left: auto; color: var(--white); font-variant-numeric: tabular-nums; }
 .previs-camera:empty { display: none; }
-@media(max-width:1100px) { .camera-studio { grid-template-columns: minmax(0,1fr) 300px; } .studio-header { padding: 8px 16px; } .studio-header p { display: none; } }
+@media(max-width:1100px) { .camera-studio { grid-template-columns: minmax(0,1fr) 300px; } .studio-header { padding: 8px 16px; } }
 @media(max-width:850px) { .camera-studio { height: auto; min-height: 100dvh; overflow: auto; grid-template-columns: 1fr; grid-template-rows: auto 55vh auto auto; grid-template-areas: "header" "stage" "motion" "inspector"; } .studio-header { align-items: start; } .studio-header nav { gap: 0; } #leftColumn { overflow: visible; border-left: 0; border-top: 1px solid var(--line); padding: 20px; } #studio-stage { min-height: 260px; } }
 @media(max-width:500px) { .motion-transport { grid-template-columns: 1fr; } .transport-readout { grid-column: auto; } .transport-readout output { margin-left: 0; } #worldPane, #worldLabel { display: none; } #cameraPane { inset: 0; } #seam { display: none; } #cameraLabel { left: 12px; } }

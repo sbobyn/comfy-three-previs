@@ -25,7 +25,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   const timeline = document.createElement('input'); timeline.type = 'range'; timeline.min = '0'; timeline.max = '0'; timeline.step = String(1 / 24); timeline.setAttribute('aria-label', 'Recorded motion time');
   const position = document.createElement('output'); position.setAttribute('aria-label', 'Current camera'); position.setAttribute('aria-live','off');
   const exportVideo = document.createElement('button'); exportVideo.textContent = 'Export saved motion video';
-  const workflowLink = document.createElement('a'); workflowLink.hidden = true; workflowLink.className = 'button-link primary';
+  const workflowLink = document.createElement('a'); workflowLink.hidden = true; workflowLink.className = 'button-link';
   const preset = document.createElement('select'); preset.setAttribute('aria-label', 'Short camera move');
   for (const [value,text] of [['dolly','Three-second dolly · 72 frames'],['crane','Three-second crane · 72 frames']]) { const o=document.createElement('option');o.value=value;o.textContent=text;preset.append(o); } preset.value='dolly';
   const usePreset = document.createElement('button'); usePreset.textContent = 'Use short move';
@@ -47,6 +47,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   }
   const delivery = document.createElement('small'); delivery.setAttribute('aria-label','Delivery plan');
   inspector.append(subjectFields,labelled('Short camera move',preset),usePreset,labelled('Delivery resolution',resolution),save,exportVideo,workflowLink,delivery);
+  const exportWarning=document.createElement('p');exportWarning.className='note';exportWarning.textContent='Export uses the saved scene, subject and camera motion. Live edits are not included; save a new shot to capture changes.';inspector.append(exportWarning);
   const provenance=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Saved export source · Advanced';provenance.append(summary,savedDetail);inspector.append(provenance);
   const transport=document.createElement('div');transport.className='motion-transport';
   const transportButtons=document.createElement('div');transportButtons.className='row';transportButtons.append(record,play);
@@ -58,7 +59,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   // Keep the adapter usable without page mounts (including agent simulations).
   document.getElementById?.('previsMount')?.append(inspector);document.getElementById?.('motionMount')?.append(transport);
   let savedShotId: string | undefined;
-  const showSaved = (shot:any,revision:number) => {savedDetail.textContent=`Export source: saved shot ${shot.id.slice(0,8)} · saved at revision ${shot.createdRevision??'not recorded'} · opened project revision ${revision}. Export always uses this saved scene, subject and camera motion. Live pose/subject edits are not included; save a new shot to capture changes.`;};
+  const showSaved = (shot:any,revision:number) => {save.className='';exportVideo.className='primary';workflowLink.className='button-link';savedDetail.textContent=`Export source: saved shot ${shot.id.slice(0,8)} · saved at revision ${shot.createdRevision??'not recorded'} · opened project revision ${revision}. Export always uses this saved scene, subject and camera motion. Live pose/subject edits are not included; save a new shot to capture changes.`;};
   let exporting = false;
   let frames: CameraFrame[] = [], recording = false, started = 0, playing = false, playhead = 0, previousTime = performance.now();
   const frame = (t: number): CameraFrame => ({ t, p: studio.pov.position.toArray(), q: studio.pov.quaternion.toArray(), mm: studio.pov.getFocalLength() });
@@ -86,7 +87,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   const pause = () => { if (playing && frames.length) adoptCamera(poseAt(playhead)); playing = false; syncTransport(); };
   resolution.onchange = () => {showDelivery();status.textContent='Delivery changed. Save a new shot before exporting; existing captures keep their original settings.';};
   usePreset.onclick = () => {
-    stop(); pause(); frames=shortCameraMove(preset.value,studio.subjectPosition(),studio.pov.getFocalLength());playhead=0;savedShotId=undefined;workflowLink.hidden=true;savedDetail.textContent='Unsaved take · Replay → Save new shot → Reopen → Export saved motion. Existing captures stay unchanged.';
+    stop(); pause(); save.className='primary';exportVideo.className='export-action';frames=shortCameraMove(preset.value,studio.subjectPosition(),studio.pov.getFocalLength());playhead=0;savedShotId=undefined;workflowLink.hidden=true;savedDetail.textContent='Unsaved take · Replay → Save new shot → Reopen → Export saved motion. Existing captures stay unchanged.';
     adoptCamera(frames[0]);apply(frames[0]);title.value=preset.value==='crane'?'Three-second crane':'Three-second dolly';syncTransport();status.textContent='Short move ready · Replay, then save a new shot. No existing shot was changed.';
   };
   record.onclick = () => {
@@ -142,7 +143,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
           status.textContent = `Exporting saved camera frame ${i + 1}/${count}`;
         }
         const { asset } = await post('finish',{stageId:stage.id});
-        workflowLink.href=`/generation.html?shot=${savedShotId}&asset=${asset.id}`;workflowLink.textContent='Use this exact video in a workflow →';workflowLink.hidden=false;
+        save.className='';exportVideo.className='export-action';workflowLink.className='button-link primary';workflowLink.href=`/generation.html?shot=${savedShotId}&asset=${asset.id}`;workflowLink.textContent='Use this exact video in a workflow →';workflowLink.hidden=false;
         savedDetail.textContent=`Exported immutable source ${asset.id} · version ${asset.version} · capture revision ${asset.requestRevision}. Live camera view is restored; open the workflow link to play the exact exported video.`;
         status.textContent = `Video saved: ${asset.frameCount} frames · ${asset.duration}s · ${width}×${height}. Export took ${((performance.now()-exportStarted)/1000).toFixed(1)} s. Open video workflows to review.`;
     } catch(e) { status.textContent = (e as Error).message; }

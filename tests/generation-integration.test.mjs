@@ -575,3 +575,23 @@ test('simulation: unknown outcomes stay visible and opening recovery never dispa
   ui.el('compare-view').click(); ui.el('source-view').click(); await ui.el('reload').click();
   assert.equal(ui.requests.filter(r => /submit|reconcile|track/.test(r.path)).length, 0);
 });
+
+test('simulation: reload preserves a deliberate return from comparison to source/request', async t => {
+  const h = await fixture(t); await h.complete(); const ui = await browserFixture(h);
+  ui.compare(); const output=ui.el('comparison-output').value;
+  ui.el('source-view').click(); await ui.el('reload').click();
+  assert.equal(ui.el('source-panel').hidden,false);
+  assert.equal(ui.el('request-panel').hidden,false);
+  assert.equal(ui.el('comparison-panel').hidden,true);
+  assert.equal(ui.el('comparison-output').value,output);
+  assert.equal(ui.el('source-view').attributes['aria-pressed'],'true');
+});
+
+test('simulation: a collected Comfy output reused as input is never labelled as a scene capture', async t => {
+  const h=await fixture(t);
+  await h.project.mutate(h.project.get().revision,p=>p.assets.push({id:'retained-output',shotId:'shot',kind:'video',source:'comfy',version:1,width:1280,height:720,frameCount:73,fps:24,duration:73/24,requestRevision:18,binding:sourceBinding,url:'/assets/retained-output.mp4'}));
+  const ui=await browserFixture(h);ui.el('asset').change('retained-output');
+  assert.match(ui.el('capture-summary').textContent,/^Comfy result v1/);
+  assert.doesNotMatch(ui.el('capture-summary').textContent,/^Captured/);
+  assert.match(ui.el('capture-origin').textContent,/^Original input binding of this Comfy result/);
+});

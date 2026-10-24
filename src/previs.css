@@ -122,3 +122,5 @@ summary:hover { color: var(--yellow); }
 .generation #status { position: sticky; top: 0; z-index: 10; background: var(--ink); border-bottom: 1px solid var(--line); }
 
 #unknown-jobs { border-color: var(--warning); color: var(--white); }
+
+html:has(body.generation) { scroll-padding-top: var(--status-height,80px); }
