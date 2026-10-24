@@ -231,3 +231,13 @@ test('short camera moves have 72 exact delivery samples, normalized poses and a 
     samples.forEach((f,i)=>{assert.equal(f.t,i/24);assert.ok(Math.abs(Math.hypot(...f.q)-1)<1e-10);assert.equal(f.mm,35);});
   }
 });
+
+
+test('simulation: recording after restore prioritizes saving the new take over the old saved export',async()=>{
+  const h=await fixture();
+  assert.equal(h.exportVideo.className,'primary');
+  h.record.click();
+  assert.equal(h.exportVideo.className,'export-action');
+  const save=h.controls.find(c=>c.textContent==='Save new shot & beauty');
+  assert.equal(save.className,'primary');
+});

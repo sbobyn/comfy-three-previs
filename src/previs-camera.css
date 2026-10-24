@@ -45,3 +45,5 @@ dt { color: var(--canvas); } dd { margin: 0; text-align: right; font-variant-num
 @media(max-width:1100px) { .camera-studio { grid-template-columns: minmax(0,1fr) 300px; } .studio-header { padding: 8px 16px; } }
 @media(max-width:850px) { .camera-studio { height: auto; min-height: 100dvh; overflow: auto; grid-template-columns: 1fr; grid-template-rows: auto 55vh auto auto; grid-template-areas: "header" "stage" "motion" "inspector"; } .studio-header { align-items: start; } .studio-header nav { gap: 0; } #leftColumn { overflow: visible; border-left: 0; border-top: 1px solid var(--line); padding: 20px; } #studio-stage { min-height: 260px; } }
 @media(max-width:500px) { .motion-transport { grid-template-columns: 1fr; } .transport-readout { grid-column: auto; } .transport-readout output { margin-left: 0; } #worldPane, #worldLabel { display: none; } #cameraPane { inset: 0; } #seam { display: none; } #cameraLabel { left: 12px; } }
+
+#cameraPane:focus-visible { outline-offset: -3px; }

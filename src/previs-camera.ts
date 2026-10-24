@@ -92,7 +92,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   };
   record.onclick = () => {
     if (recording) { stop(); return; }
-    pause(); frames = [frame(0)]; playhead = 0; recording = true; started = performance.now(); record.textContent = 'Stop shot'; syncTransport();
+    pause(); save.className='primary';exportVideo.className='export-action';workflowLink.hidden=true; frames = [frame(0)]; playhead = 0; recording = true; started = performance.now(); record.textContent = 'Stop shot'; syncTransport();
   };
   play.onclick = () => { stop(); if (playing) pause(); else { playhead = 0; playing = true; previousTime = performance.now(); syncTransport(); } };
   timeline.oninput = () => { const selectedTime = Number(timeline.value); stop(); playing = false; playhead = selectedTime; if (frames.length) { const pose = poseAt(playhead); adoptCamera(pose); apply(pose); } syncTransport(); };

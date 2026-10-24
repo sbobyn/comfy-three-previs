@@ -572,7 +572,10 @@ test('simulation: unknown outcomes stay visible and opening recovery never dispa
   assert.match(ui.el('unknown-jobs').textContent, /UNKNOWN OUTCOME.*Do not submit again/);
   assert.equal(ui.el('job-history').open, true);
   assert.match(ui.el('job-summary').textContent, /1 UNKNOWN OUTCOME/);
+  let announcements=0, message=ui.el('unknown-jobs').textContent;
+  Object.defineProperty(ui.el('unknown-jobs'),'textContent',{get:()=>message,set:value=>{message=value;announcements++;}});
   ui.el('compare-view').click(); ui.el('source-view').click(); await ui.el('reload').click();
+  assert.equal(announcements,0,'unchanged unknown-outcome alert is not rewritten');
   assert.equal(ui.requests.filter(r => /submit|reconcile|track/.test(r.path)).length, 0);
 });
 

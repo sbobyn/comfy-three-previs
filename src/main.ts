@@ -208,11 +208,20 @@ bindFlight("tilt", (v) => `${v.toFixed(0)}°`);
 
 // Keys are tracked rather than acted on directly, so several can be held at
 // once and a stuck key cannot survive the window losing focus.
-const typingInto = (target: EventTarget | null): boolean =>
-  target instanceof HTMLElement && ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName);
+const typingInto = (target: EventTarget | null, code: string): boolean => {
+  if (!(target instanceof HTMLElement)) return false;
+  if (["SELECT", "TEXTAREA"].includes(target.tagName)) return true;
+  if (target.tagName === "INPUT") {
+    const type = (target as HTMLInputElement).type;
+    if (type === "range") return ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(code);
+    if (type === "checkbox") return ["Space", "Enter"].includes(code);
+    return true;
+  }
+  return ["BUTTON", "SUMMARY", "A"].includes(target.tagName) && ["Space", "Enter"].includes(code);
+};
 
 window.addEventListener("keydown", (event) => {
-  if (typingInto(event.target) || (event.target instanceof HTMLElement && ["BUTTON", "SUMMARY", "A"].includes(event.target.tagName) && ["Space", "Enter"].includes(event.code))) return;
+  if (typingInto(event.target, event.code)) return;
   heldKeys.add(event.code);
   if (isPiloting() && PILOT_KEYS.has(event.code)) event.preventDefault();
 });
