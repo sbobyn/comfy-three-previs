@@ -522,3 +522,22 @@ test('simulation: a newly rendered Blender source remains selected across full p
   assert.equal(reopened.el('asset').value,id);assert.equal(reopened.el('source').src,asset.url);
   assert.equal(h.state.submissions.length,0);
 });
+
+
+for(const phase of ['bind','quote'])test('simulation: input edits during '+phase+' never re-enable stale request approval',async t=>{
+  const h=await fixture(t),entered=deferred(),resume=deferred();let hold=false;
+  const ui=await browserFixture(h,{intercept:async path=>{if(hold&&path==='/api/generation/'+phase){entered.resolve();await resume.promise;}}});
+  hold=true;const preparing=ui.el('prepare').click();await entered.promise;
+  try{
+    assert.equal(ui.el('workspace-controls').disabled,true,'native fieldset prevents ordinary user edits while action is pending');
+    // Simulate a queued change event or another script, bypassing native disabled controls.
+    ui.el('prompt').input('Changed while request is pending');
+  }finally{resume.resolve();await preparing;}
+  assert.equal(ui.el('workspace-controls').disabled,false);
+  assert.match(ui.el('status').textContent,/Inputs changed during preparation/);
+  assert.equal(ui.el('request').textContent,'');assert.equal(ui.el('approve').checked,false);assert.equal(ui.el('submit').disabled,true);
+  ui.el('approve').change(true);assert.equal(ui.el('submit').disabled,true);
+  assert.equal(h.state.submissions.length,0);assert.equal(h.state.uploads.length,0);
+  hold=false;await ui.el('prepare').click();
+  const latest=h.routes.state().jobs.find(j=>j.binding.prompt==='Changed while request is pending');assert.ok(latest);assert.equal(latest.status,'quoted');
+});

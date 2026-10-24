@@ -16,3 +16,5 @@ pre { overflow-wrap: anywhere; font-size: 12px; }
 .starters a{display:inline-block;max-width:100%}
 @media(max-width:900px){.generation .layout{grid-template-columns:1fr}}
 @media(max-width:900px){.layout.starters{grid-template-columns:1fr}}
+
+#workspace-controls{min-width:0;border:0;margin:0;padding:0}

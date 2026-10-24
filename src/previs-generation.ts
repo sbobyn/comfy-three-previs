@@ -5,14 +5,14 @@ const select = (id: string) => el<HTMLSelectElement>(id);
 const field = (id: string) => el<HTMLInputElement>(id);
 const video = (id: string) => el<HTMLVideoElement>(id);
 let project: Data, state: Data, definition: Data | undefined, schema: Data = {}, prepared: Data | undefined, requestInput: Data | undefined, reviewedJob: Data | undefined;
-let imported = false, busy = false;
+let imported = false, busy = false, editVersion = 0;
 const parameters: Record<string, HTMLInputElement | HTMLSelectElement> = {}, roles: Record<string, HTMLSelectElement> = {};
 async function api(path: string, input?: unknown) { const r = await fetch('/api/' + path,input===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});const data=await r.json();if(!r.ok)throw Error(data.error);return data; }
 function option(value: string,text: string) {const o=document.createElement('option');o.value=value;o.textContent=text;return o;}
 function label(text: string,control: HTMLElement) {const l=document.createElement('label');l.append(document.createTextNode(text),control);return l;}
 function backend() {return {kind:select('backend').value,...(select('backend').value==='local'?{url:field('endpoint').value}:{})};}
-function invalidate() {prepared=undefined;requestInput=undefined;field('approve').checked=false;el<HTMLButtonElement>('submit').disabled=true;el('quote').textContent='Request changed. Prepare a fresh quote.';el('prepared-source').textContent='';el('prepared-source').hidden=true;el('request').textContent='';}
-async function action(fn:()=>Promise<void>) {if(busy)return;busy=true;try{await fn();}catch(e){el('status').textContent=(e as Error).message;}finally{busy=false;}}
+function invalidate() {editVersion++;prepared=undefined;requestInput=undefined;field('approve').checked=false;el<HTMLButtonElement>('submit').disabled=true;el('quote').textContent='Request changed. Prepare a fresh quote.';el('prepared-source').textContent='';el('prepared-source').hidden=true;el('request').textContent='';}
+async function action(fn:()=>Promise<void>) {if(busy)return;busy=true;el<HTMLFieldSetElement>('workspace-controls').disabled=true;try{await fn();}catch(e){el('status').textContent=(e as Error).message;}finally{busy=false;el<HTMLFieldSetElement>('workspace-controls').disabled=false;}}
 function remember(values: Record<string,string|undefined>) {const query=new URLSearchParams(location.search);for(const [key,value]of Object.entries(values)){if(value)query.set(key,value);else query.delete(key);}history.replaceState(null,'','?'+query.toString());}
 function pickedShot() {return project.shots.find((s:Data)=>s.id===select('shot').value);}
 function pickedAsset() {return (project.assets||[]).find((a:Data)=>a.id===select('asset').value);}
@@ -110,9 +110,10 @@ function importedMapping() {
     const result=await api('generation/preset',{revision:project.revision,definition:d});project=result.project;definition=result.definition;imported=false;workflowPicker();select('workflow').value=result.definition.id;definition=result.definition;showDefinition();el('mapping').replaceChildren();el('status').textContent='Named preset saved with author graph intact. Inspect the selected backend and map project assets.';
   });
 }
-async function ensurePreset() {
+function checkEdits(version:number){if(version!==editVersion)throw Error('Inputs changed during preparation. Nothing submitted; prepare the current settings again.');}
+async function ensurePreset(version:number) {
   if(!definition)throw Error('Choose or import a mapped workflow');if(imported)throw Error('Save the imported mappings and declared outputs first');
-  if(!project.workflowDefinitions?.some((d:Data)=>d.id===definition!.id)){const saved=await api('generation/preset',{revision:project.revision,definition});project=saved.project;definition=saved.definition;select('workflow').append(option(definition!.id,`${definition!.title||definition!.id} · saved preset ${definition!.id.slice(0,8)}`));select('workflow').value=definition!.id;}
+  if(!project.workflowDefinitions?.some((d:Data)=>d.id===definition!.id)){const saved=await api('generation/preset',{revision:project.revision,definition});project=saved.project;checkEdits(version);definition=saved.definition;select('workflow').append(option(definition!.id,`${definition!.title||definition!.id} · saved preset ${definition!.id.slice(0,8)}`));select('workflow').value=definition!.id;}
 }
 function submitReady(){el<HTMLButtonElement>('submit').disabled=!prepared?.validation?.compatible||!field('approve').checked||(!(prepared.quote.status==='known'&&prepared.quote.amount===0)&&!state.paidExecutionEnabled);}
 async function reload(){invalidate();const r=await api('project');project=r.project;state=await api('generation');const query=new URLSearchParams(location.search),selected=select('shot').value||query.get('shot');select('shot').replaceChildren(...project.shots.map((s:Data)=>option(s.id,s.title)));if(selected)select('shot').value=selected;showShot();workflowPicker();drawJobs();const requestedJob=reviewedJob?.id||query.get('job'),restored=state.jobs.find((j:Data)=>j.id===requestedJob&&j.results?.length);if(restored)compareJob(restored);el('status').textContent=requestedJob&&!state.jobs.some((j:Data)=>j.id===requestedJob)?'This saved comparison is not in the open project. Open its complete project folder, including assets and generation receipts; your current shots remain available.':`Project revision ${project.revision} · original assets retained`;}
@@ -153,12 +154,12 @@ el('preview').onclick=()=>action(async()=>{el('status').textContent='Rendering f
 el('render-video').onclick=()=>action(async()=>{el('status').textContent='Rendering animation through Blender MCP; keep Blender idle. A lost connection does not cancel it.';const r=await api('video/blender',{revision:project.revision,shotId:pickedShot().id,width:Number(field('width').value),height:Number(field('height').value),fps:Number(field('fps').value)});project=r.project;showShot();select('asset').value=r.asset.id;showSource();remember({shot:pickedShot().id,asset:r.asset.id});el('status').textContent='Verified animation saved. '+describe(r.asset);});
 field('import').onchange=()=>action(async()=>{const file=field('import').files?.[0];if(!file)return;el<HTMLDetailsElement>('import-mappings').open=true;const graph=JSON.parse(await file.text());definition={version:1,id:crypto.randomUUID(),title:file.name.replace(/\.json$/,''),task:select('task').value,graph,inputs:{},parameters:{},outputs:[],constraints:{},pricing:{status:'unknown'},provenance:{source:'User-imported API graph'},verification:{status:'imported'}};imported=true;field('preset-title').value=definition.title;el('author-graph').textContent=JSON.stringify(graph,null,2);importedMapping();invalidate();});
 el('prepare').onclick=()=>action(async()=>{
-  invalidate();await ensurePreset();syncPrimarySource();const assetBindings:Data={},values:Data={};
+  invalidate();syncPrimarySource();const version=editVersion;await ensurePreset(version);checkEdits(version);const assetBindings:Data={},values:Data={};
   for(const [role,s]of Object.entries(roles)){if(!s.value)throw Error('Choose '+role+' explicitly');const[kind,id]=s.value.split(':');assetBindings[role]=kind==='asset'?{assetId:id}:{renderId:id};}
   for(const [name,c]of Object.entries(parameters))values[name]=c.type==='checkbox'?(c as HTMLInputElement).checked:c.dataset.valueType==='number'?Number(c.value):c.value;
-  const binding=await api('generation/bind',{revision:project.revision,definitionId:definition!.id,shotId:pickedShot().id,assetBindings,prompt:field('prompt').value,parameters:values,acceptTimingChange:field('accept-timing').checked});project=binding.project;
+  const binding=await api('generation/bind',{revision:project.revision,definitionId:definition!.id,shotId:pickedShot().id,assetBindings,prompt:field('prompt').value,parameters:values,acceptTimingChange:field('accept-timing').checked});project=binding.project;checkEdits(version);
   requestInput={requestId:crypto.randomUUID(),revision:project.revision,workflowBindingId:binding.workflowBindingId,backend:backend()};
-  prepared=(await api('generation/quote',requestInput)).job;
+  const quoted=(await api('generation/quote',requestInput)).job;checkEdits(version);prepared=quoted;
   showTiming(prepared!.preparedGraph);
   const pricedNode=prepared!.preparedGraph?.['2']?.inputs;
   const priced=definition!.pricing?.ratePerSecond&&pricedNode?.model_name==='kling-video-o1'&&pricedNode?.resolution==='720p';
