@@ -27,8 +27,8 @@ async function readiness() {
 }
 async function action(fn: () => Promise<void>) {
   if (busy) return;
-  busy = true; document.querySelectorAll<HTMLButtonElement>('button').forEach(b => b.disabled = true);
-  try { await fn(); } catch (e) { el('status').textContent = (e as Error).message; }
+  busy = true; el('status').dataset.state='busy'; document.querySelectorAll<HTMLButtonElement>('button').forEach(b => b.disabled = true);
+  try { await fn(); el('status').dataset.state='ready'; } catch (e) { el('status').dataset.state='error'; el('status').textContent = (e as Error).message; }
   finally { busy = false; document.querySelectorAll<HTMLButtonElement>('button').forEach(b => b.disabled = false); liveControls(); await readiness().catch(() => {}); }
 }
 function options(select: HTMLSelectElement, values: string[]) { select.replaceChildren(...values.map(value => { const o = document.createElement('option'); o.value = o.textContent = value; return o; })); }

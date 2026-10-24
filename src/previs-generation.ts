@@ -28,7 +28,7 @@ function showSource(updateBindings = true) {
 function syncPrimarySource(){const value=(roles.sourceVideo||roles.controlVideo)?.value;if(value?.startsWith('asset:')&&Array.from(select('asset').options).some(o=>o.value===value.slice(6))){select('asset').value=value.slice(6);showSource(false);remember({shot:select('shot').value,asset:select('asset').value});}}
 function showRenderTiming(){const s=pickedShot();if(!s)return;const count=s.binding.end-s.binding.start+1;el('render-timing').textContent=s.binding.source==='three'?`Browser shot: open the saved camera studio to render its recorded motion at the saved delivery settings. Choose the exact exported version below.`:`${count} selected source frames → ${(count/Number(field('fps').value)).toFixed(3)} s at chosen output FPS. Rebind exact scene/camera/range from Shots.`;}
 function showShot() {
-  const s=pickedShot();if(!s)return;
+  const s=pickedShot();el('empty-author').hidden=Boolean(s);if(!s){el('source-empty').textContent='No saved shots yet. Start a browser dolly without Blender, or bind an existing Blender scene from Scenes & shots.';el('render-controls').hidden=true;return;}
   const author=el<HTMLAnchorElement>('author-shot');author.href=s.binding.source==='three'?'/index.html?shot='+s.id:'/#shot-'+s.id;author.textContent=s.binding.source==='three'?'Open saved camera motion →':'Inspect or rebind this Blender shot →';el('render-controls').hidden=s.binding.source!=='blender';
   el('scene-owner').textContent=s.binding.source==='three'?'Browser scene · camera-study set':'Blender scene · original file is authoritative';
   el('current-binding').textContent='Current shot · '+ownership({...s.binding,file:undefined},s.browser);
@@ -53,7 +53,7 @@ function showDefinition() {
   el('author-graph').textContent=JSON.stringify(definition?.graph||{},null,2);
   el('timing-change').hidden=!definition?.constraints?.timingChange;el('timing-description').textContent=definition?.constraints?.timingChange||'';field('accept-timing').checked=false;
   renderBindings();renderParameters();showTiming();invalidate();
-  el<HTMLButtonElement>('restore-binding').disabled=!savedBinding();
+  el<HTMLButtonElement>('restore-binding').disabled=!savedBinding();el<HTMLButtonElement>('prepare').disabled=!pickedShot()||!definition;
 }
 function savedBinding() { return [...(project?.workflowBindings||[])].reverse().find((b:Data)=>b.definitionId===definition?.id&&b.shotId===pickedShot()?.id); }
 function restoreBinding() {
