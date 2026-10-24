@@ -14,7 +14,7 @@ Suggested prompt: “A luminous amber glass planet with swirling golden clouds i
 
 ## Installed versus missing
 
-Read-only checks on October 23 found ComfyUI 0.38.0, 971 live schemas, MPS, PyTorch 2.10.0.dev20250919, 128 GiB unified memory. All required node classes are present; validation reports **exactly these three missing model selections**, with no node-install requirement:
+Read-only checks refreshed on October 24 found ComfyUI 0.38.0, 971 live schemas, MPS, PyTorch 2.10.0.dev20250919, 128 GiB unified memory. All required node classes are present; validation reports **exactly these three missing model selections**, with no node-install requirement:
 
 | File | Destination under `models/` | Bytes |
 | --- | --- | ---: |
@@ -24,7 +24,15 @@ Read-only checks on October 23 found ComfyUI 0.38.0, 971 live schemas, MPS, PyTo
 
 The exact sizes come from prior read-only [Comfy-Org weight metadata](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/tree/main/split_files), not approximate tutorial labels. Total installed weights: **11,299,242,015 bytes = 11.30 GB / 10.52 GiB**. With a separate complete download cache, budget another 11.30 GB; reserve at least 2 GB for frames, receipts and outputs: **about 25 GB free disk**. A direct-download strategy may avoid duplication but needs its own integrity/provenance plan. No disk reservation or download has been made. Runtime memory is not inferred from file size.
 
-The installed SD1.5 and Qwen image/edit weights cannot substitute for this model family. Existing Qwen LoRAs are unrelated; do not insert them. Filenames and graph remain intact if validation fails.
+The October 24 audit checked live loader choices and configured model directories: no suitable installed temporal video/control weights were found. The installed SD1.5 and Qwen image/edit weights cannot substitute for this model family. Existing Qwen LoRAs are unrelated; do not insert them. Filenames and graph remain intact if validation fails.
+
+## Pinned provenance and licenses
+
+The old repository alias now resolves to **Comfy-Org/Wan-2.1**, revision `123acf1cc74bccbb9bfff8ac1ee72edc08c2341d`. The [exact-file manifest](../examples/wan-vace-local-weights.json) records each publisher path, byte count and metadata SHA-256. These are read-only metadata checks; no weight bytes have been downloaded or locally verified.
+
+[Comfy-Org's card](https://huggingface.co/Comfy-Org/Wan-2.1/blob/123acf1cc74bccbb9bfff8ac1ee72edc08c2341d/README.md) declares **Apache-2.0**, identifies the original Wan repositories, and has no separately tracked LICENSE/NOTICE or reproducible conversion recipe in the inspected package. The upstream [Wan-AI VACE LICENSE.txt](https://huggingface.co/Wan-AI/Wan2.1-VACE-1.3B/blob/574e6a744642ce3bee319afc31496b88bde8aac4/LICENSE.txt) is Apache-2.0. The [Google UMT5 card](https://huggingface.co/google/umt5-xxl/blob/66cb9e7e85526fe440a945569e42c72fb6cbc0ad/README.md) also declares Apache-2.0. Keep these sources/notices with any later acquisition or redistribution; the app's MIT grant does not relicense the weights. Publisher lineage is documented; conversion fidelity was not independently reproduced.
+
+This probe intentionally omits **23 of the original 72 frames** and runs below the model's recommended 480p. Even success would qualify only the declared 49-frame/512×288 probe, not the complete three-second/720p trajectory. Full-path temporal qualification remains a later test with explicitly reviewed frame handling.
 
 ## Mac evidence and uncertainty
 

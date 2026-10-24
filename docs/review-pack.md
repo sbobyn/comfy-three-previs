@@ -1,5 +1,7 @@
 # First-use review checkpoint · 23 October 2026
 
+**Current:** [Tuesday October 27 review candidate](tuesday-review.md). This page preserves the preceding checkpoint and its evidence; its preview/library are separate.
+
 Standalone Previs is ready for a private workflow review, **not a release-quality local temporal-video claim**. Feature expansion stops here for Steven's feedback. The preserved Kling run is never rerun by these review links. Paid execution remains disabled.
 
 Candidate: `candidate/standalone-previs-first-use-20261023`, extending preserved `candidate/standalone-previs-video-20261022` at `1d08fd0`. The exact integrated SHA, final gates and process ownership are stamped in the local [checkpoint](../.evidence/first-use-20261023/checkpoint.json). Preview: **http://127.0.0.1:5193**. It opens a disposable full-library copy; the original seven assets, three reviews and receipts remain unchanged. Parent and scoped agents used **GPT-6.1 Sol High**. No AI dispatch, provider upload, weights download or billing poll ran tonight.

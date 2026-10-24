@@ -2,6 +2,8 @@
 
 A private, standalone camera-study and Blender preview app. No Otter server, editor, library, account, assistant or launcher is required.
 
+[Tuesday review build and release boundaries](docs/tuesday-review.md) · [Local temporal-model approval proposal](docs/local-temporal-test.md)
+
 ## Run locally
 
 Requires **Node 22.12+** and **pnpm 10.18.0**. Install those prerequisites separately; the app does not change global agent configuration.
