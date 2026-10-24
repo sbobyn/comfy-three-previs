@@ -8,16 +8,19 @@ let project: Project;
 let editingShotId: string | undefined;
 let operationId: string | undefined;
 let busy = false;
+let liveAvailable = false;
+function liveControls(){document.querySelectorAll<HTMLButtonElement>('button[data-blender-live]').forEach(b=>{b.disabled=busy||!liveAvailable;b.title=liveAvailable?'':'Connect / refresh Blender first. Saved media stays available.';});}
 async function api(path: string, body?: unknown) { const r = await fetch('/api/' + path, body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); const data = await r.json(); if (!r.ok) throw Error(data.error); return data; }
 async function readiness() {
   const { blender } = await api('readiness');
   const current = blender.operation;
   operationId = current?.id;
   const uncertain = current?.status === 'uncertain';
+  liveAvailable=Boolean(catalog&&blender.configured&&!blender.error&&!uncertain&&current?.status!=='running');liveControls();
   el('recovery').hidden = !uncertain;
   el('operation-detail').textContent = current ? `${current.kind} · ${current.status} · ${current.id}` : '';
   el('blender-readiness').textContent = !blender.configured
-    ? 'Missing MCP command. Follow setup to install the matching addon and configure the upstream MCP process. Browser work remains available.'
+    ? 'Missing MCP command. Follow setup to install the matching addon and configure the upstream MCP process. Browser work, saved comparisons and downloads remain available. Configure MCP, open Blender and start the addon, then Connect / refresh; no project restart is needed.'
     : current?.status === 'running' ? 'Blender operation running. Keep external edits idle; disconnecting will not cancel it.'
     : uncertain ? current.reason
     : (blender.error || (blender.process ? `MCP process ready · addon ${blender.addon}. Refresh after external edits.` : 'MCP configured. Connect to inspect the addon and current file.'))+' Saved shots and comparisons remain available. To reconnect, open Blender, enable/start its MCP addon, then Connect / refresh here; the project needs no restart.';
@@ -26,7 +29,7 @@ async function action(fn: () => Promise<void>) {
   if (busy) return;
   busy = true; document.querySelectorAll<HTMLButtonElement>('button').forEach(b => b.disabled = true);
   try { await fn(); } catch (e) { el('status').textContent = (e as Error).message; }
-  finally { busy = false; document.querySelectorAll<HTMLButtonElement>('button').forEach(b => b.disabled = false); el<HTMLButtonElement>('save').disabled = !catalog; await readiness().catch(() => {}); }
+  finally { busy = false; document.querySelectorAll<HTMLButtonElement>('button').forEach(b => b.disabled = false); liveControls(); await readiness().catch(() => {}); }
 }
 function options(select: HTMLSelectElement, values: string[]) { select.replaceChildren(...values.map(value => { const o = document.createElement('option'); o.value = o.textContent = value; return o; })); }
 function chooseScene() { const s = catalog?.scenes.find(s => s.name === scene.value); options(camera, s?.cameras || []); if (s) { for (const k of ['start', 'frame']) el<HTMLInputElement>(k).value = String(s.start); el<HTMLInputElement>('end').value = String(s.end); el('timing').textContent = `${s.fps} fps · scene frames ${s.start}–${s.end}`; } }
@@ -37,10 +40,10 @@ function draw() {
   for (const shot of project.shots) {
     const card = document.createElement('article'), title = document.createElement('h3'), detail = document.createElement('p'), button = document.createElement('button');
     card.id = 'shot-' + shot.id; title.textContent = shot.title; detail.textContent = `${shot.binding.source==='blender'?'Blender-owned':'Browser-owned camera-study set'} · ${shot.binding.scene} / ${shot.binding.camera} · ${shot.binding.fps} fps · ${shot.binding.start}–${shot.binding.end} · preview ${shot.binding.frame}`;
-    button.textContent = 'Render & save preview'; button.onclick = () => action(async () => { el('status').textContent = 'Rendering through Blender MCP…'; project = (await api('render', { revision: project.revision, shotId: shot.id })).project; draw(); el('status').textContent = 'Preview saved against shot.'; });
+    button.dataset.blenderLive='true';button.textContent = 'Render & save preview'; button.onclick = () => action(async () => { el('status').textContent = 'Rendering through Blender MCP…'; project = (await api('render', { revision: project.revision, shotId: shot.id })).project; draw(); el('status').textContent = 'Preview saved against shot.'; });
     card.append(title, detail); if (shot.limitation) { const limit = document.createElement('p'); limit.textContent = shot.limitation; card.append(limit); }
     if (shot.binding.source === 'blender') {
-      const edit = document.createElement('button'); edit.textContent = 'Rebind camera / range';
+      const edit = document.createElement('button'); edit.dataset.blenderLive='true';edit.textContent = 'Rebind camera / range';
       edit.onclick = () => action(async () => {
         await connect(); editingShotId = shot.id; el<HTMLInputElement>('title').value = shot.title;
         if (catalog?.scenes.some(s => s.name === shot.binding.scene)) scene.value = shot.binding.scene; chooseScene();
@@ -56,7 +59,7 @@ function draw() {
     el('shots').append(card);
   }
 }
-async function connect() { const r = await api('blender/refresh', {}); catalog = r.catalog; options(scene, catalog!.scenes.map(s => s.name)); chooseScene();cameraDetail(); el('connection').textContent = `${r.serverInfo.name} · ${catalog!.file || 'Unsaved file — save in Blender first'}`; el('status').textContent = 'Scene state refreshed.'; }
+async function connect() { catalog=null;const r = await api('blender/refresh', {}); catalog = r.catalog; options(scene, catalog!.scenes.map(s => s.name)); chooseScene();cameraDetail(); el('connection').textContent = `${r.serverInfo.name} · ${catalog!.file || 'Unsaved file — save in Blender first'}`; el('status').textContent = 'Scene state refreshed.'; }
 async function reload() { const result = await api('project'); project = result.project; draw(); const state=await api('generation');const recorded=state.jobs.find((j:{id:string;status:string;results?:unknown[]})=>j.id==='1c706a23-064a-4dcc-9f4e-2c6ec6ed8a3b'&&j.status==='completed'&&j.results?.length);el('recorded-comparison').hidden=!recorded;if(recorded)el('recorded-detail').textContent='Recorded Kling O1 run: rendered source, amber-glass result and saved visual review. The result is one frame longer; original timing remains visible. This link opens the saved job.';el('status').textContent = `Project restored · revision ${project.revision}`; }
 el('refresh').onclick = () => action(reload);
 el('connect').onclick = () => action(connect);

@@ -33,6 +33,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   const resolution = document.createElement('select'); resolution.setAttribute('aria-label', 'Delivery resolution');
   for (const [value,text] of [['640','640×360 · lightweight'],['1280','1280×720 · Kling input']]) { const o=document.createElement('option');o.value=value;o.textContent=text;resolution.append(o); } resolution.value='640';
   const save = document.createElement('button'); save.textContent = 'Save new shot & beauty';
+  const savedDetail=document.createElement('small');savedDetail.setAttribute('aria-label','Saved export source');
   const status = document.createElement('span'); status.textContent = 'Browser scene · no Blender required';
   panel.append(link, title);
   for (const [axis, index] of [['X', 0], ['Y', 1], ['Z', 2]] as const) {
@@ -42,8 +43,9 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
     label.append(input); panel.append(label);
   }
   const delivery = document.createElement('small'); delivery.setAttribute('aria-label','Delivery plan');
-  panel.append(preset, usePreset, resolution, record, play, timeline, save, exportVideo, workflowLink, status, position, delivery); document.body.append(panel);
+  panel.append(preset, usePreset, resolution, record, play, timeline, save, exportVideo, workflowLink, status, position, delivery, savedDetail); document.body.append(panel);
   let savedShotId: string | undefined;
+  const showSaved = (shot:any,revision:number) => {savedDetail.textContent=`Export source: saved shot ${shot.id.slice(0,8)} · saved at revision ${shot.createdRevision??'not recorded'} · opened project revision ${revision}. Export always uses this saved scene, subject and camera motion. Live pose/subject edits are not included; save a new shot to capture changes.`;};
   let exporting = false;
   let frames: CameraFrame[] = [], recording = false, started = 0, playing = false, playhead = 0, previousTime = performance.now();
   const frame = (t: number): CameraFrame => ({ t, p: studio.pov.position.toArray(), q: studio.pov.quaternion.toArray(), mm: studio.pov.getFocalLength() });
@@ -71,7 +73,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   const pause = () => { if (playing && frames.length) adoptCamera(poseAt(playhead)); playing = false; syncTransport(); };
   resolution.onchange = () => {showDelivery();status.textContent='Delivery changed. Save a new shot before exporting; existing captures keep their original settings.';};
   usePreset.onclick = () => {
-    stop(); pause(); frames=shortCameraMove(preset.value,studio.subjectPosition(),studio.pov.getFocalLength());playhead=0;savedShotId=undefined;workflowLink.hidden=true;
+    stop(); pause(); frames=shortCameraMove(preset.value,studio.subjectPosition(),studio.pov.getFocalLength());playhead=0;savedShotId=undefined;workflowLink.hidden=true;savedDetail.textContent='Unsaved take · Replay → Save new shot → Reopen → Export saved motion. Existing captures stay unchanged.';
     adoptCamera(frames[0]);apply(frames[0]);title.value=preset.value==='crane'?'Three-second crane':'Three-second dolly';syncTransport();status.textContent='Short move ready · Replay, then save a new shot. No existing shot was changed.';
   };
   record.onclick = () => {
@@ -86,7 +88,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
       const current = await (await fetch('/api/project')).json();
       const response = await fetch('/api/browser-shot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ revision: current.project.revision, title: title.value, camera: frame(0), frames, subject: studio.subjectPosition(), delivery:selectedDelivery(), png: studio.capture().split(',')[1] }) });
       const result = await response.json(); if (!response.ok) throw Error(result.error);
-      savedShotId = result.project.shots.at(-1).id;
+      savedShotId = result.project.shots.at(-1).id;showSaved(result.project.shots.at(-1),result.project.revision);
       workflowLink.href='/index.html?shot='+savedShotId;workflowLink.textContent='Reopen saved shot';workflowLink.hidden=false;
       status.textContent = `Saved · ${frames.length} motion samples · beauty PNG`;
     } catch (e) { status.textContent = (e as Error).message; } finally { save.disabled = false; }
@@ -95,7 +97,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   if (shotId) void fetch('/api/project').then(r => r.json()).then(({ project }) => {
     const shot = project.shots.find((s: { id: string }) => s.id === shotId);
     if (!shot || shot.binding.source !== 'three') throw Error('Browser shot unavailable');
-    savedShotId = shot.id; title.value = shot.title; frames = shot.browser.frames; resolution.value=String(browserDelivery(shot.browser.delivery).width);studio.setSubjectPosition(shot.browser.subject); adoptCamera(shot.browser.camera); apply(shot.browser.camera); syncTransport();
+    savedShotId = shot.id;showSaved(shot,project.revision); title.value = shot.title; frames = shot.browser.frames; resolution.value=String(browserDelivery(shot.browser.delivery).width);studio.setSubjectPosition(shot.browser.subject); adoptCamera(shot.browser.camera); apply(shot.browser.camera); syncTransport();
     panel.querySelectorAll<HTMLInputElement>('input[type=number]').forEach((input, i) => input.value = String(shot.browser.subject[i]));
     status.textContent = 'Restored browser shot';
   }).catch(e => status.textContent = e.message);
@@ -128,6 +130,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
         }
         const { asset } = await post('finish',{stageId:stage.id});
         workflowLink.href=`/generation.html?shot=${savedShotId}&asset=${asset.id}`;workflowLink.textContent='Use this exact video in a workflow →';workflowLink.hidden=false;
+        savedDetail.textContent=`Exported immutable source ${asset.id} · version ${asset.version} · capture revision ${asset.requestRevision}. Live camera view is restored; open the workflow link to play the exact exported video.`;
         status.textContent = `Video saved: ${asset.frameCount} frames · ${asset.duration}s · ${width}×${height}. Export took ${((performance.now()-exportStarted)/1000).toFixed(1)} s. Open video workflows to review.`;
     } catch(e) { status.textContent = (e as Error).message; }
     finally {

@@ -126,8 +126,8 @@ const server = createServer(async (req, res) => {
           const browser = validateBrowser(input);
           const image = await project.image(Buffer.from(String(input.png), 'base64'));
           const id = randomUUID();
-          const binding = { source: 'three', scene: 'Camera study', camera: 'Operated camera', fps: 24, start: 0, end: Math.max(0, Math.round((browser.frames.at(-1)?.t || 0) * 24)), frame: 0 };
-          p.shots.push({ id, title: String(input.title || 'Camera study').slice(0, 160), binding, browser, renders: [image.id] });
+          const binding = { source: 'three', scene: 'Camera study', camera: 'Operated camera', fps: 24, start: 0, end: Math.max(0, Math.floor((browser.frames.at(-1)?.t || 0) * 24 + 1e-8)), frame: 0 };
+          p.shots.push({ id, title: String(input.title || 'Camera study').slice(0, 160), createdRevision: p.revision + 1, binding, browser, renders: [image.id] });
           p.renders.push({ id: image.id, shotId: id, source: 'three', pass: 'beauty', width: image.width, height: image.height, binding, createdAt: new Date().toISOString() });
           if (!p.scenes.some(s => s.owner === 'three')) p.scenes.push({ id: randomUUID(), owner: 'three', name: 'Camera study', version: 1 });
         }) };

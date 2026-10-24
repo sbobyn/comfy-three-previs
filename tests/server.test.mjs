@@ -26,9 +26,11 @@ test('HTTP boundary, shared stdio MCP and restart recovery', async () => {
   try {
     const initial = (await (await fetch(base + '/api/project')).json()).project;
     assert.equal((await fetch(base + '/api/project', { headers: { Origin: 'https://foreign.example' } })).status, 403);
-    const payload = { revision: initial.revision, title: 'Browser test', camera, subject: [0,2,-11], frames: [], png: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==' };
+    const payload = { revision: initial.revision, title: 'Browser test', camera, subject: [0,2,-11], frames: [camera,{...camera,t:2.99}], png: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==' };
     const post = () => fetch(base + '/api/browser-shot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const saved = await (await post()).json(); assert.equal(saved.project.shots.length, 1);
+    assert.equal(saved.project.shots[0].binding.end,71,'off-grid source binding matches final delivery-grid sample');
+    assert.equal(saved.project.shots[0].createdRevision,saved.project.revision);
     assert.equal((await post()).status, 409);
     const shotId = saved.project.shots[0].id;
     assert.equal((await fetch(base + '/api/handoff?shot=' + shotId + '&pass=depth')).status, 400);

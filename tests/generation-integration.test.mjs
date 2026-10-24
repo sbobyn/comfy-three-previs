@@ -143,7 +143,8 @@ async function browserFixture(h, { intercept, search = '?shot=shot' } = {}) {
     }
   }
   el('task').value = h.workflow.task; el('backend').value = 'local'; el('endpoint').value = backend.url;
-  const requests = [];
+  const requests = [],location={search};
+  const history={replaceState(_state,_title,url){location.search=url;}};
   const fetch = async (path, init) => {
     const input = init.body === undefined ? undefined : JSON.parse(init.body);
     requests.push({ path, input }); await intercept?.(path, input);
@@ -158,7 +159,7 @@ async function browserFixture(h, { intercept, search = '?shot=shot' } = {}) {
   runInNewContext(compiled, {
     exports: {}, require(name) { assert.equal(name, './previs.css'); },
     document: { getElementById: el, createElement, createTextNode: text => Object.assign(new Element('text'), { textContent: text }) },
-    HTMLSelectElement: Select, location: { search }, URLSearchParams,
+    HTMLSelectElement: Select, location, history, URLSearchParams,
     crypto: { randomUUID }, fetch,
   }, { filename: 'previs-generation.simulation.cjs' });
   await new Promise(resolve => setImmediate(resolve));
@@ -169,7 +170,7 @@ async function browserFixture(h, { intercept, search = '?shot=shot' } = {}) {
   el('prompt').input('New prompt');
   const parameter = name => descendants(el('parameters')).find(e => e.attributes['aria-label'] === name);
   const compare = () => descendants(el('jobs')).find(e => e.textContent === 'Compare source / result').click();
-  return { el, role, parameter, requests, compare };
+  return { el, role, parameter, requests, compare, location };
 }
 
 test('simulation: replacing an approved quote clears consent before awaiting the new binding', async t => {
@@ -470,4 +471,39 @@ test('simulation: absent private comparison gives a recovery instruction rather 
   const h=await fixture(t),ui=await browserFixture(h,{search:'?shot=shot&job=missing'});
   assert.match(ui.el('status').textContent,/complete project folder/);
   assert.equal(ui.el('comparison-empty').hidden,false);assert.equal(ui.el('submit').disabled,true);
+});
+
+
+test('simulation: full page reload preserves the deliberate job/output and its exact review/download',async t=>{
+  const h=await fixture(t),job=await h.complete(),ui=await browserFixture(h);
+  ui.compare();ui.el('comparison-output').change(job.results[1].id);
+  ui.el('review-notes').value='Selected second output, no replacement.';await ui.el('review').click();
+  const query=new URLSearchParams(ui.location.search);
+  assert.equal(query.get('job'),job.id);assert.equal(query.get('output'),job.results[1].id);
+  const reopened=await browserFixture(h,{search:ui.location.search});
+  assert.equal(reopened.el('comparison-output').value,job.results[1].id);
+  assert.equal(reopened.el('review-notes').value,'Selected second output, no replacement.');
+  assert.equal(reopened.el('result-download').href,job.results[1].url);
+  assert.equal(h.state.submissions.length,1);
+});
+
+test('simulation: a stale source deep link refuses fallback while the original graph stays intact',async t=>{
+  const h=await fixture(t),before=structuredClone(h.project.get().workflowDefinitions);
+  const id=randomUUID();await h.project.mutate(h.project.get().revision,p=>p.assets=[{id,shotId:'shot',kind:'video',source:'three',version:1,width:1280,height:720,frameCount:72,fps:24,duration:3,audio:false,url:'/assets/'+id+'.mp4',binding:sourceBinding}]);
+  const ui=await browserFixture(h,{search:'?shot=shot&asset=unavailable'});
+  assert.equal(ui.el('asset').value,'');assert.equal(ui.el('source').hidden,true);
+  assert.match(ui.el('asset-detail').textContent,/no other capture was substituted/);
+  assert.deepEqual(h.project.get().workflowDefinitions,before);
+  assert.equal(h.state.submissions.length,0);
+});
+
+
+test('simulation: missing comparison output never substitutes the first candidate',async t=>{
+  const h=await fixture(t),job=await h.complete();
+  const ui=await browserFixture(h,{search:'?shot=shot&job='+job.id+'&output=missing'});
+  assert.equal(ui.el('comparison-output').value,'');assert.equal(ui.el('compare-result-image').hidden,true);
+  assert.equal(ui.el('result-download').hidden,true);assert.equal(ui.el('review').disabled,true);
+  assert.match(ui.el('comparison-empty').textContent,/no candidate was substituted/);
+  ui.el('comparison-output').change(job.results[1].id);
+  assert.equal(ui.el('result-download').href,job.results[1].url);assert.equal(ui.el('review').disabled,false);
 });
