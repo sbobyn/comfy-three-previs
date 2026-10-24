@@ -1,3 +1,5 @@
+Private review: the latest bounded workstation pass is documented in [design review](docs/design-review.md). Earlier checkpoints and libraries remain preserved.
+
 # Comfy Previs
 
 A private, standalone camera-study and Blender preview app. No Otter server, editor, library, account, assistant or launcher is required.
