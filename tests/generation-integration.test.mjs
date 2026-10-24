@@ -504,6 +504,7 @@ test('simulation: missing comparison output never substitutes the first candidat
   assert.equal(ui.el('comparison-output').value,'');assert.equal(ui.el('compare-result-image').hidden,true);
   assert.equal(ui.el('result-download').hidden,true);assert.equal(ui.el('review').disabled,true);
   assert.match(ui.el('comparison-empty').textContent,/no candidate was substituted/);
+  await ui.el('reload').click();assert.equal(ui.el('comparison-output').value,'');assert.equal(ui.el('review').disabled,true);assert.equal(new URLSearchParams(ui.location.search).get('output'),'missing');
   ui.el('comparison-output').change(job.results[1].id);
   assert.equal(ui.el('result-download').href,job.results[1].url);assert.equal(ui.el('review').disabled,false);
 });

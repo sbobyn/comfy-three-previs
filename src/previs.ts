@@ -16,7 +16,7 @@ async function readiness() {
   const current = blender.operation;
   operationId = current?.id;
   const uncertain = current?.status === 'uncertain';
-  liveAvailable=Boolean(catalog&&blender.configured&&!blender.error&&!uncertain&&current?.status!=='running');liveControls();
+  liveAvailable=Boolean(catalog&&blender.configured&&blender.process&&!blender.error&&!uncertain&&current?.status!=='running');liveControls();
   el('recovery').hidden = !uncertain;
   el('operation-detail').textContent = current ? `${current.kind} · ${current.status} · ${current.id}` : '';
   el('blender-readiness').textContent = !blender.configured
