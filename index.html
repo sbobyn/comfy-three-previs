@@ -45,6 +45,15 @@
       </label>
     </div>
 
+    <section class="panel" aria-label="Camera controls">
+      <h1>Operate camera</h1>
+      <label>Controller<select id="deviceSource"><option value="keyboard">Keyboard / mouse</option><option value="gamepad">Xbox / gamepad</option><option value="phone">Phone motion + touch</option></select></label>
+      <label>Gamepad layout<select id="padLayout"><option value="game">Game · left move, right aim</option><option value="drone">RC Mode 2 · left climb/yaw</option></select></label>
+      <div class="row"><button id="deviceEnable">Enable controller</button><button id="devicePause">Pause controls</button></div>
+      <p id="deviceStatus" role="status">Choose a controller. Enable starts at the current camera pose.</p>
+      <small>Xbox: left stick move · right aim · RT up / LT down · LB slow / RB fast. A arm/record/stop · X reset starting aim · B/Escape pause. Record shot below, then save the take.</small>
+      <details><summary>Phone pairing · private LAN</summary><button id="phonePair">Create phone link</button><button id="phoneCopy" disabled>Copy private link</button><button id="phoneRevoke">Stop pairing</button><p id="phonePairStatus">Same Wi-Fi, trusted HTTPS required. Only the phone viewfinder is shared.</p><a id="phonePairLink" hidden target="_blank" rel="noreferrer">Open paired phone controller</a><a id="phoneCertificate" hidden target="_blank" rel="noreferrer">Public certificate for iPhone setup</a></details>
+    </section>
     <div class="panel" id="aimPanel">
       <h1>aim</h1>
       <label class="slider"

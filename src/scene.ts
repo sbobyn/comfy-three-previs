@@ -279,6 +279,7 @@ export function createStudio(canvas: HTMLCanvasElement, worldPane: HTMLElement):
 }
 
 export type Viewfinder = {
+  setSubjectPosition: (position: number[]) => void;
   camera: THREE.PerspectiveCamera;
   setPosition: (x: number, y: number, z: number) => void;
   setFocalLength: (mm: number) => void;
@@ -286,12 +287,7 @@ export type Viewfinder = {
   render: () => void;
 };
 
-/**
- * The same set, rendered on the phone from the operator's own sensor rather than
- * a round trip. Because the device knows where it is pointing before the desktop
- * does, this viewfinder leads the desktop view instead of lagging it — which no
- * video feed of the desktop could do.
- */
+/** Same camera-study set, synchronized from the desktop camera and subject. */
 export function createViewfinder(canvas: HTMLCanvasElement): Viewfinder {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -319,6 +315,7 @@ export function createViewfinder(canvas: HTMLCanvasElement): Viewfinder {
 
   return {
     camera,
+    setSubjectPosition: (position: number[]) => { scene.getObjectByName("previs-subject")!.position.fromArray(position); },
     setPosition: (x: number, y: number, z: number) => {
       camera.position.set(x, y, z);
     },

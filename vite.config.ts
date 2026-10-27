@@ -18,6 +18,7 @@ export default defineConfig({
     allowedHosts: [".trycloudflare.com"],
   },
   build: {
+    manifest: true,
     rollupOptions: {
       input: {
         main: "index.html",

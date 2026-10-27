@@ -121,7 +121,9 @@ test('simulation: actual TS export isolates saved trajectory and subject across 
   const liveFirst = { ...first, p: [30, 31, 32], mm: 68 }, liveLast = { ...last, p: [40, 41, 42], mm: 85 };
   const liveSubject = [8, 9, 10];
   setPose(h, liveFirst); h.studio.setSubjectPosition(liveSubject);
-  h.record.click(); h.setTime(100); setPose(h, liveLast); h.tick(); h.record.click();
+  // Live posing stays distinct from saved motion. A replacement recording now
+  // invalidates the saved export selection and is covered by its own regression.
+  h.setTime(100); setPose(h, liveLast); h.tick();
   h.title.disabled = true;
   const disabled = h.controls.map(control => control.disabled), original = h.snapshot();
   const exporting = h.exportVideo.click();
@@ -155,8 +157,8 @@ test('simulation: actual TS export isolates saved trajectory and subject across 
   assert.deepEqual(h.studio.subjectPosition(), liveSubject);
   assert.deepEqual(h.controls.map(control => control.disabled), disabled);
   assert.match(h.status.textContent, /Video saved: 3 frames/);
-  h.play.click(); h.tick(); samePose(h.snapshot(), liveFirst);
-  h.setTime(20100); h.tick(); samePose(h.snapshot(), liveLast);
+  h.play.click(); h.tick(); samePose(h.snapshot(), first);
+  h.setTime(20100); h.tick(); samePose(h.snapshot(), last);
 });
 
 for (const failAt of ['project', 'start', 'frame', 'finish']) {
@@ -240,4 +242,11 @@ test('simulation: recording after restore prioritizes saving the new take over t
   assert.equal(h.exportVideo.className,'export-action');
   const save=h.controls.find(c=>c.textContent==='Save new shot & beauty');
   assert.equal(save.className,'primary');
+});
+
+
+test('simulation: starting a new recording refuses export of the previously saved shot',async()=>{
+ const h=await fixture();h.record.click();await h.exportVideo.click();
+ assert.match(h.status.textContent,/Save a short recorded shot first/);
+ assert.equal(h.requests.length,0);assert.equal(h.captures.length,0);
 });

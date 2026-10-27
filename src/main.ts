@@ -8,7 +8,7 @@ import { OrientationSmoother, defaultSettings } from "./smoothing";
 import { Take } from "./take";
 import { addFlownDemo, demoById, demos, type Demo, type FlightSample } from "./demos";
 import { defaultFlightSettings, Drone, type FlightInput, type FlightSettings } from "./flight";
-import { activeGamepad, defaultStickSettings, readGamepad, type StickSettings } from "./gamepad";
+import { activeGamepad, availableGamepads, GamepadSession, GamepadButtons, defaultStickSettings, type GamepadLayout, type StickSettings } from "./gamepad";
 
 const canvas = element<HTMLCanvasElement>("scene");
 const fields = {
@@ -52,6 +52,7 @@ const cameraPane = element("cameraPane");
 
 const studio = createStudio(canvas, element("worldPane"));
 const updatePrevisCamera = installPrevisCamera(studio, (pose) => {
+  pauseDevice("Saved camera selected. Enable controls to operate.");
   stopPlayback(); pauseShot(); demoSelect.value = "locked"; applyDemo(demoById("locked"));
   raw.fromArray(pose.q); smoothed.copy(raw); smoother.reset(raw);
   const rotation = new THREE.Euler().setFromQuaternion(raw, "YXZ");
@@ -92,7 +93,6 @@ let lastPointerY = 0;
 
 const usingMouseAim = (): boolean => aimSourceSelect.value === "mouse";
 /** True when aiming is driven here rather than by the device's own sensor. */
-const desktopOwnsAim = (): boolean => isPiloting() || usingMouseAim();
 
 function syncAimSource(): void {
   cameraPane.classList.toggle("aiming", usingMouseAim());
@@ -228,29 +228,88 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("keyup", (event) => heldKeys.delete(event.code));
 window.addEventListener("blur", () => heldKeys.clear());
 
-const clampAxis = (value: number): number => Math.min(1, Math.max(-1, value));
-
-/** Keys and sticks sum, so either can fly and neither locks the other out. */
-function readFlightInput(): FlightInput {
-  const axis = (positive: string, negative: string): number =>
-    (heldKeys.has(positive) ? 1 : 0) - (heldKeys.has(negative) ? 1 : 0);
-
-  const keyboard: FlightInput = {
-    forward: axis("KeyW", "KeyS"),
-    lateral: axis("KeyD", "KeyA"),
-    vertical: axis("Space", "ShiftLeft"),
-    yaw: axis("KeyE", "KeyQ"),
-  };
-
-  const pad = readGamepad(sticks);
-  if (!pad) return keyboard;
-  return {
-    forward: clampAxis(keyboard.forward + pad.forward),
-    lateral: clampAxis(keyboard.lateral + pad.lateral),
-    vertical: clampAxis(keyboard.vertical + pad.vertical),
-    yaw: clampAxis(keyboard.yaw + pad.yaw),
-  };
+const deviceSource = element<HTMLSelectElement>('deviceSource');
+const padLayout = element<HTMLSelectElement>('padLayout');
+const deviceStatus = element('deviceStatus');
+const padSession = new GamepadSession();
+const padButtons = new GamepadButtons();
+const controlStartAim = new THREE.Quaternion();
+let operating = false;
+let phoneInput = noDeviceInput();
+let phoneInputAt = 0;
+let phoneReady = false;
+let phoneAligned = false;
+const phoneAlignment = new THREE.Quaternion();
+function noDeviceInput(): FlightInput { return {forward:0,lateral:0,vertical:0,yaw:0,pitch:0}; }
+function pauseDevice(reason = 'Paused. Enable controls to operate again.'): void {
+  operating = false; phoneAligned=false;phoneReady=false; heldKeys.clear(); drone.halt(); padSession.stop(reason); phoneInput = noDeviceInput();
+  deviceStatus.textContent = reason;
+  const record=document.getElementById("previsRecord") as HTMLButtonElement|null;
+  if(record?.dataset.recording==='true')record.click();
 }
+element('devicePause').addEventListener('click', () => pauseDevice());
+window.addEventListener('blur', () => pauseDevice('Window lost focus. Enable controls again.'));
+document.addEventListener('visibilitychange', () => { if (document.hidden) pauseDevice('Tab hidden. Enable controls again.'); });
+window.addEventListener('keydown', e => { if (e.code === 'Escape') pauseDevice(); });
+window.addEventListener('previs:pause-controls', () => pauseDevice('Replay/export owns the camera. Enable after finishing.'));
+deviceSource.addEventListener('change', () => pauseDevice('Controller changed. Enable to operate.'));
+padLayout.addEventListener('change', () => pauseDevice('Layout changed. Center controls and enable again.'));
+element('deviceEnable').addEventListener('click', () => {
+  pauseDevice();
+  if (deviceSource.value === 'gamepad' && !padSession.start(activeGamepad())) { deviceStatus.textContent=padSession.status; return; }
+  if (deviceSource.value === 'phone' && !controllerPresent) { deviceStatus.textContent='Pair the phone and open its controller first.'; return; }
+  if(document.body.dataset.previsPlayback==='true'||document.body.dataset.previsExporting==='true'){deviceStatus.textContent='Pause replay or finish export before enabling controls.';return;}
+  const position=studio.pov.position.clone(), orientation=studio.pov.quaternion.clone();
+  controlStartAim.copy(orientation);
+  stopPlayback();pauseShot();demoSelect.value='pilot';applyDemo(demoById('pilot'));
+  drone.adopt(position,orientation);studio.setCameraPosition(position);
+  raw.copy(orientation);smoothed.copy(raw);smoother.reset(raw); phoneAligned=false;
+  aimSourceSelect.value=deviceSource.value==='phone'?'phone':'mouse';syncAimSource();
+  operating=true;deviceStatus.textContent=deviceSource.value==='phone'?'Phone enabled. Enable motion/touch on the phone.':deviceSource.value==='gamepad'?padSession.status:'Keyboard enabled · WASD move, Q/E yaw, Space/Shift altitude.';
+});
+function recordFromController(): void {
+  if(document.body.dataset.previsPlayback==='true'||document.body.dataset.previsExporting==='true')return;
+  if(!operating){element('deviceEnable').click();return;}
+  if(deviceSource.value==='gamepad'&&!padSession.ready)return;
+  const record=document.getElementById('previsRecord') as HTMLButtonElement|null;
+  record?.click();
+}
+function handleGamepadButtons(): void {
+  const pads=availableGamepads();
+  const pad=padSession.current(pads) ?? (operating?null:activeGamepad());
+  const presses=padButtons.read(pad);
+  if(deviceSource.value!=='gamepad'||document.hidden||!document.hasFocus())return;
+  if(document.body.dataset.previsPlayback==='true')return;
+  if(presses.includes(0))recordFromController();
+  if(presses.includes(1))pauseDevice('Paused with B. Press A or Enable to operate again.');
+  if(presses.includes(2)&&operating&&padSession.ready){
+    drone.adopt(studio.pov.position,controlStartAim);raw.copy(controlStartAim);smoothed.copy(raw);smoother.reset(raw);studio.pov.quaternion.copy(raw);deviceStatus.textContent='Aim reset to the framing where controls were enabled. Position retained.';
+  }
+}
+function readFlightInput(): FlightInput {
+  if (!operating) return noDeviceInput();
+  if (deviceSource.value === 'gamepad') {
+    const input=padSession.read(availableGamepads(),sticks,padLayout.value as GamepadLayout);
+    deviceStatus.textContent=padSession.status;
+    if(!input){drone.halt();if(!padSession.current(availableGamepads()))pauseDevice(padSession.status);}
+    return input ?? noDeviceInput();
+  }
+  if (deviceSource.value === 'phone') {
+    if(!controllerPresent || (phoneReady && performance.now()-phoneInputAt>350)) { pauseDevice('Phone input stopped. Reconnect and enable controls again.');return noDeviceInput(); }
+    if(!phoneReady){drone.halt();return noDeviceInput();}
+    return phoneInput;
+  }
+  const axis=(positive:string,negative:string)=>(heldKeys.has(positive)?1:0)-(heldKeys.has(negative)?1:0);
+  return {forward:axis('KeyW','KeyS'),lateral:axis('KeyD','KeyA'),vertical:axis('Space','ShiftLeft'),yaw:axis('KeyE','KeyQ')};
+}
+const pairStatus=element('phonePairStatus'), pairLink=element<HTMLAnchorElement>('phonePairLink');
+element('phonePair').addEventListener('click', async () => {
+  try { const response=await fetch('/api/phone/pair',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); const result=await response.json();if(!response.ok)throw Error(result.error);
+    pairLink.href=result.url;pairLink.textContent='Open paired phone controller';pairLink.hidden=false;element<HTMLButtonElement>('phoneCopy').disabled=false;const certificate=element<HTMLAnchorElement>('phoneCertificate');certificate.href=new URL('/phone-ca.crt',result.url).href;certificate.hidden=false;pairStatus.textContent='Private phone link expires in 8 hours or when pairing stops. Open on iPhone Safari; trust the local certificate first. Link shares this camera-study scene only.';
+  }catch(e){pairStatus.textContent=(e as Error).message;}
+});
+element('phoneCopy').addEventListener('click', async()=>{try{await navigator.clipboard.writeText(pairLink.href);pairStatus.textContent='Private link copied. Send it to your iPhone; do not share publicly.';}catch{pairStatus.textContent='Clipboard unavailable. Use the phone link’s context menu to copy its address.';}});
+element('phoneRevoke').addEventListener('click', async () => { try {const response=await fetch('/api/phone/revoke',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});if(!response.ok)throw Error('Could not revoke pairing');pairLink.hidden=true;element<HTMLButtonElement>('phoneCopy').disabled=true;pauseDevice('Phone pairing revoked.');pairStatus.textContent='Pairing stopped.';}catch(e){pairStatus.textContent=(e as Error).message;} });
 
 bindSlider("minCutoff", (v) => `${v.toFixed(2)} Hz`);
 bindSlider("beta", (v) => v.toFixed(3));
@@ -347,7 +406,7 @@ flightRecordButton.addEventListener("click", () => {
   flightRecordButton.textContent = "Stop flight";
 });
 
-demoSelect.addEventListener("change", () => applyDemo(demoById(demoSelect.value)));
+demoSelect.addEventListener("change", () => {pauseDevice("Path changed. Enable controls to fly.");applyDemo(demoById(demoSelect.value));});
 shotPlayButton.addEventListener("click", () => {
   dollyPlaying = !dollyPlaying;
   shotPlayButton.textContent = dollyPlaying ? "Pause" : "Play";
@@ -362,6 +421,7 @@ shotDuration.addEventListener("input", () => {
 applyDemo(demos[0]);
 
 let lastRig = "";
+let lastRigAt = 0;
 
 /**
  * Pushes only what the phone cannot derive locally. Diffed rather than sent on a
@@ -373,11 +433,13 @@ function sendRig(): void {
   const payload = JSON.stringify({
     t: "rig",
     pos: [round(x), round(y), round(z)],
-    aim: desktopOwnsAim() ? [aim.x, aim.y, aim.z, aim.w] : null,
+    aim: studio.pov.quaternion.toArray(),
     format: formatSelect.value === "fill" ? null : Number(formatSelect.value),
     settings,
+    mm: studio.pov.getFocalLength(), controls: {enabled:operating,recording:document.getElementById('previsRecord')?.dataset.recording==='true'}, subject: studio.subjectPosition(),
   });
-  if (payload === lastRig) return;
+  if (payload === lastRig && performance.now()-lastRigAt<500) return;
+  lastRigAt=performance.now();
   lastRig = payload;
   if (socket?.readyState === WebSocket.OPEN) socket.send(payload);
 }
@@ -394,6 +456,7 @@ function connect(): void {
 
     if (message.t === "presence") {
       controllerPresent = message.controller;
+      if (!controllerPresent && deviceSource.value === "phone") pauseDevice("Phone disconnected. Reconnect and enable controls again.");
       kickButton.disabled = !controllerPresent;
       // A newly attached phone has no rig state, and the diff would otherwise
       // suppress the next send until something happened to change.
@@ -401,8 +464,15 @@ function connect(): void {
       return;
     }
 
+    if(message.t === "pause") {if(deviceSource.value==='phone')pauseDevice("Phone paused. Enable controls to operate again.");return;}
+    if(message.t === "record") { if(deviceSource.value==='phone' && controllerPresent)recordFromController();return; }
+    if (message.t === "control") {
+      if (operating && deviceSource.value === "phone") {phoneInput={...message.input}; phoneInputAt=performance.now();if(message.active)phoneReady=true; if(!message.active){drone.halt();phoneInput=noDeviceInput();phoneAligned=false;}}
+      return;
+    }
+    if (message.t === "recenter") {phoneAligned=false;return;}
     if (message.t === "lens") {
-      setFocalTarget(message.mm, true);
+      if (operating && deviceSource.value === "phone") setFocalTarget(message.mm, true);
       return;
     }
 
@@ -429,13 +499,16 @@ function connect(): void {
     // stay live so the HUD keeps reporting the phone.
     // Recording happens in the frame loop so it captures whatever is aiming,
     // not only the phone.
-    if (Number.isNaN(playingFrom) && !usingMouseAim()) {
-      raw.set(message.q[0], message.q[1], message.q[2], message.q[3]);
+    if (Number.isNaN(playingFrom) && !usingMouseAim() && operating && deviceSource.value==='phone') {
+      const sensor=new THREE.Quaternion().fromArray(message.q).normalize();
+      if(!phoneAligned){phoneAlignment.copy(studio.pov.quaternion).multiply(sensor.clone().invert());phoneAligned=true;}
+      raw.copy(sensor).premultiply(phoneAlignment);drone.heading=new THREE.Euler().setFromQuaternion(raw,'YXZ').y;
     }
   });
 
   socket.addEventListener("close", () => {
     socket = null;
+    if(deviceSource.value==='phone')pauseDevice("Desktop link disconnected. Reconnect and explicitly enable controls again.");
     controllerPresent = false;
     kickButton.disabled = true;
     setTimeout(connect, 1000);
@@ -556,9 +629,11 @@ setInterval(updateHud, 250);
 
 const animate = (): void => {
   const now = performance.now();
-  const dt = (now - lastFrame) / 1000;
+  const dt = Math.min(0.05,(now - lastFrame) / 1000);
   lastFrame = now;
+  if(document.body.dataset.previsExporting === "true"){requestAnimationFrame(animate);return;}
 
+  handleGamepadButtons();
   if (!Number.isNaN(playingFrom)) {
     const elapsed = now - playingFrom;
     if (elapsed > take.duration) {
@@ -577,7 +652,11 @@ const animate = (): void => {
       setFocalTarget(Math.round(head.mm), true);
     }
   } else if (isPiloting()) {
-    drone.update(readFlightInput(), dt, flight);
+    const input=readFlightInput();
+    if(operating && deviceSource.value==='phone' && (input.yaw || input.pitch)){
+      euler.setFromQuaternion(raw,'YXZ');euler.y-=input.yaw*THREE.MathUtils.degToRad(flight.yawRate)*dt;euler.x=THREE.MathUtils.clamp(euler.x+(input.pitch||0)*THREE.MathUtils.degToRad(60)*dt,-1.48,1.48);raw.setFromEuler(euler);drone.heading=euler.y;
+    }
+    if(operating) drone.update(input, dt, flight);
     studio.setCameraPosition(drone.position);
     if (flightSamples) {
       flightSamples.push({
@@ -619,7 +698,7 @@ const animate = (): void => {
   if (isPiloting()) {
     // The pilot pass owns aiming: its orientation is a flying aid, replaced
     // wholesale by the gimbal pass afterwards.
-    drone.orientation(aim, flight);
+    if(deviceSource.value === "phone") aim.copy(smoothed); else drone.orientation(aim, flight);
     studio.pov.quaternion.copy(aim);
     studio.rawPov.quaternion.copy(aim);
   } else {
@@ -632,8 +711,8 @@ const animate = (): void => {
   euler.setFromQuaternion(raw, "YXZ");
   yawDeg = THREE.MathUtils.radToDeg(euler.y);
 
-  sendRig();
   updatePrevisCamera();
+  sendRig();
   studio.render();
   requestAnimationFrame(animate);
 };

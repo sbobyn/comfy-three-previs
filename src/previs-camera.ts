@@ -20,7 +20,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   const panel = document.createElement('div');
   panel.className = 'previs-camera';
   const title = document.createElement('input'); title.value = 'Camera study'; title.setAttribute('aria-label', 'Previs shot title');
-  const record = document.createElement('button'); record.textContent = 'Record shot';
+  const record = document.createElement('button'); record.textContent = 'Record shot'; record.id='previsRecord'; record.dataset.recording='false';
   const play = document.createElement('button'); play.textContent = 'Replay motion';
   const timeline = document.createElement('input'); timeline.type = 'range'; timeline.min = '0'; timeline.max = '0'; timeline.step = String(1 / 24); timeline.setAttribute('aria-label', 'Recorded motion time');
   const position = document.createElement('output'); position.setAttribute('aria-label', 'Current camera'); position.setAttribute('aria-live','off');
@@ -82,9 +82,9 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   function apply(pose: CameraFrame) { studio.setCameraPosition(new THREE.Vector3().fromArray(pose.p)); studio.pov.quaternion.fromArray(pose.q); studio.setFocalLength(pose.mm); }
   const stop = () => {
     if (recording) { const t = Math.min(60, (performance.now() - started) / 1000); if (t > (frames.at(-1)?.t || 0)) frames.push(frame(t)); }
-    recording = false; record.textContent = 'Record shot'; syncTransport();
+    recording = false; record.dataset.recording='false'; record.textContent = 'Record shot'; syncTransport();
   };
-  const pause = () => { if (playing && frames.length) adoptCamera(poseAt(playhead)); playing = false; syncTransport(); };
+  const pause = () => { if (playing && frames.length) adoptCamera(poseAt(playhead)); playing = false; delete document.body.dataset.previsPlayback; syncTransport(); };
   resolution.onchange = () => {showDelivery();status.textContent='Delivery changed. Save a new shot before exporting; existing captures keep their original settings.';};
   usePreset.onclick = () => {
     stop(); pause(); save.className='primary';exportVideo.className='export-action';frames=shortCameraMove(preset.value,studio.subjectPosition(),studio.pov.getFocalLength());playhead=0;savedShotId=undefined;workflowLink.hidden=true;savedDetail.textContent='Unsaved take · Replay → Save new shot → Reopen → Export saved motion. Existing captures stay unchanged.';
@@ -92,12 +92,12 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   };
   record.onclick = () => {
     if (recording) { stop(); return; }
-    pause(); save.className='primary';exportVideo.className='export-action';workflowLink.hidden=true; frames = [frame(0)]; playhead = 0; recording = true; started = performance.now(); record.textContent = 'Stop shot'; syncTransport();
+    pause(); savedShotId=undefined;savedDetail.textContent='Unsaved take. Save a new shot before exporting this motion.';save.className='primary';exportVideo.className='export-action';workflowLink.hidden=true; frames = [frame(0)]; playhead = 0; recording = true; record.dataset.recording='true'; started = performance.now(); record.textContent = 'Stop shot'; syncTransport();
   };
-  play.onclick = () => { stop(); if (playing) pause(); else { playhead = 0; playing = true; previousTime = performance.now(); syncTransport(); } };
-  timeline.oninput = () => { const selectedTime = Number(timeline.value); stop(); playing = false; playhead = selectedTime; if (frames.length) { const pose = poseAt(playhead); adoptCamera(pose); apply(pose); } syncTransport(); };
+  play.onclick = () => { globalThis.dispatchEvent?.(new Event('previs:pause-controls')); stop(); if (playing) pause(); else { playhead = 0; playing = true; document.body.dataset.previsPlayback='true'; previousTime = performance.now(); syncTransport(); } };
+  timeline.oninput = () => { const selectedTime = Number(timeline.value); stop(); playing = false;delete document.body.dataset.previsPlayback; playhead = selectedTime; if (frames.length) { const pose = poseAt(playhead); adoptCamera(pose); apply(pose); } syncTransport(); };
   save.onclick = async () => {
-    stop(); pause(); save.disabled = true;
+    globalThis.dispatchEvent?.(new Event('previs:pause-controls'));stop(); pause(); save.disabled = true;
     try {
       const current = await (await fetch('/api/project')).json();
       const response = await fetch('/api/browser-shot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ revision: current.project.revision, title: title.value, camera: frame(0), frames, subject: studio.subjectPosition(), delivery:selectedDelivery(), png: studio.capture().split(',')[1] }) });
@@ -117,7 +117,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   }).catch(e => status.textContent = e.message);
   exportVideo.onclick = async () => {
     if (!savedShotId) { status.textContent = 'Save a short recorded shot first.'; return; }
-    stop(); pause(); exporting = true;
+    stop(); pause(); exporting = true; document.body.dataset.previsExporting='true';globalThis.dispatchEvent?.(new Event('previs:pause-controls'));
     const exportStarted = performance.now();
     const controls = Array.from(document.querySelectorAll<HTMLInputElement | HTMLButtonElement | HTMLSelectElement>('input,button,select'));
     const disabled = controls.map(c => c.disabled); controls.forEach(c => c.disabled = true);
@@ -150,7 +150,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
     finally {
       if (stageId) await fetch('/api/video/browser/abort', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({stageId})}).catch(() => {});
       controls.forEach((c,i) => c.disabled = disabled[i]);
-      frames = originalFrames; studio.setSubjectPosition(originalSubject); adoptCamera(original); apply(original); exporting=false; exportVideo.disabled=false; }
+      frames = originalFrames; studio.setSubjectPosition(originalSubject); adoptCamera(original); apply(original); exporting=false;delete document.body.dataset.previsExporting; exportVideo.disabled=false; }
   };
   if(new URLSearchParams(location.search).get('starter')==='dolly-3s'&&!shotId)void Promise.resolve().then(()=>{resolution.value='1280';usePreset.click();});
   syncTransport();
@@ -166,7 +166,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
     }
     if (playing && frames.length) {
       playhead = Math.min(duration(), playhead + dt); const pose = poseAt(playhead); apply(pose); timeline.value = String(playhead);
-      if (playhead >= duration()) { playing = false; adoptCamera(pose); syncTransport(); }
+      if (playhead >= duration()) { playing = false;delete document.body.dataset.previsPlayback; adoptCamera(pose); syncTransport(); }
     }
     position.textContent = `Camera ${studio.pov.position.toArray().map(x => x.toFixed(2)).join(', ')} · ${studio.pov.getFocalLength().toFixed(1)} mm · ${playhead.toFixed(2)} s`;
     panel.dataset.camera = JSON.stringify(frame(playhead));

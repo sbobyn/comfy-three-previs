@@ -6,7 +6,7 @@ import ts from 'typescript';
 
 // Exercise the actual keyboard listeners without creating a renderer or device.
 const source=await readFile(new URL('../src/main.ts',import.meta.url),'utf8');
-const listeners=source.slice(source.indexOf('const typingInto ='),source.indexOf('const clampAxis ='));
+const listeners=source.slice(source.indexOf('const typingInto ='),source.indexOf('const deviceSource ='));
 const compiled=ts.transpileModule(listeners,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
 test('pilot movement survives button focus while Space/Enter keep native control activation',()=>{
   class Element {constructor(tagName,type){this.tagName=tagName;this.type=type;}}

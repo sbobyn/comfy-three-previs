@@ -11,6 +11,10 @@ export const REPLACED_BY_NEWER = 4000;
 export const EVICTED_BY_VIEWER = 4001;
 
 export type PhoneMessage =
+  | { t: "control"; active: boolean; input: {forward:number;lateral:number;vertical:number;yaw:number;pitch:number} }
+  | { t: "recenter" }
+  | { t: "record" }
+  | { t: "pause" }
   | { t: "q"; q: [number, number, number, number] }
   | { t: "lens"; mm: number }
   | { t: "pong"; id: number };
@@ -43,9 +47,11 @@ export type ViewerMessage =
       aim: [number, number, number, number] | null;
       format: number | null;
       settings: SmoothingSettings;
+      controls?: {enabled:boolean;recording:boolean};
+      mm?: number; subject?: number[];
     };
 
 export function relayUrl(role: "phone" | "viewer"): string {
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${location.host}${RELAY_PATH}?role=${role}`;
+  return `${protocol}//${location.host}${RELAY_PATH}?role=${role}${role === "phone" && location.hash ? "&token=" + encodeURIComponent(location.hash.slice(1)) : ""}`;
 }

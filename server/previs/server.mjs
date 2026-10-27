@@ -1,3 +1,4 @@
+import { startPhoneLan } from './phone-lan.mjs';
 import { attachRelay } from '../../dist-server/relay.js';
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -51,6 +52,7 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
+    if (req.method === 'GET' && url.pathname === '/api/phone') return send(phoneLan.readiness());
     if (req.method === 'GET' && url.pathname === '/api/generation') return send(generation.state());
     if (req.method === 'GET' && url.pathname === '/api/project') return send({ project: project.get(), catalog, blender: blenderReadiness(), comfyJobs: comfy.list() });
     if (req.method === 'GET' && url.pathname === '/api/readiness') return send({ blender: blenderReadiness(), comfy: comfy.readiness(), browser: { available: true, scope: 'Editable camera-study set' } });
@@ -67,6 +69,8 @@ const server = createServer(async (req, res) => {
       if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       const input = await body(req);
       const result = await serial(async () => {
+        if (url.pathname === '/api/phone/pair') return phoneLan.pair();
+        if (url.pathname === '/api/phone/revoke') { phoneLan.revoke(); return {revoked:true}; }
         if (url.pathname.startsWith('/api/generation/')) return generation.route(url.pathname,input);
         if (url.pathname.startsWith('/api/video/')) return videos(url.pathname,input);
         if (url.pathname === '/api/transfer') {
@@ -174,7 +178,8 @@ const server = createServer(async (req, res) => {
     res.writeHead(range ? 206 : 200, { ...(media ? {'Accept-Ranges':'bytes','Content-Length':end-start+1,...(range ? {'Content-Range':`bytes ${start}-${end}/${bytes.length}`} : {})} : {}), 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(range ? bytes.subarray(start,end+1) : bytes);
   } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
-attachRelay(server);
+const relay = attachRelay(server);
+const phoneLan = await startPhoneLan({root,relay});
 server.listen(port, '127.0.0.1', () => console.log(`Comfy Previs: http://127.0.0.1:${port}`));
-async function stop() { blender.close(); server.close(); await releaseLock(); process.exit(0); }
+async function stop() { phoneLan.close();relay.close();blender.close(); server.close(); await releaseLock(); process.exit(0); }
 process.on('SIGTERM', stop); process.on('SIGINT', stop);
