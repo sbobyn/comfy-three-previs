@@ -85,3 +85,12 @@ test('actual main simulation: keyboard flight supports pointer aim and pause fre
  h.elements.cameraPane.dispatch('pointerdown',{pointerId:1,clientX:0,clientY:0});h.elements.cameraPane.dispatch('pointermove',{clientX:40,clientY:20});h.tick();assert.ok(before.angleTo(h.studio.pov.quaternion)>0.01);
  h.elements.devicePause.click();const paused=h.studio.pov.quaternion.clone();h.elements.cameraPane.dispatch('pointermove',{clientX:80,clientY:40});h.tick();assert.ok(paused.angleTo(h.studio.pov.quaternion)<1e-7);
 });
+
+test('actual main simulation: leaving phone/gamepad pilot restores pointer aim on a camera path',()=>{
+ for(const source of ['phone','gamepad']){
+  const h=fixture();h.elements.deviceSource.value=source;h.message({t:'presence',controller:true});
+  h.pads.push({connected:true,index:0,id:'Xbox',mapping:'standard',axes:[0,0,0,0],buttons:Array.from({length:17},()=>({value:0,pressed:false}))});h.enable();h.tick();
+  h.elements.demo.value='track';h.elements.demo.dispatch('change');h.tick();const before=h.studio.pov.quaternion.clone();
+  assert.equal(h.elements.aimSource.value,'mouse');h.elements.cameraPane.dispatch('pointerdown',{pointerId:1,clientX:0,clientY:0});h.elements.cameraPane.dispatch('pointermove',{clientX:40,clientY:20});h.tick();assert.ok(before.angleTo(h.studio.pov.quaternion)>0.001);
+ }
+});

@@ -370,6 +370,7 @@ function pauseShot(): void {
 
 function applyDemo(next: Demo): void {
   demo = next;
+  if(!isPiloting()){aimSourceSelect.value="mouse";syncAimSource();}
   studio.setDemo(demo);
   pauseShot();
   const movable = demo.path !== null;
