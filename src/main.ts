@@ -98,6 +98,7 @@ function syncAimSource(): void {
   cameraPane.classList.toggle("aiming", usingMouseAim());
 }
 aimSourceSelect.value = "mouse";
+aimSourceSelect.disabled = true;
 aimSourceSelect.addEventListener("change", syncAimSource);
 syncAimSource();
 
@@ -108,6 +109,7 @@ mouseSens.addEventListener("input", () => {
 // Dragged like a stick rather than like the image: pulling right pans right, so
 // the control matches the phone it stands in for.
 cameraPane.addEventListener("pointerdown", (event) => {
+  if(isPiloting() && (!operating || deviceSource.value!=="keyboard"))return;
   dragging = true;
   lastPointerX = event.clientX;
   lastPointerY = event.clientY;
@@ -116,6 +118,7 @@ cameraPane.addEventListener("pointerdown", (event) => {
 cameraPane.addEventListener("pointermove", (event) => {
   if (!dragging) return;
   const sensitivity = Number(mouseSens.value);
+  if(isPiloting() && operating && deviceSource.value==='keyboard')drone.look(THREE.MathUtils.degToRad(-(event.clientX-lastPointerX)*sensitivity),THREE.MathUtils.degToRad(-(event.clientY-lastPointerY)*sensitivity));
   mouseYaw -= (event.clientX - lastPointerX) * sensitivity;
   mousePitch = Math.min(
     85,
@@ -242,7 +245,9 @@ let phoneAligned = false;
 const phoneAlignment = new THREE.Quaternion();
 function noDeviceInput(): FlightInput { return {forward:0,lateral:0,vertical:0,yaw:0,pitch:0}; }
 function pauseDevice(reason = 'Paused. Enable controls to operate again.'): void {
-  operating = false; phoneAligned=false;phoneReady=false; heldKeys.clear(); drone.halt(); padSession.stop(reason); phoneInput = noDeviceInput();
+  operating = false; phoneAligned=false;phoneReady=false; heldKeys.clear();
+  raw.copy(studio.pov.quaternion);smoothed.copy(raw);smoother.reset(raw);drone.adopt(studio.pov.position,raw);
+  const pausedAngles=new THREE.Euler().setFromQuaternion(raw,'YXZ');mouseYaw=THREE.MathUtils.radToDeg(pausedAngles.y);mousePitch=THREE.MathUtils.radToDeg(pausedAngles.x);mouseRoll=pausedAngles.z; padSession.stop(reason); phoneInput = noDeviceInput();
   deviceStatus.textContent = reason;
   const record=document.getElementById("previsRecord") as HTMLButtonElement|null;
   if(record?.dataset.recording==='true')record.click();
@@ -264,7 +269,7 @@ element('deviceEnable').addEventListener('click', () => {
   stopPlayback();pauseShot();demoSelect.value='pilot';applyDemo(demoById('pilot'));
   drone.adopt(position,orientation);studio.setCameraPosition(position);
   raw.copy(orientation);smoothed.copy(raw);smoother.reset(raw); phoneAligned=false;
-  aimSourceSelect.value=deviceSource.value==='phone'?'phone':'mouse';syncAimSource();
+  aimSourceSelect.value=deviceSource.value==='phone'?'phone':deviceSource.value==='gamepad'?'gamepad':'mouse';syncAimSource();
   operating=true;deviceStatus.textContent=deviceSource.value==='phone'?'Phone enabled. Enable motion/touch on the phone.':deviceSource.value==='gamepad'?padSession.status:'Keyboard enabled · WASD move, Q/E yaw, Space/Shift altitude.';
 });
 function recordFromController(): void {
@@ -656,7 +661,7 @@ const animate = (): void => {
     if(operating && deviceSource.value==='phone' && (input.yaw || input.pitch)){
       euler.setFromQuaternion(raw,'YXZ');euler.y-=input.yaw*THREE.MathUtils.degToRad(flight.yawRate)*dt;euler.x=THREE.MathUtils.clamp(euler.x+(input.pitch||0)*THREE.MathUtils.degToRad(60)*dt,-1.48,1.48);raw.setFromEuler(euler);drone.heading=euler.y;
     }
-    if(operating) drone.update(input, dt, flight);
+    if(operating && (deviceSource.value!=='gamepad'||padSession.ready) && (deviceSource.value!=='phone'||phoneReady)) drone.update(input, dt, flight);
     studio.setCameraPosition(drone.position);
     if (flightSamples) {
       flightSamples.push({
@@ -685,7 +690,7 @@ const animate = (): void => {
   focalCurrent += (focalTarget - focalCurrent) * zoomBlend;
   studio.setFocalLength(focalCurrent);
 
-  if (usingMouseAim() && Number.isNaN(playingFrom)) {
+  if (usingMouseAim() && Number.isNaN(playingFrom) && (!isPiloting() || (operating && deviceSource.value==='keyboard'))) {
     euler.set(THREE.MathUtils.degToRad(mousePitch), THREE.MathUtils.degToRad(mouseYaw), mouseRoll, "YXZ");
     raw.setFromEuler(euler);
   }

@@ -72,3 +72,16 @@ test('actual main simulation: stale phone control stops the take and requires re
  assert.equal(h.elements.previsRecord.dataset.recording,'false');assert.match(h.elements.deviceStatus.textContent,/Phone input stopped/);
  const position=h.studio.pov.position.clone();h.message({t:'control',active:true,input:{forward:1,lateral:0,vertical:0,yaw:0,pitch:0}});h.tick();assert.equal(h.studio.pov.position.distanceTo(position),0);
 });
+test('actual main simulation: switching phone to gamepad preserves current aim until Enable',()=>{
+ const h=fixture();h.elements.deviceSource.value='phone';h.message({t:'presence',controller:true});h.enable();
+ h.message({t:'q',q:[0,0,0,1]});h.message({t:'control',active:true,input:{forward:0,lateral:0,vertical:0,yaw:0,pitch:0}});
+ h.message({t:'q',q:new THREE.Quaternion().setFromEuler(new THREE.Euler(.5,.4,.2)).toArray()});for(let i=0;i<10;i++)h.tick();
+ const before=h.studio.pov.quaternion.clone();h.elements.deviceSource.value='gamepad';h.elements.deviceSource.dispatch('change');h.tick();
+ assert.ok(before.angleTo(h.studio.pov.quaternion)<1e-7);
+});
+
+test('actual main simulation: keyboard flight supports pointer aim and pause freezes it',()=>{
+ const h=fixture();h.elements.deviceSource.value='keyboard';h.enable();const before=h.studio.pov.quaternion.clone();
+ h.elements.cameraPane.dispatch('pointerdown',{pointerId:1,clientX:0,clientY:0});h.elements.cameraPane.dispatch('pointermove',{clientX:40,clientY:20});h.tick();assert.ok(before.angleTo(h.studio.pov.quaternion)>0.01);
+ h.elements.devicePause.click();const paused=h.studio.pov.quaternion.clone();h.elements.cameraPane.dispatch('pointermove',{clientX:80,clientY:40});h.tick();assert.ok(paused.angleTo(h.studio.pov.quaternion)<1e-7);
+});

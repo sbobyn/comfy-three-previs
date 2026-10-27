@@ -54,6 +54,11 @@ export class Drone {
     this.heading = euler.y; this.pitch = euler.x; this.bankAngle = euler.z; this.halt();
   }
 
+  look(yaw: number, pitch: number): void {
+    this.heading += yaw;
+    this.pitch = THREE.MathUtils.clamp((this.pitch ?? 0) + pitch, -Math.PI * 85 / 180, Math.PI * 85 / 180);
+  }
+
   halt(): void { this.velocity.set(0, 0, 0); }
 
   reset(): void {
