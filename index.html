@@ -51,6 +51,7 @@
       <label>Gamepad layout<select id="padLayout"><option value="game">Game · left move, right aim</option><option value="drone">RC Mode 2 · left climb/yaw</option></select></label>
       <div class="row"><button id="deviceEnable">Enable controller</button><button id="devicePause">Pause controls</button></div>
       <p id="deviceStatus" role="status">Choose a controller. Enable starts at the current camera pose.</p>
+      <p class="note">Keyboard: Enable controller, then focus the camera view. WASD move · Q/E yaw · Space/Left Shift up/down · drag to aim · Escape pauses. Record shot → Stop shot → Save new shot.</p>
       <small>Xbox: left stick move · right aim · RT up / LT down · LB slow / RB fast. A arm/record/stop · X reset starting aim · B/Escape pause. Record shot below, then save the take.</small>
       <details><summary>Phone pairing · private LAN</summary><button id="phonePair">Create phone link</button><button id="phoneCopy" disabled>Copy private link</button><button id="phoneRevoke">Stop pairing</button><p id="phonePairStatus">Same Wi-Fi, trusted HTTPS required. Only the phone viewfinder is shared.</p><a id="phonePairLink" hidden target="_blank" rel="noreferrer">Open paired phone controller</a><a id="phoneCertificate" hidden target="_blank" rel="noreferrer">Public certificate for iPhone setup</a></details>
     </section>

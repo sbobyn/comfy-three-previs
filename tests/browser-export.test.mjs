@@ -250,3 +250,13 @@ test('simulation: starting a new recording refuses export of the previously save
  assert.match(h.status.textContent,/Save a short recorded shot first/);
  assert.equal(h.requests.length,0);assert.equal(h.captures.length,0);
 });
+
+test('simulation: stopping a take clears recording status without claiming it is saved',async()=>{
+ const h=await fixture();h.record.click();h.setTime(500);h.tick();
+ assert.match(h.status.textContent,/Recording/);
+ h.record.click();
+ assert.equal(h.record.dataset.recording,'false');
+ assert.match(h.status.textContent,/^Stopped .*save a new shot/);
+ assert.equal(h.requests.length,0);
+ h.tick();assert.match(h.status.textContent,/^Stopped /);
+});

@@ -81,7 +81,7 @@ export function installPrevisCamera(studio: Studio, adoptCamera: (frame: CameraF
   }
   function apply(pose: CameraFrame) { studio.setCameraPosition(new THREE.Vector3().fromArray(pose.p)); studio.pov.quaternion.fromArray(pose.q); studio.setFocalLength(pose.mm); }
   const stop = () => {
-    if (recording) { const t = Math.min(60, (performance.now() - started) / 1000); if (t > (frames.at(-1)?.t || 0)) frames.push(frame(t)); }
+    if (recording) { const t = Math.min(60, (performance.now() - started) / 1000); if (t > (frames.at(-1)?.t || 0)) frames.push(frame(t)); status.textContent = `Stopped · ${frames.length} motion samples · Replay, then save a new shot.`; }
     recording = false; record.dataset.recording='false'; record.textContent = 'Record shot'; syncTransport();
   };
   const pause = () => { if (playing && frames.length) adoptCamera(poseAt(playhead)); playing = false; delete document.body.dataset.previsPlayback; syncTransport(); };
