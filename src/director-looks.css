@@ -1,0 +1,50 @@
+/* Looks board. Uses the variables from director.css. */
+dialog.looks { width: min(1240px, 96vw); height: min(880px, 92vh); padding: 0; display: none; flex-direction: column; }
+dialog.looks[open] { display: flex; }
+.lk-body-wrap { flex: 1; min-height: 0; overflow: auto; padding: 14px 18px 22px; display: flex; flex-direction: column; gap: 12px; }
+.lk-style { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius); }
+.lk-style label { display: flex; flex-direction: column; gap: 5px; }
+.lk-style textarea { min-height: 52px; resize: vertical; }
+.lk-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; position: sticky; top: -14px; z-index: 2; background: var(--panel); padding: 8px 0; }
+.lk-check, .lk-field { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.lk-field select { width: auto; }
+.lk-batch { padding: 10px 12px; border: 1px solid var(--line-2); background: var(--panel-2); border-radius: var(--radius); display: flex; flex-direction: column; gap: 8px; }
+.lk-batch[hidden] { display: none; }
+.lk-batch-head { display: flex; align-items: center; gap: 10px; font-size: 12.5px; }
+.lk-quote { width: 100%; border-collapse: collapse; font-size: 12px; }
+.lk-quote td { padding: 4px 6px; border-top: 1px solid var(--line); }
+.lk-quote td.ok { color: var(--ok); } .lk-quote tr.skip td { color: var(--faint); }
+.lk-approve { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 12px; }
+.lk-approve label { display: flex; align-items: center; gap: 6px; }
+.lk-log { display: flex; flex-direction: column; gap: 3px; font: 12px/1.5 var(--mono); max-height: 150px; overflow: auto; }
+.lk-log .ok { color: var(--ok); } .lk-log .err { color: var(--bad); } .lk-log .muted { color: var(--muted); }
+
+.lk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.lk-card { display: flex; flex-direction: column; border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius); overflow: hidden; }
+.lk-card.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.lk-img { position: relative; aspect-ratio: 4 / 3; background: #0a0c0f; display: grid; place-items: center; }
+.lk-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.lk-ph { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--faint); font-size: 12px; }
+.lk-ph svg { width: 40px; height: 40px; }
+.lk-card.empty .lk-img { background: repeating-linear-gradient(135deg, #0d0f13 0 10px, #101318 10px 20px); }
+.lk-pick { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.55); border-radius: 6px; padding: 3px 4px; display: flex; }
+.lk-count, .lk-run { position: absolute; bottom: 8px; font-size: 11px; padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,.65); color: #fff; }
+.lk-count { right: 8px; } .lk-run { left: 8px; color: var(--camera); }
+.lk-body { padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.lk-name { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.lk-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lk-name .muted { font-size: 11px; white-space: nowrap; }
+.lk-shots { font-size: 11px; color: var(--muted); }
+.lk-body textarea { font-size: 12px; min-height: 56px; resize: vertical; }
+.lk-row { display: flex; gap: 6px; align-items: center; }
+.lk-row select { height: 28px; font-size: 12px; }
+
+/* Render dialog: reference preview */
+.gen-refs-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.gen-ref { display: flex; flex-direction: column; gap: 2px; width: 64px; font-size: 10.5px; color: var(--muted); }
+.gen-ref img { width: 64px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line-2); }
+.gen-ref small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.lk-share { display: inline-flex; gap: 6px; align-items: center; }
+.lk-share select { width: auto; max-width: 220px; height: 30px; }
+.lk-body select.field { height: 28px; font-size: 12px; }

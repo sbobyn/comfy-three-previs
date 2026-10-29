@@ -55,7 +55,7 @@ export function validateWorkflowDefinition(input) {
     if (targets.has(key)) fail(`Duplicate mapping target ${key}`);
     targets.add(key);
   }
-  if (Object.keys(result.inputs).some(name => !semantics.includes(name))) fail('Unknown semantic input mapping');
+  if (Object.keys(result.inputs).some(name => !semantics.includes(name) && !/^referenceImage[1-9]$/.test(name))) fail('Unknown semantic input mapping');
   if (result.task === 'transform-video' && !result.inputs.sourceVideo) fail('transform-video requires sourceVideo');
   if (result.task === 'control-video' && (!result.inputs.controlVideo || typeof result.inputs.controlVideo.pass !== 'string' || !result.inputs.controlVideo.pass)) fail('control-video requires an explicit controlVideo pass');
   if (result.task === 'first-frame' && !result.inputs.firstFrame) fail('first-frame requires firstFrame');
@@ -75,6 +75,13 @@ export function inputSchema(schema, inputs) {
   function expand(groups, prefix = '') {
     for (const group of ['required', 'optional']) for (const [name, spec] of Object.entries(groups?.[group] || {})) {
       const key = prefix + name;
+      // Auto-grow groups (e.g. images → images.image_1 … image_14): expand to their named slots;
+      // only the first `min` slots are required and the group key itself is never sent.
+      if (spec?.[0] === 'COMFY_AUTOGROW_V3') {
+        const template = spec[1]?.template || {}, inner = Object.values(template.input?.required || {})[0];
+        (template.names || []).forEach((slot, i) => { fields[`${key}.${slot}`] = { spec: inner, required: i < (template.min || 0) }; });
+        continue;
+      }
       fields[key] = { spec, required: group === 'required' };
       if (spec?.[0] === 'COMFY_DYNAMICCOMBO_V3') {
         const branch = spec[1]?.options?.find(option => option.key === inputs[key]);
@@ -152,7 +159,7 @@ export function validateGraph(graph, objectInfo, { deferredInputs = [] } = {}) {
 
 // Cost classification is about upstream local operations, never model names.
 // Custom replacements, API markers, pricing badges and Cloud stay unknown.
-const safeNativeModules = { LoadImage: 'nodes', SaveImage: 'nodes', ImageInvert: 'nodes', ImageScale: 'nodes', CheckpointLoaderSimple: 'nodes', CLIPTextEncode: 'nodes', VAEEncode: 'nodes', KSampler: 'nodes', VAEDecode: 'nodes', LoadVideo: 'comfy_extras.nodes_video', GetVideoComponents: 'comfy_extras.nodes_video', CreateVideo: 'comfy_extras.nodes_video', SaveVideo: 'comfy_extras.nodes_video' };
+const safeNativeModules = { LoadImage: 'nodes', SaveImage: 'nodes', ImageInvert: 'nodes', ImageScale: 'nodes', CheckpointLoaderSimple: 'nodes', CLIPTextEncode: 'nodes', VAEEncode: 'nodes', KSampler: 'nodes', VAEDecode: 'nodes', EmptyLatentImage: 'nodes', ImageBatch: 'nodes', LoadVideo: 'comfy_extras.nodes_video', GetVideoComponents: 'comfy_extras.nodes_video', CreateVideo: 'comfy_extras.nodes_video', SaveVideo: 'comfy_extras.nodes_video' };
 export function workflowCost(graph, objectInfo, backend) {
   const nodes = Object.entries(graph).map(([nodeId, node]) => {
     const schema = objectInfo[node.class_type];

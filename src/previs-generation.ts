@@ -30,9 +30,9 @@ function showRenderTiming(){const s=pickedShot();if(!s)return;const count=s.bind
 function showShot() {
   const s=pickedShot();el('empty-author').hidden=Boolean(s);if(!s){el('source-empty').textContent='No saved shots yet. Start a browser dolly without Blender, or bind an existing Blender scene from Scenes & shots.';el('render-controls').hidden=true;return;}
   const author=el<HTMLAnchorElement>('author-shot');author.href=s.binding.source==='three'?'/index.html?shot='+s.id:'/#shot-'+s.id;author.textContent=s.binding.source==='three'?'Open saved camera motion →':'Inspect or rebind this Blender shot →';el('render-controls').hidden=s.binding.source!=='blender';
-  el('scene-owner').textContent=s.binding.source==='three'?'Browser scene · camera-study set':'Blender scene · original file is authoritative';
+  el('scene-owner').textContent=s.binding.source==='three'?(s.browser?.director?'Director blockout · '+s.binding.scene:'Browser scene · camera-study set'):'Blender scene · original file is authoritative';
   el('current-binding').textContent='Current shot · '+ownership({...s.binding,file:undefined},s.browser);
-  el('shot-detail').textContent=`Current shot · ${s.title}. ${ownership(s.binding,s.browser)}. Blender-authored content stays in Blender; browser shots use the camera-study set.`;
+  el('shot-detail').textContent=`Current shot · ${s.title}. ${ownership(s.binding,s.browser)}. Blender-authored content stays in Blender; browser shots use ${s.browser?.director?'the director blockout snapshot':'the camera-study set'}.`;
   el('framing').hidden=true;el('framing').removeAttribute('src');
   showRenderTiming();
   el<HTMLButtonElement>('render-video').disabled=s.binding.source!=='blender';el<HTMLButtonElement>('preview').disabled=s.binding.source!=='blender';
@@ -186,7 +186,7 @@ field('seek').oninput=seekComparison;
 for(const id of ['compare-source','compare-result'])video(id).onended=()=>{el('playback-position').textContent=`${id==='compare-source'?'Source':'Result'} ended at ${video(id).duration.toFixed(3)} s. Each clip stops at its own duration.`;};
 el('review').onclick=()=>action(async()=>{if(!reviewedJob)throw Error('Choose a completed comparison');project=(await api('generation/review',{revision:project.revision,jobId:reviewedJob.id,resultIds:[select('comparison-output').value],visuallyReviewed:true,notes:field('review-notes').value})).project;el('status').textContent='Visual review saved against exact output identities.';el('saved-review').textContent='Saved review · '+project.reviews.at(-1).createdAt;});
 el('endpoint-label').hidden=select('backend').value!=='local';
-field('prompt').value='Transform the main blue subject into luminous amber glass with swirling golden clouds. Preserve its silhouette, the supplied camera motion, perspective, framing, object positions and background parallax. Cinematic studio lighting, stable geometry, consistent materials, no added camera motion, no cuts, no text.';
+field('prompt').value=new URLSearchParams(location.search).get('prompt')||'Transform the main blue subject into luminous amber glass with swirling golden clouds. Preserve its silhouette, the supplied camera motion, perspective, framing, object positions and background parallax. Cinematic studio lighting, stable geometry, consistent materials, no added camera motion, no cuts, no text.';
 void action(reload);
 
 // Keep sticky progress clear of keyboard-focused controls, including wrapped errors.

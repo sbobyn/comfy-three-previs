@@ -349,3 +349,16 @@ test('declared timing/framing changes require a fresh explicit binding acknowled
   assert.notEqual(after.fingerprint,before.fingerprint);
   assert.equal(f.state.submits,0);
 });
+
+test('auto-grow input groups expand to named slots and are optional', async () => {
+  const { validateGraph } = await import('../server/previs/workflows.mjs');
+  const objectInfo = {
+    LoadImage: { input: { required: { image: [['a.png'], { image_upload: true }] } }, output: ['IMAGE'], python_module: 'nodes' },
+    Gen: { input: { required: { prompt: ['STRING', {}], model: ['COMFY_DYNAMICCOMBO_V3', { options: [{ key: 'm1', inputs: { required: { images: ['COMFY_AUTOGROW_V3', { template: { input: { required: { image: ['IMAGE', {}] } }, names: ['image_1', 'image_2'], min: 0 } }] } } }] }] } }, output: ['IMAGE'], python_module: 'x' },
+  };
+  assert.equal(validateGraph({ 1: { class_type: 'Gen', inputs: { prompt: 'p', model: 'm1' } } }, objectInfo).compatible, true, 'an empty auto-grow group is fine');
+  const linked = validateGraph({ 0: { class_type: 'LoadImage', inputs: { image: 'a.png' } }, 1: { class_type: 'Gen', inputs: { prompt: 'p', model: 'm1', 'model.images.image_1': ['0', 0] } } }, objectInfo);
+  assert.equal(linked.compatible, true, JSON.stringify(linked.issues));
+  const bad = validateGraph({ 1: { class_type: 'Gen', inputs: { prompt: 'p', model: 'm1', 'model.images.image_9': 'x' } } }, objectInfo);
+  assert.equal(bad.compatible, false, 'unknown slots are still rejected');
+});
