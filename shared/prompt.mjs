@@ -30,8 +30,8 @@ export function shotStyle(shot) {
 }
 
 // Colours: fixed per field, a rotating set per object. Labels always travel with colours.
-export const FIELD_COLORS = { action: '#e7e9ec', world: '#7fd1a8', style: '#f0a3ff', camera: '#ffb547', movement: '#ffcf70', cuts: '#ff8f6b', lens: '#7cc8ff', filter: '#c4a1ff' };
-const OBJECT_COLORS = ['#8b9bff', '#ff7aa8', '#5fd4d4', '#ffd166', '#9be564', '#ff9f43', '#c084fc', '#4fd18b'];
+export const FIELD_COLORS = { action: '#15130F', world: '#2E7D5B', style: '#8A4CB8', camera: '#C8401F', movement: '#B5651D', cuts: '#A33E6E', lens: '#2F6DB5', filter: '#6D5BC2' };
+const OBJECT_COLORS = ['#3B5BA9', '#B33A5E', '#1F7F8A', '#9A6A0C', '#4E8A2B', '#C2611E', '#7A4FC9', '#2F7A4E'];
 
 /**
  * Tagged segments for a shot. kind 'video' (motion, for LTX) or 'image' (a still, for FLUX).

@@ -48,3 +48,6 @@ dialog.looks[open] { display: flex; }
 .lk-share { display: inline-flex; gap: 6px; align-items: center; }
 .lk-share select { width: auto; max-width: 220px; height: 30px; }
 .lk-body select.field { height: 28px; font-size: 12px; }
+
+/* Beret Labs theme */
+.lk-card { background: var(--card); border-color: var(--line); box-shadow: var(--sh-1); } .lk-card.on { box-shadow: 0 0 0 2px var(--ink); } .lk-style { background: var(--paper-2); } .lk-run { background: var(--accent); color: var(--accent-ink); }

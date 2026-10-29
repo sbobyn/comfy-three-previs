@@ -100,7 +100,7 @@ async function render() {
     h('main', { class: 'launch-main' },
       h('section', { class: 'launch-hero' },
         h('div', {},
-          h('div', { class: 'eyebrow' }, 'Three.js previs'),
+          h('div', { class: 'eyebrow' }, 'Previs for filmmakers'),
           h('h1', {}, 'Direct the scene.', h('br'), h('span', { class: 'muted' }, 'Then hand it to Comfy.')),
           h('p', {}, 'Block out a scene, describe each shot to your agent, drop in image references, preview the camera — and send the exact camera render to a Comfy workflow.')),
         h('div', { class: 'journey', 'aria-label': 'Journey' }, ...['Block out', 'Describe shots', 'Reference', 'Preview camera', 'Render workflow'].map((s, i) => h('span', {}, h('b', {}, String(i + 1).padStart(2, '0')), s)))),

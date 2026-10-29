@@ -26,3 +26,17 @@
 .ap-tag { font-size: 11.5px; padding: 2px 8px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--text); cursor: pointer; }
 .ap-tag:hover { border-color: var(--bad); }
 .ap-sgroup select { width: auto; height: 26px; font-size: 11.5px; padding: 2px 6px; }
+
+/* Beret Labs theme */
+.ap-chip { height: 24px; padding: 0 9px 0 7px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 35%, var(--line)); background: color-mix(in srgb, var(--c) 8%, var(--card)); color: var(--ink); font-size: var(--fs-xs); font-weight: 500; }
+.ap-chip small { color: var(--ink-3); }
+.ap-view, .ap-col .ap-text { background: var(--card); border-color: var(--line); padding: 12px 14px; font-size: var(--fs-sm); line-height: 1.75; color: var(--ink-2); }
+.ap-span { color: var(--ink); background: color-mix(in srgb, var(--c) 9%, transparent); border-bottom: 0; box-shadow: inset 0 -1.5px 0 color-mix(in srgb, var(--c) 70%, transparent); }
+.ap-span:hover { background: color-mix(in srgb, var(--c) 22%, transparent); }
+.ap-plain { text-decoration: underline dotted var(--ink-4); text-underline-offset: 3px; }
+.ap-auto { color: var(--ink-2); background: var(--paper-2); border: 0; }
+.ap-edited { background: var(--accent); color: var(--accent-ink); }
+.ap-block.is-edited .ap-view { border-left: 3px solid var(--accent); }
+.ap-tag { border-radius: 7px; background: color-mix(in srgb, var(--c) 7%, var(--card)); border-color: color-mix(in srgb, var(--c) 35%, var(--line)); color: var(--ink); }
+.ap-sname { color: var(--ink-3); }
+

@@ -86,3 +86,13 @@
 .sq-seam-l, .sq-seam-r { position: absolute; top: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; background: rgba(0,0,0,.6); color: #fff; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
 .sq-seam-l { right: 10px; } .sq-seam-r { left: 10px; }
 .sq-seam:focus-visible .sq-seam-grip { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Beret Labs theme */
+.sq-row { background: var(--card); border-color: var(--line); box-shadow: var(--sh-1); }
+.sq-row.on { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink), var(--sh-2); }
+.sq-st.ok { color: var(--ok); } .sq-st.stale { color: var(--warn); } .sq-st.run { color: var(--info); } .sq-st.missing, .sq-st.none { color: var(--ink-4); }
+.sq-side .btn.on { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.sq-viewer { background: var(--paper); } .sq-screen { border: 0; box-shadow: var(--stage-frame); border-radius: var(--r-md); }
+.sq-banner { background: var(--warn-soft); border-color: transparent; color: var(--warn); }
+.sq-batch, .lk-batch { background: var(--card); border-color: var(--line); box-shadow: var(--sh-1); }
+

@@ -26,3 +26,6 @@ dialog.phone-dialog { width: min(680px, 95vw); max-height: 92vh; }
 .phone-group .btn:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: -1px; }
 .phone-slot { display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .phone-slot .phone-chip { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Beret Labs theme */
+.phone-chip.live { border-color: var(--ok); } .phone-status { background: var(--paper-2); }

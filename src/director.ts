@@ -52,7 +52,7 @@ const previewBtn = h('button', { class: 'btn', type: 'button', title: 'Play the 
 const looksBtn = h('button', { class: 'btn ghost', type: 'button', title: 'Design every object’s look and the project style; generate reference images in one batch' }, 'Looks');
 const assetsBtn = h('button', { class: 'btn ghost', type: 'button', title: 'Every render, result, look and reference in this project' }, 'Assets');
 const editBtn = h('button', { class: 'btn ghost', type: 'button', title: 'Cut the shots together and export one video' }, 'Edit');
-const renderBtn = h('button', { class: 'btn camera', type: 'button' }, 'Render shot →');
+const renderBtn = h('button', { class: 'btn camera', type: 'button' }, 'Render shot');
 const sceneModeBtn = h('button', { type: 'button', role: 'tab', class: 'on', 'aria-selected': 'true', onclick: () => setMode('scene') }, 'Scene');
 const seqModeBtn = h('button', { type: 'button', role: 'tab', 'aria-selected': 'false', title: 'Every shot in order: render, generate, choose versions, play and export the final video', onclick: () => setMode('sequence') }, 'Sequence');
 const modeSwitch = h('div', { class: 'seg ws-mode', role: 'tablist', 'aria-label': 'Workspace' }, sceneModeBtn, seqModeBtn);
@@ -250,7 +250,7 @@ function renderShots() {
     const b = h('button', { class: 'shot' + (s.id === shotId ? ' active' : ''), type: 'button', role: 'option', 'aria-selected': String(s.id === shotId), onclick: () => selectShot(s.id) },
       c,
       h('span', { class: 'info' },
-        h('span', { class: 'num' }, String(i + 1).padStart(2, '0'), s.render ? h('span', { class: 'rendered' + (stale ? ' stale' : ''), title: stale ? 'Rendered before the latest changes' : 'Camera video exported' }, stale ? '● changed' : '● rendered') : null),
+        h('span', { class: 'num' }, String(i + 1).padStart(2, '0'), s.render ? h('span', { class: 'rendered' + (stale ? ' stale' : ''), title: stale ? 'Rendered before the latest changes' : 'Camera video exported' }, stale ? 'Changed' : 'Rendered') : null),
         h('span', { class: 'title' }, s.title),
         h('span', { class: 'sub' }, `${MOVES[s.camera.move]} · ${s.duration}s${s.references.length ? ` · ${s.references.length} ref` : ''}`)));
     requestAnimationFrame(() => { try { c.getContext('2d')!.drawImage(scene.thumbnail(s), 0, 0); } catch {} });
