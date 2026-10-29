@@ -1,5 +1,5 @@
 import './director.css';
-import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME } from '../shared/director.mjs';
+import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Message, Vec3, Asset, EditClip } from '../shared/director.mjs';
 import { api, h, toast, agentPill, connectDialog, shapeIcon, readFileBase64 } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
@@ -507,6 +507,7 @@ function renderShotPane() {
         h('button', { class: 'btn sm', type: 'button', onclick: () => keyFromView('start'), title: 'Use the current set view as the first camera position' }, 'Set start from view'),
         h('button', { class: 'btn sm', type: 'button', onclick: () => keyFromView('end'), title: 'Use the current set view as the last camera position' }, 'Set end from view'),
         h('button', { class: 'btn sm ghost', type: 'button', onclick: () => scene.lookThrough() }, 'Go to camera'))),
+    castBlock(s),
     operateBlock(s), // [operate]
     h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `References · ${s.references.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, 'Link each image to an object')),
@@ -778,6 +779,45 @@ async function loadCheckpoints() {
   catch (e) { checkpoints = []; checkpointError = (e as Error).message; }
   objectPane.dataset.id = ''; renderObjectPane();
 }
+// ---------- Cast (Shot tab) and Cast Card helpers ----------
+/** Every object, ticked when it's in this shot. The camera decides by default; ticks override it. */
+function castBlock(s: Shot) {
+  const rows = castRows(project, s);
+  const inCast = rows.filter(r => r.inCast), out = rows.filter(r => !r.inCast);
+  const toggle = (r: (typeof rows)[number]) => {
+    const before = normalizeCast(s.cast), next = normalizeCast(s.cast), id = r.entity.id;
+    next.include = next.include.filter(x => x !== id); next.exclude = next.exclude.filter(x => x !== id);
+    if (r.inCast && r.auto) next.exclude.push(id);       // camera sees it, but leave it out
+    else if (!r.inCast && !r.auto) next.include.push(id); // camera doesn't see it, but put it in
+    void runEntry({ label: r.inCast ? 'Remove from cast' : 'Add to cast', redo: [{ op: 'update_shot', id: s.id, patch: { cast: next } }], undo: [{ op: 'update_shot', id: s.id, patch: { cast: before } }] });
+  };
+  const row = (r: (typeof rows)[number]) => {
+    const card = castCard(project, r.entity.id)!, look = objectLooks(project, r.entity.id)[0];
+    const why = r.override === 'added' ? 'added by you' : r.override === 'removed' ? 'removed by you' : r.auto ? `camera sees it · ${Math.round(r.coverage * 100)}% of frame${r.lead ? ' · subject' : ''}` : 'not in frame';
+    const box = h('input', { type: 'checkbox', checked: r.inCast, 'aria-label': `${r.entity.name} in this shot` });
+    box.onchange = () => toggle(r);
+    return h('div', { class: 'cast-row' + (r.inCast ? ' in' : '') + (r.override ? ' manual' : '') },
+      box,
+      look ? h('img', { src: refUrl(look), alt: '' }) : h('span', { class: 'cast-ph' }, shapeIcon(r.entity.shape)),
+      h('div', { class: 'cast-main' },
+        h('button', { type: 'button', class: 'cast-name', title: 'Open this Cast Card', onclick: () => { select(r.entity.id); setTab('object'); } }, r.entity.name),
+        h('span', { class: 'cast-why' + (r.override ? ' manual' : '') }, why),
+        r.inCast ? h('span', { class: 'cast-facts' }, `${card.imageRefs.length} image${card.imageRefs.length === 1 ? '' : 's'}`, card.description ? ' · description' : ' · no description', card.styleNotes ? ' · style notes' : '', card.sharedFrom ? ` · shares ${entity(card.sharedFrom)?.name}` : '') : null));
+  };
+  return h('div', { class: 'block' },
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Cast · ${inCast.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, 'What this shot shows · ticks override the camera')),
+    ...inCast.map(row),
+    out.length ? h('details', { class: 'cast-out' }, h('summary', {}, `${out.length} not in this shot`), ...out.map(row)) : null);
+}
+/** Add any image already in the project as this object's reference. */
+function linkPicker(e: Entity) {
+  const mine = new Set(objectLooks(project, e.id).map(r => r.file));
+  const pool = [...(project.scene.references || []).filter(r => entity(r.entityId)), ...project.shots.flatMap(s => s.references)].filter(r => !mine.has(r.file));
+  const seen = new Set<string>(), list = pool.filter(r => !seen.has(r.file) && seen.add(r.file));
+  if (!list.length) return null;
+  return h('details', { class: 'cc-link' }, h('summary', {}, 'Add from project images'),
+    h('div', { class: 'cc-grid' }, ...list.slice(0, 40).map(r => h('button', { type: 'button', title: `${r.name}${r.entityId ? ` · ${entity(r.entityId)?.name}` : ''}`, onclick: () => void edit([{ op: 'link_look', entityId: e.id, referenceId: r.id }]).then(() => toast(`Added to ${e.name}’s Cast Card`)).catch(() => {}) }, h('img', { src: refUrl(r), alt: r.name, loading: 'lazy' })))));
+}
 function renderObjectPane() {
   if (objectPane.contains(document.activeElement) && objectPane.dataset.id === (selected || '')) return;
   objectPane.dataset.id = selected || '';
@@ -795,6 +835,8 @@ function renderObjectPane() {
   const inShots = project.shots.map((s, i) => ({ s, i })).filter(x => shotCast(project, x.s).some(c => c.entity.id === e.id));
 
   // Description and style feed every look and every shot prompt.
+  const styleNotes = h('textarea', { class: 'field', rows: 2, maxlength: 300, 'aria-label': 'Style notes', placeholder: 'How it should look on screen: “weathered, dusty, warm rim light”, “clean showroom chrome”…' }, e.styleNotes || '');
+  styleNotes.onchange = () => void edit([{ op: 'update_entity', id: e.id, patch: { styleNotes: styleNotes.value } }]).then(rerender).catch(() => {});
   const notes = h('textarea', { class: 'field', rows: 3, maxlength: 400, 'aria-label': 'Description', placeholder: e.kind === 'character' ? 'Age, build, wardrobe, hair, materials…' : e.kind === 'vehicle' ? 'Make, era, paint, damage, details…' : 'Materials, colour, condition, details…' }, e.notes || '');
   notes.onchange = () => void edit([{ op: 'update_entity', id: e.id, patch: { notes: notes.value } }]).then(rerender).catch(() => {});
   const styleText = project.scene.environment.style;
@@ -852,8 +894,11 @@ function renderObjectPane() {
       shared ? h('p', { class: 'note', style: 'margin:0' }, `Uses ${shared.name}’s looks and description. Change them on `, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => select(shared.id) }, shared.name), '.') : null,
       usedBy.length ? h('p', { class: 'note', style: 'margin:0' }, `Shared with ${usedBy.map(x => x.name).join(', ')}.`) : null,
       shareAll),
-    h('div', { class: 'block' },
-      h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, shared ? 'Extra notes for this one' : 'Description')), shared ? h('p', { class: 'note', style: 'margin:0' }, `Shared: ${shared.notes || '—'}`) : null, notes,
+    h('div', { class: 'block cast-card' },
+      h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Cast Card'), h('span', { class: 'cc-id mono', title: 'Blockout ID: the rendered object this card belongs to' }, `#${e.id.slice(0, 8)}`)),
+      h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s Cast Card: ${shared.notes || '—'}`) : null, notes),
+      h('label', { class: 'cc-field' }, h('span', {}, 'Style notes'), styleNotes),
+      h('div', { class: 'cc-field' }, h('span', {}, `Image references · ${looks.length}`), looks.length ? h('div', { class: 'cc-refs' }, ...looks.map(r => h('img', { src: refUrl(r), alt: r.name, title: r.name + (r.id === (shared || e).look ? ' · primary' : '') }))) : h('span', { class: 'note' }, 'None yet — generate, upload, or add one from the project.'), shared ? null : linkPicker(e)),
       h('div', { class: 'ob-style' }, h('span', { class: 'muted' }, 'Project style: '), styleText ? h('span', {}, styleText) : h('span', { class: 'muted' }, 'not set'), h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openLooks() }, styleText ? 'Edit' : 'Set style')),
       h('p', { class: 'note', style: 'margin:0' }, 'Description and style go into this object’s looks and into every shot it appears in. Its primary look is sent with those shots’ videos.')),
     shared ? null : h('div', { class: 'block' },

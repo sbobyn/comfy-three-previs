@@ -94,3 +94,23 @@ test('image presets wire the guide first, then reference images, into numbered s
   assert.deepEqual(g2['1'].inputs['model.images.image_1'], ['201', 0]);
   assert.equal(g2['1'].inputs['model.width'], 1024);
 });
+
+test('Cast Cards and a shot’s cast: camera visibility plus hand overrides', async () => {
+  const { castCard, castRows, shotObjects, normalizeCast } = await import('../shared/director.mjs');
+  const { p, runner, car, s } = street();
+  runner.notes = 'tall runner in a red jacket'; runner.styleNotes = 'gritty, rain-soaked';
+  p.scene.references = [ref('runner-look', runner.id)]; runner.look = 'runner-look';
+  const card = castCard(p, runner.id);
+  assert.equal(card.blockoutId, runner.id);
+  assert.deepEqual(card.imageRefs, ['runner-look']);
+  assert.equal(card.styleNotes, 'gritty, rain-soaked');
+  const auto = shotObjects(p, s).map(c => c.entity.id);
+  assert.ok(auto.includes(runner.id));
+  s.cast = normalizeCast({ exclude: [runner.id] });
+  assert.ok(!shotObjects(p, s).some(c => c.entity.id === runner.id), 'excluded even though the camera sees it');
+  assert.equal(castRows(p, s).find(r => r.entity.id === runner.id).override, 'removed');
+  const behind = { ...car, id: 'far', name: 'Far', position: [0, 0, 400] }; p.scene.entities.push(behind);
+  s.cast = normalizeCast({ include: ['far'] });
+  assert.ok(shotObjects(p, s).some(c => c.entity.id === 'far'), 'included even though the camera misses it');
+  assert.deepEqual(normalizeCast({ include: ['a', 'a'], exclude: ['a', 'b'] }), { include: ['a'], exclude: ['b'] });
+});

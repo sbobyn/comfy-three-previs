@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
 import { interpret } from './director-parse.mjs';
-import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences } from '../../shared/director.mjs';
+import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, normalizeCast } from '../../shared/director.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
@@ -119,6 +119,10 @@ export function applyOps(p, ops) {
         if (patch.description !== undefined) s.description = String(patch.description).slice(0, 4000);
         if (patch.duration !== undefined) s.duration = clampDuration(patch.duration);
         if (patch.start !== undefined) s.start = clampStart(patch.start);
+        if (patch.cast !== undefined) {
+          const known = id => resolveEntity(p, id)?.id || fail(`Unknown object ${id}`);
+          s.cast = normalizeCast({ include: (patch.cast?.include || []).map(known), exclude: (patch.cast?.exclude || []).map(known) });
+        }
         if (patch.camera) {
           const target = patch.camera.target === undefined ? s.camera.target : resolveEntity(p, patch.camera.target)?.id ?? null;
           s.camera = normalizeCamera({ ...s.camera, ...(patch.camera.move && patch.camera.move !== 'custom' ? { keys: null } : {}), ...patch.camera, target });
@@ -155,6 +159,16 @@ export function applyOps(p, ops) {
         const s = resolveShot(p, op.shotId); if (!s) fail('Unknown shot');
         // The image file is retained on disk; only the shot link is removed.
         s.references = s.references.filter(r => r.id !== op.referenceId); results.push({ op: op.op, id: op.referenceId }); break;
+      }
+      case 'link_look': {
+        // Reuse any image already in the project (another object's look, a shot reference) as this object's look.
+        const e = resolveEntity(p, op.entityId); if (!e) fail(`Unknown object ${op.entityId}`);
+        const src = [...(p.scene.references || []), ...p.shots.flatMap(s => s.references)].find(r => r.id === op.referenceId); if (!src) fail('Unknown image');
+        if ((p.scene.references || []).some(r => r.entityId === e.id && r.file === src.file)) fail(`${e.name} already uses that image`);
+        const ref = { id: randomUUID(), name: src.name, file: src.file, mime: src.mime, role: e.kind === 'character' ? 'character' : e.kind === 'environment' ? 'environment' : 'prop', entityId: e.id, note: 'linked', createdAt: now(), ...(src.generated ? { generated: src.generated } : {}) };
+        (p.scene.references ||= []).push(ref);
+        if (!e.look) e.look = ref.id;
+        results.push({ op: op.op, id: e.id, referenceId: ref.id }); break;
       }
       case 'set_look': {
         const e = resolveEntity(p, op.entityId); if (!e) fail(`Unknown object ${op.entityId}`);

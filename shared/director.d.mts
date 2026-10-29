@@ -1,14 +1,14 @@
 export type Vec3 = [number, number, number];
 export type Kind = 'character' | 'vehicle' | 'prop' | 'environment';
 export type Role = 'character' | 'prop' | 'environment' | 'style' | 'frame';
-export type Entity = { id: string; name: string; kind: Kind; shape: string; position: Vec3; rotation: number; scale: Vec3; color: string; notes: string; look?: string | null; lookFrom?: string | null; path?: PathKey[] | null; pitch?: number; roll?: number };
+export type Entity = { id: string; name: string; kind: Kind; shape: string; position: Vec3; rotation: number; scale: Vec3; color: string; notes: string; look?: string | null; lookFrom?: string | null; styleNotes?: string; path?: PathKey[] | null; pitch?: number; roll?: number };
 export type PathKey = { t: number; p: Vec3; r?: number; s?: Vec3; pitch?: number; roll?: number };
 export type CameraKey = { t: number; p: Vec3; look: Vec3; mm: number };
 export type ShotCamera = { move: string; target: string | null; distance: number; height: number; angle: number; mm: number; keys: CameraKey[] | null; timing?: 'linear' | 'ease' };
 export type Generated = { requestId: string; presetId: string; model: string; prompt: string; seed: number; backend: string; promptId: string };
 export type Reference = { id: string; name: string; file: string; mime: string; role: Role; entityId: string | null; note: string; createdAt: string; generated?: Generated };
 export type ShotRender = { previsShotId: string; assetId: string; prompt: string; frameCount: number; duration: number; width: number; height: number; createdAt: string; signature?: string };
-export type Shot = { id: string; title: string; description: string; duration: number; start?: number; camera: ShotCamera; references: Reference[]; render: ShotRender | null };
+export type Shot = { id: string; title: string; description: string; duration: number; start?: number; camera: ShotCamera; references: Reference[]; render: ShotRender | null; cast?: { include: string[]; exclude: string[] } };
 export type Message = { id: string; shotId: string | null; role: 'user' | 'agent' | 'builtin' | 'system'; text: string; attachments: string[]; status: 'pending' | 'claimed' | 'handled'; createdAt: string; handledBy?: string; activity?: { at: string; text: string; auto?: boolean }[]; workStartedAt?: string; workEndedAt?: string };
 export type EditClip = { id: string; shotId: string; assetId: string | null; in: number; out: number | null };
 export type Asset = { id: string; kind: 'camera-render' | 'workflow-result' | 'edit'; shotId: string | null; file: string; mime: string; sha256: string; width: number; height: number; fps: number | null; frameCount: number | null; duration: number | null; version?: number; createdAt: string; imported?: boolean; source: { clips?: { assetId: string; in: number; out: number }[]; engineShotId?: string; engineAssetId?: string; sourceAssetId?: string; jobId?: string; resultId?: string; workflow?: string; backend?: string | null; prompt?: string; quote?: { status: string; amount: number | null; currency: string } | null } };
@@ -55,3 +55,9 @@ export function entityAt(entity: Entity, t: number): { position: Vec3; rotation:
 export function entitiesAt(entities: Entity[], t: number): Entity[];
 export function sceneLength(project: DirectorProject): number;
 export function shotCameraAt(shot: Shot, entities: Entity[], t: number): { p: Vec3; look: Vec3; mm: number };
+
+export type CastCard = { id: string; blockoutId: string; name: string; kind: Kind; shape: string; description: string; styleNotes: string; imageRefs: string[]; sharedFrom: string | null };
+export function normalizeCast(c: unknown): { include: string[]; exclude: string[] };
+export function castCard(project: DirectorProject, id: string): CastCard | null;
+export function castRows(project: DirectorProject, shot: Shot): { entity: Entity; coverage: number; lead: boolean; auto: boolean; inCast: boolean; override: 'added' | 'removed' | null }[];
+export function shotObjects(project: DirectorProject, shot: Shot): { entity: Entity; coverage: number; lead: boolean }[];

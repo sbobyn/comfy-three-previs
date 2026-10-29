@@ -62,6 +62,7 @@ export function makeEntity(input, id) {
     notes: String(input.notes || '').slice(0, 500),
     look: typeof input.look === 'string' ? input.look : null,
     lookFrom: typeof input.lookFrom === 'string' && input.lookFrom !== id ? input.lookFrom : null,
+    styleNotes: String(input.styleNotes || '').slice(0, 300),
     pitch: tiltOf(input.pitch),
     roll: tiltOf(input.roll),
     path: normalizePath(input.path),
@@ -95,7 +96,42 @@ export function makeShot(input, id, number, entities = []) {
     camera: normalizeCamera({ ...defaultCamera(target), ...(input.camera || {}) }),
     references: [],
     render: null,
+    cast: normalizeCast(input.cast),
   };
+}
+
+// ---------- Cast ----------
+/** A shot's explicit cast changes on top of what its camera sees: { include: ids, exclude: ids }. */
+export function normalizeCast(c) {
+  const ids = v => [...new Set((Array.isArray(v) ? v : []).filter(x => typeof x === 'string' && x).map(String))].slice(0, 200);
+  const include = ids(c?.include), exclude = ids(c?.exclude).filter(id => !include.includes(id));
+  return { include, exclude };
+}
+/**
+ * The Cast Card of one object: everything a render needs to know about it. The blockout object *is* the record,
+ * so blockoutId always matches the rendered object. Objects that share a look inherit its images, description and style notes.
+ */
+export function castCard(project, id) {
+  const e = project.scene.entities.find(x => x.id === id); if (!e) return null;
+  const src = lookSource(project, id) || e;
+  return { id: e.id, blockoutId: e.id, name: e.name, kind: e.kind, shape: e.shape, description: objectNotes(project, e), styleNotes: [src.id !== e.id ? src.styleNotes : '', e.styleNotes].map(x => (x || '').trim()).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join('; '), imageRefs: objectLooks(project, id).map(r => r.id), sharedFrom: src.id !== e.id ? src.id : null };
+}
+/**
+ * Every object with its place in a shot's cast: auto (the camera sees it), added or removed by hand.
+ * Returns [{ entity, coverage, lead, auto, inCast }] — inCast is the final answer.
+ */
+export function castRows(project, shot) {
+  const seen = new Map(shotCast(project, shot).map(c => [c.entity.id, c]));
+  const cast = normalizeCast(shot.cast);
+  return project.scene.entities.map(e => {
+    const c = seen.get(e.id), auto = !!c;
+    const inCast = cast.include.includes(e.id) || (auto && !cast.exclude.includes(e.id));
+    return { entity: e, coverage: c?.coverage ?? 0, lead: c?.lead ?? false, auto, inCast, override: cast.include.includes(e.id) ? 'added' : cast.exclude.includes(e.id) ? 'removed' : null };
+  });
+}
+/** The shot's cast: objects in it, most prominent first (same shape as shotCast). */
+export function shotObjects(project, shot) {
+  return castRows(project, shot).filter(r => r.inCast).sort((a, b) => (b.lead - a.lead) || (b.coverage - a.coverage)).map(r => ({ entity: r.entity, coverage: r.coverage, lead: r.lead }));
 }
 
 export function clampDuration(value) {
@@ -232,7 +268,7 @@ export function shotCast(project, shot, { samples = 12, aspect = 16 / 9, minCove
  * Returns [{ ref, entityId, role, label }].
  */
 export function videoReferences(project, shot, max = 4) {
-  const cast = shotCast(project, shot);
+  const cast = shotObjects(project, shot);
   const look = id => objectLooks(project, id)[0] || shot.references.find(r => r.entityId === id && r.role !== 'frame') || null;
   const subjects = cast.filter(c => c.entity.kind !== 'environment').map(c => ({ ref: look(c.entity.id), entityId: c.entity.id, role: c.entity.kind, label: c.entity.name })).filter(x => x.ref);
   const envObjects = cast.filter(c => c.entity.kind === 'environment').map(c => ({ ref: look(c.entity.id), entityId: c.entity.id, role: 'environment', label: c.entity.name })).filter(x => x.ref);
@@ -265,7 +301,7 @@ export function compilePrompt(project, shot, refs = null) {
     return `${e.name} (${e.kind}${notes ? `, ${notes}` : ''})${match}`;
   };
   // Only what the camera sees; fall back to everything when nothing is in frame (e.g. an empty stage).
-  const castIds = new Set(shotCast(project, shot).map(c => c.entity.id));
+  const castIds = new Set(shotObjects(project, shot).map(c => c.entity.id));
   const inShot = castIds.size ? entities.filter(e => castIds.has(e.id)) : entities;
   const subjects = inShot.filter(e => e.kind !== 'environment');
   if (subjects.length) lines.push(`In shot: ${subjects.slice(0, 10).map(describe).join('; ')}.`);
@@ -367,7 +403,9 @@ export function lookPrompt(project, entity, view = null) {
   const style = project.scene.environment?.style ? ` Visual style: ${project.scene.environment.style}.` : '';
   // Names are for us, not the image: models otherwise paint them on as lettering or add extra copies.
   const only = entity.kind === 'environment' ? '' : ` Show exactly one ${entity.kind === 'character' ? 'person' : entity.kind === 'vehicle' ? 'vehicle' : 'object'}. No text, numbers, names or lettering anywhere in the image.`;
-  return lookPromptBase(project, entity, view) + only + style;
+  const card = castCard(project, entity.id);
+  const own = card?.styleNotes ? ` Look: ${card.styleNotes}.` : '';
+  return lookPromptBase(project, entity, view) + own + only + style;
 }
 function lookPromptBase(project, entity, view) {
   const desc = objectNotes(project, entity), notes = desc ? `, ${desc}` : '';
