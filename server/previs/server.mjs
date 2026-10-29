@@ -15,6 +15,9 @@ import { cameraTransfer, transferCode, verifyTransfer } from './transfer.mjs';
 import { releaseFrameStage } from './video.mjs';
 import { videoRoutes } from './video-routes.mjs';
 import { generationRoutes } from './generation-routes.mjs';
+import { openDirector, directorRoutes } from './director.mjs';
+import { openRefgen, refgenRoutes } from './refgen.mjs';
+import { setupChecks } from './setup-check.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -25,6 +28,11 @@ const blender = new BlenderMcp();
 const operations = await openOperations(data);
 const comfy = await openComfy(data, project);
 const generation = await generationRoutes(data,project);
+let refgen;
+const director = await openDirector(data, { engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id) });
+refgen = await openRefgen(data, director);
+const refgenRoute = refgenRoutes(refgen);
+const directorRoute = directorRoutes(director, project, () => ({ command: process.execPath, args: [join(root, 'server/previs/agent.mjs')], env: { PREVIS_URL: `http://127.0.0.1:${port}` } }));
 const videos = videoRoutes({data,project,blender,operations,refreshBlender});
 let connectionError = null;
 async function refreshBlender() {
@@ -52,6 +60,25 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
+    if (req.method === 'GET' && url.pathname === '/api/director/setup') return send({ ...(await setupChecks({ root, data })), agent: director.agentStatus(), dataDir: data });
+    if (req.method === 'GET' && url.pathname === '/api/director/export') {
+      const { filename, data: zip } = await director.exportZip(url.searchParams.get('id'));
+      res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Length': zip.length, 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+      return res.end(zip);
+    }
+    if (req.method === 'POST' && url.pathname === '/api/director/import') {
+      if (!/^application\/(zip|octet-stream)/.test(req.headers['content-type'] || '')) fail('Upload a .previs.zip export', 415);
+      const parts = []; let size = 0;
+      for await (const chunk of req) { size += chunk.length; if (size > 1024 ** 3) fail('Export is larger than 1 GB', 413); parts.push(chunk); }
+      return send(await director.importZip(Buffer.concat(parts)));
+    }
+    if (url.pathname.startsWith('/api/director/')) {
+      if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
+      if (!['GET', 'POST'].includes(req.method)) fail('Method not allowed', 405);
+      // Director edits serialize on their own queue so agent long-polls never block Blender or video work.
+      const input = req.method === 'POST' ? await body(req) : {};
+      return send((url.pathname.startsWith('/api/director/refgen') ? await refgenRoute(req.method, url, input) : undefined) ?? await directorRoute(req.method, url, input, { agent: req.headers['x-previs-agent'] === '1' }));
+    }
     if (req.method === 'GET' && url.pathname === '/api/phone') return send(phoneLan.readiness());
     if (req.method === 'GET' && url.pathname === '/api/generation') return send(generation.state());
     if (req.method === 'GET' && url.pathname === '/api/project') return send({ project: project.get(), catalog, blender: blenderReadiness(), comfyJobs: comfy.list() });
@@ -130,10 +157,10 @@ const server = createServer(async (req, res) => {
           const browser = validateBrowser(input);
           const image = await project.image(Buffer.from(String(input.png), 'base64'));
           const id = randomUUID();
-          const binding = { source: 'three', scene: 'Camera study', camera: 'Operated camera', fps: 24, start: 0, end: Math.max(0, Math.floor((browser.frames.at(-1)?.t || 0) * 24 + 1e-8)), frame: 0 };
+          const binding = { source: 'three', scene: browser.director ? String(browser.director.sceneName || 'Director scene').slice(0, 120) : 'Camera study', camera: browser.director ? 'Director camera' : 'Operated camera', fps: 24, start: 0, end: Math.max(0, Math.floor((browser.frames.at(-1)?.t || 0) * 24 + 1e-8)), frame: 0 };
           p.shots.push({ id, title: String(input.title || 'Camera study').slice(0, 160), createdRevision: p.revision + 1, binding, browser, renders: [image.id] });
           p.renders.push({ id: image.id, shotId: id, source: 'three', pass: 'beauty', width: image.width, height: image.height, binding, createdAt: new Date().toISOString() });
-          if (!p.scenes.some(s => s.owner === 'three')) p.scenes.push({ id: randomUUID(), owner: 'three', name: 'Camera study', version: 1 });
+          if (!browser.director && !p.scenes.some(s => s.owner === 'three')) p.scenes.push({ id: randomUUID(), owner: 'three', name: 'Camera study', version: 1 });
         }) };
         if (url.pathname === '/api/render') {
           let operationId = null, renderId = null;
@@ -164,9 +191,11 @@ const server = createServer(async (req, res) => {
     if (req.method !== 'GET') fail('Method not allowed', 405);
     let file;
     if (/^\/renders\/[a-f0-9-]{36}\.png$/.test(url.pathname)) file = join(data, url.pathname);
+    else if (/^\/director-assets\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(mp4|webm|mov|png)$/.test(url.pathname)) { const [, , pid, name] = url.pathname.split('/'); file = await director.assetFile(pid, name); }
+    else if (/^\/director-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp)$/.test(url.pathname)) { const [, , pid, name] = url.pathname.split('/'); file = await director.refFile(pid, name); }
     else if (/^\/assets\/[a-f0-9-]{36}\.(mp4|webm|mov|mkv|png)$/.test(url.pathname)) file = join(data,url.pathname);
     else {
-      const path = url.pathname === '/' ? '/previs.html' : url.pathname;
+      const path = url.pathname === '/' ? '/start.html' : url.pathname;
       file = resolve(root, 'dist', '.' + decodeURIComponent(path));
       if (!file.startsWith(join(root, 'dist') + '/')) fail('Invalid path', 403);
     }
@@ -175,7 +204,7 @@ const server = createServer(async (req, res) => {
     const range = media && req.headers.range?.match(/^bytes=(\d+)-(\d*)$/);
     const start = range ? Number(range[1]) : 0, end = range ? Math.min(bytes.length-1, range[2] ? Number(range[2]) : bytes.length-1) : bytes.length-1;
     if (range && (start > end || start >= bytes.length)) { res.writeHead(416,{'Content-Range':`bytes */${bytes.length}`}); return res.end(); }
-    res.writeHead(range ? 206 : 200, { ...(media ? {'Accept-Ranges':'bytes','Content-Length':end-start+1,...(range ? {'Content-Range':`bytes ${start}-${end}/${bytes.length}`} : {})} : {}), 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(range ? bytes.subarray(start,end+1) : bytes);
+    res.writeHead(range ? 206 : 200, { ...(media ? {'Accept-Ranges':'bytes','Content-Length':end-start+1,...(range ? {'Content-Range':`bytes ${start}-${end}/${bytes.length}`} : {})} : {}), 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(range ? bytes.subarray(start,end+1) : bytes);
   } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
 const relay = attachRelay(server);

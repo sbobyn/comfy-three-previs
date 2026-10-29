@@ -21,6 +21,8 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       input: {
+        start: "start.html",
+        director: "director.html",
         main: "index.html",
         previs: "previs.html",
         comfy: "comfy.html",

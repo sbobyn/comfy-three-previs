@@ -48,5 +48,14 @@ export function validateBrowser(input) {
   const vector = (v, n) => Array.isArray(v) && v.length === n && v.every(x => Number.isFinite(x) && Math.abs(x) < 100000);
   const frame = f => f && Number.isFinite(f.t) && f.t >= 0 && f.t <= 61 && vector(f.p, 3) && vector(f.q, 4) && Math.abs(Math.hypot(...f.q) - 1) < 0.01 && Number.isFinite(f.mm) && f.mm >= 1 && f.mm <= 2000;
   if (!vector(input.subject, 3) || !frame(input.camera) || !Array.isArray(input.frames) || input.frames.length > 1500 || !input.frames.every((f, i) => frame(f) && (!i || f.t > input.frames[i - 1].t))) throw Error('Invalid browser camera recording');
-  return { subject: input.subject, camera: input.camera, frames: input.frames, sceneVersion: 1, ...(input.delivery ? { delivery: browserDelivery(input.delivery) } : {}) };
+  const director = input.director === undefined ? undefined : validateDirectorSnapshot(input.director);
+  return { subject: input.subject, camera: input.camera, frames: input.frames, sceneVersion: director ? 2 : 1, ...(input.delivery ? { delivery: browserDelivery(input.delivery) } : {}), ...(director ? { director } : {}) };
+}
+
+// Snapshot of the director blockout a browser recording was rendered from.
+function validateDirectorSnapshot(d) {
+  const id = /^[a-f0-9-]{36}$/;
+  if (!d || typeof d !== 'object' || !id.test(d.projectId || '') || !id.test(d.shotId || '') || !Number.isInteger(d.projectRevision) || !Array.isArray(d.entities) || d.entities.length > 200) throw Error('Invalid director snapshot');
+  const text = JSON.stringify(d); if (text.length > 200000) throw Error('Director snapshot too large');
+  return { projectId: d.projectId, shotId: d.shotId, projectRevision: d.projectRevision, sceneName: String(d.sceneName || '').slice(0, 120), shotTitle: String(d.shotTitle || '').slice(0, 120), camera: d.camera ?? null, entities: d.entities };
 }

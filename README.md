@@ -1,33 +1,77 @@
-Private review: the latest bounded workstation pass is documented in [design review](docs/design-review.md). Earlier checkpoints and libraries remain preserved.
-
 # Comfy Previs
 
-A private, standalone camera-study and Blender preview app. No Otter server, editor, library, account, assistant or launcher is required.
+Block out a 3D scene in the browser, direct it shot by shot (in plain language, through your own AI agent over MCP), attach and generate visual references for every object, preview the camera, and hand the exact camera render to a ComfyUI workflow.
 
-[Tuesday review build and release boundaries](docs/tuesday-review.md) · [Local temporal-model approval proposal](docs/local-temporal-test.md)
+Everything runs locally. Nothing is uploaded or charged unless you approve a specific quoted request.
 
-## Run locally
+## Quick start
 
-Requires **Node 22.12+** and **pnpm 10.18.0**. Install those prerequisites separately; the app does not change global agent configuration.
+You need **Node.js 22.12+**, **pnpm 10** and **FFmpeg** (for exporting camera videos).
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm check
-pnpm test
-pnpm start
+# 1. Prerequisites (pick your OS)
+#    macOS:   brew install node ffmpeg
+#    Ubuntu:  sudo apt install ffmpeg   (Node 22+: https://nodejs.org or `nvm install 22`)
+#    Windows: winget install OpenJS.NodeJS Gyan.FFmpeg
+corepack enable            # provides the pinned pnpm version
+
+# 2. Clone, install, build and check
+git clone <this-repo-url> comfy-previs && cd comfy-previs
+pnpm run bootstrap         # = pnpm install --frozen-lockfile && pnpm run build && pnpm run doctor
+
+# 3. Run
+pnpm start                 # → http://127.0.0.1:5190
 ```
 
-Open **http://127.0.0.1:5190**. `PREVIS_DATA_DIR` chooses a project folder (default `.previs`); keep the entire folder, including renders and operation/job receipts, to recover your project. `PORT` selects another local port. `pnpm dev` builds and starts this same complete app; rebuild after editing browser code. `pnpm dev:camera` is the inherited camera-only Vite development server on 5187 and does not provide project APIs.
+`pnpm run doctor` re-checks your machine at any time and tells you how to fix anything missing. The launch page shows the same checklist.
 
-For a reproducible first experience, choose **Start a three-second dolly** in the workspace. Replay → save → reopen → export directly at **1280×720** (or lightweight 640×360) → use that exact video in a workflow → inspect and prepare. Delivery resolution, 16:9 framing, 24 fps, frame count and timing appear before export. No Blender or external media is required. See [first-use routes](docs/first-use.md) for clean setup, existing Blender scenes and recorded comparisons.
+### Optional: connect services
 
-### Configure Comfy Cloud
+Copy `.env.example` to `.env` (it is git-ignored) and fill in only what you use, then restart `pnpm start`.
 
-Copy `.env.example` to `.env` beside `package.json` if `.env` does not already exist. Add your key after `COMFY_CLOUD_API_KEY=` in that local file; keep `PREVIS_ALLOW_PAID=0`. On macOS/Linux, run `chmod 600 .env` to restrict file access. `.env` is gitignored; never add the key to a workflow, project, browser field or chat.
+| Want to… | Set | Notes |
+|---|---|---|
+| Quote / generate on Comfy Cloud | `COMFY_CLOUD_API_KEY` | Quotes are free. Paid runs also need `PREVIS_ALLOW_PAID=1` **and** your approval of each quote. |
+| Generate on your own GPU | run [ComfyUI](https://github.com/comfyanonymous/ComfyUI) locally | Default `http://127.0.0.1:8000`; change with `PREVIS_COMFY_URL`. Uses installed checkpoints only; nothing is downloaded. |
+| Keep projects elsewhere | `PREVIS_DATA_DIR` | Default `.previs/` in the checkout. |
+| Use another port | `PORT` | Default 5190. |
+| Drive Blender | `PREVIS_BLENDER_MCP_COMMAND`, `PREVIS_BLENDER_MCP_ARGS` | See [setup & architecture](docs/standalone-previs.md#blender-mcp). |
 
-Restart with `pnpm start`, then open **Setup & readiness → Check Cloud access**. This inspects available nodes without submitting a job. `pnpm start` and `pnpm dev` load `.env` at startup using Node's built-in loader; existing shell variables take precedence. The app still starts when `.env` is absent. Adding a key does not approve paid generation: that separately requires a reviewed quote, deliberate enablement and a matching per-request approval. See [Cloud credential setup](docs/standalone-previs.md#cloud-credentials).
+Never commit `.env` or paste keys into prompts, workflows or chat.
 
-## Three deliberate paths
+### Optional: direct with your AI agent
+
+Previs ships an MCP server (`server/previs/agent.mjs`). Click **Agent** in the app for the exact command, e.g. for Claude Code:
+
+```sh
+claude mcp add comfy-previs -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to/comfy-previs/server/previs/agent.mjs
+```
+
+Then ask your agent to *“listen for Previs direction”*. It reads your chat messages, edits the blockout/shots/camera and replies. Without an agent, a built-in parser handles simple directions offline. Agents can quote generations but only you can approve them.
+
+## Using it
+
+See the [user guide](docs/director.md). In short: **New project** → describe or drag the blockout → add shots and camera moves → add looks to objects (upload or generate) → **Render shot** → **Open in Comfy workflow**.
+
+## Your projects and files
+
+Each project is one folder: `.previs/director/<project-id>/` holding `project.json` (scene, shots, chat), `refs/` (all images), `assets/` (camera renders and workflow results) and `refgen/` (generation receipts). Use **⋯ → Export** on the launch page for a portable `.previs.zip`, and **Import project…** to bring one in. **Archive** moves a project to `.previs/director-archive/` (restorable; the app never deletes your files). Back up by copying `.previs/`.
+
+## Development
+
+```sh
+pnpm check     # typecheck + build
+pnpm test      # node --test
+pnpm run doctor   # environment check
+```
+
+The server is plain Node (`server/previs/`), the browser app is Vite + three.js (`src/`), shared scene logic lives in `shared/`.
+
+## Earlier tools and release notes
+
+The camera studio (keyboard / phone / gamepad), Blender scenes, and the video workflow page remain available from the launch page footer. Background: [setup & architecture](docs/standalone-previs.md), [release boundaries](docs/release-checkpoint.md), [device controls](docs/device-controls.md).
+
+### Three deliberate paths
 
 - **Work in Blender:** connect through the actual Blender MCP server/addon, inspect exact scene/camera/timing, bind a shot, render a local beauty PNG, save and recover it. Blender owns its file; Previs restores settings and does not save that file.
 - **Work in the browser:** move the subject in the fixed camera-study set, operate and record the camera, save a new shot and preview, reopen, scrub and replay. Blender is optional.
@@ -40,7 +84,7 @@ The [hands-on review pack](docs/review-pack.md) links the playable comparisons, 
 Cloud v1 remains available for existing integrations but may change without notice. Deprecated history retrieval has been replaced by the documented job-details endpoint with exact request/graph verification. Broader v2 migration is a separately scoped support decision. Inherited source ownership remains unresolved before distribution.
 Use the in-app **Setup & readiness** page, then read [setup, architecture and recovery](docs/standalone-previs.md), [release boundaries and evidence](docs/release-checkpoint.md), and the [walkthrough outline](docs/demo-outline.md).
 
-## Release boundaries
+### Release boundaries
 
 **Release requirement:** camera-controlled rendered video → real AI video workflow → collected and reviewed output. Both Comfy Cloud and a configured local ComfyUI backend are required, with imported API graphs and preserved LoRA settings. Task, workflow and backend are separate choices. Passthrough proves transport only and is not release completion. Implementation and qualification are tracked in [video checkpoint](docs/video-checkpoint.md). Depth/pose passes, broad asset conversion, a general world editor and physics remain deferred. Browser authoring uses the camera-study set. Phone/Xbox controls have an isolated operator flow and a phone-only HTTPS connection; see [device setup and rehearsal](docs/device-controls.md). Physical iPhone/Xbox qualification remains pending. [Historical prototype notes](docs/three-vcam-history.md) are evidence of earlier work, not current qualification.
 
