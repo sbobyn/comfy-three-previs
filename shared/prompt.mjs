@@ -45,10 +45,19 @@ export function autoPromptSegments(project, shot, kind = 'video') {
   add('intro', kind === 'video' ? 'Format' : 'Format', 'Auto-prompt', FIELD_COLORS.action, kind === 'video' ? 'Cinematic live-action shot.' : 'Cinematic film still, single frame.');
   const desc = (shot.description || '').replace(/@([a-z0-9-]+)/gi, (m, h) => entities.find(e => e.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === h.toLowerCase())?.name || m).trim();
   add('action', 'Action', `Shot ${String(n).padStart(2, '0')} description`, FIELD_COLORS.action, desc ? (/[.!?]$/.test(desc) ? desc : desc + '.') : `${shot.title}.`);
-  shotObjects(project, shot).slice(0, 8).forEach((c, i) => {
+  // Objects with the same Cast Card text (e.g. four identical cruisers) share one segment and chip.
+  const groups = [];
+  for (const c of shotObjects(project, shot)) {
     const card = castCard(project, c.entity.id);
-    const parts = [card.description, card.styleNotes].filter(Boolean).join(', ');
-    add(`obj:${card.id}`, card.name, `${card.name}’s Cast Card`, OBJECT_COLORS[i % OBJECT_COLORS.length], `${card.name}: ${parts || card.kind}.`);
+    const text = [card.description, card.styleNotes].filter(Boolean).join(', ') || card.kind;
+    const g = groups.find(x => x.text === text);
+    if (g) g.cards.push(card); else groups.push({ text, cards: [card] });
+  }
+  groups.slice(0, 8).forEach((g, i) => {
+    const names = g.cards.map(c => c.name), first = g.cards[0];
+    const who = names.length <= 2 ? names.join(' and ') : `${names.slice(0, 2).join(', ')} +${names.length - 2}`;
+    const label = names.length === 1 ? first.name : `${first.name} +${names.length - 1}`;
+    add(`obj:${first.id}`, label, `${first.sharedFrom ? (project.scene.entities.find(e => e.id === first.sharedFrom)?.name || first.name) : first.name}’s Cast Card${names.length > 1 ? ` (shared by ${names.join(', ')})` : ''}`, OBJECT_COLORS[i % OBJECT_COLORS.length], `${who}: ${g.text}.`);
   });
   if (environment?.description) add('world', 'World', 'Scene world', FIELD_COLORS.world, `Setting: ${environment.description}.`);
   if (environment?.style) add('style', 'Visual style', 'Project style', FIELD_COLORS.style, `Look: ${environment.style}.`);
