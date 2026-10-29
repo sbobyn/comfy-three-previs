@@ -7,6 +7,8 @@ import { createDirectorScene } from './director-scene';
 import { initOperate, operateBlock } from './director-operate'; // [operate]
 import { installPhoneDemo } from './director-phone'; // [director-phone]
 import { createSequence } from './director-sequence';
+import { promptBlock } from './director-prompt';
+import { shotPrompt } from '../shared/prompt.mjs';
 import { openLooksBoard, aspectFor } from './director-looks';
 import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } from './director-videogen';
 import type { TransformChange } from './director-scene';
@@ -128,8 +130,8 @@ const wsBody = h('div', { class: 'ws-body' }, rail, stage, side);
 const sequence = createSequence({
   project: () => project, apply: p => apply(p), runEntry: async e => { await runEntry(e); }, signature, assetUrl,
   thumbnail: (s, w, hh) => scene.thumbnail(s, w, hh),
-  prompt: s => s.render?.prompt && !(s.render.signature && s.render.signature !== signature(project, s)) ? s.render.prompt : compilePrompt(project, s),
-  capture: (s, o) => captureShotVideo(s, { width: 1280, height: 720, prompt: s.render?.prompt && s.render.signature === signature(project, s) ? s.render.prompt : compilePrompt(project, s), ...o }),
+  prompt: s => shotPrompt(project, s, 'video'),
+  capture: (s, o) => captureShotVideo(s, { width: 1280, height: 720, prompt: shotPrompt(project, s, 'video'), ...o }),
   openShot: id => { setMode('scene'); selectShot(id); }, openEditor: () => openEditor(),
 });
 let wsMode: 'scene' | 'sequence' = 'scene';
@@ -488,7 +490,6 @@ function renderShotPane() {
   const refsGrid = h('div', { class: 'refs' }, ...s.references.map(r => refCard(s, r)));
   const drop = h('label', { class: 'dropzone' }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => { const files = Array.from((ev.target as HTMLInputElement).files || []); void uploadRefs(files, null, false); } }), 'Drop images here or click to add references for this shot');
   dropTarget(drop, files => uploadRefs(files, null, false));
-  const promptText = compilePrompt(project, s);
   shotPane.replaceChildren(
     h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Shot ${String(idx + 1).padStart(2, '0')}`), h('button', { class: 'btn ghost sm', type: 'button', disabled: project.shots.length < 2, title: 'Delete this shot', onclick: () => { if (confirm(`Delete “${s.title}”? Its references stay on disk.`)) void edit([{ op: 'remove_shot', id: s.id }]); } }, 'Delete')),
@@ -508,14 +509,12 @@ function renderShotPane() {
         h('button', { class: 'btn sm', type: 'button', onclick: () => keyFromView('end'), title: 'Use the current set view as the last camera position' }, 'Set end from view'),
         h('button', { class: 'btn sm ghost', type: 'button', onclick: () => scene.lookThrough() }, 'Go to camera'))),
     castBlock(s),
+    promptBlock(s, { project: () => project, runEntry: e => runEntry(e as any), select: id => { select(id); setTab('object'); } }),
     operateBlock(s), // [operate]
     h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `References · ${s.references.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, 'Link each image to an object')),
       refsGrid, drop),
     keyFrameBlock(s),
-    h('div', { class: 'block' },
-      h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Render prompt'), h('button', { class: 'btn ghost sm', type: 'button', onclick: () => void navigator.clipboard.writeText(promptText).then(() => toast('Prompt copied')) }, 'Copy')),
-      h('div', { class: 'prompt-box' }, promptText)),
     ...resultsBlock(s),
     ...(rendered ? [h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Last render'), stale ? h('span', { style: 'color:var(--warn);font-size:11.5px' }, 'Scene or camera changed since') : h('span', { style: 'color:var(--ok);font-size:11.5px' }, 'Up to date')),
@@ -549,7 +548,7 @@ function keyFrameBlock(s: Shot) {
   const head = h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Key frames · ${frames.length}`), h('button', { class: 'btn sm', type: 'button', onclick: () => { f.open = !f.open; if (f.open && !refgen.presets.length) void loadRefgen(); shotPane.dataset.shot = ''; renderShotPane(); } }, f.open ? 'Close' : '✦ Generate key frame'));
   const gallery = frames.length ? h('div', { class: 'refs' }, ...frames.map(r => h('div', { class: 'ref' }, h('img', { src: refUrl(r), alt: r.name, loading: 'lazy', title: r.generated ? `${r.generated.model} · seed ${r.generated.seed}` : r.name }), h('div', { class: 'ref-body' }, h('span', { class: 'ref-name' }, h('span', {}, r.name)), h('span', { class: 'link' }, r.generated ? `✦ ${r.generated.model.split(' (')[0]}` : 'Uploaded'))))) : h('p', { class: 'note', style: 'margin:0' }, 'Generate a styled still of this shot from its blockout frame and prompt. Key frames are named in the render prompt as the look to match.');
   if (!f.open) return h('div', { class: 'block' }, head, gallery, ...jobs.filter(j => j.status !== 'quoted').slice(0, 3).map(jobRow));
-  const prompt = h('textarea', { class: 'field', rows: 4, 'aria-label': 'Key frame prompt' }, f.prompt ?? compilePrompt(project, s));
+  const prompt = h('textarea', { class: 'field', rows: 4, 'aria-label': 'Key frame prompt' }, f.prompt ?? shotPrompt(project, s, 'image'));
   prompt.oninput = () => { f.prompt = prompt.value; };
   const model = h('select', { class: 'field', 'aria-label': 'Model' }, ...refgen.presets.map(p => h('option', { value: p.id, selected: p.id === f.presetId }, `${p.title}${p.backend === 'cloud' ? ' · Cloud' : ''}`)));
   model.onchange = () => { f.presetId = model.value; shotPane.dataset.shot = ''; renderShotPane(); };
@@ -1338,7 +1337,7 @@ function openRender() {
   const bar = h('i'); const progress = h('div', { class: 'progress', hidden: true }, bar);
   const status = h('div', { class: 'status-line' });
   const capture = h('button', { class: 'btn camera', type: 'button' }, `Capture camera video`);
-  const prompt = h('textarea', { class: 'field', rows: 5, 'aria-label': 'Render prompt' }, s.render?.prompt && !(s.render.signature && s.render.signature !== signature(project, s)) ? s.render.prompt : compilePrompt(project, s));
+  const prompt = h('textarea', { class: 'field', rows: 5, 'aria-label': 'Render prompt' }, shotPrompt(project, s, 'video'));
   const open = h('a', { class: 'btn ghost sm', target: '_blank', 'aria-disabled': 'true', style: 'pointer-events:none;opacity:.45', title: 'Full workflow page: import graphs, map inputs, compare and review' }, 'Advanced workflow page ↗');
   const step1 = h('div', { class: 'step active' }, h('span', { class: 'n' }, '1'), h('div', {}, h('h3', {}, 'Camera video'), h('p', {}, 'Renders every frame through the shot camera at a fixed 24 fps — the exact source the workflow receives.'), res, h('div', { style: 'height:8px' }), facts, h('div', { style: 'height:10px' }), capture, h('div', { style: 'height:8px' }), progress, status));
   const refs = [...project.scene.entities.map(e => objectLooks(project, e.id)[0]).filter(Boolean) as Reference[], ...s.references];

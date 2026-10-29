@@ -4,6 +4,7 @@
 import { compilePrompt, referenceLegend, videoReferences } from '../shared/director.mjs';
 import type { DirectorProject, Shot, VideoRef } from '../shared/director.mjs';
 import { withReferenceImages, maxReferences } from '../shared/video-refs.mjs';
+import { shotPrompt } from '../shared/prompt.mjs';
 import { api } from './director-common';
 
 export type Def = { id: string; title: string; task: string; description?: string; pricing?: { ratePerSecond?: number }; parameters?: Record<string, { nodeId: string; input: string }>; graph?: any; inputs?: any; provenance?: { presetId?: string; referenceImages?: number }; constraints?: any };
@@ -61,7 +62,7 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   for (const [k, m] of Object.entries(def.parameters || {})) parameters[k] = def.graph?.[m.nodeId]?.inputs?.[m.input];
   const assetBindings: Record<string, unknown> = { [role]: { assetId: r.assetId } };
   registered.forEach((x, i) => { assetBindings[`referenceImage${i + 1}`] = { renderId: x.renderId }; });
-  let prompt = shotVideoPrompt(project, s, refs, o.userPrompt ?? r.prompt);
+  let prompt = shotVideoPrompt(project, s, refs, o.userPrompt ?? shotPrompt(project, s, 'video'));
   const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
   const main = (await api('project')).project;
   const bind = await api('generation/bind', { revision: main.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
@@ -92,7 +93,8 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   const secs = LTX_DURATIONS.reduce((a, b) => (Math.abs(b - s.duration) < Math.abs(a - s.duration) ? b : a));
   if ('duration' in parameters) parameters.duration = String(secs);
   const auto = compilePrompt(project, s);
-  let prompt = o.userPrompt && o.userPrompt.trim() && o.userPrompt.trim() !== auto.trim() ? o.userPrompt.trim() : auto;
+  const chosen = (o.userPrompt ?? shotPrompt(project, s, 'video')).trim();
+  let prompt = chosen || auto;
   prompt = prompt.replace('Preserve the supplied camera motion, framing and blocking.', 'Start from the supplied frame and keep its composition, characters and look.');
   const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
   const bind = await api('generation/bind', { revision: (await api('project')).project.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings: { firstFrame: { renderId }, ...(wantsLast ? { lastFrame: { renderId: lastId } } : {}) }, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });

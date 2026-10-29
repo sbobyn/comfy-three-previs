@@ -4,6 +4,7 @@ import { mkdir, readFile, readdir, writeFile, copyFile, rename, cp, stat } from 
 import { createHash } from 'node:crypto';
 import { writeZip, readZip } from './zip.mjs';
 import { renderEdit, withTemp, imageToPng } from './edit.mjs';
+import { normalizePrompts, normalizeStyle } from '../../shared/prompt.mjs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
@@ -119,6 +120,8 @@ export function applyOps(p, ops) {
         if (patch.description !== undefined) s.description = String(patch.description).slice(0, 4000);
         if (patch.duration !== undefined) s.duration = clampDuration(patch.duration);
         if (patch.start !== undefined) s.start = clampStart(patch.start);
+        if (patch.prompts !== undefined) s.prompts = normalizePrompts({ ...(s.prompts || {}), ...(patch.prompts || {}) });
+        if (patch.style !== undefined) { if (patch.style === null) delete s.style; else s.style = normalizeStyle(patch.style); }
         if (patch.cast !== undefined) {
           const known = id => resolveEntity(p, id)?.id || fail(`Unknown object ${id}`);
           s.cast = normalizeCast({ include: (patch.cast?.include || []).map(known), exclude: (patch.cast?.exclude || []).map(known) });

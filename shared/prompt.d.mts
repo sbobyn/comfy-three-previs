@@ -1,0 +1,14 @@
+import type { DirectorProject, Shot } from './director.mjs';
+export type StyleTags = { movement: string[]; cuts: string[]; lens: string[]; filter: string[] };
+export type Segment = { key: string; label: string; source: string; color: string; text: string };
+export const CAMERA_TERMS: Record<keyof StyleTags, string[]>;
+export const CAMERA_GROUPS: Record<keyof StyleTags, string>;
+export const FIELD_COLORS: Record<string, string>;
+export function suggestedStyle(shot: Shot): StyleTags;
+export function normalizeStyle(s: unknown): StyleTags;
+export function shotStyle(shot: Shot): StyleTags;
+export function autoPromptSegments(project: DirectorProject, shot: Shot, kind?: 'video' | 'image'): Segment[];
+export function autoPromptText(project: DirectorProject, shot: Shot, kind?: 'video' | 'image'): string;
+export function shotPrompt(project: DirectorProject, shot: Shot, kind?: 'video' | 'image'): string;
+export function highlightRanges(text: string, segments: Segment[]): { start: number; end: number; seg: Segment }[];
+export function normalizePrompts(p: unknown): Partial<Record<'video' | 'image', { text: string; edited: true; basedOn: string; editedAt: string }>>;
