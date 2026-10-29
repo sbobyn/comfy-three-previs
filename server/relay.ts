@@ -22,11 +22,12 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer) {
   const wss = new WebSocketServer({ noServer: true, maxPayload: 65536 });
   const viewers = new Set<WebSocket>();
   let phone: WebSocket | null = null;
+  // [director-phone] The viewer that sent "claim" is the only one whose rig/ping reaches the phone.
+  let owner: WebSocket | null = null;
 
-  const presence = (): string => JSON.stringify({ t: "presence", controller: phone !== null });
+  const presence = (viewer?: WebSocket): string => JSON.stringify({ t: "presence", controller: phone !== null, ...(owner ? { owner: owner === viewer } : {}) });
   const broadcastPresence = (): void => {
-    const text = presence();
-    for (const viewer of viewers) viewer.send(text);
+    for (const viewer of viewers) viewer.send(presence(viewer));
   };
 
   console.log(`[vcam] relay attached at ${RELAY_PATH}`);
@@ -53,7 +54,7 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer) {
         broadcastPresence();
       } else {
         viewers.add(ws);
-        ws.send(presence());
+        ws.send(presence(ws));
       }
 
       let messages=0,windowAt=Date.now();
@@ -75,6 +76,9 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer) {
           broadcastPresence();
           return;
         }
+        // [director-phone] claim ownership; once owned, other viewers no longer steer the phone.
+        if (parseKind(text) === "claim") { owner = ws; broadcastPresence(); return; }
+        if (owner && owner !== ws) return;
         phone?.send(text);
       });
 
@@ -86,6 +90,7 @@ export function attachRelay(httpServer: HttpServer | Http2SecureServer) {
           }
         } else {
           viewers.delete(ws);
+          if (owner === ws) { owner = null; broadcastPresence(); } // [director-phone]
         }
       });
     });

@@ -25,7 +25,7 @@ export type PhoneMessage =
  * that holds the slot without enabling its sensors sends nothing at all, which
  * is precisely when the viewer needs to know it is there.
  */
-export type ViewerInbound = PhoneMessage | { t: "presence"; controller: boolean };
+export type ViewerInbound = PhoneMessage | { t: "presence"; controller: boolean; /* [director-phone] set once a viewer has claimed */ owner?: boolean };
 
 import type { SmoothingSettings } from "./smoothing";
 
@@ -38,6 +38,8 @@ import type { SmoothingSettings } from "./smoothing";
 export type ViewerMessage =
   | { t: "ping"; id: number }
   | { t: "kick" }
+  /** [director-phone] Makes this viewer the only one that steers the phone. */
+  | { t: "claim" }
   | {
       t: "rig";
       /** World position, sent outright so any source works — path or flown. */
@@ -49,6 +51,8 @@ export type ViewerMessage =
       settings: SmoothingSettings;
       controls?: {enabled:boolean;recording:boolean};
       mm?: number; subject?: number[];
+      /** [director-phone] "director": the phone aims the Director shot camera (no viewfinder set, no sticks). */
+      mode?: "director";
     };
 
 export function relayUrl(role: "phone" | "viewer"): string {

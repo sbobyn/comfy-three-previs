@@ -89,6 +89,9 @@ function connect() {
     }
     if (message.t !== "rig") return;
     lastRig = performance.now();
+    // [director-phone] The Director desktop aims its own shot camera: hide the
+    // camera-study viewfinder and touch sticks, keep Re-zero / lens / Record.
+    document.body?.classList.toggle("director-mode", message.mode === "director");
     const record = element<HTMLButtonElement>("phoneRecord");
     record.textContent = message.controls?.recording
       ? "Stop shot"
@@ -142,6 +145,7 @@ async function activate(useMotion: boolean) {
         applyGrip(q, grip.value as Grip);
         lastSample = performance.now();
         sensor.textContent = "Motion samples live";
+        directorAim(q); // [director-phone]
         send({ t: "q", q: q.toArray() as [number, number, number, number] });
       });
     }
@@ -298,6 +302,15 @@ setInterval(() => {
     sensor.textContent =
       "No recent motion samples. Check Safari permission or use touch controls.";
 }, 33);
+// [director-phone] Local readout of the phone's own aim (the desktop shows the real shot).
+let aimShownAt = 0;
+function directorAim(q: { x: number; y: number; z: number; w: number }) {
+  if (!document.body?.classList.contains("director-mode") || performance.now() - aimShownAt < 100) return;
+  aimShownAt = performance.now();
+  const yaw = Math.atan2(2 * (q.w * q.y + q.x * q.z), 1 - 2 * (q.x * q.x + q.y * q.y));
+  const pitch = Math.asin(Math.max(-1, Math.min(1, 2 * (q.w * q.x - q.y * q.z))));
+  element("directorAim").textContent = `heading ${(yaw * 180 / Math.PI).toFixed(0)}° · tilt ${(pitch * 180 / Math.PI).toFixed(0)}°`;
+}
 function animate() {
   viewfinder.render();
   requestAnimationFrame(animate);

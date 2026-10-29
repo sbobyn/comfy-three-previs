@@ -10,7 +10,7 @@ export async function startPhoneLan({ root, relay, env = process.env }) {
   let error=null;
   const revoke=()=>{token=null;expires=0;relay.revoke();};
   const matches=value=>typeof value==='string'&&token&&Date.now()<expires&&Buffer.byteLength(value)===Buffer.byteLength(token)&&timingSafeEqual(Buffer.from(value),Buffer.from(token));
-  const readiness=()=>({available:!!server,error,paired:!!token&&Date.now()<expires,scope:'Phone controller only; same LAN and trusted HTTPS required.'});
+  const readiness=()=>({available:!!server,error,paired:!!token&&Date.now()<expires,expiresAt:token&&Date.now()<expires?new Date(expires).toISOString():null,ca:!!env.PREVIS_PHONE_CA,/* [director-phone] */scope:'Phone controller only; same LAN and trusted HTTPS required.'});
   if(!config.port || !config.host || !config.cert || !config.key)error='Phone HTTPS not configured. Set PREVIS_PHONE_HOST, PREVIS_PHONE_PORT, PREVIS_PHONE_CERT and PREVIS_PHONE_KEY; see docs/device-controls.md.';
   else if(!Number.isInteger(config.port)||config.port<1024||config.port>65535||!/^([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+$/.test(config.host))error='Invalid phone host/port.';
   else try{
