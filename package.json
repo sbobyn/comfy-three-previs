@@ -5,6 +5,9 @@
   "type": "module",
   "packageManager": "pnpm@10.18.0",
   "scripts": {
+    "bootstrap": "pnpm install --frozen-lockfile && pnpm run build && pnpm run doctor",
+    "doctor": "node --env-file-if-exists=.env scripts/doctor.mjs",
+    "prestart": "node scripts/doctor.mjs --quick",
     "start": "node --env-file-if-exists=.env server/previs/server.mjs",
     "test": "node --test tests/*.test.mjs",
     "dev": "pnpm build && pnpm start",
