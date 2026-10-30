@@ -3,6 +3,7 @@
 // addressed under the deploy base so the GitHub Pages demo works too.
 import './director-explain.css';
 import { h } from './director-common';
+import { seamKey } from './director-desktop-core';
 
 export type Callout = { label: string; x: number; y: number; w: number; h: number };
 export type GuideEntry = { id: string; file: string; kind: 'video' | 'image'; label?: string; project?: string; shot?: string; asset?: string; capturedAt?: string; callouts?: Callout[] };
@@ -31,7 +32,7 @@ function onVisible(el: Element, cb: (on: boolean) => void) {
  * compare convention). Sweeps gently until the first touch; reduced motion keeps a still 50/50 split.
  * Videos stay in sync, muted and looping, and play only while on screen.
  */
-export function beforeAfter(o: { before: string; after: string; kind: 'image' | 'video'; labels?: [string, string]; alt?: string; posters?: [string, string] }) {
+export function beforeAfter(o: { before: string; after: string; kind: 'image' | 'video'; labels?: [string, string]; alt?: string; posters?: [string, string]; sweep?: boolean }) {
   const [la, lb] = o.labels || ['Blockout', 'Generated'];
   const media = (src: string, cls: string, poster?: string) => o.kind === 'video'
     ? h('video', { class: cls, muted: true, loop: true, playsinline: true, preload: 'none', poster, 'aria-hidden': 'true', 'data-src': src })
@@ -39,7 +40,7 @@ export function beforeAfter(o: { before: string; after: string; kind: 'image' | 
   const a = media(o.before, 'ba-before', o.posters?.[0]), b = media(o.after, 'ba-after', o.posters?.[1]);
   const seam = h('div', { class: 'ba-seam', role: 'slider', tabindex: 0, 'aria-label': `Compare: ${la} left, ${lb} right`, 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': 50, 'aria-valuetext': `${la} 50%` });
   const el = h('figure', { class: 'ba', 'aria-label': o.alt || `${la} and ${lb}, side by side` }, a, b, seam, h('span', { class: 'ba-tag l' }, la), h('span', { class: 'ba-tag r' }, lb));
-  let x = 50, touched = false, visible = false, raf = 0, playing = o.kind === 'video' && !reduced();
+  let x = 50, touched = o.sweep === false, visible = false, raf = 0, playing = o.kind === 'video' && !reduced();
   const set = (v: number) => { x = Math.max(0, Math.min(100, v)); el.style.setProperty('--x', `${x}%`); seam.setAttribute('aria-valuenow', String(Math.round(x))); seam.setAttribute('aria-valuetext', `${la} ${Math.round(x)}%`); };
   const stop = () => { touched = true; cancelAnimationFrame(raf); raf = 0; };
   const sweep = (t0: number) => (now: number) => {
@@ -55,8 +56,7 @@ export function beforeAfter(o: { before: string; after: string; kind: 'image' | 
   el.addEventListener('pointerup', () => { drag = false; });
   el.addEventListener('pointercancel', () => { drag = false; });
   seam.addEventListener('keydown', ev => {
-    const step = ev.shiftKey ? 20 : 5;
-    const v = ev.key === 'ArrowLeft' || ev.key === 'ArrowDown' ? x - step : ev.key === 'ArrowRight' || ev.key === 'ArrowUp' ? x + step : ev.key === 'Home' ? 0 : ev.key === 'End' ? 100 : null;
+    const v = seamKey(x, ev.key, ev.shiftKey);
     if (v === null) return;
     ev.preventDefault(); ev.stopPropagation(); stop(); set(v);
   });

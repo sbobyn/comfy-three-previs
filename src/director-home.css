@@ -92,7 +92,17 @@
 .home-starters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
 .home-starters[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .home-starters[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.home-starter { display: flex; flex-direction: column; gap: 14px; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; color: inherit; border-radius: var(--r-md); }
+.home-starter { display: flex; flex-direction: column; gap: 10px; min-width: 0; color: inherit; border-radius: var(--r-md); }
+.home-seam-slot, .home-starter-open { display: block; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; color: inherit; font: inherit; border-radius: var(--r-md); }
+.home-starter-open:focus-visible { outline: none; box-shadow: var(--focus); }
+/* Blockout → generated seam on the starter's hero shot (director-media beforeAfter). */
+.home-seam-slot.has-seam { cursor: default; }
+.home-seam-slot .ba { border-radius: var(--r-md); box-shadow: 0 0 0 1px rgba(21,19,15,.08), var(--sh-2); transition: box-shadow var(--t-slow) var(--ease-out); }
+.home-starter:hover .home-seam-slot .ba { box-shadow: 0 0 0 1px rgba(21,19,15,.1), var(--sh-3); }
+/* The starter's cast images, as the shot uses them. */
+.home-cast { display: flex; align-items: center; gap: 5px; min-width: 0; padding: 0 2px; }
+.home-cast img { width: 28px; height: 28px; flex: none; border-radius: 7px; object-fit: cover; background: var(--paper-2); box-shadow: 0 0 0 1px rgba(21,19,15,.1); }
+.home-cast-label { font: 600 var(--fs-2xs)/1 var(--font); letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-4); margin-right: 3px; }
 .home-starter .home-frame { box-shadow: 0 0 0 1px rgba(21,19,15,.08), var(--sh-2); transition: box-shadow var(--t-slow) var(--ease-out), transform var(--t-slow) var(--ease-out); }
 .home-starter:hover .home-frame { transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(21,19,15,.1), var(--sh-3); }
 .home-starter:hover .home-frame img { transform: scale(1.035); }
@@ -104,7 +114,7 @@
 .home-starter .home-card-meta strong { font-size: var(--fs-lg); }
 .home-starter .home-card-meta > span { font-size: var(--fs-sm); }
 .home-card-meta .home-open { margin-top: 6px; color: var(--ink); font-weight: 550; opacity: 0; transform: translateX(-4px); transition: opacity var(--t-base), transform var(--t-base) var(--ease-out); }
-.home-starter:hover .home-open, .home-starter:focus-visible .home-open { opacity: 1; transform: none; }
+.home-starter:hover .home-open, .home-starter:focus-within .home-open { opacity: 1; transform: none; }
 
 /* Your projects */
 .home-projects { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 24px 20px; }

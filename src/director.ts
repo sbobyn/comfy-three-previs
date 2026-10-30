@@ -22,9 +22,12 @@ import { openJourney } from './director-guide';
 import { initSheets, sheetSection } from './director-sheet'; // [designsheet]
 import { moveHelp } from './director-camhelp'; // [camhelp]
 import { mountJobsPip } from './director-jobs'; // [jobs]
-import { progressSlot } from './director-progress'; // [live-progress]
+import { progressSlot, acquireProgress } from './director-progress'; // [live-progress]
 import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
 import { initMobile } from './director-mobile'; // [mobile]
+import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY, moments, useTakeEntry, keyFrameCopy } from './director-desktop-core';
+import type { ShotPips } from './director-desktop-core';
+import { VIDEO_PRICES } from '../shared/tiers.mjs';
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -45,15 +48,16 @@ const allRefs = () => project.shots.flatMap(s => s.references);
 const fmt = (t: number) => `${t.toFixed(2)}s`;
 const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 
+let editsInFlight = 0; // while our own edit is on its way, a poll can't tell our change from someone else's
 async function edit(ops: unknown[], quiet = false) {
+  editsInFlight++;
   try { const r = await api('director/edit', { projectId, ops }); apply(r.project); return r; }
   catch (e) { if (!quiet) toast((e as Error).message, true); throw e; }
+  finally { editsInFlight--; }
 }
 
 // ---------- Layout ----------
 const titleInput = h('input', { 'aria-label': 'Project name', maxlength: 120 });
-const pillSlot = h('span');
-const claudeBtn = h('button', { class: 'btn ghost sm claude-btn', type: 'button', title: 'Direct this scene from Claude', onclick: () => claudeDialog() }, h('span', { class: 'claude-mark', 'aria-hidden': 'true' }, '✳'), 'Claude');
 const claudeDialog = () => showClaudeDialog(connect, project);
 const svgIcon = (paths: string) => { const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); el.setAttribute('viewBox', '0 0 20 20'); el.setAttribute('fill', 'none'); el.setAttribute('aria-hidden', 'true'); el.innerHTML = paths; return el; };
 const ICON = {
@@ -66,11 +70,10 @@ const ICON = {
 // Preview and Generate live in the action bar pinned to the bottom of the right panel (Build and Shoot).
 const previewBtn = h('button', { class: 'btn act-preview', type: 'button', title: 'Play the shot through the camera (Space)' }, '▶ Preview');
 const renderBtn = h('button', { class: 'btn cta act-go', type: 'button', title: 'Make the blockout and generate this shot’s video' }, 'Generate video ▸');
-const libraryBtn = h('button', { class: 'btn ghost sm', type: 'button', 'aria-label': 'Library', title: 'Library: every image, blockout, video and film in this project', onclick: () => void openAssets() }, svgIcon(ICON.library), h('span', { class: 'hide-md' }, 'Library'));
 const undoBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Undo', onclick: () => void undo() }, svgIcon(ICON.undo));
 const redoBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Redo', onclick: () => void redo() }, svgIcon(ICON.redo));
 type Step = 'build' | 'shoot' | 'cut';
-const stepBtn = (k: Step, label: string, tip: string) => h('button', { type: 'button', role: 'tab', class: 'step-btn', 'data-step': k, 'aria-selected': 'false', title: tip, onclick: () => setStep(k) }, h('span', { class: 'st-label' }, label), h('span', { class: 'st-count' }));
+const stepBtn = (k: Step, label: string, tip: string) => h('button', { type: 'button', role: 'tab', class: 'step-btn', 'data-step': k, 'aria-selected': 'false', title: tip, onclick: () => setStep(k) }, h('span', { class: 'st-n', 'aria-hidden': 'true' }, String(['build', 'shoot', 'cut'].indexOf(k) + 1)), h('span', { class: 'st-label' }, label), h('span', { class: 'st-count' }));
 const stepBtns: Record<Step, HTMLElement> = {
   build: stepBtn('build', 'Build', 'Build the scene: arrange objects and give your cast images'),
   shoot: stepBtn('shoot', 'Shoot', 'Shoot the selected shot: frame the camera, fly it, generate its video'),
@@ -97,19 +100,30 @@ function menuKeys(menu: HTMLElement, opener: HTMLElement) {
     items[next]?.focus();
   });
 }
+// One "More" menu holds what used to be loose top-bar buttons (Library, Claude, Guide, shortcuts, tips, export).
 const helpMenu = h('div', { class: 'menu help-menu', hidden: true, role: 'menu' });
-const helpMenuBtn = h('button', { class: 'btn ghost sm icon help-menu-btn', type: 'button', 'aria-label': 'Help', title: 'Guide and shortcuts', onclick: () => { menuState(helpMenu, helpMenu.hidden, helpMenuBtn, true); } }, '?');
+const helpMenuBtn = h('button', { class: 'btn ghost sm icon help-menu-btn', type: 'button', 'aria-label': 'More', title: 'Library, Claude, guide and shortcuts', onclick: () => { menuState(helpMenu, helpMenu.hidden, helpMenuBtn, true); } }, '⋯');
+const menuItem = (title: string, line: string, run: () => void, icon?: string) => h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; run(); } }, h('strong', {}, icon ? svgIcon(icon) : null, title), h('span', {}, line));
 helpMenu.append(
-  h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; showJourney(); } }, h('strong', {}, 'Guide'), h('span', {}, 'The whole journey, scene to film')),
-  h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; renderHelp(); helpCard.hidden = false; } }, h('strong', {}, 'Controls & shortcuts'), h('span', {}, 'Viewport, keys and grid · ?')),
-  h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; localStorage.removeItem('previs.coach.viewport'); coach.hidden = false; } }, h('strong', {}, 'Show tips again'), h('span', {}, 'The first-run hints')));
+  menuItem('Library', 'Every image, blockout, video and film', () => void openAssets(), ICON.library),
+  menuItem('Direct with Claude', 'Edit this scene from Claude; changes show here live', () => claudeDialog()),
+  h('div', { class: 'menu-sep' }),
+  menuItem('Guide', 'The whole journey, scene to film', () => showJourney()),
+  menuItem('Controls & shortcuts', 'Viewport, keys and grid · ?', () => { renderHelp(); helpCard.hidden = false; }),
+  menuItem('Show tips again', 'The first-run hints and tour', () => showTipsAgain()),
+  h('div', { class: 'menu-sep' }),
+  menuItem('Export project (.zip)', 'Everything in this project, in one file', () => { location.href = `/api/director/export?id=${projectId}`; }));
+// Status strip: what the current step is working on, Claude's presence and the jobs pip (mounted below).
+const topStatus = h('div', { class: 'top-status', role: 'status', 'aria-live': 'polite' });
+const claudeChip = h('button', { class: 'top-claude', type: 'button', hidden: true, title: 'Claude is connected · open the setup', onclick: () => claudeDialog() }, h('span', { class: 'claude-mark', 'aria-hidden': 'true' }, '✳'), 'Claude');
+const topGo = h('button', { class: 'btn cta top-go', type: 'button' });
 const top = h('header', { class: 'ws-top' },
   h('div', { class: 'top-left' },
     h('a', { class: 'brand', href: '/', title: 'Comfy Three Previs · all projects', 'aria-label': 'Comfy Three Previs · all projects' }, h('span', { class: 'brand-mark' })),
     h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput),
     h('div', { class: 'undo-group' }, undoBtn, redoBtn)),
   modeSwitch,
-  h('div', { class: 'right' }, pillSlot, libraryBtn, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu)));
+  h('div', { class: 'right' }, h('div', { class: 'top-strip' }, topStatus, claudeChip), topGo, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu)));
 document.addEventListener('pointerdown', ev => { if (!helpMenu.hidden && !(ev.target as HTMLElement).closest?.('.menu-wrap')) helpMenu.hidden = true; });
 
 const shotList = h('div', { class: 'shots', role: 'listbox', 'aria-label': 'Shots' });
@@ -166,11 +180,17 @@ const coach = h('div', { class: 'coach', role: 'note', hidden: localStorage.getI
   h('span', {}, h('b', {}, 'Drag'), ' to orbit · ', h('b', {}, 'click'), ' to select · ', h('b', {}, 'right-click'), ' to add', h('span', { class: 'coach-more' }, ' · ', h('b', {}, 'C'), ' for the shot camera')),
   h('button', { class: 'btn sm', type: 'button', onclick: () => { coach.hidden = true; localStorage.setItem('previs.coach.viewport', '1'); } }, 'Got it'));
 const firstRun = h('div', { class: 'first-run', hidden: true });
+// Shoot: a quiet way into the camera controls. Each choice opens the camera guide in the Controls card.
+const HERO_KEY = 'previs.hero.camera';
+const camHero = h('div', { class: 'cam-hero', role: 'group', 'aria-label': 'Camera controls', hidden: true });
+camHero.append(h('span', { class: 'ch-title' }, h('i', { class: 'ch-dot', 'aria-hidden': 'true' }), 'Fly camera'),
+  ...(['orbit', 'fly', 'gamepad', 'phone'] as const).map(k => h('button', { type: 'button', class: 'ch-way', 'data-way': k, onclick: () => renderCameraGuide(k) }, k === 'orbit' ? 'Orbit' : k === 'fly' ? 'Keys' : k === 'gamepad' ? 'Gamepad' : 'Phone')),
+  h('button', { type: 'button', class: 'ch-x', 'aria-label': 'Hide the camera controls tip', title: 'Hide (Show tips again brings it back)', onclick: () => { localStorage.setItem(HERO_KEY, '1'); renderCamHero(); } }, '✕'));
 const helpToggle = h('button', { class: 'btn sm help-toggle', type: 'button', title: 'Controls & shortcuts (?)', 'aria-label': 'Controls & shortcuts', 'aria-expanded': 'false', onclick: () => { if (helpCard.hidden) renderHelp(); helpCard.hidden = !helpCard.hidden; } }, '?');
 new MutationObserver(() => helpToggle.setAttribute('aria-expanded', String(!helpCard.hidden))).observe(helpCard, { attributes: true, attributeFilter: ['hidden'] });
 const viewport = h('div', { class: 'viewport' }, canvas, labels, camFrame, monitor, monToggle, viewSeg,
   h('div', { class: 'vp-tools' }, modeSeg, snapBtn, h('button', { class: 'btn sm', type: 'button', onclick: () => frameSelected(), title: 'Frame selected, or everything (F, . or Numpad .)' }, 'Frame'), helpToggle),
-  dropHint, hud, helpCard, addPopup, coach, firstRun);
+  dropHint, hud, helpCard, addPopup, coach, firstRun, camHero);
 const playBtn = h('button', { class: 'btn sm icon', type: 'button', 'aria-label': 'Play' }, '▶');
 const scrub = h('input', { type: 'range', min: 0, max: 3, step: 0.01, value: 0, 'aria-label': 'Playhead' });
 const timeOut = h('span', { class: 'time' });
@@ -186,7 +206,9 @@ const flyDevice = h('button', { class: 'fly-device', type: 'button', 'aria-haspo
 const flyMenu = h('div', { class: 'menu fly-menu', hidden: true, role: 'menu' });
 const flyPhoneSlot = h('div', { class: 'fly-phone' });
 const flyGroup = h('div', { class: 'fly' }, flyBtn, flyDevice);
-const stage = h('section', { class: 'stage' }, viewport, h('div', { class: 'transport' }, playBtn, timeOut, h('div', { class: 'kf-nav' }, prevKeyBtn, keyBtn, nextKeyBtn), scrubWrap, moveChip, flyGroup), flyMenu);
+// The shot's place in the film, in the Cut's order: one segment per shot, the playhead inside the current one.
+const filmTrack = h('div', { class: 'film-track', role: 'group', 'aria-label': 'Shots in film order' });
+const stage = h('section', { class: 'stage' }, viewport, h('div', { class: 'transport' }, filmTrack, h('div', { class: 'transport-row' }, playBtn, timeOut, h('div', { class: 'kf-nav' }, prevKeyBtn, keyBtn, nextKeyBtn), scrubWrap, moveChip, flyGroup)), flyMenu);
 
 const shotPane = h('div', { class: 'pane shotpane' });
 const objectPane = h('div', { class: 'pane shotpane objectpane', hidden: true });
@@ -202,6 +224,7 @@ const sequence = createSequence({
   prompt: s => shotPrompt(project, s, 'video'),
   capture: (s, o) => captureShotVideo(s, { width: 1280, height: 720, prompt: shotPrompt(project, s, 'video'), ...o }),
   openShot: id => { selectShot(id); setStep('shoot'); },
+  onExportState: st => { exportState = { exportOk: st.ok, exportReason: st.reason, exportBusy: st.busy }; renderSteps(); },
 });
 let wsMode: 'scene' | 'sequence' = 'scene';
 let step: Step = 'build';
@@ -215,8 +238,9 @@ function setStep(k: Step) {
   const from = step; step = k;
   setMode(k === 'cut' ? 'sequence' : 'scene');
   mobile?.onStep(k);
-  for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); }
+  for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); b.tabIndex = key === k ? 0 : -1; }
   wsBody.classList.toggle('shooting', k === 'shoot');
+  top.dataset.step = k; renderSteps(); renderCamHero(); if (tourAt >= 0) requestAnimationFrame(placeTour);
   if (k === 'shoot') {
     setView('camera');
     if (collapsed.side) setCollapsed('side', false);
@@ -330,7 +354,8 @@ const selection = new Selection();
 const undoStack = new UndoStack();
 initSheets({ projectId, project: () => project, apply: p => apply(p), refgen: () => refgen, loadRefgen: () => loadRefgen() }); // [designsheet]
 // [jobs-pip] mount point
-mountJobsPip(top.querySelector<HTMLElement>('.right')!, { projectId, api, shots: () => project.shots, onOpenShot: id => { selectShot(id); setStep('shoot'); } }); // [jobs] status-bar pip + panel
+mountJobsPip(top.querySelector<HTMLElement>('.top-strip')!, { projectId, api, shots: () => project.shots, onOpenShot: id => { selectShot(id); setStep('shoot'); } }); // [jobs] status-bar pip + panel
+{ const strip = top.querySelector<HTMLElement>('.top-strip')!, pip = strip.querySelector('.jobs-pip'); if (pip) strip.append(pip); }
 const mobile = initMobile({ // [mobile] compact/medium layout; no-op on desktop widths
   app, top, wsBody, stage, viewport, shotList, outline, filterInput, shotPane, objectPane, readiness, actionBar, transport: { playBtn, scrub, timeOut }, modeSeg, snapBtn, coach, labels, titleInput, undoBtn, redoBtn,
   sequence, scene, selection, project: () => project, shot, step: () => step, setStep, selectShot, addShot, setView, setSection, openRender, openAssets, claudeDialog, requestDelete, frameSelected, duplicateSelection, toggleHidden, entity, runEntry, edit, undo, redo,
@@ -354,26 +379,51 @@ function apply(next: DirectorProject) {
 }
 
 const shotVideos = (id: string) => (project.assets || []).filter(a => a.kind === 'workflow-result' && a.shotId === id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-/** grey = blockout only, amber = scene changed since the blockout, green = a generated video exists. */
-function shotState(s: Shot): { pip: 'none' | 'changed' | 'video'; label: string } {
-  const stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
-  const vids = shotVideos(s.id).length;
-  if (stale) return { pip: 'changed', label: vids ? 'Scene changed since this shot’s video' : 'Scene changed since the blockout' };
-  if (vids) return { pip: 'video', label: `${vids} video${vids === 1 ? '' : 's'} generated` };
-  return { pip: 'none', label: s.render ? 'Blockout ready · no video yet' : 'Blockout only · no video yet' };
+// Rail pips: blockout · still · video per shot; "running" comes from the shared live-progress client.
+const PIP_ICON = {
+  blockout: '<rect x="2.5" y="3.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 6.5h11" stroke="currentColor" stroke-width="1.2"/>',
+  still: '<rect x="2.5" y="3.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="m4 11 3-3 2 2 1.5-1.5L12.5 11" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>',
+  video: '<path d="M5.5 4.2v7.6L12 8z" fill="currentColor"/>',
+};
+const progressLease = acquireProgress(projectId); // [live-progress]
+let liveJobs = new Set<string>();
+progressLease.client.subscribe(() => {
+  const next = new Set(progressLease.client.snapshot().jobs.filter(j => !['completed', 'failed', 'cancelled', 'closed', 'invalidated'].includes(j.status)).map(j => `${j.source}:${j.id}`));
+  if ([...next].join() !== [...liveJobs].join()) { liveJobs = next; if (project) renderShotPips(); }
+});
+function shotRunning(s: Shot) {
+  const still = refgen.jobs.some(j => j.target === 'shot' && j.shotId === s.id && (liveJobs.has(`refgen:${j.id}`) || ['uploading', 'submitting'].includes(j.status)));
+  const engine = new Set([s.render?.previsShotId, ...(project.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === s.id).map(a => a.source.engineShotId)].filter(Boolean));
+  const video = !!genCache?.jobs.some(j => engine.has(j.shotId) && liveJobs.has(`generation:${j.id}`));
+  return { still, video };
+}
+function pipsFor(s: Shot) {
+  const stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s)), run = shotRunning(s);
+  return shotPips(s, { stale, videos: shotVideos(s.id).length, stillRunning: run.still, videoRunning: run.video });
+}
+function pipEls(p: ShotPips) {
+  return (['blockout', 'still', 'video'] as const).map(k => { const el = h('i', { class: `sp sp-${k} ${p[k]}` }); el.append(svgIcon(PIP_ICON[k])); el.firstElementChild!.setAttribute('viewBox', '0 0 16 16'); return el; });
+}
+/** Refresh only the pips (live job changes) without redrawing the filmstrip. */
+function renderShotPips() {
+  for (const el of Array.from(shotList.querySelectorAll<HTMLElement>('.shot[data-shot]'))) {
+    const s = project.shots.find(x => x.id === el.dataset.shot); const box = el.querySelector('.shot-pips'); if (!s || !box) continue;
+    const p = pipsFor(s); box.setAttribute('aria-label', p.label); box.replaceChildren(...pipEls(p));
+  }
 }
 function renderShots() {
   shotList.replaceChildren(...project.shots.map((s, i) => {
-    const st = shotState(s), video = shotVideos(s.id)[0];
+    const pips = pipsFor(s), video = shotVideos(s.id)[0], still = midStill(s);
+    // Filmstrip frame: the still nearest mid-shot, else the blockout frame at mid-shot.
     const c = h('canvas', { width: 176, height: 99 });
-    const thumb = video ? (video.mime.startsWith('video/') ? h('video', { class: 'thumb', src: `${assetUrl(video)}#t=0.4`, muted: true, playsinline: true, preload: 'metadata', 'aria-hidden': 'true' }) : h('img', { class: 'thumb', src: assetUrl(video), alt: '' })) : c;
-    const b = h('button', { class: 'shot' + (s.id === shotId ? ' active' : ''), type: 'button', role: 'option', 'aria-selected': String(s.id === shotId), title: `${s.title} · ${st.label}`, onclick: () => selectShot(s.id) },
+    const thumb = still ? h('img', { class: 'thumb', src: refUrl(still), alt: '', loading: 'lazy', decoding: 'async' }) : c;
+    const b = h('button', { class: 'shot' + (s.id === shotId ? ' active' : ''), type: 'button', role: 'option', 'data-shot': s.id, 'aria-selected': String(s.id === shotId), title: `${s.title} · ${pips.label}`, onclick: () => selectShot(s.id) },
       h('span', { class: 'shot-frame' }, thumb, h('span', { class: 'shot-dur' }, `${s.duration}s`), video ? h('span', { class: 'shot-vid', 'aria-hidden': 'true' }, '▶') : null),
       h('span', { class: 'info' },
-        h('span', { class: 'num' }, h('i', { class: `pip ${st.pip}`, 'aria-label': st.label }), String(i + 1).padStart(2, '0')),
+        h('span', { class: 'num' }, String(i + 1).padStart(2, '0'), h('span', { class: 'shot-pips', role: 'img', 'aria-label': pips.label }, ...pipEls(pips))),
         h('span', { class: 'title' }, s.title),
         h('span', { class: 'sub' }, MOVES[s.camera.move])));
-    if (!video) requestAnimationFrame(() => { try { c.getContext('2d')!.drawImage(scene.thumbnail(s, 176, 99, signature(project, s)), 0, 0); } catch {} });
+    if (!still) requestAnimationFrame(() => { try { c.getContext('2d')!.drawImage(scene.thumbnail(s, 176, 99, signature(project, s)), 0, 0); } catch {} });
     return b;
   }));
 }
@@ -434,13 +484,16 @@ async function ungroupSelection() {
   if (ok) selection.set(members, members[0] ?? null);
 }
 
-pillSlot.append(claudeBtn);
 const textIfChanged = (el: HTMLElement, value: string) => { if (el.textContent !== value) el.textContent = value; };
 monLabel.append(h('span'), h('span')); frameLabel.append(h('span'), h('span'));
 function renderTransport() {
   const s = shot();
   scrub.value = String(playhead);
-  textIfChanged(timeOut, `${fmt(playhead)} / ${fmt(s.duration)}${s.start ? ` · scene ${fmt((s.start || 0) + playhead)}` : ''}`);
+  if (!timeOut.firstChild) timeOut.append(h('span'), h('span', { class: 't-film' }));
+  textIfChanged(timeOut.children[0] as HTMLElement, `${fmt(playhead)} / ${fmt(s.duration)}`);
+  const film = filmSegments(project), seg = film.segments.find(x => x.shotId === s.id);
+  textIfChanged(timeOut.children[1] as HTMLElement, seg ? ` · film ${fmt(seg.start + playhead)}` : '');
+  renderFilmTrack(film);
   textIfChanged(moveChip, describeCamera(s, project.scene.entities));
   textIfChanged(playBtn, playing ? '❚❚' : '▶');
   playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play'); playBtn.title = playing ? 'Pause' : 'Play';
@@ -451,6 +504,42 @@ function renderTransport() {
   textIfChanged(frameLabel.children[0] as HTMLElement, label); textIfChanged(frameLabel.children[1] as HTMLElement, `${fmt(playhead)} / ${fmt(s.duration)}`);
 }
 
+function renderFilmTrack(film = filmSegments(project)) {
+  const s = shot(), sig = JSON.stringify([s.id, film.segments, project.shots.map(x => x.title)]);
+  if (filmTrack.dataset.sig !== sig) {
+    filmTrack.dataset.sig = sig;
+    filmTrack.replaceChildren(...film.segments.map(x => {
+      const i = project.shots.findIndex(y => y.id === x.shotId), t = project.shots[i];
+      return h('button', { type: 'button', tabindex: -1, class: 'ft-seg' + (x.shotId === s.id ? ' on' : '') + (x.inCut ? '' : ' out'), 'data-shot': x.shotId, style: `flex:${x.duration} 1 0`, title: `Shot ${String(i + 1).padStart(2, '0')} · ${t.title} · ${x.duration}s${x.inCut ? '' : ' · left out of the cut'}`, onclick: () => { if (x.shotId !== shotId) selectShot(x.shotId); } },
+        h('span', { class: 'ft-n' }, String(i + 1).padStart(2, '0')), x.shotId === s.id ? h('i', { class: 'ft-head' }) : null);
+    }));
+  }
+  const head = filmTrack.querySelector<HTMLElement>('.ft-head'); if (head) head.style.left = `${(playhead / Math.max(0.01, s.duration)) * 100}%`;
+}
+/** Show the camera hero in Shoot (until dismissed), and never while flying. */
+function renderCamHero() { camHero.hidden = step !== 'shoot' || localStorage.getItem(HERO_KEY) === '1' || fly.state().phase === 'live' || !!mobile?.active(); }
+/** The camera guide in the Controls card (one popover for every control help): orbit, keys, gamepad, phone. */
+function renderCameraGuide(way: 'orbit' | 'fly' | 'gamepad' | 'phone') {
+  helpExplainers.forEach(x => x.dispose()); helpExplainers = [];
+  const ways = [['orbit', 'Orbit'], ['fly', 'Keys'], ['gamepad', 'Gamepad'], ['phone', 'Phone']] as const;
+  const tabs = h('div', { class: 'ex-tabs', role: 'tablist', 'aria-label': 'Camera controls' }, ...ways.map(([k, label]) => h('button', { type: 'button', role: 'tab', class: 'ex-tab', 'aria-selected': String(k === way), tabindex: k === way ? 0 : -1, onclick: () => renderCameraGuide(k) }, label)));
+  tabs.onkeydown = ev => { const i = ways.findIndex(w => w[0] === way), n = ev.key === 'ArrowRight' ? i + 1 : ev.key === 'ArrowLeft' ? i - 1 : null; if (n === null) return; ev.preventDefault(); renderCameraGuide(ways[(n + ways.length) % ways.length][0]); helpCard.querySelector<HTMLElement>('.ex-tab[aria-selected="true"]')?.focus(); };
+  const live = h('div', { class: 'help-explain' });
+  const device: FlyDevice | null = way === 'fly' ? 'keyboard' : way === 'gamepad' ? 'gamepad' : way === 'phone' ? 'phone' : null;
+  const text = way === 'orbit' ? 'Drag to orbit the set, right-drag to pan, scroll to zoom. C looks through the shot camera; Set start / end from view keys the camera from here.'
+    : way === 'fly' ? 'Fly the shot camera live with the keyboard and record a take along the shot. R records, Esc lets go.'
+    : way === 'gamepad' ? (fly.state().pad ? 'Controller connected. A arms and records, B lets go.' : 'Connect a controller and press any button. A arms and records, B lets go.')
+    : phoneConnected() ? 'Phone paired. Hold it like a camera to aim the shot.' : 'Pair your phone by scanning a QR code, then hold it like a camera to aim the shot.';
+  const act = device ? h('button', { class: 'btn camera sm', type: 'button', onclick: () => { helpCard.hidden = true; flyPick = device; localStorage.setItem('previs.fly.device', device); fly.setDevice(device); renderFly(); if (device === 'phone' && !phoneConnected()) { openPhonePairing(); return; } flyBtn.click(); } }, device === 'phone' && !phoneConnected() ? 'Pair phone…' : `Fly with ${device === 'keyboard' ? 'the keyboard' : `the ${device}`}`)
+    : h('button', { class: 'btn sm', type: 'button', onclick: () => { helpCard.hidden = true; setView('set'); } }, 'Orbit the set');
+  helpCard.replaceChildren(
+    h('div', { class: 'help-head' }, h('strong', {}, 'Camera'), h('span', { class: 'muted' }, 'Orbit, fly, gamepad or phone'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => { helpCard.hidden = true; } }, '✕')),
+    h('div', { class: 'cam-guide' }, tabs, h('p', { class: 'note', style: 'margin:0' }, text), way === 'orbit' || way === 'fly' ? live : null,
+      way === 'fly' ? keyboardDiagram() : way === 'gamepad' ? gamepadDiagram() : way === 'phone' ? phoneDiagram() : null,
+      h('div', { class: 'cam-guide-act' }, act, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { helpCard.hidden = true; goSection('camera'); requestAnimationFrame(() => document.querySelector('.op-panel')?.scrollIntoView({ block: 'center' })); } }, 'Fly settings →'))));
+  if (way === 'orbit' || way === 'fly') helpExplainers.push(mountExplainer(live, way === 'orbit' ? 'navigate' : 'fly'));
+  helpCard.hidden = false;
+}
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
 /** Number field: type to preview, Enter/blur commits, Esc reverts; drag up/down to scrub (Shift fine, Ctrl snaps). */
 function numberField(label: string, value: number, opts: { rate: number; snapTo: number; min?: number; max?: number; unit?: string; onPreview(v: number): void; onCommit(v: number, from: number): void }) {
@@ -604,7 +693,7 @@ function semanticText(ta: HTMLTextAreaElement) {
 }
 // ---------- Video model: which model this shot uses, what it accepts, and what goes into each input ----------
 let genCache: GenState | null = null, genLoading = false;
-function loadGen() { if (genCache || genLoading) return; genLoading = true; api('generation').then(st => { genCache = st; shotPane.dataset.shot = ''; renderShotPane(); renderActionBar(); }).catch(() => {}).finally(() => { genLoading = false; }); }
+function loadGen() { if (genCache || genLoading) return; genLoading = true; api('generation').then(st => { genCache = st; shotPane.dataset.shot = ''; renderShotPane(); renderActionBar(); renderShotPips(); }).catch(() => {}).finally(() => { genLoading = false; }); }
 const modelKey = (s: Shot) => `previs.shot.model.${s.id}`;
 function shotModel(s: Shot) {
   const st = genCache!; const choices = videoChoices(st as any);
@@ -694,13 +783,35 @@ function renderActionBar() {
   const ready = !!s.render && !stale;
   renderBtn.textContent = ready ? 'Generate video ▸' : 'Make blockout…';
   renderBtn.title = ready ? 'Generate this shot’s video from its blockout' : 'Make the camera blockout, then generate this shot’s video';
+  renderSteps();
 }
+/** Top bar: step counts, the status strip and the one primary action for the current step. */
 function renderSteps() {
+  if (!project) return;
   const n = project.scene.entities.filter(e => e.shape !== 'group').length, shots = project.shots.length, vids = (project.assets || []).filter(a => a.kind === 'workflow-result').length;
   stepBtns.build.querySelector('.st-count')!.textContent = `${n} object${n === 1 ? '' : 's'}`;
   stepBtns.shoot.querySelector('.st-count')!.textContent = `${shots} shot${shots === 1 ? '' : 's'}`;
   stepBtns.cut.querySelector('.st-count')!.textContent = `${vids} video${vids === 1 ? '' : 's'}`;
+  const s = shot(), stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
+  const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment'), castNeed = cast.filter(r => !objectLooks(project, r.entity.id).length).length;
+  const st = stepStatus(step, project, s, { stale, videos: shotVideos(s.id).length, castNeed, castTotal: cast.length }), text = st.parts.join(' · ');
+  if (topStatus.title !== text) { topStatus.title = text; topStatus.replaceChildren(h('span', { class: 'ts-long' }, text), h('span', { class: 'ts-short', 'aria-hidden': 'true' }, st.short)); }
+  const def = genCache ? shotModel(s) : null, slots = keyFrameSlots(def as any, VIDEO_PRICES), frames = s.references.filter(r => r.role === 'frame');
+  const a = stepAction(step, { castNeed, keyFrames: slots.length ? (slots.includes('end') ? 'start+end' : 'start') : false, hasStart: frames.some(r => r.note === 'key frame start' || !r.note), hasEnd: frames.some(r => r.note === 'key frame end'), ...exportState });
+  topGo.textContent = a.label; topGo.title = a.title; topGo.disabled = a.disabled; topGo.dataset.kind = a.kind;
+  topGo.onclick = () => a.kind === 'looks' ? openLooks() : a.kind === 'still' ? openStill(a.at || 'start') : a.kind === 'video' ? openRender() : sequence.exportFilm();
 }
+let exportState = { exportOk: false, exportReason: '', exportBusy: false };
+/** Open the storyboard composer for a still at the start or end of the shot (the top bar's Generate still). */
+function openStill(at: 'start' | 'end') {
+  const s = shot();
+  frameForm[s.id] = { ...(frameForm[s.id] || { presetId: 'flux-2-pro', count: 1, seed: Math.floor(Math.random() * 1e6), guide: true, checkpoint: '' }), open: true, prompt: null };
+  seekShot(at === 'start' ? 0 : s.duration);
+  if (!refgen.presets.length) void loadRefgen();
+  goSection('video'); shotPane.dataset.shot = ''; renderShotPane();
+  requestAnimationFrame(() => shotPane.querySelector('.sb-composer')?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }));
+}
+function showTipsAgain() { localStorage.removeItem('previs.coach.viewport'); localStorage.removeItem(HERO_KEY); localStorage.removeItem(TOUR_KEY); coach.hidden = false; renderCamHero(); if (step !== 'cut') showTour(0); }
 let rigExplainer: { dispose(): void } | undefined;
 function renderShotPane() {
   const key = `${shotId}|${project.revision}`;
@@ -798,12 +909,20 @@ function refCard(s: Shot, r: Reference) {
 
 // ---------- Shot key frames (image generation guided by the blockout frame) ----------
 const frameForm: Record<string, { open: boolean; presetId: string; count: number; seed: number; prompt: string | null; guide: boolean; checkpoint: string }> = {};
-/** When in the shot a still belongs (seconds), from its note: start, end or @t. */
-function stillTime(s: Shot, r: Reference): number | null {
-  const n = r.note || '';
-  if (n === 'key frame start') return 0;
-  if (n === 'key frame end') return s.duration;
-  const m = /^key frame @([\d.]+)s$/.exec(n); return m ? Math.min(s.duration, Number(m[1])) : null;
+/** Make an earlier take the one in use at its moment (undoable). */
+async function useTake(s: Shot, referenceId: string) {
+  const entry = useTakeEntry(s, referenceId); if (!entry) return;
+  if (await runEntry(entry)) toast(`${entry.label.replace('Use take at', 'Using the earlier take at')} · Ctrl/Cmd+Z to go back`);
+}
+/** Copy a still to the start or end of the shot so key-frame video models animate from (or to) it. */
+async function useAsKeyFrame(s: Shot, r: Reference, which: 'start' | 'end') {
+  try {
+    const blob = await (await fetch(refUrl(r))).blob();
+    const copy = keyFrameCopy(s, r, which);
+    const out = await api('director/reference', { projectId, shotId: s.id, ...copy, data: await readFileBase64(new File([blob], r.file, { type: blob.type })) });
+    apply(out.project);
+    toast(`The ${which} key frame is now this still`, false, { label: 'Undo', run: () => void edit([{ op: 'remove_reference', shotId: s.id, referenceId: out.referenceId }]).catch(() => {}) });
+  } catch (e) { toast((e as Error).message, true); }
 }
 const fmtT = (t: number) => `${t.toFixed(t % 1 ? 2 : 0)}s`;
 function seekShot(t: number) { playing = false; playhead = Math.max(0, Math.min(shot().duration, t)); scene.setPlayhead(playhead); renderTransport(); renderInspector(); }
@@ -813,12 +932,12 @@ function keyFrameBlock(s: Shot) {
   const frames = s.references.filter(r => r.role === 'frame');
   const jobs = refgen.jobs.filter(j => j.target === 'shot' && j.shotId === s.id);
   const running = jobs.filter(j => j.status === 'submitted' || j.status === 'submitting');
-  // Group takes by moment; the newest take at a moment is the one used.
-  const moments = new Map<string, { t: number | null; takes: Reference[] }>();
-  for (const r of frames) { const t = stillTime(s, r), k = t === null ? 'x' : t.toFixed(2); (moments.get(k) || moments.set(k, { t, takes: [] }).get(k)!).takes.push(r); }
-  const ordered = [...moments.values()].sort((a, b) => (a.t ?? 1e9) - (b.t ?? 1e9));
+  // Takes grouped by moment; the newest take at a moment is the one used.
+  const ordered = moments(s);
   const at = Math.round(playhead * 100) / 100;
   const label = (t: number | null) => t === null ? 'Unpinned' : t === 0 ? 'Start' : Math.abs(t - s.duration) < 0.01 ? 'End' : fmtT(t);
+  const keyOf = (t: number | null): 'start' | 'end' | null => t === 0 ? 'start' : t !== null && Math.abs(t - s.duration) < 0.01 ? 'end' : null;
+  const slots = genCache ? keyFrameSlots(shotModel(s) as any, VIDEO_PRICES) : [];
   const open = (t: number) => { f.open = true; f.prompt = null; seekShot(t); if (!refgen.presets.length) void loadRefgen(); shotPane.dataset.shot = ''; renderShotPane(); };
 
   // Shot timing: the shot's length with a pin per moment and the playhead.
@@ -835,8 +954,11 @@ function keyFrameBlock(s: Shot) {
     const used = m.takes.at(-1)!;
     return h('div', { class: 'sb-moment' + (m.t !== null && Math.abs(m.t - playhead) < 0.02 ? ' here' : '') },
       h('button', { type: 'button', class: 'sb-hero', title: 'Jump here', onclick: () => { if (m.t !== null) { seekShot(m.t); shotPane.dataset.shot = ''; renderShotPane(); } } }, h('img', { src: refUrl(used), alt: used.name, loading: 'lazy' }), h('span', { class: 'sb-when' }, label(m.t))),
-      m.takes.length > 1 ? h('div', { class: 'sb-takes' }, ...m.takes.slice(0, -1).reverse().slice(0, 4).map(r => h('img', { src: refUrl(r), alt: '', title: `Earlier take · ${r.generated?.model || ''}` }))) : null,
-      h('div', { class: 'sb-meta' }, `${m.takes.length} take${m.takes.length === 1 ? '' : 's'}`, m.t !== null ? h('button', { class: 'linklike', type: 'button', onclick: () => open(m.t!) }, 'New take') : null));
+      // Earlier takes: any one can become the take in use (for Start/End, the key frame video models get).
+      m.takes.length > 1 ? h('div', { class: 'sb-takes', role: 'group', 'aria-label': `Earlier takes · ${label(m.t)}` }, ...m.takes.slice(0, -1).reverse().slice(0, 4).map((r, k) => h('button', { type: 'button', class: 'sb-take', title: `Use this take${keyOf(m.t) ? ` as the ${keyOf(m.t)} key frame` : ''} · earlier take ${k + 1}${r.generated?.model ? ` · ${r.generated.model.split(' (')[0]}` : ''}`, 'aria-label': `Use earlier take ${k + 1} at ${label(m.t)}`, onclick: () => useTake(s, r.id) }, h('img', { src: refUrl(r), alt: '' }), h('span', { class: 'sb-use', 'aria-hidden': 'true' }, 'Use')))) : null,
+      // Mid-shot stills can become the start or end key frame for video models that animate key frames.
+      slots.length && !keyOf(m.t) ? h('div', { class: 'sb-key' }, h('span', {}, 'Key frame'), ...slots.map(w => h('button', { class: 'linklike', type: 'button', title: `Copy this still to the ${w} of the shot; ${shotModel(s)?.title?.split(' ·')[0] || 'the video model'} animates ${slots.length > 1 ? 'start → end' : 'from the start'}`, onclick: () => void useAsKeyFrame(s, used, w) }, `Use as ${w}`))) : null,
+      h('div', { class: 'sb-meta' }, keyOf(m.t) && slots.includes(keyOf(m.t)!) ? h('span', { class: 'sb-keytag' }, `${keyOf(m.t) === 'start' ? 'Start' : 'End'} key frame`) : `${m.takes.length} take${m.takes.length === 1 ? '' : 's'}`, m.t !== null ? h('button', { class: 'linklike', type: 'button', onclick: () => open(m.t!) }, 'New take') : null));
   })) : h('div', { class: 'sb-empty' }, h('strong', {}, 'Picture the shot before you film it.'), h('span', {}, 'A still costs a few cents. Pin one at the start, the end, or any moment: it uses the blockout frame there, your cast’s images and this shot’s prompt. Start→end video models use the start and end stills.'));
   const head = h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Storyboard · ${frames.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, running.length ? `Generating ${running.length}…` : 'Stills of the shot, moment by moment'));
   if (!f.open) return h('div', { class: 'block sb' }, head, track, adds, strip, ...jobs.filter(j => j.status === 'failed').slice(0, 1).map(jobRow));
@@ -944,7 +1066,7 @@ async function loadRefgen() {
     refgen = await api(`director/refgen?projectId=${projectId}`);
     // BFL image models only for now (FLUX 3 first).
     refgen.presets = refgen.presets.filter(p => /^flux/.test(p.id)).sort((a, b) => (a.id === 'flux-3' ? -1 : b.id === 'flux-3' ? 1 : 0));
-    renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); } catch (e) { toast((e as Error).message, true); }
+    renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); renderShotPips(); } catch (e) { toast((e as Error).message, true); }
 }
 function lookCard(e: Entity, r: Reference) {
   const primary = e.look === r.id;
@@ -1473,7 +1595,7 @@ document.addEventListener('pointerdown', ev => { if (!flyMenu.hidden && !(ev.tar
 menuKeys(helpMenu, helpMenuBtn); menuKeys(flyMenu, flyDevice);
 menuKeys(addMenu, rail.querySelector<HTMLElement>('.add-obj')!); menuKeys(addPopup, canvas);
 canvas.tabIndex = 0;
-fly.onChange(renderFly);
+fly.onChange(() => { renderFly(); renderCamHero(); });
 window.addEventListener('gamepadconnected', () => renderFly());
 renderFly();
 // Shot monitor (picture in picture) can fold away.
@@ -1699,35 +1821,37 @@ function genQuote(job: any, def: any, request: any, s: Shot) {
 }
 
 // ---------- Live sync ----------
+let agentLive = false;
 async function pollNow() {
   try {
     const r = await api(`director/project?id=${projectId}&since=${project.revision}`);
-    if (r.project) { const before = project; apply(r.project); announceChanges(before, r.project); }
+    if (r.agent) { agentLive = !!(r.agent.connected || r.agent.runner?.busy?.length); claudeChip.hidden = !r.agent.connected; }
+    if (r.project && r.project.revision > project.revision) { const before = project, mine = editsInFlight > 0; apply(r.project); if (!mine) announceChanges(before, r.project); }
   } catch {}
 }
-/** Changes that arrive from outside (Claude over MCP): flash the objects in their kind colour and say what changed. */
+/** Changes the user did not make (Claude over MCP, or another window): flash the objects and say what changed, with Undo. */
 function announceChanges(before: DirectorProject, after: DirectorProject) {
-  const old = new Map(before.scene.entities.map(e => [e.id, JSON.stringify(e)]));
-  const objs = after.scene.entities.filter(e => old.get(e.id) !== JSON.stringify(e));
-  const removed = before.scene.entities.filter(e => !after.scene.entities.some(x => x.id === e.id)).length;
-  const oldShots = new Map(before.shots.map(x => [x.id, JSON.stringify(x)]));
-  const shots = after.shots.filter(x => oldShots.get(x.id) !== JSON.stringify(x)).length + before.shots.filter(x => !after.shots.some(y => y.id === x.id)).length;
-  if (!objs.length && !removed && !shots) return;
+  const ext = externalChanges(before, after); if (!ext) return;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  for (const e of objs) for (const el of [labels.querySelector<HTMLElement>(`[data-id="${e.id}"]`), outline.querySelector<HTMLElement>(`[data-id="${e.id}"]`)]) {
+  for (const id of ext.ids) for (const el of [labels.querySelector<HTMLElement>(`[data-id="${id}"]`), outline.querySelector<HTMLElement>(`[data-id="${id}"]`)]) {
     if (!el) continue;
-    el.style.setProperty('--flash', KIND_COLORS[e.kind] || 'var(--accent)');
+    el.style.setProperty('--flash', KIND_COLORS[entity(id)?.kind || ''] || 'var(--accent)');
     el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
     setTimeout(() => el.classList.remove('flash'), reduce ? 900 : 1600);
   }
-  const parts = [objs.length || removed ? `${objs.length + removed} object${objs.length + removed === 1 ? '' : 's'}` : '', shots ? `${shots} shot${shots === 1 ? '' : 's'}` : ''].filter(Boolean);
-  toast(`✳ Claude updated ${parts.join(' and ')}`);
+  const who = agentLive ? '✳ ' : '', text = agentLive ? ext.text : ext.text.replace(/^Claude /, 'Changed elsewhere: ');
+  if (!ext.undo) { toast(`${who}${text}`); return; }
+  // Undo works from the toast and from Ctrl/Cmd+Z (redo re-applies the same change).
+  const redo = externalChanges(after, before)?.undo;
+  const entry = { label: agentLive ? 'Claude’s change' : 'the change from elsewhere', redo: redo || [], undo: ext.undo };
+  if (redo) { undoStack.push(entry); renderUndo(); }
+  toast(`${who}${text}`, false, { label: 'Undo', run: () => { if (redo && undoStack.peekUndo() === entry) void undo(); else void edit(entry.undo).then(() => toast(`Undid ${entry.label}`)).catch(() => {}); } });
 }
 /** Empty project: three steps from nothing to a video. */
 function renderFirstRun() {
   const key = `previs.firstrun.${project.id}`;
   const objs = project.scene.entities.filter(e => e.shape !== 'group');
-  if (objs.length || localStorage.getItem(key) === '1') { firstRun.hidden = true; return; }
+  if (objs.length || localStorage.getItem(key) === '1') { firstRun.hidden = true; if (project.revision > 0 && tourAt < 0 && objs.length) setTimeout(maybeTour, 0); return; }
   const hasImages = objs.some(e => objectLooks(project, e.id).length), hasVideo = (project.assets || []).some(a => a.kind === 'workflow-result');
   const stepEl = (n: number, done: boolean, title: string, body: string, action: Node | null) => h('li', { class: done ? 'done' : '' }, h('span', { class: 'fr-n' }, done ? '✓' : String(n)), h('div', {}, h('strong', {}, title), h('p', {}, body), action));
   firstRun.hidden = false;
@@ -1739,13 +1863,44 @@ function renderFirstRun() {
       stepEl(2, hasImages, 'Give your cast an image', 'Open a cast member in the Cast panel and generate or drop an image.', null),
       stepEl(3, hasVideo, 'Frame a shot and generate video', 'Switch to Shoot, frame or fly the camera, then press Generate video in the bar at the bottom of the right panel.', null))));
 }
+// First-run tour: four coach marks (block, cast, shoot, generate) on a new project, once per browser.
+const tourEl = h('div', { class: 'tour', role: 'dialog', 'aria-modal': 'false', 'aria-labelledby': 'tour-title', hidden: true });
+document.body.append(tourEl);
+let tourAt = -1;
+const tourAnchor = (id: string): HTMLElement | null => id === 'block' ? viewport : id === 'cast' ? (step === 'build' ? topGo : stepBtns.build) : id === 'shoot' ? stepBtns.shoot : renderBtn.getClientRects().length ? renderBtn : topGo;
+function endTour() { tourAt = -1; tourEl.hidden = true; localStorage.setItem(TOUR_KEY, '1'); localStorage.setItem('previs.coach.viewport', '1'); window.removeEventListener('resize', placeTour); }
+function placeTour() {
+  const a = tourAnchor(TOUR[tourAt]?.id || ''); if (tourAt < 0 || !a) return;
+  const r = a.getBoundingClientRect(), w = tourEl.offsetWidth || 300, hh = tourEl.offsetHeight || 140, big = r.height > 240;
+  // Big anchors (the viewport): sit inside its top-left. Small ones: below, or above when there's no room.
+  const below = big ? r.top + 56 : r.bottom + 12 + hh < innerHeight ? r.bottom + 12 : r.top - 12 - hh;
+  const left = Math.max(8, Math.min(innerWidth - w - 8, big ? r.left + 16 : r.left + r.width / 2 - w / 2));
+  tourEl.style.left = `${left}px`; tourEl.style.top = `${below}px`;
+  tourEl.dataset.side = big ? 'inside' : below > r.top ? 'below' : 'above';
+  tourEl.style.setProperty('--arrow', `${Math.max(16, Math.min(w - 16, r.left + r.width / 2 - left))}px`);
+}
+function showTour(i: number) {
+  if (i >= TOUR.length) { endTour(); return; }
+  tourAt = i; const t = TOUR[i], last = i === TOUR.length - 1;
+  coach.hidden = true;
+  const next = h('button', { class: 'btn sm primary', type: 'button', onclick: () => showTour(i + 1) }, last ? 'Done' : 'Next');
+  tourEl.replaceChildren(
+    h('div', { class: 'tour-head' }, h('span', { class: 'eyebrow' }, `${i + 1} of ${TOUR.length}`), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Skip the tour', title: 'Skip the tour (Esc)', onclick: () => endTour() }, '✕')),
+    h('strong', { id: 'tour-title' }, t.title), h('p', {}, t.body),
+    h('div', { class: 'tour-foot' }, h('span', { class: 'tour-dots', 'aria-hidden': 'true' }, ...TOUR.map((_, k) => h('i', { class: k === i ? 'on' : '' }))), i ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => showTour(i - 1) }, 'Back') : null, next));
+  tourEl.hidden = false; placeTour(); requestAnimationFrame(placeTour);
+  window.removeEventListener('resize', placeTour); window.addEventListener('resize', placeTour);
+  next.focus({ preventScroll: true });
+}
+tourEl.addEventListener('keydown', ev => { if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); endTour(); } });
+function maybeTour() { if (tourAt < 0 && !mobile?.active() && firstRun.hidden && shouldTour(project, localStorage.getItem(TOUR_KEY))) showTour(0); }
 async function poll() { await pollNow(); setTimeout(poll, 1200); }
 
 async function boot() {
   if (!projectId) { location.href = '/'; return; }
   try {
     const [p, a] = await Promise.all([api(`director/project?id=${projectId}`), api('director/agent')]);
-    connect = a.connect;
+    connect = a.connect; claudeChip.hidden = !a.agent?.connected;
     void loadRefgen().then(pollJobs);
     apply(p.project);
     // Open on the action: frame subjects, not the buildings around them.
@@ -1753,6 +1908,7 @@ async function boot() {
 
     applyHidden();
     const v = params.get('view'); setStep(v === 'sequence' ? 'cut' : v === 'shoot' ? 'shoot' : 'build');
+    setTimeout(maybeTour, 900);
     setTimeout(poll, 1200);
   } catch (e) {
     app.replaceChildren(h('div', { class: 'empty-state', style: 'margin:80px auto;max-width:420px' }, (e as Error).message, h('br'), h('a', { href: '/', class: 'btn', style: 'margin-top:12px' }, 'Back to projects')));

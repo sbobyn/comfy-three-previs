@@ -5,18 +5,22 @@ export type Gesture = 'tap' | 'long-press' | 'drag' | 'pinch' | 'twist' | 'pendi
 export type Pt = { x: number; y: number };
 
 export const COMPACT_MAX = 699, MEDIUM_MAX = 1023, SHORT_MAX = 500;
+/** A mouse-driven window this wide keeps the desktop workspace (rail, step bar, panel); touch screens up to MEDIUM_MAX get the tablet layout. */
+export const DESK_MIN = 880;
 export const SLOP = 8, LONG_PRESS_MS = 450, LIFT_MS = 300, FLICK = 0.5;
 export const QUERIES = {
   compact: `(max-width: ${COMPACT_MAX}px)`,
   medium: `(min-width: ${COMPACT_MAX + 1}px) and (max-width: ${MEDIUM_MAX}px)`,
   touch: '(pointer: coarse)',
   short: `(max-height: ${SHORT_MAX}px)`,
+  desk: `(min-width: ${DESK_MIN}px)`,
 };
 
 /** Width tier from a matchMedia-like function; null = desktop (mobile layer off). */
 export function tierOf(mm: (q: string) => { matches: boolean }): { tier: Tier; touch: boolean; short: boolean; classes: string[] } {
-  const compact = mm(QUERIES.compact).matches, medium = !compact && mm(QUERIES.medium).matches;
-  const touch = mm(QUERIES.touch).matches, short = mm(QUERIES.short).matches && (compact || medium);
+  const touch = mm(QUERIES.touch).matches, compact = mm(QUERIES.compact).matches;
+  const medium = !compact && mm(QUERIES.medium).matches && (touch || !mm(QUERIES.desk).matches);
+  const short = mm(QUERIES.short).matches && (compact || medium);
   // Phone landscape (wide but short) behaves like compact: theatre.
   const tier: Tier = compact ? 'compact' : medium ? (short ? 'compact' : 'medium') : null;
   const classes = [tier && `m-${tier}`, touch && 'm-touch', tier && short && 'm-short'].filter(Boolean) as string[];
