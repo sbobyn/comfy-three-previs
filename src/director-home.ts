@@ -12,6 +12,7 @@ import { checkList, openSetup } from './director-setup';
 import type { Check } from './director-setup';
 import { beforeAfter, guideManifest, guideUrl } from './director-media';
 import { starterMedia } from './director-desktop-core';
+import { mountJobsPip } from './director-jobs'; // [jobs] the only place with a count across every project
 
 type Summary = { id: string; title: string; template: string; updatedAt: string; shots: number; entities: number; references: number; renders: number; assets: number; sceneName: string };
 /** One starter card: enough of the blockout to draw shot 1. `key` is what the server creates from. */
@@ -20,6 +21,7 @@ export type Starter = { key: string; title: string; description: string; scene: 
 const app = document.getElementById('app')!;
 let agent: AgentStatus | null = null, connect: Connect = null;
 let showArchived = false;
+const jobsHost = h('span', { class: 'home-jobs' }); mountJobsPip(jobsHost, { projectId: '', api });
 const stills = new Map<string, string>();
 
 async function create(template: string) {
@@ -225,7 +227,7 @@ async function render() {
   app.replaceChildren(
     h('header', { class: 'home-top' },
       h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Three Previs'),
-      h('nav', {},
+      h('nav', {}, jobsHost,
         h('button', { class: 'home-link', type: 'button', onclick: () => openJourney() }, 'Guide'),
         h('button', { class: 'home-link', type: 'button', onclick: () => openSetup() }, 'Setup'))),
     h('main', { class: 'home' },

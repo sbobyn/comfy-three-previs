@@ -122,7 +122,8 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     if (inflight) return; inflight = true;
     try {
       const [j, b] = await Promise.all([
-        jobsOk ? api<JobsSnapshot>('jobs').catch(e => { if (missing(e)) jobsOk = false; return null; }) : null,
+        // A project sees only its own jobs; the global list is for home (projectId '').
+        jobsOk ? api<JobsSnapshot>(projectId ? `jobs?projectId=${encodeURIComponent(projectId)}` : 'jobs').catch(e => { if (missing(e)) jobsOk = false; return null; }) : null,
         batchesOk && projectId ? api<{ batches: BatchSummary[] }>(`director/batches?projectId=${encodeURIComponent(projectId)}`).catch(e => { if (missing(e)) batchesOk = false; return null; }) : null,
       ]);
       if (j && Array.isArray(j.jobs)) snap = j;
@@ -188,7 +189,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
       active ? `${dur(j.ageSeconds)} of ~${dur(j.expectedSeconds)}` : j.createdAt ? since(j.createdAt, now) : '',
       active ? `checked ${since(j.lastTrackedAt, now)}${j.trackCount ? ` · ×${j.trackCount}` : ''}` : j.status === 'completed' && j.ageSeconds ? `took ${dur(j.ageSeconds)}` : '',
       j.costUsd != null ? `$${j.costUsd.toFixed(2)}` : '',
-      j.status === 'orphaned' ? 'project archived or deleted · output kept' : j.projectId && j.projectId !== projectId ? 'other project' : '',
+      j.status === 'orphaned' ? 'project archived or deleted · output kept' : '',
     ].filter(Boolean);
     const shot = onOpenShot ? shotOf(j) : null;
     const tracking = busy.has(`track:${j.id}`);

@@ -51,3 +51,17 @@ test('batches: counts from summary or nodes; a live batch shows when no job is i
   assert.equal(pipState([], [{ ...batches[0], status: 'completed' }]), null);
   assert.equal(dur(59), '59s'); assert.equal(dur(130), '2m 10s'); assert.equal(dur(3720), '1h 02m');
 });
+
+test('an orphaned job (project archived or deleted) is terminal and never turns the pip red', () => {
+  const orphaned = { ...byStatus('completed'), status: 'orphaned', stuck: false, ageSeconds: 9e5, expectedSeconds: 60 };
+  assert.equal(needsAttention(orphaned), false);
+  assert.equal(pipState([orphaned], []), null);
+  assert.deepEqual(groupJobs([orphaned]).recent.map(j => j.status), ['orphaned']);
+});
+
+test('the pip in a project reads only that project\'s jobs; home shows the global count', async () => {
+  assert.match(source, /api<JobsSnapshot>\(projectId \? `jobs\?projectId=\$\{encodeURIComponent\(projectId\)\}` : 'jobs'\)/);
+  const home = await readFile(new URL('../src/director-home.ts', import.meta.url), 'utf8'), director = await readFile(new URL('../src/director.ts', import.meta.url), 'utf8');
+  assert.match(home, /mountJobsPip\(jobsHost, \{ projectId: '', api \}\)/);
+  assert.match(director, /mountJobsPip\([^;]*\{ projectId, api/);
+});
