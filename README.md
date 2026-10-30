@@ -72,6 +72,8 @@ claude mcp add comfy-previs -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to
 
 Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, and run generations. Claude can spend up to the maxCostUsd you allow in each tool call; the server must have PREVIS_ALLOW_PAID=1. Models without a price estimate are refused unless the call passes allowUnknownCost.
 
+Claude sees the director tools (`previs_director_*`). The older engine, Blender and raw-workflow tools (`previs_render_animation`, `previs_submit_passthrough` and the like) are listed only when the MCP server runs with `PREVIS_MCP_LEGACY=1`.
+
 ## Phone camera
 
 Your phone streams its orientation to the app over HTTPS on your local network.

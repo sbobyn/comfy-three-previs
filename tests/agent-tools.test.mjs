@@ -65,9 +65,9 @@ function fakePrevis(p, { jobs = 'ok', headless = true, unpriced = false } = {}) 
   return { server, calls, listen: () => new Promise(r => server.listen(0, '127.0.0.1', () => r(`http://127.0.0.1:${server.address().port}`))) };
 }
 
-async function withAgent(fake, fn) {
+async function withAgent(fake, fn, env = {}) {
   const base = await fake.listen();
-  const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_URL: base, PREVIS_AGENT_POLL_MS: '20' }, stdio: ['pipe', 'pipe', 'inherit'] });
+  const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_MCP_LEGACY: '', PREVIS_URL: base, PREVIS_AGENT_POLL_MS: '20', ...env }, stdio: ['pipe', 'pipe', 'inherit'] });
   const pending = new Map(); let n = 0;
   createInterface({ input: agent.stdout }).on('line', l => { const m = JSON.parse(l); pending.get(m.id)?.(m); });
   const rpc = (method, params) => new Promise(r => { const id = ++n; pending.set(id, r); agent.stdin.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n'); });
@@ -200,7 +200,7 @@ test('jobs_dashboard lists stuck and uncertain jobs first with advice, and copes
     assert.match(text, /cloud:video 2\/3/); assert.match(text, /tracker running/);
     assert.ok(at('Needs attention') < at('Active:') && at('Active:') < at('Recent:'));
     assert.ok(at('bbbbbbbb') < at('Active:') && at('cccccccc') < at('Active:'), 'stuck and uncertain first');
-    assert.match(text, /STUCK/); assert.match(text, /Never retry or resubmit/); assert.match(text, /previs_reconcile_generation/);
+    assert.match(text, /STUCK/); assert.match(text, /Never retry or resubmit/); assert.match(text, /Reconcile… in the Jobs panel/);
     assert.match(text, /dispatch 400: prompt too long/);
   });
   await withAgent(fakePrevis(p, { jobs: 'missing' }), async ({ raw }) => {
@@ -260,4 +260,22 @@ test('generate_image and generate_video refuse a model without a price estimate 
     assert.equal(sent.status, 'completed');
     assert.ok(fake.calls.some(c => c.path === '/api/director/refgen/submit' && c.body.approval.allowance.allowUnknownCharges === true));
   });
+});
+
+test('tools/list: the director tools by default; legacy engine, Blender and passthrough tools only with PREVIS_MCP_LEGACY=1', async () => {
+  const p = await fixture();
+  let names;
+  await withAgent(fakePrevis(p), async ({ rpc }) => {
+    const tools = (await rpc('tools/list', {})).result.tools; names = tools.map(t => t.name);
+    assert.ok(names.length >= 20 && names.length <= 30, `${names.length} tools`);
+    assert.deepEqual(names.filter(n => !n.startsWith('previs_director_')), []);
+    assert.match(tools.find(t => t.name === 'previs_director_edit').description, /\{op:"use_take",shotId,referenceId\}/);
+    const refused = await rpc('tools/call', { name: 'previs_render_animation', arguments: {} });
+    assert.match(refused.error.message, /Unknown tool/);
+  });
+  await withAgent(fakePrevis(p), async ({ rpc }) => {
+    const all = (await rpc('tools/list', {})).result.tools.map(t => t.name);
+    for (const legacy of ['previs_render_animation', 'previs_refresh_blender', 'previs_submit_passthrough', 'previs_project']) assert.ok(all.includes(legacy), legacy);
+    assert.ok(all.length > names.length);
+  }, { PREVIS_MCP_LEGACY: '1' });
 });

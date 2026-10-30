@@ -36,7 +36,7 @@ test('HTTP boundary, shared stdio MCP and restart recovery', async () => {
     assert.equal((await fetch(base + '/api/handoff?shot=' + shotId + '&pass=depth')).status, 400);
     const handoff = await (await fetch(base + '/api/handoff?shot=' + shotId)).json();
     assert.equal(handoff.images[0].pass, 'beauty'); assert.equal(handoff.execution, 'not-submitted');
-    const mcp = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_URL: base }, stdio: ['pipe','pipe','pipe'] });
+    const mcp = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_URL: base, PREVIS_MCP_LEGACY: '1' }, stdio: ['pipe','pipe','pipe'] }); // legacy engine tools
     const line = once(createInterface({ input: mcp.stdout }), 'line');
     mcp.stdin.write(JSON.stringify({ jsonrpc:'2.0', id:1, method:'tools/call', params:{ name:'previs_project', arguments:{} } }) + '\n');
     const reply = JSON.parse((await line)[0]); assert.equal(JSON.parse(reply.result.content[0].text).project.revision, saved.project.revision); mcp.kill();
