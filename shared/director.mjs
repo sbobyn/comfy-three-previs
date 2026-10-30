@@ -19,6 +19,8 @@ export const SHAPES = {
   rock: { size: [1.5, 1, 1.3], kind: 'environment', color: '#7d7468' },
   // An empty that holds other objects; moving it moves its children. Never rendered or cast.
   group: { size: [0.5, 0.5, 0.5], kind: 'environment', color: '#9aa7b8' },
+  // Sculpted ground: a valley ringed by mountains (heights from shared/terrain.mjs). 480 m across at scale 1.
+  terrain: { size: [480, 160, 480], kind: 'environment', color: '#6f8f4e' },
 };
 export const KINDS = ['character', 'vehicle', 'prop', 'environment'];
 export const ROLES = ['character', 'prop', 'environment', 'style', 'frame'];

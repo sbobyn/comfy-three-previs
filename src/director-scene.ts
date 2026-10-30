@@ -8,6 +8,7 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { computeModal, computeModalNumeric, modalKey as feedModalKey, modalHud, rigidApply, gridStep, unitsPerPixel, snapActive, snapDelta, framingDistance, isDrag, marqueeRect, inRect, RIGHT_CLICK_SLOP } from '../shared/editor-controls.mjs';
 import type { XForm, ModalMode, ModalState } from '../shared/editor-controls.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
+import { terrainHeight } from '../shared/terrain.mjs';
 import { withDescendants, SHAPES, cameraKeys, cameraAt, focusPoint, entitySize, entityAt, entitiesAt, shotCameraAt } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, CameraKey, Vec3 } from '../shared/director.mjs';
 
@@ -66,6 +67,19 @@ function buildShape(shape: string, color: string): THREE.Group {
       g.add(part(new THREE.BoxGeometry(0.5, 0.12, 0.25), new THREE.MeshStandardMaterial({ color: '#ffe0a0', emissive: '#ffcf7a', emissiveIntensity: 1.5 }), 0, h, 0.15));
       break;
     }
+    case 'terrain': { // heightfield in local space (entity position/scale are applied by the group)
+      const N = 180, geo = new THREE.PlaneGeometry(w, d, N, N).rotateX(-Math.PI / 2);
+      const pos = geo.attributes.position as THREE.BufferAttribute, cols: number[] = [];
+      const base = { position: [0, 0, 0], scale: [1, 1, 1] }, grass = new THREE.Color('#6f8f4e'), rock = new THREE.Color('#7d7a74'), snow = new THREE.Color('#f2f2ee'), c = new THREE.Color();
+      for (let i = 0; i < pos.count; i++) {
+        const y = terrainHeight(base, pos.getX(i), pos.getZ(i)); pos.setY(i, y);
+        const t = Math.min(1, Math.max(0, (y - 6) / 40)), s2 = Math.min(1, Math.max(0, (y - 105) / 25));
+        c.copy(grass).lerp(rock, t).lerp(snow, s2); cols.push(c.r, c.g, c.b);
+      }
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); geo.computeVertexNormals();
+      const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true }));
+      mesh.receiveShadow = true; g.add(mesh); break;
+    }
     case 'tree': {
       g.add(part(new THREE.CylinderGeometry(0.14, 0.2, h * 0.35, 8), material('#6b4c33'), 0, h * 0.175, 0));
       g.add(part(new THREE.ConeGeometry(w / 2, h * 0.7, 10), m, 0, h * 0.35 + h * 0.35, 0));
@@ -84,7 +98,7 @@ function buildShape(shape: string, color: string): THREE.Group {
 // Ground, road, lights and fog shared by the workspace and still renders.
 export function createStage() {
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x1a1e25, 40, 120);
+  scene.fog = null; // fog off for now: it hid distant set pieces in previs shots
   const hemi = new THREE.HemisphereLight(0xc4ccd8, 0x2a2420, 1.1);
   const sun = new THREE.DirectionalLight(0xffffff, 1.7);
   sun.position.set(9, 16, 11); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
@@ -111,7 +125,7 @@ export function createStage() {
 function applyEnv(stage: Pick<ReturnType<typeof createStage>, 'scene' | 'ground' | 'road'>, presetName: string) {
   const e = ENV[presetName] || ENV.stage;
   stage.scene.background = new THREE.Color(e.sky);
-  const fog = stage.scene.fog as THREE.Fog; fog.color.setHex(e.sky); fog.near = e.fog[0]; fog.far = e.fog[1];
+  const fog = stage.scene.fog as THREE.Fog | null; if (fog) { fog.color.setHex(e.sky); fog.near = e.fog[0]; fog.far = e.fog[1]; }
   (stage.ground.material as THREE.MeshStandardMaterial).color.setHex(e.ground); stage.road.visible = presetName === 'street';
 }
 
