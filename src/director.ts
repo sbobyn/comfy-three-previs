@@ -18,6 +18,7 @@ import type { TransformChange } from './director-scene';
 import { Selection, UndoStack, targetConsumesKey, recreateOps, snap } from '../shared/editor-controls.mjs';
 import type { UndoEntry, ModalMode } from '../shared/editor-controls.mjs';
 import { openJourney } from './director-guide';
+import { initSheets, sheetSection } from './director-sheet'; // [designsheet]
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -41,7 +42,7 @@ const refUrl = (r: Reference) => `/director-refs/${project.id}/${r.file}`;
 const assetUrl = (a: Asset) => `/director-assets/${project.id}/${a.file.replace(/^assets\//, '')}`;
 const allRefs = () => project.shots.flatMap(s => s.references);
 const fmt = (t: number) => `${t.toFixed(2)}s`;
-const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 
 async function edit(ops: unknown[], quiet = false) {
   try { const r = await api('director/edit', { projectId, ops }); apply(r.project); return r; }
@@ -274,6 +275,7 @@ initOperate({ scene, viewport, project: () => project, shot, setView, runEntry, 
 const selection = new Selection();
 const undoStack = new UndoStack();
 // [agent] Built-in agent UI: live stream, proposal cards, prompt actions. Undo entries land on the same stack.
+initSheets({ projectId, project: () => project, apply: p => apply(p), refgen: () => refgen, loadRefgen: () => loadRefgen() }); // [designsheet]
 const agentUi = createAgentUi({ projectId, project: () => project, apply: p => apply(p), runEntry: e => runEntry(e), pushUndo: e => { undoStack.push(e); renderUndo(); }, refresh: () => pollNow(), resend: (text, sid) => { textarea.value = text; if (sid) shotId = sid; void send(); }, selectShot: id => { selectShot(id); setTab('shot'); } });
 selection.subscribe(sel => { selected = sel.primary; scene.setSelection(sel.ids, sel.primary); scene.setOutlineColor(colorOf(sel.primary)); renderOutline(); renderInspector(); renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); renderKeyTrack(); });
 
@@ -1118,6 +1120,7 @@ function renderObjectPane() {
       h('label', { class: 'cc-field' }, h('span', {}, 'Style notes'), styleNotes),
       h('div', { class: 'ob-style' }, h('span', { class: 'muted' }, 'Project style: '), styleText ? h('span', {}, styleText) : h('span', { class: 'muted' }, 'not set'), h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openLooks() }, styleText ? 'Edit' : 'Set style')),
       h('p', { class: 'note', style: 'margin:0' }, 'Description and style go into this object’s looks and into every shot it appears in. Its primary look is sent with those shots’ videos.')),
+    shared ? null : sheetSection(e), // [designsheet]
     shared ? null : h('details', { class: 'block object-generate', open: form.open, ontoggle: (ev: Event) => { form.open = (ev.currentTarget as HTMLDetailsElement).open; } },
       h('summary', {}, 'Generate an image for ', e.name),
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Image request'), editedTag, h('button', { class: 'btn ghost sm', type: 'button', disabled: !form.edited, onclick: () => { form.edited = false; rerender(); } }, 'Reset')),
