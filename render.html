@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Comfy Three Previs · Render worker</title>
+  </head>
+  <body style="margin:0;background:#000">
+    <!-- Headless render worker (server/previs/headless.mjs). Runs one op from the query string and sets window.__previsResult. -->
+    <div id="stage" style="position:fixed;left:0;top:0;width:64px;height:36px;overflow:hidden"><canvas></canvas></div>
+    <script type="module" src="/src/render-worker.ts"></script>
+  </body>
+</html>

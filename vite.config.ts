@@ -43,6 +43,7 @@ export default defineConfig({
         setup: "setup.html",
         phone: "phone.html",
         phoneSolo: "phone-solo.html",
+        render: "render.html",
       },
     },
   },
