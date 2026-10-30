@@ -4,7 +4,7 @@
 // the camera move, and each visible object's place and heading on screen, projected through the same camera the
 // guide frame is rendered with. Also: the one still-prompt builder (workspace, batch and agent share it), which
 // models follow a guide, and a free check of how well a still kept its guide's layout.
-import { MOVES, entitySize, entitiesAt, shotCameraAt, videoReferences } from './director.mjs';
+import { MOVES, entitySize, entitiesAt, shotCameraAt, videoReferences, handleOf } from './director.mjs';
 
 const rad = d => (d * Math.PI) / 180, deg = r => (r * 180) / Math.PI;
 const sub = (a, b) => a.map((v, i) => v - b[i]);
@@ -206,11 +206,14 @@ export const STILL_MAX_REFS = { 'flux-3': 9, 'flux-2-pro': 7, 'nano-banana-2-1':
 /**
  * Cast images for a key frame at shot time t, in image order from image 2: looks of the objects actually in frame
  * (largest first, at least 1% of the frame), then one environment image, then the previous shot's last still for
- * continuity. Fewer, relevant images keep the guide (image 1) in charge. Returns { looks, refIds, prevImage }.
+ * continuity. The shot's lead (camera target) and the cast its description names (@handle) are always included when
+ * in frame, however small: a hero car far down the track is still the hero, and without its look the still invents a
+ * livery. Fewer, relevant images keep the guide (image 1) in charge. Returns { looks, refIds, prevImage }.
  */
 export function stillReferences(project, shot, t, cap) {
   if (!(cap > 0)) return { looks: [], refIds: [], prevImage: null };
-  const seen = new Map(frameLayout(project, shot, t).items.filter(i => i.kind !== 'environment' && i.inFrame > 0.08 && i.coverage >= 0.01).map((i, k) => [i.id, k]));
+  const named = new Set([shot.camera?.target, ...[...String(shot.description || '').matchAll(/@([a-z0-9-]+)/gi)].map(m => project.scene.entities.find(e => handleOf(e.name) === m[1].toLowerCase())?.id)].filter(Boolean));
+  const seen = new Map(frameLayout(project, shot, t).items.filter(i => i.kind !== 'environment' && i.inFrame > 0.08 && (i.coverage >= 0.01 || named.has(i.id))).map((i, k) => [i.id, k]));
   const all = videoReferences(project, shot, 16).filter(r => r.role !== 'frame' && r.role !== 'style');
   const subjects = all.filter(r => r.role !== 'environment' && seen.has(r.entityId)).sort((a, b) => seen.get(a.entityId) - seen.get(b.entityId));
   const prev = project.shots[project.shots.indexOf(shot) - 1]?.references.filter(r => r.role === 'frame').at(-1) || null;
@@ -220,8 +223,20 @@ export function stillReferences(project, shot, t, cap) {
 }
 
 /**
+ * Which instant of the action a key frame shows. The shot text describes the whole action, and on its own pulls a still
+ * to the climax (a start still of a dunk showed the dunk); the blockout's first frame is the run-up.
+ */
+export function momentLine(shot, t) {
+  const d = Number(shot?.duration) || 0;
+  if (!(d > 0)) return '';
+  if (t <= 0.05) return 'Moment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.';
+  if (t >= d - 0.05) return 'Moment: the last instant of the shot. The action described below has just happened; show the poses in image 1.';
+  return `Moment: ${Math.round(t * 10) / 10} s into the ${d} s shot; show the poses in image 1.`;
+}
+
+/**
  * The full prompt for a key-frame still. Order: how to use image 1 (an edit for Gemini models), the camera and layout
- * in words, the shot text, then which image each cast member looks like. Only the shot text is shortened to fit `max`.
+ * in words, the moment (momentLine), the shot text, then which image each cast member looks like. Only the shot text is shortened to fit `max`.
  * looks: [{ label }] in image order from image 2; prevImage: image number of the previous shot's still, if sent.
  */
 export function stillPrompt({ project, shot, t = 0, text = '', presetId = '', looks = [], prevImage = null, frame = null, max = 2500 }) {
@@ -233,11 +248,12 @@ export function stillPrompt({ project, shot, t = 0, text = '', presetId = '', lo
   const ids = [...looks.map((l, i) => `The ${l.label} looks exactly like image ${i + 2}.`), prevImage ? `Image ${prevImage} is the previous shot: keep lighting, colour grade and designs continuous.` : '',
     last > 1 ? `Image${last > 2 ? `s 2–${last}` : ' 2'} show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.` : ''].filter(Boolean).join(' ');
   const tail = "Reading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.";
-  const fixed = [head, f.text, ids, tail].filter(Boolean);
+  const moment = momentLine(shot, t);
+  const fixed = [head, f.text, moment, ids, tail].filter(Boolean);
   const room = max - fixed.join('\n').length - 2;
   let body = String(text || '').trim();
   if (body.length > room) body = room > 40 ? body.slice(0, room - 1).replace(/\s+\S*$/, '') + '…' : '';
-  return [head, f.text, body, ids, tail].filter(Boolean).join('\n').slice(0, max);
+  return [head, f.text, moment, body, ids, tail].filter(Boolean).join('\n').slice(0, max);
 }
 
 // ---------- Match check (free) ----------
@@ -284,5 +300,8 @@ export function guideMatchScore(a, b, w, h) {
 export const MATCH_FLOOR = 0.05, MATCH_CEIL = 0.5;
 /** Grey size the match check renders both images at. */
 export const MATCH_SIZE = { width: 32, height: 18 };
-/** Below this the batch may retry once with the strong-guide model. */
-export const WEAK_MATCH = 5;
+/**
+ * Below this the batch may retry once with the strong-guide model. 6, not 5: on the 2026-10-30 hero shots both FLUX 3
+ * stills that were plainly wrong (a reversed car, a wall splitting the field) were graded exactly 5; the retry scored 9.
+ */
+export const WEAK_MATCH = 6;

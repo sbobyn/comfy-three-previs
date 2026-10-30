@@ -4,7 +4,7 @@ import { mkdtemp, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { makeEntity, makeShot, shotCast } from '../shared/director.mjs';
-import { shotProjector, frameLayout, describeFrame, stillPrompt, stillReferences, guideMatchScore, followsGuide, retryModelFor, STRONG_GUIDE_MODEL, editsGuide, WEAK_MATCH } from '../shared/still-match.mjs';
+import { shotProjector, frameLayout, describeFrame, stillPrompt, momentLine, stillReferences, guideMatchScore, followsGuide, retryModelFor, STRONG_GUIDE_MODEL, editsGuide, WEAK_MATCH } from '../shared/still-match.mjs';
 import { parseGrade, graderGraph, GRADER_PROMPT } from '../server/previs/still-match.mjs';
 import { imagePresets, publicPresets } from '../server/previs/refgen.mjs';
 import { openBatches } from '../server/previs/batch.mjs';
@@ -92,10 +92,15 @@ test('still prompt: guide line, camera words, shot text, identity lines; edit ph
   assert.match(lines[0], /^Image 1 is a grey 3D blockout of this exact frame\. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly\./);
   assert.match(lines[1], /^Camera: First frame of a truck right move/);
   assert.match(lines[2], /^In frame: Hero car:/);
-  assert.equal(lines[3], 'A race at dusk.');
-  assert.match(lines[4], /^The Hero car looks exactly like image 2\. The Track looks exactly like image 3\. Image 4 is the previous shot/);
-  assert.match(lines[4], /Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing/);
-  assert.match(lines[5], /red marks are tail lights/);
+  assert.match(lines[3], /^Moment: the first instant of the shot\. The action described below is only beginning; show the poses in image 1, not the climax\./);
+  assert.equal(lines[4], 'A race at dusk.');
+  assert.match(lines[5], /^The Hero car looks exactly like image 2\. The Track looks exactly like image 3\. Image 4 is the previous shot/);
+  assert.match(lines[5], /Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing/);
+  assert.match(lines[6], /red marks are tail lights/);
+  // The shot text describes the whole action; the moment line says which instant this key frame is.
+  assert.equal(momentLine(shot, shot.duration), 'Moment: the last instant of the shot. The action described below has just happened; show the poses in image 1.');
+  assert.equal(momentLine(shot, 1.5), 'Moment: 1.5 s into the 4 s shot; show the poses in image 1.');
+  assert.equal(momentLine({ duration: 0 }, 0), '');
   assert.ok(flux.indexOf('Camera:') < flux.indexOf('looks exactly like'), 'camera words come before the identity lines');
   const nb = stillPrompt({ project, shot, t: 0, text: 'A race.', presetId: 'nano-banana-2-1', looks });
   assert.match(nb, /^Edit image 1: repaint this grey 3D blockout as one photoreal film frame\. Keep image 1's camera position/);
@@ -118,6 +123,22 @@ test('still references: objects in frame (largest first), one environment image,
   assert.deepEqual(r.refIds, ['r-car', 'r-track', 'r-prev']);
   assert.equal(r.prevImage, 4);
   assert.deepEqual(stillReferences(project, shot, 0, 0).refIds, [], 'models without reference slots get none');
+});
+
+test('still references: the lead and the cast the action names get their look even when tiny in frame', () => {
+  const { project, shot } = scene({ move: 'static', angle: 270, distance: 6, height: 0.8, mm: 50 }, [
+    { name: 'Hero car', shape: 'car', position: [-120, 0, 0], rotation: 90 },
+    { name: 'Rival car', shape: 'car', position: [-110, 0, 3], rotation: 90 },
+    { name: 'Pace car', shape: 'car', position: [-100, 0, -3], rotation: 90 },
+    { name: 'Track', shape: 'box', kind: 'environment', position: [0, -0.05, 0], scale: [300, 0.1, 14] },
+  ], { description: '@rival-car leads, then @hero-car blows past.' });
+  // A head-on camera 120 m down the track: every car is well under 1% of the frame.
+  shot.camera = { ...shot.camera, move: 'custom', keys: [{ t: 0, p: [10, 0.8, 0], look: [-120, 1, 0], mm: 50 }] };
+  const ref = (id, entityId, role = 'prop') => ({ id, name: id, file: `${id}.png`, mime: 'image/png', role, entityId, note: '', createdAt: '' });
+  project.scene.references = [ref('r-hero', 'e0'), ref('r-rival', 'e1'), ref('r-pace', 'e2'), ref('r-track', 'e3', 'environment')];
+  assert.ok(frameLayout(project, shot, 0).items.filter(i => i.kind !== 'environment').every(i => i.coverage < 0.01));
+  const r = stillReferences(project, shot, 0, 9);
+  assert.deepEqual(new Set(r.refIds), new Set(['r-hero', 'r-rival', 'r-track']), 'named and lead cars kept; the unnamed pace car is not');
 });
 
 test('match heuristic: identical frames score 10, unrelated noise scores low, sizes are checked', () => {
@@ -174,7 +195,7 @@ test('batch retryWeakMatch: a still graded below 5 is redone once with the stron
   assert.equal(on.batch.status, 'completed');
   assert.equal(on.fake.submits.filter(x => x.type === 'still').length, 2, 'one retry, never more');
   assert.equal(node.model, 'flux-3'); assert.equal(node.retriedFrom.model, 'flux-2-pro'); assert.equal(node.retriedFrom.guideMatch, 3);
-  assert.ok(3 < WEAK_MATCH);
+  assert.ok(3 < WEAK_MATCH); assert.equal(WEAK_MATCH, 6, 'a 5/10 still is retried');
   assert.equal(on.batch.spentEstimateUsd, 0.028 + 0.066, 'the retry is charged to the batch budget');
   const off = await run(false);
   assert.equal(off.fake.submits.filter(x => x.type === 'still').length, 1, 'off by default');
