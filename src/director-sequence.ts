@@ -172,7 +172,7 @@ export function createSequence(ctx: SequenceCtx) {
       h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${bState[0]}` }, bState[1]),
         h('div', { class: 'sq-acts' },
           b ? h('button', { class: 'btn sm', type: 'button', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'blockout'); } }, '▶') : null,
-          h('button', { class: 'btn sm', type: 'button', disabled: busy, onclick: (ev: Event) => { ev.stopPropagation(); void renderShots([s]); } }, s.render ? 'Remake blockout' : 'Make blockout'))),
+          h('button', { class: 'btn sm', type: 'button', disabled: busy, onclick: (ev: Event) => { ev.stopPropagation(); void renderShots([s]); } }, s.render ? 'Remake' : 'Make'))),
       h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${gState[0]}` }, gState[1]),
         h('div', { class: 'sq-acts' },
           res.length ? h('button', { class: 'btn sm', type: 'button', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'generated'); } }, '▶') : null,
