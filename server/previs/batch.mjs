@@ -118,6 +118,9 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
     // Where the camera comes from: the blockout clip, start → end stills (approximate) or one still (approximate).
     const cameraSource = needs.camera === 'keyframes' && !still.has('end') && !hasStill(project, s, 'end') && FIRST_FRAME_FALLBACK[def.id] ? 'still' : needs.camera;
     const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, estimateUsd: estimateFor('video', models.videos, { duration: s.duration }), deps: [blockout.id], cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource] });
+    // A model that edits the blockout clip takes only clip lengths its provider accepts (Seedance edit: 4–30 s).
+    const clip = needs.camera === 'blockout' ? def.constraints?.sourceVideo?.duration : null;
+    if (clip && (s.duration < clip.min || s.duration > clip.max)) Object.assign(n, { status: 'failed', planError: true, error: `${def.title.split(' · ')[0]} needs a ${clip.min}–${clip.max} s blockout clip; this shot is ${s.duration} s. Change the shot length or the model` });
     if (needs.references && castLooks.length) { n.deps.push(...castLooks); n.optional = castLooks; }
     // A model that follows the blockout clip also takes the start/end stills as its look, when this batch makes them.
     if (lookStills) for (const x of ['start', 'end'].map(at => still.get(at)).filter(Boolean)) { n.deps.push(x.id); (n.optional ||= []).push(x.id); }

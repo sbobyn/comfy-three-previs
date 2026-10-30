@@ -144,6 +144,15 @@ test('final plan adds end stills; reference models depend on looks instead; miss
   assert.throws(() => planBatch(project, { steps: ['looks'], maxCostUsd: 1, models: { looks: 'not-a-model' } }), /unpriced/);
 });
 
+test('a blockout-editing model refuses a clip length its provider rejects, at plan time', () => {
+  const short = structuredClone(project); short.shots[1].duration = 3.2;
+  const plan = model => byId(planBatch(short, { steps: ['videos'], models: { videos: model }, maxCostUsd: 5, shots: [short.shots[1].id] }).nodes, `video:${short.shots[1].id}`);
+  assert.equal(builtInPresets.find(d => d.id === 'seedance-25-edit-v1').constraints.sourceVideo.duration.min, 4, 'Seedance edit: 4–30 s input clips');
+  const sd = plan('seedance-25-edit-v1');
+  assert.equal(sd.status, 'failed'); assert.match(sd.error, /Seedance 2\.5 needs a 4–30 s blockout clip; this shot is 3\.2 s/);
+  assert.equal(plan('kling-o1-edit-v1').status, 'waiting', 'Kling O1 edit takes 3 s and up');
+});
+
 test('a key frame made for an earlier blocking is made again; uploads and current stills are kept', async () => {
   const { shotSignature, stillStale } = await import('../shared/director.mjs');
   const plan = p => byId(planBatch(p, { steps: ['stills', 'videos'], tier: 'final', maxCostUsd: 5, shots: [p.shots[0].id] }).nodes, `still:${p.shots[0].id}start`);
