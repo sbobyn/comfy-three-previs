@@ -221,6 +221,7 @@ const wsBody = h('div', { class: 'ws-body' }, rail, stage, side);
 const sequence = createSequence({
   project: () => project, apply: p => apply(p), runEntry: async e => { await runEntry(e); }, signature, assetUrl,
   thumbnail: (s, w, hh) => scene.thumbnail(s, w, hh),
+  boxes: (s, t) => scene.boxesAt(s, t),
   prompt: s => shotPrompt(project, s, 'video'),
   capture: (s, o) => captureShotVideo(s, { width: 1280, height: 720, prompt: shotPrompt(project, s, 'video'), ...o }),
   openShot: id => { selectShot(id); setStep('shoot'); },

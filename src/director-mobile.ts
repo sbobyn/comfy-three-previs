@@ -164,7 +164,7 @@ export function initMobile(host: MobileHost): MobileApi | null {
   const seq = host.sequence, parts = seq.parts;
   parts.board.parentElement!.prepend(parts.viewer);
   const exportBlock = parts.viewer.querySelector('.sq-export'); if (exportBlock) parts.board.after(exportBlock);
-  const playSeq = parts.viewer.querySelector('.sq-ctl .sq-vbar:nth-of-type(2) .btn'); if (playSeq) { playSeq.classList.add('m-playfilm'); parts.toolbar.prepend(playSeq); }
+  const playSeq = parts.viewer.querySelector('.sq-playcut'); if (playSeq) { playSeq.classList.add('m-playfilm'); parts.toolbar.prepend(playSeq); }
   const missing = parts.toolbar.querySelector<HTMLElement>('button[title^="Capture the camera video"]'); if (missing) { missing.classList.add('m-missing'); parts.toolbar.after(missing); }
   playerBar(parts.viewer.querySelector<HTMLVideoElement>('.sq-screen > video:not(.sq-over)'));
   const rowParts = new Map<string, RowParts>();

@@ -5,7 +5,10 @@ import './director-sequence.css';
 import type { DirectorProject, Shot, Asset, EditClip } from '../shared/director.mjs';
 import { progressSlot } from './director-progress'; // [live-progress]
 import { api, h, toast } from './director-common';
-import { shotCast, objectLooks } from '../shared/director.mjs';
+import { shotCast, objectLooks, shotObjects } from '../shared/director.mjs';
+import { autoPromptSegments, KIND_COLORS } from '../shared/prompt.mjs';
+import { overlayCast, promptExcerpt, layoutChips, leaderFrom, compareBands, bandStops, sweepStops, moveStop } from './director-design-core';
+import type { Box, BandSource } from './director-design-core';
 import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } from './director-videogen';
 import type { Def, EngineRef } from './director-videogen';
 
@@ -16,6 +19,8 @@ export type SequenceCtx = {
   signature(p: DirectorProject, s: Shot): string;
   assetUrl(a: Asset): string;
   thumbnail(s: Shot, w: number, h: number): HTMLCanvasElement;
+  /** Screen boxes (0–1) of the objects the shot camera sees at time t, from the live scene. */
+  boxes?(s: Shot, t: number): Box[];
   prompt(s: Shot): string;
   capture(s: Shot, o: { onStatus?: (t: string) => void; onFrame?: (url: string, i: number, n: number) => void }): Promise<unknown>;
   openShot(id: string): void;
@@ -54,7 +59,7 @@ export function comparisonFacts(source: Asset, result: Asset): string {
 
 export function createSequence(ctx: SequenceCtx) {
   let gen: { presets: Def[]; definitions: Def[]; jobs: Job[] } = { presets: [], definitions: [], jobs: [] };
-  let selected = '', view: 'generated' | 'blockout' | 'compare' = 'generated', busy = false, picked = new Set<string>();
+  let selected = '', view: 'generated' | 'blockout' | 'compare' | 'overlay' = 'generated', busy = false, picked = new Set<string>();
   let quoted: Quoted[] = [];
   const P = () => ctx.project();
 
@@ -97,32 +102,128 @@ export function createSequence(ctx: SequenceCtx) {
   const board = h('div', { class: 'sq-board', role: 'list', 'aria-label': 'Shots in order' });
   const banner = h('div', { class: 'sq-banner', hidden: true });
   const video = h('video', { playsinline: true, controls: true, preload: 'metadata' });
-  // Compare: the generated video sits over the blockout and is revealed right of a draggable seam.
+  // Compare: bands across one frame — blockout, start still, then each generated version — split by draggable seams.
+  // `over` is the newest generated version (the first video band); `extra` holds older takes and other models.
   const over = h('video', { class: 'sq-over', playsinline: true, muted: true, preload: 'auto', hidden: true, 'aria-hidden': 'true' });
-  // First-use hint, gone after the seam is moved once.
-  const seamHint = h('span', { class: 'sq-seam-hint', hidden: localStorage.getItem('previs.seq.seamHint') === '0' }, 'Drag the seam · ← → keys');
+  const stillLayer = h('img', { class: 'sq-over sq-still', alt: '', hidden: true, 'aria-hidden': 'true', draggable: false });
+  const extra = [0, 1, 2].map(() => h('video', { class: 'sq-over', playsinline: true, muted: true, preload: 'auto', hidden: true, 'aria-hidden': 'true' }));
+  // First-use hint, gone after a seam is moved once.
+  const seamHint = h('span', { class: 'sq-seam-hint', hidden: localStorage.getItem('previs.seq.seamHint') === '0' }, 'Drag a seam · ← → keys');
   const seamUsed = () => { if (seamHint.hidden) return; seamHint.hidden = true; localStorage.setItem('previs.seq.seamHint', '0'); };
-  const seam = h('div', { class: 'sq-seam', hidden: true, role: 'slider', tabindex: 0, 'aria-label': 'Compare seam: blockout left, generated right', 'aria-valuemin': 0, 'aria-valuemax': 100 }, h('span', { class: 'sq-seam-grip' }), h('span', { class: 'sq-seam-l' }, 'Blockout'), h('span', { class: 'sq-seam-r' }, 'Generated'), seamHint);
-  let seamAt = 50;
-  const setSeam = (pct: number) => { seamAt = Math.max(0, Math.min(100, pct)); over.style.clipPath = `inset(0 0 0 ${seamAt}%)`; seam.style.left = `${seamAt}%`; seam.setAttribute('aria-valuenow', String(Math.round(seamAt))); };
-  setSeam(50);
-  seam.onpointerdown = ev => {
-    ev.preventDefault(); seam.setPointerCapture(ev.pointerId); seamUsed();
-    const box = seam.parentElement!.getBoundingClientRect();
-    const move = (e: PointerEvent) => setSeam(((e.clientX - box.left) / box.width) * 100);
-    move(ev); seam.onpointermove = move; seam.onpointerup = () => { seam.onpointermove = null; };
+  const seamLayer = h('div', { class: 'sq-seams', hidden: true }, seamHint);
+  let bands: { src: BandSource; el: HTMLVideoElement | HTMLImageElement }[] = [], stops: number[] = [], seams: HTMLElement[] = [], tags: HTMLElement[] = [];
+  let sweepRaf = 0, bandKey = '';
+  const paintStops = () => {
+    bands.forEach((b, k) => { if (k) b.el.style.clipPath = `inset(0 0 0 ${stops[k - 1]}%)`; });
+    seams.forEach((sm, i) => { sm.style.left = `${stops[i]}%`; sm.setAttribute('aria-valuenow', String(Math.round(stops[i]!))); });
+    tags.forEach((t, k) => { const l = k ? stops[k - 1]! : 0, r = k < stops.length ? stops[k]! : 100; t.style.left = `${(l + r) / 2}%`; t.hidden = r - l < 7; });
   };
-  seam.onkeydown = ev => { if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') { ev.preventDefault(); seamUsed(); setSeam(seamAt + (ev.key === 'ArrowLeft' ? -5 : 5)); } };
-  // Keep the overlay in step with the main player (which owns the controls).
-  const follow = () => { if (over.hidden) return; if (Math.abs(over.currentTime - video.currentTime) > 0.06) over.currentTime = Math.min(video.currentTime, over.duration > 0 ? over.duration : video.currentTime); };
-  video.addEventListener('play', () => { if (!over.hidden) { follow(); if (over.duration > 0 && video.currentTime >= over.duration) { video.pause(); return; } void over.play().catch(() => {}); } });
-  video.addEventListener('pause', () => over.pause());
+  const stopSweep = () => { cancelAnimationFrame(sweepRaf); sweepRaf = 0; };
+  // Once per shot and session: the seams slide in from the right, then wait for the user.
+  const swept = new Set<string>();
+  function sweepOnce(key: string) {
+    if (swept.has(key) || matchMedia('(prefers-reduced-motion: reduce)').matches) { stops = bandStops(bands.length); paintStops(); return; }
+    swept.add(key); const t0 = performance.now(), ms = 1800;
+    const step = (now: number) => { sweepRaf = 0; if (!bands.length) return; stops = sweepStops(bands.length, Math.min(1, (now - t0) / ms)); paintStops(); if (now - t0 < ms) sweepRaf = requestAnimationFrame(step); };
+    sweepRaf = requestAnimationFrame(step);
+  }
+  function seamEl(i: number) {
+    const left = () => bands[i]?.src.label || '', right = () => bands[i + 1]?.src.label || '';
+    const sm = h('div', { class: 'sq-seam', role: 'slider', tabindex: 0, 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-label': `Seam ${i + 1}: ${left()} left, ${right()} right` }, h('span', { class: 'sq-seam-grip' }));
+    sm.onpointerdown = ev => {
+      ev.preventDefault(); stopSweep(); sm.setPointerCapture(ev.pointerId); seamUsed();
+      const box = seamLayer.getBoundingClientRect();
+      const move = (e: PointerEvent) => { stops = moveStop(stops, i, ((e.clientX - box.left) / box.width) * 100); paintStops(); };
+      move(ev); sm.onpointermove = move; sm.onpointerup = () => { sm.onpointermove = null; };
+    };
+    sm.onkeydown = ev => { if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') { ev.preventDefault(); stopSweep(); seamUsed(); stops = moveStop(stops, i, stops[i]! + (ev.key === 'ArrowLeft' ? -5 : 5) * (ev.shiftKey ? 4 : 1)); paintStops(); } };
+    return sm;
+  }
+  /** Lay out the compare bands for a shot: one layer per band, n − 1 seams, a label per band. */
+  function setBands(list: { src: BandSource; url: string }[], key: string) {
+    const vids = [over, ...extra]; let vi = 0;
+    bands = list.map((b, k) => {
+      if (k === 0) return { src: b.src, el: video };
+      const el = b.src.kind === 'image' ? stillLayer : vids[vi++]!;
+      if (el instanceof HTMLImageElement) { if (!el.src.endsWith(b.url)) el.src = b.url; } else if (!el.src.endsWith(b.url)) el.src = b.url;
+      el.hidden = false; el.classList.remove('dissolve'); el.style.opacity = '';
+      return { src: b.src, el };
+    });
+    for (const v of vids.slice(vi)) { v.hidden = true; v.pause(); }
+    if (!list.some(b => b.src.kind === 'image')) stillLayer.hidden = true;
+    seams = list.slice(1).map((_, i) => seamEl(i));
+    tags = list.map(b => h('span', { class: `sq-band-tag r-${b.src.role}` }, b.src.label));
+    seamLayer.replaceChildren(...tags, ...seams, seamHint); seamLayer.hidden = false;
+    // A redraw of the same bands keeps the seams where they are (and lets a running sweep finish).
+    if (key === bandKey && stops.length === list.length - 1) paintStops(); else { stopSweep(); bandKey = key; sweepOnce(key); }
+    follow(); if (!video.paused) for (const v of followers()) void v.play().catch(() => {});
+  }
+  const followers = () => [over, ...extra].filter(v => !v.hidden);
+  // Keep the overlays in step with the main player (which owns the controls).
+  const follow = () => { for (const o of followers()) if (Math.abs(o.currentTime - video.currentTime) > 0.06) o.currentTime = Math.min(video.currentTime, o.duration > 0 ? o.duration : video.currentTime); };
+  video.addEventListener('play', () => { if (!over.hidden) { follow(); if (over.duration > 0 && video.currentTime >= over.duration) { video.pause(); return; } for (const o of followers()) void o.play().catch(() => {}); } });
+  video.addEventListener('pause', () => { for (const o of [over, ...extra]) o.pause(); });
   video.addEventListener('seeked', follow);
   video.addEventListener('timeupdate', follow);
-  video.addEventListener('ratechange', () => { over.playbackRate = video.playbackRate; });
+  video.addEventListener('ratechange', () => { for (const o of followers()) o.playbackRate = video.playbackRate; });
   video.addEventListener('ended', () => { if (!over.hidden) { over.pause(); if (over.duration > 0) over.currentTime = Math.min(video.currentTime, over.duration); } });
   over.addEventListener('ended', () => { if (!over.hidden) { video.pause(); video.currentTime = Math.min(video.currentTime, over.duration); } });
-  const compareOff = () => { over.hidden = true; seam.hidden = true; over.pause(); comparisonInfo.hidden = true; comparisonPosition.hidden = true; };
+  const compareOff = () => {
+    for (const o of [over, ...extra]) { o.hidden = true; o.pause(); o.style.clipPath = ''; o.classList.remove('dissolve'); }
+    stillLayer.hidden = true; seamLayer.hidden = true; bands = []; comparisonInfo.hidden = true; comparisonPosition.hidden = true; overlayOff();
+  };
+
+  // ---------- Overlay: the blockout's boxes, leader lines to cast chips, the generated frame dissolving in under them ----------
+  const SVG = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(SVG, 'svg'); svg.setAttribute('viewBox', '0 0 1600 900'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('class', 'sq-ov-svg');
+  const ovLayer = h('div', { class: 'sq-ov', hidden: true, 'aria-label': 'Overlay: the objects the shot camera sees, with their cast images and prompt words' });
+  ovLayer.append(svg);
+  let ov: { s: Shot; items: { id: string; color: string; side: 'l' | 'r'; y: number; g: SVGGElement; rect: SVGRectElement; line: SVGLineElement; dot: SVGCircleElement }[]; cache: Map<number, Box[]>; frame: number; raf: number } | null = null;
+  const CHIP_H = 0.17, CHIP_W = 0.2, CHIP_PAD = 0.014;
+  const boxesFor = (s: Shot, t: number) => { try { return ctx.boxes?.(s, Math.max(0, Math.min(s.duration, t))) || []; } catch { return []; } };
+  function overlayOff() { if (ov) cancelAnimationFrame(ov.raf); ov = null; ovLayer.hidden = true; ovLayer.replaceChildren(svg); svg.replaceChildren(); }
+  function overlayOn(s: Shot) {
+    overlayOff();
+    const p = P(), byId = new Map(p.scene.entities.map(e => [e.id, e]));
+    const segs = autoPromptSegments(p, s, 'video'), words = (id: string) => segs.find(x => (x as { ids?: string[] }).ids?.includes(id));
+    const cast = overlayCast(shotObjects(p, s).map(c => ({ id: c.entity.id, kind: c.entity.kind, lead: c.lead, coverage: c.coverage, hero: words(c.entity.id) ? 2 : objectLooks(p, c.entity.id).length ? 1 : 0 })));
+    const ids = new Set(cast.map(c => c.id));
+    // Chips are placed once, from where each object sits through the shot; boxes and lines follow every frame.
+    const seen = new Map<string, Box>();
+    for (const u of [0.5, 0.25, 0.75, 0, 1]) for (const b of boxesFor(s, s.duration * u)) if (ids.has(b.id) && !seen.has(b.id)) seen.set(b.id, b);
+    const slots = layoutChips(cast.map(c => seen.get(c.id)).filter(Boolean) as Box[], CHIP_H, 0.04, 0.08);
+    const items = slots.map(slot => {
+      const e = byId.get(slot.id)!, color = (KIND_COLORS as Record<string, string>)[e.kind] || '#3B5BA9';
+      const g = document.createElementNS(SVG, 'g'), rect = document.createElementNS(SVG, 'rect'), line = document.createElementNS(SVG, 'line'), dot = document.createElementNS(SVG, 'circle');
+      dot.setAttribute('r', '6'); g.setAttribute('style', `--c:${color}`); g.append(rect, line, dot); svg.append(g);
+      const look = objectLooks(p, e.id)[0], seg = words(e.id);
+      const chip = h('div', { class: `sq-chip ${slot.side}`, style: `--c:${color};top:${slot.y * 100}%;height:${CHIP_H * 100}%;width:${CHIP_W * 100}%;${slot.side === 'l' ? 'left' : 'right'}:${CHIP_PAD * 100}%` },
+        look ? h('img', { src: refUrl(look.file), alt: '', loading: 'lazy' }) : h('span', { class: 'sq-chip-swatch' }),
+        h('span', { class: 'sq-chip-t' }, h('b', {}, e.name), h('span', {}, seg ? `“${promptExcerpt(seg.text)}”` : e.kind)));
+      chip.onpointerenter = () => g.classList.add('hot'); chip.onpointerleave = () => g.classList.remove('hot');
+      ovLayer.append(chip);
+      return { id: e.id, color, side: slot.side, y: slot.y, g, rect, line, dot };
+    });
+    ov = { s, items, cache: new Map(), frame: -1, raf: 0 };
+    ovLayer.hidden = false;
+    const tick = () => {
+      if (!ov) return;
+      const f = Math.round(Math.min(video.currentTime || 0, s.duration) * 24);
+      if (f !== ov.frame) {
+        ov.frame = f;
+        let list = ov.cache.get(f); if (!list) { list = boxesFor(s, f / 24); ov.cache.set(f, list); }
+        const at = new Map(list.map(b => [b.id, b]));
+        for (const it of ov.items) {
+          const b = at.get(it.id); it.g.style.display = b ? '' : 'none'; if (!b) continue;
+          it.rect.setAttribute('x', String(b.x0 * 1600)); it.rect.setAttribute('y', String(b.y0 * 900)); it.rect.setAttribute('width', String((b.x1 - b.x0) * 1600)); it.rect.setAttribute('height', String((b.y1 - b.y0) * 900));
+          const [fx, fy] = leaderFrom(b, it.side), cx = it.side === 'l' ? CHIP_PAD + CHIP_W : 1 - CHIP_PAD - CHIP_W;
+          it.line.setAttribute('x1', String(fx * 1600)); it.line.setAttribute('y1', String(fy * 900)); it.dot.setAttribute('cx', String(fx * 1600)); it.dot.setAttribute('cy', String(fy * 900)); it.line.setAttribute('x2', String(cx * 1600)); it.line.setAttribute('y2', String((it.y + CHIP_H / 2) * 900));
+        }
+      }
+      ov.raf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
   const empty = h('div', { class: 'sq-empty' });
   const abSeg = h('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Version' });
   const caption = h('div', { class: 'sq-caption' });
@@ -132,31 +233,35 @@ export function createSequence(ctx: SequenceCtx) {
   const position = (label: string, v: HTMLVideoElement) => `${label} ${v.currentTime.toFixed(3)} s${v.duration > 0 && v.currentTime >= v.duration - 0.0005 ? ' · ended' : ''}`;
   const syncPosition = () => { if (!over.hidden) comparisonPosition.textContent = `${position('Blockout', video)} / ${position('Generated', over)}`; };
   for (const v of [video, over]) for (const name of ['timeupdate', 'seeked', 'pause', 'ended', 'loadedmetadata']) v.addEventListener(name, syncPosition);
-  const playSeqBtn = h('button', { class: 'btn', type: 'button' }, '▶ Play cut');
+  const playSeqBtn = h('button', { class: 'btn sq-playcut', type: 'button' }, '▶ Play cut');
   const exportBtn = h('button', { class: 'btn camera', type: 'button' }, 'Export film');
   const exportStatus = h('div', { class: 'status-line' });
   const exportsList = h('div', { class: 'sq-exports' });
   const totals = h('span', { class: 'muted mono' });
+  // The viewer sits on top at the full content width; the shot rows follow below it.
   const el = h('section', { class: 'sequence', hidden: true, 'aria-label': 'Cut' },
     h('div', { class: 'sq-main' },
+      h('aside', { class: 'sq-viewer' },
+        h('div', { class: 'sq-screen' }, video, stillLayer, over, ...extra, ovLayer, seamLayer, empty),
+        h('div', { class: 'sq-ctl' },
+          h('div', { class: 'sq-vbar' }, abSeg, caption), comparisonInfo, comparisonPosition,
+          h('div', { class: 'sq-vbar sq-playbar' }, playSeqBtn, totals),
+          h('div', { class: 'sq-export' }, h('div', { class: 'sq-vbar' }, exportBtn, h('span', { class: 'note' }, '1280×720 · 24 fps · H.264, in shot order')), exportStatus, exportsList))),
       h('div', { class: 'sq-toolbar' },
         h('label', { class: 'sq-pickall' }, pickAll, 'All'),
         h('label', { class: 'sq-model' }, 'Video model', modelSel),
         h('label', { class: 'sq-pickall', title: 'Send the image of every cast member the shot camera sees (plus environment, style and key frame) with the request' }, useRefs, 'Send cast images'), quoteBtn, h('span', { style: 'flex:1' }), allReady, renderAllBtn),
-      banner, batch, board),
-    h('aside', { class: 'sq-viewer' },
-      h('div', { class: 'sq-screen' }, video, over, seam, empty),
-      h('div', { class: 'sq-ctl' },
-        h('div', { class: 'sq-vbar' }, abSeg, caption), comparisonInfo, comparisonPosition,
-        h('div', { class: 'sq-vbar' }, playSeqBtn, totals),
-        h('div', { class: 'sq-export' }, h('div', { class: 'sq-vbar' }, exportBtn, h('span', { class: 'note' }, '1280×720 · 24 fps · H.264, in shot order')), exportStatus, exportsList))));
+      banner, batch, board));
 
   // ---------- Board ----------
   let dragFrom = -1;
   function row(s: Shot, i: number) {
     const p = P(), c = clipFor(s), inCut = !!c, a = media(s, c), job = activeJob(s), b = blockout(s), res = results(s);
-    const thumb = h('canvas', { width: 160, height: 90 });
-    requestAnimationFrame(() => { try { thumb.getContext('2d')!.drawImage(ctx.thumbnail(s, 160, 90), 0, 0); } catch {} });
+    const thumb = h('canvas', { width: 160, height: 90, title: a?.kind === 'workflow-result' ? `The version in the cut: ${(a.source.workflow || 'generated').split(' ·')[0]}` : 'The blockout' });
+    // The thumbnail shows the version the cut plays: a generated frame when there is one, else the blockout.
+    const cached = a?.kind === 'workflow-result' ? frames.get(a.id) : undefined;
+    if (cached instanceof HTMLCanvasElement) thumb.getContext('2d')?.drawImage(cached, 0, 0);
+    else requestAnimationFrame(() => { try { thumb.getContext('2d')!.drawImage(ctx.thumbnail(s, 160, 90), 0, 0); } catch {} if (a?.kind === 'workflow-result') void frameOf(a).then(f => { if (f) thumb.getContext('2d')?.drawImage(f, 0, 0); }); });
     const pick = h('input', { type: 'checkbox', checked: picked.has(s.id), 'aria-label': `Select shot ${i + 1} for generation` });
     pick.onchange = () => { pick.checked ? picked.add(s.id) : picked.delete(s.id); syncPickAll(); };
     const bState = !s.render ? ['missing', 'No blockout'] : fresh(s) ? ['ok', 'Blockout ready'] : ['stale', 'Blockout changed'];
@@ -203,6 +308,25 @@ export function createSequence(ctx: SequenceCtx) {
     el.ondrop = ev => { ev.preventDefault(); el.classList.remove('drop'); if (dragFrom >= 0 && dragFrom !== i) void reorder(dragFrom, i); dragFrom = -1; };
     return el;
   }
+  /** A generated version's mid-clip frame at 160×90 (cover), decoded once per version. */
+  const frames = new Map<string, HTMLCanvasElement | Promise<HTMLCanvasElement | null>>();
+  function frameOf(a: Asset): Promise<HTMLCanvasElement | null> {
+    const hit = frames.get(a.id); if (hit) return Promise.resolve(hit);
+    const job = new Promise<HTMLCanvasElement | null>(resolve => {
+      const v = document.createElement('video'); v.muted = true; v.preload = 'auto'; v.playsInline = true;
+      const done = (c: HTMLCanvasElement | null) => { v.removeAttribute('src'); v.load(); if (c) frames.set(a.id, c); else frames.delete(a.id); resolve(c); };
+      v.onloadedmetadata = () => { v.currentTime = Math.max(0, (v.duration || a.duration || 0) / 2); };
+      v.onseeked = () => {
+        const c = document.createElement('canvas'); c.width = 160; c.height = 90;
+        const k = Math.max(160 / (v.videoWidth || 160), 90 / (v.videoHeight || 90)), w = (v.videoWidth || 160) * k, hh = (v.videoHeight || 90) * k;
+        try { c.getContext('2d')!.drawImage(v, (160 - w) / 2, (90 - hh) / 2, w, hh); done(c); } catch { done(null); }
+      };
+      v.onerror = () => done(null);
+      v.src = ctx.assetUrl(a);
+    });
+    frames.set(a.id, job);
+    return job;
+  }
   // Who is in the shot, and which cast images will be sent with the video request.
   function castLine(s: Shot) {
     const cast = shotCast(P(), s).filter(c => c.entity.kind !== 'environment');
@@ -228,7 +352,13 @@ export function createSequence(ctx: SequenceCtx) {
   // ---------- Viewer ----------
   let seq: { list: { s: Shot; a: Asset; c: EditClip }[]; i: number } | null = null;
   let pinned: Asset | null = null; // an export being watched
-  function select(id: string, v?: typeof view) { selected = id; pinned = null; if (v) view = v; stopSeq(); draw(); }
+  function select(id: string, v?: typeof view) { selected = id; pinned = null; if (v) view = v; stopSeq(); draw(); revealViewer(); }
+  /** Picking a shot further down the board brings the viewer back into view. */
+  function revealViewer() {
+    const main = el.querySelector<HTMLElement>('.sq-main'), screen = el.querySelector<HTMLElement>('.sq-screen');
+    if (!main || !screen || ctx.rowTemplate) return;
+    if (screen.getBoundingClientRect().top < main.getBoundingClientRect().top - 8) main.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
   function watchExport(a: Asset) { compareOff(); stopSeq(); selected = ''; pinned = a; abSeg.replaceChildren(); abSeg.hidden = true; setCaption(`Export v${a.version ?? 1} · ${a.source.clips?.length ?? 0} clips · ${sec(a.duration)}`); show(a); void video.play().catch(() => {}); drawBoard(); }
   let shownId = '';
   // Returns true when a different video was loaded (so callers only restart playback then).
@@ -247,20 +377,31 @@ export function createSequence(ctx: SequenceCtx) {
     if (!s) { compareOff(); abSeg.replaceChildren(); setCaption(''); show(null, 0, 'Pick a shot to watch it, or play the whole cut.'); return; }
     const generated = results(s)[0], b = blockout(s);
     if (view !== 'blockout' && !generated && b) view = 'blockout';
-    abSeg.replaceChildren(...(['blockout', 'compare', 'generated'] as const).map(k => h('button', { type: 'button', role: 'radio', 'aria-checked': String(view === k), class: view === k ? 'on' : '', title: k === 'compare' ? 'Blockout and generated with a draggable seam' : '', disabled: k === 'blockout' ? !b : !generated, onclick: () => { view = k; drawViewer(); } }, k === 'blockout' ? 'Blockout' : k === 'compare' ? 'Compare' : 'Generated')));
+    if (view === 'overlay' && !b) view = generated ? 'generated' : 'blockout';
+    const TITLES = { blockout: 'The blockout this shot was made from', generated: 'The version in the cut', compare: 'Blockout, start still and every generated version, split by draggable seams', overlay: 'Boxes around what the shot camera sees, linked to each cast image and its words in the prompt; the generated frame fades in under them' };
+    abSeg.replaceChildren(...(['blockout', 'generated', 'compare', 'overlay'] as const).map(k => h('button', { type: 'button', role: 'radio', 'aria-checked': String(view === k), class: view === k ? 'on' : '', title: TITLES[k], disabled: k === 'blockout' || k === 'overlay' ? !b : !generated, onclick: () => { view = k; drawViewer(); } }, k === 'blockout' ? 'Blockout' : k === 'compare' ? 'Compare' : k === 'overlay' ? 'Overlay' : 'Generated')));
     const c = clipFor(s), chosen = c?.assetId ? videos(s).find(x => x.id === c.assetId) : null;
     const genPick = chosen?.kind === 'workflow-result' ? chosen : generated;
-    const bPick = view === 'compare' ? comparisonSource(renders(s), genPick || null) : chosen?.kind === 'camera-render' ? chosen : b;
+    const bPick = view === 'compare' || view === 'overlay' ? comparisonSource(renders(s), genPick || null) || (view === 'overlay' ? b : null) : chosen?.kind === 'camera-render' ? chosen : b;
     const a = view === 'generated' ? genPick : bPick;
+    compareOff();
     if (view === 'compare' && genPick && bPick) {
-      const url = ctx.assetUrl(genPick); if (!over.src.endsWith(url)) over.src = url;
-      over.hidden = false; seam.hidden = false; setSeam(seamAt);
+      // Versions made from this blockout (others would not line up), the newest per model first.
+      const same = results(s).filter(x => x.id === genPick.id || x.source.sourceAssetId === bPick.id);
+      const ordered = [genPick, ...same.filter(x => x.id !== genPick.id)];
+      const start = [...(s.references || [])].reverse().find(r => r.role === 'frame' && (r.note === 'key frame start' || !r.note)) || null;
+      const list = compareBands(bPick, start, ordered.map(x => ({ id: x.id, createdAt: x.id === genPick.id ? '9999' : x.createdAt, source: x.source })));
+      setBands(list.map(src => ({ src, url: src.role === 'still' ? refUrl(start!.file) : ctx.assetUrl(videos(s).find(x => x.id === src.id)!) })), `${s.id}:${list.map(x => x.id).join()}`);
       comparisonInfo.hidden = false; comparisonPosition.hidden = false;
       const task = gen.jobs.find(j => j.id === genPick.source.jobId)?.definition?.task;
       comparisonInfo.textContent = comparisonFacts(bPick, genPick) + (task === 'first-frame' ? '\nThis model animates between your start and end stills; it did not see the camera move.' : '');
       syncPosition();
-    } else compareOff();
-    setCaption(`Shot ${no(p, s.id)} · ${s.title}${view === 'compare' && genPick ? ` · ${(genPick.source.workflow || 'generated').split(' ·')[0]}${bPick ? ` vs original blockout v${bPick.version ?? 1}` : ' · original source unavailable'}` : a ? ` · ${a.kind === 'workflow-result' ? (a.source.workflow || 'generated').split(' ·')[0] : `blockout v${a.version ?? 1}`} · ${sec(a.duration)}` : ''}`);
+    } else if (view === 'overlay' && bPick) {
+      if (genPick) { const url = ctx.assetUrl(genPick); if (!over.src.endsWith(url)) over.src = url; over.hidden = false; over.classList.add('dissolve'); follow(); if (!video.paused) void over.play().catch(() => {}); }
+      overlayOn(s);
+    }
+    const model = (x: Asset) => (x.source.workflow || 'generated').split(' ·')[0];
+    setCaption(`Shot ${no(p, s.id)} · ${s.title}${view === 'compare' && genPick ? ` · ${bands.length ? bands.map(x => x.src.label).join(' · ') : model(genPick)}${bPick ? '' : ' · original source unavailable'}` : view === 'overlay' && bPick ? ` · overlay on blockout v${bPick.version ?? 1}${genPick ? ` → ${model(genPick)}` : ''}` : a ? ` · ${a.kind === 'workflow-result' ? model(a) : `blockout v${a.version ?? 1}`} · ${sec(a.duration)}` : ''}`);
     if (show(a || null, 0, view === 'compare' ? 'The blockout this video was made from is no longer available. A newer blockout is not swapped in.' : view === 'generated' ? 'No generated video yet.' : 'No blockout yet. Use Make blockout on the board.', false) && a) void video.play().catch(() => {});
   }
   function cutList() { return P().shots.map(s => ({ s, c: clipFor(s)!, a: media(s)! })).filter(x => x.c && x.a); }

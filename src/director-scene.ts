@@ -757,13 +757,41 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     thumbs.set(ck, copy); if (thumbs.size > 64) thumbs.delete(thumbs.keys().next().value!);
     return copy;
   }
+  /**
+   * Screen boxes (0–1, top-left origin) of every object the shot camera sees at time t, from the live scene:
+   * mesh bounds on the render layer through a clone of the shot camera. Objects partly behind the camera are left out.
+   */
+  function boxesAt(other: Shot, t: number, aspect = 16 / 9) {
+    const cam = shotCam.clone(); cam.aspect = aspect; poseCamera(cam, shotCameraAt(other, entities, t));
+    applyTime((other.start || 0) + t);
+    const out: { id: string; x0: number; y0: number; x1: number; y1: number }[] = [];
+    const box = new THREE.Box3(), part = new THREE.Box3(), v = new THREE.Vector3();
+    for (const [id, { group, entity }] of groups) {
+      if (entity.shape === 'group') continue;
+      group.updateWorldMatrix(true, true); box.makeEmpty();
+      group.traverse(o => { const m = o as THREE.Mesh; if (!m.isMesh || !o.layers.isEnabled(0)) return; if (!m.geometry.boundingBox) m.geometry.computeBoundingBox(); part.copy(m.geometry.boundingBox!).applyMatrix4(o.matrixWorld); box.union(part); });
+      if (box.isEmpty()) continue;
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, behind = false;
+      for (let k = 0; k < 8 && !behind; k++) {
+        v.set(k & 1 ? box.max.x : box.min.x, k & 2 ? box.max.y : box.min.y, k & 4 ? box.max.z : box.min.z).applyMatrix4(cam.matrixWorldInverse);
+        if (v.z > -cam.near) { behind = true; break; }
+        v.applyMatrix4(cam.projectionMatrix);
+        x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y);
+      }
+      if (behind || x1 < -1 || x0 > 1 || y1 < -1 || y0 > 1) continue;
+      const c = (n: number) => Math.max(0, Math.min(1, n));
+      out.push({ id, x0: c((x0 + 1) / 2), x1: c((x1 + 1) / 2), y0: c((1 - y1) / 2), y1: c((1 - y0) / 2) });
+    }
+    applyTime(sceneTime());
+    return out;
+  }
   function quaternionAt(t: number): [number, number, number, number] {
     const cam = shotCam.clone(); poseCamera(cam, pose(t));
     const q = cam.quaternion.normalize(); return [q.x, q.y, q.z, q.w];
   }
 
   const api = {
-    sync, pick, pose, capture, thumbnail, quaternionAt, markDirty,
+    sync, pick, pose, capture, thumbnail, boxesAt, quaternionAt, markDirty,
     /** Outline colour matches the object's colour in the prompt. */
     setOutlineColor(c: string | null) { outline.visibleEdgeColor.set(c || 0xd6daff); outline.hiddenEdgeColor.set(c || 0xbac0ff); labelsEl.style.setProperty('--sel', c || ''); markDirty(); },
     /** Temporarily outline an object (hovering its row in the panel). */

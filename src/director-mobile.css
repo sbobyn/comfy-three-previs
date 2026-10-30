@@ -324,8 +324,10 @@ body.m-medium.m-docked[data-mstep=build] .ws-body .stage, body.m-medium.m-docked
 .m-pprog { flex: 1; min-width: 0; height: 44px; accent-color: #fff; margin: 0; touch-action: pan-y; }
 .m-ptime { font-size: 12px; text-shadow: 0 1px 2px rgba(0,0,0,.6); white-space: nowrap; }
 :is(body.m-compact, body.m-medium) .sequence .sq-ctl { padding: 10px var(--m-gutter) 0; gap: 8px; display: flex; flex-direction: column; }
+:is(body.m-compact, body.m-medium) .sequence .sq-ctl { width: auto; } :is(body.m-compact, body.m-medium) .sequence .sq-ctl > * { flex: none; }
+:is(body.m-compact, body.m-medium) .sequence .sq-export .note { display: block; }
 :is(body.m-compact, body.m-medium) .sequence .sq-ctl .sq-vbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-:is(body.m-compact, body.m-medium) .sequence .sq-ctl .sq-vbar:nth-of-type(2) { display: none; }
+:is(body.m-compact, body.m-medium) .sequence .sq-ctl .sq-playbar { display: none; }
 :is(body.m-compact, body.m-medium) .sequence .sq-ctl .seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: var(--paper-2); border: 1px solid var(--line); }
 :is(body.m-compact, body.m-medium) .sequence .sq-ctl .seg button { height: 38px; padding: 0 14px; border-radius: 999px; font: 600 var(--m-fs-sm)/1 var(--font); color: var(--ink-3); background: transparent; position: relative; min-height: 0; }
 :is(body.m-compact, body.m-medium) .sequence .sq-ctl .seg button::before { content: ''; position: absolute; inset: -3px 0; }
