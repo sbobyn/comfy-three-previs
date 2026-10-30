@@ -3,7 +3,8 @@
 // camera. It is assembled text (not a model's judgement), returned as tagged segments so the UI can
 // colour each part and show where it came from. Image and video prompts share everything except the
 // camera/motion part.
-import { shotObjects, castCard, describeCamera, MOVES } from './director.mjs';
+import { shotObjects, castCard, MOVES } from './director.mjs';
+import { cameraLine, withCameraLine } from './camera-source.mjs';
 
 // Camera vocabulary for style tags. Each term is the exact text added to the prompt.
 export const CAMERA_TERMS = {
@@ -38,8 +39,10 @@ const OBJECT_COLORS = ['#3B5BA9', '#B33A5E', '#1F7F8A', '#9A6A0C', '#4E8A2B', '#
 /**
  * Tagged segments for a shot. kind 'video' (motion, for LTX) or 'image' (a still, for FLUX).
  * Each segment: { key, label, source, color, text }.
+ * A video prompt never describes the camera move: the blockout is the camera. It carries one line naming
+ * the input to follow (`cameraSource`, see shared/camera-source.mjs) plus lens and filter hints.
  */
-export function autoPromptSegments(project, shot, kind = 'video') {
+export function autoPromptSegments(project, shot, kind = 'video', { cameraSource = 'blockout' } = {}) {
   const { entities, environment } = project.scene;
   const seg = [];
   const add = (key, label, source, color, text) => { const t = String(text || '').trim(); if (t) seg.push({ key, label, source, color, text: t }); };
@@ -58,15 +61,16 @@ export function autoPromptSegments(project, shot, kind = 'video') {
   });
   if (environment?.description) add('world', 'World', 'Scene world', FIELD_COLORS.world, `Setting: ${environment.description}.`);
   if (environment?.style) add('style', 'Visual style', 'Project style', FIELD_COLORS.style, `Look: ${environment.style}.`);
-  if (kind === 'video') add('camera', 'Camera', 'Shot camera (blockout)', FIELD_COLORS.camera, `Camera: ${describeCamera(shot, entities)}. Follow the supplied camera motion exactly.`);
+  if (kind === 'video') add('camera', 'Camera', CAMERA_FROM[cameraSource] || CAMERA_FROM.still, FIELD_COLORS.camera, cameraLine(cameraSource));
   else add('camera', 'Framing', 'Shot camera (blockout)', FIELD_COLORS.camera, `Framing: ${shot.camera.mm}mm lens, match the supplied blockout frame's composition.`);
   const st = shotStyle(shot);
   for (const g of Object.keys(CAMERA_TERMS)) {
-    if (kind === 'image' && (g === 'movement' || g === 'cuts')) continue; // a still has no motion or cuts
+    if (g === 'movement' || g === 'cuts') continue; // a still has no motion; a video takes its motion from the blockout
     if (st[g].length) add(`cam-${g}`, CAMERA_GROUPS[g], 'Camera style tags', FIELD_COLORS[g], `${CAMERA_GROUPS[g]}: ${st[g].join(', ')}.`);
   }
   return seg;
 }
+const CAMERA_FROM = { blockout: 'Blockout clip (the camera)', keyframes: 'Start → end stills', still: 'Start still' };
 /** Cast objects grouped by identical Cast Card text, each group with its colour (max 8 groups). */
 export function castGroups(project, shot) {
   const groups = [];
@@ -83,12 +87,16 @@ export function castGroups(project, shot) {
 export function objectColors(project, shot) {
   return new Map(project.scene.entities.map(e => [e.id, KIND_COLORS[e.kind] || OBJECT_COLORS[0]]));
 }
-export const autoPromptText = (project, shot, kind = 'video') => autoPromptSegments(project, shot, kind).map(s => s.text).join(' ');
+export const autoPromptText = (project, shot, kind = 'video', opts) => autoPromptSegments(project, shot, kind, opts).map(s => s.text).join(' ');
 
-/** The prompt actually used: the user's edit if there is one, else the auto-prompt. */
-export function shotPrompt(project, shot, kind = 'video') {
+/**
+ * The prompt actually used: the user's edit if there is one, else the auto-prompt. A video prompt always
+ * ends up with the camera line for `cameraSource` (an edited one has its camera line swapped or appended).
+ */
+export function shotPrompt(project, shot, kind = 'video', opts = {}) {
   const saved = shot.prompts?.[kind];
-  return saved?.edited && saved.text ? saved.text : autoPromptText(project, shot, kind);
+  if (!(saved?.edited && saved.text)) return autoPromptText(project, shot, kind, opts);
+  return kind === 'video' ? withCameraLine(saved.text, opts.cameraSource || 'blockout') : saved.text;
 }
 /** Character ranges of each segment found in a (possibly edited) text, for colouring. */
 export function highlightRanges(text, segments) {

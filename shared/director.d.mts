@@ -39,7 +39,7 @@ export function cameraKeys(shot: Shot, entities: Entity[]): CameraKey[];
 export function cameraAt(keys: CameraKey[], duration: number, t: number, timing?: 'linear' | 'ease'): { p: Vec3; look: Vec3; mm: number };
 export function describeCamera(shot: Shot, entities: Entity[]): string;
 export type VideoRef = { ref: Reference; entityId: string | null; role: string; label: string };
-export function compilePrompt(project: DirectorProject, shot: Shot, refs?: VideoRef[] | null): string;
+export function compilePrompt(project: DirectorProject, shot: Shot, refs?: VideoRef[] | null, opts?: { cameraSource?: 'blockout' | 'keyframes' | 'still' }): string;
 export function shotCast(project: DirectorProject, shot: Shot, opts?: { samples?: number; aspect?: number; minCoverage?: number }): { entity: Entity; coverage: number; lead: boolean }[];
 export function videoReferences(project: DirectorProject, shot: Shot, max?: number): VideoRef[];
 export function referenceLegend(refs: VideoRef[]): string;

@@ -5,10 +5,12 @@ import './director-prompt.css';
 import type { DirectorProject, Shot } from '../shared/director.mjs';
 import { autoPromptSegments, autoPromptText, highlightRanges, shotStyle, suggestedStyle, CAMERA_TERMS, CAMERA_GROUPS, FIELD_COLORS } from '../shared/prompt.mjs';
 import type { Segment, StyleTags } from '../shared/prompt.mjs';
+import { withCameraLine } from '../shared/camera-source.mjs';
+import type { CameraSource } from '../shared/camera-source.mjs';
 import { h, toast } from './director-common';
 import { termPicker, attachHelp } from './director-camhelp';
 
-type Ctx = { project(): DirectorProject; runEntry(e: { label: string; redo: unknown[]; undo: unknown[] }): Promise<unknown>; select(id: string): void; refresh?(): void };
+type Ctx = { project(): DirectorProject; runEntry(e: { label: string; redo: unknown[]; undo: unknown[] }): Promise<unknown>; select(id: string): void; refresh?(): void; cameraSource?(s: Shot): CameraSource };
 let kind: 'video' | 'image' = 'video';
 let editing = false, preview = false;
 
@@ -27,10 +29,12 @@ function colouredText(text: string, segs: Segment[]) {
 
 export function promptBlock(s: Shot, ctx: Ctx) {
   const p = ctx.project();
-  const segs = autoPromptSegments(p, s, kind), auto = autoPromptText(p, s, kind);
+  // The video prompt's camera line follows the shot's chosen video model (blockout clip, start → end stills or one still).
+  const cameraSource = ctx.cameraSource?.(s) || 'blockout';
+  const segs = autoPromptSegments(p, s, kind, { cameraSource }), auto = autoPromptText(p, s, kind, { cameraSource });
   const saved = s.prompts?.[kind];
   const edited = !!(saved?.edited && saved.text);
-  const text = edited ? saved!.text : auto;
+  const text = edited ? (kind === 'video' ? withCameraLine(saved!.text, cameraSource) : saved!.text) : auto;
   const save = (next: string | null, label: string) => {
     const before = s.prompts?.[kind] ?? null;
     const value = next === null ? null : { text: next, edited: true, basedOn: auto, editedAt: new Date().toISOString() };
@@ -44,7 +48,7 @@ export function promptBlock(s: Shot, ctx: Ctx) {
     return h('button', { type: 'button', class: 'ap-chip', style: `--c:${g.color}`, 'data-ids': (g.ids || []).join(' '), title: `From ${g.source}${objId ? ' · click to open the Cast Card' : ''}`, onclick: objId ? () => ctx.select(objId) : undefined }, h('i'), g.label, objId ? h('small', {}, 'Cast Card') : null);
   }));
 
-  const seg = h('div', { class: 'seg', role: 'tablist', 'aria-label': 'Prompt type' }, ...(['video', 'image'] as const).map(k => h('button', { type: 'button', role: 'tab', class: k === kind ? 'on' : '', 'aria-selected': String(k === kind), title: k === 'video' ? 'For the video model (includes camera motion)' : 'For stills (no motion)', onclick: () => { kind = k; editing = preview = false; rerender(); } }, k === 'video' ? 'Video prompt' : 'Still prompt')));
+  const seg = h('div', { class: 'seg', role: 'tablist', 'aria-label': 'Prompt type' }, ...(['video', 'image'] as const).map(k => h('button', { type: 'button', role: 'tab', class: k === kind ? 'on' : '', 'aria-selected': String(k === kind), title: k === 'video' ? 'For the video model: the camera comes from the blockout, so the prompt names no camera move' : 'For stills (no motion)', onclick: () => { kind = k; editing = preview = false; rerender(); } }, k === 'video' ? 'Video prompt' : 'Still prompt')));
   const marker = edited ? h('span', { class: 'ap-edited', title: 'You edited this prompt; your text is what generation uses' }, 'Edited') : h('span', { class: 'ap-auto', title: 'Composed from the Cast Cards, world, action and camera — assembled text, not a model' }, 'Auto');
 
   let body: Node;
@@ -90,6 +94,7 @@ export function cameraStyleBlock(s: Shot, ctx: Ctx) {
 
   return h('div', { class: 'block ap-block ap-camstyle' },
     h('div', { class: 'ap-stylehead' }, h('span', { class: 'eyebrow' }, 'Camera style'), chosen ? h('button', { class: 'btn ghost sm', type: 'button', title: 'Back to suggestions from the shot camera', onclick: () => void setStyle(null, 'Reset camera style') }, 'Reset') : h('span', { class: 'note' }, 'Suggested from the shot camera')),
-    styleRow);
+    styleRow,
+    h('p', { class: 'note' }, 'Lens and filter terms go into the prompts. Movement and cuts are notes for you: the blockout is the camera, so no prompt describes the move.'));
 }
 export { suggestedStyle };

@@ -3,6 +3,7 @@
 // Units are metres. The stage faces +z: "front" is toward the default camera,
 // "left" is -x as seen from the default camera.
 import { normalizeSheets } from './sheet-presets.mjs';
+import { cameraLine } from './camera-source.mjs';
 
 export const SHAPES = {
   person: { size: [0.5, 1.8, 0.35], kind: 'character', color: '#e8b04b' },
@@ -316,13 +317,16 @@ export function videoReferences(project, shot, max = 4) {
   return out.filter(x => !seen.has(x.ref.id) && seen.add(x.ref.id)).slice(0, Math.max(0, max));
 }
 
-/** Prompt for a shot. With `refs` (from videoReferences) each object names its numbered reference image. */
-export function compilePrompt(project, shot, refs = null) {
+/**
+ * Prompt for a shot. With `refs` (from videoReferences) each object names its numbered reference image.
+ * It never describes the camera move: it ends with the camera line for `cameraSource` (shared/camera-source.mjs).
+ */
+export function compilePrompt(project, shot, refs = null, { cameraSource = 'blockout' } = {}) {
   const { entities, environment } = project.scene;
   const lines = [];
   const desc = shot.description.replace(/@([a-z0-9-]+)/gi, (m, h) => entities.find(e => handleOf(e.name) === h.toLowerCase())?.name || m);
   lines.push(desc.trim() || shot.title);
-  lines.push(`Camera: ${describeCamera(shot, entities)}.`);
+  lines.push(`Lens: ${Math.round(shot.camera.mm)}mm.`);
   const num = id => (refs ? refs.findIndex(x => x.ref.id === id) + 1 : 0);
   const refFor = id => [...objectLooks(project, id).slice(0, 1), ...shot.references.filter(r => r.entityId === id && r.role !== 'frame')];
   const describe = e => {
@@ -348,7 +352,7 @@ export function compilePrompt(project, shot, refs = null) {
   if (style.length) lines.push(refs ? (style.some(r => num(r.id)) ? `Style: match reference image ${style.map(r => num(r.id)).filter(Boolean).join(', ')}.` : '') : `Style: match ${style.map(r => `“${r.name}”`).join(', ')}.`);
   if (environment?.style) lines.push(`Visual style: ${environment.style}.`);
   if (refs?.length) lines.push(`Keep every object consistent with its reference image across the whole shot.`);
-  lines.push('Preserve the supplied camera motion, framing and blocking.');
+  lines.push(cameraLine(cameraSource));
   return lines.filter(Boolean).join('\n');
 }
 

@@ -3,6 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import { castCard, compilePrompt, lookPrompt, lookSource, objectLooks, objectNotes, referenceLegend, videoReferences } from '../../shared/director.mjs';
 import { shotPrompt } from '../../shared/prompt.mjs';
+import { cameraSourceOf, withCameraLine } from '../../shared/camera-source.mjs';
 import { planSlots, setsFor, slotAspect, viewPrompt } from '../../shared/sheet-presets.mjs';
 import { withReferenceImages, maxReferences } from '../../shared/video-refs.mjs';
 import { snapSeconds, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
@@ -171,7 +172,8 @@ export function loopbackDrivers(base) {
       def = await definitionFor(base, 0); parameters = parametersOf(def);
       if ('duration' in parameters) parameters.duration = String(snapSeconds(s.duration));
       assetBindings = { firstFrame: { renderId: start }, ...(wantsLast ? { lastFrame: { renderId: end } } : {}) };
-      prompt = (shotPrompt(p, s, 'video').trim() || compilePrompt(p, s)).replace('Preserve the supplied camera motion, framing and blocking.', 'Start from the supplied frame and keep its composition, characters and look.');
+      const cameraSource = wantsLast ? 'keyframes' : 'still';
+      prompt = withCameraLine(shotPrompt(p, s, 'video', { cameraSource }).trim() || compilePrompt(p, s, null, { cameraSource }), cameraSource);
     } else {
       const cap = maxReferences(base);
       const registered = cap ? (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap }))).references : [];
@@ -179,8 +181,8 @@ export function loopbackDrivers(base) {
       refs = registered.map(x => ({ ref: all.find(y => y.id === x.referenceId), entityId: x.entityId, role: x.role, label: x.label })).filter(x => x.ref);
       def = await definitionFor(base, registered.length); parameters = parametersOf(def);
       assetBindings = { [def.inputs?.controlVideo ? 'controlVideo' : 'sourceVideo']: { assetId: r.assetId }, ...Object.fromEntries(registered.map((x, i) => [`referenceImage${i + 1}`, { renderId: x.renderId }])) };
-      const auto = compilePrompt(p, s), user = shotPrompt(p, s, 'video');
-      prompt = user?.trim() && user.trim() !== auto.trim() ? [user.trim(), referenceLegend(refs)].filter(Boolean).join('\n') : compilePrompt(p, s, refs);
+      const cameraSource = cameraSourceOf(def), auto = compilePrompt(p, s, null, { cameraSource }), user = shotPrompt(p, s, 'video', { cameraSource });
+      prompt = user?.trim() && user.trim() !== auto.trim() ? [withCameraLine(user, cameraSource), referenceLegend(refs)].filter(Boolean).join('\n') : compilePrompt(p, s, refs, { cameraSource });
     }
     const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
     const local = def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-');

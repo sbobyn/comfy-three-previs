@@ -28,6 +28,7 @@ import { initMobile } from './director-mobile'; // [mobile]
 import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY, moments, useTakeEntry, keyFrameCopy } from './director-desktop-core';
 import type { ShotPips } from './director-desktop-core';
 import { VIDEO_PRICES } from '../shared/tiers.mjs';
+import { cameraSourceOf } from '../shared/camera-source.mjs';
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -712,7 +713,7 @@ function modelBlock(s: Shot) {
   const usesFrames = def.task === 'first-frame', twoFrames = usesFrames && !!def.inputs?.lastFrame;
   const frames = s.references.filter(r => r.role === 'frame');
   const hasStart = frames.some(r => r.note === 'key frame start' || !r.note), hasEnd = frames.some(r => r.note === 'key frame end');
-  const maxLen = def.constraints?.promptMaxLength as number | undefined, promptLen = shotPrompt(project, s, 'video').length;
+  const maxLen = def.constraints?.promptMaxLength as number | undefined, promptLen = shotPrompt(project, s, 'video', { cameraSource: cameraSourceOf(def) }).length;
   const stale = s.render && s.render.signature && s.render.signature !== signature(project, s);
   const rate = def.pricing?.ratePerSecond as number | undefined;
   const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
@@ -847,7 +848,7 @@ function renderShotPane() {
   const refsGrid = h('div', { class: 'refs' }, ...s.references.map(r => refCard(s, r)));
   const drop = h('label', { class: 'dropzone' }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => { const files = Array.from((ev.target as HTMLInputElement).files || []); void uploadRefs(files, null); } }), 'Drop images here or click to add references for this shot');
   dropTarget(drop, files => uploadRefs(files, null));
-  const ctx = { project: () => project, runEntry: (e: any) => runEntry(e as any), select: (id: string) => { select(id); openObject(); }, refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); } };
+  const ctx = { project: () => project, runEntry: (e: any) => runEntry(e as any), select: (id: string) => { select(id); openObject(); }, refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); }, cameraSource: (x: Shot) => (genCache ? cameraSourceOf(shotModel(x)) : 'blockout' as const) };
   const rows = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const blockoutInfo = rendered ? h('details', { class: 'facts-more' },
     h('summary', {}, h('span', { class: 'info-i', 'aria-hidden': 'true' }, 'i'), 'Blockout clip', stale ? h('span', { class: 'fm-warn' }, ' · scene changed since') : h('span', { class: 'fm-ok' }, ' · up to date')),

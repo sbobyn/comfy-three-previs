@@ -5,6 +5,8 @@ import { compilePrompt, referenceLegend, videoReferences } from '../shared/direc
 import type { DirectorProject, Shot, VideoRef } from '../shared/director.mjs';
 import { withReferenceImages, maxReferences } from '../shared/video-refs.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
+import { cameraSourceOf, withCameraLine } from '../shared/camera-source.mjs';
+import type { CameraSource } from '../shared/camera-source.mjs';
 import { api } from './director-common';
 
 export type Def = { id: string; title: string; task: string; description?: string; pricing?: { ratePerSecond?: number }; parameters?: Record<string, { nodeId: string; input: string }>; graph?: any; inputs?: any; provenance?: { presetId?: string; referenceImages?: number }; constraints?: any };
@@ -25,11 +27,14 @@ export const referenceCapacity = (st: GenState, id: string) => { const b = baseO
 /** Which references a shot would use with this model, before anything is registered. */
 export function plannedReferences(project: DirectorProject, s: Shot, st: GenState, id: string) { return videoReferences(project, s, referenceCapacity(st, id)); }
 
-/** The prompt a shot uses: compiled with numbered references, or the user's text plus a reference legend. */
-export function shotVideoPrompt(project: DirectorProject, s: Shot, refs: VideoRef[], userPrompt?: string | null) {
-  const auto = compilePrompt(project, s);
-  if (userPrompt && userPrompt.trim() && userPrompt.trim() !== auto.trim()) return [userPrompt.trim(), referenceLegend(refs)].filter(Boolean).join('\n');
-  return compilePrompt(project, s, refs);
+/**
+ * The prompt a shot uses: compiled with numbered references, or the user's text plus a reference legend.
+ * Either way it carries the camera line for `cameraSource` and never describes the move.
+ */
+export function shotVideoPrompt(project: DirectorProject, s: Shot, refs: VideoRef[], userPrompt?: string | null, cameraSource: CameraSource = 'blockout') {
+  const auto = compilePrompt(project, s, null, { cameraSource });
+  if (userPrompt && userPrompt.trim() && userPrompt.trim() !== auto.trim()) return [withCameraLine(userPrompt, cameraSource), referenceLegend(refs)].filter(Boolean).join('\n');
+  return compilePrompt(project, s, refs, { cameraSource });
 }
 
 async function definitionFor(st: GenState, id: string, refCount: number): Promise<Def> {
@@ -62,7 +67,8 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   for (const [k, m] of Object.entries(def.parameters || {})) parameters[k] = def.graph?.[m.nodeId]?.inputs?.[m.input];
   const assetBindings: Record<string, unknown> = { [role]: { assetId: r.assetId } };
   registered.forEach((x, i) => { assetBindings[`referenceImage${i + 1}`] = { renderId: x.renderId }; });
-  let prompt = shotVideoPrompt(project, s, refs, o.userPrompt ?? shotPrompt(project, s, 'video'));
+  const cameraSource = cameraSourceOf(def);
+  let prompt = shotVideoPrompt(project, s, refs, o.userPrompt ?? shotPrompt(project, s, 'video', { cameraSource }), cameraSource);
   const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
   const main = (await api('project')).project;
   const bind = await api('generation/bind', { revision: main.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
@@ -92,10 +98,10 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   // Nearest supported clip length to the shot's duration.
   const secs = LTX_DURATIONS.reduce((a, b) => (Math.abs(b - s.duration) < Math.abs(a - s.duration) ? b : a));
   if ('duration' in parameters) parameters.duration = String(secs);
-  const auto = compilePrompt(project, s);
-  const chosen = (o.userPrompt ?? shotPrompt(project, s, 'video')).trim();
-  let prompt = chosen || auto;
-  prompt = prompt.replace('Preserve the supplied camera motion, framing and blocking.', 'Start from the supplied frame and keep its composition, characters and look.');
+  // Start → end stills stand in for the camera (they only approximate the move); one still leaves it to the model.
+  const cameraSource: CameraSource = wantsLast ? 'keyframes' : 'still';
+  const chosen = (o.userPrompt ?? shotPrompt(project, s, 'video', { cameraSource })).trim();
+  let prompt = withCameraLine(chosen || compilePrompt(project, s, null, { cameraSource }), cameraSource);
   const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
   const bind = await api('generation/bind', { revision: (await api('project')).project.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings: { firstFrame: { renderId }, ...(wantsLast ? { lastFrame: { renderId: lastId } } : {}) }, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
   const request = { requestId: crypto.randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: o.backend || 'cloud' } };

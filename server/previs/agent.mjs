@@ -1,6 +1,7 @@
 import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
 import { autoPromptSegments, autoPromptText, shotPrompt, shotStyle, normalizeStyle, CAMERA_TERMS } from '../../shared/prompt.mjs';
+import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, handleOf, videoReferences } from '../../shared/director.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { setsFor, planSlots, slotAspect, viewPrompt, EXPRESSION_PACKS, INTENSITIES, MAX_SHEET_SLOTS } from '../../shared/sheet-presets.mjs';
@@ -119,7 +120,7 @@ function shotInputs(p, s, d) {
   const rows = castRows(p, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const withImg = rows.filter(r => objectLooks(p, r.entity.id).length);
   const frames = s.references.filter(r => r.role === 'frame');
-  return { model: m, prompt: shotPrompt(p, s, 'video'), blockout: m.inputs.blockoutVideo.used ? (s.render ? { rendered: true, duration: s.render.duration, frames: s.render.frameCount } : { rendered: false, action: 'Render it with previs_director_render_blockout (or ask the user to click Render shot)' }) : 'not used',
+  return { model: m, prompt: shotPrompt(p, s, 'video', { cameraSource: cameraSourceOf(d) }), blockout: m.inputs.blockoutVideo.used ? (s.render ? { rendered: true, duration: s.render.duration, frames: s.render.frameCount } : { rendered: false, action: 'Render it with previs_director_render_blockout (or ask the user to click Render shot)' }) : 'not used',
     keyFrames: m.inputs.startFrame ? { start: frames.some(r => r.note !== 'key frame end'), end: frames.some(r => r.note === 'key frame end') } : 'not used',
     referenceSlots: withImg.slice(0, cap).map((r, i) => ({ slot: `Image ${i + 1}`, object: r.entity.name, kind: r.entity.kind, image: objectLooks(p, r.entity.id)[0]?.name })),
     leftOut: [...withImg.slice(cap).map(r => ({ object: r.entity.name, why: 'over the model’s image limit' })), ...rows.filter(r => !objectLooks(p, r.entity.id).length).map(r => ({ object: r.entity.name, why: 'no image yet' }))],
@@ -144,7 +145,8 @@ async function generateVideo(a) {
     refs = cap ? (await post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap })).references : [];
     assetBindings = { [d.inputs?.controlVideo ? 'controlVideo' : 'sourceVideo']: { assetId: r.assetId }, ...Object.fromEntries(refs.map((x, i) => [`referenceImage${i + 1}`, { renderId: x.renderId }])) };
   }
-  let prompt = shotPrompt(p, s, 'video') + (refs.length ? ' ' + refs.map((x, i) => `Image ${i + 1} shows ${x.label}.`).join(' ') : '');
+  const cameraSource = cameraSourceOf(d, assetBindings);
+  let prompt = shotPrompt(p, s, 'video', { cameraSource }) + (refs.length ? ' ' + refs.map((x, i) => `Image ${i + 1} shows ${x.label}.`).join(' ') : '');
   const maxLen = d.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
   const main = (await get('/api/project')).project;
   const bind = await post('/api/generation/bind', { revision: main.revision, definitionId: d.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: true });
