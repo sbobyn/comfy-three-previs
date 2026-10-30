@@ -194,7 +194,8 @@ export type GuideEntryLite = { id: string; file: string; kind: 'video' | 'image'
 export type StarterMedia = { kind: 'video' | 'image' | 'still'; before?: string; after?: string; posters?: [string, string]; label?: string; cast: { file: string; label: string }[] };
 /** The starter's hero shot media from public/guide/manifest.json: blockout ↔ generated video, else a still pair, else nothing (draw the blockout still). */
 export function starterMedia(slug: string, entries: GuideEntryLite[]): StarterMedia {
-  const mine = entries.filter(e => e.id.startsWith(`${slug}-`));
+  const own = new RegExp(`^${slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-(s\\d+-(blockout|generated|still)(-poster|-blockout)?|cast-\\d+|sheet)$`);
+  const mine = entries.filter(e => own.test(e.id));
   const cast = mine.filter(e => /-cast-\d+$/.test(e.id)).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true })).map(e => ({ file: e.file, label: e.label || '' }));
   const pick = (re: RegExp) => mine.find(e => re.test(e.id));
   const bv = pick(/-s\d+-blockout$/), gv = pick(/-s\d+-generated$/);

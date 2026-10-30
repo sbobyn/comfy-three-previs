@@ -102,3 +102,27 @@ test('the first-run tour shows once, on a new project', () => {
   assert.equal(core.shouldTour({ ...p, scene: { entities: [] } }, null, now), false, 'the empty stage has its own Start here card');
   assert.deepEqual(plain(core.TOUR.map(t => t.id)), ['block', 'cast', 'shoot', 'generate']);
 });
+
+test('a starter card’s seam pairs its blockout and generated video, falls back to stills, then to the blockout frame', () => {
+  const e = (id, kind = 'image', label = '') => ({ id, file: `${id}.${kind === 'video' ? 'mp4' : 'webp'}`, kind, label });
+  const entries = [e('final-lap-s2-blockout', 'video'), e('final-lap-s2-generated', 'video', 'Final Lap · The draft'), e('final-lap-s2-blockout-poster'), e('final-lap-s2-generated-poster'),
+    e('final-lap-cast-2', 'image', 'Comfy car'), e('final-lap-cast-10', 'image', 'Pit crew'), e('final-lap-cast-1', 'image', 'Fan'), e('final-lap-sheet'),
+    e('wingspan-s2-still-blockout'), e('wingspan-s2-still'), e('wingspan-cast-1', 'image', 'Eagle'), e('generate-before', 'video')];
+  const fl = plain(core.starterMedia('final-lap', entries));
+  assert.deepEqual([fl.kind, fl.before, fl.after, fl.posters], ['video', 'final-lap-s2-blockout.mp4', 'final-lap-s2-generated.mp4', ['final-lap-s2-blockout-poster.webp', 'final-lap-s2-generated-poster.webp']]);
+  assert.deepEqual(fl.cast.map(c => c.label), ['Fan', 'Comfy car', 'Pit crew'], 'cast images in number order; the design sheet is not one');
+  const ws = plain(core.starterMedia('wingspan', entries));
+  assert.deepEqual([ws.kind, ws.before, ws.after, ws.cast.length], ['image', 'wingspan-s2-still-blockout.webp', 'wingspan-s2-still.webp', 1]);
+  assert.deepEqual(plain(core.starterMedia('breaking-news', entries)), { kind: 'still', cast: [] }, 'no media: the card keeps its blockout frame');
+  assert.equal(core.starterMedia('final', entries).kind, 'still', 'slugs match whole words only');
+});
+
+test('the seam moves by keyboard: arrows step 5, Shift 20, Home and End jump, and it stays in 0–100', () => {
+  assert.equal(core.seamKey(50, 'ArrowRight'), 55);
+  assert.equal(core.seamKey(50, 'ArrowLeft', true), 30);
+  assert.equal(core.seamKey(98, 'ArrowUp'), 100);
+  assert.equal(core.seamKey(3, 'ArrowDown'), 0);
+  assert.equal(core.seamKey(40, 'Home'), 0);
+  assert.equal(core.seamKey(40, 'End'), 100);
+  assert.equal(core.seamKey(40, 'Enter'), null, 'other keys are left alone');
+});
