@@ -498,6 +498,8 @@ function renderShotPane() {
     h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Shot ${String(idx + 1).padStart(2, '0')}`), h('button', { class: 'btn ghost sm', type: 'button', disabled: project.shots.length < 2, title: 'Delete this shot', onclick: () => { if (confirm(`Delete “${s.title}”? Its references stay on disk.`)) void edit([{ op: 'remove_shot', id: s.id }]); } }, 'Delete')),
       title, desc, handles),
+    castBlock(s),
+    promptBlock(s, { project: () => project, runEntry: e => runEntry(e as any), select: id => { select(id); setTab('object'); } }),
     h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Camera'), h('span', { class: 'muted', style: 'font-size:11.5px' }, describeCamera(s, project.scene.entities))),
       h('div', { class: 'grid2' }, h('label', {}, 'Move', move), h('label', {}, 'Target', target)),
@@ -512,8 +514,6 @@ function renderShotPane() {
         h('button', { class: 'btn sm', type: 'button', onclick: () => keyFromView('start'), title: 'Use the current set view as the first camera position' }, 'Set start from view'),
         h('button', { class: 'btn sm', type: 'button', onclick: () => keyFromView('end'), title: 'Use the current set view as the last camera position' }, 'Set end from view'),
         h('button', { class: 'btn sm ghost', type: 'button', onclick: () => scene.lookThrough() }, 'Go to camera'))),
-    castBlock(s),
-    promptBlock(s, { project: () => project, runEntry: e => runEntry(e as any), select: id => { select(id); setTab('object'); } }),
     operateBlock(s), // [operate]
     h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `References · ${s.references.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, 'Link each image to an object')),
@@ -805,7 +805,10 @@ function castBlock(s: Shot) {
       h('div', { class: 'cast-main' },
         h('button', { type: 'button', class: 'cast-name', title: 'Open this Cast Card', onclick: () => { select(r.entity.id); setTab('object'); } }, r.entity.name),
         h('span', { class: 'cast-why' + (r.override ? ' manual' : '') }, why),
-        r.inCast ? h('span', { class: 'cast-facts' }, `${card.imageRefs.length} image${card.imageRefs.length === 1 ? '' : 's'}`, card.description ? ' · description' : ' · no description', card.styleNotes ? ' · style notes' : '', card.sharedFrom ? ` · shares ${entity(card.sharedFrom)?.name}` : '') : null));
+        r.inCast && card.description ? h('span', { class: 'cast-desc' }, card.description) : null,
+        r.inCast && card.styleNotes ? h('span', { class: 'cast-style' }, h('b', {}, 'Style '), card.styleNotes) : null,
+        r.inCast && card.imageRefs.length ? h('span', { class: 'cast-imgs' }, ...objectLooks(project, r.entity.id).slice(0, 6).map(ref => h('img', { src: refUrl(ref), alt: ref.name, title: ref.name, loading: 'lazy' }))) : null,
+        r.inCast ? h('span', { class: 'cast-facts' }, `${card.imageRefs.length} image${card.imageRefs.length === 1 ? '' : 's'}`, card.sharedFrom ? ` · shares ${entity(card.sharedFrom)?.name}’s Cast Card` : '', ` · #${card.blockoutId.slice(0, 6)}`) : null));
   };
   return h('div', { class: 'block' },
     h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Cast · ${inCast.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, 'What this shot shows · ticks override the camera')),

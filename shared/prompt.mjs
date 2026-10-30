@@ -7,10 +7,10 @@ import { shotObjects, castCard, describeCamera, MOVES } from './director.mjs';
 
 // Camera vocabulary for style tags. Each term is the exact text added to the prompt.
 export const CAMERA_TERMS = {
-  movement: ['static locked-off shot', 'slow push-in', 'slow pull-out', 'tracking shot', 'dolly alongside', 'crane up', 'crane down', 'orbit around the subject', 'handheld', 'steadicam follow', 'drone flyover', 'whip pan', 'slow pan', 'tilt up'],
-  cuts: ['hard cut', 'match cut', 'smash cut', 'jump cut', 'cross-dissolve', 'continuous take, no cuts'],
-  lens: ['14mm ultra-wide', '24mm wide', '35mm natural', '50mm normal', '85mm portrait', '135mm telephoto', 'anamorphic', 'macro', 'shallow depth of field', 'deep focus', 'rack focus'],
-  filter: ['35mm film grain', 'teal and orange grade', 'black and white', 'golden hour light', 'neon noir', 'bleach bypass', 'soft diffusion (ProMist)', 'anamorphic lens flare', 'high contrast', 'muted pastel palette'],
+  movement: ['FPV drone chase', 'dolly zoom', 'crane up into an orbit', 'static locked-off shot', 'slow push-in', 'slow pull-out', 'tracking shot', 'dolly alongside', 'crane up', 'crane down', 'orbit around the subject', 'handheld', 'steadicam follow', 'drone flyover', 'whip pan', 'slow pan', 'tilt up'],
+  cuts: ['speed ramp', 'hard cut', 'match cut', 'smash cut', 'jump cut', 'cross-dissolve', 'continuous take, no cuts'],
+  lens: ['long lens compression', '14mm ultra-wide', '24mm wide', '35mm natural', '50mm normal', '85mm portrait', '135mm telephoto', 'anamorphic', 'macro', 'shallow depth of field', 'deep focus', 'rack focus'],
+  filter: ['VHS tracking lines', 'chroma smear', 'Eastmancolor', 'deep blue dusk', 'saturated primaries', '35mm film grain', 'teal and orange grade', 'black and white', 'golden hour light', 'neon noir', 'bleach bypass', 'soft diffusion (ProMist)', 'anamorphic lens flare', 'high contrast', 'muted pastel palette'],
 };
 export const CAMERA_GROUPS = { movement: 'Movement', cuts: 'Cuts', lens: 'Lens', filter: 'Filter' };
 // Starting suggestions from the shot's own camera, so the tags begin true to the blockout.
@@ -49,15 +49,17 @@ export function autoPromptSegments(project, shot, kind = 'video') {
   const groups = [];
   for (const c of shotObjects(project, shot)) {
     const card = castCard(project, c.entity.id);
-    const text = [card.description, card.styleNotes].filter(Boolean).join(', ') || card.kind;
+    const text = [card.description, card.styleNotes].filter(Boolean).join(', ');
+    if (!text) continue; // structural blockout pieces with an empty Cast Card add nothing to the prompt
     const g = groups.find(x => x.text === text);
     if (g) g.cards.push(card); else groups.push({ text, cards: [card] });
   }
   groups.slice(0, 8).forEach((g, i) => {
     const names = g.cards.map(c => c.name), first = g.cards[0];
-    const who = names.length <= 2 ? names.join(' and ') : `${names.slice(0, 2).join(', ')} +${names.length - 2}`;
     const label = names.length === 1 ? first.name : `${first.name} +${names.length - 1}`;
-    add(`obj:${first.id}`, label, `${first.sharedFrom ? (project.scene.entities.find(e => e.id === first.sharedFrom)?.name || first.name) : first.name}’s Cast Card${names.length > 1 ? ` (shared by ${names.join(', ')})` : ''}`, OBJECT_COLORS[i % OBJECT_COLORS.length], `${who}: ${g.text}.`);
+    // The sentence is the description itself; the object name lives on the chip.
+    const sentence = g.text.charAt(0).toUpperCase() + g.text.slice(1);
+    add(`obj:${first.id}`, label, `${first.sharedFrom ? (project.scene.entities.find(e => e.id === first.sharedFrom)?.name || first.name) : first.name}’s Cast Card${names.length > 1 ? ` (shared by ${names.join(', ')})` : ''}`, OBJECT_COLORS[i % OBJECT_COLORS.length], /[.!?]$/.test(sentence) ? sentence : sentence + '.');
   });
   if (environment?.description) add('world', 'World', 'Scene world', FIELD_COLORS.world, `Setting: ${environment.description}.`);
   if (environment?.style) add('style', 'Visual style', 'Project style', FIELD_COLORS.style, `Look: ${environment.style}.`);
