@@ -990,3 +990,53 @@ dialog.claude-help p { margin: 6px 0; line-height: 1.5; }
 .shotpane.hl-on .ap-chip:not(.hl) { opacity: .45; }
 .shotpane .ap-span.hl { color: var(--ink, #15130F); background: color-mix(in srgb, var(--c) 22%, transparent); box-shadow: inset 0 -2px 0 var(--c), 0 0 0 2px color-mix(in srgb, var(--c) 18%, transparent); }
 .shotpane .ap-chip.hl { box-shadow: 0 0 0 2px var(--c); }
+
+/* ---------- Right panel: sections never squash or overlap ---------- */
+.shotpane > *, .shotpane .block > *, .cast-row, .cast-slot > * { flex-shrink: 0; }
+.shotpane .block { min-width: 0; }
+.shotpane .block-head { flex-wrap: wrap; row-gap: 2px; }
+.shotpane .block-head .eyebrow { white-space: nowrap; }
+.shotpane > .objectpane, .cast-slot > .objectpane { min-height: auto; height: auto; position: static; }
+.objectpane .inspector .head { flex-wrap: wrap; }
+.objectpane .inspector .row { grid-template-columns: minmax(56px, auto) minmax(0, 1fr); }
+.objectpane .grid2, .objectpane .vec { min-width: 0; }
+.objectpane input, .objectpane select, .objectpane textarea { min-width: 0; max-width: 100%; }
+.group-bar { flex-wrap: wrap; }
+@container side (max-width: 340px) {
+  .cast-head { grid-template-columns: 16px 34px minmax(0, 1fr) 10px; gap: 8px; padding: 7px 8px 7px 6px; }
+  .cast-row .cast-thumb, .cast-row .cast-ph { width: 34px; height: 34px; }
+  .cast-row .cast-desc { display: none; }
+  .shotpane { padding: 12px; }
+}
+.side { container-type: inline-size; container-name: side; }
+
+/* ---------- Shots rail: no sideways scroll; cards adapt to the rail width ---------- */
+.rail { container-type: inline-size; container-name: rail; }
+.shots { overflow-x: hidden; overflow-y: auto; }
+.shot { min-width: 0; width: 100%; }
+.shot .num { min-width: 0; overflow: hidden; white-space: nowrap; }
+@container rail (max-width: 230px) {
+  .shot { grid-template-columns: 64px minmax(0, 1fr); gap: 8px; }
+  .shot canvas, .shot .thumb { width: 64px; height: 36px; }
+  .shot .num .rendered { font-size: 0; width: 7px; height: 7px; border-radius: 50%; background: currentColor; padding: 0; }
+}
+@container rail (max-width: 170px) {
+  .shot { grid-template-columns: 1fr; }
+  .shot canvas, .shot .thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; }
+}
+
+/* ---------- Quiet, warm scrollbars everywhere ---------- */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink, #15130F) 22%, transparent) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--ink, #15130F) 18%, transparent); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background-color: color-mix(in srgb, var(--ink, #15130F) 32%, transparent); }
+
+/* ---------- Shot description: object words underlined in their kind colour ---------- */
+.sem-text { position: relative; display: grid; border-radius: 12px; background: var(--card, #fffdf9); border: 1px solid var(--line); transition: border-color .15s ease, box-shadow .15s ease; }
+.sem-text:focus-within { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
+.sem-text > .sem-back, .sem-text > textarea { grid-area: 1 / 1; margin: 0; padding: 11px 13px; font: 13.5px/1.6 var(--sans, inherit); letter-spacing: normal; white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; border: 0; box-sizing: border-box; min-height: 96px; max-height: 260px; overflow-y: auto; }
+.sem-text > textarea { background: transparent !important; color: transparent; caret-color: var(--ink, #15130F); resize: none; field-sizing: content; outline: none; box-shadow: none !important; position: relative; z-index: 1; }
+.sem-text > textarea::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); color: transparent; }
+.sem-text > .sem-back { color: var(--ink-2, #3a352d); pointer-events: none; overflow: hidden; }
+.sem-back mark { background: color-mix(in srgb, var(--k) 9%, transparent); color: color-mix(in srgb, var(--k) 88%, #000); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--k) 70%, transparent); text-decoration-thickness: 2px; text-underline-offset: 3px; border-radius: 3px; }

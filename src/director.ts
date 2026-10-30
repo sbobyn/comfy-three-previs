@@ -539,14 +539,52 @@ function slider(label: string, min: number, max: number, step: number, value: nu
   return h('div', { class: 'slider-row' }, label, input, out);
 }
 
+// ---------- Shot description: words that name scene objects are underlined in their kind's colour ----------
+function objectTerms() {
+  const terms: { re: string; kind: string; id: string }[] = [];
+  const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const KIND_ORDER = ['character', 'vehicle', 'prop', 'environment'];
+  const ents = [...project.scene.entities].sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind));
+  for (const e of ents) {
+    const parts = new Set<string>([e.name, '@' + handleOf(e.name), ...e.name.split(/\s*·\s*/)]);
+    for (const p of [...parts]) { const last = p.trim().split(/\s+/).at(-1) || ''; if (/^[a-z][a-z-]{3,}$/i.test(last)) parts.add(last); }
+    for (const p of parts) { const t = p.trim(); if (t.length >= 3 && !/^\d/.test(t)) terms.push({ re: esc(t), kind: e.kind, id: e.id }); }
+  }
+  terms.sort((a, b) => b.re.length - a.re.length); // longest match wins
+  return terms;
+}
+function semanticText(ta: HTMLTextAreaElement) {
+  const back = h('div', { class: 'sem-back', 'aria-hidden': 'true' });
+  const wrap = h('div', { class: 'sem-text' }, back, ta);
+  const paint = () => {
+    const terms = objectTerms(), text = ta.value;
+    back.replaceChildren();
+    if (!terms.length) { back.append(text + '\n'); return; }
+    const re = new RegExp(`(?<![\\w@-])(${terms.map(t => t.re).join('|')})(s|es)?(?![\\w-])`, 'gi');
+    let at = 0;
+    for (const m of text.matchAll(re)) {
+      const hit = terms.find(t => new RegExp(`^${t.re}$`, 'i').test(m[1]))!;
+      if (m.index! > at) back.append(text.slice(at, m.index));
+      back.append(h('mark', { style: `--k:${KIND_COLORS[hit.kind]}`, 'data-id': hit.id }, m[0]));
+      at = m.index! + m[0].length;
+    }
+    back.append(text.slice(at) + '\n');
+    back.scrollTop = ta.scrollTop;
+  };
+  ta.addEventListener('input', paint);
+  ta.addEventListener('scroll', () => { back.scrollTop = ta.scrollTop; });
+  requestAnimationFrame(paint); paint();
+  return wrap;
+}
 function renderShotPane() {
   if (shotPane.contains(document.activeElement) && shotPane.dataset.shot === shotId) return;
   shotPane.dataset.shot = shotId;
   const s = shot(), idx = project.shots.indexOf(s);
   const title = h('input', { class: 'field', value: s.title, maxlength: 120, 'aria-label': 'Shot title' });
   title.onchange = () => void edit([{ op: 'update_shot', id: s.id, patch: { title: title.value } }]);
-  const desc = h('textarea', { class: 'field', rows: 4, placeholder: 'What happens in this shot? Mention objects with @handle, e.g. @runner sprints past @car.', 'aria-label': 'Shot description' }, s.description);
+  const desc = h('textarea', { class: 'field', rows: 4, spellcheck: false, placeholder: 'What happens in this shot? Mention objects with @handle, e.g. @runner sprints past @car.', 'aria-label': 'Shot description' }, s.description);
   desc.onchange = () => void edit([{ op: 'update_shot', id: s.id, patch: { description: desc.value } }]);
+  const descBox = semanticText(desc);
   const handles = h('div', { class: 'chips', style: 'padding:0' }, ...project.scene.entities.filter(e => e.kind !== 'environment').slice(0, 8).map(e => h('button', { type: 'button', onclick: () => { desc.setRangeText('@' + handleOf(e.name) + ' ', desc.selectionStart, desc.selectionEnd, 'end'); desc.focus(); } }, '@' + handleOf(e.name))));
   const local = (patch: Partial<Shot['camera']>) => { Object.assign(s.camera, patch); scene.sync(project, s); renderTransport(); };
   const commit = (patch: Partial<Shot['camera']>) => void edit([{ op: 'update_shot', id: s.id, patch: { camera: patch } }]);
@@ -570,7 +608,7 @@ function renderShotPane() {
   shotPane.replaceChildren(
     h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Shot ${String(idx + 1).padStart(2, '0')}`), h('button', { class: 'btn ghost sm', type: 'button', disabled: project.shots.length < 2, title: 'Delete this shot', onclick: () => { if (confirm(`Delete “${s.title}”? Its references stay on disk.`)) void edit([{ op: 'remove_shot', id: s.id }]); } }, 'Delete')),
-      title, desc),
+      title, descBox),
     castBlock(s),
     promptBlock(s, { project: () => project, runEntry: e => runEntry(e as any), select: id => { select(id); setTab('object'); } }),
     h('div', { class: 'block' },
