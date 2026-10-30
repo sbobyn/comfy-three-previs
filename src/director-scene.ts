@@ -168,6 +168,14 @@ export type ScenePose = { p: Vec3; look: Vec3; mm: number };
 export type DirectorScene = ReturnType<typeof createDirectorScene>;
 export type TransformChange = { id: string; before: XForm; after: XForm };
 export type ClickMode = 'replace' | 'add' | 'toggle';
+/** auto: characters, vehicles, the shot's target and props at least 24 px on screen (environment on hover/selection); all: every root object; none. */
+export type LabelMode = 'auto' | 'all' | 'none';
+type Item = {
+  group: THREE.Group; entity: Entity; label: HTMLElement; key: string;
+  /** Label content key (name|color|image|kind), its lead <img>/swatch, cached group-label height and the last written layout. */
+  lkey: string; lead: HTMLElement | null; topOff: number | null; span: number | null; lw: number; lh: number; lx: number; ly: number; shown: boolean; crowded: boolean;
+};
+const LABEL_MIN_PX = 24, LABEL_GAP = 2, LABEL_PUSHES = 3;
 
 type Events = {
   onRefImage(id: string): string | null;
@@ -280,7 +288,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
 
   const marquee = document.createElement('div'); marquee.className = 'marquee'; marquee.hidden = true; overlay.append(marquee);
 
-  const groups = new Map<string, { group: THREE.Group; entity: Entity; label: HTMLElement; key: string }>();
+  const groups = new Map<string, Item>();
   const trails = new Map<string, THREE.Line>();
   let entities: Entity[] = [], shot: Shot | null = null, keys: CameraKey[] = [], playhead = 0, view: 'set' | 'camera' = 'set', dirty = true, env = 'stage';
   let selectedIds: string[] = [], primary: string | null = null;
@@ -288,6 +296,8 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   let live: ScenePose | null = null; // [operate] pose flown by the camera operator, overrides the shot camera while set.
   let aimOverride: { q: [number, number, number, number]; mm: number | null } | null = null; // [director-phone]
   let mode: ModalMode = 'translate', snapPref = false, ctrlHeld = false, step = 1;
+  let labelMode: LabelMode = 'auto', pointerHover: string | null = null;
+  // Drawing is on demand: controls (incl. damping), gizmo, edits, playhead, hover, view, live pose and resize mark the frame dirty.
   const markDirty = () => { dirty = true; };
   controls.addEventListener('change', markDirty);
   gizmo.addEventListener('change', markDirty);
@@ -333,19 +343,24 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
         const group = buildShape(e.shape, e.color); group.userData.entityId = e.id;
         group.traverse(o => { o.userData.entityId = e.id; });
         scene.add(group);
-        const label = document.createElement('div'); label.className = 'label'; label.dataset.id = e.id; labelsEl.append(label);
-        item = { group, entity: e, label, key }; groups.set(e.id, item);
+        const label = document.createElement('div'); label.className = 'label'; label.dataset.id = e.id; label.style.display = 'none'; labelsEl.append(label);
+        item = { group, entity: e, label, key, lkey: '', lead: null, topOff: null, span: null, lw: 0, lh: 0, lx: NaN, ly: NaN, shown: false, crowded: false }; groups.set(e.id, item);
       }
       item.entity = e;
       // Never fight a live gizmo drag or modal preview.
       if (!(gizmoDrag?.starts.has(e.id)) && !(modal?.starts.has(e.id))) placeGroup(item.group, e);
       item.group.visible = !hiddenIds.has(e.id);
-      const ref = events.onRefImage(e.id);
-      item.label.replaceChildren();
-      if (ref) { const img = document.createElement('img'); img.src = ref; img.alt = ''; item.label.append(img); } else { const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = e.color; item.label.append(sw); }
-      item.label.append(e.name);
-      item.label.classList.toggle('tgt', e.id === current.camera.target);
-      item.label.style.setProperty('--k', KIND_COLORS[e.kind] || '#9aa7b8');
+      const ref = events.onRefImage(e.id), lkey = `${e.name}|${e.color}|${ref || ''}|${e.kind}`;
+      if (item.lkey !== lkey) { // rebuild only on change; the same image URL keeps its <img>
+        let lead = item.lead;
+        if (ref) { if (!(lead instanceof HTMLImageElement) || lead.getAttribute('src') !== ref) { lead = document.createElement('img'); lead.setAttribute('src', ref); (lead as HTMLImageElement).alt = ''; } }
+        else { if (!lead || lead instanceof HTMLImageElement) { lead = document.createElement('span'); lead.className = 'sw'; } lead.style.background = e.color; }
+        item.label.replaceChildren(lead, e.name);
+        item.label.style.setProperty('--k', KIND_COLORS[e.kind] || '#9aa7b8');
+        Object.assign(item, { lkey, lead, lw: 0 });
+      }
+      const tgt = e.id === current.camera.target;
+      if (item.label.classList.contains('tgt') !== tgt) { item.label.classList.toggle('tgt', tgt); item.lw = 0; }
     }
     for (const [id, item] of groups) if (!seen.has(id)) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); groups.delete(id); }
     // Motion trails for animated objects.
@@ -360,6 +375,14 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       line.computeLineDistances();
     }
     applyTime(sceneTime());
+    // Group labels sit above their members: bounds once per sync, kept as an offset from the group's own height.
+    for (const item of groups.values()) {
+      if (item.entity.shape !== 'group') { item.topOff = item.span = null; continue; }
+      const b = new THREE.Box3();
+      for (const id of withDescendants(entities, [item.entity.id])) { const g2 = groups.get(id); if (g2 && g2.entity.shape !== 'group') b.expandByObject(g2.group); }
+      item.topOff = b.isEmpty() ? null : b.max.y + 0.4 - item.group.position.y;
+      item.span = b.isEmpty() ? null : Math.max(...b.getSize(new THREE.Vector3()).toArray());
+    }
     keys = cameraKeys(current, entitiesAt(entities, current.start || 0));
     const pts: THREE.Vector3[] = [];
     for (let i = 0; i <= 64; i++) pts.push(new THREE.Vector3(...shotCameraAt(current, entities, (i / 64) * current.duration).p));
@@ -415,7 +438,13 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     offsetX = Math.round((vw - canvasW) / 2); offsetY = Math.round((vh - canvasH) / 2);
     canvas.style.left = `${offsetX}px`; canvas.style.top = `${offsetY}px`;
   }
+  // Labels are measured once per content change; a resize (font size follows the viewport width) re-measures them.
+  let clip = '';
+  const remeasure = () => { for (const it of groups.values()) it.lw = 0; markDirty(); };
+  new ResizeObserver(markDirty).observe(monitorEl); // the monitor folds and animates its width on its own
+  document.fonts?.ready.then(remeasure);
   function resize() {
+    for (const it of groups.values()) it.lw = 0;
     const r = overlay.getBoundingClientRect(), vw = Math.max(1, r.width), vh = Math.max(1, r.height);
     const settle = () => { if (Math.round(vw) !== canvasW || Math.round(vh) !== canvasH) { applySize(vw, vh); placeCanvas(vw, vh); draw(); dirty = false; } };
     if (!canvasW) { applySize(vw, vh); placeCanvas(vw, vh); draw(); dirty = false; return; }
@@ -461,27 +490,16 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       const fog = scene.fog; scene.fog = null;
       composer.render();
       scene.fog = fog;
-      const c = canvas.getBoundingClientRect(), m = monitorEl.getBoundingClientRect();
+      const c = canvas.getBoundingClientRect(), m = monitorEl.getBoundingClientRect(), o = overlay.getBoundingClientRect(); // once per drawn frame
       if (m.width > 0) {
         const x = m.left - c.left, y = c.bottom - m.bottom;
         renderer.setScissorTest(true); renderer.setScissor(x, y, m.width, m.height); renderer.setViewport(x, y, m.width, m.height);
         cleanRender(renderer, shotCam); renderer.setScissorTest(false); renderer.setViewport(0, 0, s.x, s.y);
       }
       // Labels never cover the shot-camera monitor: cut a hole in the label layer where it sits.
-      const o = overlay.getBoundingClientRect();
-      if (m.width > 0) {
-        const x0 = m.left - o.left, y0 = m.top - o.top;
-        labelsEl.style.clipPath = `path(evenodd, 'M0 0 H${o.width} V${o.height} H0 Z M${x0} ${y0} h${m.width} v${m.height} h${-m.width} Z')`;
-      } else labelsEl.style.clipPath = '';
-      for (const { group, label, entity } of groups.values()) {
-        const [, hgt] = entitySize(entity);
-        let top = group.position.y + hgt * group.scale.y / Math.max(0.001, entity.scale[1]) + 0.25;
-        if (entity.shape === 'group') { const b = new THREE.Box3(); for (const id of withDescendants(entities, [entity.id])) { const g2 = groups.get(id); if (g2 && g2.entity.shape !== 'group') b.expandByObject(g2.group); } if (!b.isEmpty()) top = b.max.y + 0.4; }
-        const v = new THREE.Vector3(group.position.x, top, group.position.z).project(world);
-        const hidden = hiddenIds.has(entity.id) || v.z > 1 || Math.abs(v.x) > 1.1 || Math.abs(v.y) > 1.1 || (!!entity.parent && !selectedIds.includes(entity.id));
-        label.style.display = hidden ? 'none' : '';
-        if (!hidden) { label.style.left = `${offsetX + ((v.x + 1) / 2) * s.x}px`; label.style.top = `${offsetY + ((1 - v.y) / 2) * s.y}px`; }
-      }
+      const nextClip = m.width > 0 ? `path(evenodd, 'M0 0 H${o.width} V${o.height} H0 Z M${m.left - o.left} ${m.top - o.top} h${m.width} v${m.height} h${-m.width} Z')` : '';
+      if (nextClip !== clip) labelsEl.style.clipPath = clip = nextClip;
+      layoutLabels(s);
       frameEl.hidden = true;
     } else {
       renderer.setClearColor(0x000000); renderer.clear();
@@ -489,14 +507,58 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       const x = (s.x - w) / 2, y = (s.y - hh) / 2;
       renderer.setScissorTest(true); renderer.setScissor(x, y, w, hh); renderer.setViewport(x, y, w, hh);
       cleanRender(renderer, shotCam); renderer.setScissorTest(false);
-      for (const { label } of groups.values()) label.style.display = 'none';
+      for (const it of groups.values()) showLabel(it, false);
       frameEl.hidden = false; Object.assign(frameEl.style, { left: `${offsetX + x}px`, top: `${offsetY + (s.y - y - hh)}px`, width: `${w}px`, height: `${hh}px` });
     }
   }
-  function loop() { if (dirty) { dirty = false; draw(); } requestAnimationFrame(loop); }
+  let frames = 0;
+  function loop() { if (dirty) { dirty = false; frames++; draw(); } requestAnimationFrame(loop); }
   requestAnimationFrame(loop);
-  // Damping keeps moving for a moment after release.
-  setInterval(() => { if (view === 'set') markDirty(); }, 100);
+  // Damping needs no timer (controls.update() keeps firing 'change' until it settles); a slow heartbeat only while G/R/S runs.
+  setInterval(() => { if (view === 'set' && modal) markDirty(); }, 500);
+
+  function showLabel(it: Item, on: boolean, crowded = false) {
+    if (it.shown !== on) { it.label.style.display = on ? '' : 'none'; it.shown = on; if (!on) it.lx = it.ly = NaN; }
+    if (it.crowded !== crowded) { it.label.toggleAttribute('data-crowded', crowded); it.crowded = crowded; }
+  }
+  /** Which labels show, where, and a greedy de-overlap (push down, then give up and mark crowded). Writes only what changed. */
+  function layoutLabels(s: THREE.Vector2) {
+    const v = new THREE.Vector3(), cam = world.position, persp0 = world === persp;
+    const upp = (d: number) => persp0 ? unitsPerPixel(Math.max(0.1, d), persp.fov, Math.max(1, s.y)) : (ortho.top - ortho.bottom) / ortho.zoom / Math.max(1, s.y);
+    const want: { it: Item; x: number; y: number; prio: number }[] = [];
+    for (const it of groups.values()) {
+      const { group, entity } = it, id = entity.id;
+      const sel = selectedIds.includes(id), hov = id === hoverId || id === pointerHover;
+      let on = labelMode !== 'none' && !hiddenIds.has(id) && (!entity.parent || sel) && (labelMode === 'all' || sel || hov || entity.kind !== 'environment');
+      if (on) {
+        const [w, hgt, d] = entitySize(entity), ratio = group.scale.y / Math.max(0.001, entity.scale[1]);
+        const top = it.topOff != null ? group.position.y + it.topOff : group.position.y + hgt * ratio + 0.25;
+        v.set(group.position.x, top, group.position.z).project(world);
+        on = v.z <= 1 && Math.abs(v.x) <= 1.1 && Math.abs(v.y) <= 1.1;
+        // Tiny props drop out; characters, vehicles and the shot's target always keep a label (the collision pass still applies).
+        const key = sel || hov || id === shot?.camera.target || entity.kind === 'character' || entity.kind === 'vehicle';
+        if (on && labelMode === 'auto' && !key) on = (it.span ?? Math.max(w, hgt, d) * ratio) / upp(cam.distanceTo(group.position)) >= LABEL_MIN_PX;
+        if (on) want.push({ it, x: offsetX + ((v.x + 1) / 2) * s.x, y: offsetY + ((1 - v.y) / 2) * s.y, prio: sel ? 0 : hov ? 1 : id === shot?.camera.target ? 2 : entity.kind === 'character' ? 3 : entity.kind === 'environment' ? 5 : 4 });
+      }
+      if (!on) showLabel(it, false);
+    }
+    // Measure labels whose content or size class changed (one layout read for all of them).
+    const fresh = want.filter(w => !w.it.lw);
+    for (const { it } of fresh) showLabel(it, true, it.crowded);
+    for (const { it } of fresh) { it.lw = it.label.offsetWidth; it.lh = it.label.offsetHeight; }
+    want.sort((a, b) => a.prio - b.prio || a.y - b.y);
+    const placed: { l: number; r: number; t: number; b: number }[] = [];
+    for (const w of want) {
+      const { it } = w, half = it.lw / 2;
+      let y = w.y, pushes = 0, hit: (typeof placed)[number] | undefined;
+      while ((hit = placed.find(p => w.x - half < p.r && p.l < w.x + half && y - it.lh < p.b && p.t < y)) && pushes < LABEL_PUSHES) { y = hit.b + LABEL_GAP + it.lh; pushes++; }
+      if (hit) { showLabel(it, false, true); continue; }
+      placed.push({ l: w.x - half, r: w.x + half, t: y - it.lh, b: y });
+      showLabel(it, true);
+      if (!(Math.abs(w.x - it.lx) < 0.5)) { it.label.style.left = `${w.x}px`; it.lx = w.x; }
+      if (!(Math.abs(y - it.ly) < 0.5)) { it.label.style.top = `${y}px`; it.ly = y; }
+    }
+  }
 
   // ---------- Picking ----------
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -537,7 +599,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   let modal: (ModalState & { starts: Map<string, XForm>; primaryStart: XForm; startPointer: { x: number; y: number }; pointer: { x: number; y: number } }) | null = null;
   let lastPointer = { x: 0, y: 0 }, pointerInside = false;
   overlay.addEventListener('pointermove', ev => { lastPointer = { x: ev.clientX, y: ev.clientY }; pointerInside = true; });
-  overlay.addEventListener('pointerleave', () => { pointerInside = false; });
+  overlay.addEventListener('pointerleave', () => { pointerInside = false; if (pointerHover) { pointerHover = null; markDirty(); } });
   function previewModal() {
     if (!modal || !primary) return;
     const cam = world; cam.updateMatrixWorld();
@@ -609,7 +671,11 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       Object.assign(marquee.style, { left: `${Math.max(0, r.left - o.left)}px`, top: `${Math.max(0, r.top - o.top)}px`, width: `${Math.min(o.right, r.right) - Math.max(o.left, r.left)}px`, height: `${Math.min(o.bottom, r.bottom) - Math.max(o.top, r.top)}px` });
       marquee.hidden = false;
     }
-    if (!down && !modal) canvas.style.cursor = view === 'set' && pick(ev.clientX, ev.clientY) ? 'pointer' : '';
+    if (!down && !modal) {
+      const id = view === 'set' ? pick(ev.clientX, ev.clientY) : null;
+      canvas.style.cursor = id ? 'pointer' : '';
+      if (id !== pointerHover) { pointerHover = id; markDirty(); } // environment labels show on hover
+    }
   });
   canvas.addEventListener('pointerup', ev => {
     if (ev.button === 2 && rightDown) {
@@ -677,19 +743,26 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     applyTime(sceneTime(t)); cleanRender(capturer, cam, true); applyTime(sceneTime());
     return captureCanvas.toDataURL(type, quality);
   }
-  function thumbnail(other: Shot, width = 176, height = 99) {
+  const thumbs = new Map<string, HTMLCanvasElement>();
+  /** Shot card still at mid-shot. With a signature (e.g. director.ts `signature(project, shot)`) the result is cached and reused. */
+  function thumbnail(other: Shot, width = 176, height = 99, signature?: string) {
+    const ck = signature ? `${signature}|${width}x${height}` : '', cached = ck ? thumbs.get(ck) : undefined;
+    if (cached) return cached;
     capturer.setPixelRatio(1); capturer.setSize(width, height, false);
     const cam = shotCam.clone(); cam.aspect = width / height;
     poseCamera(cam, shotCameraAt(other, entities, other.duration * 0.5));
     applyTime((other.start || 0) + other.duration * 0.5); cleanRender(capturer, cam, true); applyTime(sceneTime());
-    return captureCanvas;
+    if (!ck) return captureCanvas;
+    const copy = document.createElement('canvas'); copy.width = width; copy.height = height; copy.getContext('2d')!.drawImage(captureCanvas, 0, 0);
+    thumbs.set(ck, copy); if (thumbs.size > 64) thumbs.delete(thumbs.keys().next().value!);
+    return copy;
   }
   function quaternionAt(t: number): [number, number, number, number] {
     const cam = shotCam.clone(); poseCamera(cam, pose(t));
     const q = cam.quaternion.normalize(); return [q.x, q.y, q.z, q.w];
   }
 
-  return {
+  const api = {
     sync, pick, pose, capture, thumbnail, quaternionAt, markDirty,
     /** Outline colour matches the object's colour in the prompt. */
     setOutlineColor(c: string | null) { outline.visibleEdgeColor.set(c || 0xd6daff); outline.hiddenEdgeColor.set(c || 0xbac0ff); labelsEl.style.setProperty('--sel', c || ''); markDirty(); },
@@ -718,6 +791,24 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     worldView(): { p: Vec3; look: Vec3; mm: number } { return { p: world.position.toArray() as Vec3, look: controls.target.toArray() as Vec3, mm: Math.round(persp.getFocalLength()) }; },
     orbitTarget: () => controls.target.toArray() as Vec3,
     lookThrough() { const p = pose(); world.position.set(...p.p); controls.target.set(...p.look); markDirty(); },
+    setLabelMode(m: LabelMode) { if (labelMode !== m) { labelMode = m; markDirty(); } },
+    labelMode: () => labelMode,
+    /** Orbit and zoom around this object from now on without moving the view: the pivot moves to the object's depth on the
+     *  view axis, so nothing on screen changes. aim = true puts the pivot on the object itself (the camera stays put but turns to it). */
+    pivotOn(id: string, aim = false) {
+      const it = groups.get(id); if (!it) return false;
+      const f = new THREE.Vector3(...focusPoint({ ...it.entity, position: it.group.position.toArray() as Vec3 }));
+      if (aim) controls.target.copy(f);
+      else {
+        world.updateMatrixWorld(); const fwd = world.getWorldDirection(new THREE.Vector3()), depth = f.sub(world.position).dot(fwd);
+        if (depth < ZOOM_NEAR) return false; // behind or at the camera: keep the pivot
+        controls.target.copy(world.position).addScaledVector(fwd, depth);
+      }
+      controls.update(); markDirty(); return true;
+    },
     focusOn(entity: Entity) { const f = focusPoint(entity); const off = world.position.clone().sub(controls.target); controls.target.set(...f); world.position.copy(controls.target.clone().add(off)); markDirty(); },
   };
+  // Test hook (dev builds or ?perf): drawn-frame counter plus the editor-camera pose for acceptance scripts.
+  if (import.meta.env.DEV || /[?&]perf\b/.test(location.search)) (window as unknown as { __scene: unknown }).__scene = { frames: () => frames, worldView: api.worldView, pivotOn: api.pivotOn, setLabelMode: api.setLabelMode, setPlayhead: api.setPlayhead };
+  return api;
 }
