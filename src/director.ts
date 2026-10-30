@@ -20,6 +20,7 @@ import { Selection, UndoStack, targetConsumesKey, recreateOps, snap } from '../s
 import type { UndoEntry, ModalMode } from '../shared/editor-controls.mjs';
 import { openJourney } from './director-guide';
 import { initSheets, sheetSection } from './director-sheet'; // [designsheet]
+import { moveHelp } from './director-camhelp'; // [camhelp]
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -795,7 +796,7 @@ function renderShotPane() {
     section('cast', 'Cast', h('span', { class: 'sec-dots' }, ...rows.slice(0, 6).map(r => h('i', { style: `background:${KIND_COLORS[r.entity.kind]}` })), `${rows.length}`), castBlock(s)),
     section('camera', 'Camera', describeCamera(s, project.scene.entities),
       h('div', { class: 'block' },
-      h('div', { class: 'grid2' }, h('label', {}, 'Move', move), h('label', {}, 'Target', target)),
+      h('div', { class: 'grid2' }, h('label', {}, h('span', { class: 'ch-labrow' }, 'Move', moveHelp(move)), move), h('label', {}, 'Target', target)),
       h('div', { class: 'slider-row' }, 'Starts at', numberField('Start', s.start || 0, { rate: 0.05, snapTo: 0.5, min: 0, max: MAX_SCENE_TIME, unit: 's', onPreview: v => { s.start = v; scene.sync(project, s); renderTransport(); }, onCommit: (v, from) => void runEntry({ label: 'Shot start', redo: [{ op: 'update_shot', id: s.id, patch: { start: v } }], undo: [{ op: 'update_shot', id: s.id, patch: { start: from } }] }) }), h('output', {}, `of ${sceneLength(project).toFixed(1)}s`)),
       slider('Duration', 0.5, MAX_DURATION, 0.25, s.duration, 's', v => { s.duration = v; scrub.max = String(v); scene.sync(project, s); renderTransport(); }, v => void edit([{ op: 'update_shot', id: s.id, patch: { duration: v } }])),
       slider('Lens', 12, 135, 1, Math.round(s.camera.mm), 'mm', v => local({ mm: v, ...(custom ? { keys: s.camera.keys!.map(k => ({ ...k, mm: v })) } : {}) }), v => commit({ mm: v, ...(custom ? { keys: s.camera.keys!.map(k => ({ ...k, mm: v })) } : {}) })),

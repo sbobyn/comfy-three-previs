@@ -6,6 +6,7 @@ import type { DirectorProject, Shot } from '../shared/director.mjs';
 import { autoPromptSegments, autoPromptText, highlightRanges, shotStyle, suggestedStyle, CAMERA_TERMS, CAMERA_GROUPS, FIELD_COLORS } from '../shared/prompt.mjs';
 import type { Segment, StyleTags } from '../shared/prompt.mjs';
 import { h, toast } from './director-common';
+import { termPicker, attachHelp } from './director-camhelp';
 
 type Ctx = { project(): DirectorProject; runEntry(e: { label: string; redo: unknown[]; undo: unknown[] }): Promise<unknown>; select(id: string): void; refresh?(): void };
 let kind: 'video' | 'image' = 'video';
@@ -81,10 +82,10 @@ export function cameraStyleBlock(s: Shot, ctx: Ctx) {
   const st = shotStyle(s), chosen = !!s.style;
   const setStyle = (next: StyleTags | null, label: string) => ctx.runEntry({ label, redo: [{ op: 'update_shot', id: s.id, patch: { style: next } }], undo: [{ op: 'update_shot', id: s.id, patch: { style: s.style ?? null } }] }).then(() => { (document.activeElement as HTMLElement | null)?.blur?.(); ctx.refresh?.(); });
   const styleRow = h('div', { class: 'ap-style' }, ...(Object.keys(CAMERA_TERMS) as (keyof StyleTags)[]).map(g => {
-    const sel = h('select', { class: 'field', 'aria-label': `Add ${CAMERA_GROUPS[g]} term` }, h('option', { value: '' }, `+ ${CAMERA_GROUPS[g]}`), ...CAMERA_TERMS[g].filter(t => !st[g].includes(t)).map(t => h('option', { value: t }, t)));
-    sel.onchange = () => { if (!sel.value) return; const next = { ...st, [g]: [...st[g], sel.value] }; void setStyle(next, `Add ${CAMERA_GROUPS[g]}`); };
+    // [camhelp] A picker whose options preview themselves (animated card), instead of a plain select.
+    const sel = termPicker({ group: g, label: `+ ${CAMERA_GROUPS[g]}`, ariaLabel: `Add ${CAMERA_GROUPS[g]} term`, items: CAMERA_TERMS[g].filter(t => !st[g].includes(t)).map(t => ({ value: t })), onPick: t => void setStyle({ ...st, [g]: [...st[g], t] }, `Add ${CAMERA_GROUPS[g]}`) });
     return h('div', { class: 'ap-sgroup' }, h('span', { class: 'ap-sname', style: `--c:${FIELD_COLORS[g]}` }, h('i'), CAMERA_GROUPS[g]),
-      ...st[g].map(t => h('button', { type: 'button', class: 'ap-tag', style: `--c:${FIELD_COLORS[g]}`, title: `Remove “${t}”`, onclick: () => void setStyle({ ...st, [g]: st[g].filter(x => x !== t) }, `Remove ${CAMERA_GROUPS[g]}`) }, t, ' ×')), sel);
+      ...st[g].map(t => attachHelp(h('button', { type: 'button', class: 'ap-tag', style: `--c:${FIELD_COLORS[g]}`, 'aria-label': `Remove “${t}”`, onclick: () => void setStyle({ ...st, [g]: st[g].filter(x => x !== t) }, `Remove ${CAMERA_GROUPS[g]}`) }, t, ' ×'), g, t)), sel);
   }));
 
   return h('div', { class: 'block ap-block ap-camstyle' },
