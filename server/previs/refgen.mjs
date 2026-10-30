@@ -219,8 +219,8 @@ export async function openRefgen(root, director, options = {}) {
       if (r.guide) { await mkdir(dirFor(input.projectId), { recursive: true }); const file = `${id}-guide.png`; await writeFile(join(dirFor(input.projectId), file), r.guide, { mode: 0o600 }); guide = { file, sha256: r.guideSha }; }
       const refs = [];
       for (const [k, b] of refBytes.entries()) { const file = `${id}-ref${k + 1}.png`; await mkdir(dirFor(input.projectId), { recursive: true }); await writeFile(join(dirFor(input.projectId), file), b, { mode: 0o600 }); refs.push({ file, referenceId: refIds[k], sha256: createHash('sha256').update(b).digest('hex') }); }
-      const frameAt = r.shot && ['start', 'end'].includes(input.frameAt) ? input.frameAt : null;
-      const target = r.shot ? { target: 'shot', shotId: r.shot.id, ...(frameAt ? { frameAt } : {}), shotNumber: r.project.shots.indexOf(r.shot) + 1, entityName: `Shot ${String(r.project.shots.indexOf(r.shot) + 1).padStart(2, '0')} ${r.shot.title}` } : { target: 'object', entityId: r.entity.id, entityName: r.entity.name };
+      const frameAt = !r.shot ? null : ['start', 'end'].includes(input.frameAt) ? input.frameAt : Number.isFinite(Number(input.frameAt)) && input.frameAt !== null && input.frameAt !== '' ? Math.round(Math.max(0, Number(input.frameAt)) * 100) / 100 : null;
+      const target = r.shot ? { target: 'shot', shotId: r.shot.id, ...(frameAt !== null ? { frameAt } : {}), shotNumber: r.project.shots.indexOf(r.shot) + 1, entityName: `Shot ${String(r.project.shots.indexOf(r.shot) + 1).padStart(2, '0')} ${r.shot.title}` } : { target: 'object', entityId: r.entity.id, entityName: r.entity.name };
       return persist({ id, projectId: input.projectId, ...target, ...r.settings, guide, refs, backend: r.adapter.snapshot, graph: r.graph, graphHash: hashValue(r.graph), quote: r.quote, partnerNodes: r.partnerNodes, fingerprint: r.fingerprint, status: 'quoted', message: 'Quoted. Nothing was sent.', createdAt: now() });
     }),
     submit: input => serial(async () => {
@@ -264,7 +264,7 @@ export async function openRefgen(root, director, options = {}) {
       const expected = Object.entries(job.graph).filter(([, n]) => n.class_type === 'SaveImage').map(([id]) => id);
       for (const nodeId of expected) for (const image of history.outputs?.[nodeId]?.images || []) {
         const bytes = await adapter.view(image);
-        const r = await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId }), name: `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId } });
+        const r = await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId }), name: `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId } });
         referenceIds.push(r.referenceId);
       }
       if (!referenceIds.length) return persist({ ...job, status: 'failed', message: 'Completed without a saved image output.', finishedAt: now() });

@@ -653,7 +653,7 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
         const references = [];
         // First-frame workflows take one image: the shot's newest key frame.
         const frames = s.references.filter(r => r.role === 'frame');
-        const startFrame = frames.filter(r => r.note === 'key frame start').at(-1) || frames.filter(r => r.note !== 'key frame end').at(-1);
+        const startFrame = frames.filter(r => r.note === 'key frame start').at(-1) || frames.filter(r => !r.note).at(-1) || frames.filter(r => r.note !== 'key frame end').at(0);
         const endFrame = frames.filter(r => r.note === 'key frame end').at(-1);
         // keyFrames: [start, end?] for first/last-frame workflows.
         const picks = input.firstFrame ? [startFrame && { ref: startFrame, entityId: null, role: 'frame', label: 'start key frame' }, input.lastFrame && endFrame && { ref: endFrame, entityId: null, role: 'frame', label: 'end key frame' }].filter(Boolean) : videoReferences(p, s, max);
