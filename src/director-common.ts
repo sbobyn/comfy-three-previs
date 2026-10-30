@@ -26,10 +26,12 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<s
   return el;
 }
 
-export function toast(text: string, error = false) {
+/** A short status line at the bottom. With an action (e.g. Undo) it stays a little longer and carries one button. */
+export function toast(text: string, error = false, action?: { label: string; run: () => void }) {
   const t = h('div', { class: 'toast' + (error ? ' err' : ''), role: 'status' }, text);
+  if (action) t.append(h('button', { class: 'btn', type: 'button', onclick: () => { t.remove(); action.run(); } }, action.label));
   document.body.append(t);
-  setTimeout(() => t.remove(), error ? 6000 : 2600);
+  setTimeout(() => t.remove(), action ? 8000 : error ? 6000 : 2600);
 }
 
 export function ago(iso: string) {

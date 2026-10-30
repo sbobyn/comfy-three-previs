@@ -21,6 +21,8 @@ export type SequenceCtx = {
   openShot(id: string): void;
   /** Unused: the Cut board is the only editor. Kept so the workspace can drop it in its own change. */
   openEditor?(): void;
+  /** The export button's state, for the workspace top bar's Export film. */
+  onExportState?(s: { ok: boolean; busy: boolean; reason: string }): void;
   /** [mobile] compact row template; the parts are today's controls, re-arranged by the mobile layer. */
   rowTemplate?(parts: RowParts): HTMLElement;
 };
@@ -284,6 +286,7 @@ export function createSequence(ctx: SequenceCtx) {
     totals.textContent = `${list.length} of ${p.shots.length} shots · ${total.toFixed(2)}s${missing ? ` · ${missing} without a blockout` : ''}`;
     exportBtn.disabled = busy || !list.length || missing > 0;
     exportBtn.title = missing ? 'Make a blockout for every shot in the cut first' : '';
+    ctx.onExportState?.({ ok: !!list.length && !missing, busy, reason: !list.length ? 'Nothing in the cut yet' : missing ? `Make a blockout for every shot in the cut first (${missing} missing)` : '' });
     const edits = (p.assets || []).filter(a => a.kind === 'edit').sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     exportsList.replaceChildren(...(edits.length ? [h('span', { class: 'eyebrow' }, 'Exports')] : []), ...edits.slice(0, 4).map(a => h('div', { class: 'sq-exp' },
       h('button', { class: 'btn ghost sm', type: 'button', 'aria-label': `Play export v${a.version ?? 1}`, onclick: () => watchExport(a) }, '▶'),
@@ -450,6 +453,8 @@ export function createSequence(ctx: SequenceCtx) {
       timer = window.setInterval(() => { if (!busy && gen.jobs.some(j => !DONE.includes(j.status) && j.status !== 'quoted')) void loadGen().then(draw); }, 8000);
     },
     refresh() { if (!el.hidden && !busy) { if (!seq) draw(); else { drawBoard(); drawExports(); } } },
+    /** Export the film (the Cut view's Export film), from the workspace top bar. */
+    exportFilm() { if (!exportBtn.disabled) exportBtn.click(); else toast(exportBtn.title || 'Nothing to export yet'); },
     /** Select a shot and show it in the viewer (e.g. 'compare'). Call after switching to the Cut step. */
     open(shotId: string, v: typeof view = 'generated') {
       if (!P().shots.some(s => s.id === shotId)) return;

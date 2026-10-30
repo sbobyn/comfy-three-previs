@@ -198,6 +198,12 @@ export function applyOps(p, ops) {
         if (patch.note !== undefined) r.note = String(patch.note).slice(0, 500);
         results.push({ op: op.op, id: r.id }); break;
       }
+      case 'use_take': {
+        // The newest take at a moment is the one in use (and a key frame's newest take is what video models get): move this one last.
+        const s = resolveShot(p, op.shotId); if (!s) fail('Unknown shot');
+        const i = s.references.findIndex(r => r.id === op.referenceId && r.role === 'frame'); if (i < 0) fail('Unknown still');
+        s.references.push(...s.references.splice(i, 1)); results.push({ op: op.op, id: op.referenceId }); break;
+      }
       case 'remove_reference': {
         if ((p.scene.references || []).some(r => r.id === op.referenceId)) {
           p.scene.references = p.scene.references.filter(r => r.id !== op.referenceId);

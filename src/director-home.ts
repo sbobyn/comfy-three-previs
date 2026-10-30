@@ -10,6 +10,8 @@ import type { AgentStatus, Connect } from './director-common';
 import { openJourney } from './director-guide';
 import { checkList, openSetup } from './director-setup';
 import type { Check } from './director-setup';
+import { beforeAfter, guideManifest, guideUrl } from './director-media';
+import { starterMedia } from './director-desktop-core';
 
 type Summary = { id: string; title: string; template: string; updatedAt: string; shots: number; entities: number; references: number; renders: number; assets: number; sceneName: string };
 /** One starter card: enough of the blockout to draw shot 1. `key` is what the server creates from. */
@@ -53,12 +55,31 @@ function card(el: HTMLElement, img: HTMLElement | null, title: string, line: str
   return el;
 }
 
-/** The starter grid. Every starter renders through here. */
+/**
+ * The starter grid. Every starter renders through here: its hero shot as a draggable blockout → video seam
+ * (a still pair, or just the blockout frame, when that's all there is), the cast's images under it, then the title.
+ */
 export function starterCards(starters: Starter[], onPick: (key: string) => void) {
-  return h('div', { class: 'home-starters', 'data-count': String(Math.min(starters.length, 4)) }, ...starters.map(s =>
-    card(h('button', { class: 'home-starter', type: 'button', 'data-template': s.key, onclick: () => onPick(s.key) }),
-      frame(still({ scene: s.scene }, s.shot, `starter:${s.key}`)), s.title, s.description,
-      h('span', { class: 'home-open', 'aria-hidden': 'true' }, s.shots && s.shots > 1 ? `${s.shots} shots` : 'Open', ' →'))));
+  const cards = starters.map(s => {
+    const blockout = frame(still({ scene: s.scene }, s.shot, `starter:${s.key}`));
+    const slot = h('button', { class: 'home-seam-slot', type: 'button', tabindex: -1, 'aria-hidden': 'true', onclick: () => onPick(s.key) }, blockout);
+    const cast = h('div', { class: 'home-cast', hidden: true });
+    const open = card(h('button', { class: 'home-starter-open', type: 'button', onclick: () => onPick(s.key) }), null, s.title, s.description,
+      h('span', { class: 'home-open', 'aria-hidden': 'true' }, s.shots && s.shots > 1 ? `${s.shots} shots` : 'Open', ' →'));
+    return { s, slot, cast, el: h('div', { class: 'home-starter', 'data-template': s.key }, slot, cast, open) };
+  });
+  void guideManifest().then(map => {
+    const entries = [...map.values()];
+    for (const c of cards) {
+      const m = starterMedia(c.s.key, entries);
+      if (m.kind !== 'still' && c.slot.isConnected) {
+        const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: m.kind, posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: false, alt: `${m.label || c.s.title}: blockout on the left, generated ${m.kind === 'video' ? 'video' : 'still'} on the right. Drag the seam or use the arrow keys.` });
+        c.slot.replaceWith(h('div', { class: 'home-seam-slot has-seam' }, seam));
+      }
+      if (m.cast.length) { c.cast.hidden = false; c.cast.replaceChildren(h('span', { class: 'home-cast-label' }, 'Cast'), ...m.cast.slice(0, 5).map(x => h('img', { src: guideUrl(x.file), alt: x.label, title: x.label, loading: 'lazy', decoding: 'async' }))); }
+    }
+  });
+  return h('div', { class: 'home-starters', 'data-count': String(Math.min(starters.length, 4)) }, ...cards.map(c => c.el));
 }
 
 const ICONS = {
