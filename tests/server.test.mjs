@@ -66,3 +66,29 @@ test('retired Blender/workbench routes answer 404 by default; the director\'s ro
     assert.equal((await fetch(base + '/api/generation')).status, 200);
   } finally { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; }
 });
+
+test('media is streamed by byte range (206, 416 and full 200) without reading the whole file', async () => {
+  const { mkdir, writeFile } = await import('node:fs/promises');
+  const { randomUUID } = await import('node:crypto');
+  const dir = await mkdtemp(join(tmpdir(), 'previs-range-')), port = 15195, base = `http://127.0.0.1:${port}`, id = randomUUID();
+  const bytes = Buffer.from(Array.from({ length: 3 * 1024 * 1024 }, (_, i) => i % 251));
+  await mkdir(join(dir, 'assets'), { recursive: true }); await writeFile(join(dir, 'assets', `${id}.mp4`), bytes);
+  const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  const url = `${base}/assets/${id}.mp4`;
+  try {
+    const part = await fetch(url, { headers: { Range: 'bytes=1000-1999' } });
+    assert.equal(part.status, 206); assert.equal(part.headers.get('content-range'), `bytes 1000-1999/${bytes.length}`); assert.equal(part.headers.get('content-length'), '1000');
+    assert.deepEqual(Buffer.from(await part.arrayBuffer()), bytes.subarray(1000, 2000));
+    const tail = await fetch(url, { headers: { Range: `bytes=${bytes.length - 10}-` } });
+    assert.equal(tail.status, 206); assert.deepEqual(Buffer.from(await tail.arrayBuffer()), bytes.subarray(bytes.length - 10));
+    const past = await fetch(url, { headers: { Range: `bytes=${bytes.length}-` } });
+    assert.equal(past.status, 416); assert.equal(past.headers.get('content-range'), `bytes */${bytes.length}`); await past.arrayBuffer();
+    const whole = await fetch(url);
+    assert.equal(whole.status, 200); assert.equal(whole.headers.get('accept-ranges'), 'bytes'); assert.equal(whole.headers.get('content-type'), 'video/mp4');
+    assert.deepEqual(Buffer.from(await whole.arrayBuffer()), bytes);
+    assert.equal((await fetch(`${base}/assets/${randomUUID()}.mp4`)).status, 404);
+  } finally { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; }
+  const source = await (await import('node:fs/promises')).readFile(new URL('../server/previs/server.mjs', import.meta.url), 'utf8');
+  assert.match(source, /createReadStream\(file, \{ start, end \}\)/);
+});

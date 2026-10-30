@@ -1,7 +1,8 @@
 import { startPhoneLan } from './phone-lan.mjs';
 import { attachRelay } from '../../dist-server/relay.js';
 import { createServer } from 'node:http';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, mkdir, stat } from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
 import { resolve, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BlenderMcp } from './mcp-client.mjs';
@@ -247,12 +248,17 @@ const server = createServer(async (req, res) => {
       file = resolve(root, 'dist', '.' + decodeURIComponent(path));
       if (!file.startsWith(join(root, 'dist') + '/')) fail('Invalid path', 403);
     }
-    const bytes = await readFile(file);
     const media = ['.mp4','.webm','.mov','.mkv'].includes(extname(file));
-    const range = media && req.headers.range?.match(/^bytes=(\d+)-(\d*)$/);
-    const start = range ? Number(range[1]) : 0, end = range ? Math.min(bytes.length-1, range[2] ? Number(range[2]) : bytes.length-1) : bytes.length-1;
-    if (range && (start > end || start >= bytes.length)) { res.writeHead(416,{'Content-Range':`bytes */${bytes.length}`}); return res.end(); }
-    res.writeHead(range ? 206 : 200, { ...(media ? {'Accept-Ranges':'bytes','Content-Length':end-start+1,...(range ? {'Content-Range':`bytes ${start}-${end}/${bytes.length}`} : {})} : {}), 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(range ? bytes.subarray(start,end+1) : bytes);
+    const headers = { 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
+    if (!media) { const bytes = await readFile(file); res.writeHead(200, headers); return res.end(bytes); }
+    // Media: stream only the requested range (scrubbing a 40 MB film no longer reads 40 MB per request).
+    const { size } = await stat(file);
+    const range = req.headers.range?.match(/^bytes=(\d+)-(\d*)$/);
+    const start = range ? Number(range[1]) : 0, end = range ? Math.min(size-1, range[2] ? Number(range[2]) : size-1) : size-1;
+    if (range && (start > end || start >= size)) { res.writeHead(416,{'Content-Range':`bytes */${size}`}); return res.end(); }
+    res.writeHead(range ? 206 : 200, { 'Accept-Ranges':'bytes','Content-Length':Math.max(0, end-start+1),...(range ? {'Content-Range':`bytes ${start}-${end}/${size}`} : {}), ...headers });
+    if (!size) return res.end();
+    const stream = createReadStream(file, { start, end }); stream.on('error', () => res.destroy()); res.on('close', () => stream.destroy()); stream.pipe(res);
   } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
 const relay = attachRelay(server);
