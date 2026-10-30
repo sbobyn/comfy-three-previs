@@ -180,24 +180,40 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   let world: THREE.PerspectiveCamera | THREE.OrthographicCamera = persp;
   const controls = new OrbitControls(persp, canvas);
   controls.target.set(0, 1, 0); controls.enableDamping = true; controls.dampingFactor = 0.12; controls.minDistance = 0.08; controls.maxDistance = 3000;
-  // Wheel zoom heads toward the cursor. Orbit zoom scales the distance to the pivot, so it stalls as it
-  // gets close; within DOLLY_NEAR the wheel instead flies camera and pivot forward together at a steady pace.
-  controls.zoomToCursor = true; controls.zoomSpeed = 1.2;
-  // Zoom-in is ours: a steady step (a fifth of the distance, never tiny) toward the cursor, so it never stalls;
-  // once the step would pass the pivot, camera and pivot move together (fly through). Zoom-out stays with OrbitControls.
+  // Wheel / pinch zoom (perspective): one symmetric, exponential zoom toward the point under the cursor.
+  // Camera and pivot scale together about that point, so the point stays under the cursor, in and out mirror
+  // each other exactly, orbit keeps pivoting where you zoomed, and it never stalls near the pivot.
+  controls.zoomToCursor = true; controls.zoomSpeed = 1.2; // ortho view keeps OrbitControls' zoom
+  const ZOOM_NEAR = 0.35;
   canvas.addEventListener('wheel', ev => {
-    if (world !== persp || ev.deltaY >= 0 || ev.ctrlKey) return;
-    const dist = persp.position.distanceTo(controls.target);
+    if (world !== persp) return;
     ev.preventDefault(); ev.stopImmediatePropagation();
-    const notches = Math.min(4, Math.abs(ev.deltaY) / (ev.deltaMode === 1 ? 3 : 100));
-    // Direction: toward the point under the cursor, like zoomToCursor.
+    const px = ev.deltaMode === 1 ? ev.deltaY * 33 : ev.deltaMode === 2 ? ev.deltaY * 400 : ev.deltaY;
+    const k = ev.ctrlKey ? 0.008 : 0.0012; // ~12% per mouse notch; pinch reports small deltas
+    const factor = Math.exp(-Math.max(-250, Math.min(250, px)) * k); // >1 zooms in
     const r = canvas.getBoundingClientRect();
     const ndc = new THREE.Vector2(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
-    const dir = new THREE.Vector3(ndc.x, ndc.y, 0.5).unproject(persp).sub(persp.position).normalize();
-    const len = Math.min(Math.max(0.12, dist * 0.2) * notches, 400);
-    const step = dir.multiplyScalar(len);
-    persp.position.add(step);
-    if (dist - len < 1.5) controls.target.add(step); // close to the pivot: carry it along instead of stopping
+    const ray = new THREE.Raycaster(); ray.setFromCamera(ndc, persp);
+    // Anchor: where the cursor ray meets the plane through the pivot, facing the camera.
+    const fwd = persp.getWorldDirection(new THREE.Vector3());
+    const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(fwd, controls.target);
+    // Prefer the real surface under the cursor (objects or ground); never zoom through it.
+    const hitObj = ray.intersectObjects([ground, ...[...groups.values()].map(g => g.group)], true).find(h => (h.object as THREE.Mesh).isMesh && h.object.visible);
+    const anchor = hitObj?.point.clone() ?? ray.ray.intersectPlane(plane, new THREE.Vector3()) ?? controls.target.clone();
+    const dist = persp.position.distanceTo(controls.target);
+    let next = dist / factor;
+    if (next > controls.maxDistance) next = controls.maxDistance;
+    // Stop short of a surface: keep at least ZOOM_NEAR between the camera and the point under the cursor.
+    if (hitObj && factor > 1) { const toHit = persp.position.distanceTo(anchor); if (toHit * (next / dist) < ZOOM_NEAR) next = dist * Math.min(1, ZOOM_NEAR / Math.max(1e-6, toHit)); }
+    if (!hitObj && factor > 1 && next < ZOOM_NEAR) {
+      // Already close: fly camera and pivot forward together along the cursor ray instead of stopping.
+      const step = ray.ray.direction.clone().multiplyScalar(Math.max(0.05, dist) * (factor - 1));
+      persp.position.add(step); controls.target.add(step);
+    } else {
+      const s2 = next / dist;
+      persp.position.sub(anchor).multiplyScalar(s2).add(anchor);
+      controls.target.sub(anchor).multiplyScalar(s2).add(anchor);
+    }
     controls.update(); markDirty();
   }, { capture: true, passive: false });
   const shotCam = new THREE.PerspectiveCamera(40, 16 / 9, 0.1, 6000); shotCam.layers.set(0);
