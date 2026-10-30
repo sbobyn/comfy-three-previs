@@ -1,5 +1,12 @@
 import { SHAPES, entitySize } from '../shared/director.mjs';
 import type { Entity, DirectorProject } from '../shared/director.mjs';
+import { claudeExamples } from './director-design-core';
+
+/** The read-only GitHub Pages demo (built with VITE_DEMO=1): no Cloud status, no generation. */
+export const DEMO = Boolean(import.meta.env.VITE_DEMO);
+export const REPO_URL = 'https://github.com/sbobyn/comfy-three-previs';
+/** In-page demo notice, in the page's own header (the demo shim's floating banner steps aside for it). */
+export const demoBadge = () => h('a', { class: 'demo-badge', href: REPO_URL, target: '_blank', rel: 'noopener', title: 'This is a read-only demo. Run Comfy Three Previs locally to edit and generate.' }, 'Read-only demo · Run it locally ↗');
 
 export type RunnerStatus = { available: boolean; model: string; busy: string[]; runs: Record<string, { messageId: string; startedAt: string; text: string; steps: string[] } | null> }; // [agent]
 export type AgentStatus = { connected: boolean; waiting: boolean; lastSeen: string | null; name: string | null; runner?: RunnerStatus | null };
@@ -105,22 +112,21 @@ export function claudeDialog(connect: Connect, project?: DirectorProject) {
   document.getElementById('connect-dialog')?.remove();
   const opener = document.activeElement as HTMLElement | null;
   const command = connect ? `claude mcp add comfy-previs -e ${quote(`PREVIS_URL=${location.origin}`)} -- ${quote(connect.command)} ${connect.args.map(quote).join(' ')}` : 'Start the Comfy Three Previs server to see the setup command.';
-  const code = (text: string) => {
-    const copy = h('button', { class: 'btn sm', type: 'button' }, 'Copy');
+  // Copy sits in each block's header row, never over the command itself.
+  const code = (title: Node, text: string) => {
+    const copy = h('button', { class: 'btn sm', type: 'button', 'aria-label': 'Copy the command' }, 'Copy');
     copy.onclick = async () => { try { await navigator.clipboard.writeText(text); copy.textContent = 'Copied'; } catch { toast('Could not copy. Select and copy the command below.', true); } };
-    return h('div', { class: 'code', style: 'white-space:pre-wrap;overflow-wrap:anywhere' }, text, copy);
+    return h('div', { class: 'code-block' }, h('div', { class: 'code-head' }, title, copy), h('div', { class: 'code', style: 'white-space:pre-wrap;overflow-wrap:anywhere' }, text));
   };
-  const names = project?.scene.entities.filter(e => e.kind !== 'environment').slice(0, 2).map(e => e.name) || [];
-  const subject = names[0] || 'the main character';
   const dlg = h('dialog', { id: 'connect-dialog', class: 'claude-help', 'aria-labelledby': 'connect-title' },
     h('div', { class: 'dialog-head' }, h('h2', { id: 'connect-title' }, 'Direct with Claude'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'dialog-body' },
       h('p', {}, 'Connect Claude Desktop or Claude Code to Comfy Three Previs. Ask Claude to build and direct your scene; edits appear here live and can be undone.'),
-      h('h3', {}, 'Claude Code'), code(command),
-      connect ? h('details', {}, h('summary', {}, 'Claude Desktop configuration'), code(JSON.stringify({ mcpServers: { 'comfy-previs': { ...connect, env: { ...connect.env, PREVIS_URL: location.origin } } } }, null, 2))) : null,
-      h('h3', {}, 'Try asking'),
-      h('ul', {}, h('li', {}, `Open ${project?.title || 'my project'} and write a Cast Card for ${subject}.`), h('li', {}, `Make shot 1 a slow push-in on ${subject}.`), h('li', {}, names[1] ? `Add a reverse angle from ${names[1]} toward ${subject}.` : 'Add three shots that cover the key moment from different angles.')),
-      h('p', { class: 'note' }, 'Claude can spend up to the maxCostUsd you allow in each tool call; the server must have PREVIS_ALLOW_PAID=1.')));
+      code(h('h3', {}, 'Claude Code'), command),
+      connect ? h('details', {}, h('summary', {}, 'Claude Desktop configuration'), code(h('span', { class: 'muted' }, 'claude_desktop_config.json'), JSON.stringify({ mcpServers: { 'comfy-previs': { ...connect, env: { ...connect.env, PREVIS_URL: location.origin } } } }, null, 2))) : null,
+      h('h3', {}, project ? `Try asking, in ${project.title.replace(/^Starter · /, '')}` : 'Try asking'),
+      h('ul', { class: 'claude-asks' }, ...claudeExamples(project).map(t => h('li', {}, t))),
+      h('p', { class: 'note' }, 'Edits are free and can be undone here. Paid Comfy Cloud runs happen only when this server is started with PREVIS_ALLOW_PAID=1. Claude then sets a limit (maxCostUsd) on each request, and a request estimated above it is refused. Cloud bills actual usage, so the limit is an allowance, not a hard cap.')));
   dlg.addEventListener('keydown', ev => ev.stopPropagation());
   dlg.addEventListener('close', () => { dlg.remove(); if (opener?.isConnected) opener.focus(); });
   document.body.append(dlg); dlg.showModal();

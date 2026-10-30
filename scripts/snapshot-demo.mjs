@@ -9,7 +9,7 @@
 //                     (default ../comfy-previs-autoprompt-20261029/.evidence/dev-data)
 //   DEMO_PROJECTS     comma-separated project ids (default: the four starters)
 //   DEMO_MEDIA_MB     media budget in MB (default 60)
-import { mkdir, writeFile, copyFile, readdir, stat, rm, rename } from 'node:fs/promises';
+import { mkdir, writeFile, copyFile, readdir, stat, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
@@ -38,11 +38,11 @@ function clean(v) {
   return v;
 }
 
-// GitHub Pages serves index.html at the root: make that the project home
-// (start.html) and move the camera studio to camera.html (the shim maps
-// /index.html links there).
-if (!existsSync(join(out, 'camera.html'))) await rename(join(out, 'index.html'), join(out, 'camera.html'));
+// GitHub Pages serves index.html at the root: make that the project home (start.html). The old camera studio
+// is gone (public/index.html is only a redirect stub), so it is replaced rather than kept as camera.html;
+// the other retired pages stay as redirect stubs to the home page.
 await copyFile(join(out, 'start.html'), join(out, 'index.html'));
+await rm(join(out, 'camera.html'), { force: true });
 
 const dataDir = join(out, 'demo-data'), mediaDir = join(out, 'demo-media');
 await rm(dataDir, { recursive: true, force: true }); await rm(mediaDir, { recursive: true, force: true });

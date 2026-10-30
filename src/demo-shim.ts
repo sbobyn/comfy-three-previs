@@ -14,7 +14,8 @@ const AGENT = { agent: { connected: false, waiting: false, lastSeen: null, name:
 function rewrite(url: string): string {
   if (!url.startsWith('/') || url.startsWith('//') || url.startsWith(BASE)) return url;
   if (/^\/(assets\/[\w-]+\.(mp4|webm|mov|png)|director-refs\/|director-assets\/|renders\/)/.test(url)) return MEDIA + url.slice(1);
-  if (url === '/index.html' || url.startsWith('/index.html?')) return BASE + 'camera.html' + url.slice(11);
+  // The old camera studio (index.html) is gone; its links go to the home page.
+  if (url === '/index.html' || url.startsWith('/index.html?')) return BASE + url.slice(11);
   if (url === '/' || /^\/[\w-]+\.html/.test(url)) return BASE + (url === '/' ? '' : url.slice(1));
   return url;
 }
@@ -78,16 +79,27 @@ Element.prototype.setAttribute = function (name: string, value: string) {
   setAttr.call(this, name, (name === 'src' || name === 'href' || name === 'poster') ? rewrite(String(value)) : value);
 };
 
+// Pages with their own header badge (home, workspace) get no floating banner. Elsewhere the banner sits at the
+// top right, out of the way of transports and tab bars, and can be dismissed.
 function banner() {
+  const own = document.querySelector<HTMLElement>('.demo-badge');
+  if (own && own.offsetParent) return;
   const bar = document.createElement('div');
-  bar.setAttribute('role', 'note');
-  bar.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:2147483647;display:flex;gap:10px;align-items:center;padding:7px 14px;border-radius:999px;background:rgba(17,17,20,.86);color:#f2f2f5;font:500 12.5px/1.3 system-ui,-apple-system,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);pointer-events:auto;white-space:nowrap';
-  const text = document.createElement('span'); text.textContent = 'Read-only demo · Run locally to edit & generate →';
-  const link = document.createElement('a'); link.href = REPO; link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'GitHub';
-  link.style.cssText = 'color:#9ecbff;text-decoration:underline;font-weight:600';
-  bar.append(text, link);
+  bar.setAttribute('role', 'note'); bar.className = 'demo-banner';
+  bar.style.cssText = 'position:fixed;right:12px;top:calc(56px + env(safe-area-inset-top, 0px));z-index:2147483647;display:flex;gap:8px;align-items:center;padding:6px 6px 6px 12px;border-radius:999px;background:rgba(17,17,20,.86);color:#f2f2f5;font:500 12px/1.3 system-ui,-apple-system,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);pointer-events:auto;white-space:nowrap';
+  // Phones: a short pill beside the view switch rather than over it.
+  const narrow = innerWidth < 700;
+  const link = document.createElement('a'); link.href = REPO; link.target = '_blank'; link.rel = 'noopener'; link.textContent = narrow ? 'Demo ↗' : 'Read-only demo · Run it locally ↗';
+  link.title = 'Read-only demo. Run Comfy Three Previs locally to edit and generate.';
+  link.style.cssText = 'color:#f2f2f5;text-decoration:none;font-weight:600';
+  const close = document.createElement('button'); close.type = 'button'; close.textContent = '✕'; close.setAttribute('aria-label', 'Hide the demo notice');
+  close.style.cssText = 'border:0;background:rgba(255,255,255,.14);color:#f2f2f5;border-radius:999px;width:22px;height:22px;cursor:pointer;font-size:11px';
+  close.onclick = () => bar.remove();
+  if (narrow) { bar.style.padding = '6px 12px'; bar.style.right = '64px'; } // clear of the viewport's corner button
+  bar.append(link, ...(narrow ? [] : [close]));
   document.body.append(bar);
 }
-if (document.body) banner(); else addEventListener('DOMContentLoaded', banner);
+// After the page has built its header (a module script runs before the app's own code).
+if (document.readyState === 'complete') setTimeout(banner, 300); else addEventListener('load', () => setTimeout(banner, 300));
 
 export {};

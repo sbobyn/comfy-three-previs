@@ -5,7 +5,7 @@ import { TEMPLATES, makeEntity, makeShot } from '../shared/director.mjs';
 import type { DirectorProject, Shot } from '../shared/director.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
 import { renderStill } from './director-scene';
-import { api, h, ago, claudeDialog, toast } from './director-common';
+import { api, h, ago, claudeDialog, toast, DEMO, demoBadge } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
 import { openJourney } from './director-guide';
 import { checkList, openSetup } from './director-setup';
@@ -75,7 +75,8 @@ export function starterCards(starters: Starter[], onPick: (key: string) => void)
     for (const c of cards) {
       const m = starterMedia(c.s.key, entries);
       if (m.kind !== 'still' && c.slot.isConnected) {
-        const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: m.kind, posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: false, alt: `${m.label || c.s.title}: blockout on the left, generated ${m.kind === 'video' ? 'video' : 'still'} on the right. Drag the seam or use the arrow keys.` });
+        // The generated loop fills the card; hovering (or dragging on touch) scrubs the blockout in from the left.
+        const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: m.kind, posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: false, reveal: true, alt: `${m.label || c.s.title}: the generated ${m.kind === 'video' ? 'video' : 'still'}. Move across it, or use the arrow keys, to reveal the blockout it was made from.` });
         c.slot.replaceWith(h('div', { class: 'home-seam-slot has-seam' }, seam));
       }
       if (m.cast.length) { c.cast.hidden = false; c.cast.replaceChildren(h('span', { class: 'home-cast-label' }, 'Cast'), ...m.cast.slice(0, 5).map(x => h('img', { src: guideUrl(x.file), alt: x.label, title: x.label, loading: 'lazy', decoding: 'async' }))); }
@@ -126,7 +127,21 @@ function claudeHint() {
   return h('button', { class: 'home-claude' + (agent?.connected ? ' on' : ''), type: 'button', onclick: () => claudeDialog(connect) }, h('span', { class: 'home-claude-mark', 'aria-hidden': 'true' }, '✳'), text);
 }
 
-// Hero visual: the starters' first frames, cross-fading like a monitor.
+/**
+ * Hero: The draft (Final Lap) as one frame — blockout ↔ generated, the same camera — sweeping once on load,
+ * then the seam follows a drag. Falls back to the starters' blockout frames when the example media is missing.
+ */
+function heroSeam(starters: Starter[]) {
+  const slot = h('div', { class: 'home-hero-seam' }, heroReel(starters));
+  void guideManifest().then(map => {
+    const m = starterMedia('final-lap', [...map.values()]);
+    if (m.kind !== 'video' || !slot.isConnected) return;
+    const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: 'video', posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: 'once', alt: `${m.label || 'The draft'}: the blockout on the left and the generated video on the right, the same camera. Drag the seam or use the arrow keys.` });
+    slot.replaceChildren(seam, h('p', { class: 'home-hero-cap' }, h('strong', {}, 'Same camera.'), ' Drag the seam.', h('span', {}, m.label || 'Final Lap · The draft')));
+  });
+  return slot;
+}
+// Fallback hero: the starters' first frames, cross-fading like a monitor.
 function heroReel(starters: Starter[]) {
   const urls = starters.map(s => still({ scene: s.scene }, s.shot, `starter:${s.key}`)).filter(Boolean);
   if (!urls.length) return h('div', { class: 'home-reel is-empty' });
@@ -227,10 +242,11 @@ async function render() {
   app.replaceChildren(
     h('header', { class: 'home-top' },
       h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Three Previs'),
-      h('nav', {}, jobsHost,
+      h('nav', {}, DEMO ? demoBadge() : null, jobsHost,
         h('button', { class: 'home-link', type: 'button', onclick: () => openJourney() }, 'Guide'),
         h('button', { class: 'home-link', type: 'button', onclick: () => openSetup() }, 'Setup'))),
-    h('main', { class: 'home' },
+    // Phones list projects before starters, except for someone new (fewer than 3 projects): starters first.
+    h('main', { class: 'home' + (projects.length < 3 ? ' is-new' : '') },
       h('section', { class: 'home-hero' },
         h('div', { class: 'home-hero-copy' },
           h('p', { class: 'home-eyebrow' }, 'Previsualization for AI video'),
@@ -239,14 +255,14 @@ async function render() {
           h('div', { class: 'home-actions' },
             newScene('New scene'),
             h('a', { class: 'home-btn', href: '#starters', onclick: (ev: Event) => { ev.preventDefault(); starterSection.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } }, 'Open a starter')),
-          h('div', { class: 'home-meta' }, claudeHint(), setup ? setupStatus(setup.checks, setup.dataDir) : null)),
-        heroReel(starters)),
+          h('div', { class: 'home-meta' }, claudeHint(), setup && !DEMO ? setupStatus(setup.checks, setup.dataDir) : null)),
+        heroSeam(starters)),
       steps(),
       starterSection,
       h('section', { class: 'home-section', 'aria-labelledby': 'projects-title' },
         h('div', { class: 'home-head' }, h('h2', { id: 'projects-title' }, 'Your projects'), projects.length ? h('span', {}, String(projects.length)) : null, h('i', { class: 'grow' }),
           fileInput, h('button', { class: 'home-link', type: 'button', onclick: () => fileInput.click() }, 'Import…'),
-          archivedCount ? h('button', { class: 'home-link', type: 'button', 'aria-pressed': String(showArchived), onclick: () => { showArchived = !showArchived; void render(); } }, showArchived ? 'Hide archived' : `Archived · ${archivedCount}`) : null),
+          archivedCount ? h('button', { class: 'home-link home-archived', type: 'button', 'aria-pressed': String(showArchived), onclick: () => { showArchived = !showArchived; void render(); } }, showArchived ? 'Hide archived' : `Archived · ${archivedCount}`) : null),
         list, archivedList)));
 }
 
