@@ -1,6 +1,6 @@
 // Mobile acceptance checks (A1–A13 + desktop unchanged). Headless Chromium on Metal, one browser at a time.
 // node scripts/mobile-check.mjs --base http://127.0.0.1:5274 [--desktop-only <dir>] [--phase 1|2|3]
-import { chromium } from '/Users/stevenbobyn/dev/timeblock/node_modules/playwright-core/index.mjs';
+import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
