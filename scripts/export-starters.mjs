@@ -1,55 +1,155 @@
 #!/usr/bin/env node
 // Re-export the launch page starters from their source projects into examples/starters/.
 //
-//   node scripts/export-starters.mjs --server http://127.0.0.1:5173
+//   node scripts/export-starters.mjs --server http://127.0.0.1:5270
 //   node scripts/export-starters.mjs --data-dir ~/path/to/previs-data
 //
-// Each starter is written to examples/starters/<slug>/starter.json (no renders, references or
-// assets for now). Run it again after editing a starter project to refresh the snapshot.
-// Override a source project with --<slug> <project-id>.
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
+// Each starter is written to examples/starters/<slug>/starter.json plus a media/ folder: every object's
+// primary look and design sheet, each shot's chosen still, its blockout clip and its chosen video
+// (see starterPicks in server/previs/starters.mjs). Images become WebP no larger than 1600 px; videos become
+// 720p H.264 at up to 2.5 Mbit/s with no audio (needs ffmpeg and ffprobe on PATH). A file whose source
+// has not changed is not re-encoded, so re-exports leave unchanged media byte-identical.
+//
+// Options: --<slug> <project-id> overrides a source project; --only <slug>; --no-media writes the
+// version 1 snapshot (no media); --max-mb <n> (default 80) keeps only the hero shots' videos when over.
+import { readFile, writeFile, mkdir, readdir, rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { createHash } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { tmpdir } from 'node:os';
 import { STARTERS_DIR, starterSnapshot } from '../server/previs/starters.mjs';
 
+const run = promisify(execFile);
+
+// hero: the shots whose videos stay if the media is over budget, and explicit still picks where the
+// project's newest still is not the one to show (see .evidence content notes, 30 Oct 2026).
 export const SOURCES = [
-  { slug: 'breaking-news', id: 'ff685e99-00bf-4f5f-979a-944f0caca7c9', title: 'Breaking News', description: 'News anchor delivers the headline' },
-  { slug: 'wingspan', id: 'f158baf1-2cac-4311-859a-e5c590d381d4', title: 'Wingspan', description: 'Eagle dives through an alpine valley' },
-  { slug: 'final-lap', id: 'ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f', title: 'Final Lap', description: 'Comfy car wins on the last lap' },
-  { slug: 'posterized', id: '5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6', title: 'Posterized', description: 'Comfy dunk in a packed arena' },
+  { slug: 'breaking-news', id: 'ff685e99-00bf-4f5f-979a-944f0caca7c9', title: 'Breaking News', description: 'A news anchor breaks the story of this launch',
+    hero: { shots: ['3014d6d1-f093-4e8f-b791-aed102116cf3'], stills: { '3014d6d1-f093-4e8f-b791-aed102116cf3': '541259b3-11e0-4bd4-a459-4532c24a7447' } } },
+  { slug: 'wingspan', id: 'f158baf1-2cac-4311-859a-e5c590d381d4', title: 'Wingspan', description: 'Eagle dives through an alpine valley',
+    hero: { shots: ['3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a', '2c4b00d0-4453-42f2-8af7-a058616d2a3e'], stills: { '3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a': '46987310-01b1-49b3-a0dc-e09d669bd56a' } } },
+  { slug: 'final-lap', id: 'ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f', title: 'Final Lap', description: 'Comfy car wins on the last lap',
+    hero: { shots: ['95a7f87c-6236-4628-a4e9-88bcea6dc6aa'], stills: {} } },
+  { slug: 'posterized', id: '5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6', title: 'Posterized', description: 'Comfy dunk in a packed arena',
+    hero: { shots: ['755f685b-a74e-4c80-8ffd-8dc9cbdfd450', '4feea365-12b8-456f-878e-80be456c4c27'], stills: { '4feea365-12b8-456f-878e-80be456c4c27': '8a719256-c46e-4833-b6a0-37ae0eb91fdf' } } },
 ];
 
-const args = process.argv.slice(2);
-const opt = name => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : undefined; };
-const server = opt('server'), dataDir = opt('data-dir') || process.env.PREVIS_DATA_DIR;
-const out = opt('out') || STARTERS_DIR;
-if (!server && !dataDir) {
-  console.error('Usage: node scripts/export-starters.mjs (--server <url> | --data-dir <dir>) [--out <dir>] [--<slug> <project-id>]');
-  process.exit(2);
-}
+const IMAGE_MAX_PX = 1600, VIDEO_HEIGHT = 720, VIDEO_KBPS = 2000, VIDEO_MAX_KBPS = 2500;
 
-async function project(id) {
-  if (server) {
-    const r = await fetch(new URL(`/api/director/project?id=${id}`, server));
-    const data = await r.json();
-    if (!r.ok) throw Error(data.error || `HTTP ${r.status}`);
-    return data.project;
+async function main(args) {
+  const opt = name => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : undefined; };
+  const server = opt('server'), dataDir = opt('data-dir') || process.env.PREVIS_DATA_DIR;
+  const out = opt('out') || STARTERS_DIR, only = opt('only'), media = !args.includes('--no-media');
+  const maxBytes = Number(opt('max-mb') || 80) * 1024 * 1024;
+  if (!server && !dataDir) {
+    console.error('Usage: node scripts/export-starters.mjs (--server <url> | --data-dir <dir>) [--out <dir>] [--only <slug>] [--no-media] [--max-mb 80] [--<slug> <project-id>]');
+    process.exit(2);
   }
-  return JSON.parse(await readFile(join(dataDir, 'director', id, 'project.json'), 'utf8'));
+  const project = async id => {
+    if (server) {
+      const r = await fetch(new URL(`/api/director/project?id=${id}`, server));
+      const data = await r.json();
+      if (!r.ok) throw Error(data.error || `HTTP ${r.status}`);
+      return data.project;
+    }
+    return JSON.parse(await readFile(join(dataDir, 'director', id, 'project.json'), 'utf8'));
+  };
+  // Bytes of a file inside a project folder: refs/<file> or assets/<file>.
+  const source = async (pid, rel) => {
+    if (!server) return readFile(join(dataDir, 'director', pid, rel));
+    const [sub, name] = rel.split('/');
+    const r = await fetch(new URL(`/${sub === 'refs' ? 'director-refs' : 'director-assets'}/${pid}/${name}`, server));
+    if (!r.ok) throw Error(`${rel}: HTTP ${r.status}`);
+    return Buffer.from(await r.arrayBuffer());
+  };
+
+  const written = [], totals = [];
+  for (const [order, src] of SOURCES.entries()) {
+    if (only && only !== src.slug) continue;
+    const id = opt(src.slug) || src.id;
+    let p;
+    try { p = await project(id); } catch (e) { console.error(`✗ ${src.slug}: could not read project ${id} (${e.message})`); process.exitCode = 1; continue; }
+    const dir = join(out, src.slug);
+    await mkdir(dir, { recursive: true });
+    let prev = null; try { prev = JSON.parse(await readFile(join(dir, 'starter.json'), 'utf8')); } catch {}
+    const snap = starterSnapshot(p, { slug: src.slug, title: src.title, description: src.description, order, media, hero: src.hero });
+    if (media) await encodeMedia(snap, dir, prev, rel => source(p.id, rel));
+    totals.push({ slug: src.slug, snap, dir, hero: src.hero });
+    written.push(src.slug);
+  }
+  // Over budget: keep the hero shots' videos only.
+  const size = () => totals.reduce((a, t) => a + t.snap.media.reduce((b, m) => b + m.bytes, 0), 0);
+  if (media && size() > maxBytes) {
+    console.log(`Media is ${mb(size())}, over ${mb(maxBytes)}: keeping only the hero shots' videos.`);
+    for (const t of totals) {
+      const drop = new Set(t.snap.assets.filter(a => a.kind === 'workflow-result' && !t.hero.shots.includes(a.shotId)).map(a => a.id));
+      t.snap.assets = t.snap.assets.filter(a => !drop.has(a.id));
+      t.snap.edit.clips = t.snap.edit.clips.filter(c => !drop.has(c.assetId));
+      t.snap.media = t.snap.media.filter(m => !drop.has(m.path.match(/([a-f0-9-]{36})\.mp4$/)?.[1]));
+    }
+  }
+  for (const t of totals) {
+    await writeFile(join(t.dir, 'starter.json'), `${JSON.stringify(t.snap, null, 2)}\n`);
+    if (media) await prune(t.dir, t.snap.media);
+    const bytes = t.snap.media.reduce((b, m) => b + m.bytes, 0);
+    console.log(`✓ ${t.slug}: ${t.snap.scene.entities.length} objects, ${t.snap.shots.length} shots, ${(t.snap.scene.references || []).length} object images, ${(t.snap.assets || []).length} clips, media ${mb(bytes)}`);
+  }
+  if (media) console.log(`Total media ${mb(size())}`);
+  // The index lists every starter the server offers, in launch-page order.
+  let index = { starters: [] };
+  try { index = JSON.parse(await readFile(join(out, 'index.json'), 'utf8')); } catch {}
+  const order = [...new Set([...SOURCES.map(s => s.slug).filter(s => written.includes(s) || index.starters.includes(s)), ...index.starters])];
+  await writeFile(join(out, 'index.json'), `${JSON.stringify({ starters: order }, null, 2)}\n`);
 }
 
-const written = [];
-for (const [order, src] of SOURCES.entries()) {
-  const id = opt(src.slug) || src.id;
-  let p;
-  try { p = await project(id); } catch (e) { console.error(`✗ ${src.slug}: could not read project ${id} (${e.message})`); process.exitCode = 1; continue; }
-  const snap = starterSnapshot(p, { slug: src.slug, title: src.title, description: src.description, order });
-  await mkdir(join(out, src.slug), { recursive: true });
-  await writeFile(join(out, src.slug, 'starter.json'), `${JSON.stringify(snap, null, 2)}\n`);
-  written.push(src.slug);
-  console.log(`✓ ${src.slug}: ${snap.scene.entities.length} objects, ${snap.shots.length} shots`);
+const mb = n => `${(n / 1024 / 1024).toFixed(1)} MB`;
+const sha = b => createHash('sha256').update(b).digest('hex');
+
+/** Encode every listed file into <dir>/<path>, reusing the previous export's file when its source is unchanged. */
+async function encodeMedia(snap, dir, prev, read) {
+  const tmp = join(tmpdir(), `starter-media-${process.pid}`);
+  await mkdir(tmp, { recursive: true });
+  const out = [];
+  for (const f of snap.media) {
+    const bytes = await read(f.from);
+    const sourceSha256 = sha(bytes), dest = join(dir, f.path);
+    const old = prev?.media?.find(m => m.path === f.path && m.sourceSha256 === sourceSha256);
+    if (old && existsSync(dest) && sha(await readFile(dest)) === old.sha256) { out.push(old); continue; }
+    const input = join(tmp, `in-${sourceSha256.slice(0, 16)}`);
+    await writeFile(input, bytes);
+    await mkdir(dirname(dest), { recursive: true });
+    if (f.kind === 'image') {
+      await run('ffmpeg', ['-v', 'error', '-y', '-i', input, '-vf', `scale='min(${IMAGE_MAX_PX},iw)':'min(${IMAGE_MAX_PX},ih)':force_original_aspect_ratio=decrease`, '-c:v', 'libwebp', '-quality', '82', '-map_metadata', '-1', dest]);
+    } else {
+      await run('ffmpeg', ['-v', 'error', '-y', '-i', input, '-vf', `scale=-2:'min(${VIDEO_HEIGHT},ih)'`, '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-pix_fmt', 'yuv420p',
+        '-b:v', `${VIDEO_KBPS}k`, '-maxrate', `${VIDEO_MAX_KBPS}k`, '-bufsize', `${VIDEO_MAX_KBPS * 2}k`, '-an', '-map_metadata', '-1', '-fflags', '+bitexact', '-flags:v', '+bitexact', '-movflags', '+faststart', dest]);
+    }
+    const data = await readFile(dest);
+    const entry = { path: f.path, kind: f.kind, bytes: data.length, sha256: sha(data), sourceSha256, ...(await probe(dest, f.kind)) };
+    out.push(entry);
+    await rm(input, { force: true });
+  }
+  await rm(tmp, { recursive: true, force: true });
+  snap.media = out;
 }
-// The index lists every starter the server offers, in launch-page order.
-let index = { starters: [] };
-try { index = JSON.parse(await readFile(join(out, 'index.json'), 'utf8')); } catch {}
-const order = [...new Set([...SOURCES.map(s => s.slug).filter(s => written.includes(s) || index.starters.includes(s)), ...index.starters])];
-await writeFile(join(out, 'index.json'), `${JSON.stringify({ starters: order }, null, 2)}\n`);
+
+async function probe(file, kind) {
+  const { stdout } = await run('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-count_frames', '-show_entries', 'stream=width,height,r_frame_rate,nb_read_frames:format=duration', '-of', 'json', file]);
+  const j = JSON.parse(stdout), s = j.streams?.[0] || {};
+  if (kind === 'image') return { width: s.width, height: s.height };
+  const [a, b] = String(s.r_frame_rate || '24/1').split('/').map(Number);
+  return { width: s.width, height: s.height, fps: Math.round((a / (b || 1)) * 1000) / 1000, frameCount: Number(s.nb_read_frames) || null, duration: Math.round(Number(j.format?.duration) * 1000) / 1000 || null };
+}
+
+/** Delete media files the snapshot no longer lists. */
+async function prune(dir, list) {
+  const keep = new Set(list.map(m => m.path));
+  for (const sub of ['refs', 'assets']) {
+    let names = []; try { names = await readdir(join(dir, 'media', sub)); } catch { continue; }
+    for (const n of names) if (!keep.has(`media/${sub}/${n}`)) await rm(join(dir, 'media', sub, n));
+  }
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) await main(process.argv.slice(2));
