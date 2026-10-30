@@ -1,0 +1,37 @@
+{
+  "name": "comfy-three-previs",
+  "version": "0.0.0",
+  "description": "Open-source AI previs: 3D blockouts, consistent cast images, gamepad & phone camera, AI video.",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.18.0",
+  "scripts": {
+    "bootstrap": "pnpm install --frozen-lockfile && pnpm run build && pnpm run doctor",
+    "doctor": "node --env-file-if-exists=.env scripts/doctor.mjs",
+    "prestart": "node scripts/doctor.mjs --quick",
+    "start": "node --env-file-if-exists=.env server/previs/server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "dev": "pnpm build && pnpm start",
+    "build": "vite build && vite build --config vite.server.config.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm typecheck && pnpm build",
+    "dev:camera": "vite --host 127.0.0.1 --port 5187",
+    "demo:build": "VITE_DEMO=1 vite build --base=/comfy-three-previs/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.0",
+    "@types/three": "^0.185.0",
+    "@types/ws": "^8.18.1",
+    "prettier": "3.6.2",
+    "three": "0.185.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "ws": "^8.21.3"
+  },
+  "license": "MIT"
+}

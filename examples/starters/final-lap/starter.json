@@ -1,0 +1,2984 @@
+{
+  "format": "comfy-previs-starter",
+  "version": 1,
+  "slug": "final-lap",
+  "order": 2,
+  "title": "Final Lap",
+  "description": "Comfy car wins on the last lap",
+  "scene": {
+    "name": "Oval speedway",
+    "environment": {
+      "preset": "stage",
+      "description": "A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.",
+      "style": "Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+    },
+    "entities": [
+      {
+        "id": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "name": "Infield grass",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          -0.05,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#4f7a3e",
+        "notes": "Mown infield grass with painted logo-free surface.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "name": "Turns 1–2 · surface 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          65.221,
+          0,
+          -39.658
+        ],
+        "rotation": 352.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "a2c9fd5e-53eb-4c37-b7ef-a54cc03e698d",
+        "name": "Turns 1–2 · surface 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          75.307,
+          0,
+          -36.955
+        ],
+        "rotation": 337.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "24f3015a-1122-43bd-8281-fce6783da7bc",
+        "name": "Turns 1–2 · surface 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          84.35,
+          0,
+          -31.734
+        ],
+        "rotation": 322.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "12d58254-b419-4e5a-96c5-1b1fc9aa6b8a",
+        "name": "Turns 1–2 · surface 4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          91.734,
+          0,
+          -24.35
+        ],
+        "rotation": 307.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "97ff2a72-8cc5-47b1-946f-bb4c76f3e571",
+        "name": "Turns 1–2 · surface 5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          96.955,
+          0,
+          -15.307
+        ],
+        "rotation": 292.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "600eb1c8-8f1d-4711-b1bc-26466102cc00",
+        "name": "Turns 1–2 · surface 6",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          99.658,
+          0,
+          -5.221
+        ],
+        "rotation": 277.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "2490f736-a35b-4ad6-9648-8e499afcc169",
+        "name": "Turns 1–2 · surface 7",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          99.658,
+          0,
+          5.221
+        ],
+        "rotation": 262.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "2f6a9cc6-69d2-4021-902b-aeb4502e27ae",
+        "name": "Turns 1–2 · surface 8",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          96.955,
+          0,
+          15.307
+        ],
+        "rotation": 247.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "f9c968ed-8c51-4ee9-a1ef-ca73723b9f1e",
+        "name": "Turns 1–2 · surface 9",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          91.734,
+          0,
+          24.35
+        ],
+        "rotation": 232.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "31050605-ef24-4f4c-8bcb-f13d016dfcef",
+        "name": "Turns 1–2 · surface 10",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          84.35,
+          0,
+          31.734
+        ],
+        "rotation": 217.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "6683105d-b07d-47c3-a677-a79efbecf531",
+        "name": "Turns 1–2 · surface 11",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          75.307,
+          0,
+          36.955
+        ],
+        "rotation": 202.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "36d6b486-5608-45f4-9d66-1caf48ff05aa",
+        "name": "Turns 1–2 · surface 12",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          65.221,
+          0,
+          39.658
+        ],
+        "rotation": 187.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+      },
+      {
+        "id": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "name": "Turns 3–4 · surface 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -65.221,
+          0,
+          39.658
+        ],
+        "rotation": 172.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "82f955da-d998-48aa-8e21-645ff005d1ed",
+        "name": "Turns 3–4 · surface 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -75.307,
+          0,
+          36.955
+        ],
+        "rotation": 157.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "dddf89e7-f651-40e5-bfef-567e7845219f",
+        "name": "Turns 3–4 · surface 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -84.35,
+          0,
+          31.734
+        ],
+        "rotation": 142.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "741d8d2d-2b0b-4e35-8aac-45f54ed3934c",
+        "name": "Turns 3–4 · surface 4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -91.734,
+          0,
+          24.35
+        ],
+        "rotation": 127.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "edd8facb-7c29-41c5-a790-9af9a2e90144",
+        "name": "Turns 3–4 · surface 5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -96.955,
+          0,
+          15.307
+        ],
+        "rotation": 112.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "1d741586-291e-4015-92fe-40b8a5598395",
+        "name": "Turns 3–4 · surface 6",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -99.658,
+          0,
+          5.221
+        ],
+        "rotation": 97.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "3fe9f8ed-44c5-4f98-9f17-bdeb86e4f8fc",
+        "name": "Turns 3–4 · surface 7",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -99.658,
+          0,
+          -5.221
+        ],
+        "rotation": 82.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "4fb1a31d-86d8-4263-98f6-2253a253e88a",
+        "name": "Turns 3–4 · surface 8",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -96.955,
+          0,
+          -15.307
+        ],
+        "rotation": 67.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "a228b176-8d59-4318-8088-f46ededebfc1",
+        "name": "Turns 3–4 · surface 9",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -91.734,
+          0,
+          -24.35
+        ],
+        "rotation": 52.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "ae78daa4-d1ca-485f-9329-9d15de8bc292",
+        "name": "Turns 3–4 · surface 10",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -84.35,
+          0,
+          -31.734
+        ],
+        "rotation": 37.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "5734dbb7-0876-44a9-bacd-634ee08277c7",
+        "name": "Turns 3–4 · surface 11",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -75.307,
+          0,
+          -36.955
+        ],
+        "rotation": 22.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "ee8bf8a0-baea-432e-8bac-a047d5959e66",
+        "name": "Turns 3–4 · surface 12",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -65.221,
+          0,
+          -39.658
+        ],
+        "rotation": 7.5,
+        "scale": [
+          11,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+      },
+      {
+        "id": "a339e4ea-8fe5-483d-a29a-8466df6e46ad",
+        "name": "Start-finish line",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          20,
+          0.06,
+          40
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2,
+          0.05,
+          14
+        ],
+        "color": "#f4f1ea",
+        "notes": "Checkered start-finish line painted across the track.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+        "name": "Flag stand",
+        "kind": "prop",
+        "shape": "box",
+        "position": [
+          20,
+          4,
+          49
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          8,
+          2
+        ],
+        "color": "#d8d4cc",
+        "notes": "Starter flag stand above the start-finish line; official waving a checkered flag.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "10ae3f0d-6628-42d8-8908-bd199dce7e60",
+        "name": "Turns 1–2 stands 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          71.315,
+          4.5,
+          -56.886
+        ],
+        "rotation": 348.75,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "55c182b7-2731-4f12-a2ca-4105cd246391",
+        "name": "Turns 1–2 stands 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          92.223,
+          4.5,
+          -48.225
+        ],
+        "rotation": 326.25,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "46c10b83-dde1-4949-82d9-43251b161226",
+        "name": "Turns 1–2 stands 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          108.225,
+          4.5,
+          -32.223
+        ],
+        "rotation": 303.75,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "1ba1b6a4-cb60-41b9-81b8-7e5c1a6af2d2",
+        "name": "Turns 1–2 stands 4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          116.886,
+          4.5,
+          -11.315
+        ],
+        "rotation": 281.25,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "84371ee4-a339-48ff-91e1-049672ec5d7c",
+        "name": "Turns 1–2 stands 5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          116.886,
+          4.5,
+          11.315
+        ],
+        "rotation": 258.75,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "7f832cb0-11b6-4559-833c-1ec29671c7b6",
+        "name": "Turns 1–2 stands 6",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          108.225,
+          4.5,
+          32.223
+        ],
+        "rotation": 236.25,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "aa5542c8-5506-4221-a9bb-3e46862c45d3",
+        "name": "Turns 1–2 stands 7",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          92.223,
+          4.5,
+          48.225
+        ],
+        "rotation": 213.75,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "48cf0201-87b5-40bf-b30e-007cbd2094f4",
+        "name": "Turns 1–2 stands 8",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          71.315,
+          4.5,
+          56.886
+        ],
+        "rotation": 191.25,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "name": "Turns 3–4 stands 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -71.315,
+          4.5,
+          56.886
+        ],
+        "rotation": 168.75,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "cccaa03b-89c2-42a2-93ea-ea7346fa21d7",
+        "name": "Turns 3–4 stands 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -92.223,
+          4.5,
+          48.225
+        ],
+        "rotation": 146.25,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "4f935319-e102-451e-ba0f-3372c310e811",
+        "name": "Turns 3–4 stands 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -108.225,
+          4.5,
+          32.223
+        ],
+        "rotation": 123.75,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "ce0ec112-219b-4934-b0f6-67ac1673b034",
+        "name": "Turns 3–4 stands 4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -116.886,
+          4.5,
+          11.315
+        ],
+        "rotation": 101.25,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "3997d2eb-b9e6-456b-9fba-a17aa0a52958",
+        "name": "Turns 3–4 stands 5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -116.886,
+          4.5,
+          -11.315
+        ],
+        "rotation": 78.75,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "050a3030-cab9-45a5-8d4a-6c7b766a422e",
+        "name": "Turns 3–4 stands 6",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -108.225,
+          4.5,
+          -32.223
+        ],
+        "rotation": 56.25,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "2d384c03-70ab-4917-a8a6-1c4fcabdd105",
+        "name": "Turns 3–4 stands 7",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -92.223,
+          4.5,
+          -48.225
+        ],
+        "rotation": 33.75,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "e1ec393c-e8b9-4f56-9a5e-c2d78091d08b",
+        "name": "Turns 3–4 stands 8",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -71.315,
+          4.5,
+          -56.886
+        ],
+        "rotation": 11.25,
+        "scale": [
+          16,
+          9,
+          10
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "603c30fc-7ae6-4991-9c8c-ce426f5b73be",
+        "name": "Press box",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          14,
+          70
+        ],
+        "rotation": 0,
+        "scale": [
+          40,
+          6,
+          6
+        ],
+        "color": "#c9c4ba",
+        "notes": "Glass-fronted press box and suites above the main grandstand.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
+        "name": "Light tower 1",
+        "kind": "prop",
+        "shape": "lamp",
+        "position": [
+          -85,
+          0,
+          65
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          6,
+          2
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9"
+      },
+      {
+        "id": "35c8a8c9-8d40-4a06-9419-c44947e51f81",
+        "name": "Light tower 2",
+        "kind": "prop",
+        "shape": "lamp",
+        "position": [
+          85,
+          0,
+          65
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          6,
+          2
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9"
+      },
+      {
+        "id": "7d41992d-3fd4-4314-9ae7-9d4a61809cf5",
+        "name": "Light tower 3",
+        "kind": "prop",
+        "shape": "lamp",
+        "position": [
+          -85,
+          0,
+          -65
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          6,
+          2
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9"
+      },
+      {
+        "id": "04b773a7-9c9c-41e5-9f9b-415f09ae6790",
+        "name": "Light tower 4",
+        "kind": "prop",
+        "shape": "lamp",
+        "position": [
+          85,
+          0,
+          -65
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          6,
+          2
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9"
+      },
+      {
+        "id": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "name": "Comfy car",
+        "kind": "vehicle",
+        "shape": "car",
+        "position": [
+          40,
+          0,
+          -37
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#2459D8",
+        "notes": "Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              46,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 0.38,
+            "p": [
+              38,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 0.75,
+            "p": [
+              30,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 1.12,
+            "p": [
+              22,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 1.5,
+            "p": [
+              14.01,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 1.88,
+            "p": [
+              6.01,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 2.25,
+            "p": [
+              -1.99,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 2.62,
+            "p": [
+              -9.99,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 3,
+            "p": [
+              -17.99,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 3.38,
+            "p": [
+              -25.99,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 3.75,
+            "p": [
+              -33.99,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 4.12,
+            "p": [
+              -41.99,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 4.5,
+            "p": [
+              -49.98,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 4.88,
+            "p": [
+              -57.98,
+              0,
+              -42
+            ]
+          },
+          {
+            "t": 5.25,
+            "p": [
+              -65.96,
+              0,
+              -41.57
+            ]
+          },
+          {
+            "t": 5.62,
+            "p": [
+              -73.72,
+              0,
+              -39.69
+            ]
+          },
+          {
+            "t": 6,
+            "p": [
+              -80.99,
+              0,
+              -36.38
+            ]
+          },
+          {
+            "t": 6.38,
+            "p": [
+              -87.5,
+              0,
+              -31.75
+            ]
+          },
+          {
+            "t": 6.75,
+            "p": [
+              -93.01,
+              0,
+              -25.97
+            ]
+          },
+          {
+            "t": 7.12,
+            "p": [
+              -97.33,
+              0,
+              -19.25
+            ]
+          },
+          {
+            "t": 7.5,
+            "p": [
+              -100.3,
+              0,
+              -11.84
+            ]
+          },
+          {
+            "t": 7.88,
+            "p": [
+              -101.81,
+              0,
+              -4
+            ]
+          },
+          {
+            "t": 8.25,
+            "p": [
+              -101.81,
+              0,
+              3.99
+            ]
+          },
+          {
+            "t": 8.62,
+            "p": [
+              -100.3,
+              0,
+              11.83
+            ]
+          },
+          {
+            "t": 9,
+            "p": [
+              -97.33,
+              0,
+              19.25
+            ]
+          },
+          {
+            "t": 9.38,
+            "p": [
+              -93.01,
+              0,
+              25.97
+            ]
+          },
+          {
+            "t": 9.75,
+            "p": [
+              -87.5,
+              0,
+              31.75
+            ]
+          },
+          {
+            "t": 10.12,
+            "p": [
+              -80.99,
+              0,
+              36.38
+            ]
+          },
+          {
+            "t": 10.5,
+            "p": [
+              -73.73,
+              0,
+              39.69
+            ]
+          },
+          {
+            "t": 10.88,
+            "p": [
+              -65.97,
+              0,
+              41.57
+            ]
+          },
+          {
+            "t": 11.25,
+            "p": [
+              -57.99,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 11.62,
+            "p": [
+              -49.99,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 12,
+            "p": [
+              -41.99,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 12.38,
+            "p": [
+              -33.99,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 12.75,
+            "p": [
+              -25.99,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 13.12,
+            "p": [
+              -17.99,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 13.5,
+            "p": [
+              -9.99,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 13.88,
+            "p": [
+              -2,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 14.25,
+            "p": [
+              6,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 14.62,
+            "p": [
+              14,
+              0,
+              42
+            ]
+          },
+          {
+            "t": 15,
+            "p": [
+              22,
+              0,
+              42
+            ]
+          }
+        ],
+        "parent": null
+      },
+      {
+        "id": "5152add7-b749-4ce5-a4de-1aea29da0857",
+        "name": "Rival car",
+        "kind": "vehicle",
+        "shape": "car",
+        "position": [
+          48,
+          0,
+          -43
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#16181A",
+        "notes": "Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              36,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 0.38,
+            "p": [
+              28.77,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 0.75,
+            "p": [
+              21.54,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 1.12,
+            "p": [
+              14.31,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 1.5,
+            "p": [
+              7.08,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 1.88,
+            "p": [
+              -0.15,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 2.25,
+            "p": [
+              -7.39,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 2.62,
+            "p": [
+              -14.62,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 3,
+            "p": [
+              -21.85,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 3.38,
+            "p": [
+              -29.08,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 3.75,
+            "p": [
+              -36.31,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 4.12,
+            "p": [
+              -43.54,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 4.5,
+            "p": [
+              -50.77,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 4.88,
+            "p": [
+              -58,
+              0,
+              -37
+            ]
+          },
+          {
+            "t": 5.25,
+            "p": [
+              -65.22,
+              0,
+              -36.63
+            ]
+          },
+          {
+            "t": 5.62,
+            "p": [
+              -72.23,
+              0,
+              -34.92
+            ]
+          },
+          {
+            "t": 6,
+            "p": [
+              -78.78,
+              0,
+              -31.88
+            ]
+          },
+          {
+            "t": 6.38,
+            "p": [
+              -84.61,
+              0,
+              -27.63
+            ]
+          },
+          {
+            "t": 6.75,
+            "p": [
+              -89.51,
+              0,
+              -22.32
+            ]
+          },
+          {
+            "t": 7.12,
+            "p": [
+              -93.28,
+              0,
+              -16.17
+            ]
+          },
+          {
+            "t": 7.5,
+            "p": [
+              -95.79,
+              0,
+              -9.4
+            ]
+          },
+          {
+            "t": 7.88,
+            "p": [
+              -96.93,
+              0,
+              -2.27
+            ]
+          },
+          {
+            "t": 8.25,
+            "p": [
+              -96.67,
+              0,
+              4.95
+            ]
+          },
+          {
+            "t": 8.62,
+            "p": [
+              -95.01,
+              0,
+              11.97
+            ]
+          },
+          {
+            "t": 9,
+            "p": [
+              -92.02,
+              0,
+              18.54
+            ]
+          },
+          {
+            "t": 9.38,
+            "p": [
+              -87.81,
+              0,
+              24.41
+            ]
+          },
+          {
+            "t": 9.75,
+            "p": [
+              -82.54,
+              0,
+              29.34
+            ]
+          },
+          {
+            "t": 10.12,
+            "p": [
+              -76.41,
+              0,
+              33.16
+            ]
+          },
+          {
+            "t": 10.5,
+            "p": [
+              -69.66,
+              0,
+              35.72
+            ]
+          },
+          {
+            "t": 10.88,
+            "p": [
+              -62.54,
+              0,
+              36.91
+            ]
+          },
+          {
+            "t": 11.25,
+            "p": [
+              -55.31,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 11.62,
+            "p": [
+              -48.08,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 12,
+            "p": [
+              -40.85,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 12.38,
+            "p": [
+              -33.62,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 12.75,
+            "p": [
+              -26.39,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 13.12,
+            "p": [
+              -19.15,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 13.5,
+            "p": [
+              -11.92,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 13.88,
+            "p": [
+              -4.69,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 14.25,
+            "p": [
+              2.54,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 14.62,
+            "p": [
+              9.77,
+              0,
+              37
+            ]
+          },
+          {
+            "t": 15,
+            "p": [
+              17,
+              0,
+              37
+            ]
+          }
+        ],
+        "parent": null
+      },
+      {
+        "id": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+        "name": "Fan with phone",
+        "kind": "character",
+        "shape": "person",
+        "position": [
+          9.6,
+          0,
+          50.2
+        ],
+        "rotation": 180,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#E0A040",
+        "notes": "Excited race fan in a yellow Comfy cap and blue t-shirt, holding up a phone to film the finish.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d",
+        "name": "Turns 1–2",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          85.53750000000002,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "ed28a388-bdbd-4faf-a41e-0476940a0e2a",
+        "name": "Turns 3–4",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          -85.53750000000002,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "00a1d9ec-8bc9-4030-8806-0952f7447aaa",
+        "name": "Oval track",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          0.6250000000000049,
+          0,
+          3.7500000000000004
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "955a776a-b960-4e80-91be-4060a7be2182",
+        "name": "Grandstands",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          1.853589745461131e-15,
+          0,
+          3.0434782608695654
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9",
+        "name": "Light towers",
+        "kind": "prop",
+        "shape": "group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "230b7768-07a6-444d-b467-749f42173a79",
+        "name": "Front stretch 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          0,
+          40
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "Banked asphalt racing surface, white lane lines, tyre rubber marks.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "a90faaf6-3016-4794-957b-577930322b12",
+        "name": "Front stretch 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          0,
+          40
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "1d7115f6-cb7d-44dd-a205-bca52147f52f",
+        "name": "Front stretch 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          0,
+          40
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "96d8c102-ca1d-4942-b6e6-d4baf94c0629",
+        "name": "Back stretch 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          0,
+          -40
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "Asphalt back straight.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "0e25b0c9-6698-4558-8d74-6aca859f9639",
+        "name": "Back stretch 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          0,
+          -40
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "d3737908-b1c7-4344-87d4-56036a4fcaae",
+        "name": "Back stretch 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          0,
+          -40
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          0.08,
+          14
+        ],
+        "color": "#3b3d42",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "e7918a79-8b59-4e45-bcb6-38ee6f015e63",
+        "name": "Outer wall · front 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          0.6,
+          47.5
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          1.2,
+          0.4
+        ],
+        "color": "#e8e4dc",
+        "notes": "SAFER barrier wall with catch fence.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "b2036080-0c39-4c8f-bbd3-583072538a2c",
+        "name": "Outer wall · front 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          0.6,
+          47.5
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          1.2,
+          0.4
+        ],
+        "color": "#e8e4dc",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "1acc900a-8dec-4725-a23f-3bfae2b41544",
+        "name": "Outer wall · front 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          0.6,
+          47.5
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          1.2,
+          0.4
+        ],
+        "color": "#e8e4dc",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "b200f2ef-56f4-492b-aaa9-fc3186713f8f",
+        "name": "Pit wall 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          0.5,
+          32.5
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          1,
+          0.4
+        ],
+        "color": "#e8e4dc",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "bc016ee4-24f1-40bb-a9b3-39a9a54e8977",
+        "name": "Pit wall 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          0.5,
+          32.5
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          1,
+          0.4
+        ],
+        "color": "#e8e4dc",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "fb447006-5364-4d7a-bd01-51c7ff0bb5b6",
+        "name": "Pit wall 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          0.5,
+          32.5
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          1,
+          0.4
+        ],
+        "color": "#e8e4dc",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "dceb46f3-70ff-496c-aaa8-e513b0728066",
+        "name": "Front stretch stands · tier 1 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          1.5,
+          54
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          3,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "f6a3e725-aac5-41e6-8715-8e1eeba14b04",
+        "name": "Front stretch stands · tier 1 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          1.5,
+          54
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          3,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "430f9374-2e95-44c6-87f7-109b2fc0a968",
+        "name": "Front stretch stands · tier 1 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          1.5,
+          54
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          3,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "dce986d2-52e5-4184-908e-4462a6bae885",
+        "name": "Front stretch stands · tier 2 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          4.5,
+          58
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          6,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "4ae39a2a-a31f-46c8-94a2-2dfc0279b07e",
+        "name": "Front stretch stands · tier 2 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          4.5,
+          58
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          6,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "7423f5c9-a24a-4066-8b50-018a1323faa7",
+        "name": "Front stretch stands · tier 2 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          4.5,
+          58
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          6,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "cbbf718f-447b-4261-afb9-b755ac69c482",
+        "name": "Front stretch stands · tier 3 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          7.5,
+          62
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          9,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "5b52cb5a-37a5-4bfe-81a0-a028823917b6",
+        "name": "Front stretch stands · tier 3 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          7.5,
+          62
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          9,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "1c098657-9858-49b3-a7a3-92d6defe5f29",
+        "name": "Front stretch stands · tier 3 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          7.5,
+          62
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          9,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "bd19c9b1-08f5-450a-9536-a0f131309f6e",
+        "name": "Back stretch stands · tier 1 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          1.5,
+          -54
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          3,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "3e1183e5-fc40-4a83-9178-3cd0cb83f726",
+        "name": "Back stretch stands · tier 1 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          1.5,
+          -54
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          3,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "979143d7-b3b9-463e-808d-17420e3c4f60",
+        "name": "Back stretch stands · tier 1 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          1.5,
+          -54
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          3,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "6e68917f-9837-418d-ba03-d4c84808957f",
+        "name": "Back stretch stands · tier 2 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          4.5,
+          -58
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          6,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "4839eefc-1d96-4e05-b103-1271de2c3cd5",
+        "name": "Back stretch stands · tier 2 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          4.5,
+          -58
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          6,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "a34ebe26-8db2-4561-9ea1-14aa8a36cd0b",
+        "name": "Back stretch stands · tier 2 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          4.5,
+          -58
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          6,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "d2eee31b-8af2-4592-88c9-57886439bff4",
+        "name": "Back stretch stands · tier 3 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          7.5,
+          -62
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          9,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "e100abd7-11ba-47b0-9e7e-4120ccaae28b",
+        "name": "Back stretch stands · tier 3 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          7.5,
+          -62
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          9,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "8bb298fe-163a-4bbc-a1ec-4e1a4bf4ac41",
+        "name": "Back stretch stands · tier 3 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          7.5,
+          -62
+        ],
+        "rotation": 0,
+        "scale": [
+          40.2,
+          9,
+          4
+        ],
+        "color": "#8d929b",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+      },
+      {
+        "id": "eb3c70ef-8f9f-4146-b800-9cb8b5f0d690",
+        "name": "Infield grass 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -40,
+          -0.05,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          40,
+          0.1,
+          50
+        ],
+        "color": "#4f7a3e",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "232d1f3b-6c6b-491a-bb31-8e61b273efbe",
+        "name": "Infield grass 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          40,
+          -0.05,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          40,
+          0.1,
+          50
+        ],
+        "color": "#4f7a3e",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      }
+    ]
+  },
+  "shots": [
+    {
+      "title": "Final lap",
+      "description": "Wide aerial as @rival-car leads @comfy-car out of turn four onto the front stretch, the grandstands roaring.",
+      "duration": 4,
+      "start": 4,
+      "camera": {
+        "move": "crane-down",
+        "target": "5152add7-b749-4ce5-a4de-1aea29da0857",
+        "distance": 45,
+        "height": 26,
+        "angle": 150,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    },
+    {
+      "title": "The draft",
+      "description": "Low tracking shot alongside as @comfy-car pulls out of @rival-car's draft and draws level.",
+      "duration": 4,
+      "start": 8,
+      "camera": {
+        "move": "truck-right",
+        "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "distance": 8,
+        "height": 1.8,
+        "angle": -90,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    },
+    {
+      "title": "From the stands",
+      "description": "Handheld phone view from @fan-with-phone in the front stretch stands as both cars thunder side by side toward the line.",
+      "duration": 4,
+      "start": 11,
+      "camera": {
+        "move": "custom",
+        "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "distance": 20,
+        "height": 11,
+        "angle": 20,
+        "mm": 26,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              9,
+              3.4,
+              50.2
+            ],
+            "look": [
+              -14,
+              0.8,
+              41
+            ],
+            "mm": 26
+          },
+          {
+            "t": 1,
+            "p": [
+              9.3,
+              3.3,
+              50.1
+            ],
+            "look": [
+              21,
+              0.6,
+              41.5
+            ],
+            "mm": 26
+          }
+        ]
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    },
+    {
+      "title": "Checkered flag",
+      "description": "Low angle at the start-finish line: @comfy-car crosses first by a nose as the checkered flag waves.",
+      "duration": 3,
+      "start": 12,
+      "camera": {
+        "move": "static",
+        "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "distance": 12,
+        "height": 0.6,
+        "angle": 120,
+        "mm": 24,
+        "keys": null
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    }
+  ],
+  "media": []
+}

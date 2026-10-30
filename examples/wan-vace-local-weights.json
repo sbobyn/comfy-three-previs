@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "status": "approval-required-not-downloaded",
+  "checkedAt": "2026-10-24T22:19:56.682978+00:00",
+  "purpose": "One bounded local temporal control-video probe; not a model registry or automatic download list",
+  "weights": [
+    {
+      "repository": "Comfy-Org/Wan-2.1",
+      "revision": "123acf1cc74bccbb9bfff8ac1ee72edc08c2341d",
+      "repositoryPath": "split_files/diffusion_models/wan2.1_vace_1.3B_fp16.safetensors",
+      "destinationUnderModels": "diffusion_models/wan2.1_vace_1.3B_fp16.safetensors",
+      "bytes": 4309519800,
+      "sha256": "640ccc0577e6a5d4bb15cd91b11b699ef914fc55f126c5a1c544e152130784f2",
+      "declaredRepositoryLicense": "Apache-2.0",
+      "metadataSource": "https://huggingface.co/api/models/Comfy-Org/Wan-2.1?blobs=true",
+      "pinnedFilePage": "https://huggingface.co/Comfy-Org/Wan-2.1/blob/123acf1cc74bccbb9bfff8ac1ee72edc08c2341d/split_files/diffusion_models/wan2.1_vace_1.3B_fp16.safetensors"
+    },
+    {
+      "repository": "Comfy-Org/Wan-2.1",
+      "revision": "123acf1cc74bccbb9bfff8ac1ee72edc08c2341d",
+      "repositoryPath": "split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "destinationUnderModels": "text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "bytes": 6735906897,
+      "sha256": "c3355d30191f1f066b26d93fba017ae9809dce6c627dda5f6a66eaa651204f68",
+      "declaredRepositoryLicense": "Apache-2.0",
+      "metadataSource": "https://huggingface.co/api/models/Comfy-Org/Wan-2.1?blobs=true",
+      "pinnedFilePage": "https://huggingface.co/Comfy-Org/Wan-2.1/blob/123acf1cc74bccbb9bfff8ac1ee72edc08c2341d/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors"
+    },
+    {
+      "repository": "Comfy-Org/Wan-2.1",
+      "revision": "123acf1cc74bccbb9bfff8ac1ee72edc08c2341d",
+      "repositoryPath": "split_files/vae/wan_2.1_vae.safetensors",
+      "destinationUnderModels": "vae/wan_2.1_vae.safetensors",
+      "bytes": 253815318,
+      "sha256": "2fc39d31359a4b0a64f55876d8ff7fa8d780956ae2cb13463b0223e15148976b",
+      "declaredRepositoryLicense": "Apache-2.0",
+      "metadataSource": "https://huggingface.co/api/models/Comfy-Org/Wan-2.1?blobs=true",
+      "pinnedFilePage": "https://huggingface.co/Comfy-Org/Wan-2.1/blob/123acf1cc74bccbb9bfff8ac1ee72edc08c2341d/split_files/vae/wan_2.1_vae.safetensors"
+    }
+  ],
+  "downloadBytes": 11299242015,
+  "recommendedFreeDiskBytes": 25000000000,
+  "licenseScope": "Apache-2.0 declared by the named official publishers; these weights are not MIT. Retain publisher/upstream attribution and license texts if later downloaded or redistributed. Metadata hashes have not been checked against locally downloaded bytes.",
+  "sources": [
+    "https://docs.comfy.org/tutorials/video/wan/vace",
+    "https://huggingface.co/Comfy-Org/Wan-2.1/blob/123acf1cc74bccbb9bfff8ac1ee72edc08c2341d/README.md",
+    "https://huggingface.co/api/models/Comfy-Org/Wan-2.1?blobs=true",
+    "https://huggingface.co/Wan-AI/Wan2.1-VACE-1.3B/blob/574e6a744642ce3bee319afc31496b88bde8aac4/LICENSE.txt",
+    "https://huggingface.co/Wan-AI/Wan2.1-VACE-1.3B/blob/574e6a744642ce3bee319afc31496b88bde8aac4/README.md",
+    "https://huggingface.co/google/umt5-xxl/blob/66cb9e7e85526fe440a945569e42c72fb6cbc0ad/README.md",
+    "https://docs.comfy.org/installation/system_requirements"
+  ]
+}

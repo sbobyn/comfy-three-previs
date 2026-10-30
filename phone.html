@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <title>Comfy Three Previs · phone camera</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+        color: #e6e6f0;
+        font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+        -webkit-user-select: none;
+        user-select: none;
+        overscroll-behavior: none;
+      }
+      #scene {
+        display: block;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+
+      #status {
+        position: fixed;
+        top: calc(10px + env(safe-area-inset-top));
+        left: calc(14px + env(safe-area-inset-left));
+        color: #9a9ab0;
+        pointer-events: none;
+        text-shadow: 0 1px 3px #000;
+      }
+      #status b {
+        color: #ff5a5a;
+        font-weight: 600;
+      }
+
+      /* Centred card: shown before motion is granted, and again if the slot is
+         taken, so reclaiming never needs a page reload. */
+      #start {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 24px;
+        background: rgba(8, 8, 12, 0.82);
+        backdrop-filter: blur(6px);
+      }
+      #start[hidden] {
+        display: none;
+      }
+      #start h1 {
+        margin: 0;
+        font-size: 15px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #9a9ab0;
+      }
+
+      #bar {
+        position: fixed;
+        left: calc(14px + env(safe-area-inset-left));
+        right: calc(14px + env(safe-area-inset-right));
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: rgba(10, 10, 14, 0.72);
+        border: 1px solid #2c2c40;
+        border-radius: 14px;
+        backdrop-filter: blur(8px);
+      }
+      #bar[hidden] {
+        display: none;
+      }
+      #zoom {
+        flex: 1;
+        min-width: 80px;
+      }
+      #zoomValue {
+        min-width: 58px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      input[type="range"] {
+        height: 40px;
+        margin: 0;
+        accent-color: #4f8cff;
+      }
+      button,
+      select {
+        padding: 12px 14px;
+        font: inherit;
+        color: #e6e6f0;
+        background: #26263a;
+        border: 1px solid #3a3a52;
+        border-radius: 10px;
+        touch-action: manipulation;
+      }
+      #bar select {
+        padding: 12px 8px;
+        flex-shrink: 0;
+      }
+      #enable {
+        width: min(340px, 100%);
+        padding: 18px;
+        font-weight: 600;
+        background: #2f4a86;
+        border-color: #4f8cff;
+      }
+      button:disabled {
+        opacity: 0.4;
+      }
+      .ghost {
+        background: rgba(38, 38, 58, 0.6);
+      }
+      #touchPads { position:fixed;left:14px;right:14px;bottom:120px;display:flex;justify-content:space-between;align-items:end;gap:8px;pointer-events:none; }
+      .touch-pad { width:120px;height:120px;max-width:23vw;display:grid;place-content:center;text-align:center;border:1px solid #C2BFB9;border-radius:50%;background:#211927aa;touch-action:none;pointer-events:auto; }
+      #touchPads button {pointer-events:auto;touch-action:none;}
+      #start {z-index:3;} #status {z-index:4;max-width:90vw;color:#F0EFED;} #enable{background:#F2FF59;color:#211927;} button,select{background:#49378B;color:#F0EFED;} :focus-visible{outline:3px solid #F2FF59;outline-offset:2px;}
+      /* [director-phone] Aiming the Director shot camera: no viewfinder set, no sticks; bigger buttons. */
+      #director { display:none; }
+      body.director-mode #scene, body.director-mode #touchPads { display:none; }
+      body.director-mode #director { display:flex; position:fixed; inset:0; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:24px; text-align:center; color:#F0EFED; }
+      body.director-mode #director b { font-size:17px; } body.director-mode #directorAim { font-size:22px; font-variant-numeric:tabular-nums; color:#F2FF59; }
+      body.director-mode #bar button { padding:16px 18px; font-size:15px; }
+      @media(max-width:600px){#touchPads{bottom:180px;flex-wrap:wrap}.touch-pad{height:90px;}#touchPads button{padding:8px;}}
+    </style>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+
+    <div id="status"><span id="link">connecting…</span> · <span id="sensor">sensor off</span></div>
+
+    <div id="start">
+      <h1>Previs phone camera</h1>
+      <p>Motion aim + touch movement. Enable Phone on the Mac first.</p><button id="enable">Enable motion + touch</button><button id="touchOnly">Use touch controls only</button>
+    </div>
+
+    <div id="director"><b>Aiming the Director shot camera</b><span id="directorAim">waiting for motion…</span><span>Hold the phone like a camera. Re-zero points the shot straight ahead.</span></div><!-- [director-phone] -->
+    <div id="touchPads"><div id="movePad" class="touch-pad">MOVE<br>Forward / strafe</div><div id="heightPad" class="touch-pad">ALTITUDE<br>Up / down</div><div id="lookPad" class="touch-pad">AIM<br>Touch mode</div><button id="slow">Hold slow</button><button id="fast">Hold fast</button></div>
+    <div id="bar" hidden>
+      <select id="grip" title="How the phone is held">
+        <option value="portrait">Portrait</option>
+        <option value="landscape-left">Landscape ↺</option>
+        <option value="landscape-right">Landscape ↻</option>
+      </select>
+      <button id="zero" class="ghost">Re-zero</button>
+      <input type="range" id="zoom" min="0" max="1" step="0.001" value="0.368" />
+      <span id="zoomValue">35 mm</span>
+      <button id="phoneRecord" disabled>Arm camera</button><button id="chrome" class="ghost">Pause</button>
+    </div>
+
+    <script type="module" src="/src/phone.ts"></script>
+  </body>
+</html>

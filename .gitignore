@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.log
+.vite/
+.claude/
+.DS_Store
+.env*
+!.env.example
+
+.previs/
+dist-server/
+.evidence/
+
+/node_modules
+dist-demo/

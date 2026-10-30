@@ -1,0 +1,79 @@
+/* [agent] Built-in agent UI. Every colour goes through --ag-* so a restyle (e.g. warm white / black)
+   only needs to override these on :root or .ws; the defaults inherit the app palette. */
+:root {
+  --ag-accent: var(--accent);
+  --ag-accent-ink: var(--accent-ink);
+  --ag-ok: var(--ok);
+  --ag-bad: var(--bad);
+  --ag-warn: var(--warn);
+  --ag-text: var(--text);
+  --ag-muted: var(--muted);
+  --ag-faint: var(--faint);
+  --ag-card: var(--panel-2);
+  --ag-card-line: var(--line-2);
+  --ag-raise: var(--raise);
+  --ag-radius: 12px;
+  --ag-orb: conic-gradient(from 210deg, var(--ag-accent), var(--camera, #ffb547), var(--ag-accent));
+}
+
+/* ---- pill ---- */
+.ag-pill.ready .dot { background: var(--ag-ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ag-ok) 20%, transparent); }
+.ag-pill.busy .dot { background: var(--ag-accent); animation: ag-pulse 1.2s ease-in-out infinite; }
+.ag-pill.external .dot { background: var(--ag-ok); }
+.ag-pill.off { color: var(--ag-muted); }
+@keyframes ag-pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ag-accent) 45%, transparent); } 50% { box-shadow: 0 0 0 5px transparent; } }
+
+/* ---- reply text ---- */
+.ag-body p { margin: 0; }
+.ag-body p + p, .ag-body p + ul, .ag-body ul + p, .ag-body p + ol { margin-top: 8px; }
+.ag-body ul, .ag-body ol { margin: 0; padding-left: 18px; }
+.ag-body li + li { margin-top: 2px; }
+.ag-body code { font-family: var(--mono); font-size: 12px; background: var(--ag-raise); padding: 0 4px; border-radius: 4px; }
+.msg.agent.error .ag-body { color: var(--ag-bad); }
+.msg.agent.error .av { background: color-mix(in srgb, var(--ag-bad) 22%, transparent); color: var(--ag-bad); }
+
+/* ---- cards ---- */
+.ag-card { margin-top: 8px; border: 1px solid var(--ag-card-line); background: var(--ag-card); border-radius: var(--ag-radius); padding: 10px 12px; display: grid; gap: 8px; max-width: 560px; }
+.ag-head { display: flex; align-items: center; gap: 8px; min-height: 22px; }
+.ag-title { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ag-faint); font-weight: 600; }
+.ag-count { font-size: 11px; color: var(--ag-muted); background: var(--ag-raise); border-radius: 999px; padding: 1px 7px; }
+.ag-foot { display: flex; align-items: center; gap: 8px; }
+.ag-foot .note { margin-left: auto; color: var(--ag-faint); font-size: 11.5px; }
+.ag-state { font-size: 12px; color: var(--ag-muted); }
+.ag-state.ok { color: var(--ag-ok); font-weight: 600; }
+.ag-auto { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ag-faint); cursor: pointer; }
+.ag-auto input { margin: 0; accent-color: var(--ag-accent); }
+
+/* proposal list */
+.ag-changes { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.ag-changes li { display: grid; grid-template-columns: 18px 1fr; gap: 6px; align-items: start; font-size: 12.5px; color: var(--ag-text); }
+.ag-changes li i { font-style: normal; width: 18px; height: 18px; border-radius: 5px; display: grid; place-items: center; font-size: 11px; background: var(--ag-raise); color: var(--ag-muted); }
+.ag-changes li.k-add i { color: var(--ag-ok); }
+.ag-changes li.k-remove i { color: var(--ag-bad); }
+.ag-changes li.k-camera i { color: var(--camera, #ffb547); }
+.ag-changes li.k-animate i { color: var(--ag-accent); }
+.ag-card.is-discarded .ag-changes, .ag-card.is-undone .ag-changes { opacity: .5; text-decoration: line-through; text-decoration-color: var(--ag-faint); }
+.ag-card.is-applied { border-color: color-mix(in srgb, var(--ag-ok) 35%, var(--ag-card-line)); }
+
+/* thinking */
+.ag-card.thinking { background: color-mix(in srgb, var(--ag-card) 70%, transparent); }
+.ag-orb { width: 12px; height: 12px; border-radius: 50%; background: var(--ag-orb); animation: ag-spin 1.6s linear infinite; }
+@keyframes ag-spin { to { transform: rotate(360deg); } }
+.ag-card.thinking .ag-title { background: linear-gradient(90deg, var(--ag-faint) 0 35%, var(--ag-text) 50%, var(--ag-faint) 65% 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: ag-shimmer 1.8s linear infinite; }
+@keyframes ag-shimmer { from { background-position: 200% 0; } to { background-position: 0 0; } }
+.ag-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: 12px; color: var(--ag-muted); }
+.ag-steps:empty { display: none; }
+.ag-steps li { display: flex; gap: 8px; align-items: baseline; }
+.ag-steps li::before { content: '✓'; font-size: 10px; color: var(--ag-ok); }
+.ag-steps li.live { color: var(--ag-text); }
+.ag-steps li.live::before { content: '›'; color: var(--ag-accent); }
+.ag-stream { white-space: pre-wrap; word-wrap: break-word; color: var(--ag-text); border-top: 1px solid var(--ag-card-line); padding-top: 8px; }
+.ag-stream::after { content: '▍'; color: var(--ag-accent); animation: ag-blink 1s steps(2) infinite; }
+@keyframes ag-blink { to { opacity: 0; } }
+
+/* answer actions */
+.ag-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+
+@media (prefers-reduced-motion: reduce) { .ag-orb, .ag-card.thinking .ag-title, .ag-stream::after, .ag-pill.busy .dot { animation: none; } }
+
+.ag-queued { font-size: 12px; color: var(--ink-3, var(--muted)); padding: 6px 0 2px; }

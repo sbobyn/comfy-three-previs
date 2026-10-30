@@ -1,0 +1,42 @@
+/* Auto-prompt block. Colours always come with a text label (chips) or a hover title (spans). */
+.ap-block .seg button { font-size: 11.5px; }
+.ap-auto, .ap-edited { font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; margin-left: 6px; }
+.ap-auto { color: var(--muted); border: 1px solid var(--line-2); }
+.ap-edited { color: #1a1205; background: var(--camera); }
+.ap-block.is-edited { box-shadow: inset 3px 0 0 var(--camera); }
+.ap-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.ap-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 2px 8px 2px 6px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--text); cursor: default; }
+.ap-chip[onclick], .ap-chip:has(small) { cursor: pointer; }
+.ap-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.ap-chip small { font-size: 10px; color: var(--muted); }
+.ap-view, .ap-col .ap-text { background: var(--bg); border: 1px solid var(--line-2); border-radius: 8px; padding: 9px 10px; font-size: 12.5px; line-height: 1.6; }
+.ap-text { white-space: pre-wrap; word-break: break-word; }
+.ap-span { color: var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); border-bottom: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); border-radius: 3px; padding: 0 1px; }
+.ap-span:hover { background: color-mix(in srgb, var(--c) 24%, transparent); }
+.ap-plain { color: var(--text); text-decoration: underline dotted var(--faint); }
+.ap-edit { font-size: 12.5px; line-height: 1.55; min-height: 150px; }
+.ap-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.ap-preview { display: grid; gap: 8px; }
+.ap-col { display: flex; flex-direction: column; gap: 4px; }
+.ap-stylehead { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.ap-style { display: flex; flex-direction: column; gap: 6px; }
+.ap-sgroup { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.ap-sname { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; width: 74px; color: var(--muted); }
+.ap-sname i { width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
+.ap-tag { font-size: 11.5px; padding: 2px 8px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--text); cursor: pointer; }
+.ap-tag:hover { border-color: var(--bad); }
+.ap-sgroup select { width: auto; height: 26px; font-size: 11.5px; padding: 2px 6px; }
+
+/* Beret Labs theme */
+.ap-chip { height: 24px; padding: 0 9px 0 7px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 35%, var(--line)); background: color-mix(in srgb, var(--c) 8%, var(--card)); color: var(--ink); font-size: var(--fs-xs); font-weight: 500; }
+.ap-chip small { color: var(--ink-3); }
+.ap-view, .ap-col .ap-text { background: var(--card); border-color: var(--line); padding: 12px 14px; font-size: var(--fs-sm); line-height: 1.75; color: var(--ink-2); }
+.ap-span { color: var(--ink); background: color-mix(in srgb, var(--c) 9%, transparent); border-bottom: 0; box-shadow: inset 0 -1.5px 0 color-mix(in srgb, var(--c) 70%, transparent); }
+.ap-span:hover { background: color-mix(in srgb, var(--c) 22%, transparent); }
+.ap-plain { text-decoration: underline dotted var(--ink-4); text-underline-offset: 3px; }
+.ap-auto { color: var(--ink-2); background: var(--paper-2); border: 0; }
+.ap-edited { background: var(--accent); color: var(--accent-ink); }
+.ap-block.is-edited .ap-view { border-left: 3px solid var(--accent); }
+.ap-tag { border-radius: 7px; background: color-mix(in srgb, var(--c) 7%, var(--card)); border-color: color-mix(in srgb, var(--c) 35%, var(--line)); color: var(--ink); }
+.ap-sname { color: var(--ink-3); }
+
