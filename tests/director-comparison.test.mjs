@@ -22,8 +22,8 @@ test('comparison selects the result’s original source and never a newer render
 
 test('comparison discloses the extra frame and original durations without fitting', () => {
   const text = exports.comparisonFacts(original, result);
-  assert.match(text, /96 frames · 4\.000000 s/);
-  assert.match(text, /97 frames · 4\.041667 s/);
+  assert.match(text, /96 frames · 4\.00 s/);
+  assert.match(text, /97 frames · 4\.04 s/);
   assert.match(text, /Timing differs/);
   assert.match(text, /shorter clip/);
   assert.match(text, /Originals are unchanged/);

@@ -1,6 +1,6 @@
-// Looks board: design every object's look in one place. Project-wide world and style notes, a card per
-// object (its look, description and the shots it appears in), and one approved batch that generates
-// reference images on Cloud for every selected object. Results attach to each object automatically.
+// Cast images board: every object's image in one place. Project-wide world and style notes, a card per
+// object (its image, description and the shots it appears in), and one approved batch that generates
+// cast images on Cloud for every selected object. Results attach to each object automatically.
 import './director-looks.css';
 import { objectLooks, lookPrompt, lookViews, shotCast, handleOf, lookSource } from '../shared/director.mjs';
 import type { DirectorProject, Entity } from '../shared/director.mjs';
@@ -51,12 +51,12 @@ export function openLooksBoard(ctx: LooksCtx) {
   const missingBox = h('input', { type: 'checkbox' });
   const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Generate');
   const estLooks = () => { const p: any = ctx.refgen().presets.find(x => x.id === presetSel.value); if (p?.backend === 'local') return ' · free'; const usd = p?.pricing?.usdPerImage; const n = P().scene.entities.filter(e => picked.has(e.id) && !e.lookFrom).length; return usd != null && n ? ` · ≈ $${(usd * n * Number(countSel.value)).toFixed(2)}` : ''; };
-  // Bulk: give every selected object the look of one object (e.g. all police cars → Police 1).
-  const shareFrom = h('select', { class: 'field', 'aria-label': 'Share the look of' });
-  const shareBtn = h('button', { class: 'btn', type: 'button', title: 'Selected objects reuse this object’s looks and description' }, 'Share look');
+  // Bulk: give every selected object the image of one object (e.g. all police cars → Police 1).
+  const shareFrom = h('select', { class: 'field', 'aria-label': 'Use the image of' });
+  const shareBtn = h('button', { class: 'btn', type: 'button', title: 'Selected objects reuse this object’s images and description' }, 'Use this image');
   shareBtn.onclick = async () => {
     const id = shareFrom.value, ids = [...picked].filter(x => x !== id); if (!id || !ids.length) return;
-    try { await ctx.edit(ids.map(x => ({ op: 'update_entity', id: x, patch: { lookFrom: id } }))); toast(`${ids.length} object${ids.length === 1 ? '' : 's'} now share ${P().scene.entities.find(x => x.id === id)?.name}’s look`); picked.clear(); draw(); }
+    try { await ctx.edit(ids.map(x => ({ op: 'update_entity', id: x, patch: { lookFrom: id } }))); toast(`${ids.length} object${ids.length === 1 ? '' : 's'} now use ${P().scene.entities.find(x => x.id === id)?.name}’s image`); picked.clear(); draw(); }
     catch (err) { toast((err as Error).message, true); }
   };
   const grid = h('div', { class: 'lk-grid' });
@@ -72,44 +72,44 @@ export function openLooksBoard(ctx: LooksCtx) {
     const running = jobs.some(j => j.status === 'submitted');
     const inShots = shotsWith(e.id);
     const box = h('input', { type: 'checkbox', checked: picked.has(e.id), 'aria-label': `Select ${e.name}` });
-    if (e.lookFrom) { box.title = 'Uses another object’s look — select it to share a different one'; }
+    if (e.lookFrom) { box.title = 'Uses another object’s image — select it to share a different one'; }
     box.onchange = () => { box.checked ? picked.add(e.id) : picked.delete(e.id); syncToolbar(); el.classList.toggle('on', box.checked); };
     const notes = h('textarea', { class: 'field', rows: 3, maxlength: 400, placeholder: e.kind === 'character' ? 'Age, build, wardrobe, hair, materials…' : e.kind === 'vehicle' ? 'Make, era, paint, damage, details…' : 'Materials, colour, condition, details…', 'aria-label': `${e.name} description` }, e.notes || '');
     notes.onchange = async () => { try { await ctx.edit([{ op: 'update_entity', id: e.id, patch: { notes: notes.value } }]); } catch {} };
     const vs = lookViews(e); views[e.id] ||= Object.keys(vs)[0];
     const src = lookSource(P(), e.id), shared = src && src.id !== e.id ? src : null;
-    const shareSel = h('select', { class: 'field', 'aria-label': `${e.name} look` }, h('option', { value: '' }, 'Own look'),
+    const shareSel = h('select', { class: 'field', 'aria-label': `${e.name} image` }, h('option', { value: '' }, 'Own image'),
       ...P().scene.entities.filter(x => x.id !== e.id && lookSource(P(), x.id)?.id !== e.id).sort((a, b) => (b.kind === e.kind ? 1 : 0) - (a.kind === e.kind ? 1 : 0) || a.name.localeCompare(b.name)).map(x => h('option', { value: x.id, selected: e.lookFrom === x.id }, `Same as ${x.name}`)));
     shareSel.onchange = async () => { try { await ctx.edit([{ op: 'update_entity', id: e.id, patch: { lookFrom: shareSel.value || null } }]); picked.delete(e.id); draw(); } catch {} };
     const viewSel = h('select', { class: 'field', 'aria-label': `${e.name} view` }, ...Object.entries(vs).map(([k, label]) => h('option', { value: k, selected: k === views[e.id] }, label)));
     viewSel.onchange = () => { views[e.id] = viewSel.value; };
     const el = h('div', { class: 'lk-card' + (picked.has(e.id) ? ' on' : '') + (primary ? '' : ' empty') },
       h('div', { class: 'lk-img' },
-        primary ? h('img', { src: refUrl(primary.file), alt: `${e.name} look`, loading: 'lazy' }) : h('div', { class: 'lk-ph' }, shapeIcon(e.shape), h('span', {}, 'No look yet')),
+        primary ? h('img', { src: refUrl(primary.file), alt: `${e.name} cast image`, loading: 'lazy' }) : h('div', { class: 'lk-ph' }, shapeIcon(e.shape), h('span', {}, 'No image yet')),
         h('label', { class: 'lk-pick' }, box),
-        shared ? h('span', { class: 'lk-count' }, `= ${shared.name}`) : looks.length > 1 ? h('span', { class: 'lk-count' }, `${looks.length} looks`) : null,
+        shared ? h('span', { class: 'lk-count' }, `= ${shared.name}`) : looks.length > 1 ? h('span', { class: 'lk-count' }, `${looks.length} images`) : null,
         running ? h('span', { class: 'lk-run' }, 'Generating…') : null),
       h('div', { class: 'lk-body' },
-        h('div', { class: 'lk-name' }, h('strong', {}, e.name), h('span', { class: 'muted' }, `${e.kind} · @${handleOf(e.name)}`)),
+        h('div', { class: 'lk-name' }, h('strong', { title: e.name }, e.name), h('span', { class: 'muted' }, `${e.kind} · @${handleOf(e.name)}`)),
         h('div', { class: 'lk-shots' }, inShots.length ? `In shot ${inShots.map(x => String(x.i + 1).padStart(2, '0')).join(' · ')}` : 'Not seen by any shot camera'),
         notes, shareSel,
-        h('div', { class: 'lk-row' }, shared ? h('span', { class: 'muted', style: 'flex:1;font-size:11.5px' }, 'Shared look · notes add to it') : viewSel, h('button', { class: 'btn sm ghost', type: 'button', onclick: () => { dlg.close(); ctx.openObject(e.id); } }, 'Open'))));
+        h('div', { class: 'lk-row' }, shared ? h('span', { class: 'muted', style: 'flex:1;font-size:11.5px' }, 'Shared image · notes add to it') : viewSel, h('button', { class: 'btn sm ghost', type: 'button', onclick: () => { dlg.close(); ctx.openObject(e.id); } }, 'Open'))));
     return el;
   }
   function syncToolbar() {
     const list = shown();
     pickAll.checked = list.length > 0 && list.every(e => picked.has(e.id)); pickAll.indeterminate = !pickAll.checked && list.some(e => picked.has(e.id));
-    quoteBtn.textContent = picked.size ? `Generate ${picked.size} look${picked.size === 1 ? '' : 's'}${estLooks()}` : 'Generate';
+    quoteBtn.textContent = picked.size ? `Generate ${picked.size} image${picked.size === 1 ? '' : 's'}${estLooks()}` : 'Generate';
     quoteBtn.disabled = busy || !picked.size;
     const keep = shareFrom.value;
-    shareFrom.replaceChildren(h('option', { value: '' }, 'Give selected the look of…'), ...P().scene.entities.filter(x => !x.lookFrom && objectLooks(P(), x.id).length).map(x => h('option', { value: x.id, selected: x.id === keep }, x.name)));
+    shareFrom.replaceChildren(h('option', { value: '' }, 'Give selected the image of…'), ...P().scene.entities.filter(x => !x.lookFrom && objectLooks(P(), x.id).length).map(x => h('option', { value: x.id, selected: x.id === keep }, x.name)));
     shareBtn.disabled = busy || !picked.size || !shareFrom.value;
   }
   function draw() {
     const ents = shown();
     // Subjects first, then environment pieces; inside each, objects the shots see come first.
     const order = (e: Entity) => (e.kind === 'environment' ? 2 : 0) + (shotsWith(e.id).length ? 0 : 1);
-    grid.replaceChildren(...(ents.length ? [...ents].sort((a, b) => order(a) - order(b)).map(card) : [h('div', { class: 'empty-state', style: 'grid-column:1/-1' }, onlyMissing ? 'Every object has a look.' : 'Add objects to the scene first.')]));
+    grid.replaceChildren(...(ents.length ? [...ents].sort((a, b) => order(a) - order(b)).map(card) : [h('div', { class: 'empty-state', style: 'grid-column:1/-1' }, onlyMissing ? 'Every object has an image.' : 'Add objects to the scene first.')]));
     syncToolbar();
   }
 
@@ -120,7 +120,7 @@ export function openLooksBoard(ctx: LooksCtx) {
     plan = [];
     const presetId = presetSel.value, count = Number(countSel.value);
     for (const e of P().scene.entities.filter(x => picked.has(x.id))) {
-      if (e.lookFrom) { plan.push({ e, job: null, issue: `uses ${lookSource(P(), e.id)?.name}’s look` }); continue; }
+      if (e.lookFrom) { plan.push({ e, job: null, issue: `uses ${lookSource(P(), e.id)?.name}’s image` }); continue; }
       const view = views[e.id] || Object.keys(lookViews(e))[0];
       try {
         const r = await api('director/refgen/prepare', { projectId: P().id, entityId: e.id, presetId, prompt: lookPrompt(P(), e, view), aspect: aspectFor(e, view), count, seed: Math.floor(Math.random() * 1e6) });
@@ -151,12 +151,12 @@ export function openLooksBoard(ctx: LooksCtx) {
       ready.length ? h('div', { class: 'lk-approve' },
         free ? h('span', {}, 'Local generation · no charge') : h('span', {}, 'Estimated total ', h('b', { class: 'mono' }, `≈ $${total.toFixed(2)}`), ' · Cloud totals are estimates'),
         h('label', {}, approve, free ? 'I approve these requests' : 'I approve these requests, up to'), free ? null : cap, free ? null : h('span', {}, 'USD in total'), go,
-        blocked ? h('p', { class: 'note', style: 'margin:0;flex-basis:100%' }, 'Paid generation is off on this server (PREVIS_ALLOW_PAID≠1). Nothing will be sent.') : h('p', { class: 'note', style: 'margin:0;flex-basis:100%' }, 'Objects run one at a time. A failed or uncertain request stops the batch and is never retried. New looks become primary on objects that had none.')) : h('p', { class: 'note' }, 'Nothing to generate.'));
+        blocked ? h('p', { class: 'note', style: 'margin:0;flex-basis:100%' }, 'Paid generation is off on this server (PREVIS_ALLOW_PAID≠1). Nothing will be sent.') : h('p', { class: 'note', style: 'margin:0;flex-basis:100%' }, 'Objects run one at a time. A failed or uncertain request stops the batch and is never retried. New images become primary on objects that had none.')) : h('p', { class: 'note' }, 'Nothing to generate.'));
   }
   async function run(list: Planned[], cap: number, free: boolean) {
     busy = true; syncToolbar();
     const log = h('div', { class: 'lk-log' }); let spent = 0;
-    batch.replaceChildren(h('div', { class: 'lk-batch-head' }, h('strong', {}, `Generating looks for ${list.length} object${list.length === 1 ? '' : 's'}`)), log);
+    batch.replaceChildren(h('div', { class: 'lk-batch-head' }, h('strong', {}, `Generating images for ${list.length} object${list.length === 1 ? '' : 's'}`)), log);
     const line = (t: string, cls = '') => { const l = h('div', { class: cls }, t); log.append(l); return l; };
     try {
       for (const x of list) {
@@ -178,18 +178,18 @@ export function openLooksBoard(ctx: LooksCtx) {
       }
       line(free ? 'Done' : `Done · estimated spend ≈ $${spent.toFixed(2)}`, 'muted');
     } catch (err) { if ((err as Error).message !== 'stop') line((err as Error).message, 'err'); }
-    finally { busy = false; picked.clear(); await ctx.reloadRefgen(); draw(); toast('Looks updated'); }
+    finally { busy = false; picked.clear(); await ctx.reloadRefgen(); draw(); toast('Cast images updated'); }
   }
 
   const dlg = h('dialog', { class: 'looks', id: 'looks-dialog', 'aria-labelledby': 'looks-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'looks-title' }, `Looks · ${P().title}`), h('span', { class: 'muted', style: 'font-size:12px' }, 'Every object’s look is sent with each shot it appears in.'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'looks-title', title: P().title }, `Cast images · ${P().title}`), h('span', { class: 'muted', style: 'font-size:12px' }, 'Each object’s image is sent with every shot it appears in.'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'lk-body-wrap' },
       h('section', { class: 'lk-style' },
         h('label', {}, h('span', { class: 'eyebrow' }, 'World'), world),
         h('label', {}, h('span', { class: 'eyebrow' }, 'Visual style'), style),
-        h('p', { class: 'note', style: 'margin:0;grid-column:1/-1' }, 'Used in every look and every shot prompt, so objects and shots share one world.')),
+        h('p', { class: 'note', style: 'margin:0;grid-column:1/-1' }, 'Used in every cast image and every shot prompt, so objects and shots share one world.')),
       h('div', { class: 'lk-toolbar' },
-        h('label', { class: 'lk-check' }, pickAll, 'All'), h('label', { class: 'lk-check' }, missingBox, 'Without a look'),
+        h('label', { class: 'lk-check' }, pickAll, 'All'), h('label', { class: 'lk-check' }, missingBox, 'Without an image'),
         h('span', { class: 'lk-share' }, shareFrom, shareBtn),
         h('span', { style: 'flex:1' }),
         h('label', { class: 'lk-field' }, 'Model', presetSel), h('label', { class: 'lk-field' }, countSel), quoteBtn),

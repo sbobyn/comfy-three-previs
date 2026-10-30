@@ -1,6 +1,6 @@
-// Sequence view: every shot in order, with its blockout render and generated video side by side.
-// Reorder shots, render missing blockouts, quote and generate videos in one approved batch,
-// choose the version each shot uses in the cut, trim, play the whole sequence and export it.
+// Cut view: every shot in order, with its blockout and generated video side by side.
+// Reorder shots, make missing blockouts, quote and generate videos in one approved batch,
+// choose the version each shot uses in the cut, trim, play the whole cut and export the film.
 import './director-sequence.css';
 import type { DirectorProject, Shot, Asset, EditClip } from '../shared/director.mjs';
 import { api, h, toast } from './director-common';
@@ -18,7 +18,8 @@ export type SequenceCtx = {
   prompt(s: Shot): string;
   capture(s: Shot, o: { onStatus?: (t: string) => void; onFrame?: (url: string, i: number, n: number) => void }): Promise<unknown>;
   openShot(id: string): void;
-  openEditor(): void;
+  /** Unused: the Cut board is the only editor. Kept so the workspace can drop it in its own change. */
+  openEditor?(): void;
 };
 
 type Job = { id: string; shotId: string; status: string; message?: string; definition?: { title?: string; task?: string } };
@@ -36,12 +37,12 @@ export function comparisonSource(assets: Asset[], result: Asset | null): Asset |
 }
 
 export function comparisonFacts(source: Asset, result: Asset): string {
-  const describe = (label: string, a: Asset) => `${label} · ${a.width ?? '?'}×${a.height ?? '?'} · ${a.fps ?? '?'} fps · ${a.frameCount ?? '?'} frames · ${a.duration == null ? '?' : a.duration.toFixed(6)} s`;
+  const describe = (label: string, a: Asset) => `${label} · ${a.width ?? '?'}×${a.height ?? '?'} · ${a.fps ?? '?'} fps · ${a.frameCount ?? '?'} frames · ${a.duration == null ? '?' : a.duration.toFixed(2)} s`;
   const changed = (a: number | null | undefined, b: number | null | undefined) => a != null && b != null && Math.abs(a - b) > 0.000002;
   const timing = changed(source.frameCount, result.frameCount) || changed(source.fps, result.fps) || changed(source.duration, result.duration);
   const framing = changed(source.width, result.width) || changed(source.height, result.height);
-  return [describe('Saved source', source), describe('Result', result),
-    timing ? 'Timing differs. Comparison stops at the shorter clip; open Generated to inspect any extra result frames. Originals are unchanged.' : '',
+  return [describe('Blockout', source), describe('Generated', result),
+    timing ? 'Timing differs. Compare stops at the shorter clip; switch to Generated to see any extra frames. Originals are unchanged.' : '',
     framing ? 'Resolution differs. Each original keeps its own framing.' : ''].filter(Boolean).join('\n');
 }
 
@@ -73,14 +74,15 @@ export function createSequence(ctx: SequenceCtx) {
 
   // ---------- Layout ----------
   const modelSel = h('select', { class: 'field', 'aria-label': 'Video model' });
-  const renderAllBtn = h('button', { class: 'btn', type: 'button', title: 'Capture the camera video of every shot that has none, or whose blockout changed' }, 'Make missing blockouts');
+  const renderAllBtn = h('button', { class: 'btn', type: 'button', title: 'Make the blockout of every shot that has none, or whose scene changed' }, 'Make missing blockouts');
+  const allReady = h('span', { class: 'sq-allready muted', role: 'status', hidden: true }, '✓ All blockouts ready');
   const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Quote selected');
   // Rough cost on the button: rate × seconds (LTX rounds to its clip lengths).
   const estShots = () => { const d = choice().find(x => x.id === modelSel.value); const rate = d?.pricing?.ratePerSecond; if (!rate) return ''; const secs = (s: Shot) => (d!.task === 'first-frame' ? [2, 3, 4, 5, 6, 8, 10].reduce((a, b) => (Math.abs(b - s.duration) < Math.abs(a - s.duration) ? b : a)) : s.render?.duration ?? s.duration); return ` · ≈ $${P().shots.filter(s => picked.has(s.id)).reduce((t, s) => t + rate * secs(s), 0).toFixed(2)}`; };
   const useRefs = h('input', { type: 'checkbox', checked: localStorage.getItem('previs.seq.refs') !== '0' });
   useRefs.onchange = () => { localStorage.setItem('previs.seq.refs', useRefs.checked ? '1' : '0'); drawBoard(); };
   const refUrl = (file: string) => `/director-refs/${P().id}/${file}`;
-  /** Thumbnails of the reference images going into a shot, numbered as the prompt names them. */
+  /** Thumbnails of the cast images going into a shot, numbered as the prompt names them. */
   function refStrip(list: { file: string; name: string; label: string; role: string }[]) {
     return h('span', { class: 'sq-refs' }, ...list.map((r, i) => h('span', { class: 'sq-ref', title: `${i + 1} · ${r.label}${r.role === 'environment' || r.role === 'style' || r.role === 'frame' ? ` (${r.role})` : ''} — ${r.name}` }, h('img', { src: refUrl(r.file), alt: '', loading: 'lazy' }), h('i', {}, String(i + 1)))));
   }
@@ -91,17 +93,20 @@ export function createSequence(ctx: SequenceCtx) {
   const video = h('video', { playsinline: true, controls: true, preload: 'metadata' });
   // Compare: the generated video sits over the blockout and is revealed right of a draggable seam.
   const over = h('video', { class: 'sq-over', playsinline: true, muted: true, preload: 'auto', hidden: true, 'aria-hidden': 'true' });
-  const seam = h('div', { class: 'sq-seam', hidden: true, role: 'slider', tabindex: 0, 'aria-label': 'Compare seam: blockout left, generated right', 'aria-valuemin': 0, 'aria-valuemax': 100 }, h('span', { class: 'sq-seam-grip' }), h('span', { class: 'sq-seam-l' }, 'Blockout'), h('span', { class: 'sq-seam-r' }, 'Generated'));
+  // First-use hint, gone after the seam is moved once.
+  const seamHint = h('span', { class: 'sq-seam-hint', hidden: localStorage.getItem('previs.seq.seamHint') === '0' }, 'Drag the seam · ← → keys');
+  const seamUsed = () => { if (seamHint.hidden) return; seamHint.hidden = true; localStorage.setItem('previs.seq.seamHint', '0'); };
+  const seam = h('div', { class: 'sq-seam', hidden: true, role: 'slider', tabindex: 0, 'aria-label': 'Compare seam: blockout left, generated right', 'aria-valuemin': 0, 'aria-valuemax': 100 }, h('span', { class: 'sq-seam-grip' }), h('span', { class: 'sq-seam-l' }, 'Blockout'), h('span', { class: 'sq-seam-r' }, 'Generated'), seamHint);
   let seamAt = 50;
   const setSeam = (pct: number) => { seamAt = Math.max(0, Math.min(100, pct)); over.style.clipPath = `inset(0 0 0 ${seamAt}%)`; seam.style.left = `${seamAt}%`; seam.setAttribute('aria-valuenow', String(Math.round(seamAt))); };
   setSeam(50);
   seam.onpointerdown = ev => {
-    ev.preventDefault(); seam.setPointerCapture(ev.pointerId);
+    ev.preventDefault(); seam.setPointerCapture(ev.pointerId); seamUsed();
     const box = seam.parentElement!.getBoundingClientRect();
     const move = (e: PointerEvent) => setSeam(((e.clientX - box.left) / box.width) * 100);
     move(ev); seam.onpointermove = move; seam.onpointerup = () => { seam.onpointermove = null; };
   };
-  seam.onkeydown = ev => { if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') { ev.preventDefault(); setSeam(seamAt + (ev.key === 'ArrowLeft' ? -5 : 5)); } };
+  seam.onkeydown = ev => { if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') { ev.preventDefault(); seamUsed(); setSeam(seamAt + (ev.key === 'ArrowLeft' ? -5 : 5)); } };
   // Keep the overlay in step with the main player (which owns the controls).
   const follow = () => { if (over.hidden) return; if (Math.abs(over.currentTime - video.currentTime) > 0.06) over.currentTime = Math.min(video.currentTime, over.duration > 0 ? over.duration : video.currentTime); };
   video.addEventListener('play', () => { if (!over.hidden) { follow(); if (over.duration > 0 && video.currentTime >= over.duration) { video.pause(); return; } void over.play().catch(() => {}); } });
@@ -115,23 +120,23 @@ export function createSequence(ctx: SequenceCtx) {
   const empty = h('div', { class: 'sq-empty' });
   const abSeg = h('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Version' });
   const caption = h('div', { class: 'sq-caption' });
+  const setCaption = (t: string) => { caption.textContent = t; caption.title = t; };
   const comparisonInfo = h('div', { class: 'sq-comparison-info', hidden: true });
   const comparisonPosition = h('div', { class: 'sq-comparison-position mono', hidden: true });
   const position = (label: string, v: HTMLVideoElement) => `${label} ${v.currentTime.toFixed(3)} s${v.duration > 0 && v.currentTime >= v.duration - 0.0005 ? ' · ended' : ''}`;
-  const syncPosition = () => { if (!over.hidden) comparisonPosition.textContent = `${position('Source', video)} / ${position('Result', over)}`; };
+  const syncPosition = () => { if (!over.hidden) comparisonPosition.textContent = `${position('Blockout', video)} / ${position('Generated', over)}`; };
   for (const v of [video, over]) for (const name of ['timeupdate', 'seeked', 'pause', 'ended', 'loadedmetadata']) v.addEventListener(name, syncPosition);
-  const playSeqBtn = h('button', { class: 'btn', type: 'button' }, '▶ Play sequence');
-  const exportBtn = h('button', { class: 'btn camera', type: 'button' }, 'Export final video');
+  const playSeqBtn = h('button', { class: 'btn', type: 'button' }, '▶ Play cut');
+  const exportBtn = h('button', { class: 'btn camera', type: 'button' }, 'Export film');
   const exportStatus = h('div', { class: 'status-line' });
   const exportsList = h('div', { class: 'sq-exports' });
   const totals = h('span', { class: 'muted mono' });
-  const el = h('section', { class: 'sequence', hidden: true, 'aria-label': 'Sequence' },
+  const el = h('section', { class: 'sequence', hidden: true, 'aria-label': 'Cut' },
     h('div', { class: 'sq-main' },
       h('div', { class: 'sq-toolbar' },
         h('label', { class: 'sq-pickall' }, pickAll, 'All'),
         h('label', { class: 'sq-model' }, 'Video model', modelSel),
-        h('label', { class: 'sq-pickall', title: 'Send the image of every cast member the shot camera sees (plus environment, style and key frame) with the request' }, useRefs, 'Send cast images'), quoteBtn, h('span', { style: 'flex:1' }), renderAllBtn,
-        h('button', { class: 'btn ghost', type: 'button', title: 'Timeline with duplicates, custom order and frame-accurate trims', onclick: () => ctx.openEditor() }, 'Timeline')),
+        h('label', { class: 'sq-pickall', title: 'Send the image of every cast member the shot camera sees (plus environment, style and key frame) with the request' }, useRefs, 'Send cast images'), quoteBtn, h('span', { style: 'flex:1' }), allReady, renderAllBtn),
       banner, batch, board),
     h('aside', { class: 'sq-viewer' },
       h('div', { class: 'sq-screen' }, video, over, seam, empty),
@@ -168,15 +173,15 @@ export function createSequence(ctx: SequenceCtx) {
       h('span', { class: 'sq-grip', title: 'Drag to reorder', 'aria-hidden': 'true' }, '⋮⋮'), pick,
       h('span', { class: 'sq-num mono' }, String(i + 1).padStart(2, '0')),
       thumb,
-      h('div', { class: 'sq-title' }, h('strong', {}, s.title), h('span', { class: 'muted' }, `${s.duration}s${a ? ` · cut uses ${a.kind === 'workflow-result' ? 'generated' : 'blockout'}` : ''}`), castLine(s)),
+      h('div', { class: 'sq-title' }, h('strong', { title: s.title }, s.title), h('span', { class: 'muted', title: a ? `The cut uses the ${a.kind === 'workflow-result' ? 'generated video' : 'blockout'}` : '' }, `${s.duration}s${a ? ` · cut uses ${a.kind === 'workflow-result' ? 'generated' : 'blockout'}` : ''}`), castLine(s)),
       h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${bState[0]}` }, bState[1]),
         h('div', { class: 'sq-acts' },
-          b ? h('button', { class: 'btn sm', type: 'button', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'blockout'); } }, '▶') : null,
-          h('button', { class: 'btn sm', type: 'button', disabled: busy, onclick: (ev: Event) => { ev.stopPropagation(); void renderShots([s]); } }, s.render ? 'Remake' : 'Make'))),
+          b ? h('button', { class: 'btn sm', type: 'button', 'aria-label': `Play the blockout of shot ${i + 1}`, title: 'Play the blockout', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'blockout'); } }, '▶') : null,
+          h('button', { class: 'btn sm', type: 'button', disabled: busy, 'aria-label': `${s.render ? 'Remake' : 'Make'} the blockout of shot ${i + 1}`, onclick: (ev: Event) => { ev.stopPropagation(); void renderShots([s]); } }, s.render ? 'Remake' : 'Make'))),
       h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${gState[0]}` }, gState[1]),
         h('div', { class: 'sq-acts' },
-          res.length ? h('button', { class: 'btn sm', type: 'button', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'generated'); } }, '▶') : null,
-          h('button', { class: 'btn sm', type: 'button', disabled: busy || !!job, title: 'Generate this shot with the selected model', onclick: (ev: Event) => { ev.stopPropagation(); picked = new Set([s.id]); void quote(); } }, 'Generate'))),
+          res.length ? h('button', { class: 'btn sm', type: 'button', 'aria-label': `Play the generated video of shot ${i + 1}`, title: 'Play the generated video', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'generated'); } }, '▶') : null,
+          h('button', { class: 'btn sm', type: 'button', disabled: busy || !!job, title: 'Generate this shot with the selected model', 'aria-label': `Generate shot ${i + 1}`, onclick: (ev: Event) => { ev.stopPropagation(); picked = new Set([s.id]); void quote(); } }, 'Generate'))),
       h('div', { class: 'sq-cell sq-cut' }, version, h('div', { class: 'sq-trim' }, trim('in'), h('span', { class: 'muted' }, '→'), trim('out'))),
       h('div', { class: 'sq-side' }, include, h('div', { class: 'sq-move' }, move(-1), move(1)),
         h('button', { class: 'btn ghost sm', type: 'button', title: 'Open this shot in the scene', onclick: (ev: Event) => { ev.stopPropagation(); ctx.openShot(s.id); } }, 'Open')));
@@ -189,7 +194,7 @@ export function createSequence(ctx: SequenceCtx) {
     el.ondrop = ev => { ev.preventDefault(); el.classList.remove('drop'); if (dragFrom >= 0 && dragFrom !== i) void reorder(dragFrom, i); dragFrom = -1; };
     return el;
   }
-  // Who is in the shot, and which of their looks will be sent with the video request.
+  // Who is in the shot, and which cast images will be sent with the video request.
   function castLine(s: Shot) {
     const cast = shotCast(P(), s).filter(c => c.entity.kind !== 'environment');
     const refs = useRefs.checked && modelSel.value ? plannedReferences(P(), s, gen, modelSel.value) : [];
@@ -198,7 +203,7 @@ export function createSequence(ctx: SequenceCtx) {
     return h('span', { class: 'sq-cast' },
       refs.length ? refStrip(refs.map(r => ({ file: r.ref.file, name: r.ref.name, label: r.label, role: r.role }))) : null,
       h('span', { class: 'muted', title: cast.map(c => `${c.entity.name} · ${Math.round(c.coverage * 100)}% of frame`).join('\n') }, cast.length ? `In shot: ${cast.slice(0, 4).map(c => c.entity.name).join(', ')}${cast.length > 4 ? ` +${cast.length - 4}` : ''}` : 'No objects in frame'),
-      missing.length ? h('span', { class: 'sq-nolook', title: `${missing.join(', ')} ${missing.length === 1 ? 'has' : 'have'} no look yet — open Looks to make one` }, `${missing.length} without a look`) : null);
+      missing.length ? h('span', { class: 'sq-nolook', title: `${missing.join(', ')} ${missing.length === 1 ? 'has' : 'have'} no cast image yet — open Cast images in the Library to make one` }, `${missing.length} without a cast image`) : null);
   }
   async function reorder(from: number, to: number) {
     const p = P(); if (to < 0 || to >= p.shots.length) return;
@@ -208,14 +213,14 @@ export function createSequence(ctx: SequenceCtx) {
     const cut = p.edit?.clips?.length ? ids.flatMap(id => p.edit!.clips.filter(c => c.shotId === id)) : null;
     await ctx.runEntry({ label: 'Reorder shots', redo: [{ op: 'reorder_shots', ids }, ...(cut ? [{ op: 'set_edit', clips: cut }] : [])], undo: [{ op: 'reorder_shots', ids: before }, ...(cut ? [{ op: 'set_edit', clips: cutBefore }] : [])] });
   }
-  const syncPickAll = () => { const n = P().shots.length; pickAll.checked = picked.size === n; pickAll.indeterminate = picked.size > 0 && picked.size < n; quoteBtn.textContent = picked.size ? `Quote ${picked.size} shot${picked.size === 1 ? '' : 's'}${estShots()}` : 'Quote selected'; quoteBtn.disabled = busy || !picked.size; };
+  const syncPickAll = () => { const n = P().shots.length; pickAll.checked = picked.size === n; pickAll.indeterminate = picked.size > 0 && picked.size < n; quoteBtn.textContent = picked.size ? `Quote ${picked.size} shot${picked.size === 1 ? '' : 's'}${estShots()}` : 'Quote selected'; quoteBtn.disabled = busy || !picked.size; quoteBtn.title = picked.size ? 'Estimate the cost of the ticked shots. Nothing is sent until you approve.' : 'Tick shots on the board (or All) to quote them'; };
   pickAll.onchange = () => { picked = pickAll.checked ? new Set(P().shots.map(s => s.id)) : new Set(); draw(); };
 
   // ---------- Viewer ----------
   let seq: { list: { s: Shot; a: Asset; c: EditClip }[]; i: number } | null = null;
   let pinned: Asset | null = null; // an export being watched
   function select(id: string, v?: typeof view) { selected = id; pinned = null; if (v) view = v; stopSeq(); draw(); }
-  function watchExport(a: Asset) { compareOff(); stopSeq(); selected = ''; pinned = a; abSeg.replaceChildren(); abSeg.hidden = true; caption.textContent = `Export v${a.version ?? 1} · ${a.source.clips?.length ?? 0} clips · ${sec(a.duration)}`; show(a); void video.play().catch(() => {}); drawBoard(); }
+  function watchExport(a: Asset) { compareOff(); stopSeq(); selected = ''; pinned = a; abSeg.replaceChildren(); abSeg.hidden = true; setCaption(`Export v${a.version ?? 1} · ${a.source.clips?.length ?? 0} clips · ${sec(a.duration)}`); show(a); void video.play().catch(() => {}); drawBoard(); }
   let shownId = '';
   // Returns true when a different video was loaded (so callers only restart playback then).
   function show(a: Asset | null, from = 0, msg = '', force = true) {
@@ -230,7 +235,7 @@ export function createSequence(ctx: SequenceCtx) {
     const p = P(), s = p.shots.find(x => x.id === selected);
     if (seq || pinned) return;
     abSeg.hidden = !s;
-    if (!s) { compareOff(); abSeg.replaceChildren(); caption.textContent = ''; show(null, 0, 'Pick a shot to watch it, or play the whole sequence.'); return; }
+    if (!s) { compareOff(); abSeg.replaceChildren(); setCaption(''); show(null, 0, 'Pick a shot to watch it, or play the whole cut.'); return; }
     const generated = results(s)[0], b = blockout(s);
     if (view !== 'blockout' && !generated && b) view = 'blockout';
     abSeg.replaceChildren(...(['blockout', 'compare', 'generated'] as const).map(k => h('button', { type: 'button', role: 'radio', 'aria-checked': String(view === k), class: view === k ? 'on' : '', title: k === 'compare' ? 'Blockout and generated with a draggable seam' : '', disabled: k === 'blockout' ? !b : !generated, onclick: () => { view = k; drawViewer(); } }, k === 'blockout' ? 'Blockout' : k === 'compare' ? 'Compare' : 'Generated')));
@@ -243,20 +248,20 @@ export function createSequence(ctx: SequenceCtx) {
       over.hidden = false; seam.hidden = false; setSeam(seamAt);
       comparisonInfo.hidden = false; comparisonPosition.hidden = false;
       const task = gen.jobs.find(j => j.id === genPick.source.jobId)?.definition?.task;
-      comparisonInfo.textContent = comparisonFacts(bPick, genPick) + (task === 'first-frame' ? '\nKey-frame animation: the full source camera-motion clip was not supplied to this workflow.' : '');
+      comparisonInfo.textContent = comparisonFacts(bPick, genPick) + (task === 'first-frame' ? '\nThis model animates between your start and end stills; it did not see the camera move.' : '');
       syncPosition();
     } else compareOff();
-    caption.textContent = `Shot ${no(p, s.id)} · ${s.title}${view === 'compare' && genPick ? ` · ${(genPick.source.workflow || 'generated').split(' ·')[0]}${bPick ? ` vs original blockout v${bPick.version ?? 1}` : ' · original source unavailable'}` : a ? ` · ${a.kind === 'workflow-result' ? (a.source.workflow || 'generated').split(' ·')[0] : `blockout v${a.version ?? 1}`} · ${sec(a.duration)}` : ''}`;
-    if (show(a || null, 0, view === 'compare' ? 'The original camera render for this result is unavailable. A newer blockout will not be substituted.' : view === 'generated' ? 'No generated video yet.' : 'No blockout yet. Use Make blockout on the board.', false) && a) void video.play().catch(() => {});
+    setCaption(`Shot ${no(p, s.id)} · ${s.title}${view === 'compare' && genPick ? ` · ${(genPick.source.workflow || 'generated').split(' ·')[0]}${bPick ? ` vs original blockout v${bPick.version ?? 1}` : ' · original source unavailable'}` : a ? ` · ${a.kind === 'workflow-result' ? (a.source.workflow || 'generated').split(' ·')[0] : `blockout v${a.version ?? 1}`} · ${sec(a.duration)}` : ''}`);
+    if (show(a || null, 0, view === 'compare' ? 'The blockout this video was made from is no longer available. A newer blockout is not swapped in.' : view === 'generated' ? 'No generated video yet.' : 'No blockout yet. Use Make blockout on the board.', false) && a) void video.play().catch(() => {});
   }
   function cutList() { return P().shots.map(s => ({ s, c: clipFor(s)!, a: media(s)! })).filter(x => x.c && x.a); }
-  function stopSeq() { if (!seq) return; seq = null; playSeqBtn.textContent = '▶ Play sequence'; video.pause(); }
+  function stopSeq() { if (!seq) return; seq = null; playSeqBtn.textContent = '▶ Play cut'; video.pause(); }
   function playAt(i: number) {
     if (!seq) return;
     seq.i = i; const x = seq.list[i];
     if (!x) { stopSeq(); drawViewer(); return; }
     selected = x.s.id; drawBoard();
-    caption.textContent = `Sequence · ${i + 1} / ${seq.list.length} · Shot ${no(P(), x.s.id)} ${x.s.title}`;
+    setCaption(`Cut · ${i + 1} / ${seq.list.length} · Shot ${no(P(), x.s.id)} ${x.s.title}`);
     compareOff(); abSeg.replaceChildren(); show(x.a, x.c.in || 0); void video.play().catch(() => {});
   }
   playSeqBtn.onclick = () => {
@@ -295,13 +300,13 @@ export function createSequence(ctx: SequenceCtx) {
     if (!list.length) { toast('Every blockout is up to date'); return; }
     busy = true; draw();
     const bar = h('i'), status = h('span');
-    batch.hidden = false; batch.replaceChildren(h('div', { class: 'sq-batch-head' }, h('strong', {}, `Rendering ${list.length} blockout${list.length === 1 ? '' : 's'}`), status), h('div', { class: 'progress' }, bar));
+    batch.hidden = false; batch.replaceChildren(h('div', { class: 'sq-batch-head' }, h('strong', {}, `Making ${list.length} blockout${list.length === 1 ? '' : 's'}`), status), h('div', { class: 'progress' }, bar));
     try {
       for (const [k, s] of list.entries()) {
         const label = `Shot ${no(P(), s.id)} ${s.title}`;
         await ctx.capture(s, { onStatus: t => { status.textContent = `${label} · ${t}`; }, onFrame: (_u, i, n) => { status.textContent = `${label} · frame ${i + 1}/${n}`; bar.style.width = `${((k + (i + 1) / n) / list.length) * 100}%`; } });
       }
-      batch.hidden = true; toast(`Rendered ${list.length} blockout${list.length === 1 ? '' : 's'}`);
+      batch.hidden = true; toast(`Made ${list.length} blockout${list.length === 1 ? '' : 's'}`);
     } catch (e) { batch.replaceChildren(h('p', { class: 'status-line err' }, (e as Error).message)); }
     finally { busy = false; draw(); }
   }
@@ -313,7 +318,7 @@ export function createSequence(ctx: SequenceCtx) {
     try { gen = await api('generation'); } catch { return; }
     const keep = modelSel.value;
     modelSel.onchange = () => syncPickAll();
-    modelSel.replaceChildren(...choice().map(d => h('option', { value: d.id }, `${d.title}${referenceCapacity(gen, d.id) ? ` · up to ${referenceCapacity(gen, d.id)} refs` : ''}`)));
+    modelSel.replaceChildren(...choice().map(d => h('option', { value: d.id }, `${d.title}${referenceCapacity(gen, d.id) ? ` · up to ${referenceCapacity(gen, d.id)} images` : ''}`)));
     if (keep && choice().some(d => d.id === keep)) modelSel.value = keep;
   }
   // Every submit needs a fresh binding against the engine's current revision.
@@ -368,7 +373,7 @@ export function createSequence(ctx: SequenceCtx) {
         h('span', {}, `Estimated total `, h('b', { class: 'mono' }, unknownCost ? `≥ $${total.toFixed(2)}` : `≈ $${total.toFixed(2)}`), ' · Cloud totals are estimates'),
         h('label', {}, approve, 'I approve these requests, with an allowance of ', max, ' USD in total'),
         h('label', {}, unknown, 'I accept unresolved provider/runtime charges. The allowance is not a provider-enforced spending cap.'), go,
-        h('p', { class: 'note', style: 'margin:0' }, 'Shots run one at a time (one job per backend). Each is re-checked just before it is sent; a failed or uncertain job stops the batch and is never retried.')) : h('p', { class: 'note' }, 'Nothing to generate.'));
+        h('p', { class: 'note', style: 'margin:0' }, 'Shots run one at a time. Each is re-checked just before it is sent; a failed or uncertain job stops the batch and is never retried.')) : h('p', { class: 'note' }, 'Nothing to generate.'));
   }
   async function runBatch(def: Def, id: string, list: Quoted[], cap: number) {
     if (modelSel.value !== id) modelSel.value = id;
@@ -413,9 +418,11 @@ export function createSequence(ctx: SequenceCtx) {
     const p = P();
     picked = new Set([...picked].filter(id => p.shots.some(s => s.id === id)));
     banner.hidden = !customOrder();
-    banner.textContent = 'The cut has a custom order or duplicate clips from the advanced timeline. Changes here put it back in shot order.';
-    renderAllBtn.disabled = busy || p.shots.every(fresh);
-    renderAllBtn.textContent = p.shots.every(fresh) ? 'All blockouts ready' : `Make ${p.shots.filter(s => !fresh(s)).length} missing blockout${p.shots.filter(s => !fresh(s)).length === 1 ? '' : 's'}`;
+    banner.textContent = 'The cut has a custom order or duplicate clips. Changes here put it back in shot order.';
+    const stale = p.shots.filter(s => !fresh(s)).length;
+    allReady.hidden = !!stale || !p.shots.length; renderAllBtn.hidden = !stale;
+    renderAllBtn.disabled = busy;
+    renderAllBtn.textContent = `Make ${stale} missing blockout${stale === 1 ? '' : 's'}`;
     drawBoard(); syncPickAll(); drawExports();
     if (!seq) drawViewer();
   }
@@ -432,5 +439,11 @@ export function createSequence(ctx: SequenceCtx) {
       timer = window.setInterval(() => { if (!busy && gen.jobs.some(j => !DONE.includes(j.status) && j.status !== 'quoted')) void loadGen().then(draw); }, 8000);
     },
     refresh() { if (!el.hidden && !busy) { if (!seq) draw(); else { drawBoard(); drawExports(); } } },
+    /** Select a shot and show it in the viewer (e.g. 'compare'). Call after switching to the Cut step. */
+    open(shotId: string, v: typeof view = 'generated') {
+      if (!P().shots.some(s => s.id === shotId)) return;
+      pinned = null; selected = shotId; view = v; stopSeq(); draw();
+      requestAnimationFrame(() => board.querySelector('.sq-row.on')?.scrollIntoView({ block: 'nearest' }));
+    },
   };
 }
