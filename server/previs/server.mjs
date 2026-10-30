@@ -19,6 +19,8 @@ import { openDirector, directorRoutes } from './director.mjs';
 import { openAgentRunner } from './agent-runner.mjs'; // [agent]
 import { openRefgen, refgenRoutes } from './refgen.mjs';
 import { setupChecks } from './setup-check.mjs';
+import { openHeadless } from './headless.mjs'; // [headless]
+import { renderRoutes } from './render-routes.mjs'; // [headless]
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -51,6 +53,7 @@ let operation = Promise.resolve();
 const serial = fn => { const next = operation.then(fn); operation = next.catch(() => {}); return next; };
 const port = Number(process.env.PORT || 5190);
 agentRunner = await openAgentRunner({ root, dataDir: data, port, director }); // [agent] built-in Claude Code runner
+const headless = openHeadless({ port }), renderRoute = renderRoutes({ director, headless }); // [headless] C2 render routes
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
 async function body(req) {
   let text = ''; for await (const chunk of req) { text += chunk; if (text.length > 16 * 1024 * 1024) fail('Request too large', 413); }
@@ -75,6 +78,7 @@ const server = createServer(async (req, res) => {
       for await (const chunk of req) { size += chunk.length; if (size > 1024 ** 3) fail('Export is larger than 1 GB', 413); parts.push(chunk); }
       return send(await director.importZip(Buffer.concat(parts)));
     }
+    if (renderRoute.handles(url.pathname)) return await renderRoute.serve(req, url, send, body); // [headless]
     if (url.pathname.startsWith('/api/director/')) {
       if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       if (!['GET', 'POST'].includes(req.method)) fail('Method not allowed', 405);
@@ -213,5 +217,5 @@ const server = createServer(async (req, res) => {
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});
 server.listen(port, '127.0.0.1', () => console.log(`Comfy Previs: http://127.0.0.1:${port}`));
-async function stop() { agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await releaseLock(); process.exit(0); }
+async function stop() { agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await headless.close(); await releaseLock(); process.exit(0); }
 process.on('SIGTERM', stop); process.on('SIGINT', stop);
