@@ -18,7 +18,7 @@ test('HTTP boundary, shared stdio MCP and restart recovery', async () => {
   const port = 15190, base = `http://127.0.0.1:${port}`;
   let server;
   async function start() {
-    server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
+    server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_LEGACY_ROUTES: '1' }, stdio: ['ignore', 'pipe', 'pipe'] });
     await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   }
   async function stop() { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; }
@@ -45,4 +45,24 @@ test('HTTP boundary, shared stdio MCP and restart recovery', async () => {
     assert.deepEqual(restored, saved.project);
     assert.equal((await fetch(base + '/renders/' + restored.renders[0].id + '.png')).status, 200);
   } finally { await stop(); }
+});
+
+test('retired Blender/workbench routes answer 404 by default; the director\'s routes still work', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'previs-retired-'));
+  const port = 15194, base = `http://127.0.0.1:${port}`;
+  const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_LEGACY_ROUTES: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  const post = (path, body = {}) => fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  try {
+    for (const path of ['/api/transfer', '/api/comfy/inspect', '/api/comfy/submit', '/api/blender/refresh', '/api/render', '/api/shots', '/api/video/blender']) {
+      const r = await post(path); assert.equal(r.status, 404, path); assert.match((await r.json()).error, /PREVIS_LEGACY_ROUTES=1/);
+    }
+    for (const path of ['/api/handoff?shot=x', '/api/readiness', '/api/comfy/jobs']) assert.equal((await fetch(base + path)).status, 404, path);
+    // Used by the director: the engine project (revision), browser capture, video capture and generation.
+    const project = (await (await fetch(base + '/api/project')).json()).project;
+    const saved = await post('/api/browser-shot', { revision: project.revision, title: 'Capture', camera, subject: [0, 2, -11], frames: [camera, { ...camera, t: 1 }], png: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==' });
+    assert.equal(saved.status, 200);
+    assert.equal((await post('/api/video/readiness')).status, 200);
+    assert.equal((await fetch(base + '/api/generation')).status, 200);
+  } finally { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; }
 });

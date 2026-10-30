@@ -71,6 +71,10 @@ function blenderReadiness() { return { configured: Boolean(process.env.PREVIS_BL
 let catalog = null;
 let operation = Promise.resolve();
 const serial = fn => { const next = operation.then(fn); operation = next.catch(() => {}); return next; };
+// Routes of the retired Blender/workbench pages: Blender MCP, camera transfer, raw Comfy passthrough, handoff and
+// Blender previews. Nothing in the director uses them; they answer only when PREVIS_LEGACY_ROUTES=1.
+const legacyRoutes = process.env.PREVIS_LEGACY_ROUTES === '1';
+const LEGACY_ROUTE = /^\/api\/(transfer|handoff|render|shots|readiness|comfy\/[a-z]+|blender\/[a-z]+|video\/blender)$/;
 // Video capture runs on its own queue, one chain per frame stage (a 120-frame capture never waits behind
 // generation or another capture). Blender video stays on the global queue with every other Blender call.
 const videoLock = keyedLock();
@@ -90,6 +94,7 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
+    if (!legacyRoutes && LEGACY_ROUTE.test(url.pathname)) fail('Retired route (Blender/workbench pages); start Previs with PREVIS_LEGACY_ROUTES=1 to use it', 404);
     if (await progressRoutes.handle(req, res)) return; // [live-progress] GET /api/jobs/stream, /api/jobs/{source}/{id}/preview
     if (req.method === 'GET' && url.pathname === '/api/director/agent/stream') { const id = url.searchParams.get('id') || ''; if (!/^[a-f0-9-]{36}$/.test(id)) fail('Unknown project', 404); return agentRunner.stream(req, res, id); } // [agent] live steps + reply text (SSE)
     if (req.method === 'GET' && url.pathname === '/api/director/setup') return send({ ...(await setupChecks({ root, data })), agent: director.agentStatus(), dataDir: data });
