@@ -4,7 +4,7 @@
 .op-pass { width: 100%; }
 .op-pass button { flex: 1; }
 .op-pad { font: 11px var(--mono); color: var(--faint); padding: 6px 8px; border-radius: 6px; background: var(--bg); border: 1px dashed var(--line-2); }
-.op-pad.ok { color: var(--ok); border-style: solid; border-color: rgba(79, 209, 139, .35); }
+.op-pad.ok { color: var(--ok); border-style: solid; border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
 .op-check { flex-direction: row !important; align-items: center; gap: 6px !important; padding-top: 18px; }
 .op-note { margin: 0; }
 .op-tune summary { cursor: pointer; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
@@ -15,17 +15,18 @@
 .op-take { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding-top: 4px; border-top: 1px solid var(--line); }
 .op-take-label { flex: 1 1 100%; font: 11.5px var(--mono); color: var(--muted); }
 
-.op-hud { position: absolute; left: 14px; top: 58px; z-index: 6; min-width: 250px; padding: 8px 10px; border-radius: 8px; background: rgba(11, 13, 16, .78); border: 1px solid var(--line-2); font: 11.5px var(--mono); color: #ffd79a; pointer-events: none; display: flex; flex-direction: column; gap: 4px; backdrop-filter: blur(4px); }
+.op-hud { position: absolute; left: 14px; top: 58px; z-index: 6; min-width: 250px; padding: 8px 10px; border-radius: 8px; background: var(--glass); border: 1px solid var(--glass-line); font: 11.5px var(--mono); color: var(--on-stage); pointer-events: none; display: flex; flex-direction: column; gap: 4px; backdrop-filter: blur(4px); }
 .op-hud-row { display: flex; gap: 12px; justify-content: space-between; }
 .op-state { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; letter-spacing: .06em; }
-.op-state i { width: 8px; height: 8px; border-radius: 50%; background: var(--camera); }
-.op-hud.rec { border-color: rgba(255, 107, 107, .7); }
-.op-hud.rec .op-state { color: var(--bad); }
+.op-state i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.op-hud.rec { border-color: color-mix(in srgb, var(--accent) 70%, transparent); }
+.op-hud.rec .op-state { color: #F2876E; }
 .op-hud.rec .op-state i { background: var(--bad); animation: op-blink 1s steps(2) infinite; }
 .op-hud.playback .op-state i { background: var(--ok); }
-.op-time { color: var(--text); }
-.op-hud-bar { height: 3px; border-radius: 2px; background: var(--line-2); overflow: hidden; }
+.op-time { color: var(--on-stage); }
+.op-hud-bar { height: 3px; border-radius: 2px; background: var(--glass-line); overflow: hidden; }
 .op-hud-bar i { display: block; height: 100%; background: var(--camera); }
 .op-hud.rec .op-hud-bar i { background: var(--bad); }
-.op-hud-help { color: var(--muted); font-size: 10.5px; white-space: normal; max-width: 360px; }
+.op-hud-help { color: var(--on-stage-2); font-size: 10.5px; white-space: normal; max-width: 360px; }
 @keyframes op-blink { 50% { opacity: .2; } }
+@media (prefers-reduced-motion: reduce) { .op-hud.rec .op-state i { animation: none; } }
