@@ -8,7 +8,7 @@ import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
 import { assertNoSecrets } from './workflows.mjs';
 import { builtInPresets } from './presets.mjs';
-import { blockoutStale, castRows, lookSource, objectLooks } from '../../shared/director.mjs';
+import { blockoutStale, stillStale, castRows, lookSource, objectLooks } from '../../shared/director.mjs';
 import { cameraSourceOf, CAMERA_SOURCE_LABELS } from '../../shared/camera-source.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { planSlots } from '../../shared/sheet-presets.mjs';
@@ -31,8 +31,9 @@ function fail(message, status = 400) { const e = Error(message); e.status = stat
 const shotName = (p, s) => `Shot ${String(p.shots.indexOf(s) + 1).padStart(2, '0')} ${s.title}`;
 const atLabel = at => (typeof at === 'number' ? `${at}s` : at);
 const atKey = at => (typeof at === 'number' ? `@${at}` : at);
-function hasStill(shot, at) {
-  const notes = (shot.references || []).filter(r => r.role === 'frame').map(r => r.note || '');
+// A key frame made for an earlier blocking does not count: the batch makes it again (it would hand the video the old layout).
+function hasStill(project, shot, at, { stale = false } = {}) {
+  const notes = (shot.references || []).filter(r => r.role === 'frame' && stillStale(project, shot, r) === stale).map(r => r.note || '');
   return at === 'start' ? notes.some(n => n === 'key frame start' || !n) : at === 'end' ? notes.includes('key frame end') : notes.includes(`key frame @${at}s`);
 }
 function videoNeeds(def) {
@@ -111,11 +112,11 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
     if (want('stills')) for (const at of stillsAt) {
       if (typeof at === 'number' && at > s.duration) continue;
       still.set(at, add({ id: `still:${s.id}${atKey(at)}`, type: 'still', label: `${name} · ${atLabel(at)} still`, target: { shotId: s.id, t: at }, model: models.stills, estimateUsd: estimateFor('still', models.stills), deps: castLooks, optional: castLooks,
-        ...(hasStill(s, at) ? { status: 'skipped', note: 'Key frame already exists' } : {}) }));
+        ...(hasStill(project, s, at) ? { status: 'skipped', note: 'Key frame already exists' } : hasStill(project, s, at, { stale: true }) ? { note: 'Blocking changed since its key frame; made again' } : {}) }));
     }
     if (!want('videos')) continue;
     // Where the camera comes from: the blockout clip, start → end stills (approximate) or one still (approximate).
-    const cameraSource = needs.camera === 'keyframes' && !still.has('end') && !hasStill(s, 'end') && FIRST_FRAME_FALLBACK[def.id] ? 'still' : needs.camera;
+    const cameraSource = needs.camera === 'keyframes' && !still.has('end') && !hasStill(project, s, 'end') && FIRST_FRAME_FALLBACK[def.id] ? 'still' : needs.camera;
     const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, estimateUsd: estimateFor('video', models.videos, { duration: s.duration }), deps: [blockout.id], cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource] });
     if (needs.references && castLooks.length) { n.deps.push(...castLooks); n.optional = castLooks; }
     // A model that follows the blockout clip also takes the start/end stills as its look, when this batch makes them.
@@ -124,7 +125,7 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
     const endOptional = Boolean(FIRST_FRAME_FALLBACK[def.id]);
     for (const at of needs.keyFrames) {
       if (still.has(at)) { n.deps.push(still.get(at).id); if (at === 'end' && endOptional) (n.optional ||= []).push(still.get(at).id); }
-      else if (!hasStill(s, at) && !(at === 'end' && endOptional)) Object.assign(n, { status: 'failed', planError: true, error: `Needs a ${at} key frame; add the stills step` });
+      else if (!hasStill(project, s, at) && !(at === 'end' && endOptional)) Object.assign(n, { status: 'failed', planError: true, error: `Needs a ${at} key frame; add the stills step` });
     }
   }
   // Stills before design sheets: a sheet sends several images at once and would hold the cloud image slots the stills

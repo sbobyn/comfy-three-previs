@@ -16,6 +16,7 @@ import { slotsFor } from './concurrency.mjs';
 import { uploadCacheFor } from './upload-cache.mjs';
 import { validateGraph, workflowCost, validateApproval, hashValue, assertNoSecrets } from './workflows.mjs';
 import { followsGuide, describeFrame } from '../../shared/still-match.mjs';
+import { shotSignature } from '../../shared/director.mjs';
 import { stillGuideMatch, gradeStillPaid } from './still-match.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
@@ -262,7 +263,7 @@ export async function openRefgen(root, director, options = {}) {
         const existing = refs.find(r => r.generated?.requestId === job.id && r.generated?.outputKey === output.key);
         const bytes = existing ? null : await adapter.view(output.location);
         const guideMatch = bytes && job.target === 'shot' && job.guide ? await matchGuide(job, adapter, bytes, output.key) : null;
-        const r = existing ? { referenceId: existing.id, project: current } : await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, outputKey: output.key, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId, ...(guideMatch ? { guideMatch } : {}) } });
+        const r = existing ? { referenceId: existing.id, project: current } : await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, outputKey: output.key, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId, ...(job.signature ? { signature: job.signature } : {}), ...(guideMatch ? { guideMatch } : {}) } });
         if (!referenceIds.includes(r.referenceId)) referenceIds.push(r.referenceId);
         const ref = [...(r.project?.scene?.references || []), ...(r.project?.shots || []).flatMap(x => x.references || [])].find(x => x.id === r.referenceId);
         const match = ref?.generated?.guideMatch; // graded scores only (the rough local one is not a match verdict)
@@ -370,7 +371,8 @@ export async function openRefgen(root, director, options = {}) {
       const refs = [];
       for (const [k, b] of refBytes.entries()) { const file = `${id}-ref${k + 1}.png`; await mkdir(dirFor(input.projectId), { recursive: true }); await writeFile(join(dirFor(input.projectId), file), b, { mode: 0o600 }); refs.push({ file, referenceId: refIds[k], sha256: createHash('sha256').update(b).digest('hex') }); }
       const frameAt = !r.shot ? null : ['start', 'end'].includes(input.frameAt) ? input.frameAt : Number.isFinite(Number(input.frameAt)) && input.frameAt !== null && input.frameAt !== '' ? Math.round(Math.max(0, Number(input.frameAt)) * 100) / 100 : null;
-      const target = r.shot ? { target: 'shot', shotId: r.shot.id, ...(frameAt !== null ? { frameAt } : {}), shotNumber: r.project.shots.indexOf(r.shot) + 1, entityName: `Shot ${String(r.project.shots.indexOf(r.shot) + 1).padStart(2, '0')} ${r.shot.title}` } : { target: 'object', entityId: r.entity.id, entityName: r.entity.name };
+      // A key frame records the blocking it was made from (the blockout signature), so a later change marks it stale.
+      const target = r.shot ? { target: 'shot', shotId: r.shot.id, ...(frameAt !== null ? { frameAt } : {}), signature: shotSignature(r.project, r.shot), shotNumber: r.project.shots.indexOf(r.shot) + 1, entityName: `Shot ${String(r.project.shots.indexOf(r.shot) + 1).padStart(2, '0')} ${r.shot.title}` } : { target: 'object', entityId: r.entity.id, entityName: r.entity.name };
       // Design-sheet views name their image after the view and note which sheet slot it fills.
       const sheet = !r.shot && input.sheet && typeof input.sheet === 'object' ? { sheetId: String(input.sheet.sheetId || '').slice(0, 48), slotId: String(input.sheet.slotId || '').slice(0, 48), label: String(input.sheet.label || '').slice(0, 60) } : null;
       return persist({ id, projectId: input.projectId, ...target, ...(sheet ? { sheet } : {}), ...r.settings, guide, refs, backend: r.adapter.snapshot, graph: r.graph, graphHash: hashValue(r.graph), quote: r.quote, partnerNodes: r.partnerNodes, fingerprint: r.fingerprint, status: 'quoted', message: 'Quoted. Nothing was sent.', createdAt: now() });

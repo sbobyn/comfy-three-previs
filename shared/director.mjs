@@ -301,6 +301,18 @@ export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys
 /** The shot's blockout clip no longer matches its camera, timing or scene (it is made again before a video uses it). */
 export const blockoutStale = (project, shot) => !!(shot.render && shot.render.signature && shot.render.signature !== shotSignature(project, shot));
 
+/**
+ * A generated key-frame still made for an earlier blocking (camera, timing or scene). New stills record the shot
+ * signature they were made at; an older generated still without one counts as stale when the shot's blockout clip is
+ * newer than it (blockouts are made again only when the shot changes). Uploaded frames are never stale.
+ */
+export function stillStale(project, shot, ref) {
+  if (!ref?.generated) return false;
+  const made = ref.generated.signature;
+  if (made) return made !== shotSignature(project, shot);
+  return !!(shot.render?.createdAt && ref.createdAt && ref.createdAt < shot.render.createdAt);
+}
+
 /** The shot's chosen start still and end still (its newest key frames), each null when missing. */
 export function keyStills(shot) {
   const frames = (shot.references || []).filter(r => r.role === 'frame');

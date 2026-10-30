@@ -186,6 +186,9 @@ test('shot key frames: blockout guide is quoted, uploaded at submit and attached
   const p = await director.get(project.id);
   const frames = p.shots[0].references.filter(r => r.role === 'frame');
   assert.equal(frames.length, 2); assert.equal(frames[0].generated.presetId, 'local-checkpoint');
+  const { shotSignature, stillStale } = await import('../shared/director.mjs');
+  assert.equal(frames[0].generated.signature, shotSignature(p, p.shots[0]), 'a key frame records the blocking it was made from');
+  assert.equal(stillStale(p, p.shots[0], frames[0]), false);
   const { compilePrompt } = await import('../shared/director.mjs');
   assert.match(compilePrompt(p, p.shots[0]), /Look: match key frame/);
 });
