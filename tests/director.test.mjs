@@ -124,7 +124,9 @@ test('HTTP director routes and the stdio MCP agent loop', async () => {
     const rpc = (method, params) => new Promise(r => { const id = ++n; pending.set(id, r); agent.stdin.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n'); });
     const call = async (name, args) => { const m = await rpc('tools/call', { name, arguments: args }); assert.equal(m.result.isError, false, m.result.content[0].text); return JSON.parse(m.result.content[0].text); };
     await rpc('initialize', {});
-    const names = (await rpc('tools/list', {})).result.tools.map(t => t.name);
+    const listed = (await rpc('tools/list', {})).result.tools;
+    const names = listed.map(t => t.name);
+    assert.deepEqual(listed.find(t => t.name === 'previs_director_generate_quote').inputSchema.properties.presetId.enum, refgenState.presets.map(p => p.id), 'MCP quotes expose the same image presets as the app');
     for (const t of ['previs_director_wait_for_direction', 'previs_director_edit', 'previs_director_reply', 'previs_director_get']) assert.ok(names.includes(t), t);
     const waiting = call('previs_director_wait_for_direction', { projectId: p.id, timeoutSeconds: 10, agentName: 'test' });
     await new Promise(r => setTimeout(r, 300));
