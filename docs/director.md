@@ -1,6 +1,6 @@
 # Comfy Three Previs guide
 
-Build → Cast → Shoot → Generate → Cut. Open a starter on the home page to explore a finished example, or create an empty scene. The in-app **Guide** has interactive examples; opening it never edits a project or starts a generation.
+Build → Cast → Shoot → Generate → Cut. Open a starter on the home page to explore a finished example (cast images, design sheets, stills, a video per shot and a cut, all already made), or create an empty scene. The in-app **Guide** has interactive examples; opening it never edits a project or starts a generation.
 
 ![Home and starter projects](../public/guide/home.webp)
 
