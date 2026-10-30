@@ -126,3 +126,23 @@ test('the seam moves by keyboard: arrows step 5, Shift 20, Home and End jump, an
   assert.equal(core.seamKey(40, 'End'), 100);
   assert.equal(core.seamKey(40, 'Enter'), null, 'other keys are left alone');
 });
+
+test('“Use this take” makes an earlier take the one in use, and undo restores the previous one', async () => {
+  const { createProjectDocument, applyOps } = await import('../server/previs/director.mjs');
+  const p = createProjectDocument({ template: 'street' }), s = p.shots[0];
+  s.references.push(frame('a', 'key frame start'), frame('m', 'key frame @2s'), frame('b', 'key frame start'), frame('e', 'key frame end'));
+  const entry = core.useTakeEntry(s, 'a');
+  assert.deepEqual(plain(entry), { label: 'Use take at start', redo: [{ op: 'use_take', shotId: s.id, referenceId: 'a' }], undo: [{ op: 'use_take', shotId: s.id, referenceId: 'b' }] });
+  assert.equal(core.useTakeEntry(s, 'b'), null, 'the take in use needs no change');
+  assert.equal(core.useTakeEntry(s, 'nope'), null);
+  applyOps(p, plain(entry.redo));
+  const start = () => s.references.filter(r => r.note === 'key frame start').at(-1).id;
+  assert.equal(start(), 'a', 'the server sends the newest start take to key-frame models');
+  assert.equal(core.moments(s)[0].takes.at(-1).id, 'a');
+  applyOps(p, plain(entry.undo));
+  assert.equal(start(), 'b');
+  assert.throws(() => applyOps(p, [{ op: 'use_take', shotId: s.id, referenceId: 'missing' }]), /Unknown still/);
+  const copy = plain(core.keyFrameCopy(s, s.references.find(r => r.id === 'm'), 'end'));
+  assert.deepEqual(copy, { role: 'frame', note: 'key frame end', name: 'm · end (from 2s)' }, 'a mid-shot still copied as the end key frame keeps its own moment');
+  assert.equal(core.stillTime(s, { note: 'key frame end' }), s.duration);
+});

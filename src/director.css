@@ -783,8 +783,19 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .sb-hero img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s ease; }
 .sb-hero:hover img { transform: scale(1.03); }
 .sb-when { position: absolute; left: 6px; bottom: 6px; font: 600 10.5px/1 var(--mono); color: #fff; background: rgba(21,19,15,.66); padding: 3px 6px; border-radius: 5px; backdrop-filter: blur(4px); }
-.sb-takes { display: flex; gap: 4px; }
-.sb-takes img { width: 34px; height: 19px; border-radius: 3px; object-fit: cover; opacity: .75; }
+.sb-takes { display: flex; gap: 4px; flex-wrap: wrap; }
+/* An earlier take: click to use it (it becomes the newest take at its moment). */
+.sb-take { position: relative; padding: 0; border: 0; border-radius: 4px; background: none; cursor: pointer; overflow: hidden; flex: none; }
+.sb-take img { width: 40px; height: 23px; display: block; border-radius: 4px; object-fit: cover; opacity: .78; transition: opacity var(--t-fast); }
+.sb-take .sb-use { position: absolute; inset: 0; display: grid; place-items: center; font: 600 9.5px/1 var(--font); color: #fff; background: rgba(21,19,15,.55); opacity: 0; transition: opacity var(--t-fast); }
+.sb-take:hover img, .sb-take:focus-visible img { opacity: 1; }
+.sb-take:hover .sb-use, .sb-take:focus-visible .sb-use { opacity: 1; }
+.sb-take:focus-visible { outline: none; box-shadow: var(--focus); }
+.sb-key { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; font-size: 11px; color: var(--ink-3); }
+.sb-key > span { flex-basis: 100%; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--ink-4); font-weight: 600; }
+.sb-key button { white-space: nowrap; }
+.sb-keytag { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); font-weight: 600; }
+.sb-keytag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 .sb-meta { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--ink-3); }
 .sb-empty { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 12px; border: 1px dashed var(--line); font-size: 12.5px; color: var(--ink-3); line-height: 1.45; }
 .sb-empty strong { color: var(--ink); font-size: 13px; }

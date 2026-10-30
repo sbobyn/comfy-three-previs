@@ -25,7 +25,7 @@ import { mountJobsPip } from './director-jobs'; // [jobs]
 import { progressSlot, acquireProgress } from './director-progress'; // [live-progress]
 import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
 import { initMobile } from './director-mobile'; // [mobile]
-import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY } from './director-desktop-core';
+import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY, moments, useTakeEntry, keyFrameCopy } from './director-desktop-core';
 import type { ShotPips } from './director-desktop-core';
 import { VIDEO_PRICES } from '../shared/tiers.mjs';
 
@@ -909,12 +909,20 @@ function refCard(s: Shot, r: Reference) {
 
 // ---------- Shot key frames (image generation guided by the blockout frame) ----------
 const frameForm: Record<string, { open: boolean; presetId: string; count: number; seed: number; prompt: string | null; guide: boolean; checkpoint: string }> = {};
-/** When in the shot a still belongs (seconds), from its note: start, end or @t. */
-function stillTime(s: Shot, r: Reference): number | null {
-  const n = r.note || '';
-  if (n === 'key frame start') return 0;
-  if (n === 'key frame end') return s.duration;
-  const m = /^key frame @([\d.]+)s$/.exec(n); return m ? Math.min(s.duration, Number(m[1])) : null;
+/** Make an earlier take the one in use at its moment (undoable). */
+async function useTake(s: Shot, referenceId: string) {
+  const entry = useTakeEntry(s, referenceId); if (!entry) return;
+  if (await runEntry(entry)) toast(`${entry.label.replace('Use take at', 'Using the earlier take at')} · Ctrl/Cmd+Z to go back`);
+}
+/** Copy a still to the start or end of the shot so key-frame video models animate from (or to) it. */
+async function useAsKeyFrame(s: Shot, r: Reference, which: 'start' | 'end') {
+  try {
+    const blob = await (await fetch(refUrl(r))).blob();
+    const copy = keyFrameCopy(s, r, which);
+    const out = await api('director/reference', { projectId, shotId: s.id, ...copy, data: await readFileBase64(new File([blob], r.file, { type: blob.type })) });
+    apply(out.project);
+    toast(`The ${which} key frame is now this still`, false, { label: 'Undo', run: () => void edit([{ op: 'remove_reference', shotId: s.id, referenceId: out.referenceId }]).catch(() => {}) });
+  } catch (e) { toast((e as Error).message, true); }
 }
 const fmtT = (t: number) => `${t.toFixed(t % 1 ? 2 : 0)}s`;
 function seekShot(t: number) { playing = false; playhead = Math.max(0, Math.min(shot().duration, t)); scene.setPlayhead(playhead); renderTransport(); renderInspector(); }
@@ -924,12 +932,12 @@ function keyFrameBlock(s: Shot) {
   const frames = s.references.filter(r => r.role === 'frame');
   const jobs = refgen.jobs.filter(j => j.target === 'shot' && j.shotId === s.id);
   const running = jobs.filter(j => j.status === 'submitted' || j.status === 'submitting');
-  // Group takes by moment; the newest take at a moment is the one used.
-  const moments = new Map<string, { t: number | null; takes: Reference[] }>();
-  for (const r of frames) { const t = stillTime(s, r), k = t === null ? 'x' : t.toFixed(2); (moments.get(k) || moments.set(k, { t, takes: [] }).get(k)!).takes.push(r); }
-  const ordered = [...moments.values()].sort((a, b) => (a.t ?? 1e9) - (b.t ?? 1e9));
+  // Takes grouped by moment; the newest take at a moment is the one used.
+  const ordered = moments(s);
   const at = Math.round(playhead * 100) / 100;
   const label = (t: number | null) => t === null ? 'Unpinned' : t === 0 ? 'Start' : Math.abs(t - s.duration) < 0.01 ? 'End' : fmtT(t);
+  const keyOf = (t: number | null): 'start' | 'end' | null => t === 0 ? 'start' : t !== null && Math.abs(t - s.duration) < 0.01 ? 'end' : null;
+  const slots = genCache ? keyFrameSlots(shotModel(s) as any, VIDEO_PRICES) : [];
   const open = (t: number) => { f.open = true; f.prompt = null; seekShot(t); if (!refgen.presets.length) void loadRefgen(); shotPane.dataset.shot = ''; renderShotPane(); };
 
   // Shot timing: the shot's length with a pin per moment and the playhead.
@@ -946,8 +954,11 @@ function keyFrameBlock(s: Shot) {
     const used = m.takes.at(-1)!;
     return h('div', { class: 'sb-moment' + (m.t !== null && Math.abs(m.t - playhead) < 0.02 ? ' here' : '') },
       h('button', { type: 'button', class: 'sb-hero', title: 'Jump here', onclick: () => { if (m.t !== null) { seekShot(m.t); shotPane.dataset.shot = ''; renderShotPane(); } } }, h('img', { src: refUrl(used), alt: used.name, loading: 'lazy' }), h('span', { class: 'sb-when' }, label(m.t))),
-      m.takes.length > 1 ? h('div', { class: 'sb-takes' }, ...m.takes.slice(0, -1).reverse().slice(0, 4).map(r => h('img', { src: refUrl(r), alt: '', title: `Earlier take · ${r.generated?.model || ''}` }))) : null,
-      h('div', { class: 'sb-meta' }, `${m.takes.length} take${m.takes.length === 1 ? '' : 's'}`, m.t !== null ? h('button', { class: 'linklike', type: 'button', onclick: () => open(m.t!) }, 'New take') : null));
+      // Earlier takes: any one can become the take in use (for Start/End, the key frame video models get).
+      m.takes.length > 1 ? h('div', { class: 'sb-takes', role: 'group', 'aria-label': `Earlier takes · ${label(m.t)}` }, ...m.takes.slice(0, -1).reverse().slice(0, 4).map((r, k) => h('button', { type: 'button', class: 'sb-take', title: `Use this take${keyOf(m.t) ? ` as the ${keyOf(m.t)} key frame` : ''} · earlier take ${k + 1}${r.generated?.model ? ` · ${r.generated.model.split(' (')[0]}` : ''}`, 'aria-label': `Use earlier take ${k + 1} at ${label(m.t)}`, onclick: () => useTake(s, r.id) }, h('img', { src: refUrl(r), alt: '' }), h('span', { class: 'sb-use', 'aria-hidden': 'true' }, 'Use')))) : null,
+      // Mid-shot stills can become the start or end key frame for video models that animate key frames.
+      slots.length && !keyOf(m.t) ? h('div', { class: 'sb-key' }, h('span', {}, 'Key frame'), ...slots.map(w => h('button', { class: 'linklike', type: 'button', title: `Copy this still to the ${w} of the shot; ${shotModel(s)?.title?.split(' ·')[0] || 'the video model'} animates ${slots.length > 1 ? 'start → end' : 'from the start'}`, onclick: () => void useAsKeyFrame(s, used, w) }, `Use as ${w}`))) : null,
+      h('div', { class: 'sb-meta' }, keyOf(m.t) && slots.includes(keyOf(m.t)!) ? h('span', { class: 'sb-keytag' }, `${keyOf(m.t) === 'start' ? 'Start' : 'End'} key frame`) : `${m.takes.length} take${m.takes.length === 1 ? '' : 's'}`, m.t !== null ? h('button', { class: 'linklike', type: 'button', onclick: () => open(m.t!) }, 'New take') : null));
   })) : h('div', { class: 'sb-empty' }, h('strong', {}, 'Picture the shot before you film it.'), h('span', {}, 'A still costs a few cents. Pin one at the start, the end, or any moment: it uses the blockout frame there, your cast’s images and this shot’s prompt. Start→end video models use the start and end stills.'));
   const head = h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Storyboard · ${frames.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, running.length ? `Generating ${running.length}…` : 'Stills of the shot, moment by moment'));
   if (!f.open) return h('div', { class: 'block sb' }, head, track, adds, strip, ...jobs.filter(j => j.status === 'failed').slice(0, 1).map(jobRow));
