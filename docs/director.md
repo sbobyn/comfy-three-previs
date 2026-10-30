@@ -21,8 +21,9 @@ The launch page (`http://127.0.0.1:5190`) shows:
 
 The **Direct** tab is a chat about the current shot. Type `@` to mention an object. Drop, paste or attach images to add them as references for that shot.
 
-- With an **agent connected** (green pill), your own Claude Code / Codex / MCP client reads each message, edits the scene and replies. Click the pill for setup steps.
-- Without an agent, the **built-in parser** handles phrases like:
+- **Built-in agent** (pill reads **Agent ready**): when Claude Code is installed on this Mac and signed in (`claude` once in a terminal), Previs runs it for you with Previs tools only, on your existing login. No terminal, no API key. Questions and prompt requests are answered in the thread (**Copy**, **Use as shot prompt**); scene, shot, camera and animation changes arrive as a **proposed changes** card you **Apply** or **Discard** (one undo step). A one-line change to an existing object or shot applies straight away with **Undo** (switch that off on the card). **Stop** interrupts a turn; a failed turn offers **Retry**. The agent cannot render or spend money. Set `PREVIS_AGENT=off` to disable it, `PREVIS_AGENT_MODEL` to pick the model (default `sonnet`), `PREVIS_CLAUDE_PATH` if `claude` is somewhere unusual.
+- **Your agent (MCP)** (pill reads **Agent connected**): your own Claude Code / Codex / MCP client reads each message, edits the scene live and replies. Click the pill for setup steps; choose **Your agent (MCP)** in the composer's route menu.
+- Without either, the **built-in parser** handles phrases like:
   - `add a red car on the left` · `put a detective next to the car facing the runner`
   - `slow dolly in on @runner, 50mm, low angle` · `orbit around the car over 4 seconds`
   - `new shot: wide establishing crane up` · `environment: rainy neon alley`

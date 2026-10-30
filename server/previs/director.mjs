@@ -9,6 +9,8 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
 import { interpret } from './director-parse.mjs';
+import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
+import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
 import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, normalizeCast } from '../../shared/director.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
@@ -233,7 +235,10 @@ export async function openDirector(root, options = {}) {
     return structuredClone(p);
   }
   const agentPresent = () => waiters.size > 0 || Date.now() - agent.lastSeen < 45000;
-  function agentStatus() { return { connected: agentPresent(), waiting: waiters.size > 0, lastSeen: agent.lastSeen ? new Date(agent.lastSeen).toISOString() : null, name: agent.name }; }
+  const runner = () => options.runner?.() || null; // [agent] built-in Claude Code runner, when installed
+  function agentStatus() { return { connected: agentPresent(), waiting: waiters.size > 0, lastSeen: agent.lastSeen ? new Date(agent.lastSeen).toISOString() : null, name: agent.name, runner: runner()?.status() ?? null }; }
+  // [agent] A proposal is re-planned from the base project every time, so ids and undo stay consistent.
+  function proposalOf(p, m) { return m.proposal?.ops?.length ? planProposal(p, m.proposal.ops) : null; }
   async function pending(projectId) {
     const ids = projectId ? [projectId] : (await list()).map(p => p.id);
     const out = [];
@@ -279,9 +284,27 @@ export async function openDirector(root, options = {}) {
       if (!text && !attachments.length) fail('Write a direction or attach a reference');
       const message = { id: randomUUID(), shotId: shot.id, role: 'user', text, attachments, status: 'pending', createdAt: now() };
       p.messages.push(message);
-      const mode = ['auto', 'agent', 'builtin'].includes(input.mode) ? input.mode : 'auto';
-      if (mode === 'builtin' || (mode === 'auto' && !agentPresent())) runBuiltin(p, message);
-      return { project: await save(p), messageId: message.id, routed: message.status === 'pending' ? 'agent' : 'builtin' };
+      const mode = ['auto', 'runner', 'agent', 'builtin'].includes(input.mode) ? input.mode : 'auto';
+      // [agent] Auto: the built-in runner when Claude Code is installed, else a connected external agent, else the parser.
+      const r = runner();
+      const toRunner = mode === 'runner' || (mode === 'auto' && !!r?.available());
+      if (toRunner && !r?.available()) fail('Claude Code is not installed on this Mac; choose another route', 503);
+      if (mode === 'builtin' || (mode === 'auto' && !toRunner && !agentPresent())) runBuiltin(p, message);
+      const queued = toRunner && r.busy?.(p.id);
+      const runInput = { text, shotNumber: p.shots.indexOf(shot) + 1, shotTitle: shot.title, attachments: shot.references.filter(x => attachments.includes(x.id)).map(x => `refs/${x.file}`) };
+      if (queued) { message.status = 'queued'; message.handledBy = 'runner'; message.runInput = runInput; } // starts when the current turn finishes
+      else if (toRunner) { message.status = 'claimed'; message.handledBy = 'runner'; message.workStartedAt = now(); }
+      const saved = await save(p);
+      if (queued) return { project: saved, messageId: message.id, routed: 'queued' };
+      if (toRunner) r.start(p.id, message.id, { text, shotNumber: p.shots.indexOf(shot) + 1, shotTitle: shot.title, attachments: shot.references.filter(x => attachments.includes(x.id)).map(x => `refs/${x.file}`) });
+      return { project: saved, messageId: message.id, routed: toRunner ? 'runner' : message.status === 'pending' ? 'agent' : 'builtin' };
+    }),
+    /** The oldest message waiting for the built-in agent, now claimed. */
+    nextQueued: id => serial(async () => {
+      const p = structuredClone(await load(id));
+      const m = p.messages.find(x => x.role === 'user' && x.status === 'queued'); if (!m) return null;
+      m.status = 'claimed'; m.workStartedAt = now(); const input = m.runInput; delete m.runInput;
+      await save(p); return { messageId: m.id, input };
     }),
     builtin: (id, messageId) => serial(async () => {
       const p = structuredClone(await load(id));
@@ -347,7 +370,7 @@ export async function openDirector(root, options = {}) {
       agent.lastSeen = Date.now();
       const m = input.messageId ? p.messages.find(x => x.id === input.messageId && x.role === 'user') : p.messages.find(x => x.role === 'user' && x.status === 'claimed');
       const text = String(input.text || '').trim().slice(0, 300);
-      if (!m || !text) return { project: p, logged: false };
+      if (!m || !text || m.activity?.at(-1)?.text === text) return { project: p, logged: false }; // [agent] no duplicate consecutive lines
       m.activity = [...(m.activity || []), { at: now(), text, ...(input.auto ? { auto: true } : {}) }].slice(-40);
       if (!m.workStartedAt) m.workStartedAt = now();
       return { project: await save(p), logged: true };
@@ -359,8 +382,45 @@ export async function openDirector(root, options = {}) {
       if (input.messageId && !original) fail('Unknown message');
       if (original) { original.status = 'handled'; original.handledBy = 'agent'; original.workEndedAt = now(); }
       const text = String(input.text || '').trim().slice(0, 8000); if (!text) fail('Reply text required');
-      p.messages.push({ id: randomUUID(), shotId: original?.shotId ?? resolveShot(p, input.shotId)?.id ?? null, role: 'agent', text, attachments: [], status: 'handled', createdAt: now(), ...(original ? { replyTo: original.id } : {}) });
+      p.messages.push({ id: randomUUID(), shotId: original?.shotId ?? resolveShot(p, input.shotId)?.id ?? null, role: 'agent', text, attachments: [], status: 'handled', createdAt: now(), ...(original ? { replyTo: original.id } : {}), ...(input.via === 'runner' ? { via: 'runner' } : {}), ...(input.error ? { error: true } : {}) });
       return { project: await save(p) };
+    }),
+    // [agent] Built-in agent: edits collect on the user message as a proposal until the user applies or discards it.
+    propose: (id, messageId, ops) => serial(async () => {
+      const p = structuredClone(await load(id));
+      const m = p.messages.find(x => x.id === messageId && x.role === 'user'); if (!m) fail('Unknown message');
+      if (m.proposal?.status && m.proposal.status !== 'pending') fail('That proposal was already decided', 409);
+      const plan = planProposal(p, [...(m.proposal?.ops || []), ...(Array.isArray(ops) ? ops : [])]);
+      const fresh = plan.summary.slice(m.proposal?.ops?.length || 0);
+      m.proposal = { ops: plan.ops, undo: plan.undo, summary: plan.summary, small: plan.small, status: 'pending' };
+      m.activity = [...(m.activity || []), ...fresh.map(s => ({ at: now(), text: s.text, auto: true }))].slice(-40);
+      await save(p);
+      return { summary: fresh.map(s => s.text), ids: plan.ops.map(o => o.entity?.id || o.shot?.id || null) };
+    }),
+    // Project as the agent should see it mid-turn: pending proposal applied on a copy.
+    async preview(id, messageId) {
+      const p = await load(id); const m = p.messages.find(x => x.id === messageId);
+      const plan = m ? proposalOf(p, m) : null;
+      return { project: plan ? plan.preview : structuredClone(p), pending: plan?.summary || [], shotId: m?.shotId ?? null };
+    },
+    suggest: (id, messageId, input) => serial(async () => {
+      const p = structuredClone(await load(id));
+      const m = p.messages.find(x => x.id === messageId && x.role === 'user'); if (!m) fail('Unknown message');
+      const s = resolveShot(p, input.shot); if (!s) fail(`Unknown shot ${input.shot}`);
+      const text = String(input.text || '').trim().slice(0, 4000); if (!text) fail('Prompt text required');
+      m.suggestion = { shotId: s.id, kind: input.kind === 'image' ? 'image' : 'video', text };
+      await save(p); return { ok: true, shot: p.shots.indexOf(s) + 1 };
+    }),
+    // Apply / discard / undo a proposal. Apply runs its ops as one edit; the browser records one undo entry.
+    proposal: (id, messageId, action) => serial(async () => {
+      const p = structuredClone(await load(id));
+      const m = p.messages.find(x => x.id === messageId && x.role === 'user'); if (!m?.proposal) fail('No proposal on that message');
+      const pr = m.proposal;
+      if (action === 'apply') { if (pr.status !== 'pending') fail('That proposal was already decided', 409); applyOps(p, pr.ops); pr.status = 'applied'; pr.decidedAt = now(); }
+      else if (action === 'discard') { if (pr.status !== 'pending') fail('That proposal was already decided', 409); pr.status = 'discarded'; pr.decidedAt = now(); }
+      else if (action === 'undo') { if (pr.status !== 'applied') fail('Nothing to undo', 409); applyOps(p, pr.undo); pr.status = 'undone'; pr.decidedAt = now(); }
+      else fail('action must be apply, discard or undo');
+      return { project: await save(p), proposal: pr };
     }),
     // Copy finished workflow results whose source is one of this project's camera renders.
     syncResults: id => serial(async () => {
@@ -527,7 +587,7 @@ export function summarizeOps(ops, project) {
   return lines.length > 4 ? `${lines.slice(0, 3).join(' · ')} · +${lines.length - 3} more edits` : lines.join(' · ');
 }
 
-export function directorRoutes(director, previs, connect = () => null) {
+export function directorRoutes(director, previs, connect = () => null, runner = () => null) {
   return async function route(method, url, input, meta = {}) {
     const path = url.pathname;
     if (!path.startsWith('/api/director/')) return undefined;
@@ -583,6 +643,24 @@ export function directorRoutes(director, previs, connect = () => null) {
         return r;
       }
       case '/api/director/agent/progress': return director.progress(input.projectId, input);
+      // [agent] Built-in runner tools (scoped to one message) and the browser's proposal decisions.
+      case '/api/director/agent/scene': { const { project: p, pending, shotId } = await director.preview(input.projectId, input.messageId); return sceneView(p, shotId, pending); }
+      case '/api/director/agent/prompt': {
+        const { project: p } = await director.preview(input.projectId, input.messageId);
+        const s = p.shots.find(x => x.id === input.shot) || p.shots.find(x => handleOf(x.title) === handleOf(String(input.shot || ''))) || p.shots[Number(input.shot) - 1]; if (!s) fail(`Unknown shot ${input.shot}`);
+        const kind = input.kind === 'image' ? 'image' : 'video';
+        return { shot: p.shots.indexOf(s) + 1, kind, auto: autoPromptText(p, s, kind), current: shotPrompt(p, s, kind), edited: !!(s.prompts?.[kind]?.edited) };
+      }
+      case '/api/director/agent/propose': return director.propose(input.projectId, input.messageId, input.ops);
+      case '/api/director/agent/suggest': return director.suggest(input.projectId, input.messageId, input);
+      case '/api/director/agent/proposal': return director.proposal(input.projectId, input.messageId, input.action);
+      case '/api/director/agent/stop': {
+        const r = runner()?.stop(input.projectId) ?? { stopped: false };
+        // No live run (e.g. the server restarted mid-turn): close the stale message so the thread never sticks on “Thinking”.
+        if (!r.stopped && input.messageId) { const p = await director.get(input.projectId); const m = p.messages.find(x => x.id === input.messageId && x.role === 'user' && x.status === 'claimed'); if (m) return director.reply(input.projectId, { messageId: m.id, text: 'Stopped.', via: 'runner', error: true }); }
+        return r;
+      }
+      case '/api/director/agent/reset': return runner()?.reset(input.projectId) ?? { reset: false };
       case '/api/director/animate': {
         const ops = (Array.isArray(input.animations) ? input.animations : [input]).map(a => a.clear ? { op: 'clear_animation', id: a.object } : Array.isArray(a.removeTimes) ? { op: 'remove_keyframes', id: a.object, times: a.removeTimes } : { op: 'set_keyframes', id: a.object, keys: a.keys, mode: a.mode });
         const r = await director.edit(input.projectId, ops);

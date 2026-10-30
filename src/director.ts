@@ -1,13 +1,15 @@
 import './director.css';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Message, Vec3, Asset, EditClip } from '../shared/director.mjs';
-import { api, h, toast, agentPill, connectDialog, shapeIcon, readFileBase64 } from './director-common';
+import { api, h, toast, connectDialog, shapeIcon, readFileBase64 } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
 import { initOperate, operateBlock } from './director-operate'; // [operate]
 import { installPhoneDemo } from './director-phone'; // [director-phone]
 import { createSequence } from './director-sequence';
 import { promptBlock } from './director-prompt';
+import { createAgentUi, agentText, ROUTES } from './director-agent'; // [agent]
+import type { Route } from './director-agent';
 import { shotPrompt } from '../shared/prompt.mjs';
 import { openLooksBoard, aspectFor } from './director-looks';
 import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } from './director-videogen';
@@ -27,7 +29,7 @@ let refgen: { presets: Preset[]; jobs: any[]; paidExecutionEnabled: boolean; clo
 const genForm: Record<string, { prompt: string; presetId: string; aspect: string; count: number; seed: number; checkpoint: string; view: string; edited: boolean }> = {};
 let agent: AgentStatus | null = null, connect: Connect = null;
 let playhead = 0, playing = false, lastTick = 0;
-let mode: 'auto' | 'agent' | 'builtin' = 'auto';
+let mode: Route = 'auto'; // [agent]
 let pendingAtts: string[] = [];
 let seenMessages = 0;
 
@@ -112,9 +114,9 @@ const shotTab = h('button', { type: 'button', onclick: () => setTab('shot') }, '
 const objectTab = h('button', { type: 'button', onclick: () => setTab('object') }, 'Object');
 const shotChip = h('span', { class: 'shotchip' });
 const thread = h('div', { class: 'thread', 'aria-live': 'polite' });
-const textarea = h('textarea', { placeholder: 'Describe the blockout, the camera, or this shot… Use @ to mention objects. Drop images to attach references.', rows: 3, 'aria-label': 'Direction' });
+const textarea = h('textarea', { placeholder: 'Ask or direct: “slow dolly in on @runner”, “write the prompt for shot 2”… @ mentions objects · Enter sends · Shift+Enter newline', rows: 3, 'aria-label': 'Direction' });
 const attsRow = h('div', { class: 'pending-atts' });
-const routeSel = h('select', { 'aria-label': 'Send to' }, h('option', { value: 'auto' }, 'Auto'), h('option', { value: 'agent' }, 'Agent (MCP)'), h('option', { value: 'builtin' }, 'Built-in parser'));
+const routeSel = h('select', { 'aria-label': 'Send to' }, ...ROUTES.map(r => h('option', { value: r.value, title: r.title }, r.label))); // [agent]
 const routeNote = h('span');
 const fileInput = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true });
 const suggest = h('div', { class: 'suggest', hidden: true });
@@ -225,6 +227,8 @@ const scene = createDirectorScene(canvas, labels, monitor, camFrame, {
 initOperate({ scene, viewport, project: () => project, shot, setView, runEntry, toast, setPlayhead(t) { playing = false; playhead = t; scene.setPlayhead(t); renderTransport(); } });
 const selection = new Selection();
 const undoStack = new UndoStack();
+// [agent] Built-in agent UI: live stream, proposal cards, prompt actions. Undo entries land on the same stack.
+const agentUi = createAgentUi({ projectId, project: () => project, apply: p => apply(p), runEntry: e => runEntry(e), pushUndo: e => { undoStack.push(e); renderUndo(); }, refresh: () => pollNow(), resend: (text, sid) => { textarea.value = text; if (sid) shotId = sid; void send(); }, selectShot: id => { selectShot(id); setTab('shot'); } });
 selection.subscribe(sel => { selected = sel.primary; scene.setSelection(sel.ids, sel.primary); renderOutline(); renderInspector(); renderObjectPane(); renderKeyTrack(); });
 
 // ---------- Rendering ----------
@@ -308,17 +312,18 @@ function renderThread() {
 }
 
 function messageView(m: Message) {
-  const who = m.role === 'user' ? 'You' : m.role === 'agent' ? 'Agent' : m.role === 'builtin' ? 'Built-in parser' : 'Previs';
+  const who = m.role === 'user' ? 'You' : m.role === 'agent' ? (m.via === 'runner' ? 'Agent' : 'Your agent') : m.role === 'builtin' ? 'Parser' : 'Previs';
   const av = m.role === 'user' ? 'Y' : m.role === 'agent' ? 'A' : m.role === 'builtin' ? '⚙' : '◐';
   const refs = m.attachments.map(id => allRefs().find(r => r.id === id)).filter(Boolean) as Reference[];
-  return h('div', { class: `msg ${m.role}` },
+  return h('div', { class: `msg ${m.role}${m.error ? ' error' : ''}`, dataset: { msg: m.id } },
     h('div', { class: 'av', 'aria-hidden': 'true' }, av),
     h('div', {},
       h('div', { class: 'who' }, h('b', {}, who), new Date(m.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })),
-      richText(m.text),
+      m.role === 'agent' ? agentText(m.text, richText) : richText(m.text),
       refs.length ? h('div', { class: 'atts' }, ...refs.map(r => h('img', { src: refUrl(r), alt: r.name, title: `${r.name}${r.entityId ? ' → ' + (entity(r.entityId)?.name || '') : ''}` }))) : null,
-      activityView(m),
-      m.role === 'user' && m.status !== 'handled' ? h('div', { class: 'pending' }, m.status === 'claimed' ? (m.activity?.length ? h('span', { class: 'working' }, 'Working…') : h('span', { class: 'working' }, 'Agent is working…')) : 'Waiting for agent…', h('button', { type: 'button', onclick: () => void api('director/message/builtin', { projectId, messageId: m.id }).then(r => apply(r.project)).catch(e => toast(e.message, true)) }, 'Use built-in parser')) : null));
+      m.handledBy === 'runner' && m.status !== 'handled' ? null : activityView(m),
+      ...agentUi.extras(m), // [agent] thinking block, proposal card, prompt actions, retry
+      m.role === 'user' && m.status !== 'handled' && m.handledBy !== 'runner' ? h('div', { class: 'pending' }, m.status === 'claimed' ? (m.activity?.length ? h('span', { class: 'working' }, 'Working…') : h('span', { class: 'working' }, 'Agent is working…')) : 'Waiting for agent…', h('button', { type: 'button', onclick: () => void api('director/message/builtin', { projectId, messageId: m.id }).then(r => apply(r.project)).catch(e => toast(e.message, true)) }, 'Use built-in parser')) : null));
 }
 
 // Agent steps under the message being worked on: live while working, collapsed when done.
@@ -330,10 +335,9 @@ function activityView(m: Message) {
   return h('ol', { class: 'activity live' }, ...rows.slice(-8));
 }
 
-function renderRoute() {
-  pillSlot.replaceChildren(agentPill(agent, () => connectDialog(agent, connect)));
-  const toAgent = mode === 'agent' || (mode === 'auto' && agent?.connected);
-  routeNote.textContent = toAgent ? (agent?.connected ? '→ your agent' : '→ agent (not connected; will wait)') : '→ built-in parser';
+function renderRoute() { // [agent]
+  pillSlot.replaceChildren(agentUi.pill(agent, () => connectDialog(agent, connect)));
+  routeNote.textContent = agentUi.routeNote(mode, agent);
 }
 
 function renderTransport() {
@@ -1465,15 +1469,15 @@ function genQuote(job: any, def: any, request: any, s: Shot) {
 }
 
 // ---------- Live sync ----------
-async function poll() {
+async function pollNow() {
   try {
     const r = await api(`director/project?id=${projectId}&since=${project.revision}`);
     const changed = JSON.stringify(r.agent) !== JSON.stringify(agent);
     agent = r.agent;
     if (r.project) apply(r.project); else if (changed) renderRoute();
   } catch {}
-  setTimeout(poll, 1200);
 }
+async function poll() { await pollNow(); setTimeout(poll, 1200); }
 
 async function boot() {
   if (!projectId) { location.href = '/'; return; }
@@ -1486,6 +1490,7 @@ async function boot() {
     scene.frame(project.scene.entities.filter(e => e.kind !== 'environment').map(e => e.id), 3.5);
     setTab(project.messages.some(m => m.role === 'user') ? 'direct' : 'direct');
     if (params.get('view') === 'sequence') setMode('sequence');
+    agentUi.connect(); // [agent] live steps + streaming reply
     setTimeout(poll, 1200);
   } catch (e) {
     app.replaceChildren(h('div', { class: 'empty-state', style: 'margin:80px auto;max-width:420px' }, (e as Error).message, h('br'), h('a', { href: '/', class: 'btn', style: 'margin-top:12px' }, 'Back to projects')));

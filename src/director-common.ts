@@ -1,7 +1,8 @@
 import { SHAPES, entitySize } from '../shared/director.mjs';
 import type { Entity } from '../shared/director.mjs';
 
-export type AgentStatus = { connected: boolean; waiting: boolean; lastSeen: string | null; name: string | null };
+export type RunnerStatus = { available: boolean; model: string; busy: string[]; runs: Record<string, { messageId: string; startedAt: string; text: string; steps: string[] } | null> }; // [agent]
+export type AgentStatus = { connected: boolean; waiting: boolean; lastSeen: string | null; name: string | null; runner?: RunnerStatus | null };
 export type Connect = { command: string; args: string[]; env: Record<string, string> } | null;
 
 export async function api<T = any>(path: string, body?: unknown): Promise<T> {
@@ -112,7 +113,7 @@ export function connectDialog(status: AgentStatus | null, connect: Connect) {
   const dlg = h('dialog', { id: 'connect-dialog', 'aria-labelledby': 'connect-title' },
     h('div', { class: 'dialog-head' }, h('h2', { id: 'connect-title' }, 'Connect your agent'), agentPill(status, () => {}), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'dialog-body' },
-      h('p', { class: 'muted', style: 'margin:0' }, 'Your own coding agent (Claude Code, Codex, any MCP client) reads the chat, edits the blockout, shots and camera, and replies here. It runs on your subscription — Previs never calls a model itself. Without an agent, a built-in parser handles simple directions.'),
+      h('p', { class: 'muted', style: 'margin:0' }, status?.runner?.available ? 'The built-in agent is ready: Previs runs Claude Code on this Mac with Previs tools only, on your existing login. You only need the steps below to use a different agent (Codex, another MCP client) instead.' : 'Install Claude Code and sign in once (run “claude” in a terminal) for the built-in agent. Or connect your own coding agent (Claude Code, Codex, any MCP client) over MCP: it reads the chat, edits the blockout, shots and camera, and replies here. Without an agent, a built-in parser handles simple directions.'),
       h('ol', {},
         h('li', {}, h('b', {}, 'Add the MCP server'), ' (Claude Code):', code(claude), h('details', {}, h('summary', { class: 'muted', style: 'cursor:pointer;margin-top:6px' }, 'Other MCP clients (JSON)'), code(json))),
         h('li', {}, h('b', {}, 'Ask your agent to listen'), code(ask)),

@@ -16,6 +16,7 @@ import { releaseFrameStage } from './video.mjs';
 import { videoRoutes } from './video-routes.mjs';
 import { generationRoutes } from './generation-routes.mjs';
 import { openDirector, directorRoutes } from './director.mjs';
+import { openAgentRunner } from './agent-runner.mjs'; // [agent]
 import { openRefgen, refgenRoutes } from './refgen.mjs';
 import { setupChecks } from './setup-check.mjs';
 
@@ -28,11 +29,11 @@ const blender = new BlenderMcp();
 const operations = await openOperations(data);
 const comfy = await openComfy(data, project);
 const generation = await generationRoutes(data,project);
-let refgen;
-const director = await openDirector(data, { engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id) });
+let refgen, agentRunner; // [agent]
+const director = await openDirector(data, { engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
 refgen = await openRefgen(data, director);
 const refgenRoute = refgenRoutes(refgen);
-const directorRoute = directorRoutes(director, project, () => ({ command: process.execPath, args: [join(root, 'server/previs/agent.mjs')], env: { PREVIS_URL: `http://127.0.0.1:${port}` } }));
+const directorRoute = directorRoutes(director, project, () => ({ command: process.execPath, args: [join(root, 'server/previs/agent.mjs')], env: { PREVIS_URL: `http://127.0.0.1:${port}` } }), () => agentRunner);
 const videos = videoRoutes({data,project,blender,operations,refreshBlender});
 let connectionError = null;
 async function refreshBlender() {
@@ -49,6 +50,7 @@ let catalog = null;
 let operation = Promise.resolve();
 const serial = fn => { const next = operation.then(fn); operation = next.catch(() => {}); return next; };
 const port = Number(process.env.PORT || 5190);
+agentRunner = await openAgentRunner({ root, dataDir: data, port, director }); // [agent] built-in Claude Code runner
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
 async function body(req) {
   let text = ''; for await (const chunk of req) { text += chunk; if (text.length > 16 * 1024 * 1024) fail('Request too large', 413); }
@@ -60,6 +62,7 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
+    if (req.method === 'GET' && url.pathname === '/api/director/agent/stream') { const id = url.searchParams.get('id') || ''; if (!/^[a-f0-9-]{36}$/.test(id)) fail('Unknown project', 404); return agentRunner.stream(req, res, id); } // [agent] live steps + reply text (SSE)
     if (req.method === 'GET' && url.pathname === '/api/director/setup') return send({ ...(await setupChecks({ root, data })), agent: director.agentStatus(), dataDir: data });
     if (req.method === 'GET' && url.pathname === '/api/director/export') {
       const { filename, data: zip } = await director.exportZip(url.searchParams.get('id'));
@@ -210,5 +213,5 @@ const server = createServer(async (req, res) => {
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});
 server.listen(port, '127.0.0.1', () => console.log(`Comfy Previs: http://127.0.0.1:${port}`));
-async function stop() { phoneLan.close();relay.close();blender.close(); server.close(); await releaseLock(); process.exit(0); }
+async function stop() { agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await releaseLock(); process.exit(0); }
 process.on('SIGTERM', stop); process.on('SIGINT', stop);
