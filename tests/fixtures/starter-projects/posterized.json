@@ -1,0 +1,2669 @@
+{
+ "version": 1,
+ "id": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+ "title": "Starter \u00b7 Posterized",
+ "template": "empty",
+ "scene": {
+  "name": "Arena",
+  "environment": {
+   "preset": "interior",
+   "description": "A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.",
+   "style": "Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action."
+  },
+  "entities": [
+   {
+    "id": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
+    "name": "Court floor",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     28,
+     0.05,
+     15
+    ],
+    "color": "#C8955A",
+    "notes": "Polished maple hardwood basketball court with painted lines, glossy reflections.",
+    "look": "7a3ba3aa-337d-43d3-8006-75565321d885",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+   },
+   {
+    "id": "f33945af-cec9-4a63-bed2-db955c077150",
+    "name": "Center circle",
+    "kind": "environment",
+    "shape": "cylinder",
+    "position": [
+     0,
+     0.03,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     3.6,
+     0.05,
+     3.6
+    ],
+    "color": "#2459D8",
+    "notes": "Blue center circle with a yellow ring.",
+    "look": "530f7854-9e0b-4e28-9832-e607e0ce85a6",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+   },
+   {
+    "id": "3da529e7-0222-4ced-9423-beb9b452f787",
+    "name": "East paint",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     9.7,
+     0.02,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     5.8,
+     0.05,
+     4.9
+    ],
+    "color": "#2459D8",
+    "notes": "",
+    "look": null,
+    "lookFrom": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+   },
+   {
+    "id": "933f0c85-b621-4058-927b-577630edea46",
+    "name": "East hoop support",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     14.2,
+     1.6,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     0.4,
+     3.2,
+     0.4
+    ],
+    "color": "#1d1f22",
+    "notes": "Padded base and steel arm that hold the basketball backboard over the baseline.",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11"
+   },
+   {
+    "id": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+    "name": "East backboard",
+    "kind": "prop",
+    "shape": "box",
+    "position": [
+     12.7,
+     3.35,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     0.06,
+     1.05,
+     1.8
+    ],
+    "color": "#e8f0f6",
+    "notes": "Clear glass backboard with a white border.",
+    "look": "7d1c9733-7313-41c2-9684-07461c874677",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11",
+    "sheets": [
+     {
+      "id": "sfqpn9xcu",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:16:08.072Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "41cvgcwl",
+          "requestId": "941d2783-7fb6-464d-80c6-3a0d3b60e0a5",
+          "referenceId": "7d1c9733-7313-41c2-9684-07461c874677",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 265761,
+          "error": "",
+          "createdAt": "2026-10-30T17:16:08.072Z"
+         }
+        ],
+        "selected": "41cvgcwl",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "90ijnbhw",
+          "requestId": "1262def9-8a55-4621-8534-4e3da982ac52",
+          "referenceId": "c6515805-b4b7-443d-af2c-0320d04299f1",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 712275,
+          "error": "",
+          "createdAt": "2026-10-30T17:16:08.072Z"
+         }
+        ],
+        "selected": "90ijnbhw",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "i5phbdzj",
+          "requestId": "551166bc-8f28-46d4-8a64-f480be9bf01a",
+          "referenceId": "2edbc317-12b8-4ad4-a364-233d952e4dc7",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 938668,
+          "error": "",
+          "createdAt": "2026-10-30T17:16:08.072Z"
+         }
+        ],
+        "selected": "i5phbdzj",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "nec5qzpo",
+          "requestId": "28d5e1a1-ba52-4646-ae62-c28c5cc0414e",
+          "referenceId": "58f6398c-51e9-4d57-847b-d491e5bcf662",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 148185,
+          "error": "",
+          "createdAt": "2026-10-30T17:16:08.072Z"
+         }
+        ],
+        "selected": "nec5qzpo",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+    "name": "East rim",
+    "kind": "prop",
+    "shape": "cylinder",
+    "position": [
+     12.25,
+     3.05,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     0.46,
+     0.05,
+     0.46
+    ],
+    "color": "#E2591C",
+    "notes": "Orange breakaway rim with a white net.",
+    "look": "fd36fea2-8a0c-488f-86cc-e463794253cd",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11",
+    "sheets": [
+     {
+      "id": "snza47csx",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:24:33.040Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "rch2382z",
+          "requestId": "683ef24d-08da-4e5a-8975-194272a684e8",
+          "referenceId": "e5d80152-6842-4354-99aa-8c6538a878e8",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 983349,
+          "error": "",
+          "createdAt": "2026-10-30T17:24:33.040Z"
+         }
+        ],
+        "selected": "rch2382z",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "tw3iolzs",
+          "requestId": "6895e237-c128-484f-87fc-bd4403bb2f67",
+          "referenceId": "f3801765-7683-4e8c-9ca6-5be877e22e13",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 694000,
+          "error": "",
+          "createdAt": "2026-10-30T17:24:33.040Z"
+         }
+        ],
+        "selected": "tw3iolzs",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "0t5ifftz",
+          "requestId": "bf65601e-acb8-4155-9949-62049377d9a2",
+          "referenceId": "261fbeee-1c63-41b5-b972-471e04cc25a7",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 37145,
+          "error": "",
+          "createdAt": "2026-10-30T17:24:33.040Z"
+         }
+        ],
+        "selected": "0t5ifftz",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "2vg8dd3g",
+          "requestId": "d9ac3793-ce52-430e-ad6b-85a923ed7222",
+          "referenceId": "7e274e7f-df45-4217-874f-fe0c08fe9756",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 546987,
+          "error": "",
+          "createdAt": "2026-10-30T17:24:33.040Z"
+         }
+        ],
+        "selected": "2vg8dd3g",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "21535720-bd48-45f3-9371-e4935952b362",
+    "name": "West paint",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -9.7,
+     0.02,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     5.8,
+     0.05,
+     4.9
+    ],
+    "color": "#2459D8",
+    "notes": "",
+    "look": null,
+    "lookFrom": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+   },
+   {
+    "id": "01194033-ad5e-4473-80c6-6073e0f5e6d0",
+    "name": "West hoop support",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -14.2,
+     1.6,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     0.4,
+     3.2,
+     0.4
+    ],
+    "color": "#1d1f22",
+    "notes": "Padded base and steel arm that hold the basketball backboard over the baseline.",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "d6fbfc22-92f9-4b4c-8cfa-3ac2e7b517d4"
+   },
+   {
+    "id": "c6f3fef1-e438-4dbb-970c-3360829c2bbd",
+    "name": "West backboard",
+    "kind": "prop",
+    "shape": "box",
+    "position": [
+     -12.7,
+     3.35,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     0.06,
+     1.05,
+     1.8
+    ],
+    "color": "#e8f0f6",
+    "notes": "Clear glass backboard with a white border.",
+    "look": null,
+    "lookFrom": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "d6fbfc22-92f9-4b4c-8cfa-3ac2e7b517d4",
+    "sheets": [
+     {
+      "id": "s1xse4x39",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:21:10.843Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "gdnweqi6",
+          "requestId": "7f4c9230-b333-4b10-8f28-fa3f1327adf9",
+          "referenceId": "0f5a6663-d3fd-40ef-b867-fd6cbfae8134",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 634027,
+          "error": "",
+          "createdAt": "2026-10-30T17:21:10.843Z"
+         }
+        ],
+        "selected": "gdnweqi6",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "t931uvbd",
+          "requestId": "0697408f-f741-4e0d-a26c-f5f1b0e92bda",
+          "referenceId": "10250039-6774-4336-9d61-82514cfffc3d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 73290,
+          "error": "",
+          "createdAt": "2026-10-30T17:21:10.843Z"
+         }
+        ],
+        "selected": "t931uvbd",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "k1j8bjhq",
+          "requestId": "eb793166-a11a-44ca-aa6e-85840cbf89e1",
+          "referenceId": "cd930a45-6829-4fa7-87a1-a06e78538ddb",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 115198,
+          "error": "",
+          "createdAt": "2026-10-30T17:21:10.843Z"
+         }
+        ],
+        "selected": "k1j8bjhq",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "4l3p8f8z",
+          "requestId": "d70f7f44-0060-4014-87ec-f1943e68535d",
+          "referenceId": "1f3d3aa2-7a51-4ed2-8486-5ec3b795ff75",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 56663,
+          "error": "",
+          "createdAt": "2026-10-30T17:21:10.843Z"
+         }
+        ],
+        "selected": "4l3p8f8z",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "7eae4d0c-c98f-4372-a182-2276da77c19c",
+    "name": "West rim",
+    "kind": "prop",
+    "shape": "cylinder",
+    "position": [
+     -12.25,
+     3.05,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     0.46,
+     0.05,
+     0.46
+    ],
+    "color": "#E2591C",
+    "notes": "Orange breakaway rim with a white net.",
+    "look": null,
+    "lookFrom": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "d6fbfc22-92f9-4b4c-8cfa-3ac2e7b517d4"
+   },
+   {
+    "id": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "name": "Sideline stands \u00b7 tier 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     1,
+     12
+    ],
+    "rotation": 0,
+    "scale": [
+     26,
+     2,
+     2.2
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": "49b20a6f-8d7b-4fb8-a748-27e7cbdb0957",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "a2fdbf66-8de0-41ae-b9e8-7aa6138520ed",
+    "name": "Sideline stands \u00b7 tier 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     2.6,
+     14.2
+    ],
+    "rotation": 0,
+    "scale": [
+     26,
+     3.6,
+     2.2
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "62d70ffa-5138-46bf-9839-5fc21cd383e1",
+    "name": "Sideline stands \u00b7 tier 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     4.2,
+     16.4
+    ],
+    "rotation": 0,
+    "scale": [
+     26,
+     5.2,
+     2.2
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "9c81a972-96b5-4415-8e7f-65d464edb5a5",
+    "name": "Far sideline stands \u00b7 tier 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     1,
+     -12
+    ],
+    "rotation": 0,
+    "scale": [
+     26,
+     2,
+     2.2
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "ecc70a35-1c6a-4f3b-b38d-a9e4dc0e929d",
+    "name": "Far sideline stands \u00b7 tier 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     2.6,
+     -14.2
+    ],
+    "rotation": 0,
+    "scale": [
+     26,
+     3.6,
+     2.2
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "e5add64a-323f-46b6-8e83-4eb0d044faa7",
+    "name": "Far sideline stands \u00b7 tier 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     4.2,
+     -16.4
+    ],
+    "rotation": 0,
+    "scale": [
+     26,
+     5.2,
+     2.2
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "c77b4752-4eac-4d94-9d5d-4f484d2b4e6a",
+    "name": "East end stands 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     16.926,
+     2.5,
+     -14.712
+    ],
+    "rotation": 348.75,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "5e4c1052-d36f-45f2-96b2-7f6bfdac3a02",
+    "name": "East end stands 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     22.334,
+     2.5,
+     -12.472
+    ],
+    "rotation": 326.25,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "ff4433ed-98d0-4ea1-b3df-6c0332022f56",
+    "name": "East end stands 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     26.472,
+     2.5,
+     -8.334
+    ],
+    "rotation": 303.75,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "81dd75f3-b723-4981-a765-1a4165b9ab90",
+    "name": "East end stands 4",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     28.712,
+     2.5,
+     -2.926
+    ],
+    "rotation": 281.25,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "fc3076a6-37fd-400c-84c7-e38b1023da60",
+    "name": "East end stands 5",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     28.712,
+     2.5,
+     2.926
+    ],
+    "rotation": 258.75,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "84f81643-a55c-4637-8a96-a95df8714c3b",
+    "name": "East end stands 6",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     26.472,
+     2.5,
+     8.334
+    ],
+    "rotation": 236.25,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "c7336edb-b36c-4aad-b05f-2c01ff191ced",
+    "name": "East end stands 7",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     22.334,
+     2.5,
+     12.472
+    ],
+    "rotation": 213.75,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "b926819c-2ebc-42b1-9f3c-8b9976bfad28",
+    "name": "East end stands 8",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     16.926,
+     2.5,
+     14.712
+    ],
+    "rotation": 191.25,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "d6a31d05-4c73-4f33-bda6-2b25293e30ff",
+    "name": "West end stands 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -16.926,
+     2.5,
+     14.712
+    ],
+    "rotation": 168.75,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "0b28e69b-b6ca-48cb-a0b2-2b76e5bcf6aa",
+    "name": "West end stands 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -22.334,
+     2.5,
+     12.472
+    ],
+    "rotation": 146.25,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "7ae3c42b-815a-4023-b372-6cd260918b5e",
+    "name": "West end stands 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -26.472,
+     2.5,
+     8.334
+    ],
+    "rotation": 123.75,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "506fbb21-7667-456d-8025-f30c6e9a345d",
+    "name": "West end stands 4",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -28.712,
+     2.5,
+     2.926
+    ],
+    "rotation": 101.25,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "ecec1c50-11aa-4d42-ba91-800062ccf275",
+    "name": "West end stands 5",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -28.712,
+     2.5,
+     -2.926
+    ],
+    "rotation": 78.75,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "fa2b9dbf-423e-4fda-a5c5-aebb0ca3a24d",
+    "name": "West end stands 6",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -26.472,
+     2.5,
+     -8.334
+    ],
+    "rotation": 56.25,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "86566b99-79c7-4919-905f-5cdcb248a74b",
+    "name": "West end stands 7",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -22.334,
+     2.5,
+     -12.472
+    ],
+    "rotation": 33.75,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "d8ad2771-12b0-41ee-8df7-54fef8e978ed",
+    "name": "West end stands 8",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -16.926,
+     2.5,
+     -14.712
+    ],
+    "rotation": 11.25,
+    "scale": [
+     6,
+     5,
+     4
+    ],
+    "color": "#6f747d",
+    "notes": "",
+    "look": null,
+    "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+   },
+   {
+    "id": "f853574c-2cf2-4176-8bfa-ecc511d2da73",
+    "name": "Jumbotron",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     13,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     6,
+     3,
+     6
+    ],
+    "color": "#1d1f22",
+    "notes": "Four-sided center-hung scoreboard with bright LED screens.",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "name": "Comfy guard",
+    "kind": "character",
+    "shape": "person",
+    "position": [
+     -2,
+     0,
+     1.5
+    ],
+    "rotation": 90,
+    "scale": [
+     1.1,
+     1.12,
+     1.1
+    ],
+    "color": "#2459D8",
+    "notes": "Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.",
+    "look": "6e60c0e9-d930-4a49-b083-fbc4485d7e1d",
+    "lookFrom": null,
+    "styleNotes": "Blue and yellow only; never black, white or green on this player",
+    "pitch": 0,
+    "roll": 0,
+    "path": [
+     {
+      "t": 0,
+      "p": [
+       -6,
+       0,
+       2
+      ]
+     },
+     {
+      "t": 3,
+      "p": [
+       -1,
+       0,
+       2.5
+      ]
+     },
+     {
+      "t": 6,
+      "p": [
+       4,
+       0,
+       2.2
+      ]
+     },
+     {
+      "t": 9,
+      "p": [
+       8.6,
+       0,
+       1.2
+      ]
+     },
+     {
+      "t": 10.6,
+      "p": [
+       10.6,
+       0,
+       0.6
+      ]
+     },
+     {
+      "t": 11.6,
+      "p": [
+       11.6,
+       1,
+       0.25
+      ]
+     },
+     {
+      "t": 12.2,
+      "p": [
+       12,
+       1.15,
+       0.05
+      ]
+     },
+     {
+      "t": 13.2,
+      "p": [
+       12.1,
+       0,
+       0.4
+      ]
+     },
+     {
+      "t": 15,
+      "p": [
+       11.4,
+       0,
+       1.6
+      ]
+     }
+    ],
+    "parent": null,
+    "sheets": [
+     {
+      "id": "sd20aztkk",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:04:37.464Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "alrfq4wt",
+          "requestId": "d6ec65a3-0ecd-4ebb-a216-34321511a8b2",
+          "referenceId": "8000d100-2dbf-4825-a0bc-89c10382fe6c",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 396892,
+          "error": "",
+          "createdAt": "2026-10-30T17:04:37.464Z"
+         }
+        ],
+        "selected": "alrfq4wt",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "dz6shx1m",
+          "requestId": "f3ba8819-1f2d-4ba2-a0f9-21cd1dd91993",
+          "referenceId": "32cb978d-d436-4b0c-9c6f-68d1aaa22535",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 184826,
+          "error": "",
+          "createdAt": "2026-10-30T17:04:37.464Z"
+         }
+        ],
+        "selected": "dz6shx1m",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "3rex6fqn",
+          "requestId": "34e6d04c-e9ed-429b-a625-a1330232d8ec",
+          "referenceId": "64cb59d7-d53d-4d38-98b9-4641967a1d5d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 781759,
+          "error": "",
+          "createdAt": "2026-10-30T17:04:37.464Z"
+         }
+        ],
+        "selected": "3rex6fqn",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "sc8u2531",
+          "requestId": "e68de948-7a9e-4de8-a1e6-ff7890b56192",
+          "referenceId": "35723f25-67df-4684-a370-fe096c83a2ee",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 956673,
+          "error": "",
+          "createdAt": "2026-10-30T17:04:37.464Z"
+         }
+        ],
+        "selected": "sc8u2531",
+        "accepted": null
+       }
+      ]
+     },
+     {
+      "id": "srbrmr8vy",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:45:28.308Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "a4xtsniq",
+          "requestId": "7d9cc1b3-ce71-4684-a506-9d1c363e79f6",
+          "referenceId": "31a37d1b-16de-4c8f-818a-d6357cf82436",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 560252,
+          "error": "",
+          "createdAt": "2026-10-30T17:45:28.308Z"
+         }
+        ],
+        "selected": "a4xtsniq",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "3yknyndu",
+          "requestId": "7b98161b-d132-4937-b5bf-63300206d9f3",
+          "referenceId": "88027289-2f3c-4162-9a13-33cc8830c067",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 291534,
+          "error": "",
+          "createdAt": "2026-10-30T17:45:28.308Z"
+         }
+        ],
+        "selected": "3yknyndu",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "7d55ucfj",
+          "requestId": "c3b053a9-777f-4a8c-8ec8-cd666a6b8c7d",
+          "referenceId": "1251c81f-09b5-4450-841e-e61189597f0b",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 623310,
+          "error": "",
+          "createdAt": "2026-10-30T17:45:28.308Z"
+         }
+        ],
+        "selected": "7d55ucfj",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "vg3hm10t",
+          "requestId": "16e0e33a-072d-41c6-9b2b-b1bf176f1a52",
+          "referenceId": "baff0e42-1ae0-432f-a337-5b040038384b",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 70929,
+          "error": "",
+          "createdAt": "2026-10-30T17:45:28.308Z"
+         }
+        ],
+        "selected": "vg3hm10t",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "6c5f0096-a6b1-4c07-8bdf-de9798174c0e",
+    "name": "Comfy wing",
+    "kind": "character",
+    "shape": "person",
+    "position": [
+     4,
+     0,
+     -4.5
+    ],
+    "rotation": 90,
+    "scale": [
+     1.1,
+     1.12,
+     1.1
+    ],
+    "color": "#2459D8",
+    "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
+    "look": null,
+    "lookFrom": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "1ace31d3-afba-4589-8a9e-8de04363ebd5",
+    "name": "Comfy center",
+    "kind": "character",
+    "shape": "person",
+    "position": [
+     7,
+     0,
+     5
+    ],
+    "rotation": 120,
+    "scale": [
+     1.1,
+     1.12,
+     1.1
+    ],
+    "color": "#2459D8",
+    "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
+    "look": null,
+    "lookFrom": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "name": "Rival defender",
+    "kind": "character",
+    "shape": "person",
+    "position": [
+     9,
+     0,
+     0.5
+    ],
+    "rotation": 270,
+    "scale": [
+     1.1,
+     1.12,
+     1.1
+    ],
+    "color": "#16181A",
+    "notes": "Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.",
+    "look": "0248f460-ffea-4e12-86ad-fa3eb083b609",
+    "lookFrom": null,
+    "styleNotes": "Black and neon green only; never white, red or blue on this player",
+    "pitch": 0,
+    "roll": 0,
+    "path": [
+     {
+      "t": 0,
+      "p": [
+       2,
+       0,
+       0
+      ]
+     },
+     {
+      "t": 6,
+      "p": [
+       8,
+       0,
+       0.5
+      ]
+     },
+     {
+      "t": 10,
+      "p": [
+       10.8,
+       0,
+       0.2
+      ],
+      "r": 270
+     },
+     {
+      "t": 11.6,
+      "p": [
+       11.4,
+       0.6,
+       -0.3
+      ],
+      "r": 270
+     },
+     {
+      "t": 12.4,
+      "p": [
+       11.6,
+       0,
+       -0.5
+      ],
+      "r": 270
+     },
+     {
+      "t": 15,
+      "p": [
+       11,
+       0,
+       -1.4
+      ],
+      "r": 240
+     }
+    ],
+    "parent": null,
+    "sheets": [
+     {
+      "id": "sgo49c1oq",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:08:14.155Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "raiq5onf",
+          "requestId": "bdc12a9c-bef3-488b-8de4-b379991c20b2",
+          "referenceId": "5d01a364-3687-4c21-9fb4-fffe32048b3d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 481020,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:14.155Z"
+         }
+        ],
+        "selected": "raiq5onf",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "4encfw6y",
+          "requestId": "d8bb1609-0704-49ad-b937-a66584db0098",
+          "referenceId": "b662d8aa-94db-4be1-bd00-75d2a668ba6d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 137683,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:14.155Z"
+         }
+        ],
+        "selected": "4encfw6y",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "swiiynxk",
+          "requestId": "9d9ce36a-4893-4577-bbe8-25c5ef9a4cbd",
+          "referenceId": "83ad42b2-ddab-434a-bb33-775a542697ad",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 71152,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:14.155Z"
+         }
+        ],
+        "selected": "swiiynxk",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "zljwbi1m",
+          "requestId": "e0f969e5-55af-4947-af38-3a97308e9d9f",
+          "referenceId": "1cfbfb2e-bb9c-4142-bc09-7d6294cedd3f",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 289869,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:14.155Z"
+         }
+        ],
+        "selected": "zljwbi1m",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "5cf9ca0b-51f8-4044-9a39-01ee27348fa7",
+    "name": "Rival forward",
+    "kind": "character",
+    "shape": "person",
+    "position": [
+     6,
+     0,
+     -3
+    ],
+    "rotation": 250,
+    "scale": [
+     1.1,
+     1.12,
+     1.1
+    ],
+    "color": "#16181A",
+    "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers.",
+    "look": null,
+    "lookFrom": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "4e8328c3-1083-4dfa-b12a-4c11dd02a683",
+    "name": "Rival guard",
+    "kind": "character",
+    "shape": "person",
+    "position": [
+     3,
+     0,
+     4
+    ],
+    "rotation": 240,
+    "scale": [
+     1.1,
+     1.12,
+     1.1
+    ],
+    "color": "#16181A",
+    "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers.",
+    "look": null,
+    "lookFrom": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+    "name": "Basketball",
+    "kind": "prop",
+    "shape": "sphere",
+    "position": [
+     -1.6,
+     1,
+     1.5
+    ],
+    "rotation": 0,
+    "scale": [
+     0.24,
+     0.24,
+     0.24
+    ],
+    "color": "#E2591C",
+    "notes": "Orange leather basketball with black seams.",
+    "look": "6a525369-1df1-4883-ad37-d623f9ae39c9",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": [
+     {
+      "t": 0,
+      "p": [
+       -5.6,
+       1,
+       2.3
+      ]
+     },
+     {
+      "t": 3,
+      "p": [
+       -0.6,
+       0.6,
+       2.8
+      ]
+     },
+     {
+      "t": 6,
+      "p": [
+       4.4,
+       1,
+       2.5
+      ]
+     },
+     {
+      "t": 9,
+      "p": [
+       9,
+       0.7,
+       1.5
+      ]
+     },
+     {
+      "t": 10.6,
+      "p": [
+       10.9,
+       1.6,
+       0.6
+      ]
+     },
+     {
+      "t": 11.6,
+      "p": [
+       12,
+       3.2,
+       0.2
+      ]
+     },
+     {
+      "t": 12.2,
+      "p": [
+       12.25,
+       3.1,
+       0
+      ]
+     },
+     {
+      "t": 12.6,
+      "p": [
+       12.25,
+       1.6,
+       0
+      ]
+     },
+     {
+      "t": 13.4,
+      "p": [
+       12,
+       0.2,
+       0.3
+      ]
+     },
+     {
+      "t": 15,
+      "p": [
+       11.5,
+       0.2,
+       1.2
+      ]
+     }
+    ],
+    "parent": null,
+    "sheets": [
+     {
+      "id": "s5deriu3w",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:08:19.180Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "9c71ynsr",
+          "requestId": "6cf99926-ad9a-4fa2-81dc-eacb5fd6f573",
+          "referenceId": "67dba558-2aea-4d77-a2fb-5490d2213022",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 143434,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:19.180Z"
+         }
+        ],
+        "selected": "9c71ynsr",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "2310y0ta",
+          "requestId": "8a47b792-7fb4-4caa-829c-4bd679541832",
+          "referenceId": "f6fad414-8bf1-4d11-9f0d-710850141aa5",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 375334,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:19.180Z"
+         }
+        ],
+        "selected": "2310y0ta",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "kf6u0r3j",
+          "requestId": "0b20b71e-e6f2-418b-921d-c0c4ae077682",
+          "referenceId": "ba9a5d73-8304-46e0-bde3-24bc3b9efc80",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 432070,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:19.180Z"
+         }
+        ],
+        "selected": "kf6u0r3j",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "v9colzhs",
+          "requestId": "451c7ed0-b32c-4908-ad41-c8373aefcb2d",
+          "referenceId": "abd804ae-5282-4345-bc07-616ba65dbfc9",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 73599,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:19.180Z"
+         }
+        ],
+        "selected": "v9colzhs",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "c45f5f71-dc94-45b5-8e35-383daa7ecd11",
+    "name": "East hoop",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     12.212499999999999,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "d6fbfc22-92f9-4b4c-8cfa-3ac2e7b517d4",
+    "name": "West hoop",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     -12.212499999999999,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "96bc0661-664b-4ce7-8f98-1e8a1954399f",
+    "name": "Arena stands",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     0,
+     0,
+     8.074349270001139e-17
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "1da57d85-2ce8-4466-b14e-0b9409dcd02e",
+    "name": "Court",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     0,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   }
+  ],
+  "references": [
+   {
+    "id": "32072d1e-c469-44e6-8db6-8a5835874bd3",
+    "name": "Comfy guard \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "32072d1e-c469-44e6-8db6-8a5835874bd3.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "",
+    "createdAt": "2026-10-30T15:19:41.993Z"
+   },
+   {
+    "id": "379c6bab-3390-470a-baa8-fa73980375c1",
+    "name": "Rival defender \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "379c6bab-3390-470a-baa8-fa73980375c1.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "note": "",
+    "createdAt": "2026-10-30T15:20:23.119Z"
+   },
+   {
+    "id": "6a525369-1df1-4883-ad37-d623f9ae39c9",
+    "name": "Basketball \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "6a525369-1df1-4883-ad37-d623f9ae39c9.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+    "note": "",
+    "createdAt": "2026-10-30T15:21:03.125Z"
+   },
+   {
+    "id": "8000d100-2dbf-4825-a0bc-89c10382fe6c",
+    "name": "Comfy guard \u00b7 Front",
+    "file": "8000d100-2dbf-4825-a0bc-89c10382fe6c.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:sd20aztkk:front",
+    "createdAt": "2026-10-30T17:05:30.304Z"
+   },
+   {
+    "id": "32cb978d-d436-4b0c-9c6f-68d1aaa22535",
+    "name": "Comfy guard \u00b7 Left",
+    "file": "32cb978d-d436-4b0c-9c6f-68d1aaa22535.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:sd20aztkk:left",
+    "createdAt": "2026-10-30T17:05:41.808Z"
+   },
+   {
+    "id": "35723f25-67df-4684-a370-fe096c83a2ee",
+    "name": "Comfy guard \u00b7 Right",
+    "file": "35723f25-67df-4684-a370-fe096c83a2ee.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:sd20aztkk:right",
+    "createdAt": "2026-10-30T17:07:42.856Z"
+   },
+   {
+    "id": "64cb59d7-d53d-4d38-98b9-4641967a1d5d",
+    "name": "Comfy guard \u00b7 Back",
+    "file": "64cb59d7-d53d-4d38-98b9-4641967a1d5d.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:sd20aztkk:back",
+    "createdAt": "2026-10-30T17:07:54.460Z"
+   },
+   {
+    "id": "35bea06f-8e12-4d0c-bb6f-543a04a5668a",
+    "name": "Comfy guard \u00b7 design sheet",
+    "file": "35bea06f-8e12-4d0c-bb6f-543a04a5668a.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:sd20aztkk:composed",
+    "createdAt": "2026-10-30T17:07:58.934Z"
+   },
+   {
+    "id": "5d01a364-3687-4c21-9fb4-fffe32048b3d",
+    "name": "Rival defender \u00b7 Front",
+    "file": "5d01a364-3687-4c21-9fb4-fffe32048b3d.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "note": "sheet:sgo49c1oq:front",
+    "createdAt": "2026-10-30T17:12:40.690Z"
+   },
+   {
+    "id": "67dba558-2aea-4d77-a2fb-5490d2213022",
+    "name": "Basketball \u00b7 Front",
+    "file": "67dba558-2aea-4d77-a2fb-5490d2213022.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+    "note": "sheet:s5deriu3w:front",
+    "createdAt": "2026-10-30T17:13:29.513Z"
+   },
+   {
+    "id": "b662d8aa-94db-4be1-bd00-75d2a668ba6d",
+    "name": "Rival defender \u00b7 Left",
+    "file": "b662d8aa-94db-4be1-bd00-75d2a668ba6d.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "note": "sheet:sgo49c1oq:left",
+    "createdAt": "2026-10-30T17:13:32.747Z"
+   },
+   {
+    "id": "f6fad414-8bf1-4d11-9f0d-710850141aa5",
+    "name": "Basketball \u00b7 Left side",
+    "file": "f6fad414-8bf1-4d11-9f0d-710850141aa5.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+    "note": "sheet:s5deriu3w:left-side",
+    "createdAt": "2026-10-30T17:13:39.724Z"
+   },
+   {
+    "id": "83ad42b2-ddab-434a-bb33-775a542697ad",
+    "name": "Rival defender \u00b7 Back",
+    "file": "83ad42b2-ddab-434a-bb33-775a542697ad.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "note": "sheet:sgo49c1oq:back",
+    "createdAt": "2026-10-30T17:14:02.572Z"
+   },
+   {
+    "id": "ba9a5d73-8304-46e0-bde3-24bc3b9efc80",
+    "name": "Basketball \u00b7 Back",
+    "file": "ba9a5d73-8304-46e0-bde3-24bc3b9efc80.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+    "note": "sheet:s5deriu3w:back",
+    "createdAt": "2026-10-30T17:14:06.548Z"
+   },
+   {
+    "id": "1cfbfb2e-bb9c-4142-bc09-7d6294cedd3f",
+    "name": "Rival defender \u00b7 Right",
+    "file": "1cfbfb2e-bb9c-4142-bc09-7d6294cedd3f.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "note": "sheet:sgo49c1oq:right",
+    "createdAt": "2026-10-30T17:14:12.554Z"
+   },
+   {
+    "id": "82bf3201-d094-4511-aa7d-58b950580996",
+    "name": "Rival defender \u00b7 design sheet",
+    "file": "82bf3201-d094-4511-aa7d-58b950580996.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "note": "sheet:sgo49c1oq:composed",
+    "createdAt": "2026-10-30T17:14:16.850Z"
+   },
+   {
+    "id": "abd804ae-5282-4345-bc07-616ba65dbfc9",
+    "name": "Basketball \u00b7 Right side",
+    "file": "abd804ae-5282-4345-bc07-616ba65dbfc9.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+    "note": "sheet:s5deriu3w:right-side",
+    "createdAt": "2026-10-30T17:14:18.219Z"
+   },
+   {
+    "id": "a5431a78-accc-4bdb-863d-fc14c8149856",
+    "name": "Basketball \u00b7 design sheet",
+    "file": "a5431a78-accc-4bdb-863d-fc14c8149856.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+    "note": "sheet:s5deriu3w:composed",
+    "createdAt": "2026-10-30T17:14:22.331Z"
+   },
+   {
+    "id": "7a3ba3aa-337d-43d3-8006-75565321d885",
+    "name": "Court floor \u00b7 Flux.2 [pro] \u00b7 604858",
+    "file": "7a3ba3aa-337d-43d3-8006-75565321d885.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
+    "note": "",
+    "createdAt": "2026-10-30T17:14:45.785Z"
+   },
+   {
+    "id": "530f7854-9e0b-4e28-9832-e607e0ce85a6",
+    "name": "Center circle \u00b7 Flux.2 [pro] \u00b7 6244",
+    "file": "530f7854-9e0b-4e28-9832-e607e0ce85a6.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "f33945af-cec9-4a63-bed2-db955c077150",
+    "note": "",
+    "createdAt": "2026-10-30T17:15:52.909Z"
+   },
+   {
+    "id": "7d1c9733-7313-41c2-9684-07461c874677",
+    "name": "East backboard \u00b7 Front",
+    "file": "7d1c9733-7313-41c2-9684-07461c874677.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+    "note": "sheet:sfqpn9xcu:front",
+    "createdAt": "2026-10-30T17:21:31.254Z"
+   },
+   {
+    "id": "49b20a6f-8d7b-4fb8-a748-27e7cbdb0957",
+    "name": "Sideline stands \u00b7 tier 1 \u00b7 Flux.2 [pro] \u00b7 168158",
+    "file": "49b20a6f-8d7b-4fb8-a748-27e7cbdb0957.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+    "note": "",
+    "createdAt": "2026-10-30T17:21:56.371Z"
+   },
+   {
+    "id": "c6515805-b4b7-443d-af2c-0320d04299f1",
+    "name": "East backboard \u00b7 Left side",
+    "file": "c6515805-b4b7-443d-af2c-0320d04299f1.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+    "note": "sheet:sfqpn9xcu:left-side",
+    "createdAt": "2026-10-30T17:22:00.388Z"
+   },
+   {
+    "id": "2edbc317-12b8-4ad4-a364-233d952e4dc7",
+    "name": "East backboard \u00b7 Back",
+    "file": "2edbc317-12b8-4ad4-a364-233d952e4dc7.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+    "note": "sheet:sfqpn9xcu:back",
+    "createdAt": "2026-10-30T17:23:17.881Z"
+   },
+   {
+    "id": "58f6398c-51e9-4d57-847b-d491e5bcf662",
+    "name": "East backboard \u00b7 Right side",
+    "file": "58f6398c-51e9-4d57-847b-d491e5bcf662.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+    "note": "sheet:sfqpn9xcu:right-side",
+    "createdAt": "2026-10-30T17:23:49.066Z"
+   },
+   {
+    "id": "3fd3dd96-91ff-46ab-963c-ed726bd3920f",
+    "name": "East backboard \u00b7 design sheet",
+    "file": "3fd3dd96-91ff-46ab-963c-ed726bd3920f.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+    "note": "sheet:sfqpn9xcu:composed",
+    "createdAt": "2026-10-30T17:23:52.134Z"
+   },
+   {
+    "id": "fd36fea2-8a0c-488f-86cc-e463794253cd",
+    "name": "East rim \u00b7 Flux.2 [pro] \u00b7 561150",
+    "file": "fd36fea2-8a0c-488f-86cc-e463794253cd.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+    "note": "",
+    "createdAt": "2026-10-30T17:24:32.871Z"
+   },
+   {
+    "id": "e5d80152-6842-4354-99aa-8c6538a878e8",
+    "name": "East rim \u00b7 Front",
+    "file": "e5d80152-6842-4354-99aa-8c6538a878e8.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+    "note": "sheet:snza47csx:front",
+    "createdAt": "2026-10-30T17:25:21.451Z"
+   },
+   {
+    "id": "f3801765-7683-4e8c-9ca6-5be877e22e13",
+    "name": "East rim \u00b7 Left side",
+    "file": "f3801765-7683-4e8c-9ca6-5be877e22e13.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+    "note": "sheet:snza47csx:left-side",
+    "createdAt": "2026-10-30T17:25:43.135Z"
+   },
+   {
+    "id": "261fbeee-1c63-41b5-b972-471e04cc25a7",
+    "name": "East rim \u00b7 Back",
+    "file": "261fbeee-1c63-41b5-b972-471e04cc25a7.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+    "note": "sheet:snza47csx:back",
+    "createdAt": "2026-10-30T17:25:54.383Z"
+   },
+   {
+    "id": "7e274e7f-df45-4217-874f-fe0c08fe9756",
+    "name": "East rim \u00b7 Right side",
+    "file": "7e274e7f-df45-4217-874f-fe0c08fe9756.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+    "note": "sheet:snza47csx:right-side",
+    "createdAt": "2026-10-30T17:26:23.646Z"
+   },
+   {
+    "id": "bf835786-020b-4b4b-b483-b5391dbd3c6a",
+    "name": "East rim \u00b7 design sheet",
+    "file": "bf835786-020b-4b4b-b483-b5391dbd3c6a.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+    "note": "sheet:snza47csx:composed",
+    "createdAt": "2026-10-30T17:26:24.035Z"
+   },
+   {
+    "id": "6e60c0e9-d930-4a49-b083-fbc4485d7e1d",
+    "name": "Comfy guard \u00b7 Flux.2 [pro] \u00b7 96424",
+    "file": "6e60c0e9-d930-4a49-b083-fbc4485d7e1d.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "",
+    "createdAt": "2026-10-30T17:41:20.229Z"
+   },
+   {
+    "id": "0248f460-ffea-4e12-86ad-fa3eb083b609",
+    "name": "Rival defender \u00b7 Flux.2 [pro] \u00b7 657566",
+    "file": "0248f460-ffea-4e12-86ad-fa3eb083b609.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+    "note": "",
+    "createdAt": "2026-10-30T17:41:24.773Z"
+   },
+   {
+    "id": "31a37d1b-16de-4c8f-818a-d6357cf82436",
+    "name": "Comfy guard \u00b7 Front",
+    "file": "31a37d1b-16de-4c8f-818a-d6357cf82436.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:srbrmr8vy:front",
+    "createdAt": "2026-10-30T17:46:26.915Z"
+   },
+   {
+    "id": "88027289-2f3c-4162-9a13-33cc8830c067",
+    "name": "Comfy guard \u00b7 Left",
+    "file": "88027289-2f3c-4162-9a13-33cc8830c067.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:srbrmr8vy:left",
+    "createdAt": "2026-10-30T17:47:27.657Z"
+   },
+   {
+    "id": "1251c81f-09b5-4450-841e-e61189597f0b",
+    "name": "Comfy guard \u00b7 Back",
+    "file": "1251c81f-09b5-4450-841e-e61189597f0b.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:srbrmr8vy:back",
+    "createdAt": "2026-10-30T17:47:30.561Z"
+   },
+   {
+    "id": "baff0e42-1ae0-432f-a337-5b040038384b",
+    "name": "Comfy guard \u00b7 Right",
+    "file": "baff0e42-1ae0-432f-a337-5b040038384b.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:srbrmr8vy:right",
+    "createdAt": "2026-10-30T17:48:08.152Z"
+   },
+   {
+    "id": "43817e73-bb30-4087-a356-d8bc02b45f0c",
+    "name": "Comfy guard \u00b7 design sheet",
+    "file": "43817e73-bb30-4087-a356-d8bc02b45f0c.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "note": "sheet:srbrmr8vy:composed",
+    "createdAt": "2026-10-30T17:48:09.915Z"
+   }
+  ]
+ },
+ "shots": [
+  {
+   "id": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+   "title": "Fast break",
+   "description": "Wide arena shot as @comfy-guard sprints the ball up the court on a fast break, @comfy-wing and @comfy-center filling the lanes, the rival defenders backpedalling, the crowd on its feet.",
+   "duration": 5,
+   "start": 1,
+   "camera": {
+    "move": "crane-down",
+    "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "distance": 18,
+    "height": 10,
+    "angle": 160,
+    "mm": 28,
+    "keys": null
+   },
+   "references": [
+    {
+     "id": "70c992c1-d32d-4f72-b005-75c2f1508564",
+     "name": "Shot 01 Fast break \u00b7 Flux.2 [pro] \u00b7 484291",
+     "file": "70c992c1-d32d-4f72-b005-75c2f1508564.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:44:45.837Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "crane down"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "24mm wide"
+    ],
+    "filter": [
+     "saturated primaries"
+    ]
+   }
+  },
+  {
+   "id": "4feea365-12b8-456f-878e-80be456c4c27",
+   "title": "The drive",
+   "description": "Low tracking shot alongside as @comfy-guard drives hard along the baseline past @rival-defender, crossing the ball between his legs, sneakers squeaking.",
+   "duration": 5,
+   "start": 6,
+   "camera": {
+    "move": "truck-right",
+    "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "distance": 5,
+    "height": 1.4,
+    "angle": -80,
+    "mm": 35,
+    "keys": null
+   },
+   "references": [
+    {
+     "id": "8a719256-c46e-4833-b6a0-37ae0eb91fdf",
+     "name": "Shot 02 The drive \u00b7 Flux.2 [pro] \u00b7 366018",
+     "file": "8a719256-c46e-4833-b6a0-37ae0eb91fdf.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:48:24.303Z"
+    },
+    {
+     "id": "42792a91-9882-4d70-bf54-33bc5791e2ac",
+     "name": "Shot 02 The drive \u00b7 FLUX 3 Image \u00b7 366018",
+     "file": "42792a91-9882-4d70-bf54-33bc5791e2ac.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T19:16:31.677Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "tracking shot",
+     "dolly alongside"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "35mm natural"
+    ],
+    "filter": [
+     "high contrast"
+    ]
+   }
+  },
+  {
+   "id": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
+   "title": "Posterized",
+   "description": "Low angle under the rim: @comfy-guard explodes upward and throws down a two-handed dunk over @rival-defender, the net snaps, the camera rises with him, the arena erupts.",
+   "duration": 5,
+   "start": 10,
+   "camera": {
+    "move": "crane-up",
+    "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+    "distance": 5,
+    "height": 0.8,
+    "angle": -35,
+    "mm": 20,
+    "keys": null
+   },
+   "references": [
+    {
+     "id": "d0177bfd-0e15-4eeb-b1e8-91a08760f1b2",
+     "name": "Shot 03 Posterized \u00b7 FLUX 3 Image \u00b7 792113",
+     "file": "d0177bfd-0e15-4eeb-b1e8-91a08760f1b2.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T19:51:14.937Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "crane up"
+    ],
+    "cuts": [
+     "speed ramp"
+    ],
+    "lens": [
+     "14mm ultra-wide"
+    ],
+    "filter": [
+     "high contrast"
+    ]
+   },
+   "prompts": {}
+  }
+ ],
+ "note": "Copied from the live starter project on 30 Oct 2026 (generation provenance, assets and messages removed) for auto-prompt tests."
+}

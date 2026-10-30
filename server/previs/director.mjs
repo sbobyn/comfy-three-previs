@@ -14,7 +14,8 @@ import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
 import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
 import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
-import { loadStarters, starterCard, instantiateStarter } from './starters.mjs';
+import { loadStarters, starterCard, instantiateStarter, attachStarterMedia } from './starters.mjs';
+import { existsSync } from 'node:fs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
@@ -49,8 +50,10 @@ export function createProjectDocument({ title, template = 'street' } = {}, id = 
   const spec = starter || TEMPLATES[t];
   const at = now();
   if (starter) {
-    const { scene, shots } = instantiateStarter(starter);
-    return { version: 1, id, title: String(title || starter.title).slice(0, 120), template: t, createdAt: at, updatedAt: at, revision: 1, scene, shots, messages: [{ id: randomUUID(), shotId: null, role: 'system', text: `Started from the “${starter.title}” starter. Change anything — describe edits to your agent or drag things in the viewport.`, attachments: [], status: 'handled', createdAt: at }] };
+    // A starter's media (looks, sheets, stills, blockout and chosen videos) comes along when its files are present.
+    const { scene, shots, assets, edit, files } = instantiateStarter(starter, { has: path => !!starter.dir && existsSync(join(starter.dir, path)) });
+    const media = files.length && starter.dir ? { dir: starter.dir, files } : null;
+    return { version: 1, id, title: String(title || starter.title).slice(0, 120), template: t, createdAt: at, updatedAt: at, revision: 1, scene, shots, ...(assets ? { assets } : {}), ...(edit ? { edit } : {}), ...(media ? { starterMedia: media } : {}), messages: [{ id: randomUUID(), shotId: null, role: 'system', text: `Started from the “${starter.title}” starter. Change anything — describe edits to your agent or drag things in the viewport.`, attachments: [], status: 'handled', createdAt: at }] };
   }
   const entities = [];
   for (const e of spec.entities) entities.push(makeEntity({ ...e, name: uniqueName(entities, e.name) }, randomUUID()));
@@ -100,6 +103,7 @@ export function applyOps(p, ops) {
         const before = { position: [...e.position], rotation: e.rotation, scale: [...e.scale] };
         const next = makeEntity({ ...e, ...patch, name: patch.name ? uniqueName(p.scene.entities.filter(x => x !== e), patch.name) : e.name }, e.id);
         Object.assign(e, next);
+        if (!next.sheets) delete e.sheets; // `sheets: []` clears them (makeEntity omits an empty list)
         // Children follow their parent rigidly, unless this batch already places them (the editor sends every moved object).
         if (['position', 'rotation', 'scale'].some(k => patch[k] !== undefined)) {
           const kids = descendantsOf(p.scene.entities, e.id).filter(d => !batchIds.has(d.id));
@@ -319,6 +323,9 @@ export async function openDirector(root, options = {}) {
     create: input => serial(async () => {
       const p = createProjectDocument(input, randomUUID(), await loadStarters(options.startersDir));
       await mkdir(join(dir, p.id, 'refs'), { recursive: true });
+      // Starter media is copied before the project is first saved, so it never lists a file it lacks.
+      const media = p.starterMedia; delete p.starterMedia;
+      if (media) await attachStarterMedia(media.dir, join(dir, p.id), media.files);
       p.revision = 0; return save(p);
     }),
     edit: (id, ops) => serial(async () => {

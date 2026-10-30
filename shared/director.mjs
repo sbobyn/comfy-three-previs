@@ -146,7 +146,7 @@ export function normalizeCast(c) {
 export function castCard(project, id) {
   const e = project.scene.entities.find(x => x.id === id); if (!e) return null;
   const src = lookSource(project, id) || e;
-  return { id: e.id, blockoutId: e.id, name: e.name, kind: e.kind, shape: e.shape, description: objectNotes(project, e), styleNotes: [src.id !== e.id ? src.styleNotes : '', e.styleNotes].map(x => (x || '').trim()).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join('; '), imageRefs: objectLooks(project, id).map(r => r.id), sharedFrom: src.id !== e.id ? src.id : null };
+  return { id: e.id, blockoutId: e.id, name: e.name, kind: e.kind, shape: e.shape, description: objectNotes(project, e), styleNotes: [src.id !== e.id ? src.styleNotes : '', e.styleNotes].map(x => (x || '').trim().replace(/[\s.,;:]+$/, '')).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join('; '), imageRefs: objectLooks(project, id).map(r => r.id), sharedFrom: src.id !== e.id ? src.id : null };
 }
 /**
  * Every object with its place in a shot's cast: auto (the camera sees it), added or removed by hand.
@@ -406,8 +406,9 @@ export function lookSource(project, entityId) {
 /** Description used in prompts: the shared object's description plus this object's own notes. */
 export function objectNotes(project, entity) {
   const src = lookSource(project, entity.id);
-  const parts = [src && src.id !== entity.id ? src.notes : '', entity.notes].map(x => (x || '').trim()).filter(Boolean);
-  return [...new Set(parts)].join('; ');
+  const parts = [...new Set([src && src.id !== entity.id ? src.notes : '', entity.notes].map(x => (x || '').trim()).filter(Boolean))];
+  // Joined parts drop their own end punctuation, so a prompt never reads ".;".
+  return parts.length > 1 ? parts.map(x => x.replace(/[\s.,;:]+$/, '')).join('; ') : parts.join('');
 }
 export function objectLooks(project, entityId) {
   const shared = lookSource(project, entityId);
