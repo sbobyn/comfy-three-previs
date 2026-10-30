@@ -1,6 +1,6 @@
 # First use and review routes
 
-The procedural browser study set needs no Blender, account, credentials, external media or absolute path. Comfy Three Previs is MIT licensed, including the camera studio inherited from the author's earlier three-vcam project.md. No private `.blend`, AI output or weights are bundled.
+The procedural browser study set needs no Blender, account, credentials, external media or absolute path. New Previs code is MIT; distribution of inherited three-vcam portions still requires the ownership confirmation in THIRD_PARTY_NOTICES.md. No private `.blend`, AI output or weights are bundled.
 
 ## Clean setup
 

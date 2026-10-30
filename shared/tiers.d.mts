@@ -1,0 +1,11 @@
+export type TierName = 'draft' | 'final';
+export type StepModels = { looks: string; sheets: string; stills: string; videos: string };
+export const TIERS: Record<TierName, StepModels>;
+export const IMAGE_PRICES: Record<string, number>;
+export const VIDEO_PRICES: Record<string, { ratePerSecond: number; keyFrames?: boolean; local?: boolean }>;
+export const FIRST_FRAME_FALLBACK: Record<string, string>;
+export const KEY_FRAME_SECONDS: number[];
+export function snapSeconds(duration: number): number;
+export function stepOf(type: string): 'looks' | 'sheets' | 'stills' | 'videos' | null;
+export function modelsFor(tier?: string, overrides?: Partial<StepModels>): StepModels;
+export function estimateFor(type: 'blockout' | 'look' | 'sheet' | 'still' | 'video', model: string, options?: { duration?: number; count?: number }): number | null;

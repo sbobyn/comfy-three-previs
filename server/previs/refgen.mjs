@@ -6,9 +6,13 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { RECOVERY_ATTEMPTS, recoveryAttempts, beginRecovery } from './result-recovery.mjs';
 import { atomicJson } from './atomic.mjs';
 import { imageToPng } from './edit.mjs';
-import { createBackend, backendTransportKey } from './backends.mjs';
+import { createBackend, errorDetail, safeMediaLocation } from './backends.mjs';
+import { telemetryHooks } from './job-progress.mjs';
+import { slotsFor } from './concurrency.mjs';
+import { uploadCacheFor } from './upload-cache.mjs';
 import { validateGraph, workflowCost, validateApproval, hashValue, assertNoSecrets } from './workflows.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
@@ -138,8 +142,9 @@ export async function openRefgen(root, director, options = {}) {
   const jobs = new Map();
   const dirFor = pid => join(root, 'director', pid, 'refgen');
   const backendFor = options.backend || (input => createBackend(input, options.backendOptions));
+  const telemetry = telemetryHooks(options.telemetry); // optional live progress; never part of the outcome
   const allowPaid = () => (options.allowPaid ?? process.env.PREVIS_ALLOW_PAID === '1') === true;
-  async function persist(job) { assertNoSecrets(job); await mkdir(dirFor(job.projectId), { recursive: true }); await atomicJson(join(dirFor(job.projectId), job.id + '.json'), job); jobs.set(job.id, structuredClone(job)); return structuredClone(job); }
+  async function persist(job) { if (job.status === 'uncertain' && !job.uncertainAt) job = { ...job, uncertainAt: now() }; assertNoSecrets(job); await mkdir(dirFor(job.projectId), { recursive: true }); await atomicJson(join(dirFor(job.projectId), job.id + '.json'), job); jobs.set(job.id, structuredClone(job)); return structuredClone(job); }
   // Recover receipts: an interrupted dispatch is uncertain and is never resent.
   async function load(id) {
     let files = []; try { files = await readdir(dirFor(id)); } catch {}
@@ -147,13 +152,71 @@ export async function openRefgen(root, director, options = {}) {
       const job = JSON.parse(await readFile(join(dirFor(id), f), 'utf8'));
       if (job.projectId !== id) continue;
       if (job.status === 'submitting') { job.status = 'uncertain'; job.message = 'Stopped during dispatch. The backend may still run it; this request is never resent.'; await persist(job); }
+      else if (job.status === 'uploading') { job.status = 'quoted'; job.lastAttempt = { at: now(), code: 'interrupted', error: 'Stopped while uploading; nothing was sent' }; await persist(job); }
       else jobs.set(job.id, job);
     }
   }
   for (const { id } of await director.list()) await load(id);
   let chain = Promise.resolve();
   const serial = fn => { const next = chain.then(fn); chain = next.catch(() => {}); return next; };
-  const active = j => ['submitting', 'submitted', 'uncertain'].includes(j.status);
+  const active = j => ['uploading', 'submitting', 'submitted', 'uncertain', 'collecting'].includes(j.status);
+  const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root);
+  slots.register('refgen', () => [...jobs.values()].filter(active).map(j => ({ id: j.id, backend: j.backend, kind: 'image', status: j.status, uncertainAt: j.uncertainAt, dispatchStartedAt: j.dispatchStartedAt, createdAt: j.createdAt })));
+  let tracker = null;
+  const label = j => `${j.entityName || 'Image'}${j.sheet?.label ? ` · ${j.sheet.label}` : ''} · ${String(j.model || j.presetId || '').split(' (')[0]}`;
+  async function trackJob(id, tracking) {
+    let job = jobs.get(id); if (!job) fail('Unknown request', 404);
+    if (!['submitted', 'uncertain', 'collecting'].includes(job.status) || !job.promptId) return structuredClone(job);
+    if (tracking) job = { ...job, tracking: { lastTrackedAt: tracking.lastTrackedAt ?? null, trackCount: tracking.trackCount ?? 0, nextTrackAt: tracking.nextTrackAt ?? null } };
+    const unchanged = () => tracking ? persist(job) : structuredClone(job);
+    const adapter = backendFor(job.backend.kind === 'local' ? { kind: 'local', url: job.backend.url } : { kind: 'cloud' });
+    if (!job.collection) {
+      let history;
+      try { history = await adapter.history(job.promptId); }
+      catch (e) { if (tracking) await persist({ ...job, tracking: { ...job.tracking, error: errorDetail(e) } }); throw e; }
+      if (!history) return unchanged();
+      const status = history.status?.status_str;
+      if (status === 'error' || status === 'cancelled') {
+        // Surface the provider's own reason (e.g. a partner API "Server side error").
+        const legacy = (history.status?.messages || []).find(m => m?.[0] === 'execution_error')?.[1];
+        const err = history.error || (legacy ? { nodeId: legacy.node_id ?? null, nodeType: legacy.node_type || null, message: String(legacy.exception_message || '') } : null);
+        const why = err ? ` ${err.nodeType || 'Node'}: ${String(err.message || '').replace(/\s+/g, ' ').slice(0, 240)}` : '';
+        return persist({ ...job, status: 'failed', provider: { status, ...(err ? { error: err } : {}) }, failure: { phase: 'execution', httpStatus: null, detail: err ? errorDetail({ message: why.trim() }) : null }, message: `Backend reported ${status}.${why} Nothing is retried.`, finishedAt: now() });
+      }
+      if (!history.status?.completed) return unchanged();
+      const collection = [];
+      const expected = Object.entries(job.graph).filter(([, n]) => n.class_type === 'SaveImage').map(([id]) => id);
+      for (const nodeId of expected) for (const image of history.outputs?.[nodeId]?.images || []) {
+        const location = safeMediaLocation(image), key = `${nodeId}:${hashValue(location)}`;
+        if (!collection.some(x => x.key === key)) collection.push({ key, location });
+      }
+      if (!collection.length || collection.length > 128) return persist({ ...job, status: 'failed', failure: { phase: 'declared-outputs', detail: 'Completed without 1–128 saved image outputs' }, message: 'Completed without valid saved image outputs.', finishedAt: now() });
+      const project = await director.get(job.projectId);
+      const existing = [...(project.scene.references || []), ...project.shots.flatMap(s => s.references || [])];
+      if (existing.some(r => r.generated?.requestId === job.id && !r.generated.outputKey)) return persist({ ...job, status: 'recovery-required', collection, failure: { phase: 'collection', detail: 'Legacy imported output lacks an output key; reconcile existing references before recovery to avoid duplicates.' }, message: 'Existing output identity needs operator reconciliation. Nothing was downloaded or resubmitted.' });
+      job = await persist({ ...job, status: 'collecting', collection });
+    }
+    if (recoveryAttempts(job, 'collection') >= RECOVERY_ATTEMPTS) return persist({ ...job, status: 'recovery-required', message: 'Recovery limit reached. Recover existing output only; never resubmit.' });
+    job = await persist(beginRecovery(job, 'collection'));
+    try {
+      const referenceIds = [...(job.referenceIds || [])], results = [...(job.results || [])];
+      for (const output of job.collection) {
+        if (results.some(r => r.key === output.key)) continue;
+        const current = await director.get(job.projectId);
+        const refs = job.target === 'shot' ? current.shots.find(s => s.id === job.shotId)?.references || [] : current.scene.references || [];
+        const existing = refs.find(r => r.generated?.requestId === job.id && r.generated?.outputKey === output.key);
+        const bytes = existing ? null : await adapter.view(output.location);
+        const r = existing ? { referenceId: existing.id, project: current } : await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, outputKey: output.key, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId } });
+        if (!referenceIds.includes(r.referenceId)) referenceIds.push(r.referenceId);
+        const ref = [...(r.project?.scene?.references || []), ...(r.project?.shots || []).flatMap(x => x.references || [])].find(x => x.id === r.referenceId);
+        results.push({ id: r.referenceId, key: output.key, kind: 'image', url: ref?.file ? `/director-refs/${job.projectId}/${ref.file}` : null });
+        job = await persist({ ...job, referenceIds, results });
+      }
+      return persist({ ...job, status: 'completed', referenceIds, results, failure: null, tracking: { ...job.tracking, error: null }, message: `Attached ${referenceIds.length} ${job.target === 'shot' ? 'key frame' : 'look'}${referenceIds.length === 1 ? '' : 's'} to ${job.entityName}.`, finishedAt: now() });
+    } catch (error) {
+      return persist({ ...job, status: recoveryAttempts(job, 'collection') >= RECOVERY_ATTEMPTS ? 'recovery-required' : 'collecting', failure: { phase: 'collection', detail: errorDetail(error) }, tracking: { ...job.tracking, error: errorDetail(error) }, message: 'Existing output collection failed; no resubmission. Recovery is bounded across restarts.' });
+    }
+  }
 
   async function resolve(input) {
     const preset = imagePresets.find(p => p.id === input.presetId); if (!preset) fail('Choose a generation preset');
@@ -193,9 +256,18 @@ export async function openRefgen(root, director, options = {}) {
     return { preset, adapter, graph, validation, quote: cost, partnerNodes, settings, fingerprint, entity, shot, guide, guideSha, project };
   }
 
-  return {
+  const api = {
     load,
     presets: publicPresets,
+    all: () => [...jobs.values()].map(j => structuredClone(j)),
+    useTracker(t) { tracker = t; },
+    // Job-tracker source (contract C1); images attach inside track, so onTerminal has nothing extra to do.
+    trackerSource: () => ({
+      name: 'refgen', list: () => [...jobs.values()].map(j => structuredClone(j)), get: id => { const j = jobs.get(id); if (!j) fail('Unknown request', 404); return structuredClone(j); },
+      isActive: active, track: (id, tracking) => serial(() => trackJob(id, tracking)), kindOf: () => 'image', label, projectIdOf: j => j.projectId,
+      expectedSeconds: j => j.backend?.kind === 'local' ? 600 : 90, costOf: j => j.quote?.amount ?? j.quote?.estimate ?? null,
+      resultsOf: j => j.results || (j.referenceIds || []).map(id => ({ id, kind: 'image', url: null })), onTerminal() {},
+    }),
     list(projectId) { return [...jobs.values()].filter(j => j.projectId === projectId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(j => structuredClone(j)); },
     paidEnabled: allowPaid,
     async checkpoints(localUrl) {
@@ -207,7 +279,8 @@ export async function openRefgen(root, director, options = {}) {
       const guideBytes = input.target === 'shot' && input.guide ? Buffer.from(String(input.guide), 'base64') : null;
       if (guideBytes && guideBytes.length > 12 * 1024 * 1024) fail('The composition guide is too large');
       // Reference images: director references (object looks, earlier key frames), normalised to PNG.
-      const refIds = Array.isArray(input.referenceIds) ? input.referenceIds.slice(0, 9) : [];
+      if (Array.isArray(input.referenceIds) && input.referenceIds.length > 9) fail('At most 9 reference images are supported');
+      const refIds = Array.isArray(input.referenceIds) ? input.referenceIds : [];
       const project0 = refIds.length ? await director.get(input.projectId) : null;
       const allRefs = project0 ? [...(project0.scene.references || []), ...project0.shots.flatMap(s => s.references)] : [];
       const refBytes = [];
@@ -228,51 +301,54 @@ export async function openRefgen(root, director, options = {}) {
     submit: input => serial(async () => {
       const saved = jobs.get(input.requestId); if (!saved || saved.projectId !== input.projectId) fail('Unknown request', 404);
       if (saved.status !== 'quoted') return structuredClone(saved);
+      const twin = input.allowDuplicate === true ? null : [...jobs.values()].find(j => j.id !== saved.id && j.projectId === saved.projectId && j.entityId === saved.entityId && j.shotId === saved.shotId && j.fingerprint === saved.fingerprint && (active(j) || j.status === 'recovery-required'));
+      if (twin) {
+        const error = `An identical request is already active (${twin.id}); nothing was sent.`;
+        await persist({ ...saved, lastAttempt: { at: now(), code: 'duplicate', error, existingId: twin.id } });
+        throw Object.assign(Error(error), { status: 409, apiCode: 'duplicate', existingId: twin.id });
+      }
       const free = saved.quote.status === 'known' && saved.quote.amount === 0;
       if (!free && !allowPaid()) fail('Paid and unknown-cost generation is disabled on this server (PREVIS_ALLOW_PAID is not 1). Nothing was sent.', 403);
-      if ([...jobs.values()].some(j => j.id !== saved.id && active(j) && backendTransportKey(j.backend) === backendTransportKey(saved.backend))) fail('Another request on this backend is still running or uncertain. Resolve it first; nothing is retried.', 409);
-      const guideBytes = saved.guide ? await readFile(join(dirFor(saved.projectId), saved.guide.file)) : null;
-      const refBytes = await Promise.all((saved.refs || []).map(x => readFile(join(dirFor(saved.projectId), x.file))));
-      const current = await resolve({ ...saved, projectId: saved.projectId, entityId: saved.entityId, guideBytes, refBytes, localUrl: saved.backend.kind === 'local' ? saved.backend.url : undefined });
-      if (current.fingerprint !== saved.fingerprint) { await persist({ ...saved, status: 'invalidated', message: 'Backend schema, settings or price changed. Get a new quote.' }); fail('Quote changed; get a new quote and approve again', 409); }
-      validateApproval(input.approval, saved.fingerprint, saved.quote);
-      let job = await persist({ ...saved, approval: structuredClone(input.approval), status: 'submitting', message: 'Dispatch started. This request is never resent.', dispatchStartedAt: now() });
-      try {
-        const graph = structuredClone(saved.graph);
-        if (guideBytes) { const up = await current.adapter.upload(guideBytes, { filename: `${saved.id}-guide.png`, mime: 'image/png', subfolder: `previs/${saved.id}` }); graph[GUIDE].inputs.image = up.value; }
-        for (const [k, b] of refBytes.entries()) { const up = await current.adapter.upload(b, { filename: `${saved.id}-ref${k + 1}.png`, mime: 'image/png', subfolder: `previs/${saved.id}` }); graph[refNode(k + 1)].inputs.image = up.value; }
-        const { promptId } = await current.adapter.submit({ graph, requestId: saved.id, projectId: saved.projectId, partnerNodes: saved.partnerNodes });
-        job = await persist({ ...job, submittedGraph: graph, status: 'submitted', promptId, message: 'Accepted by the backend. Generating…', submittedAt: now() });
-      } catch (e) {
-        job = await persist({ ...job, status: 'uncertain', message: `Dispatch outcome unknown (${e.message}). Check the backend; this request is never resent.` });
-      }
-      return job;
+      const release = slots.acquire({ id: saved.id, backend: saved.backend, kind: 'image' });
+      try { return await dispatch(saved, input); } finally { release(); }
     }),
-    track: input => serial(async () => {
-      const job = jobs.get(input.requestId); if (!job || job.projectId !== input.projectId) fail('Unknown request', 404);
-      if (!['submitted', 'uncertain'].includes(job.status) || !job.promptId) return structuredClone(job);
-      const adapter = backendFor(job.backend.kind === 'local' ? { kind: 'local', url: job.backend.url } : { kind: 'cloud' });
-      const history = await adapter.history(job.promptId);
-      if (!history) return structuredClone(job);
-      const status = history.status?.status_str;
-      if (status === 'error' || status === 'cancelled') {
-        // Surface the provider's own reason (e.g. a partner API "Server side error").
-        const err = (history.status?.messages || []).find(m => m?.[0] === 'execution_error')?.[1];
-        const why = err ? ` ${err.node_type || 'Node'}: ${String(err.exception_message || '').replace(/\s+/g, ' ').slice(0, 240)}` : '';
-        return persist({ ...job, status: 'failed', message: `Backend reported ${status}.${why} Nothing is retried.`, finishedAt: now() });
-      }
-      if (!history.status?.completed) return structuredClone(job);
-      const referenceIds = [];
-      const expected = Object.entries(job.graph).filter(([, n]) => n.class_type === 'SaveImage').map(([id]) => id);
-      for (const nodeId of expected) for (const image of history.outputs?.[nodeId]?.images || []) {
-        const bytes = await adapter.view(image);
-        const r = await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId } });
-        referenceIds.push(r.referenceId);
-      }
-      if (!referenceIds.length) return persist({ ...job, status: 'failed', message: 'Completed without a saved image output.', finishedAt: now() });
-      return persist({ ...job, status: 'completed', referenceIds, message: `Attached ${referenceIds.length} ${job.target === 'shot' ? 'key frame' : 'look'}${referenceIds.length === 1 ? '' : 's'} to ${job.entityName}.`, finishedAt: now() });
-    }),
+    // Without a tracker (tests, tools) this tracks directly; with one, the tracker records the attempt.
+    track: (input, tracking) => {
+      const job = jobs.get(input.requestId); if (!job || job.projectId !== input.projectId) return Promise.reject(Object.assign(Error('Unknown request'), { status: 404 }));
+      return tracker && !tracking ? tracker.trackNow('refgen', job.id) : serial(() => trackJob(job.id, tracking));
+    },
   };
+  async function dispatch(saved, input) {
+    const guideBytes = saved.guide ? await readFile(join(dirFor(saved.projectId), saved.guide.file)) : null;
+    const refBytes = await Promise.all((saved.refs || []).map(x => readFile(join(dirFor(saved.projectId), x.file))));
+    const current = await resolve({ ...saved, projectId: saved.projectId, entityId: saved.entityId, guideBytes, refBytes, localUrl: saved.backend.kind === 'local' ? saved.backend.url : undefined });
+    if (current.fingerprint !== saved.fingerprint) { await persist({ ...saved, status: 'invalidated', message: 'Backend schema, settings or price changed. Get a new quote.' }); fail('Quote changed; get a new quote and approve again', 409); }
+    validateApproval(input.approval, saved.fingerprint, saved.quote);
+    let job = await persist({ ...saved, approval: structuredClone(input.approval), status: 'uploading', message: 'Uploading inputs; nothing dispatched yet.',
+      ...(saved.backend.kind === 'local' ? { progressClientId: saved.progressClientId || randomUUID() } : {}) });
+    let dispatchStarted = false;
+    const observing = telemetry.begin(job); telemetry.phase(job, 'uploading');
+    try {
+      const graph = structuredClone(saved.graph);
+      if (guideBytes) { const up = await uploadCache.upload(current.adapter, guideBytes, { filename: `${saved.id}-guide.png`, mime: 'image/png', subfolder: `previs/${saved.id}` }); graph[GUIDE].inputs.image = up.value; }
+      for (const [k, b] of refBytes.entries()) { const up = await uploadCache.upload(current.adapter, b, { filename: `${saved.id}-ref${k + 1}.png`, mime: 'image/png', subfolder: `previs/${saved.id}` }); graph[refNode(k + 1)].inputs.image = up.value; }
+      await observing; // Bounded: an unavailable observer only means polling.
+      job = await persist({ ...job, status: 'submitting', message: 'Dispatch started. This request is never resent.', dispatchStartedAt: now() });
+      dispatchStarted = true; telemetry.phase(job, 'submitting');
+      const { promptId } = await current.adapter.submit({ graph, requestId: saved.id, projectId: saved.projectId, partnerNodes: saved.partnerNodes, ...(job.progressClientId ? { clientId: job.progressClientId } : {}) });
+      job = await persist({ ...job, submittedGraph: graph, status: 'submitted', promptId, message: 'Accepted by the backend. Generating…', submittedAt: now() });
+      telemetry.accept(job); // Only after the acceptance receipt is durable.
+    } catch (e) {
+      // Upload failures happen before any prompt is sent; a rejected prompt never ran. Both free the slot.
+      const failure = { phase: dispatchStarted ? 'dispatch' : 'preparation', httpStatus: e.httpStatus || null, detail: errorDetail(e) };
+      const rejected = !dispatchStarted || e.notSent === true || [400, 401, 402, 403, 413, 422, 429].includes(e.httpStatus);
+      if (dispatchStarted && rejected) failure.notSent = true;
+      job = await persist({ ...job, status: rejected ? 'failed' : 'uncertain', failure, message: rejected ? `${dispatchStarted ? 'Backend rejected the request' : 'Upload failed before dispatch'} (${failure.detail.slice(0, 240)}). Nothing is retried.` : `Dispatch outcome unknown (${e.message}). Check the backend; this request is never resent.`, ...(rejected ? { finishedAt: now() } : {}) });
+    }
+    if (tracker && active(job)) tracker.watch('refgen', job.id);
+    return job;
+  }
+  return api;
 }
 
 export function refgenRoutes(refgen) {

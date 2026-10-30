@@ -1,4 +1,4 @@
-/* Comfy Previs — home / launch page. Uses the Beret Labs tokens from director.css. */
+/* Comfy Three Previs — home / launch page. Uses the Beret Labs tokens from director.css. */
 
 .home-top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 16px; height: 56px; padding: 0 max(28px, calc((100% - 1180px) / 2)); background: color-mix(in srgb, var(--paper) 82%, transparent); backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid transparent; transition: border-color var(--t-base); }
 .home-top nav { margin-left: auto; display: flex; gap: 2px; align-items: center; }
@@ -97,10 +97,13 @@
 .home-starter:hover .home-frame { transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(21,19,15,.1), var(--sh-3); }
 .home-starter:hover .home-frame img { transform: scale(1.035); }
 .home-starter:active .home-frame { transform: translateY(-1px) scale(.99); }
-.home-starter-meta { display: flex; flex-direction: column; gap: 3px; padding: 0 2px; }
-.home-starter-meta strong { font-size: var(--fs-lg); font-weight: 600; letter-spacing: var(--track-tight); }
-.home-starter-meta > span { color: var(--ink-3); font-size: var(--fs-sm); }
-.home-starter-meta .home-open { margin-top: 6px; color: var(--ink); font-weight: 550; opacity: 0; transform: translateX(-4px); transition: opacity var(--t-base), transform var(--t-base) var(--ease-out); }
+.home-card-meta { display: flex; flex-direction: column; gap: 2px; padding: 0 2px; min-width: 0; }
+.home-card-meta strong { font-weight: 600; font-size: var(--fs-md); letter-spacing: var(--track-tight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.home-card-meta > span { color: var(--ink-3); font-size: var(--fs-xs); }
+.home-starter .home-card-meta { gap: 3px; }
+.home-starter .home-card-meta strong { font-size: var(--fs-lg); }
+.home-starter .home-card-meta > span { font-size: var(--fs-sm); }
+.home-card-meta .home-open { margin-top: 6px; color: var(--ink); font-weight: 550; opacity: 0; transform: translateX(-4px); transition: opacity var(--t-base), transform var(--t-base) var(--ease-out); }
 .home-starter:hover .home-open, .home-starter:focus-visible .home-open { opacity: 1; transform: none; }
 
 /* Your projects */
@@ -110,9 +113,7 @@
 .home-project { display: flex; flex-direction: column; gap: 11px; text-decoration: none; color: inherit; border-radius: var(--r-md); }
 .home-project .home-frame { transition: box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out); }
 .home-project:hover .home-frame { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(21,19,15,.1), var(--sh-2); }
-.home-project-meta { display: flex; flex-direction: column; gap: 2px; padding: 0 2px; min-width: 0; }
-.home-project-meta strong { font-weight: 600; font-size: var(--fs-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 28px; }
-.home-project-meta > span { color: var(--ink-3); font-size: var(--fs-xs); }
+.home-project .home-card-meta strong { padding-right: 28px; }
 .is-archived .home-project { padding: 14px; background: var(--paper-2); }
 .home-more { position: absolute; right: 0; bottom: 18px; width: 28px; height: 24px; border: 0; border-radius: var(--r-sm); background: none; color: var(--ink-3); font-size: 16px; line-height: 1; cursor: pointer; opacity: 0; transition: opacity var(--t-fast), background var(--t-fast); }
 .home-project-wrap:hover .home-more, .home-more:focus-visible, .home-more[aria-expanded="true"] { opacity: 1; }
@@ -127,9 +128,8 @@
 .home-empty > span { color: var(--ink-3); max-width: 360px; }
 .home-empty .home-btn { margin-top: 12px; }
 
-.home-foot { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line); font-size: var(--fs-xs); color: var(--ink-4); }
-.home-foot a { color: var(--ink-3); text-decoration: none; transition: color var(--t-fast); }
-.home-foot a:hover { color: var(--ink); }
+.home-inline { padding: 0; border: 0; background: none; color: var(--ink-2); font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.home-inline:hover { color: var(--ink); }
 
 /* Entrance: content rises in once. */
 .home-hero-copy > *, .home-reel, .home-steps, .home-section { animation: home-rise var(--t-reveal) var(--ease-out) both; }

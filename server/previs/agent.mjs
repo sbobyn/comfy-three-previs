@@ -1,7 +1,7 @@
 import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
 import { autoPromptSegments, autoPromptText, shotPrompt, shotStyle, normalizeStyle, CAMERA_TERMS } from '../../shared/prompt.mjs';
-import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, handleOf } from '../../shared/director.mjs';
+import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, handleOf, videoReferences } from '../../shared/director.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { setsFor, planSlots, slotAspect, viewPrompt, EXPRESSION_PACKS, INTENSITIES, MAX_SHEET_SLOTS } from '../../shared/sheet-presets.mjs';
 const base = process.env.PREVIS_URL || 'http://127.0.0.1:5190';
@@ -56,9 +56,9 @@ const tools = [
       const { job } = await post('/api/director/refgen/prepare', { projectId: p.id, entityId: e.id, presetId: a.presetId || 'flux-3', prompt: a.prompt || lookPrompt(p, e, view), aspect: a.aspect || (e.kind === 'character' ? '3:4' : e.kind === 'environment' ? '16:9' : '4:3'), count: a.count || 1, seed: a.seed ?? Math.floor(Math.random() * 1e6) });
       const est = job.quote?.estimate ?? null;
       if (est !== null && est > a.maxCostUsd) return { submitted: false, reason: `Estimated $${est} is above maxCostUsd $${a.maxCostUsd}`, requestId: job.id };
-      let r; for (let i = 0; i < 60; i++) { try { r = (await post('/api/director/refgen/submit', { projectId: p.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: a.maxCostUsd, allowUnknownCharges: true } } })).job; break; } catch (err) { if (!/Another request/.test(err.message)) throw err; await sleep(5000); } }
+      let r; for (let i = 0; i < 60; i++) { try { r = (await post('/api/director/refgen/submit', { projectId: p.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: a.maxCostUsd, allowUnknownCharges: true } } })).job; break; } catch (err) { if (!isBusy(err)) throw err; await sleep(busyWait(err)); } }
       if (!r) return { submitted: false, reason: 'Image backend stayed busy; try again shortly', requestId: job.id };
-      const t0 = Date.now(); while (r.status === 'submitted' && Date.now() - t0 < 300000) { await sleep(4000); r = (await post('/api/director/refgen/track', { projectId: p.id, requestId: job.id })).job; }
+      const t0 = Date.now(); while (r.status === 'submitted' && Date.now() - t0 < 300000) { await sleep(Math.min(4000, POLL_MS)); r = (await post('/api/director/refgen/track', { projectId: p.id, requestId: job.id })).job; }
       if (r.status === 'completed' && r.referenceIds?.[0] && a.makePrimary !== false) await post('/api/director/edit', { projectId: p.id, ops: [{ op: 'set_look', entityId: e.id, referenceId: r.referenceIds[0] }] });
       return { object: e.name, status: r.status, message: r.message, requestId: job.id, referenceIds: r.referenceIds || [], estimateUsd: est, primary: r.status === 'completed' && a.makePrimary !== false ? r.referenceIds?.[0] : undefined };
     } },
@@ -68,23 +68,41 @@ const tools = [
       const options = { expressions: { pack: EXPRESSION_PACKS.map(x => x.id), intensities: Object.keys(INTENSITIES), angle: ['front', 'front-left', 'both'] }, 'obj-turn4': { top: 'boolean' }, 'obj-turn8': { top: 'boolean' }, custom: { label: 'string', direction: 'string', angle: 'front | front-left | left | back-left | back | back-right | right | front-right | top', framing: 'full | bust | head | whole | detail | wide' } };
       return { kind, object: e ? { id: e.id, name: e.name, hasPrimaryImage: !!objectLooks(p, e.id)[0] } : null, sets: setsFor(kind).map(s => ({ id: s.id, label: s.label, hint: s.hint, defaults: s.options || {}, options: options[s.id] || null, slots: planSlots(s.id, kind, s.options || {}).map(x => ({ id: x.id, label: x.label, aspect: slotAspect(x.spec, kind) })) })),
         sheets: (e?.sheets || []).map(sh => ({ id: sh.id, setId: sh.setId, label: sh.label, slots: sh.slots.map(x => ({ id: x.id, label: x.label, attempts: x.attempts.length, referenceId: (x.attempts.find(t => t.id === x.accepted) || x.attempts.find(t => t.id === x.selected) || {}).referenceId || null, accepted: !!x.accepted })) })),
-        note: 'Each view is its own image generated from the object’s primary image. Compose the sheet in the Previs object editor (Design sheet → Compose sheet…); composition needs the browser.' };
+        note: 'Each view is its own image generated from the object’s primary image. previs_director_generate_sheet with compose:true composes the sheet image when every view lands (headless renderer); otherwise compose it in the Previs object editor (Design sheet → Compose sheet…).' };
     } },
-  { name: 'previs_director_generate_sheet', description: 'Generate a design-sheet set for one object on Comfy Cloud (paid: set maxCostUsd for the whole set). Every view is its own image request from the object’s primary image (reference image 1) plus its Cast Card description, style notes and the project style, sent one at a time. Views attach to the object’s images and fill the sheet in the Previs object editor live. Returns per-slot results. Uncertain dispatches stop the batch and are never resent. Takes about 30–60 s per view.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, object: { type: 'string', description: 'Object name or id' }, setId: { type: 'string', description: 'From previs_director_sheet_presets, e.g. turn3, obj-turn4, expressions, establishing' }, options: { type: 'object', description: 'Set options, e.g. { pack: "basic6", intensities: ["clear"], angle: "front" } for expressions' }, slots: { type: 'array', items: { type: 'string' }, description: 'Only these slot ids (default: all)' }, note: { type: 'string', description: 'Extra direction added to every view' }, presetId: { type: 'string', description: 'flux-2-pro (default, cheapest) or flux-3' }, maxCostUsd: { type: 'number', minimum: 0.01, maximum: 5 } }, required: ['projectId', 'object', 'setId', 'maxCostUsd'], additionalProperties: false },
+  { name: 'previs_director_generate_sheet', description: 'Generate a design-sheet set for one object on Comfy Cloud (paid: set maxCostUsd for the whole set). Every view is its own image request from the object’s primary image (reference image 1) plus its Cast Card description, style notes and the project style, sent one at a time. Views attach to the object’s images and fill the sheet in the Previs object editor live. Returns per-slot results. Uncertain dispatches stop the batch and are never resent. Takes about 30–60 s per view. compose:true then composes the sheet image (free, headless renderer) once every view has landed.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, object: { type: 'string', description: 'Object name or id' }, compose: { type: 'boolean', description: 'Compose the sheet image after every view lands (default false)' }, setId: { type: 'string', description: 'From previs_director_sheet_presets, e.g. turn3, obj-turn4, expressions, establishing' }, options: { type: 'object', description: 'Set options, e.g. { pack: "basic6", intensities: ["clear"], angle: "front" } for expressions' }, slots: { type: 'array', items: { type: 'string' }, description: 'Only these slot ids (default: all)' }, note: { type: 'string', description: 'Extra direction added to every view' }, presetId: { type: 'string', description: 'flux-2-pro (default, cheapest) or flux-3' }, maxCostUsd: { type: 'number', minimum: 0.01, maximum: 5 } }, required: ['projectId', 'object', 'setId', 'maxCostUsd'], additionalProperties: false },
     run: async a => generateSheet(a) },
   { name: 'previs_director_set_primary_image', description: 'Choose which of an object’s images is primary: the one shown on its Cast Card and sent to video models as its reference.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, object: { type: 'string' }, referenceId: { type: 'string' } }, required: ['projectId', 'object', 'referenceId'], additionalProperties: false },
     run: async a => { const p = await project(a.projectId), e = entityOf(p, a.object); await post('/api/director/edit', { projectId: p.id, ops: [{ op: 'set_look', entityId: e.id, referenceId: a.referenceId }] }); return { ok: true, object: e.name, primary: a.referenceId }; } },
   { name: 'previs_director_shot_inputs', description: 'Show exactly what a video model would receive for a shot: the prompt text, the blockout video (if the model uses it and whether it is rendered and current), start/end key frames, and which object image fills each reference slot — plus objects that would be left out. Free; nothing is sent.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string' }, model: { type: 'string', description: 'Video model id from previs_director_models' } }, required: ['projectId', 'shot', 'model'], additionalProperties: false },
     run: async a => { const p = await project(a.projectId), s = shotOf(p, a.shot), gen = await get('/api/generation'), def = videoDefs(gen).find(d => d.id === a.model); if (!def) throw Error(`Unknown video model ${a.model}`); return shotInputs(p, s, def); } },
-  { name: 'previs_director_generate_video', description: 'Generate a shot’s video on Comfy Cloud with the chosen model (paid: set maxCostUsd). Requires the shot’s blockout to be rendered in the workspace (Render shot) — Claude cannot render the 3D blockout itself; first-frame models also need key frames. Binds the blockout video / key frames, the shot prompt and the cast’s primary images, submits once and returns jobId; the result attaches to the shot when done (check with previs_director_video_status). Never retries.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string' }, model: { type: 'string' }, maxCostUsd: { type: 'number', minimum: 0.05, maximum: 10 }, useReferences: { type: 'boolean' } }, required: ['projectId', 'shot', 'model', 'maxCostUsd'], additionalProperties: false },
+  { name: 'previs_director_generate_video', description: 'Generate a shot’s video on Comfy Cloud with the chosen model (paid: set maxCostUsd). Requires the shot’s blockout to be rendered (previs_director_render_blockout, or Render shot in the workspace); first-frame models also need key frames (previs_director_generate_still at start/end). Binds the blockout video / key frames, the shot prompt and the cast’s primary images, submits once and returns jobId; the result attaches to the shot when done (check with previs_director_video_status). Never retries.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string' }, model: { type: 'string' }, maxCostUsd: { type: 'number', minimum: 0.05, maximum: 10 }, useReferences: { type: 'boolean' } }, required: ['projectId', 'shot', 'model', 'maxCostUsd'], additionalProperties: false },
     run: async a => generateVideo(a) },
   { name: 'previs_director_video_status', description: 'Track a submitted video job; when complete the video attaches to its shot (Sequence view). Never resubmits.', inputSchema: { type: 'object', properties: { jobId: { type: 'string' } }, required: ['jobId'], additionalProperties: false },
     run: async a => { const j = (await post('/api/generation/track', { jobId: a.jobId })).job; return { status: j.status, message: j.message, results: (j.results || []).map(r => ({ id: r.id, duration: r.duration, width: r.width, height: r.height })) }; } },
+
+  // ---------- Server-side rendering, stills, batches and the job dashboard ----------
+  { name: 'previs_director_render_blockout', description: 'Render a shot’s grey 3D blockout video on the server (headless GPU renderer, no charge), exactly like Render shot in the workspace. Video models that follow the camera move need it. Skips a shot that is already rendered unless force is true (re-render after changing the camera, objects or animation). Takes about 10–60 s.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string', description: 'Shot number, title or id' }, force: { type: 'boolean' } }, required: ['projectId', 'shot'], additionalProperties: false },
+    run: async a => renderBlockout(a) },
+  { name: 'previs_director_generate_still', description: 'Generate a still (storyboard key frame) of a shot at a moment on Comfy Cloud (paid: set maxCostUsd), exactly like the workspace storyboard: image 1 is the blockout frame at that moment (composition), then the cast’s primary images and the previous shot’s last still for continuity, with the shot’s image prompt. at: "start", "end" or seconds into the shot; start/end stills feed start→end video models. Waits up to 5 minutes. Never retries a failed request.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string' }, at: { type: ['string', 'number'], description: '"start", "end" or seconds into the shot' }, presetId: { type: 'string', description: 'flux-2-pro (default, cheapest) or flux-3; other models get no reference images' }, prompt: { type: 'string', description: 'Default: the shot’s image prompt (previs_director_get_prompt kind image)' }, moment: { type: 'string', description: 'What happens at this moment, added to the prompt' }, count: { type: 'integer', minimum: 1, maximum: 4 }, seed: { type: 'integer' }, maxCostUsd: { type: 'number', minimum: 0.01, maximum: 5 } }, required: ['projectId', 'shot', 'at', 'maxCostUsd'], additionalProperties: false },
+    run: async a => generateStill(a) },
+  { name: 'previs_director_batch_generate', description: 'Plan and run a whole-project generation batch on the server: looks (object primary images), sheets, stills and videos, in dependency order (a shot’s video starts as soon as its blockout and stills land), within one budget (paid: maxCostUsd caps the total; nodes over budget are skipped, not sent). tier "draft" (cheap: FLUX 2 Pro, LTX Fast) or "final" (FLUX 3, LTX Pro), or explicit models. dryRun:true returns the plan and estimate without sending anything — do that first and tell the user the estimate. wait:true polls up to 5 minutes. Never resubmits uncertain jobs.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, steps: { type: 'array', items: { type: 'string', enum: ['looks', 'sheets', 'stills', 'videos'] } }, tier: { type: 'string', enum: ['draft', 'final'] }, models: { type: 'object', properties: { looks: { type: 'string' }, sheets: { type: 'string' }, stills: { type: 'string' }, videos: { type: 'string' } }, additionalProperties: false }, maxCostUsd: { type: 'number', minimum: 0, maximum: 100 }, shots: { type: 'array', items: { type: 'string' }, description: 'Shot ids (default: all)' }, objects: { type: 'array', items: { type: 'string' }, description: 'Object ids (default: all cast)' }, stillsAt: { type: 'array', items: { type: ['string', 'number'] } }, dryRun: { type: 'boolean' }, wait: { type: 'boolean' } }, required: ['projectId', 'steps', 'maxCostUsd'], additionalProperties: false },
+    run: async a => batchGenerate(a) },
+  { name: 'previs_director_batch_status', description: 'Read a generation batch: status, node counts by status (waiting, ready, running, done, failed, skipped, budget), spent vs estimated cost, failed nodes and the last 10 events. Free.', inputSchema: { type: 'object', properties: { batchId: { type: 'string' } }, required: ['batchId'], additionalProperties: false },
+    run: async a => batchSummary((await get(`/api/director/batch?id=${encodeURIComponent(a.batchId)}`)).batch) },
+  { name: 'previs_director_view_shot', description: 'See a shot: returns an image. what: "blockout" (the 3D blockout frame at t, rendered now), "still" (the shot’s newest storyboard still, or the one nearest t), "video" (a frame of the shot’s newest generated video at t, or of assetId). t is seconds (default: middle of the shot/video). contactSheet: tile that many frames across the shot (stills: the newest takes) into one small grid image. Use it to check framing, continuity and results before and after paid steps. Free.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string' }, what: { type: 'string', enum: ['blockout', 'still', 'video'] }, t: { type: 'number', minimum: 0 }, contactSheet: { type: 'integer', minimum: 2, maximum: 12 }, assetId: { type: 'string', description: 'A specific generated video (default: newest)' }, referenceId: { type: 'string', description: 'A specific still (default: newest or nearest t)' }, width: { type: 'integer', minimum: 160, maximum: 1280 } }, required: ['projectId', 'shot', 'what'], additionalProperties: false },
+    content: true, run: async a => viewShot(a) },
+  { name: 'previs_director_jobs_dashboard', description: 'Every image and video generation job on this server in one compact table: status, age vs expected time, cost, backend slot use. Stuck and uncertain jobs are listed first with what to do. Free; never retries or resubmits anything.', inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+    content: true, run: async () => jobsDashboard() },
 ];
 // ---------- helpers for composite tools ----------
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function get(path) { const r = await fetch(base + path); const j = await r.json(); if (!r.ok) throw Error(j.error || `HTTP ${r.status}`); return j; }
-async function post(path, body) { const r = await fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Previs-Agent': '1' }, body: JSON.stringify(body) }); const j = await r.json(); if (!r.ok) throw Error(j.error || `HTTP ${r.status}`); return j; }
+const httpError = (r, j) => Object.assign(Error(j.error || `HTTP ${r.status}`), { status: r.status, code: j.code, retryAfterSeconds: j.retryAfterSeconds });
+async function get(path) { const r = await fetch(base + path); const j = await r.json().catch(() => ({})); if (!r.ok) throw httpError(r, j); return j; }
+async function post(path, body) { const r = await fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Previs-Agent': '1' }, body: JSON.stringify(body) }); const j = await r.json().catch(() => ({})); if (!r.ok) throw httpError(r, j); return j; }
+const isBusy = err => err.code === 'busy' || /Another request|Backend busy/.test(err.message);
+const busyWait = err => (err.retryAfterSeconds ?? 5) * 1000;
+const POLL_MS = Number(process.env.PREVIS_AGENT_POLL_MS) || 5000;
 async function project(id) { return (await get(`/api/director/project?id=${encodeURIComponent(id)}`)).project; }
 function shotOf(p, ref) { const s = p.shots.find(x => x.id === ref) || p.shots.find(x => x.title.toLowerCase() === String(ref).toLowerCase()) || (/^\d+$/.test(String(ref)) ? p.shots[Number(ref) - 1] : null); if (!s) throw Error(`Unknown shot ${ref}`); return s; }
 function entityOf(p, ref) { const e = p.scene.entities.find(x => x.id === ref) || p.scene.entities.find(x => x.name.toLowerCase() === String(ref).toLowerCase()) || p.scene.entities.find(x => handleOf(x.name) === handleOf(String(ref))); if (!e) throw Error(`Unknown object ${ref}`); return e; }
@@ -101,7 +119,7 @@ function shotInputs(p, s, d) {
   const rows = castRows(p, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const withImg = rows.filter(r => objectLooks(p, r.entity.id).length);
   const frames = s.references.filter(r => r.role === 'frame');
-  return { model: m, prompt: shotPrompt(p, s, 'video'), blockout: m.inputs.blockoutVideo.used ? (s.render ? { rendered: true, duration: s.render.duration, frames: s.render.frameCount } : { rendered: false, action: 'Ask the user to click Render shot in the workspace' }) : 'not used',
+  return { model: m, prompt: shotPrompt(p, s, 'video'), blockout: m.inputs.blockoutVideo.used ? (s.render ? { rendered: true, duration: s.render.duration, frames: s.render.frameCount } : { rendered: false, action: 'Render it with previs_director_render_blockout (or ask the user to click Render shot)' }) : 'not used',
     keyFrames: m.inputs.startFrame ? { start: frames.some(r => r.note !== 'key frame end'), end: frames.some(r => r.note === 'key frame end') } : 'not used',
     referenceSlots: withImg.slice(0, cap).map((r, i) => ({ slot: `Image ${i + 1}`, object: r.entity.name, kind: r.entity.kind, image: objectLooks(p, r.entity.id)[0]?.name })),
     leftOut: [...withImg.slice(cap).map(r => ({ object: r.entity.name, why: 'over the model’s image limit' })), ...rows.filter(r => !objectLooks(p, r.entity.id).length).map(r => ({ object: r.entity.name, why: 'no image yet' }))],
@@ -110,14 +128,14 @@ function shotInputs(p, s, d) {
 async function generateVideo(a) {
   const p = await project(a.projectId), s = shotOf(p, a.shot), gen = await get('/api/generation'), d = videoDefs(gen).find(x => x.id === a.model);
   if (!d) throw Error(`Unknown video model ${a.model}`);
-  if (!s.render) return { submitted: false, reason: 'The shot’s blockout is not rendered. Ask the user to click Render shot in the workspace, then call again.' };
+  if (!s.render) return { submitted: false, reason: 'The shot’s blockout is not rendered. Render it with previs_director_render_blockout (or ask the user to click Render shot), then call again.' };
   const m = describeVideoModel(d), r = s.render;
   let assetBindings = {}, refs = [], parameters = {};
   for (const [k, map] of Object.entries(d.parameters || {})) parameters[k] = d.graph?.[map.nodeId]?.inputs?.[map.input];
   if (d.task === 'first-frame') {
     const fr = (await post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: m.inputs.endFrame })).references;
     const start = fr.find(x => x.label === 'start key frame')?.renderId, end = fr.find(x => x.label === 'end key frame')?.renderId;
-    if (!start || (m.inputs.endFrame && !end)) return { submitted: false, reason: 'This model animates key frames: generate the shot’s start (and end) key frames in the workspace first.' };
+    if (!start || (m.inputs.endFrame && !end)) return { submitted: false, reason: 'This model animates key frames: generate the shot’s start (and end) stills first (previs_director_generate_still at:"start" / at:"end").' };
     assetBindings = { firstFrame: { renderId: start }, ...(m.inputs.endFrame ? { lastFrame: { renderId: end } } : {}) };
     const secs = [2, 3, 4, 5, 6, 8, 10].reduce((x, y) => (Math.abs(y - s.duration) < Math.abs(x - s.duration) ? y : x));
     if ('duration' in parameters) parameters.duration = String(secs);
@@ -170,23 +188,143 @@ async function generateSheet(a) {
     catch (err) { results.push({ slot: s.id, label: s.label, status: 'failed', message: err.message }); continue; }
     await setAttempt({ requestId: job.id });
     let r = null, error = null;
-    for (let w = 0; w < 180; w++) { try { r = (await post('/api/director/refgen/submit', { projectId: p.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: a.maxCostUsd, allowUnknownCharges: true } } })).job; break; } catch (err) { if (!/Another request/.test(err.message)) { error = err.message; break; } await sleep(5000); } }
+    for (let w = 0; w < 180; w++) { try { r = (await post('/api/director/refgen/submit', { projectId: p.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: a.maxCostUsd, allowUnknownCharges: true } } })).job; break; } catch (err) { if (!isBusy(err)) { error = err.message; break; } await sleep(busyWait(err)); } }
     if (!r) { await setAttempt({ error: error || 'Image backend stayed busy; nothing was sent' }); results.push({ slot: s.id, label: s.label, status: 'failed', message: error || 'Image backend stayed busy; nothing was sent' }); continue; }
     if (r.status === 'uncertain') { await setAttempt({ error: r.message.slice(0, 300) }); results.push({ slot: s.id, label: s.label, status: 'uncertain', message: r.message }); return { sheetId, stopped: 'A dispatch outcome is unknown; the batch stopped and nothing is resent.', results, skipped: planned.slice(i + 1).map(x => x.id) }; }
-    const t0 = Date.now(); while (r.status === 'submitted' && Date.now() - t0 < 300000) { await sleep(4000); r = (await post('/api/director/refgen/track', { projectId: p.id, requestId: job.id })).job; }
+    const t0 = Date.now(); while (r.status === 'submitted' && Date.now() - t0 < 300000) { await sleep(Math.min(4000, POLL_MS)); r = (await post('/api/director/refgen/track', { projectId: p.id, requestId: job.id })).job; }
     if (r.status === 'completed' && r.referenceIds?.[0]) await setAttempt({ referenceId: r.referenceIds[0] });
     else if (r.status !== 'submitted') await setAttempt({ error: String(r.message || r.status).slice(0, 300) });
     results.push({ slot: s.id, label: s.label, status: r.status, requestId: job.id, referenceId: r.referenceIds?.[0] || null, message: r.message });
   }
-  return { object: e.name, sheetId, label, model: preset.title, estimateUsd: total, results, next: 'Open the object in Previs → Design sheet to keep views, retry or edit them, and Compose sheet (browser, no charge).' };
+  const landed = results.length === planned.length && results.every(r => r.status === 'completed' && r.referenceId);
+  const composed = !a.compose ? undefined : !landed ? { composed: false, reason: 'Not every view landed; compose once they do (Design sheet → Compose sheet…).' }
+    : await post('/api/director/sheet/compose', { projectId: p.id, entityId: e.id, sheetId }).then(r => ({ composed: true, referenceId: r.referenceId }), err => ({ composed: false, reason: err.code === 'headless-unavailable' ? `Headless renderer unavailable (${err.message}); compose in the object editor (browser, no charge).` : err.message }));
+  return { object: e.name, sheetId, label, model: preset.title, estimateUsd: total, results, ...(composed ? { compose: composed } : {}), next: composed?.composed ? 'The composed sheet is saved as an object image; view it in Previs → Design sheet.' : 'Open the object in Previs → Design sheet to keep views, retry or edit them, and Compose sheet (browser, no charge).' };
+}
+// ---------- Blockouts, stills, viewing, batches and jobs ----------
+const headlessOff = err => `Headless rendering is unavailable (${err.message}). Ask the user to click Render shot in the workspace, or start Previs with PREVIS_HEADLESS=1.`;
+async function renderBlockout(a) {
+  const p = await project(a.projectId), s = shotOf(p, a.shot);
+  try {
+    const r = await post('/api/director/render-blockout', { projectId: p.id, shotId: s.id, force: a.force === true });
+    return { shot: s.title, rendered: !r.skipped, ...(r.skipped ? { skipped: true, note: 'Already rendered; pass force:true after changing the camera, objects or animation.' } : {}), previsShotId: r.previsShotId, asset: r.asset, next: 'Check it with previs_director_view_shot what:"blockout".' };
+  } catch (err) { if (err.code === 'headless-unavailable') return { rendered: false, reason: headlessOff(err) }; throw err; }
+}
+/** When in the shot a still belongs (seconds), from its note: start, end or @t (as the workspace storyboard). */
+function stillTime(s, r) { const n = r.note || ''; if (n === 'key frame start') return 0; if (n === 'key frame end') return s.duration; const m = /^key frame @([\d.]+)s$/.exec(n); return m ? Math.min(s.duration, Number(m[1])) : null; }
+const momentLabel = (s, t) => (t === 0 ? 'start' : Math.abs(t - s.duration) < 0.01 ? 'end' : `${t}s`);
+// Mirrors the workspace storyboard composer (src/director.ts keyFrameBlock): guide frame, cast looks, previous shot's last still, legend.
+async function generateStill(a) {
+  const p = await project(a.projectId), s = shotOf(p, a.shot);
+  const t = a.at === 'start' ? 0 : a.at === 'end' ? s.duration : Math.round(Math.max(0, Math.min(s.duration, Number(a.at))) * 100) / 100;
+  if (!Number.isFinite(t)) throw Error('at must be "start", "end" or seconds into the shot');
+  const presetId = a.presetId || 'flux-2-pro', count = a.count || 1;
+  const cap = presetId === 'flux-3' ? 9 : presetId === 'flux-2-pro' ? 7 : 0;
+  const looks = cap ? videoReferences(p, s, cap).filter(r => r.role !== 'frame' && r.role !== 'style') : [];
+  const prev = p.shots[p.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);
+  const refIds = [...looks.map(r => r.ref.id), ...(prev ? [prev.id] : [])].slice(0, Math.max(0, cap - 1));
+  const first = 2;
+  const legend = `\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. ${looks.slice(0, refIds.length).map((r, i) => `The ${r.label} looks exactly like image ${i + first}.`).join(' ')}${prev && refIds.includes(prev.id) ? ` Image ${refIds.indexOf(prev.id) + first} is the previous shot: keep lighting and style continuous.` : ''} No text, captions or labels.`;
+  const text = [(a.prompt ?? shotPrompt(p, s, 'image')).trim(), a.moment?.trim() ? `At this moment: ${a.moment.trim()}.` : ''].filter(Boolean).join(' ');
+  const frameAt = t === 0 ? 'start' : Math.abs(t - s.duration) < 0.01 ? 'end' : t;
+  let guide; try { guide = await post('/api/director/frame', { projectId: p.id, shotId: s.id, t, width: 1280, height: 720 }); }
+  catch (err) { if (err.code === 'headless-unavailable') return { submitted: false, reason: `${headlessOff(err)} The still needs the blockout frame as image 1; nothing was sent.` }; throw err; }
+  const { job } = await post('/api/director/refgen/prepare', { projectId: p.id, target: 'shot', shotId: s.id, frameAt, presetId, prompt: (text + legend).slice(0, 2500), aspect: '16:9', count, seed: a.seed ?? Math.floor(Math.random() * 1e6), referenceIds: refIds, guide: guide.data });
+  const est = job.quote?.estimate ?? null;
+  if (est === null || est > a.maxCostUsd) return { submitted: false, reason: est === null ? 'Cost unknown for this model; nothing was sent' : `Estimated $${est} is above maxCostUsd $${a.maxCostUsd}`, requestId: job.id };
+  let r; for (let i = 0; i < 60; i++) { try { r = (await post('/api/director/refgen/submit', { projectId: p.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: a.maxCostUsd, allowUnknownCharges: true } } })).job; break; } catch (err) { if (!isBusy(err)) throw err; await sleep(busyWait(err)); } }
+  if (!r) return { submitted: false, reason: 'Image backend stayed busy; nothing was sent', requestId: job.id };
+  const t0 = Date.now(); while (r.status === 'submitted' && Date.now() - t0 < 300000) { await sleep(Math.min(4000, POLL_MS)); r = (await post('/api/director/refgen/track', { projectId: p.id, requestId: job.id })).job; }
+  return { shot: s.title, at: momentLabel(s, t), status: r.status, message: r.message, requestId: job.id, referenceIds: r.referenceIds || [], estimateUsd: est,
+    inputs: ['Image 1: blockout frame', ...looks.slice(0, refIds.length).map((x, i) => `Image ${i + first}: ${x.label}`), ...(prev && refIds.includes(prev.id) ? [`Image ${refIds.indexOf(prev.id) + first}: previous shot`] : [])],
+    next: r.status === 'submitted' ? 'Still running: check with previs_director_generate_track (projectId, requestId).' : 'See it with previs_director_view_shot what:"still".' };
+}
+const MAX_IMAGE_BYTES = 1000000;
+const b64Bytes = d => Math.floor((d.length * 3) / 4);
+/** Fetch an image, shrinking it until it fits the MCP payload budget. */
+async function fitImage(fetchAt, width) {
+  for (let w = width, i = 0; ; w = Math.floor(w * 0.7), i++) { const r = await fetchAt(w); if (b64Bytes(r.data) <= MAX_IMAGE_BYTES || i === 3) return r; }
+}
+const assetFrame = (pid, params) => { const q = new URLSearchParams({ projectId: pid }); for (const [k, v] of Object.entries(params)) for (const x of [].concat(v)) if (x != null) q.append(k, String(x)); return get(`/api/director/asset-frame?${q}`); };
+async function viewShot(a) {
+  const p = await project(a.projectId), s = shotOf(p, a.shot), n = a.contactSheet || 0, cols = !n ? 1 : n <= 4 ? n : n <= 6 ? 3 : 4;
+  const spread = d => Array.from({ length: n }, (_, i) => Math.round(((d * i) / (n - 1)) * 100) / 100);
+  const summary = { shot: { id: s.id, title: s.title, duration: s.duration }, what: a.what };
+  const text = extra => [{ type: 'text', text: JSON.stringify({ ...summary, ...extra }) }];
+  let img;
+  try {
+    if (a.what === 'blockout') {
+      const t = Math.min(s.duration, a.t ?? s.duration / 2);
+      if (n) { summary.frames = spread(s.duration); img = await fitImage(w => assetFrame(p.id, { shotId: s.id, t: summary.frames, width: w, cols, type: 'image/jpeg' }), a.width || 1280); }
+      else {
+        summary.t = t; const w0 = a.width || 1280;
+        img = await fitImage(w => post('/api/director/frame', { projectId: p.id, shotId: s.id, t, width: w - (w % 2), height: Math.round((w * 9) / 32) * 2, type: w < w0 ? 'image/jpeg' : 'image/png' }), w0);
+      }
+      summary.source = s.render ? { rendered: true, assetId: s.render.assetId } : { rendered: false, note: 'Live blockout; not yet rendered as video (previs_director_render_blockout).' };
+    } else if (a.what === 'still') {
+      const frames = s.references.filter(r => r.role === 'frame');
+      if (!frames.length) return text({ available: false, reason: 'No stills yet; generate one with previs_director_generate_still.' });
+      let picked;
+      if (n) picked = frames.slice(-n).sort((x, y) => (stillTime(s, x) ?? 1e9) - (stillTime(s, y) ?? 1e9));
+      else if (a.referenceId) { picked = frames.filter(r => r.id === a.referenceId); if (!picked.length) throw Error(`Unknown still ${a.referenceId}`); }
+      else if (a.t != null) { const timed = frames.filter(r => stillTime(s, r) !== null); const best = Math.min(...timed.map(r => Math.abs(stillTime(s, r) - a.t))); picked = [timed.filter(r => Math.abs(stillTime(s, r) - a.t) === best).at(-1) || frames.at(-1)]; }
+      else picked = [frames.at(-1)];
+      summary.stills = picked.map(r => ({ referenceId: r.id, at: stillTime(s, r) === null ? null : momentLabel(s, stillTime(s, r)), model: r.generated?.model || null, url: `/director-refs/${p.id}/${r.file}` }));
+      img = await fitImage(w => assetFrame(p.id, { referenceId: picked.map(r => r.id), width: w, cols: picked.length > 1 ? cols : 1, type: 'image/jpeg' }), a.width || 1280);
+    } else if (a.what === 'video') {
+      const videos = (p.assets || []).filter(x => x.kind === 'workflow-result' && x.shotId === s.id && String(x.mime).startsWith('video/')).sort((x, y) => y.createdAt.localeCompare(x.createdAt));
+      const v = a.assetId ? videos.find(x => x.id === a.assetId) : videos[0];
+      if (!v) return text({ available: false, reason: a.assetId ? `No generated video ${a.assetId} on this shot` : 'No generated video for this shot yet (previs_director_generate_video or previs_director_batch_generate).' });
+      const d = v.duration || s.duration;
+      summary.video = { assetId: v.id, model: (v.source?.workflow || '').split(' ·')[0] || null, duration: v.duration, width: v.width, height: v.height, createdAt: v.createdAt, url: `/director-assets/${p.id}/${v.file.replace(/^assets\//, '')}`, others: videos.length - 1 };
+      if (n) summary.frames = spread(d); else summary.t = Math.min(d, a.t ?? d / 2);
+      img = await fitImage(w => assetFrame(p.id, { assetId: v.id, t: n ? summary.frames : summary.t, width: w, cols, type: 'image/jpeg' }), a.width || 1280);
+    } else throw Error('what must be blockout, still or video');
+  } catch (err) { if (err.code === 'headless-unavailable') return text({ available: false, reason: headlessOff(err) }); throw err; }
+  return [{ type: 'image', data: img.data, mimeType: img.mime }, ...text({ image: { width: img.width, height: img.height, mimeType: img.mime, bytes: b64Bytes(img.data) } })];
+}
+const BATCH_OPEN = ['planned', 'running'];
+function batchSummary(b) {
+  const counts = {}; for (const n of b.nodes) counts[n.status] = (counts[n.status] || 0) + 1;
+  return { batchId: b.id, status: b.status, tier: b.tier ?? null, steps: b.steps, nodes: b.nodes.length, counts, estimateUsd: b.estimateUsd, spentEstimateUsd: b.spentEstimateUsd, maxCostUsd: b.maxCostUsd, budgetSkipped: b.budgetSkipped,
+    failed: b.nodes.filter(n => n.status === 'failed').slice(0, 10).map(n => ({ node: n.id, label: n.label, error: n.error })), events: (b.events || []).slice(-10) };
+}
+async function batchGenerate(a) {
+  const { wait, ...input } = a;
+  let b = (await post('/api/director/batch', input)).batch;
+  if (a.dryRun) return { ...batchSummary(b), plan: b.nodes.map(n => ({ node: n.id, type: n.type, label: n.label, status: n.status, deps: n.deps, estimateUsd: n.estimateUsd })), next: `Nothing was sent. Tell the user the estimate ($${b.estimateUsd}), then call again without dryRun.` };
+  const t0 = Date.now();
+  while (wait && BATCH_OPEN.includes(b.status) && Date.now() - t0 < 300000) { await sleep(POLL_MS); b = (await get(`/api/director/batch?id=${b.id}`)).batch; }
+  return { ...batchSummary(b), next: BATCH_OPEN.includes(b.status) ? `Still running: check with previs_director_batch_status batchId ${b.id}, and previs_director_jobs_dashboard for individual jobs.` : 'Check results with previs_director_view_shot.' };
+}
+const TERMINAL = new Set(['completed', 'failed', 'closed', 'cancelled', 'invalidated']);
+const ago = s => (s == null ? '—' : s < 90 ? `${Math.round(s)}s` : s < 5400 ? `${Math.round(s / 60)}m` : `${(s / 3600).toFixed(1)}h`);
+function jobAdvice(j) {
+  if (j.status === 'uncertain' || j.uncertain) return j.source === 'generation' ? 'Outcome unknown; it may still run and charge. Never retry or resubmit. Check Comfy Cloud history, then previs_reconcile_generation.' : 'Outcome unknown; it may still run and charge. Never retry or resubmit; keep tracking (previs_director_generate_track) and check Comfy Cloud history.';
+  return `Running far longer than expected (~${ago(j.expectedSeconds)}). Do not resubmit; the tracker keeps checking. Tell the user and check Comfy Cloud history.`;
+}
+async function jobsDashboard() {
+  let d; try { d = await get('/api/jobs'); }
+  catch (err) { if (err.status === 404) return [{ type: 'text', text: 'The job dashboard is not available on this Previs server yet (GET /api/jobs, job tracker). Use previs_generation_state and the track tools instead.' }]; throw err; }
+  const jobs = d.jobs || [], attention = jobs.filter(j => j.stuck || j.uncertain || j.status === 'uncertain');
+  const active = jobs.filter(j => !attention.includes(j) && !TERMINAL.has(j.status)), done = jobs.filter(j => !attention.includes(j) && TERMINAL.has(j.status)).sort((x, y) => String(y.createdAt).localeCompare(String(x.createdAt))).slice(0, 15);
+  const row = j => `${(j.stuck ? 'STUCK' : j.status).padEnd(10)} ${String(j.kind || '').padEnd(5)} ${`${ago(j.ageSeconds)}/${ago(j.expectedSeconds)}`.padEnd(9)} ${(j.costUsd == null ? '—' : `$${Number(j.costUsd).toFixed(2)}`).padStart(6)}  ${j.label || j.source} · ${String(j.id).slice(0, 8)}${j.failure?.detail ? `\n    ${j.failure.phase || 'failed'}${j.failure.httpStatus ? ` ${j.failure.httpStatus}` : ''}: ${String(j.failure.detail).slice(0, 160)}` : ''}`;
+  const limits = Object.entries(d.limits || {}).map(([k, v]) => `${k} ${v.active}/${v.limit}`).join(' · ');
+  const lines = [`Jobs: ${jobs.length} · active ${active.length} · needs attention ${attention.length} · slots ${limits || '—'} · tracker ${d.tracker?.running ? 'running' : 'stopped'}`,
+    'status     kind  age/exp     cost  label · id'];
+  if (attention.length) lines.push('', 'Needs attention (never retry):', ...attention.flatMap(j => [row(j), `    → ${jobAdvice(j)}`]));
+  if (active.length) lines.push('', 'Active:', ...active.map(row));
+  if (done.length) lines.push('', 'Recent:', ...done.map(row));
+  if (!jobs.length) lines.push('', 'No jobs yet.');
+  return [{ type: 'text', text: lines.join('\n') }];
 }
 async function handle(message) {
-  if (message.method === 'initialize') return { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: 'comfy-previs', version: '0.1.0' }, instructions: 'Comfy Previs director. The user directs you here in chat while the Previs workspace (http://127.0.0.1:<port>/director.html?project=<id>) is open beside you; every edit appears there live and can be undone. Find the project with previs_director_projects (or create one with previs_director_create_project), read it with previs_director_get before every change, then build and direct with previs_director_edit (objects, Cast Card descriptions in notes/styleNotes, world and style, shots and cameras) and previs_director_animate (keyframed motion). Keep blockouts simple and readable: a few clear objects, named for what they are, each with a concrete appearance description. Reply with a short plain summary of what changed. Workflow: build the scene (objects with Cast Card descriptions, grouped where sensible), give each character/vehicle/prop an image (previs_director_generate_image, then set the best as primary), write shots and cameras, check and refine each shot prompt (previs_director_get_prompt / set_prompt / set_camera_style), choose a video model (previs_director_models, previs_director_shot_inputs), and once the user has rendered the blockout, generate video (previs_director_generate_video). Always state the estimated cost before paid generation and keep maxCostUsd tight. previs_director_wait_for_direction is only for messages typed inside the workspace and is not needed when the user talks to you directly.' };
+  if (message.method === 'initialize') return { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: 'comfy-previs', version: '0.1.0' }, instructions: 'Comfy Previs director. The user directs you here in chat while the Previs workspace (http://127.0.0.1:<port>/director.html?project=<id>) is open beside you; every edit appears there live and can be undone. Find the project with previs_director_projects (or create one with previs_director_create_project), read it with previs_director_get before every change, then build and direct with previs_director_edit (objects, Cast Card descriptions in notes/styleNotes, world and style, shots and cameras) and previs_director_animate (keyframed motion). Keep blockouts simple and readable: a few clear objects, named for what they are, each with a concrete appearance description. Reply with a short plain summary of what changed. Workflow: build the scene (objects with Cast Card descriptions, grouped where sensible), give each character/vehicle/prop an image (previs_director_generate_image, then set the best as primary), write shots and cameras, check and refine each shot prompt (previs_director_get_prompt / set_prompt / set_camera_style), choose a video model (previs_director_models, previs_director_shot_inputs), render the blockout yourself (previs_director_render_blockout, free, server GPU), make storyboard stills (previs_director_generate_still at start/end or any moment; start→end video models use them), compose design sheets (previs_director_generate_sheet compose:true), then generate video (previs_director_generate_video). For a whole project use previs_director_batch_generate (dryRun first, then run within one budget; follow it with previs_director_batch_status). You can see the work: previs_director_view_shot returns an image of the blockout, a still or a generated video frame at any moment, or a small contact sheet; look before and after every paid step. previs_director_jobs_dashboard lists every running job; never retry stuck or uncertain jobs. Always state the estimated cost before paid generation and keep maxCostUsd tight. previs_director_wait_for_direction is only for messages typed inside the workspace and is not needed when the user talks to you directly.' };
   if (message.method === 'ping') return {};
-  if (message.method === 'tools/list') return { tools: tools.map(({ path, run, ...tool }) => tool) };
+  if (message.method === 'tools/list') return { tools: tools.map(({ path, run, content, ...tool }) => tool) };
   if (message.method === 'tools/call') {
     const tool = tools.find(t => t.name === message.params?.name); if (!tool) throw Error('Unknown tool');
-    if (tool.run) { try { return { isError: false, content: [{ type: 'text', text: JSON.stringify(await tool.run(message.params.arguments || {})) }] }; } catch (e) { return { isError: true, content: [{ type: 'text', text: e.message }] }; } }
+    if (tool.run) { try { const out = await tool.run(message.params.arguments || {}); return { isError: false, content: tool.content ? out : [{ type: 'text', text: JSON.stringify(out) }] }; } catch (e) { return { isError: true, content: [{ type: 'text', text: e.message }] }; } }
     try {
       const response = await fetch(base + tool.path, ['/api/project','/api/readiness','/api/generation'].includes(tool.path) ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Previs-Agent': '1' }, body: JSON.stringify(message.params.arguments || {}) });
       const result = await response.json(); return { isError: !response.ok, content: [{ type: 'text', text: JSON.stringify(result) }] };

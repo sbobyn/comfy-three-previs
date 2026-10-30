@@ -8,7 +8,8 @@ RB fast movement (2.5). RC Mode 2 remains an explicit alternative. Phone =
 motion aim plus touch move/altitude, or touch-only aim. Physical walking is not
 positional tracking. These changes adapt the existing Previs implementation;
 no Otter or SBNodes code/runtime is bundled. Their GPL modules were read as
-behavior references, not relicensed as MIT. Existing inherited-source notices.
+behavior references, not relicensed as MIT. Existing inherited-source notices
+and the unresolved distribution decision still apply.
 
 ## Desktop
 

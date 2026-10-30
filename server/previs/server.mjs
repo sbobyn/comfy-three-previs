@@ -19,6 +19,16 @@ import { openDirector, directorRoutes } from './director.mjs';
 import { openAgentRunner } from './agent-runner.mjs'; // [agent]
 import { openRefgen, refgenRoutes } from './refgen.mjs';
 import { setupChecks } from './setup-check.mjs';
+import { openHeadless } from './headless.mjs'; // [headless]
+import { renderRoutes } from './render-routes.mjs'; // [headless]
+import { frameRoutes } from './frames.mjs'; // [frames]
+import { openBatches } from './batch.mjs'; import { batchRoutes } from './batch-routes.mjs'; import { fakeBackend, loopbackDrivers, loopbackJobs } from './batch-drivers.mjs'; // [batch]
+import { createJobTracker } from './job-tracker.mjs';
+import { slotsFor } from './concurrency.mjs';
+import { WebSocket } from 'ws';
+import { createJobProgress, createProgressSocketFactory } from './job-progress.mjs'; // [live-progress]
+import { createJobProgressRoutes } from './job-progress-routes.mjs';
+import { createProgressCoordinator } from './job-progress-coordinator.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -28,10 +38,21 @@ const project = await openProject(data);
 const blender = new BlenderMcp();
 const operations = await openOperations(data);
 const comfy = await openComfy(data, project);
-const generation = await generationRoutes(data,project);
+// [live-progress] Ephemeral observer; stores get nonthrowing hooks, the tracker stays the only authority.
+let tracker; const jobSources = {};
+const observe = createJobProgress({ connect: createProgressSocketFactory({ WebSocket }), trackNow: (source, id) => tracker?.trackNow(source, id) });
+const progress = createProgressCoordinator({ observe, sources: jobSources });
+const generation = await generationRoutes(data,project,{ telemetry: progress.telemetry('generation') });
 let refgen, agentRunner; // [agent]
 const director = await openDirector(data, { engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
-refgen = await openRefgen(data, director);
+refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen') });
+jobSources.generation = generation.trackerSource({ director }); jobSources.refgen = refgen.trackerSource();
+tracker = createJobTracker({ sources: [jobSources.generation, jobSources.refgen], limits: () => slotsFor(data).snapshot(), log: line => console.log(`[jobs] ${line}`) });
+generation.useTracker(tracker); refgen.useTracker(tracker); tracker.start();
+progress.restore(); progress.start(tracker); // [live-progress] observe accepted receipts; reconcile from C1
+// Same policy as every route (loopback host/origin, checked before this runs) plus an existing director project.
+const projectExists = async id => { try { await director.get(id); return true; } catch { return false; } };
+const progressRoutes = createJobProgressRoutes({ observe, resolveProject: async (_req, id) => (await projectExists(id)) ? progress.scope(id) : null });
 const refgenRoute = refgenRoutes(refgen);
 const directorRoute = directorRoutes(director, project, () => ({ command: process.execPath, args: [join(root, 'server/previs/agent.mjs')], env: { PREVIS_URL: `http://127.0.0.1:${port}` } }), () => agentRunner);
 const videos = videoRoutes({data,project,blender,operations,refreshBlender});
@@ -51,6 +72,9 @@ let operation = Promise.resolve();
 const serial = fn => { const next = operation.then(fn); operation = next.catch(() => {}); return next; };
 const port = Number(process.env.PORT || 5190);
 agentRunner = await openAgentRunner({ root, dataDir: data, port, director }); // [agent] built-in Claude Code runner
+const headless = openHeadless({ port }), renderRoute = renderRoutes({ director, headless }); // [headless] C2 render routes
+const frameRoute = frameRoutes({ director, headless }); // [frames] A6 video/still frames and contact sheets for agents
+const batches = await openBatches(data, { ...(process.env.PREVIS_BATCH_FAKE === '1' ? fakeBackend({ log: console.log }) : { drivers: loopbackDrivers(`http://127.0.0.1:${port}`), jobs: loopbackJobs(`http://127.0.0.1:${port}`) }), loadProject: id => director.get(id), log: console.log }), batchRoute = batchRoutes(batches); // [batch]
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
 async function body(req) {
   let text = ''; for await (const chunk of req) { text += chunk; if (text.length > 16 * 1024 * 1024) fail('Request too large', 413); }
@@ -62,6 +86,7 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
+    if (await progressRoutes.handle(req, res)) return; // [live-progress] GET /api/jobs/stream, /api/jobs/{source}/{id}/preview
     if (req.method === 'GET' && url.pathname === '/api/director/agent/stream') { const id = url.searchParams.get('id') || ''; if (!/^[a-f0-9-]{36}$/.test(id)) fail('Unknown project', 404); return agentRunner.stream(req, res, id); } // [agent] live steps + reply text (SSE)
     if (req.method === 'GET' && url.pathname === '/api/director/setup') return send({ ...(await setupChecks({ root, data })), agent: director.agentStatus(), dataDir: data });
     if (req.method === 'GET' && url.pathname === '/api/director/export') {
@@ -75,6 +100,10 @@ const server = createServer(async (req, res) => {
       for await (const chunk of req) { size += chunk.length; if (size > 1024 ** 3) fail('Export is larger than 1 GB', 413); parts.push(chunk); }
       return send(await director.importZip(Buffer.concat(parts)));
     }
+    if (renderRoute.handles(url.pathname)) return await renderRoute.serve(req, url, send, body); // [headless]
+    if (req.method === 'GET' && url.pathname === '/api/director/asset-frame') { try { return send(await frameRoute(url)); } catch (e) { if (e.apiCode) return send({ error: e.message, code: e.apiCode }, e.status); throw e; } } // [frames]
+    if (req.method === 'GET' && url.pathname === '/api/director/batch/stream') { const id = url.searchParams.get('id') || ''; if (!/^[a-f0-9-]{36}$/.test(id)) fail('Unknown batch', 404); return batches.stream(req, res, id); } // [batch]
+    if (/^\/api\/director\/batch(es|\/|$)/.test(url.pathname)) { if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415); return send(await batchRoute(req.method, url, req.method === 'POST' ? await body(req) : {})); } // [batch]
     if (url.pathname.startsWith('/api/director/')) {
       if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       if (!['GET', 'POST'].includes(req.method)) fail('Method not allowed', 405);
@@ -84,6 +113,11 @@ const server = createServer(async (req, res) => {
     }
     if (req.method === 'GET' && url.pathname === '/api/phone') return send(phoneLan.readiness());
     if (req.method === 'GET' && url.pathname === '/api/generation') return send(generation.state());
+    if (req.method === 'GET' && url.pathname === '/api/jobs') {
+      const id = url.searchParams.get('projectId'), snap = tracker.snapshot(); if (id === null) return send(snap);
+      if (!(await projectExists(id))) fail('Unknown project', 404);
+      return send({ ...snap, jobs: snap.jobs.filter(job => job.projectId === id) });
+    }
     if (req.method === 'GET' && url.pathname === '/api/project') return send({ project: project.get(), catalog, blender: blenderReadiness(), comfyJobs: comfy.list() });
     if (req.method === 'GET' && url.pathname === '/api/readiness') return send({ blender: blenderReadiness(), comfy: comfy.readiness(), browser: { available: true, scope: 'Editable camera-study set' } });
     if (req.method === 'GET' && url.pathname === '/api/comfy/jobs') return send({ jobs: comfy.list() });
@@ -208,10 +242,10 @@ const server = createServer(async (req, res) => {
     const start = range ? Number(range[1]) : 0, end = range ? Math.min(bytes.length-1, range[2] ? Number(range[2]) : bytes.length-1) : bytes.length-1;
     if (range && (start > end || start >= bytes.length)) { res.writeHead(416,{'Content-Range':`bytes */${bytes.length}`}); return res.end(); }
     res.writeHead(range ? 206 : 200, { ...(media ? {'Accept-Ranges':'bytes','Content-Length':end-start+1,...(range ? {'Content-Range':`bytes ${start}-${end}/${bytes.length}`} : {})} : {}), 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(range ? bytes.subarray(start,end+1) : bytes);
-  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
+  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});
-server.listen(port, '127.0.0.1', () => console.log(`Comfy Previs: http://127.0.0.1:${port}`));
-async function stop() { agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await releaseLock(); process.exit(0); }
+server.listen(port, '127.0.0.1', () => { console.log(`Comfy Previs: http://127.0.0.1:${port}`); batches.start(); });
+async function stop() { progressRoutes.stop(); progress.stop(); tracker.stop(); batches.close(); agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await headless.close(); await releaseLock(); process.exit(0); }
 process.on('SIGTERM', stop); process.on('SIGINT', stop);

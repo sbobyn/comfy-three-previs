@@ -1,0 +1,11 @@
+{ "batches": [
+  { "id": "b7a6f5e4-d3c2-4b1a-9f8e-7d6c5b4a3f2e", "projectId": "f158baf1-2cac-4311-859a-e5c590d381d4", "status": "running",
+    "createdAt": "2026-10-30T11:55:00.000Z", "updatedAt": "2026-10-30T12:01:50.000Z", "steps": ["looks", "sheets", "stills", "videos"], "tier": "draft",
+    "models": { "looks": "flux-2-pro", "sheets": "flux-2-pro", "stills": "flux-2-pro", "videos": "ltx-25-i2v-fast-v1" },
+    "maxCostUsd": 5, "estimateUsd": 3.4, "spentEstimateUsd": 1.18, "budgetSkipped": 0,
+    "counts": { "done": 7, "running": 2, "ready": 1, "waiting": 5, "failed": 1 }, "lastEvent": { "at": "2026-10-30T12:01:50.000Z", "text": "Still · The dive @ start submitted" } },
+  { "id": "c8b7a6f5-e4d3-4c2b-8a1f-9e8d7c6b5a4f", "projectId": "f158baf1-2cac-4311-859a-e5c590d381d4", "status": "paused",
+    "createdAt": "2026-10-30T09:10:00.000Z", "updatedAt": "2026-10-30T09:31:00.000Z", "steps": ["stills", "videos"], "tier": "final",
+    "models": { "stills": "flux-3", "videos": "ltx-25-flf-v1" }, "maxCostUsd": 2, "estimateUsd": 4.1, "spentEstimateUsd": 1.96, "budgetSkipped": 3,
+    "counts": { "done": 4, "budget": 3, "waiting": 2 }, "lastEvent": { "at": "2026-10-30T09:31:00.000Z", "text": "Budget reached: 3 nodes skipped" } }
+] }

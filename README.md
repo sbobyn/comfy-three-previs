@@ -6,6 +6,8 @@ Block out a scene in 3D in your browser, give every character and prop a consist
 
 **Live demo:** <https://sbobyn.github.io/comfy-three-previs/> — read-only. Image and video generation need a local install (below).
 
+**Launch film:** <https://sbobyn.github.io/comfy-three-previs/launch-film.mp4> (also [square](https://sbobyn.github.io/comfy-three-previs/launch-film-1x1.mp4), [vertical](https://sbobyn.github.io/comfy-three-previs/launch-film-9x16.mp4) and [30 s](https://sbobyn.github.io/comfy-three-previs/launch-film-30s.mp4)).
+
 ## Features
 
 - **3D blockout editor** — place, name, group and animate simple objects; keyframed camera moves per shot.
@@ -96,6 +98,10 @@ Your phone streams its orientation to the app over HTTPS on your local network.
 
 Open one from the home page and make it yours: **Breaking News** (a news anchor delivers the headline), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage.
 
+## Guide
+
+[Build · Cast · Shoot · Generate · Cut](docs/director.md) — the user guide, with captured examples. The in-app **Guide** adds interactive viewport examples and before/after comparisons.
+
 ## Development
 
 ```sh
@@ -104,6 +110,10 @@ pnpm test      # node --test
 ```
 
 The server is plain Node (`server/previs/`), the browser app is Vite + three.js (`src/`), and shared scene logic lives in `shared/`.
+
+### Publishing
+
+`scripts/publish-public.sh` publishes the committed tree to the public repo and redeploys the live demo with the latest launch film. It runs the gate and a secret scan first, adds one commit to public `main` (the tree, not the history) and one to `gh-pages` (`pnpm run demo:build` from a temporary read-only server, plus `launch-film*.mp4` from the newest `.evidence/launch-film/v*/`), then checks the Pages build and loads the demo in headless Chrome. It never force-pushes. Settings are environment variables listed at the top of the script (`TRAILER_DIR`, `SOURCE_DATA`, `DRY_RUN=1`, …).
 
 ## License
 

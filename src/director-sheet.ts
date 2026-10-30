@@ -10,6 +10,7 @@ import { setsFor, setDef, planSlots, slotAspect, slotLayout, viewPrompt, editVie
 import type { Sheet, SheetSlot, SheetAttempt, PlannedSlot } from '../shared/sheet-presets.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
 import { api, h, toast } from './director-common';
+import { progressSlot } from './director-progress'; // [live-progress]
 import { composeSheet, canvasBlob } from './director-sheet-compose';
 import type { ComposeOptions } from './director-sheet-compose';
 
@@ -149,7 +150,7 @@ async function runTask(t: Task): Promise<boolean> {
     catch (err) {
       const msg = (err as Error).message;
       if (!/Another request on this backend/.test(msg) || waited > 900) { await fail(msg); return true; }
-      setLive(t, 'waiting', 'Waiting for the image backend…'); await sleep(5000);
+      setLive(t, 'waiting', 'Waiting for the image model…'); await sleep(5000);
     }
   }
   if (sent.status === 'uncertain') { await fail(sent.message); toast('Dispatch outcome unknown — the batch stopped. Nothing is resent.', true); return false; }
@@ -203,8 +204,21 @@ async function makePrimary(e: Entity, referenceId: string) {
   try { const r = await api('director/edit', { projectId: ctx.projectId, ops: [{ op: 'set_look', entityId: e.id, referenceId }] }); ctx.apply(r.project); redraw(); toast(`Primary image for ${e.name} updated`); }
   catch (err) { toast((err as Error).message, true); }
 }
+// Styled yes/no in the workspace's delete-dialog pattern.
+function confirmDialog(title: string, body: string, ok: string): Promise<boolean> {
+  return new Promise(resolve => {
+    let yes = false;
+    const okBtn = h('button', { class: 'btn primary', type: 'button', onclick: () => { yes = true; dlg.close(); } }, ok);
+    const dlg = h('dialog', { class: 'confirm', 'aria-labelledby': 'ds-confirm-title' }, h('div', { class: 'dialog-body' },
+      h('h2', { id: 'ds-confirm-title', style: 'margin:0;font-size:15px' }, title),
+      h('p', { class: 'muted', style: 'margin:0' }, body),
+      h('div', { style: 'display:flex;gap:8px;justify-content:flex-end' }, h('button', { class: 'btn', type: 'button', onclick: () => dlg.close() }, 'Cancel'), okBtn)));
+    dlg.addEventListener('close', () => { dlg.remove(); resolve(yes); });
+    document.body.append(dlg); dlg.showModal(); okBtn.focus();
+  });
+}
 async function removeSheet(e: Entity, sheet: Sheet) {
-  if (!confirm(`Remove the set “${sheet.label}”? Its images stay on ${e.name}.`)) return;
+  if (!await confirmDialog(`Remove the set “${sheet.label}”?`, `Its images stay on ${e.name}.`, 'Remove set')) return;
   for (const s of sheet.slots) { const k = keyOf(sheet.id, s.id); if (live.get(k)?.phase === 'queued') { live.delete(k); const i = queue.findIndex(t => t.sheetId === sheet.id && t.slotId === s.id); if (i >= 0) queue.splice(i, 1); } }
   await mutate(e.id, sheets => { const i = sheets.findIndex(x => x.id === sheet.id); if (i >= 0) sheets.splice(i, 1); }).catch(err => toast((err as Error).message, true));
   const u = uiFor(e); u.sheetId = null; u.focus = null;
@@ -256,7 +270,7 @@ function identityRow(e: Entity) {
   const id = objectLooks(P(), e.id)[0];
   return h('div', { class: 'ds-identity' + (id ? '' : ' missing') },
     id ? h('img', { src: refUrl(id), alt: '' }) : h('span', { class: 'ds-noid' }, '!'),
-    h('span', {}, id ? h('b', {}, 'Identity: primary image') : h('b', {}, 'No primary image yet'), h('br'), h('small', {}, id ? 'Sent as image 1 with the Cast Card description and style.' : 'Generate or upload a look above first — every view is drawn from it.')));
+    h('span', {}, id ? h('b', {}, 'Identity: primary image') : h('b', {}, 'No primary image yet'), h('br'), h('small', {}, id ? 'Sent as image 1 with the Cast Card description and style.' : 'Generate or upload an image above first — every view is drawn from it.')));
 }
 
 function modelPicker(u: Ui, onChange: () => void) {
@@ -365,18 +379,19 @@ function slotDetail(e: Entity, u: Ui, sheet: Sheet, s: SheetSlot) {
   const canPay = st.paidExecutionEnabled && st.cloudCredential;
   const idx = shown ? s.attempts.indexOf(shown) + 1 : 0;
   const job = jobOf(shown?.requestId ?? null);
-  const retryNote = h('textarea', { class: 'field', rows: 2, maxlength: 300, placeholder: 'Optional extra direction: “arms at sides”, “hair tucked behind ear”…', 'data-key': `retry-${s.id}` }, u.retry);
+  const retryNote = h('textarea', { class: 'field', rows: 2, maxlength: 300, placeholder: 'Optional extra direction: “arms at sides”, “hair tucked behind ear”…', 'aria-label': 'Extra direction for the retry', 'data-key': `retry-${s.id}` }, u.retry);
   retryNote.oninput = () => { u.retry = retryNote.value; };
-  const editNote = h('textarea', { class: 'field', rows: 2, maxlength: 300, placeholder: 'What to change: “close the jacket”, “make the logo larger”…', 'data-key': `edit-${s.id}` }, u.edit);
+  const editNote = h('textarea', { class: 'field', rows: 2, maxlength: 300, placeholder: 'What to change: “close the jacket”, “make the logo larger”…', 'aria-label': 'What to change in this image', 'data-key': `edit-${s.id}` }, u.edit);
   editNote.oninput = () => { u.edit = editNote.value; editBtn.disabled = busy || !canPay || !ref || !editNote.value.trim(); };
   const task = (mode: Task['mode'], note: string, from: string | null): Task => ({ entityId: e.id, sheetId: sheet.id, slotId: s.id, mode, note, from, presetId: u.presetId });
-  const retryBtn = h('button', { class: 'btn sm', type: 'button', disabled: busy || !canPay || !objectLooks(P(), e.id)[0], onclick: () => { const note = u.retry.trim(); u.retry = ''; enqueue([task('retry', note, null)]); } }, 'Retry from reference', h('span', { class: 'ds-cost' }, est(u.presetId, 1)));
+  const retryBtn = h('button', { class: 'btn sm', type: 'button', disabled: busy || !canPay || !objectLooks(P(), e.id)[0], onclick: () => { const note = u.retry.trim(); u.retry = ''; enqueue([task('retry', note, null)]); } }, 'Retry from the primary image', h('span', { class: 'ds-cost' }, est(u.presetId, 1)));
   const editBtn = h('button', { class: 'btn sm', type: 'button', disabled: busy || !canPay || !ref || !u.edit.trim(), onclick: () => { const note = u.edit.trim(); u.edit = ''; enqueue([task('edit', note, shown!.id)]); } }, 'Edit this image', h('span', { class: 'ds-cost' }, est(u.presetId, 1)));
   const accepted = !!shown && s.accepted === shown.id;
   return h('div', { class: 'ds-detail' },
     h('div', { class: 'ds-detail-head' }, h('b', {}, s.label), h('span', { class: 'muted' }, shown ? `attempt ${idx} of ${s.attempts.length}${shown.mode !== 'generate' ? ` · ${shown.mode}` : ''}` : 'not generated yet'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => { u.focus = null; draw(e.id); } }, '✕')),
     ref && !busy ? h('a', { class: 'ds-big', href: refUrl(ref), target: '_blank', rel: 'noopener', title: 'Open full size' }, h('img', { src: refUrl(ref), alt: `${s.label} view` })) : null,
     busy || state === 'failed' || state === 'uncertain' ? h('div', { class: 'status-line' + (busy ? '' : ' err') }, message) : null,
+    (busy || state === 'uncertain') && shown?.requestId ? progressSlot(ctx.projectId, 'refgen', shown.requestId, `${e.name} · ${s.label}`, 'sheet') : null, // [live-progress]
     s.attempts.length ? h('div', { class: 'ds-attempts', role: 'listbox', 'aria-label': 'Attempts' }, ...s.attempts.map((a, i) => {
       const r = refById(a.referenceId), on = shown?.id === a.id;
       return h('button', { type: 'button', role: 'option', 'aria-selected': String(on), class: 'ds-att' + (on ? ' on' : '') + (s.accepted === a.id ? ' kept' : ''), title: `Attempt ${i + 1}${a.mode !== 'generate' ? ` (${a.mode}${a.note ? `: ${a.note}` : ''})` : ''}`, onclick: () => void selectAttempt(e, sheet, s, a.id) },
@@ -387,7 +402,7 @@ function slotDetail(e: Entity, u: Ui, sheet: Sheet, s: SheetSlot) {
       e.look === ref.id ? h('span', { class: 'ds-primary' }, '★ Primary image') : h('button', { class: 'btn sm ghost', type: 'button', title: 'The primary image is the one video models receive', onclick: () => void makePrimary(e, ref.id) }, '★ Make primary'),
       s.accepted && !accepted ? h('span', { class: 'note' }, 'Another attempt is kept') : null) : null,
     h('div', { class: 'ds-redo' },
-      h('div', { class: 'ds-redo-col' }, h('span', { class: 'ds-redo-t' }, 'Retry', h('small', {}, 'new image from the identity reference')), retryNote, retryBtn),
+      h('div', { class: 'ds-redo-col' }, h('span', { class: 'ds-redo-t' }, 'Retry', h('small', {}, 'new image from the primary image')), retryNote, retryBtn),
       h('div', { class: 'ds-redo-col' }, h('span', { class: 'ds-redo-t' }, 'Edit', h('small', {}, 'change this attempt, keep the rest')), editNote, editBtn)),
     job?.prompt ? h('details', { class: 'ds-prompt' }, h('summary', {}, 'Prompt sent'), h('pre', {}, job.prompt)) : null);
 }
@@ -445,7 +460,7 @@ function openCompose(e: Entity, sheetId: string) {
         h('div', { class: 'ds-opt' }, h('span', { class: 'eyebrow' }, 'Show'), toggle('name', 'Name label'), toggle('labels', 'View labels'), toggle('swatches', 'Colour swatches'), toggle('sameScale', 'Same scale')),
         h('p', { class: 'note' }, 'Kept ✓ views are used; slots without a kept view use the attempt they show.'),
         h('div', { class: 'ds-compose-actions' }, attach, h('label', { class: 'check-row' }, primaryBox, 'Make it the primary image'), download, status),
-        h('p', { class: 'note' }, 'A turnaround sheet as the single reference suits video models with few image slots.')),
+        h('p', { class: 'note' }, 'A turnaround sheet as the only image suits video models that take few images.')),
       h('div', { class: 'ds-compose-main' }, preview, dims)));
   dlg.addEventListener('close', () => dlg.remove());
   document.body.append(dlg); dlg.showModal(); void render();

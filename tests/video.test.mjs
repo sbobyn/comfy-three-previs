@@ -166,8 +166,8 @@ test('immutable versioned assets retain source binding, request revision and bro
     assert.equal(first.asset.timing.sampling, 'one-output-frame-per-source-frame');
     const firstBytes = await readFile(join(root, 'assets', first.asset.id + '.mp4'));
     assert.equal((await lstat(join(root, 'assets', first.asset.id + '.mp4'))).mode & 0o222, 0);
-    await assert.rejects(save({ revision: firstRevision }), { status: 409 });
-    const second = await save(); assert.equal(second.asset.version, 2); assert.notEqual(first.asset.id, second.asset.id);
+    // Additive result saves may use an older revision, but still validate the exact source snapshot.
+    const second = await save({ revision: firstRevision }); assert.equal(second.asset.version, 2); assert.notEqual(first.asset.id, second.asset.id);
     assert.deepEqual(await readFile(join(root, 'assets', first.asset.id + '.mp4')), firstBytes);
     await assert.rejects(save({ shotId: 'browser', binding: browserBinding }), /exact saved browser/);
     await assert.rejects(save({ shotId: 'browser', binding: browserBinding, provenance: { browserSnapshot: browser, browserSnapshotHash: 'wrong' } }), /snapshot hash/);
@@ -175,11 +175,13 @@ test('immutable versioned assets retain source binding, request revision and bro
     assert.equal(saved.asset.provenance.browserSnapshotHash, browserSnapshotHash(browser));
     assert.deepEqual(saved.asset.provenance.browserSnapshot, browser);
     await project.mutate(project.get().revision, p => { p.shots[0].binding.camera = 'Rebound'; p.shots[1].browser.subject[0] = 99; });
+    await assert.rejects(save({ revision: firstRevision }), /binding changed/);
+    await assert.rejects(save({ revision: firstRevision, shotId: 'browser', binding: browserBinding, provenance: { browserSnapshot: browser } }), /exact saved browser/);
     const reopened = (await openProject(root)).get(); assert.equal(reopened.assets.length, 3);
     assert.equal(reopened.assets[0].binding.camera, 'Selected'); assert.equal(reopened.assets[2].provenance.browserSnapshot.subject[0], 1);
     assert.deepEqual(reopened.assets, project.get().assets);
     // Persistence failure retains the copied media and does not publish project metadata.
-    const failing = { mutate: (revision, fn) => project.mutate(revision, async p => { await fn(p); throw Error('simulated disk failure'); }) };
+    const failing = { get: project.get, append: fn => project.append(async p => { await fn(p); throw Error('simulated disk failure'); }) };
     const before = project.get();
     await assert.rejects(save({ project: failing, binding: before.shots[0].binding }), /simulated disk failure/);
     assert.deepEqual(project.get(), before); assert.equal((await readdir(join(root, 'assets'))).length, 4);

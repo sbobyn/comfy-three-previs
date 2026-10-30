@@ -44,7 +44,7 @@ export function promptBlock(s: Shot, ctx: Ctx) {
     return h('button', { type: 'button', class: 'ap-chip', style: `--c:${g.color}`, 'data-ids': (g.ids || []).join(' '), title: `From ${g.source}${objId ? ' · click to open the Cast Card' : ''}`, onclick: objId ? () => ctx.select(objId) : undefined }, h('i'), g.label, objId ? h('small', {}, 'Cast Card') : null);
   }));
 
-  const seg = h('div', { class: 'seg', role: 'tablist', 'aria-label': 'Prompt type' }, ...(['video', 'image'] as const).map(k => h('button', { type: 'button', role: 'tab', class: k === kind ? 'on' : '', 'aria-selected': String(k === kind), title: k === 'video' ? 'For the LTX video (includes camera motion)' : 'For the FLUX still (no motion)', onclick: () => { kind = k; editing = preview = false; rerender(); } }, k === 'video' ? 'Video · LTX' : 'Image · FLUX')));
+  const seg = h('div', { class: 'seg', role: 'tablist', 'aria-label': 'Prompt type' }, ...(['video', 'image'] as const).map(k => h('button', { type: 'button', role: 'tab', class: k === kind ? 'on' : '', 'aria-selected': String(k === kind), title: k === 'video' ? 'For the video model (includes camera motion)' : 'For stills (no motion)', onclick: () => { kind = k; editing = preview = false; rerender(); } }, k === 'video' ? 'Video prompt' : 'Still prompt')));
   const marker = edited ? h('span', { class: 'ap-edited', title: 'You edited this prompt; your text is what generation uses' }, 'Edited') : h('span', { class: 'ap-auto', title: 'Composed from the Cast Cards, world, action and camera — assembled text, not a model' }, 'Auto');
 
   let body: Node;

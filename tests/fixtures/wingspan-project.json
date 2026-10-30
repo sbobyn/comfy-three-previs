@@ -1,0 +1,2068 @@
+{
+ "version": 1,
+ "id": "f158baf1-2cac-4311-859a-e5c590d381d4",
+ "title": "Starter \u00b7 Wingspan",
+ "template": "empty",
+ "createdAt": "2026-10-30T14:57:15.669Z",
+ "updatedAt": "2026-10-30T15:47:44.017Z",
+ "revision": 25,
+ "scene": {
+  "name": "Alpine valley",
+  "environment": {
+   "preset": "stage",
+   "description": "A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.",
+   "style": "Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour."
+  },
+  "entities": [
+   {
+    "id": "910451e8-e15e-4907-ac3a-a388cba96e01",
+    "name": "Alpine lake",
+    "kind": "environment",
+    "shape": "cylinder",
+    "position": [
+     0,
+     0.51,
+     -45
+    ],
+    "rotation": 0,
+    "scale": [
+     50,
+     0.05,
+     44
+    ],
+    "color": "#2f7fa6",
+    "notes": "Clear turquoise glacial lake reflecting the peaks.",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+    "name": "River 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     38.03,
+     3.99,
+     42.37
+    ],
+    "rotation": 120.95999999999998,
+    "scale": [
+     31.155,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "83c26dc9-e3a6-48d9-bb88-ed6e8359d030",
+    "name": "River 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     39.08,
+     3.89,
+     43.66
+    ],
+    "rotation": 120.57999999999998,
+    "scale": [
+     27.554,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "947a503d-f221-439e-aa92-6540ede5cc32",
+    "name": "River 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     35,
+     1.08,
+     39
+    ],
+    "rotation": 127.87,
+    "scale": [
+     24.804,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "353a0feb-b328-41be-bebe-6788175954b7",
+    "name": "River 4",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     23,
+     0.74,
+     21
+    ],
+    "rotation": 119.05000000000001,
+    "scale": [
+     22.591,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "85bbe9ab-a681-4c2c-9b5f-471b5e175bdf",
+    "name": "River 5",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     14,
+     0.29,
+     3
+    ],
+    "rotation": 113.95999999999998,
+    "scale": [
+     21.698,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "2414bb8c-0206-468a-b65e-331feabdb678",
+    "name": "River 6",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     7,
+     0.04,
+     -14
+    ],
+    "rotation": 110.56,
+    "scale": [
+     19.088,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "82a23174-4a95-47ce-b8d5-9ce856f186f7",
+    "name": "Pine 30,40 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     39.8,
+     0.03,
+     33.2
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9601630635824202,
+     1.5362609017318725,
+     0.9601630635824202
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "b2c4252c-3e42-40a1-84d7-0512b3a3ea3a",
+    "name": "Pine 30,40 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     28,
+     0.51,
+     33.8
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2857330776539702,
+     2.0571729242463523,
+     1.2857330776539702
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "6b12bc98-093a-4f45-bc5c-869a95bc1405",
+    "name": "Pine 30,40 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     19.4,
+     0.37,
+     41.6
+    ],
+    "rotation": 0,
+    "scale": [
+     1.5632147904952411,
+     2.501143664792386,
+     1.5632147904952411
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "6c6a111c-041a-48b8-b747-28ad16b82347",
+    "name": "Pine 30,40 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     33.1,
+     0.39,
+     42
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9433034338352984,
+     1.5092854941364775,
+     0.9433034338352984
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "c85189ad-ce30-4df1-bb56-14db334a3f1c",
+    "name": "Pine 30,40 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     32.1,
+     0.38,
+     29.2
+    ],
+    "rotation": 0,
+    "scale": [
+     1.0547572764203539,
+     1.6876116422725662,
+     1.0547572764203539
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "c11992cc-c705-4af1-b9e3-a8257ac1d2ef",
+    "name": "Pine 30,40 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     31.4,
+     0.42,
+     31.2
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1933973305000256,
+     1.909435728800041,
+     1.1933973305000256
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "9775db1d-db9d-49fc-9abc-71d0a4faa77b",
+    "name": "Pine 30,40 \u00b7 7",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     31,
+     0.42,
+     41.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.292180093908969,
+     2.0674881502543503,
+     1.292180093908969
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "520d360e-02ff-4a53-8c7b-bc5545c3e889",
+    "name": "Pine -25,-10 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -20.6,
+     -0.06,
+     -19.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2998430739882547,
+     2.0797489183812075,
+     1.2998430739882547
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "b64c0e83-eeda-48c6-9610-0424c410985d",
+    "name": "Pine -25,-10 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -32.5,
+     -0.1,
+     -19.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.3984775360223076,
+     2.237564057635692,
+     1.3984775360223076
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "81f45ec9-0ae2-4012-8c77-01ce5af2f909",
+    "name": "Pine -25,-10 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -23.5,
+     -0.06,
+     -7.1
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2474901465794443,
+     1.995984234527111,
+     1.2474901465794443
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "98a8e209-fbcc-4a83-8372-266a13c3b667",
+    "name": "Pine -25,-10 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -24.2,
+     -0.06,
+     -3.3
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2259213060877718,
+     1.961474089740435,
+     1.2259213060877718
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "7e4d775d-be32-4e28-8892-b157e868bf16",
+    "name": "Pine -25,-10 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -14.8,
+     -0.14,
+     -13.3
+    ],
+    "rotation": 0,
+    "scale": [
+     1.0738986094002845,
+     1.7182377750404552,
+     1.0738986094002845
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "55498705-af3a-4c3e-8cb3-88b489496eb2",
+    "name": "Pine -25,-10 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -32.7,
+     -0.04,
+     -3.3
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9572985075570389,
+     1.5316776120912623,
+     0.9572985075570389
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "918b4a0d-2989-4100-8410-cc2bea69e2a3",
+    "name": "Pine -25,-10 \u00b7 7",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -29.8,
+     -0.06,
+     -10.1
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1404329829708613,
+     1.8246927727533782,
+     1.1404329829708613
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "2892f942-4050-4fd5-9600-b97c692f3e39",
+    "name": "Pine -25,-10 \u00b7 8",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -26.2,
+     -0.06,
+     -7.4
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9512406072217676,
+     1.5219849715548284,
+     0.9512406072217676
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "c9e3c3ac-ed62-4284-8262-ebcaeab27a3d",
+    "name": "Pine 20,-20 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     20.3,
+     0.27,
+     -28
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1394390643119006,
+     1.823102502899041,
+     1.1394390643119006
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "f028ef6d-33e7-49ea-a59a-5b829cd96c15",
+    "name": "Pine 20,-20 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     30.4,
+     0.27,
+     -21.9
+    ],
+    "rotation": 0,
+    "scale": [
+     1.5734133583884768,
+     2.517461373421563,
+     1.5734133583884768
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "2b046f26-461a-4950-83c9-4330f5ee829d",
+    "name": "Pine 20,-20 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     9.9,
+     -0.24,
+     -18.6
+    ],
+    "rotation": 0,
+    "scale": [
+     1.4523659200432486,
+     2.323785472069198,
+     1.4523659200432486
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "fa6977c1-c9f1-4353-ac94-9efeee05709e",
+    "name": "Pine 20,-20 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     27.6,
+     0.35,
+     -23.8
+    ],
+    "rotation": 0,
+    "scale": [
+     1.145124871403418,
+     1.8321997942454686,
+     1.145124871403418
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "d9a01948-a5e8-4530-b789-e63a5def8821",
+    "name": "Pine 20,-20 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     19.9,
+     -0.08,
+     -12.9
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9481340645848024,
+     1.5170145033356839,
+     0.9481340645848024
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "e36e50cd-4b29-4ca9-aefd-3d0db58042a1",
+    "name": "Pine 20,-20 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     10.2,
+     -0.24,
+     -25.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.3879294474788497,
+     2.2206871159661596,
+     1.3879294474788497
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "e258d808-40cc-4d52-a100-961a930ce6c4",
+    "name": "Pine -45,-60 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -55.4,
+     -0.17,
+     -54.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1167251635565623,
+     1.7867602616904996,
+     1.1167251635565623
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "150cacac-c987-40d1-b0bc-3dd674b6df21",
+    "name": "Pine -45,-60 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -43.1,
+     -0.17,
+     -55.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2119485370756453,
+     1.9391176593210326,
+     1.2119485370756453
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "13f4eb4d-9fd8-44da-8e5d-694d0dbf682b",
+    "name": "Pine -45,-60 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -39.8,
+     -0.26,
+     -50.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1429036789819156,
+     1.828645886371065,
+     1.1429036789819156
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "8d3b1304-acee-485d-a208-20782e7d7fc9",
+    "name": "Pine -45,-60 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -34.4,
+     -0.02,
+     -63.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.327643680438154,
+     2.1242298887010462,
+     1.327643680438154
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "1beb6f3c-d216-43ac-b689-cba24e83a9aa",
+    "name": "Pine -45,-60 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -45.2,
+     0.12,
+     -66.8
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1012023485492033,
+     1.7619237576787254,
+     1.1012023485492033
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "e37b2f0a-b276-467b-ac7d-abdcc7e8e4ce",
+    "name": "Pine -45,-60 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -39.3,
+     -0.02,
+     -62.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.541771358326043,
+     2.466834173321669,
+     1.541771358326043
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "fa8e4f34-eb14-45fe-b37a-c2c209333e0d",
+    "name": "Pine -45,-60 \u00b7 7",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -45.1,
+     0.15,
+     -68
+    ],
+    "rotation": 0,
+    "scale": [
+     1.181150979434013,
+     1.8898415670944209,
+     1.181150979434013
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "47194363-1e1a-4aea-bac5-48445f204e28",
+    "name": "Pine 45,-65 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     39.7,
+     0.18,
+     -73.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.201365155762353,
+     1.922184249219765,
+     1.201365155762353
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "7fd3e21f-2c40-4a08-bb94-7e77e5722ec5",
+    "name": "Pine 45,-65 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     46.2,
+     0.1,
+     -60
+    ],
+    "rotation": 0,
+    "scale": [
+     1.5905269567008302,
+     2.5448431307213286,
+     1.5905269567008302
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "35d23ef3-0157-4b08-9472-d27c4a035b17",
+    "name": "Pine 45,-65 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     49.4,
+     0.43,
+     -67.9
+    ],
+    "rotation": 0,
+    "scale": [
+     1.0615260556760775,
+     1.698441689081724,
+     1.0615260556760775
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "d3cfec51-e0d1-4ad2-859c-abe5aac5500b",
+    "name": "Pine 45,-65 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     35,
+     -0.1,
+     -73.4
+    ],
+    "rotation": 0,
+    "scale": [
+     1.3609616738806312,
+     2.17753867820901,
+     1.3609616738806312
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "6ae671b4-a8d8-48a9-a386-91cb162e916c",
+    "name": "Pine 45,-65 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     33.3,
+     -0.1,
+     -57.1
+    ],
+    "rotation": 0,
+    "scale": [
+     1.027640011786838,
+     1.644224018858941,
+     1.027640011786838
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "3743d56a-947d-4d67-b0b3-272197050ae4",
+    "name": "Pine 45,-65 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     39.8,
+     0.19,
+     -73.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2742136736100727,
+     2.038741877776116,
+     1.2742136736100727
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "71c8eda8-820e-47f6-b753-d274cb46d70d",
+    "name": "Pine 60,80 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     48.9,
+     4,
+     54.69
+    ],
+    "rotation": 0,
+    "scale": [
+     0.987844058747184,
+     1.5805504939954944,
+     0.987844058747184
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "005d2470-1aa7-418d-841c-26a28c06c680",
+    "name": "Pine 60,80 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     46.49,
+     3.6,
+     55.09
+    ],
+    "rotation": 0,
+    "scale": [
+     1.35847652460143,
+     2.1735624393622883,
+     1.35847652460143
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "a726b1a2-87cb-4f2b-9b56-c4d97880cfc3",
+    "name": "Pine 60,80 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     49.19,
+     3.72,
+     54.02
+    ],
+    "rotation": 0,
+    "scale": [
+     1.5096856508104404,
+     2.415497041296705,
+     1.5096856508104404
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "aa749c97-3146-47d5-afc4-7ff6ba5fdf48",
+    "name": "Pine 60,80 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     50.02,
+     3.78,
+     53.69
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2914902185996266,
+     2.0663843497594026,
+     1.2914902185996266
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "c76b6dbf-ef9d-4436-b42b-0d08ded2f6e4",
+    "name": "Pine 60,80 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     44.88,
+     3.57,
+     55.98
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2370659727156363,
+     1.9793055563450181,
+     1.2370659727156363
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "f8e76546-d2f0-4caf-9276-cbde518ae391",
+    "name": "Pine tree",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -30,
+     0.19,
+     20
+    ],
+    "rotation": 0,
+    "scale": [
+     1.4,
+     2.2,
+     1.4
+    ],
+    "color": "#2f5d3a",
+    "notes": "Tall subalpine fir and pine trees, dark green, dense.",
+    "look": "51b2c693-ffb7-4a99-872d-27760f502590",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "311a48d9-648a-4672-ba4e-1e047baf087f",
+    "name": "Elk 1",
+    "kind": "character",
+    "shape": "box",
+    "position": [
+     -14,
+     0.52,
+     -20
+    ],
+    "rotation": 40,
+    "scale": [
+     0.9,
+     1.5,
+     2.3
+    ],
+    "color": "#7a5534",
+    "notes": "Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull.",
+    "look": "eb8bde51-a7df-40c5-9060-90fc87391217",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+   },
+   {
+    "id": "b97a657b-5608-4482-a5a2-cad13f6eaab3",
+    "name": "Elk 2",
+    "kind": "character",
+    "shape": "box",
+    "position": [
+     -11,
+     0.4,
+     -24
+    ],
+    "rotation": 70,
+    "scale": [
+     0.9,
+     1.5,
+     2.3
+    ],
+    "color": "#7a5534",
+    "notes": "",
+    "look": null,
+    "lookFrom": "311a48d9-648a-4672-ba4e-1e047baf087f",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+   },
+   {
+    "id": "784d7710-1963-47c5-8176-78f3363c2d6e",
+    "name": "Elk 3",
+    "kind": "character",
+    "shape": "box",
+    "position": [
+     -17,
+     0.59,
+     -25
+    ],
+    "rotation": 10,
+    "scale": [
+     0.9,
+     1.5,
+     2.3
+    ],
+    "color": "#7a5534",
+    "notes": "",
+    "look": null,
+    "lookFrom": "311a48d9-648a-4672-ba4e-1e047baf087f",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+   },
+   {
+    "id": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "name": "Bald eagle",
+    "kind": "character",
+    "shape": "box",
+    "position": [
+     80,
+     70,
+     120
+    ],
+    "rotation": 0,
+    "scale": [
+     2.2,
+     0.3,
+     0.9
+    ],
+    "color": "#3b2a1e",
+    "notes": "A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons.",
+    "look": "9b06d6d6-2f59-4612-a960-f348d5116241",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": [
+     {
+      "t": 0,
+      "p": [
+       95,
+       127.19,
+       135
+      ]
+     },
+     {
+      "t": 3,
+      "p": [
+       72,
+       72.2,
+       95
+      ]
+     },
+     {
+      "t": 5,
+      "p": [
+       55,
+       38,
+       66
+      ]
+     },
+     {
+      "t": 7,
+      "p": [
+       40,
+       22,
+       40
+      ]
+     },
+     {
+      "t": 9,
+      "p": [
+       22,
+       18.13,
+       14
+      ]
+     },
+     {
+      "t": 10.5,
+      "p": [
+       6,
+       4,
+       -8
+      ]
+     },
+     {
+      "t": 11.8,
+      "p": [
+       -8,
+       2.6,
+       -18
+      ]
+     },
+     {
+      "t": 13,
+      "p": [
+       -24,
+       5.91,
+       -32
+      ]
+     },
+     {
+      "t": 15,
+      "p": [
+       -45,
+       22,
+       -58
+      ]
+     }
+    ],
+    "parent": null
+   },
+   {
+    "id": "10a9a848-8da4-43ee-95d9-d33975e4419c",
+    "name": "River",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     31.666666666666668,
+     0,
+     31.75
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "206c50a1-c23a-4cd1-be52-92d976ee68ee",
+    "name": "Forest",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     9.1325,
+     0,
+     -9.045
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "3197eeea-90f6-47db-86d8-15d534e592fe",
+    "name": "Elk herd",
+    "kind": "character",
+    "shape": "group",
+    "position": [
+     -14,
+     0,
+     -23
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "a0f8b196-e985-42f2-bec8-96b8208980e5",
+    "name": "Alpine terrain",
+    "kind": "environment",
+    "shape": "terrain",
+    "position": [
+     0,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#6f8f4e",
+    "notes": "Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above.",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   }
+  ],
+  "references": [
+   {
+    "id": "9b06d6d6-2f59-4612-a960-f348d5116241",
+    "name": "Bald eagle \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "9b06d6d6-2f59-4612-a960-f348d5116241.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "note": "",
+    "createdAt": "2026-10-30T15:25:29.339Z",
+    "generated": {
+     "requestId": "51b8886f-ae58-4b20-bc48-5f97fa97d647",
+     "presetId": "flux-3",
+     "model": "FLUX 3 Image (BFL)",
+     "prompt": "Character reference photo of Bald eagle, A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons.. Full body, standing, front three-quarter view, black accents in the wardrobe. Plain light grey studio background, soft even lighting, photorealistic, sharp focus. Wardrobe suits A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Show exactly one person. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour..",
+     "seed": 7301,
+     "backend": "cloud:https://cloud.comfy.org",
+     "promptId": "23d4a881-8cef-4852-a327-a84513042da6"
+    }
+   },
+   {
+    "id": "eb8bde51-a7df-40c5-9060-90fc87391217",
+    "name": "Elk 1 \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "eb8bde51-a7df-40c5-9060-90fc87391217.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "311a48d9-648a-4672-ba4e-1e047baf087f",
+    "note": "",
+    "createdAt": "2026-10-30T15:26:13.795Z",
+    "generated": {
+     "requestId": "9a5b5164-2961-4e43-abe0-b186165d8519",
+     "presetId": "flux-3",
+     "model": "FLUX 3 Image (BFL)",
+     "prompt": "Character reference photo of Elk 1, Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull.. Full body, standing, front three-quarter view, brown accents in the wardrobe. Plain light grey studio background, soft even lighting, photorealistic, sharp focus. Wardrobe suits A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Show exactly one person. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour..",
+     "seed": 7301,
+     "backend": "cloud:https://cloud.comfy.org",
+     "promptId": "8b8e820f-7c18-4930-b1f6-24c6053f9b3d"
+    }
+   },
+   {
+    "id": "51b2c693-ffb7-4a99-872d-27760f502590",
+    "name": "Pine tree \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "51b2c693-ffb7-4a99-872d-27760f502590.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "f8e76546-d2f0-4caf-9276-cbde518ae391",
+    "note": "",
+    "createdAt": "2026-10-30T15:26:57.678Z",
+    "generated": {
+     "requestId": "928d0898-784d-4a97-a4f4-52401e408703",
+     "presetId": "flux-3",
+     "model": "FLUX 3 Image (BFL)",
+     "prompt": "Reference photo of Pine tree, Tall subalpine fir and pine trees, dark green, dense. in A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour..",
+     "seed": 7301,
+     "backend": "cloud:https://cloud.comfy.org",
+     "promptId": "d6e9c749-e958-4e0f-9736-bb835fb7fece"
+    }
+   }
+  ]
+ },
+ "shots": [
+  {
+   "id": "b59a89ad-13b3-4978-949c-e4eb450147be",
+   "title": "The valley",
+   "description": "Sweeping aerial over the lake and peaks as a tiny @bald-eagle glides down from the ridge.",
+   "duration": 5,
+   "start": 0,
+   "camera": {
+    "move": "custom",
+    "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "distance": 6,
+    "height": 1.6,
+    "angle": 0,
+    "mm": 24,
+    "keys": [
+     {
+      "t": 0,
+      "p": [
+       -40,
+       46.8,
+       -95
+      ],
+      "look": [
+       95,
+       121.19,
+       135
+      ],
+      "mm": 24
+     },
+     {
+      "t": 0.25,
+      "p": [
+       -27.5,
+       43.96,
+       -75
+      ],
+      "look": [
+       85.42,
+       98.28,
+       118.33
+      ],
+      "mm": 24
+     },
+     {
+      "t": 0.5,
+      "p": [
+       -15,
+       42.5,
+       -55
+      ],
+      "look": [
+       75.83,
+       75.37,
+       101.67
+      ],
+      "mm": 24
+     },
+     {
+      "t": 0.75,
+      "p": [
+       -2.5,
+       41.25,
+       -35
+      ],
+      "look": [
+       65.63,
+       53.38,
+       84.13
+      ],
+      "mm": 24
+     },
+     {
+      "t": 1,
+      "p": [
+       10,
+       40,
+       -15
+      ],
+      "look": [
+       55,
+       32,
+       66
+      ],
+      "mm": 24
+     }
+    ]
+   },
+   "references": [
+    {
+     "id": "fc1ce5da-1edc-48c0-a95c-329f1f60fed6",
+     "name": "Shot 01 The valley \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "fc1ce5da-1edc-48c0-a95c-329f1f60fed6.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T15:47:44.017Z",
+     "generated": {
+      "requestId": "9219c2e1-41b0-4459-8f37-f4472b7c64a6",
+      "presetId": "flux-3",
+      "model": "FLUX 3 Image (BFL)",
+      "prompt": "Cinematic film still, single frame. Sweeping aerial over the lake and peaks as a tiny Bald eagle glides down from the ridge. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Framing: 24mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. This is the first frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Bald eagle looks exactly like image 2. One single photographic frame, no split panels, no captions or watermarks.",
+      "seed": 4242,
+      "backend": "cloud:https://cloud.comfy.org",
+      "promptId": "c7e9fed1-e61e-4673-92cb-886b50866785"
+     }
+    }
+   ],
+   "render": {
+    "previsShotId": "e7557c29-b6df-4d90-aaab-f0540925c773",
+    "assetId": "881acfc2-ccc0-4309-ba61-0f31f3afd5b6",
+    "prompt": "Cinematic live-action shot. Sweeping aerial over the lake and peaks as a tiny Bald eagle glides down from the ridge. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Custom keys, 24mm wide, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 24mm wide.",
+    "frameCount": 120,
+    "duration": 5,
+    "width": 1280,
+    "height": 720,
+    "signature": "c4895061",
+    "createdAt": "2026-10-30T15:34:22.580Z"
+   },
+   "cast": {
+    "include": [],
+    "exclude": []
+   }
+  },
+  {
+   "id": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+   "title": "The dive",
+   "description": "FPV chase right behind @bald-eagle as it folds its wings and dives down the river canyon.",
+   "duration": 5,
+   "start": 5,
+   "camera": {
+    "move": "custom",
+    "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "distance": 7,
+    "height": 2.5,
+    "angle": 180,
+    "mm": 20,
+    "keys": [
+     {
+      "t": 0,
+      "p": [
+       57.65,
+       43.02,
+       70.59
+      ],
+      "look": [
+       53.68,
+       36.59,
+       63.71
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.1,
+      "p": [
+       54.76,
+       38.25,
+       62.78
+      ],
+      "look": [
+       49.15,
+       32.99,
+       57.66
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.2,
+      "p": [
+       51.43,
+       33.27,
+       55.21
+      ],
+      "look": [
+       44.79,
+       28.29,
+       51.51
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.3,
+      "p": [
+       47.17,
+       30.23,
+       50.23
+      ],
+      "look": [
+       42.08,
+       25.19,
+       44.41
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.4,
+      "p": [
+       42.53,
+       25.23,
+       46.46
+      ],
+      "look": [
+       39.37,
+       21.14,
+       36.81
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.5,
+      "p": [
+       36.35,
+       23.14,
+       38.95
+      ],
+      "look": [
+       35.28,
+       20.87,
+       30.03
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.6,
+      "p": [
+       32.49,
+       21.53,
+       30.56
+      ],
+      "look": [
+       29.72,
+       20.4,
+       24.27
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.7,
+      "p": [
+       30.09,
+       21.26,
+       23.57
+      ],
+      "look": [
+       23.98,
+       18.33,
+       18.62
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.8,
+      "p": [
+       25.51,
+       22.8,
+       17.81
+      ],
+      "look": [
+       20.19,
+       17.05,
+       12.02
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.9,
+      "p": [
+       18.66,
+       16.98,
+       10.6
+      ],
+      "look": [
+       15.59,
+       11.84,
+       4.16
+      ],
+      "mm": 20
+     },
+     {
+      "t": 1,
+      "p": [
+       13.53,
+       12.15,
+       2.35
+      ],
+      "look": [
+       9.77,
+       7.33,
+       -2.82
+      ],
+      "mm": 20
+     }
+    ]
+   },
+   "references": [],
+   "render": {
+    "previsShotId": "aa36c5e4-acb6-4e90-ba8d-2522041ba796",
+    "assetId": "3851df8d-8a49-41c4-b9d2-173ffba492a7",
+    "prompt": "Cinematic live-action shot. FPV chase right behind Bald eagle as it folds its wings and dives down the river canyon. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Clear turquoise glacial lake reflecting the peaks. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Tall subalpine fir and pine trees, dark green, dense. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Custom keys, 20mm wide, eye level, 5s. Follow the supplied camera motion exactly. Movement: FPV drone chase. Cuts: continuous take, no cuts. Lens: 14mm ultra-wide. Filter: golden hour light.",
+    "frameCount": 120,
+    "duration": 5,
+    "width": 1280,
+    "height": 720,
+    "signature": "58176ae3",
+    "createdAt": "2026-10-30T15:33:33.384Z"
+   },
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "FPV drone chase"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "14mm ultra-wide"
+    ],
+    "filter": [
+     "golden hour light"
+    ]
+   }
+  },
+  {
+   "id": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+   "title": "The swoop",
+   "description": "Low tracking shot at the lakeshore as @bald-eagle skims the water past the grazing @elk-herd and climbs away.",
+   "duration": 5,
+   "start": 10,
+   "camera": {
+    "move": "truck-left",
+    "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "distance": 12,
+    "height": 2,
+    "angle": 80,
+    "mm": 35,
+    "keys": null
+   },
+   "references": [],
+   "render": {
+    "previsShotId": "2c4396de-21cc-4de4-9b79-e3bfaca8f5bb",
+    "assetId": "ab0dadf7-30c7-4ccc-94a1-2bf8cf76bc30",
+    "prompt": "Cinematic live-action shot. Low tracking shot at the lakeshore as Bald eagle skims the water past the grazing Elk herd and climbs away. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Clear turquoise glacial lake reflecting the peaks. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Truck left on Bald eagle, 35mm normal, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 35mm natural.",
+    "frameCount": 120,
+    "duration": 5,
+    "width": 1280,
+    "height": 720,
+    "signature": "9dd68d03",
+    "createdAt": "2026-10-30T15:33:49.595Z"
+   },
+   "cast": {
+    "include": [],
+    "exclude": []
+   }
+  }
+ ],
+ "messages": [],
+ "assets": [
+  {
+   "id": "da248217-be34-4f1e-8c1d-0808eaa0b7df",
+   "kind": "camera-render",
+   "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
+   "file": "assets/da248217-be34-4f1e-8c1d-0808eaa0b7df.mp4",
+   "mime": "video/mp4",
+   "sha256": "fd4c0d2f79c5f4270127e2ca7e6acf1b8901693221f22e5ae75c6aafdcb01350",
+   "width": 1280,
+   "height": 720,
+   "fps": 24,
+   "frameCount": 120,
+   "duration": 5,
+   "version": 1,
+   "createdAt": "2026-10-30T15:14:09.908Z",
+   "source": {
+    "engineShotId": "6caaa6dd-1d4c-4e94-b19f-ba28adb9b490",
+    "engineAssetId": "da248217-be34-4f1e-8c1d-0808eaa0b7df",
+    "prompt": "Cinematic live-action shot. Sweeping aerial over the lake and peaks as a tiny Bald eagle glides down from the ridge. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Lush green alpine meadow with wildflowers in summer. Clear turquoise glacial lake reflecting the peaks. Tall subalpine fir and pine trees, dark green, dense. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Custom keys, 24mm wide, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 24mm wide.",
+    "signature": "67c3d0a6"
+   }
+  },
+  {
+   "id": "3caa4306-ca1f-411a-b5b8-04059794338e",
+   "kind": "camera-render",
+   "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+   "file": "assets/3caa4306-ca1f-411a-b5b8-04059794338e.mp4",
+   "mime": "video/mp4",
+   "sha256": "adaa653da22528c680c5c110b16990a4339479d3f35cd7804cf8f74717bb0ea8",
+   "width": 1280,
+   "height": 720,
+   "fps": 24,
+   "frameCount": 120,
+   "duration": 5,
+   "version": 1,
+   "createdAt": "2026-10-30T15:14:11.758Z",
+   "source": {
+    "engineShotId": "04d84d92-1c12-4ac9-bdea-35ba12e26a45",
+    "engineAssetId": "3caa4306-ca1f-411a-b5b8-04059794338e",
+    "prompt": "Cinematic live-action shot. FPV chase right behind Bald eagle as it folds its wings and dives down the river canyon. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Lush green alpine meadow with wildflowers in summer. Clear turquoise glacial lake reflecting the peaks. Jagged granite alpine peak with snowfields near the summit and scree slopes. Tall subalpine fir and pine trees, dark green, dense. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Custom keys, 20mm wide, eye level, 5s. Follow the supplied camera motion exactly. Movement: FPV drone chase. Cuts: continuous take, no cuts. Lens: 14mm ultra-wide. Filter: golden hour light.",
+    "signature": "68786482"
+   }
+  },
+  {
+   "id": "0a411947-cf4f-40fc-9d73-e279738c9334",
+   "kind": "camera-render",
+   "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+   "file": "assets/0a411947-cf4f-40fc-9d73-e279738c9334.mp4",
+   "mime": "video/mp4",
+   "sha256": "cb5ad066a06af07ed9bb269828fa50c91e2bfe8d90182ca1d8295ea415420e2a",
+   "width": 1280,
+   "height": 720,
+   "fps": 24,
+   "frameCount": 120,
+   "duration": 5,
+   "version": 1,
+   "createdAt": "2026-10-30T15:14:13.115Z",
+   "source": {
+    "engineShotId": "cdbc02d6-6566-4906-abf6-1a9fe5b918f1",
+    "engineAssetId": "0a411947-cf4f-40fc-9d73-e279738c9334",
+    "prompt": "Cinematic live-action shot. Low tracking shot at the lakeshore as Bald eagle skims the water past the grazing Elk herd and climbs away. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Lush green alpine meadow with wildflowers in summer. Clear turquoise glacial lake reflecting the peaks. Jagged granite alpine peak with snowfields near the summit and scree slopes. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Truck left on Bald eagle, 35mm normal, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 35mm natural.",
+    "signature": "dfa6ec37"
+   }
+  },
+  {
+   "id": "3851df8d-8a49-41c4-b9d2-173ffba492a7",
+   "kind": "camera-render",
+   "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+   "file": "assets/3851df8d-8a49-41c4-b9d2-173ffba492a7.mp4",
+   "mime": "video/mp4",
+   "sha256": "aa92a461570f3f4a6810a9202223d622f8029a1c36e7b03bfb2060c7d21cf715",
+   "width": 1280,
+   "height": 720,
+   "fps": 24,
+   "frameCount": 120,
+   "duration": 5,
+   "version": 2,
+   "createdAt": "2026-10-30T15:33:33.384Z",
+   "source": {
+    "engineShotId": "aa36c5e4-acb6-4e90-ba8d-2522041ba796",
+    "engineAssetId": "3851df8d-8a49-41c4-b9d2-173ffba492a7",
+    "prompt": "Cinematic live-action shot. FPV chase right behind Bald eagle as it folds its wings and dives down the river canyon. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Clear turquoise glacial lake reflecting the peaks. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Tall subalpine fir and pine trees, dark green, dense. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Custom keys, 20mm wide, eye level, 5s. Follow the supplied camera motion exactly. Movement: FPV drone chase. Cuts: continuous take, no cuts. Lens: 14mm ultra-wide. Filter: golden hour light.",
+    "signature": "58176ae3"
+   }
+  },
+  {
+   "id": "ab0dadf7-30c7-4ccc-94a1-2bf8cf76bc30",
+   "kind": "camera-render",
+   "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+   "file": "assets/ab0dadf7-30c7-4ccc-94a1-2bf8cf76bc30.mp4",
+   "mime": "video/mp4",
+   "sha256": "700ff8bb096c400abb868f2ea748a978113e2e24ab9c54bbe04b6e4b5e9338d2",
+   "width": 1280,
+   "height": 720,
+   "fps": 24,
+   "frameCount": 120,
+   "duration": 5,
+   "version": 2,
+   "createdAt": "2026-10-30T15:33:49.595Z",
+   "source": {
+    "engineShotId": "2c4396de-21cc-4de4-9b79-e3bfaca8f5bb",
+    "engineAssetId": "ab0dadf7-30c7-4ccc-94a1-2bf8cf76bc30",
+    "prompt": "Cinematic live-action shot. Low tracking shot at the lakeshore as Bald eagle skims the water past the grazing Elk herd and climbs away. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Clear turquoise glacial lake reflecting the peaks. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Truck left on Bald eagle, 35mm normal, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 35mm natural.",
+    "signature": "9dd68d03"
+   }
+  },
+  {
+   "id": "881acfc2-ccc0-4309-ba61-0f31f3afd5b6",
+   "kind": "camera-render",
+   "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
+   "file": "assets/881acfc2-ccc0-4309-ba61-0f31f3afd5b6.mp4",
+   "mime": "video/mp4",
+   "sha256": "ff05d8c6733b11fe5a1d905520d34fc53a0f17aa39b579851cc1ea06731fcdb4",
+   "width": 1280,
+   "height": 720,
+   "fps": 24,
+   "frameCount": 120,
+   "duration": 5,
+   "version": 2,
+   "createdAt": "2026-10-30T15:34:22.580Z",
+   "source": {
+    "engineShotId": "e7557c29-b6df-4d90-aaab-f0540925c773",
+    "engineAssetId": "881acfc2-ccc0-4309-ba61-0f31f3afd5b6",
+    "prompt": "Cinematic live-action shot. Sweeping aerial over the lake and peaks as a tiny Bald eagle glides down from the ridge. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Custom keys, 24mm wide, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 24mm wide.",
+    "signature": "c4895061"
+   }
+  }
+ ]
+}

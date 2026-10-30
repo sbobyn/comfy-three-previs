@@ -47,7 +47,7 @@ test('the director picker exposes imported video workflows without a model-name 
 });
 
 test('camera capture samples the actual 24-fps clock without speeding the motion to fit an extra endpoint', async () => {
-  const source = await readFile(new URL('../src/director.ts', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../src/director-capture.ts', import.meta.url), 'utf8');
   const line = source.split('\n').find(l => l.includes('const n =') && l.includes('at = (i: number)'));
   assert.ok(line);
   const context = { s: { duration: 4 } };

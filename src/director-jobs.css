@@ -1,0 +1,87 @@
+/* Jobs pip (top bar) and jobs side sheet. Quiet by default: the pip only appears while something is in flight. */
+.jobs-pip { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px 0 10px; border-radius: var(--r-full); border: 1px solid var(--line); background: var(--card); color: var(--ink-2); font: 500 var(--fs-xs)/1 var(--font); font-variant-numeric: tabular-nums; cursor: pointer; white-space: nowrap; transition: border-color var(--t-fast), background var(--t-fast), color var(--t-fast); }
+.jobs-pip[hidden] { display: none; }
+.jobs-pip:hover { border-color: var(--line-2); color: var(--ink); }
+.jobs-pip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.jobs-pip .jp-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-4); flex: none; position: relative; }
+.jobs-pip .jp-short { display: none; }
+.jobs-pip.jp-run, .jobs-pip.jp-batch { color: var(--warn); background: color-mix(in srgb, var(--warn-soft) 55%, var(--card)); border-color: color-mix(in srgb, #D9962B 35%, var(--line)); }
+.jobs-pip.jp-run .jp-dot, .jobs-pip.jp-batch .jp-dot { background: #D9962B; }
+.jobs-pip.jp-run .jp-dot::after, .jobs-pip.jp-batch .jp-dot::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; border: 1.5px solid #D9962B; opacity: 0; animation: jp-ring 2.4s var(--ease) infinite; }
+.jobs-pip.jp-bad { color: var(--bad); background: var(--bad-soft); border-color: var(--accent-line); }
+.jobs-pip.jp-bad .jp-dot { background: var(--accent); }
+.jobs-pip.jp-done { color: var(--ok); }
+.jobs-pip.jp-done .jp-dot { background: var(--ok); }
+.jobs-pip.jp-fail { color: var(--bad); }
+.jobs-pip.jp-fail .jp-dot { background: var(--bad); }
+.jobs-pip.jp-pop { animation: jp-pop var(--t-slow) var(--ease); }
+@keyframes jp-ring { 0% { transform: scale(.6); opacity: .7; } 70%, 100% { transform: scale(1.5); opacity: 0; } }
+@keyframes jp-pop { 0% { transform: scale(.94); } 60% { transform: scale(1.03); } 100% { transform: none; } }
+@media (max-width: 1180px) { .jobs-pip .jp-text { display: none; } .jobs-pip .jp-short { display: inline; } .jobs-pip { padding: 0 9px 0 8px; gap: 6px; } }
+@media (prefers-reduced-motion: reduce) { .jobs-pip .jp-dot::after, .jobs-pip.jp-pop { animation: none; } }
+
+/* Side sheet: slides in from the right over the panel, light scrim so the workspace stays legible. */
+dialog.jobs-sheet { position: fixed; inset: 8px 8px 8px auto; margin: 0; width: min(420px, calc(100vw - 16px)); height: auto; max-height: none; padding: 0; display: none; flex-direction: column; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-3); overflow: hidden; }
+dialog.jobs-sheet[open] { display: flex; animation: js-in var(--t-slow) var(--ease); }
+dialog.jobs-sheet::backdrop { background: rgba(21, 19, 15, .14); backdrop-filter: none; }
+@keyframes js-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { dialog.jobs-sheet[open] { animation: none; } }
+.js-head { display: flex; align-items: flex-start; gap: 10px; padding: 16px 16px 10px 18px; }
+.js-head > div { flex: 1; min-width: 0; }
+.js-head h2 { margin: 0; font: 600 var(--fs-xl)/var(--lh-tight) var(--serif); letter-spacing: var(--track-tight); }
+.js-sub { margin: 3px 0 0; color: var(--ink-3); font-size: var(--fs-sm); }
+.js-slots { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0 18px 12px; border-bottom: 1px solid var(--line); }
+.js-slot { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-2xs); color: var(--ink-3); }
+.js-slot-name { letter-spacing: .02em; }
+.js-pips { display: inline-flex; gap: 3px; }
+.js-pips i { width: 6px; height: 6px; border-radius: 2px; background: var(--line-2); }
+.js-pips i.on { background: var(--ink); }
+.js-body { flex: 1; overflow: auto; padding: 6px 10px 14px; overscroll-behavior: contain; }
+.js-sec h3 { display: flex; align-items: center; gap: 6px; margin: 12px 8px 6px; font: 600 var(--fs-2xs)/1 var(--font); letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-3); }
+.js-sec.bad h3 { color: var(--bad); }
+.js-n { font-variant-numeric: tabular-nums; color: var(--ink-4); font-weight: 500; }
+.js-sec ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.js-empty { margin: 0 8px; color: var(--ink-4); font-size: var(--fs-sm); }
+.js-idle { display: grid; justify-items: center; gap: 10px; padding: 48px 28px; text-align: center; color: var(--ink-3); font-size: var(--fs-sm); }
+.js-idle p { margin: 0; max-width: 260px; line-height: var(--lh); }
+.js-idle-mark { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 6px var(--accent-soft); }
+.js-foot { padding: 9px 18px; border-top: 1px solid var(--line); color: var(--ink-4); font-size: var(--fs-2xs); }
+
+.jr { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; padding: 10px 10px 10px 8px; border-radius: var(--r-md); background: var(--card); border: 1px solid var(--line); }
+.js-sec.recent .jr { background: transparent; border-color: transparent; padding-block: 8px; }
+.js-sec.recent .jr:hover { background: var(--paper-2); }
+.jr-kind { width: 26px; height: 26px; border-radius: var(--r-sm); display: grid; place-items: center; background: var(--paper-2); color: var(--ink-3); }
+.jr-kind svg { width: 16px; height: 16px; }
+.jr.t-run .jr-kind { color: var(--warn); background: var(--warn-soft); }
+.jr.t-bad .jr-kind { color: var(--bad); background: var(--bad-soft); }
+.jr-main { min-width: 0; display: grid; gap: 4px; }
+.jr-top { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.jr-label { flex: 1; min-width: 0; font-weight: 600; font-size: var(--fs-sm); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jr-status { flex: none; display: inline-flex; align-items: center; gap: 5px; font-size: var(--fs-2xs); font-weight: 500; color: var(--ink-3); text-transform: lowercase; }
+.jr-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.jr-status.t-run { color: var(--warn); } .jr-status.t-bad { color: var(--bad); } .jr-status.t-ok { color: var(--ok); } .jr-status.t-warn { color: var(--warn); } .jr-status.t-muted { color: var(--ink-4); }
+.jr-meta { font-size: var(--fs-2xs); color: var(--ink-3); font-variant-numeric: tabular-nums; line-height: var(--lh); }
+.jr-meta.faint { color: var(--ink-4); }
+.jr-bar { height: 3px; border-radius: 2px; background: var(--paper-3); overflow: hidden; margin-top: 2px; }
+.jr-bar i { display: block; height: 100%; border-radius: inherit; background: #D9962B; transition: width var(--t-reveal) var(--ease); }
+.jr-bar.over i { background: repeating-linear-gradient(90deg, #D9962B 0 6px, color-mix(in srgb, #D9962B 55%, transparent) 6px 10px); }
+.jr-bar.bad i { background: var(--accent); }
+.jr-progress { margin-top: 6px; }
+.jr-progress .dp-media { max-width: 320px; }
+.jr-fail { border-left: 2px solid var(--accent-line); padding: 2px 0 2px 8px; margin-top: 2px; }
+.jr-fail.soft { border-left-color: var(--line-2); }
+.jr-fail.soft .jr-fail-head { color: var(--ink-3); }
+.jr-fail-head { font-size: var(--fs-2xs); font-weight: 600; color: var(--bad); margin-bottom: 3px; }
+.jr-fail pre { margin: 0; font: 400 var(--fs-2xs)/1.5 var(--mono); color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 9.5em; overflow: auto; }
+.jr-act { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 0 -8px; }
+.jr-act .btn { color: var(--ink-2); }
+.jr-act .btn:hover { color: var(--ink); background: var(--paper-2); }
+.jr-rec { display: grid; gap: 6px; margin-top: 4px; padding: 10px 12px; border-radius: var(--r-sm); background: var(--paper-2); font-size: var(--fs-xs); }
+.jr-rec p { margin: 0; color: var(--ink-3); line-height: var(--lh); }
+.jr-rec label { display: flex; align-items: flex-start; gap: 8px; color: var(--ink-2); cursor: pointer; line-height: var(--lh-snug); }
+.jr-rec input { margin: 1px 0 0; accent-color: var(--ink); }
+.jr-rec-go { display: flex; justify-content: flex-end; }
+.jr-close:not(:disabled) { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+.jb-bar { display: flex; height: 6px; border-radius: var(--r-full); background: var(--paper-3); overflow: hidden; margin-top: 2px; }
+.jb-bar i { display: block; height: 100%; transition: width var(--t-reveal) var(--ease); }
+.jb-bar .d { background: var(--ink); } .jb-bar .r { background: #D9962B; } .jb-bar .f { background: var(--accent); } .jb-bar .s { background: var(--line-2); }

@@ -1,107 +1,77 @@
-# Director user guide
+# Comfy Three Previs guide
 
-The director workspace is where you block out one scene, plan its shots, and send camera renders to ComfyUI.
+Build → Cast → Shoot → Generate → Cut. Open a starter on the home page to explore a finished example, or create an empty scene. The in-app **Guide** has interactive examples; opening it never edits a project or starts a generation.
 
-## 1. Start or open a project
+![Home and starter projects](../public/guide/home.webp)
 
-The launch page (`http://127.0.0.1:5190`) shows:
+## 1. Build
 
-- **Setup**: what's ready on this machine (FFmpeg, Cloud key, local ComfyUI…). Fix any ✗ items first.
-- **New project**: name it, then **Start empty** or pick a starter project (Breaking News, Wingspan, Final Lap, Posterized). Starters are full multi-shot scenes you can change freely; see `examples/starters/`.
-- **Open project**: your projects, newest first. **⋯** gives you Export, Duplicate and Archive. **Import project…** loads a `.previs.zip`, and **Archived** lets you restore archived projects.
+Block out the people, vehicles, props and set with simple 3D objects.
 
-## 2. Block out the scene
+- Right-click or press **Shift + A** to add an object, then name it.
+- Drag empty space to orbit, right-drag to pan and scroll to zoom. Click selects; Shift-click adds to the selection; Shift-drag draws a selection box.
+- **G / R / S** move, rotate and resize. **X / Y / Z** constrain an axis; type a number and press Enter to confirm. Escape cancels.
+- **Ctrl/⌘ + G** groups selected objects. Click again inside a selected group to edit a piece.
+- Press **I** to set a key at the playhead, move later in the shot, move the object and set another key. Preview to see the motion.
 
-- **Drag** an object to move it. Drag empty space to orbit. **F** frames everything.
-- **+ next to Scene** adds an object (person, car, box, table, building, tree…).
-- Click an object to open its panel. From there you can rename it, change its type, colour, facing, size or height, add notes, aim the camera at it, or open its **Looks**.
-- Keys: **R** rotates the selected object, **Delete** removes it, **Esc** deselects.
+![Build: scene and object controls](../public/guide/build.webp)
 
-## 3. Direct in plain language
+## 2. Cast
 
-The **Direct** tab is a chat about the current shot. Type `@` to mention an object. Drop, paste or attach images to add them as references for that shot.
+Give objects cast images so their appearance carries between shots.
 
-- **Built-in agent** (pill reads **Agent ready**): when Claude Code is installed on this Mac and signed in (`claude` once in a terminal), Previs runs it for you with Previs tools only, on your existing login. No terminal, no API key. Questions and prompt requests are answered in the thread (**Copy**, **Use as shot prompt**); scene, shot, camera and animation changes arrive as a **proposed changes** card you **Apply** or **Discard** (one undo step). A one-line change to an existing object or shot applies straight away with **Undo** (switch that off on the card). **Stop** interrupts a turn; a failed turn offers **Retry**. The agent cannot render or spend money. Set `PREVIS_AGENT=off` to disable it, `PREVIS_AGENT_MODEL` to pick the model (default `sonnet`), `PREVIS_CLAUDE_PATH` if `claude` is somewhere unusual.
-- **Your agent (MCP)** (pill reads **Agent connected**): your own Claude Code / Codex / MCP client reads each message, edits the scene live and replies. Click the pill for setup steps; choose **Your agent (MCP)** in the composer's route menu.
-- Without either, the **built-in parser** handles phrases like:
-  - `add a red car on the left` · `put a detective next to the car facing the runner`
-  - `slow dolly in on @runner, 50mm, low angle` · `orbit around the car over 4 seconds`
-  - `new shot: wide establishing crane up` · `environment: rainy neon alley`
-  - Story sentences, such as `the runner sprints past the car`, are added to the shot description.
+- Open an object and upload or drop an image, or request an image from its description.
+- A design sheet shows the same design from several views. Pick the image you want to use for the object.
+- The app gathers cast images for objects visible in the shot. Review the actual inputs before approving a request: models accept different inputs and counts.
+- Make a still to check the shot's composition and appearance before making a video.
 
-## 4. Shots and camera
+The in-app guide compares the grey blockout with this Breaking News still and shows the cast images used.
 
-- The **Shots** list on the left has a live thumbnail per shot. **+** adds a shot.
-- The **Shot** tab holds the title, description, camera move, target, duration (up to 5 s), lens, distance, height and angle. **Set start/end from view** turns the current orbit view into custom camera keys.
-- The camera's path and frame show in the set. The **SHOT CAM** monitor is the actual camera view; click it (or press **C**) to look through the camera. **Space** plays the shot.
+![Breaking News still](../public/guide/breaking-news-s2-still.webp)
 
-### Operate the camera (gamepad, keyboard, phone)
+## 3. Shoot
 
-The **Operate** block in the Shot tab records a camera move live, in two passes:
+Pick a shot, frame its subject and preview the camera move.
 
-1. **Position pass:** fly the path as a drone (or dolly along a path) with a gamepad (Game or RC Mode 2 stick layout) or the keyboard (W/S forward and back, A/D strafe, Q/E turn, Space/Shift up and down, R record, Esc release). Gamepad: A arms, records and stops; B releases; X levels; LB slow; RB fast.
-2. **Aim pass:** the recorded path replays in real time while you aim with the right stick, a pointer drag, or your phone.
+- Set **distance, height, angle and lens**, then choose a move. The information button beside Move previews it.
+- **Preview** plays the shot. **C** looks through the shot camera.
+- **Fly camera** records a take using the keyboard, gamepad or phone. Keep the take to use it as camera keys.
+- Keyboard flight: W/S forward/back, A/D sideways, Q/E turn, Space/Shift up/down, arrows aim, Alt slows, R records and Escape releases.
 
-**Keep take** turns the take into the shot's camera keys (up to 64, recorded timing kept, up to 5 s) as one undoable edit. The scene's animation plays from the shot's start while you record.
+![Shoot: shot camera and settings](../public/guide/shoot.webp)
 
-**Phone** (transport bar) pairs a phone over your local network; see [director-phone.md](director-phone.md) for the one-time certificate setup. **Aim** previews the shot camera aimed by the phone. In the Operate aim pass, choose **Phone** as the aim source: the phone's Record and Re-zero buttons drive the take.
+See [device controls](device-controls.md) for gamepad layouts and [phone setup](director-phone.md) for pairing over local HTTPS. The guide includes keyboard, gamepad and phone diagrams.
 
-## 5. Looks: one consistent design for every object
+## 4. Generate
 
-**Looks** (top bar) opens the Looks board:
+Make the grey blockout, then ask a video model to turn it into the shot.
 
-- **World** and **Visual style** notes apply to the whole project. They go into every look prompt and every shot prompt.
-- Each object has a card showing its primary look, a **description** (wardrobe, materials, make, condition…), the shots whose camera sees it, and a view (full body, character sheet, face close-up, three-quarter, side profile, wide plate…).
-- Tick objects (objects that appear prominently and have no look are pre-ticked), pick a model, then **Quote**. Nothing is sent. One approval with a total limit generates them one at a time. New looks become primary on objects that had none.
-- Image models: FLUX 3 and Flux.2 [pro] (BFL), Flux 1.1 [pro] Ultra, Nano Banana 2.1 / 2 / Pro on Comfy Cloud, or a checkpoint in your local ComfyUI.
+- **Make blockout** captures the shot camera on your computer for free. If you change the shot, make the blockout again.
+- Choose a video model. Some models follow a clip; others animate from one or two stills and do not see the full camera move.
+- Review the inputs, where the model runs and the estimated cost. Paid work needs explicit approval; opening the guide never approves anything.
+- Inspect the result against the blockout. A still is typically a few cents and a five-second video about a dollar, but the estimate for your selected model is the one to check.
 
-The **Object** tab shows the same thing for one object: the hero look and alternates (click to make primary, drop or upload images), the description, view presets, and a single-object quote.
+[Watch the blockout](../public/guide/final-lap-s2-blockout.mp4) · [Watch the generated shot](../public/guide/final-lap-s2-generated.mp4)
 
-Paid Cloud runs also require `PREVIS_ALLOW_PAID=1` on the server. Requests are never resent automatically.
+![Generate: review inputs and estimate](../public/guide/generate.webp)
 
-### How looks reach the video
+## 5. Cut
 
-Each shot works out which objects its camera actually sees over the shot. When you generate a video, Previs sends, as reference images:
+Choose the versions, order and timing of the film.
 
-1. the primary look of every object in frame (the camera's subject first, then larger objects),
-2. environment references,
-3. style references,
-4. the shot's key frame.
+- Drag shot rows to reorder them.
+- Choose a version for each shot and trim its in/out times.
+- **In cut** includes or leaves out a shot. Compare blockout and generated video by dragging the seam or using the arrow keys.
+- Preview the sequence, then **Export film** to write an MP4 in shot order. Project export separately keeps the editable project and its media together.
 
-The prompt numbers them ("Runner — looks exactly like reference image 1"). Kling O1 takes up to 4 images; Seedance 2.5 takes up to 9. Untick **Looks as references** to send the blockout and prompt only. **LTX 2.5** works differently: it animates the shot's key frame (or its first blockout frame) and doesn't follow the blockout's motion.
+![Cut board: order, version, trims and export](../public/guide/cut.webp)
 
-## 6. Render and hand off
+## Other ways to work
 
-**Render blockout…** (it becomes **Generate video ▸** once the blockout is current), in the action bar pinned to the bottom of the right panel next to **▶ Preview**, renders each frame through the shot camera at 24 fps (1280×720 or 640×360) and saves the video into the project. Edit the compiled prompt if you like, then **Open in Comfy workflow →**. That page has the video and prompt preselected. Choose a workflow and backend there; it quotes and asks for approval before anything runs.
+You can direct the same project through Claude using the MCP connector; see the [README setup](../README.md#direct-scenes-from-claude-mcp). Phone aiming requires local HTTPS and a trusted certificate. The public demo is read-only; generation needs a local installation.
 
-Workflow results come back automatically. They appear under **Workflow results** in the shot's Shot tab and in **Assets**.
+## Guide media and maintenance
 
-## 7. Sequence: generate, review and export the whole film
+The shipped examples live in `public/guide/`; `manifest.json` records their source project, shot, asset and capture time. URLs in the app respect the deployment base, including GitHub Pages. See [guide integration and capture](guide-integration.md) for the capture command and the module APIs.
 
-Switch the top bar from **Scene** to **Sequence**. Every shot is listed in order:
-
-- **Order:** drag a row, use ↑ ↓, or press Alt+↑/↓ on a focused row. Undo works as usual.
-- **Blockout:** green means the camera video is up to date. **Render missing blockouts** captures every shot that has no blockout or has changed.
-- **Generate:** tick shots (or **All**), pick a video model (Kling O1, Seedance 2.5…), then **Quote**. Nothing is sent. One approval with a total limit runs the shots one at a time; each is re-checked before it is sent, and a failed or uncertain job stops the batch without retrying.
-- **Cut:** each row chooses the version used in the final cut (newest generated, else blockout, or any specific version), its in/out trim, and whether the shot is **In cut** or **Excluded**.
-- **Viewer:** click a row to watch it and flip between **Blockout**, **Compare** (drag the seam between the blockout and the generated video) and **Generated**. **Play sequence** plays the cut in order.
-- **Export final video** joins the cut into one 1280×720, 24 fps H.264 file. Every export is listed with Download.
-
-**Advanced timeline** (or **Edit**) opens the clip timeline for duplicates and custom orders.
-
-## 8. Assets, export and backup
-
-**Assets** (top bar) lists everything in the project: camera renders (every version), workflow results, object looks and shot references. You can download any of them, reopen a render in a workflow, or compare a result with its source.
-
-Everything lives in the project's own folder, `.previs/director/<project-id>/`, so **Export project (.zip)** carries all of it. When you import an export, its renders are kept for reference, but you render again before workflow hand-off: that re-registers the video with this machine's workflow engine and takes about a second.
-
-## Limits
-
-- One scene per project. Shots export up to 5 seconds (120 frames).
-- Only the beauty pass is exported. Depth and pose guides aren't available yet.
-- Reference images are named in prompts, not wired into image inputs automatically. Map image inputs on the workflow page.
-- Look generation is text-to-image.
-
-## Design references
-
-The viewport controls (selection, G/R/S, snapping, framing, undo) and keyframe animation follow two reference notes from the Otter team: the *Otter blockout controls reference* and the *Otter keyframe animation reference*. They're kept outside this repository. Previs reimplements the behaviour independently; no Otter source is copied. Treat those notes as the intended reference for future work on these areas.
+Older review packs and checkpoints are historical engineering notes, not current user instructions. See [the historical document index](history/README.md).

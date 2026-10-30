@@ -1,17 +1,17 @@
 import './director.css';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf } from '../shared/director.mjs';
-import type { DirectorProject, Shot, Entity, Reference, Message, Vec3, Asset, EditClip } from '../shared/director.mjs';
-import { api, h, toast, connectDialog, shapeIcon, readFileBase64 } from './director-common';
-import type { AgentStatus, Connect } from './director-common';
+import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
+import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64 } from './director-common';
+import type { Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
+import { captureShotVideo as captureVideo } from './director-capture';
+import type { CaptureOptions } from './director-capture';
 import { initOperate, operateBlock, fly } from './director-operate'; // [operate]
 import type { FlyDevice } from './director-operate';
 import { installPhoneDemo, openPhonePairing, phoneConnected } from './director-phone'; // [director-phone]
 import { createSequence } from './director-sequence';
 import { promptBlock, cameraStyleBlock } from './director-prompt';
 import { objectColors, KIND_COLORS } from '../shared/prompt.mjs';
-import { createAgentUi, agentText, ROUTES } from './director-agent'; // [agent]
-import type { Route } from './director-agent';
 import { shotPrompt } from '../shared/prompt.mjs';
 import { openLooksBoard, aspectFor } from './director-looks';
 import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } from './director-videogen';
@@ -21,6 +21,10 @@ import type { UndoEntry, ModalMode } from '../shared/editor-controls.mjs';
 import { openJourney } from './director-guide';
 import { initSheets, sheetSection } from './director-sheet'; // [designsheet]
 import { moveHelp } from './director-camhelp'; // [camhelp]
+import { mountJobsPip } from './director-jobs'; // [jobs]
+import { progressSlot } from './director-progress'; // [live-progress]
+import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
+import { initMobile } from './director-mobile'; // [mobile]
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -28,16 +32,11 @@ const app = document.getElementById('app')!;
 let project: DirectorProject;
 let shotId = params.get('shot') || '';
 let selected: string | null = null;
-let tab: 'direct' | 'shot' | 'object' = 'direct';
 type Preset = { id: string; title: string; backend: 'cloud' | 'local'; note: string; pricing: { status: string; usdPerImage: number | null; creditsPerImage: number | null; rate?: string; source: string | null } };
 let refgen: { presets: Preset[]; jobs: any[]; paidExecutionEnabled: boolean; cloudCredential: boolean } = { presets: [], jobs: [], paidExecutionEnabled: false, cloudCredential: false };
 const genForm: Record<string, { prompt: string; presetId: string; aspect: string; count: number; seed: number; checkpoint: string; view: string; edited: boolean; open?: boolean }> = {};
-let agent: AgentStatus | null = null, connect: Connect = null;
+let connect: Connect = null;
 let playhead = 0, playing = false, lastTick = 0;
-let mode: Route = 'auto'; // [agent]
-let pendingAtts: string[] = [];
-let seenMessages = 0;
-
 const shot = (): Shot => project.shots.find(s => s.id === shotId) || project.shots[0];
 const entity = (id: string | null) => project.scene.entities.find(e => e.id === id) || null;
 const refUrl = (r: Reference) => `/director-refs/${project.id}/${r.file}`;
@@ -53,23 +52,9 @@ async function edit(ops: unknown[], quiet = false) {
 
 // ---------- Layout ----------
 const titleInput = h('input', { 'aria-label': 'Project name', maxlength: 120 });
-const sceneLabel = h('span', { class: 'muted' });
 const pillSlot = h('span');
 const claudeBtn = h('button', { class: 'btn ghost sm claude-btn', type: 'button', title: 'Direct this scene from Claude', onclick: () => claudeDialog() }, h('span', { class: 'claude-mark', 'aria-hidden': 'true' }, '✳'), 'Claude');
-function claudeDialog() {
-  const d = h('dialog', { class: 'claude-help' },
-    h('h3', {}, 'Direct with Claude'),
-    h('p', {}, 'Previs is a connector in Claude Desktop and Claude Code. Ask Claude to build and direct this scene; edits appear here live, and every change can be undone.'),
-    h('p', { class: 'muted' }, 'Try:'),
-    h('ul', {},
-      h('li', {}, `“In Previs, open ${project?.title || 'my project'} and add a second creator watching from the bridge.”`),
-      h('li', {}, '“Write a Cast Card for every character, then make shot 1 a slow push-in on the car.”'),
-      h('li', {}, '“Add three shots that cover the lift-off from different angles.”')),
-    h('p', { class: 'muted' }, 'Setup: add the “comfy-previs” MCP server (node server/previs/agent.mjs, PREVIS_URL=http://127.0.0.1:<port>) to Claude.'),
-    h('div', { class: 'bar', style: 'display:flex;justify-content:flex-end;margin-top:12px' }, h('button', { class: 'btn sm', type: 'button', onclick: () => d.close() }, 'Done')));
-  d.addEventListener('close', () => d.remove());
-  document.body.append(d); (d as HTMLDialogElement).showModal();
-}
+const claudeDialog = () => showClaudeDialog(connect, project);
 const svgIcon = (paths: string) => { const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); el.setAttribute('viewBox', '0 0 20 20'); el.setAttribute('fill', 'none'); el.setAttribute('aria-hidden', 'true'); el.innerHTML = paths; return el; };
 const ICON = {
   undo: '<path d="M7.5 5.5 4 9l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 9h7a4.5 4.5 0 0 1 0 9H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
@@ -81,8 +66,7 @@ const ICON = {
 // Preview and Generate live in the action bar pinned to the bottom of the right panel (Build and Shoot).
 const previewBtn = h('button', { class: 'btn act-preview', type: 'button', title: 'Play the shot through the camera (Space)' }, '▶ Preview');
 const renderBtn = h('button', { class: 'btn cta act-go', type: 'button', title: 'Make the blockout and generate this shot’s video' }, 'Generate video ▸');
-const filmBtn = h('button', { class: 'btn cta', type: 'button', hidden: true, title: 'Cut the shots together and export one film' }, 'Export film');
-const libraryBtn = h('button', { class: 'btn ghost sm', type: 'button', title: 'Library: every image, blockout, video and film in this project', onclick: () => void openAssets() }, svgIcon(ICON.library), h('span', { class: 'hide-md' }, 'Library'));
+const libraryBtn = h('button', { class: 'btn ghost sm', type: 'button', 'aria-label': 'Library', title: 'Library: every image, blockout, video and film in this project', onclick: () => void openAssets() }, svgIcon(ICON.library), h('span', { class: 'hide-md' }, 'Library'));
 const undoBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Undo', onclick: () => void undo() }, svgIcon(ICON.undo));
 const redoBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Redo', onclick: () => void redo() }, svgIcon(ICON.redo));
 type Step = 'build' | 'shoot' | 'cut';
@@ -92,9 +76,29 @@ const stepBtns: Record<Step, HTMLElement> = {
   shoot: stepBtn('shoot', 'Shoot', 'Shoot the selected shot: frame the camera, fly it, generate its video'),
   cut: stepBtn('cut', 'Cut', 'Cut the film: every shot in order, choose videos, play and export'),
 };
-const modeSwitch = h('nav', { class: 'steps', role: 'tablist', 'aria-label': 'Workflow step' }, stepBtns.build, h('i', { class: 'st-sep', 'aria-hidden': 'true' }), stepBtns.shoot, h('i', { class: 'st-sep', 'aria-hidden': 'true' }), stepBtns.cut);
+const modeSwitch = h('nav', { class: 'steps', role: 'tablist', 'aria-label': 'Step' }, stepBtns.build, h('i', { class: 'st-sep', 'aria-hidden': 'true' }), stepBtns.shoot, h('i', { class: 'st-sep', 'aria-hidden': 'true' }), stepBtns.cut);
+function menuState(menu: HTMLElement, open: boolean, opener?: HTMLElement, focus = false) {
+  menu.hidden = !open;
+  opener?.setAttribute('aria-expanded', String(open));
+  if (open && focus) menu.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+}
+function menuKeys(menu: HTMLElement, opener: HTMLElement) {
+  opener.setAttribute('aria-haspopup', 'menu'); opener.setAttribute('aria-expanded', 'false');
+  new MutationObserver(() => opener.setAttribute('aria-expanded', String(!menu.hidden))).observe(menu, { attributes: true, attributeFilter: ['hidden'] });
+  opener.addEventListener('keydown', ev => { if (['ArrowDown', 'ArrowUp'].includes(ev.key)) { ev.preventDefault(); if (menu.hidden) opener.click(); const items = Array.from(menu.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')); (ev.key === 'ArrowUp' ? items.at(-1) : items[0])?.focus(); } });
+  menu.addEventListener('keydown', ev => {
+    const items = Array.from(menu.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')).filter(el => el.getClientRects().length);
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); menuState(menu, false, opener); opener.focus(); return; }
+    if (ev.key === 'Tab') { menuState(menu, false, opener); return; }
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(ev.key)) return;
+    ev.preventDefault(); ev.stopPropagation();
+    const next = ev.key === 'Home' ? 0 : ev.key === 'End' ? items.length - 1 : (index + (ev.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length;
+    items[next]?.focus();
+  });
+}
 const helpMenu = h('div', { class: 'menu help-menu', hidden: true, role: 'menu' });
-const helpMenuBtn = h('button', { class: 'btn ghost sm icon help-menu-btn', type: 'button', 'aria-label': 'Help', title: 'Guide and shortcuts', onclick: () => { helpMenu.hidden = !helpMenu.hidden; } }, '?');
+const helpMenuBtn = h('button', { class: 'btn ghost sm icon help-menu-btn', type: 'button', 'aria-label': 'Help', title: 'Guide and shortcuts', onclick: () => { menuState(helpMenu, helpMenu.hidden, helpMenuBtn, true); } }, '?');
 helpMenu.append(
   h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; showJourney(); } }, h('strong', {}, 'Guide'), h('span', {}, 'The whole journey, scene to film')),
   h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; renderHelp(); helpCard.hidden = false; } }, h('strong', {}, 'Controls & shortcuts'), h('span', {}, 'Viewport, keys and grid · ?')),
@@ -102,16 +106,16 @@ helpMenu.append(
 const top = h('header', { class: 'ws-top' },
   h('div', { class: 'top-left' },
     h('a', { class: 'brand', href: '/', title: 'Comfy Three Previs · all projects', 'aria-label': 'Comfy Three Previs · all projects' }, h('span', { class: 'brand-mark' })),
-    h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput, h('span', { hidden: true }, sceneLabel)),
+    h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput),
     h('div', { class: 'undo-group' }, undoBtn, redoBtn)),
   modeSwitch,
-  h('div', { class: 'right' }, pillSlot, libraryBtn, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu), filmBtn));
+  h('div', { class: 'right' }, pillSlot, libraryBtn, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu)));
 document.addEventListener('pointerdown', ev => { if (!helpMenu.hidden && !(ev.target as HTMLElement).closest?.('.menu-wrap')) helpMenu.hidden = true; });
 
 const shotList = h('div', { class: 'shots', role: 'listbox', 'aria-label': 'Shots' });
 const outline = h('div', { class: 'outline', 'aria-label': 'Scene objects' });
-const addMenu = h('div', { class: 'add-menu', hidden: true });
-for (const shape of Object.keys(SHAPES).filter(x => x !== 'group')) addMenu.append(h('button', { type: 'button', title: `Add ${shape}`, onclick: () => addObject(shape) }, shapeIcon(shape), shape));
+const addMenu = h('div', { class: 'add-menu', role: 'menu', hidden: true });
+for (const shape of Object.keys(SHAPES).filter(x => x !== 'group')) addMenu.append(h('button', { type: 'button', role: 'menuitem', title: `Add ${shape}`, onclick: () => addObject(shape) }, shapeIcon(shape), shape));
 let outlineFilter = '';
 const filterInput = h('input', { class: 'tree-filter', type: 'search', placeholder: 'Filter', 'aria-label': 'Filter scene objects' });
 filterInput.oninput = () => { outlineFilter = filterInput.value.trim().toLowerCase(); renderOutline(); };
@@ -162,8 +166,10 @@ const coach = h('div', { class: 'coach', role: 'note', hidden: localStorage.getI
   h('span', {}, h('b', {}, 'Drag'), ' to orbit · ', h('b', {}, 'click'), ' to select · ', h('b', {}, 'right-click'), ' to add', h('span', { class: 'coach-more' }, ' · ', h('b', {}, 'C'), ' for the shot camera')),
   h('button', { class: 'btn sm', type: 'button', onclick: () => { coach.hidden = true; localStorage.setItem('previs.coach.viewport', '1'); } }, 'Got it'));
 const firstRun = h('div', { class: 'first-run', hidden: true });
+const helpToggle = h('button', { class: 'btn sm help-toggle', type: 'button', title: 'Controls & shortcuts (?)', 'aria-label': 'Controls & shortcuts', 'aria-expanded': 'false', onclick: () => { if (helpCard.hidden) renderHelp(); helpCard.hidden = !helpCard.hidden; } }, '?');
+new MutationObserver(() => helpToggle.setAttribute('aria-expanded', String(!helpCard.hidden))).observe(helpCard, { attributes: true, attributeFilter: ['hidden'] });
 const viewport = h('div', { class: 'viewport' }, canvas, labels, camFrame, monitor, monToggle, viewSeg,
-  h('div', { class: 'vp-tools' }, modeSeg, snapBtn, h('button', { class: 'btn sm', type: 'button', onclick: () => frameSelected(), title: 'Frame selected, or everything (F, . or Numpad .)' }, 'Frame')),
+  h('div', { class: 'vp-tools' }, modeSeg, snapBtn, h('button', { class: 'btn sm', type: 'button', onclick: () => frameSelected(), title: 'Frame selected, or everything (F, . or Numpad .)' }, 'Frame'), helpToggle),
   dropHint, hud, helpCard, addPopup, coach, firstRun);
 const playBtn = h('button', { class: 'btn sm icon', type: 'button', 'aria-label': 'Play' }, '▶');
 const scrub = h('input', { type: 'range', min: 0, max: 3, step: 0.01, value: 0, 'aria-label': 'Playhead' });
@@ -182,27 +188,12 @@ const flyPhoneSlot = h('div', { class: 'fly-phone' });
 const flyGroup = h('div', { class: 'fly' }, flyBtn, flyDevice);
 const stage = h('section', { class: 'stage' }, viewport, h('div', { class: 'transport' }, playBtn, timeOut, h('div', { class: 'kf-nav' }, prevKeyBtn, keyBtn, nextKeyBtn), scrubWrap, moveChip, flyGroup), flyMenu);
 
-const directTab = h('button', { type: 'button', hidden: true, onclick: () => setTab('direct') }, 'Direct');
-const shotTab = h('button', { type: 'button', class: 'on', hidden: true, onclick: () => setTab('shot') }, 'Shot');
-const objectTab = h('button', { type: 'button', hidden: true, onclick: () => setTab('object') }, 'Object');
-const shotChip = h('span', { class: 'shotchip' });
-const thread = h('div', { class: 'thread', 'aria-live': 'polite' });
-const textarea = h('textarea', { placeholder: 'Ask or direct: “slow dolly in on @runner”, “write the prompt for shot 2”… @ mentions objects · Enter sends · Shift+Enter newline', rows: 3, 'aria-label': 'Direction' });
-const attsRow = h('div', { class: 'pending-atts' });
-const routeSel = h('select', { 'aria-label': 'Send to' }, ...ROUTES.map(r => h('option', { value: r.value, title: r.title }, r.label))); // [agent]
-const routeNote = h('span');
-const fileInput = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true });
-const suggest = h('div', { class: 'suggest', hidden: true });
-const sendBtn = h('button', { class: 'btn primary sm', type: 'button' }, 'Send');
-const composer = h('div', { class: 'composer' }, suggest, attsRow, textarea, h('div', { class: 'bar' }, h('span', { class: 'route' }, routeSel, routeNote), fileInput, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => fileInput.click(), title: 'Attach reference images' }, '＋ Image'), sendBtn));
-const chips = h('div', { class: 'chips' });
-const directPane = h('div', { class: 'pane' }, thread, chips, composer);
-const shotPane = h('div', { class: 'pane shotpane', hidden: true });
+const shotPane = h('div', { class: 'pane shotpane' });
 const objectPane = h('div', { class: 'pane shotpane objectpane', hidden: true });
 const readiness = h('div', { class: 'ready', role: 'status', 'aria-label': 'Shot readiness' });
 const actHint = h('div', { class: 'act-hint', 'aria-live': 'polite' });
 const actionBar = h('div', { class: 'side-act', role: 'toolbar', 'aria-label': 'Shot actions' }, actHint, h('div', { class: 'act-btns' }, previewBtn, renderBtn));
-const side = h('aside', { class: 'side' }, h('div', { class: 'tabs side-head', role: 'tablist' }, directTab, shotTab, objectTab, shotChip, readiness), h('div', { class: 'side-body', style: 'min-height:0;display:grid' }, directPane, shotPane, objectPane), actionBar);
+const side = h('aside', { class: 'side' }, h('div', { class: 'side-head' }, readiness), h('div', { class: 'side-body', style: 'min-height:0;display:grid' }, shotPane, objectPane), actionBar);
 const wsBody = h('div', { class: 'ws-body' }, rail, stage, side);
 // Sequence view (src/director-sequence.ts) shares the top bar and replaces the workspace body.
 const sequence = createSequence({
@@ -210,7 +201,7 @@ const sequence = createSequence({
   thumbnail: (s, w, hh) => scene.thumbnail(s, w, hh),
   prompt: s => shotPrompt(project, s, 'video'),
   capture: (s, o) => captureShotVideo(s, { width: 1280, height: 720, prompt: shotPrompt(project, s, 'video'), ...o }),
-  openShot: id => { selectShot(id); setStep('shoot'); }, openEditor: () => openEditor(),
+  openShot: id => { selectShot(id); setStep('shoot'); },
 });
 let wsMode: 'scene' | 'sequence' = 'scene';
 let step: Step = 'build';
@@ -223,38 +214,29 @@ function setMode(m: typeof wsMode) {
 function setStep(k: Step) {
   const from = step; step = k;
   setMode(k === 'cut' ? 'sequence' : 'scene');
+  mobile?.onStep(k);
   for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); }
-  filmBtn.hidden = k !== 'cut';
   wsBody.classList.toggle('shooting', k === 'shoot');
   if (k === 'shoot') {
     setView('camera');
     if (collapsed.side) setCollapsed('side', false);
     openSection('camera'); openSection('video');
-    requestAnimationFrame(() => shotPane.querySelector('[data-sec="camera"]')?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }));
+    if (!mobile?.active()) requestAnimationFrame(() => shotPane.querySelector('[data-sec="camera"]')?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }));
   } else if (k === 'build' && from === 'shoot') setView('set');
   const q = new URLSearchParams(location.search); if (k === 'build') q.delete('view'); else q.set('view', k === 'cut' ? 'sequence' : 'shoot'); history.replaceState(null, '', `?${q}`);
 }
-filmBtn.onclick = () => openEditor();
 app.replaceChildren(top, wsBody, sequence.el);
 
 function showJourney() {
   if (!project) { toast('Wait for the project to finish loading.'); return; }
-  const scenePanel = (t: 'direct' | 'shot') => {
-    if (step === 'cut') setStep('build');
-    if (collapsed.side) setCollapsed('side', false);
-    setTab(t);
-    (t === 'direct' ? textarea : shotTab).focus();
-  };
   openJourney({
-    context: `${project.title} · Browser-owned scene · ${project.scene.entities.length} objects · ${project.shots.length} shots · ${project.assets?.length || 0} saved video assets. Counts describe saved work, not quality acceptance.`,
+    context: `${project.title} · ${project.scene.entities.length} objects · ${project.shots.length} shots · ${project.assets?.length || 0} saved video assets.`,
     actions: {
-      scene: () => scenePanel('shot'),
-      looks: () => openLooks(),
-      shot: () => scenePanel('shot'),
-      capture: () => { setStep('shoot'); openRender(); },
-      workflow: () => { setStep('cut'); stepBtns.cut.focus(); },
-      compare: () => { setStep('cut'); stepBtns.cut.focus(); },
-      export: () => { void openAssets(); },
+      build: () => { setStep('build'); if (collapsed.side) setCollapsed('side', false); stepBtns.build.focus(); },
+      cast: () => openLooks(),
+      shoot: () => { setStep('shoot'); stepBtns.shoot.focus(); },
+      generate: () => { setStep('shoot'); openRender(); },
+      cut: () => { setStep('cut'); stepBtns.cut.focus(); },
     },
   });
 }
@@ -332,11 +314,11 @@ const scene = createDirectorScene(canvas, labels, monitor, camFrame, {
     const k = chain.findIndex(x => selection.has(x));
     id = k > 0 ? chain[k - 1] : k === 0 ? id : chain.at(-1)!;
     if (mode === 'add') selection.add(id); else if (mode === 'toggle') selection.toggle(id); else selection.set([id], id);
-    // Focus the editor camera on what you clicked (the orbit then pivots around it).
-    if (mode === 'replace' && selection.has(id) && scene.view() === 'set') scene.frame([id], 1.2);
-    if (selection.ids.length) setTab('object');
+    // Move only the orbit pivot; framing remains an explicit action.
+    if (mode === 'replace' && selection.has(id) && scene.view() === 'set') scene.pivotOn(id);
+    if (selection.ids.length) openObject();
   },
-  onMarquee(ids) { selection.addMany(ids); if (selection.ids.length) setTab('object'); },
+  onMarquee(ids) { selection.addMany(ids); if (selection.ids.length) openObject(); },
   onContextMenu(x, y) { openAddPopup(x, y); },
   onTransformCommit(changes, label) { void commitTransforms(changes, label); },
   onModal(text) { hud.hidden = !text; hud.textContent = text || ''; },
@@ -346,10 +328,14 @@ const scene = createDirectorScene(canvas, labels, monitor, camFrame, {
 initOperate({ scene, viewport, project: () => project, shot, setView, runEntry, toast, setPlayhead(t) { playing = false; playhead = t; scene.setPlayhead(t); renderTransport(); } });
 const selection = new Selection();
 const undoStack = new UndoStack();
-// [agent] Built-in agent UI: live stream, proposal cards, prompt actions. Undo entries land on the same stack.
 initSheets({ projectId, project: () => project, apply: p => apply(p), refgen: () => refgen, loadRefgen: () => loadRefgen() }); // [designsheet]
-const agentUi = createAgentUi({ projectId, project: () => project, apply: p => apply(p), runEntry: e => runEntry(e), pushUndo: e => { undoStack.push(e); renderUndo(); }, refresh: () => pollNow(), resend: (text, sid) => { textarea.value = text; if (sid) shotId = sid; void send(); }, selectShot: id => { selectShot(id); setTab('shot'); } });
-selection.subscribe(sel => { selected = sel.primary; viewport.classList.toggle('has-sel', sel.ids.length > 0); scene.setSelection(sel.ids, sel.primary); scene.setOutlineColor(colorOf(sel.primary)); renderOutline(); renderInspector(); renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); renderKeyTrack(); });
+// [jobs-pip] mount point
+mountJobsPip(top.querySelector<HTMLElement>('.right')!, { projectId, api, shots: () => project.shots, onOpenShot: id => { selectShot(id); setStep('shoot'); } }); // [jobs] status-bar pip + panel
+const mobile = initMobile({ // [mobile] compact/medium layout; no-op on desktop widths
+  app, top, wsBody, stage, viewport, shotList, outline, filterInput, shotPane, objectPane, readiness, actionBar, transport: { playBtn, scrub, timeOut }, modeSeg, snapBtn, coach, labels, titleInput, undoBtn, redoBtn,
+  sequence, scene, selection, project: () => project, shot, step: () => step, setStep, selectShot, addShot, setView, setSection, openRender, openAssets, claudeDialog, requestDelete, frameSelected, duplicateSelection, toggleHidden, entity, runEntry, edit, undo, redo,
+});
+selection.subscribe(sel => { selected = sel.primary; viewport.classList.toggle('has-sel', sel.ids.length > 0); scene.setSelection(sel.ids, sel.primary); scene.setOutlineColor(colorOf(sel.primary)); renderOutline(); renderInspector(); renderObjectPane(); placeObjectPane(); highlightPrompt(selected); renderKeyTrack(); });
 
 // ---------- Rendering ----------
 function apply(next: DirectorProject) {
@@ -357,14 +343,14 @@ function apply(next: DirectorProject) {
   if (!project.shots.some(s => s.id === shotId)) shotId = project.shots[0].id;
   selection.retain(new Set(project.scene.entities.map(e => e.id)));
   if (document.activeElement !== titleInput) titleInput.value = project.title;
-  sceneLabel.textContent = project.scene.name;
+  titleInput.title = project.title;
   document.title = `${project.title} · Comfy Three Previs`;
   scrub.max = String(shot().duration);
   if (playhead > shot().duration) playhead = shot().duration;
   scene.sync(project, shot());
-  renderShots(); renderOutline(); renderThread(); renderInspector(); renderShotPane(); renderObjectPane(); renderTransport(); renderRoute(); renderSteps(); renderReadiness(); renderFirstRun();
+  renderShots(); renderOutline(); renderInspector(); renderShotPane(); renderObjectPane(); renderTransport(); renderSteps(); renderReadiness(); renderFirstRun();
   history.replaceState(null, '', `?project=${project.id}&shot=${shotId}${step === 'cut' ? '&view=sequence' : step === 'shoot' ? '&view=shoot' : ''}`);
-  sequence.refresh(); looksBoard?.refresh();
+  placeObjectPane(); sequence.refresh(); looksBoard?.refresh();
 }
 
 const shotVideos = (id: string) => (project.assets || []).filter(a => a.kind === 'workflow-result' && a.shotId === id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -387,7 +373,7 @@ function renderShots() {
         h('span', { class: 'num' }, h('i', { class: `pip ${st.pip}`, 'aria-label': st.label }), String(i + 1).padStart(2, '0')),
         h('span', { class: 'title' }, s.title),
         h('span', { class: 'sub' }, MOVES[s.camera.move])));
-    if (!video) requestAnimationFrame(() => { try { c.getContext('2d')!.drawImage(scene.thumbnail(s), 0, 0); } catch {} });
+    if (!video) requestAnimationFrame(() => { try { c.getContext('2d')!.drawImage(scene.thumbnail(s, 176, 99, signature(project, s)), 0, 0); } catch {} });
     return b;
   }));
 }
@@ -417,14 +403,14 @@ function renderOutline() {
     const children = kids(e.id), open = openGroups.has(e.id) || (!!outlineFilter && children.some(c => visible.has(c.id)));
     const off = hiddenObjs.has(e.id);
     const ref = objectLooks(project, e.id)[0] || allRefs().find(r => r.entityId === e.id && r.role !== 'style');
-    const btn = h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : '') + (children.length ? ' parent' : '') + (off ? ' off' : ''), 'data-id': e.id, type: 'button', style: `--depth:${depth};--k:${KIND_COLORS[e.kind]}`, onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.frame([e.id], 1.2); } if (selection.ids.length) setTab('object'); }, ondblclick: () => scene.focusOn(e) },
+    const btn = h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : '') + (children.length ? ' parent' : '') + (off ? ' off' : ''), 'data-id': e.id, title: e.name, type: 'button', style: `--depth:${depth};--k:${KIND_COLORS[e.kind]}`, onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.pivotOn(e.id); } if (selection.ids.length) openObject(); }, ondblclick: () => scene.focusOn(e) },
       children.length ? h('span', { class: 'twisty' + (open ? ' open' : ''), role: 'button', 'aria-label': open ? 'Collapse' : 'Expand', onclick: (ev: MouseEvent) => { ev.stopPropagation(); toggleGroup(e.id); } }, '›') : h('span', { class: 'twisty none' }),
       e.shape === 'group' ? h('span', { class: 'sw grp' }) : h('span', { class: 'sw', style: `background:${e.color}` }),
       h('span', { class: 'name' }, e.name),
       children.length ? h('span', { class: 'count' }, String(withDescendants(all, [e.id]).length - 1)) : null,
       e.id === shot().camera.target ? h('span', { class: 'tgt', title: 'Camera target' }, '◎') : null,
       ref ? h('img', { class: 'refdot', src: refUrl(ref), alt: '', title: `Image: ${ref.name}` }) : null,
-      h('span', { class: 'eye', role: 'button', tabindex: -1, 'aria-label': off ? `Show ${e.name}` : `Hide ${e.name}`, title: off ? 'Show in the viewport' : 'Hide in the viewport (renders still include it)', onclick: (ev: MouseEvent) => { ev.stopPropagation(); toggleHidden(e.id); } }, svgIcon(off ? ICON.eyeOff : ICON.eye)));
+      h('span', { class: 'eye', role: 'button', tabindex: -1, 'aria-label': off ? `Show ${e.name}` : `Hide ${e.name}`, title: off ? 'Show in the viewport' : 'Hide in the viewport (the blockout still includes it)', onclick: (ev: MouseEvent) => { ev.stopPropagation(); toggleHidden(e.id); } }, svgIcon(off ? ICON.eyeOff : ICON.eye)));
     return [btn, ...(open ? children.flatMap(c => row(c, depth + 1)) : [])];
   };
   for (const [kind, list] of Object.entries(groups)) {
@@ -448,77 +434,21 @@ async function ungroupSelection() {
   if (ok) selection.set(members, members[0] ?? null);
 }
 
-function richText(text: string) {
-  const out = h('div', { class: 'body' });
-  const parts = text.split(/(@[a-z0-9-]+)/gi);
-  for (const part of parts) {
-    const e = part.startsWith('@') ? project.scene.entities.find(x => handleOf(x.name) === part.slice(1).toLowerCase()) : null;
-    out.append(e ? h('span', { class: 'mention', title: e.kind }, e.name) : part);
-  }
-  return out;
-}
-
-function renderThread() {
-  const atBottom = thread.scrollHeight - thread.scrollTop - thread.clientHeight < 40;
-  thread.replaceChildren();
-  let lastShot: string | null | undefined;
-  for (const m of project.messages) {
-    if (m.shotId && m.shotId !== lastShot && m.role === 'user') {
-      const s = project.shots.find(x => x.id === m.shotId);
-      if (s) thread.append(h('button', { class: 'divider', type: 'button', style: 'border:0;background:none;cursor:pointer;width:100%', onclick: () => selectShot(s.id) }, `SHOT ${String(project.shots.indexOf(s) + 1).padStart(2, '0')} · ${s.title}`));
-      lastShot = m.shotId;
-    }
-    thread.append(messageView(m));
-  }
-  if (project.messages.length !== seenMessages || atBottom) thread.scrollTop = thread.scrollHeight;
-  seenMessages = project.messages.length;
-  const s = shot(), target = entity(s.camera.target);
-  const handle = target ? '@' + handleOf(target.name) : 'the subject';
-  chips.replaceChildren(...[`Add a red car on the left`, `Slow dolly in on ${handle}, 50mm, low angle`, `Orbit around ${handle} over 4 seconds`, `New shot: wide establishing crane up`].map(t => h('button', { type: 'button', onclick: () => { textarea.value = t; textarea.focus(); } }, t)));
-  chips.hidden = project.messages.filter(m => m.role === 'user').length > 6;
-}
-
-function messageView(m: Message) {
-  const who = m.role === 'user' ? 'You' : m.role === 'agent' ? (m.via === 'runner' ? 'Agent' : 'Your agent') : m.role === 'builtin' ? 'Parser' : 'Previs';
-  const av = m.role === 'user' ? 'Y' : m.role === 'agent' ? 'A' : m.role === 'builtin' ? '⚙' : '◐';
-  const refs = m.attachments.map(id => allRefs().find(r => r.id === id)).filter(Boolean) as Reference[];
-  return h('div', { class: `msg ${m.role}${m.error ? ' error' : ''}`, dataset: { msg: m.id } },
-    h('div', { class: 'av', 'aria-hidden': 'true' }, av),
-    h('div', {},
-      h('div', { class: 'who' }, h('b', {}, who), new Date(m.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })),
-      m.role === 'agent' ? agentText(m.text, richText) : richText(m.text),
-      refs.length ? h('div', { class: 'atts' }, ...refs.map(r => h('img', { src: refUrl(r), alt: r.name, title: `${r.name}${r.entityId ? ' → ' + (entity(r.entityId)?.name || '') : ''}` }))) : null,
-      m.handledBy === 'runner' && m.status !== 'handled' ? null : activityView(m),
-      ...agentUi.extras(m), // [agent] thinking block, proposal card, prompt actions, retry
-      m.role === 'user' && m.status !== 'handled' && m.handledBy !== 'runner' ? h('div', { class: 'pending' }, m.status === 'claimed' ? (m.activity?.length ? h('span', { class: 'working' }, 'Working…') : h('span', { class: 'working' }, 'Agent is working…')) : 'Waiting for agent…', h('button', { type: 'button', onclick: () => void api('director/message/builtin', { projectId, messageId: m.id }).then(r => apply(r.project)).catch(e => toast(e.message, true)) }, 'Use built-in parser')) : null));
-}
-
-// Agent steps under the message being worked on: live while working, collapsed when done.
-function activityView(m: Message) {
-  if (m.role !== 'user' || !m.activity?.length) return null;
-  const secs = m.workStartedAt ? Math.max(1, Math.round(((m.workEndedAt ? Date.parse(m.workEndedAt) : Date.now()) - Date.parse(m.workStartedAt)) / 1000)) : 0;
-  const rows = m.activity.map((a, i) => h('li', { class: (a.auto ? 'auto' : '') + (m.status !== 'handled' && i === m.activity!.length - 1 ? ' live' : '') }, a.text));
-  if (m.status === 'handled') return h('details', { class: 'activity done' }, h('summary', {}, `Worked for ${secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}m ${secs % 60}s`} · ${m.activity.length} step${m.activity.length === 1 ? '' : 's'}`), h('ol', {}, ...rows));
-  return h('ol', { class: 'activity live' }, ...rows.slice(-8));
-}
-
-function renderRoute() { // [agent]
-  pillSlot.replaceChildren(claudeBtn);
-  routeNote.textContent = agentUi.routeNote(mode, agent);
-}
-
+pillSlot.append(claudeBtn);
+const textIfChanged = (el: HTMLElement, value: string) => { if (el.textContent !== value) el.textContent = value; };
+monLabel.append(h('span'), h('span')); frameLabel.append(h('span'), h('span'));
 function renderTransport() {
   const s = shot();
   scrub.value = String(playhead);
-  timeOut.textContent = `${fmt(playhead)} / ${fmt(s.duration)}${s.start ? ` · scene ${fmt((s.start || 0) + playhead)}` : ''}`;
-  moveChip.textContent = describeCamera(s, project.scene.entities);
-  playBtn.textContent = playing ? '❚❚' : '▶';
+  textIfChanged(timeOut, `${fmt(playhead)} / ${fmt(s.duration)}${s.start ? ` · scene ${fmt((s.start || 0) + playhead)}` : ''}`);
+  textIfChanged(moveChip, describeCamera(s, project.scene.entities));
+  textIfChanged(playBtn, playing ? '❚❚' : '▶');
+  playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play'); playBtn.title = playing ? 'Pause' : 'Play';
   const pv = playing ? '❚❚ Pause' : '▶ Preview'; if (previewBtn.textContent !== pv) previewBtn.textContent = pv;
   renderKeyTrack();
   const label = `SHOT ${String(project.shots.indexOf(s) + 1).padStart(2, '0')} · ${MOVES[s.camera.move]} · ${Math.round(scene.pose().mm)}mm`;
-  monLabel.replaceChildren(h('span', {}, label), h('span', {}, fmt(playhead)));
-  frameLabel.replaceChildren(h('span', {}, label), h('span', {}, `${fmt(playhead)} / ${fmt(s.duration)}`));
-  shotChip.textContent = `SHOT ${String(project.shots.indexOf(s) + 1).padStart(2, '0')}`;
+  textIfChanged(monLabel.children[0] as HTMLElement, label); textIfChanged(monLabel.children[1] as HTMLElement, fmt(playhead));
+  textIfChanged(frameLabel.children[0] as HTMLElement, label); textIfChanged(frameLabel.children[1] as HTMLElement, `${fmt(playhead)} / ${fmt(s.duration)}`);
 }
 
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -703,21 +633,20 @@ function modelBlock(s: Shot) {
   return h('div', { class: 'block vm' },
     h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted', style: 'font-size:11.5px' }, rate ? `≈ $${(rate * s.duration).toFixed(2)} for ${s.duration}s` : 'Cost shown at quote')),
     pick,
-    def.description ? h('p', { class: 'note vm-desc' }, def.description) : null,
+    def.description ? h('p', { class: 'note vm-desc', title: def.description }, def.description) : null,
     h('div', { class: 'vm-inputs' },
-      h('div', { class: 'vm-head' }, 'What this model takes'),
+      h('div', { class: 'vm-head' }, 'What this model takes'), modelInputsDiagram(def.task, { twoFrames, castImages: refs.length }),
       slot(!maxLen || promptLen <= maxLen, 'Text prompt', maxLen ? h('span', {}, `${promptLen.toLocaleString()} / ${maxLen.toLocaleString()} characters`, promptLen > maxLen ? h('b', { class: 'vm-over' }, ' · will be cut') : '') : `${promptLen.toLocaleString()} characters`),
       usesClip ? slot(s.render ? !stale : false, 'Blockout video', s.render ? (stale ? 'The scene changed since · a new blockout is made when you generate' : `Your camera move · ${s.render.duration}s, ${s.render.frameCount} frames`) : 'Made from your camera when you generate') : slot(null, 'Blockout video', 'Not used · describe the motion in the prompt'),
       usesFrames ? slot(hasStart, twoFrames ? 'Start frame' : 'First frame', hasStart ? 'Start still ready (Storyboard)' : 'Add a Start still in the Storyboard below') : null,
       twoFrames ? slot(hasEnd, 'End frame', hasEnd ? 'End still ready (Storyboard)' : 'Add an End still in the Storyboard below') : null,
-      slot(cap ? refs.length > 0 : null, 'Reference images', cap ? `${refs.length} of up to ${cap}` : 'Not accepted by this model')),
+      slot(cap ? refs.length > 0 : null, 'Cast images', cap ? `${refs.length} of up to ${cap}` : 'Not accepted by this model')),
     cap ? h('div', { class: 'vm-map' },
       h('div', { class: 'vm-head' }, 'Shot objects → model inputs'),
       ...refs.map((r, i) => h('div', { class: 'vm-ref', style: `--k:${KIND_COLORS[entity(r.entityId!)?.kind || 'prop']}`, onmouseenter: () => { if (r.entityId) { scene.setHover(r.entityId); highlightPrompt(r.entityId); } }, onmouseleave: () => { scene.setHover(null); highlightPrompt(selected); } },
         h('span', { class: 'vm-n' }, `Image ${i + 1}`), h('img', { src: refUrl(r.ref), alt: '' }), h('span', { class: 'vm-name' }, r.label))),
       ...cast.filter(r => !sent.has(r.entity.id)).map(r => h('div', { class: 'vm-ref missing', style: `--k:${KIND_COLORS[r.entity.kind]}` },
-        h('span', { class: 'vm-n' }, objectLooks(project, r.entity.id).length ? 'Over limit' : 'No image'), h('span', { class: 'vm-ph' }), h('span', { class: 'vm-name' }, r.entity.name)))) : null,
-    h('button', { class: 'btn camera vm-go', type: 'button', onclick: () => openRender() }, s.render && !stale ? 'Generate video…' : 'Make blockout, then generate…'));
+        h('span', { class: 'vm-n' }, objectLooks(project, r.entity.id).length ? 'Over limit' : 'No image'), h('span', { class: 'vm-ph' }), h('span', { class: 'vm-name' }, r.entity.name)))) : null);
 }
 // ---------- Shot panel sections (Story → Cast → Camera → Video → More), collapsible, state remembered ----------
 const secState: Record<string, boolean> = JSON.parse(localStorage.getItem('previs.sections') || '{}');
@@ -733,7 +662,7 @@ function section(key: string, title: string, aside: Node | string | null, ...bod
   return h('section', { class: 'sec' + (open ? ' open' : ''), 'data-sec': key },
     h('div', { class: 'sec-headrow' },
       h('button', { type: 'button', class: 'sec-head', 'aria-expanded': String(open), onclick: () => setSection(key, !secOpen(key)) }, h('span', { class: 'sec-chev', 'aria-hidden': 'true' }, '›'), h('span', { class: 'sec-title' }, title)),
-      aside ? h('span', { class: 'sec-aside' }, aside) : null),
+      aside ? h('span', { class: 'sec-aside', title: typeof aside === 'string' ? aside : aside.textContent || '' }, aside) : null),
     h('div', { class: 'sec-body', hidden: !open }, ...body));
 }
 function goSection(key: string) { if (collapsed.side) setCollapsed('side', false); openSection(key); shotPane.querySelector(`[data-sec="${key}"]`)?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }
@@ -763,8 +692,8 @@ function renderActionBar() {
   actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}` }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * s.duration).toFixed(2)}`)] : []));
   actHint.title = `${s.title} · ${s.duration}s · ${state}${rate ? ` · about $${(rate * s.duration).toFixed(2)} to generate` : ''}`;
   const ready = !!s.render && !stale;
-  renderBtn.textContent = ready ? 'Generate video ▸' : 'Render blockout…';
-  renderBtn.title = ready ? 'Generate this shot’s video from its blockout' : 'Render the camera blockout, then generate this shot’s video';
+  renderBtn.textContent = ready ? 'Generate video ▸' : 'Make blockout…';
+  renderBtn.title = ready ? 'Generate this shot’s video from its blockout' : 'Make the camera blockout, then generate this shot’s video';
 }
 function renderSteps() {
   const n = project.scene.entities.filter(e => e.shape !== 'group').length, shots = project.shots.length, vids = (project.assets || []).filter(a => a.kind === 'workflow-result').length;
@@ -772,9 +701,15 @@ function renderSteps() {
   stepBtns.shoot.querySelector('.st-count')!.textContent = `${shots} shot${shots === 1 ? '' : 's'}`;
   stepBtns.cut.querySelector('.st-count')!.textContent = `${vids} video${vids === 1 ? '' : 's'}`;
 }
+let rigExplainer: { dispose(): void } | undefined;
 function renderShotPane() {
-  if (shotPane.contains(document.activeElement) && shotPane.dataset.shot === shotId) return;
-  shotPane.dataset.shot = shotId;
+  const key = `${shotId}|${project.revision}`;
+  if (shotPane.dataset.shot === key) return;
+  shotPane.dataset.shot = key;
+  rigExplainer?.dispose();
+  // The rebuild detaches the object pane (re-placed below); keep typing there intact, e.g. during a refgen poll.
+  const held = objectPane.contains(document.activeElement) ? document.activeElement as HTMLElement : null;
+  const caret = held instanceof HTMLInputElement || held instanceof HTMLTextAreaElement ? [held.selectionStart, held.selectionEnd] : null;
   const s = shot(), idx = project.shots.indexOf(s);
   const title = h('input', { class: 'field', value: s.title, maxlength: 120, 'aria-label': 'Shot title' });
   title.onchange = () => void edit([{ op: 'update_shot', id: s.id, patch: { title: title.value } }]);
@@ -799,23 +734,22 @@ function renderShotPane() {
   const rendered = s.render;
   const stale = rendered && rendered.signature && rendered.signature !== signature(project, s);
   const refsGrid = h('div', { class: 'refs' }, ...s.references.map(r => refCard(s, r)));
-  const drop = h('label', { class: 'dropzone' }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => { const files = Array.from((ev.target as HTMLInputElement).files || []); void uploadRefs(files, null, false); } }), 'Drop images here or click to add references for this shot');
-  dropTarget(drop, files => uploadRefs(files, null, false));
-  const ctx = { project: () => project, runEntry: (e: any) => runEntry(e as any), select: (id: string) => { select(id); setTab('object'); }, refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); } };
+  const drop = h('label', { class: 'dropzone' }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => { const files = Array.from((ev.target as HTMLInputElement).files || []); void uploadRefs(files, null); } }), 'Drop images here or click to add references for this shot');
+  dropTarget(drop, files => uploadRefs(files, null));
+  const ctx = { project: () => project, runEntry: (e: any) => runEntry(e as any), select: (id: string) => { select(id); openObject(); }, refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); } };
   const rows = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const blockoutInfo = rendered ? h('details', { class: 'facts-more' },
     h('summary', {}, h('span', { class: 'info-i', 'aria-hidden': 'true' }, 'i'), 'Blockout clip', stale ? h('span', { class: 'fm-warn' }, ' · scene changed since') : h('span', { class: 'fm-ok' }, ' · up to date')),
     h('video', { src: `/assets/${rendered.assetId}.mp4`, controls: true, muted: true, loop: true, playsinline: true, preload: 'metadata', style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }),
-    h('div', { class: 'facts' }, 'Frames', h('b', {}, `${rendered.frameCount} @ 24 fps`), 'Duration', h('b', {}, `${Number(rendered.duration).toFixed(2)}s`), 'Size', h('b', {}, `${rendered.width}×${rendered.height}`)),
-    h('a', { class: 'btn sm', href: workflowUrl(rendered.previsShotId, rendered.assetId, rendered.prompt), target: '_blank' }, 'Open in Comfy →')) : null;
+    h('div', { class: 'facts' }, 'Frames', h('b', {}, `${rendered.frameCount} @ 24 fps`), 'Duration', h('b', {}, `${Number(rendered.duration).toFixed(2)}s`), 'Size', h('b', {}, `${rendered.width}×${rendered.height}`))) : null;
   shotPane.replaceChildren(
-    section('story', 'Story', h('span', { class: 'sec-meta' }, `Shot ${String(idx + 1).padStart(2, '0')}`, h('button', { class: 'btn ghost sm', type: 'button', disabled: project.shots.length < 2, title: 'Delete this shot', onclick: () => { if (confirm(`Delete “${s.title}”? Its images stay on disk.`)) void edit([{ op: 'remove_shot', id: s.id }]); } }, 'Delete')),
+    section('story', 'Story', h('span', { class: 'sec-meta' }, `Shot ${String(idx + 1).padStart(2, '0')}`, h('button', { class: 'btn ghost sm', type: 'button', disabled: project.shots.length < 2, title: 'Delete this shot', onclick: () => { requestDeleteShot(s); } }, 'Delete')),
       h('div', { class: 'block' }, title, descBox)),
     section('cast', 'Cast', h('span', { class: 'sec-dots' }, ...rows.slice(0, 6).map(r => h('i', { style: `background:${KIND_COLORS[r.entity.kind]}` })), `${rows.length}`), castBlock(s)),
     section('camera', 'Camera', describeCamera(s, project.scene.entities),
       h('div', { class: 'block' },
       h('div', { class: 'grid2' }, h('label', {}, h('span', { class: 'ch-labrow' }, 'Move', moveHelp(move)), move), h('label', {}, 'Target', target)),
-      h('div', { class: 'slider-row' }, 'Starts at', numberField('Start', s.start || 0, { rate: 0.05, snapTo: 0.5, min: 0, max: MAX_SCENE_TIME, unit: 's', onPreview: v => { s.start = v; scene.sync(project, s); renderTransport(); }, onCommit: (v, from) => void runEntry({ label: 'Shot start', redo: [{ op: 'update_shot', id: s.id, patch: { start: v } }], undo: [{ op: 'update_shot', id: s.id, patch: { start: from } }] }) }), h('output', {}, `of ${sceneLength(project).toFixed(1)}s`)),
+      h('div', { class: 'slider-row' }, 'Starts at', numberField('Start', s.start || 0, { rate: 0.05, snapTo: 0.5, min: 0, max: MAX_SCENE_TIME, unit: 's', onPreview: v => { s.start = v; scene.sync(project, s); renderTransport(); }, onCommit: (v, from) => void runEntry({ label: 'Shot start', redo: [{ op: 'update_shot', id: s.id, patch: { start: v } }], undo: [{ op: 'update_shot', id: s.id, patch: { start: from } }] }) }), h('output', {}, `/ ${sceneLength(project).toFixed(1)} s`)),
       slider('Duration', 0.5, MAX_DURATION, 0.25, s.duration, 's', v => { s.duration = v; scrub.max = String(v); scene.sync(project, s); renderTransport(); }, v => void edit([{ op: 'update_shot', id: s.id, patch: { duration: v } }])),
       slider('Lens', 12, 135, 1, Math.round(s.camera.mm), 'mm', v => local({ mm: v, ...(custom ? { keys: s.camera.keys!.map(k => ({ ...k, mm: v })) } : {}) }), v => commit({ mm: v, ...(custom ? { keys: s.camera.keys!.map(k => ({ ...k, mm: v })) } : {}) })),
       custom ? h('p', { class: 'note', style: 'margin:0' }, 'Custom keys from the set view or a flown take. Pick a move above to go back to a preset.') : h('div', { class: 'block', style: 'gap:6px' },
@@ -826,6 +760,7 @@ function renderShotPane() {
         h('button', { class: 'btn sm', type: 'button', onclick: () => keyFromView('start'), title: 'Use the current director view as the first camera position' }, 'Set start from view'),
         h('button', { class: 'btn sm', type: 'button', onclick: () => keyFromView('end'), title: 'Use the current director view as the last camera position' }, 'Set end from view'),
         h('button', { class: 'btn sm ghost', type: 'button', onclick: () => scene.lookThrough() }, 'Go to camera'))),
+      h('details', { class: 'facts-more' }, h('summary', {}, 'Camera controls explained'), h('div', { class: 'help-explain', 'data-explain': 'camera-rig' })),
       cameraStyleBlock(s, ctx),
       operateBlock(s)), // [operate]
     section('video', 'Video', shotVideos(s.id).length ? h('span', { class: 'fm-ok' }, `${shotVideos(s.id).length} ready`) : null,
@@ -838,8 +773,12 @@ function renderShotPane() {
       h('div', { class: 'block' },
         h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Shot images · ${s.references.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, 'Extra images for this shot; link each to an object')),
         refsGrid, drop)));
+  const rigHost = shotPane.querySelector<HTMLElement>('[data-explain="camera-rig"]')!;
+  rigExplainer = mountExplainer(rigHost, 'camera-rig');
+  const rigPlay = rigHost.querySelector<HTMLElement>('.ex-play'); if (rigPlay) { rigPlay.style.width = '44px'; rigPlay.style.height = '44px'; }
   renderReadiness();
   placeObjectPane();
+  if (held?.isConnected && document.activeElement !== held) { held.focus({ preventScroll: true }); if (caret) try { (held as HTMLInputElement).setSelectionRange(caret[0], caret[1]); } catch {} }
   shotPane.addEventListener('focusout', () => setTimeout(() => { if (!shotPane.contains(document.activeElement) && !objectPane.contains(document.activeElement)) renderShotPane(); }, 0), { once: true });
 }
 
@@ -882,7 +821,7 @@ function keyFrameBlock(s: Shot) {
   const label = (t: number | null) => t === null ? 'Unpinned' : t === 0 ? 'Start' : Math.abs(t - s.duration) < 0.01 ? 'End' : fmtT(t);
   const open = (t: number) => { f.open = true; f.prompt = null; seekShot(t); if (!refgen.presets.length) void loadRefgen(); shotPane.dataset.shot = ''; renderShotPane(); };
 
-  // Timeline: the shot's length with a pin per moment and the playhead.
+  // Shot timing: the shot's length with a pin per moment and the playhead.
   const track = h('div', { class: 'sb-track', title: 'Click to move the playhead; add a still at that moment', onclick: (ev: MouseEvent) => { const r = (ev.currentTarget as HTMLElement).getBoundingClientRect(); seekShot(((ev.clientX - r.left) / r.width) * s.duration); shotPane.dataset.shot = ''; renderShotPane(); } },
     h('div', { class: 'sb-rail' }),
     h('div', { class: 'sb-head', style: `left:${(playhead / s.duration) * 100}%` }),
@@ -936,7 +875,7 @@ function keyFrameBlock(s: Shot) {
     h('div', { class: 'sb-in' }, h('figure', {}, h('img', { src: guidePng, alt: 'Blockout frame' }), h('figcaption', {}, h('b', {}, 'Image 1'), ' blockout frame · composition')),
       ...looks.slice(0, refIds.length).map((r, i) => h('figure', { style: `--k:${KIND_COLORS[entity(r.entityId!)?.kind || 'prop']}` }, h('img', { src: refUrl(r.ref), alt: '' }), h('figcaption', {}, h('b', {}, `Image ${i + 2}`), ' ', r.label))),
       prev && refIds.includes(prev.id) ? h('figure', {}, h('img', { src: refUrl(prev), alt: '' }), h('figcaption', {}, h('b', {}, `Image ${refIds.indexOf(prev.id) + 2}`), ' previous shot · continuity')) : null),
-    !cap ? h('p', { class: 'note', style: 'margin:0' }, 'This model takes no reference images; only the prompt and blockout frame guide it.') : null);
+    !cap ? h('p', { class: 'note', style: 'margin:0' }, 'This model takes no cast images; only the prompt and blockout frame guide it.') : null);
   return h('div', { class: 'block sb' }, head, track, adds,
     h('div', { class: 'sb-composer' }, inputs, moment, prompt,
       h('div', { class: 'grid2' }, h('label', {}, 'Image model', model), h('label', {}, 'Takes', count)),
@@ -953,7 +892,7 @@ function resultsBlock(s: Shot): Node[] {
     ...results.slice(0, 3).map(a => h('div', { style: 'display:flex;flex-direction:column;gap:4px' },
       a.mime.startsWith('video/') ? h('video', { src: assetUrl(a), controls: true, muted: true, loop: true, playsinline: true, preload: 'metadata', style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }) : h('img', { src: assetUrl(a), alt: '', style: 'width:100%;border-radius:8px' }),
       h('div', { class: 'vid-meta' }, h('span', {}, (a.source.workflow || 'Video').split(' ·')[0]), h('span', { class: 'muted' }, `${a.duration != null ? Number(a.duration).toFixed(1) : '—'}s · ${a.width}×${a.height} · ${new Date(a.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`),
-        a.source.jobId ? h('a', { class: 'linklike', href: `/generation.html?job=${a.source.jobId}&output=${a.source.resultId}`, target: '_blank', title: 'Compare the video with its blockout' }, 'Compare →') : null))))];
+        h('button', { class: 'linklike', type: 'button', title: 'Compare the video with its blockout', onclick: () => { setStep('cut'); sequence.open(s.id, 'compare'); } }, 'Compare')))))];
 }
 async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' | 'ref' = 'all') {
   document.getElementById('assets-dialog')?.remove();
@@ -968,8 +907,7 @@ async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' 
       sub: (a.kind === 'edit' ? 'Whole film' : shotLabel(a.shotId!)) + (a.imported ? ' · imported' : ''), url: assetUrl(a), video: a.mime.startsWith('video/'), created: a.createdAt,
       meta: `${a.frameCount ?? '—'}f · ${a.duration != null ? Number(a.duration).toFixed(2) : '—'}s · ${a.width}×${a.height}`,
       actions: [h('a', { class: 'btn sm', href: assetUrl(a), download: `${a.id}.${a.file.split('.').pop()}` }, 'Download'),
-        a.kind === 'camera-render' && !a.imported ? h('a', { class: 'btn sm', href: workflowUrl(a.source.engineShotId!, a.source.engineAssetId || a.id, a.source.prompt || ''), target: '_blank' }, 'Open in Comfy') : null,
-        a.kind === 'workflow-result' && a.source.jobId ? h('a', { class: 'btn sm', href: `/generation.html?job=${a.source.jobId}&output=${a.source.resultId}`, target: '_blank' }, 'Compare') : null].filter(Boolean) as Node[],
+        a.kind === 'workflow-result' && a.shotId ? h('button', { class: 'btn sm', type: 'button', onclick: () => { document.getElementById('assets-dialog')?.remove(); setStep('cut'); sequence.open(a.shotId!, 'compare'); } }, 'Compare') : null].filter(Boolean) as Node[],
     })),
     ...(project.scene.references || []).filter(r => entity(r.entityId)).map(r => ({ kind: 'look' as const, title: r.name, sub: `Cast image · ${entity(r.entityId)?.name || 'object'}${entity(r.entityId)?.look === r.id ? ' · primary' : ''}`, url: refUrl(r), video: false, created: r.createdAt, meta: r.generated ? `✦ ${r.generated.model.split(' (')[0]} · seed ${r.generated.seed}` : 'uploaded', actions: [h('a', { class: 'btn sm', href: refUrl(r), download: r.file }, 'Download')] })),
     ...project.shots.flatMap(s => s.references.map(r => ({ kind: 'ref' as const, title: r.name, sub: `${shotLabel(s.id)} · ${r.role}`, url: refUrl(r), video: false, created: r.createdAt, meta: entity(r.entityId) ? `→ ${entity(r.entityId)!.name}` : 'not linked', actions: [h('a', { class: 'btn sm', href: refUrl(r), download: r.file }, 'Download')] }))),
@@ -991,123 +929,15 @@ async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' 
   };
   draw();
   const dlg = h('dialog', { class: 'assets', id: 'assets-dialog', 'aria-labelledby': 'assets-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Design every cast member’s look and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast looks board'), h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Design every cast member’s look and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'assets-body' }, seg, h('p', { class: 'note', style: 'margin:0' }, 'Everything here lives in this project’s own folder, so exporting it carries videos, films, blockouts and images together.'), grid));
   document.body.append(dlg); dlg.showModal();
-}
-
-// ---------- Edit timeline ----------
-const shotNo = (id: string) => String(project.shots.findIndex(s => s.id === id) + 1).padStart(2, '0');
-function clipsOf(p = project): EditClip[] { return p.edit?.clips?.length ? p.edit.clips : p.shots.map(s => ({ id: s.id, shotId: s.id, assetId: null, in: 0, out: null })); }
-function clipMedia(c: EditClip): Asset | null {
-  const list = (project.assets || []).filter(a => a.shotId === c.shotId && a.mime?.startsWith('video/'));
-  if (c.assetId) return list.find(a => a.id === c.assetId) || null;
-  const newest = (k: string) => list.filter(a => a.kind === k).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-  return newest('workflow-result') || newest('camera-render') || null;
-}
-const assetLabel = (a: Asset) => a.kind === 'workflow-result' ? `Video · ${(a.source.workflow || 'model').split(' ·')[0]}` : `Blockout v${a.version ?? 1}`;
-function openEditor() {
-  document.getElementById('editor-dialog')?.remove();
-  let clips = structuredClone(clipsOf()), sel = 0, playing = false, idx = 0;
-  const video = h('video', { playsinline: true, muted: true, preload: 'auto' });
-  const empty = h('div', { class: 'ed-empty' });
-  const status = h('div', { class: 'status-line' });
-  const timecode = h('span', { class: 'mono muted' });
-  const track = h('div', { class: 'ed-track', role: 'listbox', 'aria-label': 'Timeline' });
-  const panel = h('div', { class: 'ed-panel' });
-  const exportBtn = h('button', { class: 'btn camera', type: 'button' }, 'Export film');
-  const playBtn2 = h('button', { class: 'btn', type: 'button' }, '▶ Play cut');
-  const len = (c: EditClip) => { const a = clipMedia(c); return a?.duration ? Math.max(0, (c.out ?? a.duration) - (c.in || 0)) : 0; };
-  const total = () => clips.reduce((t, c) => t + len(c), 0);
-  const save = async () => {
-    const before = structuredClone(clipsOf());
-    await runEntry({ label: 'Edit timeline', redo: [{ op: 'set_edit', clips }], undo: [{ op: 'set_edit', clips: before }] });
-    clips = structuredClone(clipsOf()); draw();
-  };
-  const show = (i: number, t = 0) => {
-    const c = clips[i], a = c && clipMedia(c);
-    if (!a) { video.removeAttribute('src'); video.hidden = true; empty.hidden = false; empty.textContent = c ? `Shot ${shotNo(c.shotId)} has no video or blockout yet. Generate its video in Shoot first.` : 'The timeline is empty.'; return false; }
-    video.hidden = false; empty.hidden = true;
-    const url = assetUrl(a);
-    if (!video.src.endsWith(url)) video.src = url;
-    video.currentTime = (c.in || 0) + t; return true;
-  };
-  const playFrom = (i: number) => {
-    idx = i;
-    while (idx < clips.length && !clipMedia(clips[idx])) idx++;
-    if (idx >= clips.length) { playing = false; playBtn2.textContent = '▶ Play cut'; return; }
-    sel = idx; draw(false); show(idx); void video.play();
-  };
-  video.ontimeupdate = () => {
-    const c = clips[idx], a = c && clipMedia(c);
-    let before = 0; for (let i = 0; i < idx; i++) before += len(clips[i]);
-    timecode.textContent = `${(before + Math.max(0, video.currentTime - (c?.in || 0))).toFixed(2)}s / ${total().toFixed(2)}s`;
-    if (playing && a && video.currentTime >= (c.out ?? a.duration ?? 0) - 0.02) playFrom(idx + 1);
-  };
-  video.onended = () => { if (playing) playFrom(idx + 1); };
-  playBtn2.onclick = () => { if (playing) { playing = false; video.pause(); playBtn2.textContent = '▶ Play cut'; return; } playing = true; playBtn2.textContent = '❚❚ Pause'; playFrom(sel); };
-  let dragFrom = -1;
-  function draw(refreshPreview = true) {
-    const tot = Math.max(1, total());
-    track.replaceChildren(...clips.map((c, i) => {
-      const a = clipMedia(c), shot = project.shots.find(s => s.id === c.shotId);
-      const thumb = h('canvas', { width: 160, height: 90 });
-      if (shot) requestAnimationFrame(() => { try { thumb.getContext('2d')!.drawImage(scene.thumbnail(shot, 160, 90), 0, 0); } catch {} });
-      const block = h('div', { class: 'ed-clip' + (i === sel ? ' on' : '') + (a ? '' : ' missing'), role: 'option', 'aria-selected': String(i === sel), draggable: true, tabindex: 0, style: `width:${Math.round(Math.max(1.2, len(c) || 1.5) * 64)}px;`, title: 'Drag to reorder' },
-        thumb, h('div', { class: 'ed-meta' }, h('strong', {}, `${shotNo(c.shotId)} ${shot?.title || 'Removed shot'}`), h('span', {}, a ? `${assetLabel(a)} · ${len(c).toFixed(2)}s` : 'No video yet')));
-      block.onclick = () => { sel = i; draw(); };
-      block.ondragstart = ev => { dragFrom = i; ev.dataTransfer?.setData('text/plain', String(i)); };
-      block.ondragover = ev => ev.preventDefault();
-      block.ondrop = ev => { ev.preventDefault(); if (dragFrom < 0 || dragFrom === i) return; const [m] = clips.splice(dragFrom, 1); clips.splice(i, 0, m); sel = i; dragFrom = -1; void save(); };
-      return block;
-    }), h('div', { class: 'ed-total mono' }, `${clips.length} clip${clips.length === 1 ? '' : 's'} · ${total().toFixed(2)}s`));
-    track.style.setProperty('--total', String(tot));
-    const c = clips[sel];
-    panel.replaceChildren();
-    if (c) {
-      const shot = project.shots.find(s => s.id === c.shotId), a = clipMedia(c);
-      const options = (project.assets || []).filter(x => x.shotId === c.shotId && x.mime?.startsWith('video/')).sort((x, y) => y.createdAt.localeCompare(x.createdAt));
-      const src = h('select', { class: 'field', 'aria-label': 'Clip source' }, h('option', { value: '' }, 'Newest (video, else blockout)'), ...options.map(o => h('option', { value: o.id, selected: o.id === c.assetId }, `${assetLabel(o)} · ${o.duration != null ? Number(o.duration).toFixed(2) : '—'}s · ${new Date(o.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`)));
-      src.onchange = () => { c.assetId = src.value || null; c.in = 0; c.out = null; void save(); };
-      const dur = a?.duration || 0;
-      const inF = numberField('In', c.in || 0, { rate: 0.01, snapTo: 1 / 24, min: 0, max: dur, unit: 's', onPreview: v => { c.in = v; show(sel); }, onCommit: v => { c.in = v; void save(); } });
-      const outF = numberField('Out', c.out ?? dur, { rate: 0.01, snapTo: 1 / 24, min: 0, max: dur, unit: 's', onPreview: v => { c.out = v; show(sel, Math.max(0, v - (c.in || 0) - 0.04)); }, onCommit: v => { c.out = v; void save(); } });
-      panel.append(
-        h('div', { class: 'ed-row' }, h('strong', {}, `Clip ${sel + 1} · Shot ${shotNo(c.shotId)} ${shot?.title || ''}`), h('span', { style: 'flex:1' }),
-          h('button', { class: 'btn sm', type: 'button', disabled: sel === 0, onclick: () => { [clips[sel - 1], clips[sel]] = [clips[sel], clips[sel - 1]]; sel--; void save(); } }, '← Move'),
-          h('button', { class: 'btn sm', type: 'button', disabled: sel === clips.length - 1, onclick: () => { [clips[sel + 1], clips[sel]] = [clips[sel], clips[sel + 1]]; sel++; void save(); } }, 'Move →'),
-          h('button', { class: 'btn sm', type: 'button', onclick: () => { clips.splice(sel + 1, 0, { ...structuredClone(c), id: crypto.randomUUID() }); sel++; void save(); } }, 'Duplicate'),
-          h('button', { class: 'btn sm ghost', type: 'button', onclick: () => { clips.splice(sel, 1); sel = Math.max(0, sel - 1); void save(); } }, 'Remove')),
-        h('div', { class: 'ed-row' }, h('label', { class: 'ed-src' }, 'Source', src), a ? h('div', { class: 'xyz', style: 'grid-template-columns: repeat(2, 120px)' }, inF, outF) : h('button', { class: 'btn sm camera', type: 'button', onclick: () => { dlg.close(); selectShot(c.shotId); setStep('shoot'); openRender(); } }, 'Generate this shot →')));
-    }
-    const addSel = h('select', { class: 'field', 'aria-label': 'Add a shot to the timeline' }, h('option', { value: '' }, '+ Add shot…'), ...project.shots.map((s, i) => h('option', { value: s.id }, `${String(i + 1).padStart(2, '0')} ${s.title}`)));
-    addSel.onchange = () => { if (!addSel.value) return; clips.push({ id: crypto.randomUUID(), shotId: addSel.value, assetId: null, in: 0, out: null }); sel = clips.length - 1; void save(); };
-    panel.append(h('div', { class: 'ed-row' }, addSel, h('button', { class: 'btn sm ghost', type: 'button', title: 'Every shot, in shot order, newest versions', onclick: () => { clips = project.shots.map(s => ({ id: crypto.randomUUID(), shotId: s.id, assetId: null, in: 0, out: null })); sel = 0; void save(); } }, 'Reset to all shots')));
-    exportBtn.disabled = !clips.length;
-    if (refreshPreview && !playing) show(sel);
-  }
-  exportBtn.onclick = async () => {
-    exportBtn.disabled = true; status.className = 'status-line'; status.textContent = 'Exporting with FFmpeg…';
-    try {
-      const r = await api('director/edit-export', { projectId });
-      apply(r.project);
-      status.innerHTML = '';
-      status.append(`Exported ${Number(r.asset.duration).toFixed(2)}s · ${r.asset.frameCount} frames · ${r.asset.width}×${r.asset.height}. Saved in the Library. `, h('a', { href: `/director-assets/${project.id}/${r.asset.file.replace(/^assets\//, '')}`, download: `${project.title}-edit-v${r.asset.version}.mp4` }, 'Download'));
-    } catch (e) { status.className = 'status-line err'; status.textContent = (e as Error).message; }
-    finally { exportBtn.disabled = false; }
-  };
-  const dlg = h('dialog', { class: 'editor', id: 'editor-dialog', 'aria-labelledby': 'editor-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'editor-title' }, `Film · ${project.title}`), timecode, playBtn2, exportBtn, h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
-    h('div', { class: 'ed-body' }, h('div', { class: 'ed-preview' }, video, empty), track, panel, status,
-      h('p', { class: 'note', style: 'margin:0' }, 'Each clip uses its shot\'s newest video, else its newest blockout, unless you pick a version. Export conforms every clip to 1280×720 at 24 fps and joins them in order.')));
-  dlg.addEventListener('close', () => { video.pause(); dlg.remove(); });
-  document.body.append(dlg); dlg.showModal(); draw();
 }
 
 // ---------- Object looks & generation ----------
 let looksBoard: { refresh(): void } | null = null;
 function openLooks() {
-  looksBoard = openLooksBoard({ project: () => project, edit: ops => edit(ops), refgen: () => refgen as any, reloadRefgen: () => loadRefgen(), openObject: id => { if (step === 'cut') setStep('build'); select(id); setTab('object'); } });
+  looksBoard = openLooksBoard({ project: () => project, edit: ops => edit(ops), refgen: () => refgen as any, reloadRefgen: () => loadRefgen(), openObject: id => { if (step === 'cut') setStep('build'); select(id); openObject(); } });
 }
 async function loadRefgen() {
   try {
@@ -1121,9 +951,9 @@ function lookCard(e: Entity, r: Reference) {
   return h('div', { class: 'ref' + (primary ? ' primary' : '') },
     h('img', { src: refUrl(r), alt: r.name, loading: 'lazy', title: r.generated ? `${r.generated.model} · seed ${r.generated.seed}\n${r.generated.prompt}` : r.name }),
     h('div', { class: 'ref-body' },
-      h('div', { class: 'ref-name' }, h('span', { title: r.name }, r.name), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': `Remove look ${r.name}`, title: 'Remove look (file is kept)', onclick: () => void edit([{ op: 'remove_reference', referenceId: r.id }]) }, '✕')),
+      h('div', { class: 'ref-name' }, h('span', { title: r.name }, r.name), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': `Remove image ${r.name}`, title: 'Remove image (file is kept)', onclick: () => void edit([{ op: 'remove_reference', referenceId: r.id }]) }, '✕')),
       h('span', { class: 'link' + (r.generated ? '' : ' none') }, r.generated ? `✦ ${r.generated.model.split(' (')[0]}` : 'Uploaded'),
-      h('button', { class: 'btn sm' + (primary ? ' camera' : ''), type: 'button', disabled: primary, onclick: () => void edit([{ op: 'set_look', entityId: e.id, referenceId: r.id }]) }, primary ? '★ Primary look' : 'Make primary')));
+      h('button', { class: 'btn sm' + (primary ? ' camera' : ''), type: 'button', disabled: primary, onclick: () => void edit([{ op: 'set_look', entityId: e.id, referenceId: r.id }]) }, primary ? '★ Primary image' : 'Make primary')));
 }
 let checkpoints: string[] | null = null, checkpointError = '';
 async function loadCheckpoints() {
@@ -1160,18 +990,19 @@ function castBlock(s: Shot) {
     return h('div', { class: 'cast-row' + (r.inCast ? ' in' : '') + (open ? ' open' : '') + (c ? ' colored' : ''), 'data-cast': id, style: c ? `--c:${c}` : '',
       onmouseenter: () => { scene.setHover(id); highlightPrompt(id); }, onmouseleave: () => { scene.setHover(null); highlightPrompt(selected); } },
       h('div', { class: 'cast-head', role: 'button', tabindex: 0, 'aria-expanded': String(open), title: open ? 'Close' : 'Open: Cast Card, images and generation',
-        onclick: () => { if (open) selection.clear(); else { selection.set([id], id); if (scene.view() === 'set') scene.frame([id], 1.2); setTab('object'); } } },
+        onkeydown: (ev: KeyboardEvent) => { if (ev.target === ev.currentTarget && ['Enter', ' '].includes(ev.key)) { ev.preventDefault(); ev.stopPropagation(); (ev.currentTarget as HTMLElement).click(); } },
+        onclick: () => { if (selected === id) selection.clear(); else { selection.set([id], id); if (scene.view() === 'set') scene.pivotOn(id); openObject(); } } },
         box,
         look ? h('img', { class: 'cast-thumb', src: refUrl(look), alt: '' }) : h('span', { class: 'cast-ph' }, shapeIcon(r.entity.shape)),
         h('div', { class: 'cast-main' },
           h('span', { class: 'cast-name' }, r.entity.name),
           h('span', { class: 'cast-why' }, why, looks.length ? ` · ${looks.length} image${looks.length === 1 ? '' : 's'}` : '', card.sharedFrom ? ` · shares ${entity(card.sharedFrom)?.name}` : ''),
-          !open && r.inCast && card.description ? h('span', { class: 'cast-desc' }, card.description) : null),
+          r.inCast && card.description ? h('span', { class: 'cast-desc', hidden: open }, card.description) : null),
         h('span', { class: 'cast-chev', 'aria-hidden': 'true' }, '›')),
-      open ? h('div', { class: 'cast-slot', 'data-cast-slot': id }) : null);
+      h('div', { class: 'cast-slot', 'data-cast-slot': id }));
   };
   return h('div', { class: 'block' },
-    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `In this shot · ${featured.length}`), h('button', { class: 'btn ghost sm', type: 'button', title: 'Every cast member’s look and the project style in one board', onclick: () => openLooks() }, 'Looks board')),
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `In this shot · ${featured.length}`), h('button', { class: 'btn ghost sm', type: 'button', hidden: !rows.length, title: 'Every cast member’s image and the project style in one board', onclick: () => openLooks() }, 'Cast images')),
     ...featured.map(row),
     pieces.length ? h('details', { class: 'cast-out', open: pieces.some(r => r.entity.id === selected) }, h('summary', {}, `${pieces.length} set piece${pieces.length === 1 ? '' : 's'} in frame · no Cast Card`), ...pieces.map(row)) : null,
     out.length ? h('details', { class: 'cast-out', open: out.some(r => r.entity.id === selected) }, h('summary', {}, `${out.length} not in this shot`), ...out.map(row)) : null);
@@ -1189,7 +1020,7 @@ function renderObjectPane() {
   if (objectPane.contains(document.activeElement) && objectPane.dataset.id === (selected || '')) return;
   objectPane.dataset.id = selected || '';
   const e = entity(selected);
-  if (!e) { objectPane.replaceChildren(h('div', { class: 'empty-state', style: 'margin:8px' }, 'Select an object to design its look. ', h('button', { class: 'btn sm', type: 'button', onclick: () => openLooks() }, 'Open cast looks board'))); return; }
+  if (!e) { objectPane.replaceChildren(h('div', { class: 'empty-state', style: 'margin:8px' }, 'Select an object to design its image. ', h('button', { class: 'btn sm', type: 'button', onclick: () => openLooks() }, 'Open cast images'))); return; }
   if (selection.ids.length > 1) { objectPane.replaceChildren(h('div', { class: 'group-bar' }, h('span', {}, `${selection.ids.length} objects selected`), h('button', { class: 'btn sm', type: 'button', onclick: () => void groupSelection() }, 'Group', h('kbd', {}, '⌘G'))), inspector, h('p', { class: 'note' }, 'Select one object to design or generate its image.')); return; }
   if (e.shape === 'group') { const n = withDescendants(project.scene.entities, [e.id]).length - 1; objectPane.replaceChildren(h('div', { class: 'group-bar' }, h('span', {}, `Group · ${n} object${n === 1 ? '' : 's'} inside`), h('button', { class: 'btn sm ghost', type: 'button', onclick: () => void ungroupSelection() }, 'Ungroup', h('kbd', {}, '⇧⌘G'))), inspector, h('p', { class: 'note' }, 'Move, rotate or resize the group and everything inside follows. Click an object inside it in the viewport to edit just that part.')); return; }
   const looks = objectLooks(project, e.id), primary = looks[0];
@@ -1238,38 +1069,38 @@ function renderObjectPane() {
   };
   const jobs = refgen.jobs.filter(j => j.entityId === e.id);
   const quoted = jobs.find(j => j.status === 'quoted');
-  const upload = h('label', { class: 'ob-add', title: `Upload looks for ${e.name}` }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => void uploadRefs(Array.from((ev.target as HTMLInputElement).files || []), e.id, false) }), '＋', h('small', {}, 'Upload'));
-  dropTarget(upload, files => uploadRefs(files, e.id, false));
+  const upload = h('label', { class: 'ob-add', title: `Upload images for ${e.name}` }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => void uploadRefs(Array.from((ev.target as HTMLInputElement).files || []), e.id) }), '＋', h('small', {}, 'Upload'));
+  dropTarget(upload, files => uploadRefs(files, e.id));
   const hero = h('div', { class: 'ob-hero' + (primary ? '' : ' empty') },
-    primary ? h('img', { src: refUrl(primary), alt: `${e.name} look`, title: primary.generated ? `${primary.generated.model} · seed ${primary.generated.seed}\n${primary.generated.prompt}` : primary.name }) : h('div', { class: 'ob-ph' }, shapeIcon(e.shape), h('span', {}, 'No look yet — generate one below or drop an image here')),
+    primary ? h('img', { src: refUrl(primary), alt: `${e.name} image`, title: primary.generated ? `${primary.generated.model} · seed ${primary.generated.seed}\n${primary.generated.prompt}` : primary.name }) : h('div', { class: 'ob-ph' }, shapeIcon(e.shape), h('span', {}, 'No image yet — generate one below or drop an image here')),
     primary ? h('span', { class: 'ob-badge' }, '★ Primary · ', primary.generated ? primary.generated.model.split(' (')[0] : 'uploaded') : null);
-  dropTarget(hero, files => uploadRefs(files, e.id, false));
-  const strip = h('div', { class: 'ob-strip' }, ...looks.map(r => h('div', { class: 'ob-thumb' + (r.id === e.look ? ' on' : ''), title: r.id === e.look ? 'Primary look' : 'Make primary' },
+  dropTarget(hero, files => uploadRefs(files, e.id));
+  const strip = h('div', { class: 'ob-strip' }, ...looks.map(r => h('div', { class: 'ob-thumb' + (r.id === e.look ? ' on' : ''), title: r.id === e.look ? 'Primary image' : 'Make primary' },
     h('button', { type: 'button', class: 'ob-thumb-img', 'aria-label': r.id === e.look ? `${r.name} (primary)` : `Make ${r.name} primary`, onclick: () => void edit([{ op: 'set_look', entityId: e.id, referenceId: r.id }]) }, h('img', { src: refUrl(r), alt: '', loading: 'lazy' })),
-    h('button', { type: 'button', class: 'ob-x', 'aria-label': `Remove look ${r.name}`, title: 'Remove look (file is kept)', onclick: () => void edit([{ op: 'remove_reference', referenceId: r.id }]) }, '✕'))), upload);
+    h('button', { type: 'button', class: 'ob-x', 'aria-label': `Remove image ${r.name}`, title: 'Remove image (file is kept)', onclick: () => void edit([{ op: 'remove_reference', referenceId: r.id }]) }, '✕'))), upload);
   // Share another object's look and description (e.g. every police car uses Police 1).
   const others = project.scene.entities.filter(x => x.id !== e.id && lookSource(project, x.id)?.id !== e.id).sort((a, b) => (b.kind === e.kind ? 1 : 0) - (a.kind === e.kind ? 1 : 0) || a.name.localeCompare(b.name));
-  const shareSel = h('select', { class: 'field', 'aria-label': 'Look' }, h('option', { value: '' }, 'Its own look'), ...others.map(x => h('option', { value: x.id, selected: e.lookFrom === x.id }, `Same as ${x.name}${objectLooks(project, x.id).length ? '' : ' (no look yet)'}`)));
-  shareSel.onchange = () => { const before = e.lookFrom || null, after = shareSel.value || null; void runEntry({ label: after ? 'Share look' : 'Own look', redo: [{ op: 'update_entity', id: e.id, patch: { lookFrom: after } }], undo: [{ op: 'update_entity', id: e.id, patch: { lookFrom: before } }] }).then(rerender); };
+  const shareSel = h('select', { class: 'field', 'aria-label': 'Image' }, h('option', { value: '' }, 'Its own image'), ...others.map(x => h('option', { value: x.id, selected: e.lookFrom === x.id }, `Same as ${x.name}${objectLooks(project, x.id).length ? '' : ' (no image yet)'}`)));
+  shareSel.onchange = () => { const before = e.lookFrom || null, after = shareSel.value || null; void runEntry({ label: after ? 'Share image' : 'Own image', redo: [{ op: 'update_entity', id: e.id, patch: { lookFrom: after } }], undo: [{ op: 'update_entity', id: e.id, patch: { lookFrom: before } }] }).then(rerender); };
   const sameKind = project.scene.entities.filter(x => x.id !== e.id && x.kind === e.kind && x.shape === e.shape && !x.lookFrom && !objectLooks(project, x.id).length && (x.lookFrom !== e.id));
-  const shareAll = !shared && looks.length && sameKind.length ? h('button', { class: 'btn sm', type: 'button', title: sameKind.map(x => x.name).join(', '), onclick: () => void runEntry({ label: 'Share look', redo: sameKind.map(x => ({ op: 'update_entity', id: x.id, patch: { lookFrom: e.id } })), undo: sameKind.map(x => ({ op: 'update_entity', id: x.id, patch: { lookFrom: null } })) }).then(() => toast(`${sameKind.length} object${sameKind.length === 1 ? '' : 's'} now use ${e.name}’s look`)) }, `Use for ${sameKind.length} similar ${e.shape}${sameKind.length === 1 ? '' : 's'} without a look`) : null;
+  const shareAll = !shared && looks.length && sameKind.length ? h('button', { class: 'btn sm', type: 'button', title: sameKind.map(x => x.name).join(', '), onclick: () => void runEntry({ label: 'Share image', redo: sameKind.map(x => ({ op: 'update_entity', id: x.id, patch: { lookFrom: e.id } })), undo: sameKind.map(x => ({ op: 'update_entity', id: x.id, patch: { lookFrom: null } })) }).then(() => toast(`${sameKind.length} object${sameKind.length === 1 ? '' : 's'} now use ${e.name}’s image`)) }, `Use for ${sameKind.length} similar ${e.shape}${sameKind.length === 1 ? '' : 's'} without an image`) : null;
   const usedBy = project.scene.entities.filter(x => x.lookFrom === e.id);
   objectPane.replaceChildren(...([
     inspector,
     h('div', { class: 'block object-visual' },
-      h('div', { class: 'block-head' }, h('strong', { style: 'flex:1' }, 'Visual reference'), h('button', { class: 'btn primary sm', type: 'button', onclick: () => { if (shared) { select(shared.id); return; } const form = objectPane.querySelector<HTMLDetailsElement>('.object-generate'); if (form) { form.open = true; form.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); form.querySelector<HTMLTextAreaElement>('textarea')?.focus({ preventScroll: true }); } } }, shared ? 'Edit shared image…' : 'Generate image…')),
+      h('div', { class: 'block-head' }, h('strong', { style: 'flex:1' }, 'Image'), h('button', { class: 'btn primary sm', type: 'button', onclick: () => { if (shared) { select(shared.id); return; } const form = objectPane.querySelector<HTMLDetailsElement>('.object-generate'); if (form) { form.open = true; form.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); form.querySelector<HTMLTextAreaElement>('textarea')?.focus({ preventScroll: true }); } } }, shared ? 'Edit shared image…' : 'Generate image…')),
       h('div', { class: 'ob-shots' }, ...(inShots.length ? [h('span', { class: 'muted' }, 'In shot'), ...inShots.map(x => h('button', { type: 'button', class: 'chip', title: x.s.title, onclick: () => selectShot(x.s.id) }, String(x.i + 1).padStart(2, '0')))] : [h('span', { class: 'muted' }, 'No shot camera sees this object yet.')])),
       hero, shared ? null : strip,
-      h('details', { class: 'object-reference-options' }, h('summary', {}, 'Reference sharing & project images'), h('label', { class: 'ob-share' }, h('span', { class: 'muted' }, 'Look'), shareSel), shared ? null : linkPicker(e), shareAll),
-      shared ? h('p', { class: 'note', style: 'margin:0' }, `Uses ${shared.name}’s looks and description. Change them on `, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => select(shared.id) }, shared.name), '.') : null,
+      h('details', { class: 'object-reference-options' }, h('summary', {}, 'Share an image from another object'), h('label', { class: 'ob-share' }, h('span', { class: 'muted' }, 'Image'), shareSel), shared ? null : linkPicker(e), shareAll),
+      shared ? h('p', { class: 'note', style: 'margin:0' }, `Uses ${shared.name}’s images and description. Change them on `, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => select(shared.id) }, shared.name), '.') : null,
       usedBy.length ? h('p', { class: 'note', style: 'margin:0' }, `Shared with ${usedBy.map(x => x.name).join(', ')}.`) : null,
-      h('p', { class: 'note', style: 'margin:0' }, 'Associated with ', h('strong', {}, e.name), '. The primary image is offered as a reference when this object is in a shot; workflow limits still apply.')),
+      h('p', { class: 'note', style: 'margin:0' }, 'Sent with every shot that includes ', h('strong', {}, e.name), '; each video model takes a limited number of images.')),
     h('div', { class: 'block cast-card' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Appearance')),
       h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s Cast Card: ${shared.notes || '—'}`) : null, notes),
       h('label', { class: 'cc-field' }, h('span', {}, 'Style notes'), styleNotes),
       h('div', { class: 'ob-style' }, h('span', { class: 'muted' }, 'Project style: '), styleText ? h('span', {}, styleText) : h('span', { class: 'muted' }, 'not set'), h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openLooks() }, styleText ? 'Edit' : 'Set style')),
-      h('p', { class: 'note', style: 'margin:0' }, 'Description and style go into this object’s looks and into every shot it appears in. Its primary look is sent with those shots’ videos.')),
+      h('p', { class: 'note', style: 'margin:0' }, 'Description and style go into this object’s images and every shot it appears in. Its primary image is sent with those shots’ videos.')),
     shared ? null : sheetSection(e), // [designsheet]
     shared ? null : h('details', { class: 'block object-generate', open: form.open, ontoggle: (ev: Event) => { form.open = (ev.currentTarget as HTMLDetailsElement).open; } },
       h('summary', {}, 'Generate an image for ', e.name),
@@ -1314,7 +1145,7 @@ function quoteCard(job: any) {
     } catch (err) { status.className = 'status-line err'; status.textContent = (err as Error).message; sync(); }
   };
   return h('div', { class: 'prompt-box', style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
-    h('div', { class: 'facts' }, 'Model', h('b', {}, job.model), 'Backend', h('b', {}, job.backend.kind === 'cloud' ? 'Comfy Cloud' : job.backend.url), 'Images', h('b', {}, `${job.count} · ${job.aspect} · seed ${job.seed}`), 'Cost', h('b', { style: `color:${free ? 'var(--ok)' : 'var(--warn)'}` }, job.quote.label), 'Quote', h('b', {}, job.fingerprint.slice(0, 12))),
+    h('div', { class: 'facts' }, 'Model', h('b', {}, job.model), 'Runs on', h('b', {}, job.backend.kind === 'cloud' ? 'Comfy Cloud' : job.backend.url), 'Images', h('b', {}, `${job.count} · ${job.aspect} · seed ${job.seed}`), 'Estimated cost', h('b', { style: `color:${free ? 'var(--ok)' : 'var(--warn)'}` }, job.quote.label), 'Quote', h('b', {}, job.fingerprint.slice(0, 12))),
     h('label', { style: 'display:flex;gap:8px;align-items:center' }, approve, 'I approve this exact request'),
     free ? null : h('label', { style: 'display:flex;gap:8px;align-items:center' }, unknown, 'I accept the Cloud total is unknown, up to', max, 'USD'),
     h('div', { style: 'display:flex;gap:8px;align-items:center' }, go, blocked ? h('span', { class: 'note' }, 'Paid generation is off on this server (PREVIS_ALLOW_PAID≠1). Nothing will be sent.') : null),
@@ -1324,7 +1155,8 @@ function jobRow(job: any) {
   const color = job.status === 'completed' ? 'var(--ok)' : job.status === 'failed' || job.status === 'uncertain' || job.status === 'invalidated' ? 'var(--bad)' : 'var(--warn)';
   return h('div', { style: 'display:flex;flex-direction:column;gap:2px;font-size:12px;border-top:1px solid var(--line);padding-top:6px' },
     h('div', { style: 'display:flex;gap:8px' }, h('b', { style: `color:${color};font-weight:600` }, job.status), h('span', { class: 'muted', style: 'flex:1' }, `${job.model.split(' (')[0]} · ${job.count} img`), job.status === 'submitted' ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => void trackJob(job.id) }, 'Check') : null),
-    h('span', { class: 'note' }, job.message));
+    h('span', { class: 'note' }, job.message),
+    ['uploading', 'submitting', 'submitted', 'uncertain'].includes(job.status) ? progressSlot(projectId, 'refgen', job.id, job.entityName || 'Image', 'requests') : null); // [live-progress]
 }
 async function trackJob(id: string) {
   try { await api('director/refgen/track', { projectId, requestId: id }); } catch (e) { toast((e as Error).message, true); }
@@ -1346,23 +1178,29 @@ function pollJobs() {
 function selectShot(id: string) { shotId = id; playhead = 0; playing = false; apply(project); }
 function select(id: string | null) { if (id) selection.set([id], id); else selection.clear(); }
 // One panel: the shot, its cast, and the selected object opened in place inside its cast row.
-function setTab(t: 'direct' | 'shot' | 'object') {
-  tab = t; shotTab.classList.add('on');
-  directPane.hidden = true; shotPane.hidden = false;
-  if (t === 'object') { if (collapsed.side) setCollapsed('side', false); renderObjectPane(); void loadRefgen(); placeObjectPane(true); }
+function openObject() {
+  if (collapsed.side) setCollapsed('side', false);
+  placeObjectPane(true);
 }
 const colorOf = (id: string | null) => (id ? objectColors(project, shot()).get(id) ?? null : null);
 /** Put the selected object's editor inside its cast row (or at the top when it isn't in the cast). */
 function placeObjectPane(scroll = false) {
+  for (const row of Array.from(shotPane.querySelectorAll<HTMLElement>('[data-cast]'))) {
+    const open = row.dataset.cast === selected; row.classList.toggle('open', open);
+    row.querySelector('.cast-head')?.setAttribute('aria-expanded', String(open));
+    const desc = row.querySelector<HTMLElement>('.cast-desc'); if (desc) desc.hidden = open;
+  }
+  if (mobile?.active()) { mobile.placeObject(objectPane, selected); return; }
   if (!selected) { objectPane.remove(); highlightPrompt(null); return; }
   objectPane.hidden = false;
   const slot = shotPane.querySelector(`[data-cast-slot="${selected}"]`);
   if (slot) { if (objectPane.parentElement !== slot) slot.append(objectPane); }
   else { objectPane.classList.add('loose'); const castBody = shotPane.querySelector('[data-sec="cast"] .sec-body'); if (castBody) { if (castBody.firstElementChild !== objectPane) castBody.prepend(objectPane); } else shotPane.prepend(objectPane); }
-  if (tab === 'object') openSection('cast');
+  openSection('cast');
+  const group = slot?.closest('details'); if (group) group.open = true;
   if (slot) objectPane.classList.remove('loose');
   highlightPrompt(selected);
-  if (scroll) requestAnimationFrame(() => (slot?.closest('.cast-row') || objectPane).scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+  if (scroll) requestAnimationFrame(() => (slot?.closest('.cast-row') || objectPane).scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }));
 }
 /** Light up an object's words in the prompt (and its chip); everything else steps back. */
 function highlightPrompt(id: string | null) {
@@ -1377,7 +1215,7 @@ function setView(v: 'set' | 'camera') {
 async function addShot() {
   const s = shot();
   const r = await edit([{ op: 'add_shot', index: project.shots.indexOf(s) + 1, shot: { duration: s.duration, camera: { ...s.camera, keys: s.camera.move === 'custom' ? s.camera.keys : null } } }]);
-  selectShot(r.results[0].id); setTab('shot');
+  selectShot(r.results[0].id);
 }
 async function addObject(shape: string) {
   addMenu.hidden = true; addPopup.hidden = true;
@@ -1386,43 +1224,18 @@ async function addObject(shape: string) {
   const ok = await runEntry({ label: `Add ${shape}`, redo: [{ op: 'add_entity', entity: { id, name: shape[0].toUpperCase() + shape.slice(1), shape, position: [snap(t[0], 0.1), 0, snap(t[2], 0.1)] } }], undo: [{ op: 'remove_entity', id }] });
   if (ok) selection.set([id], id);
 }
-function workflowUrl(previsShotId: string, assetId: string, prompt: string) {
-  return `/generation.html?shot=${previsShotId}&asset=${assetId}&prompt=${encodeURIComponent(prompt)}`;
-}
-
-async function uploadRefs(files: File[], entityId: string | null, toComposer: boolean) {
+async function uploadRefs(files: File[], entityId: string | null) {
   const images = files.filter(f => /^image\/(png|jpeg|webp)$/.test(f.type));
   if (!images.length) { toast('Drop PNG, JPEG or WebP images', true); return; }
   for (const f of images) {
     if (f.size > 10 * 1024 * 1024) { toast(`${f.name} is over 10 MB`, true); continue; }
     try {
-      const r = await api('director/reference', { projectId, shotId, name: f.name, data: await readFileBase64(f), entityId, ...(entityId && !toComposer ? { scope: 'object' } : {}) });
+      const r = await api('director/reference', { projectId, shotId, name: f.name, data: await readFileBase64(f), entityId, ...(entityId ? { scope: 'object' } : {}) });
       apply(r.project);
-      if (toComposer) pendingAtts.push(r.referenceId);
       if (entityId) toast(`${f.name} added as a look for ${entity(entityId)?.name}`);
     } catch (e) { toast((e as Error).message, true); }
   }
-  renderAtts();
 }
-function renderAtts() {
-  const refs = shot().references;
-  pendingAtts = pendingAtts.filter(id => refs.some(r => r.id === id));
-  attsRow.replaceChildren(...pendingAtts.map(id => { const r = refs.find(x => x.id === id)!; return h('figure', {}, h('img', { src: refUrl(r), alt: r.name, title: r.name }), h('button', { type: 'button', 'aria-label': `Detach ${r.name}`, onclick: () => { pendingAtts = pendingAtts.filter(x => x !== id); renderAtts(); } }, '×')); }));
-  attsRow.hidden = !pendingAtts.length;
-}
-
-async function send() {
-  const text = textarea.value.trim();
-  if (!text && !pendingAtts.length) return;
-  sendBtn.disabled = true;
-  try {
-    const r = await api('director/message', { projectId, shotId, text, attachments: pendingAtts, mode });
-    textarea.value = ''; pendingAtts = []; renderAtts(); suggest.hidden = true;
-    apply(r.project);
-  } catch (e) { toast((e as Error).message, true); }
-  finally { sendBtn.disabled = false; textarea.focus(); }
-}
-
 function dropTarget(el: HTMLElement, onFiles: (files: File[]) => void, onState?: (on: boolean) => void) {
   let depth = 0;
   el.addEventListener('dragenter', ev => { if (!ev.dataTransfer?.types.includes('Files')) return; ev.preventDefault(); depth++; el.classList.add('drag'); onState?.(true); });
@@ -1431,52 +1244,10 @@ function dropTarget(el: HTMLElement, onFiles: (files: File[]) => void, onState?:
   el.addEventListener('drop', ev => { ev.preventDefault(); depth = 0; el.classList.remove('drag'); onState?.(false); onFiles(Array.from(ev.dataTransfer?.files || [])); });
 }
 
-// ---------- @mentions ----------
-let suggestIndex = 0;
-function mentionQuery() {
-  const before = textarea.value.slice(0, textarea.selectionStart);
-  return before.match(/@([a-z0-9-]*)$/i)?.[1] ?? null;
-}
-function updateSuggest() {
-  const q = mentionQuery();
-  if (q === null) { suggest.hidden = true; return; }
-  const list = project.scene.entities.filter(e => handleOf(e.name).includes(q.toLowerCase()) || e.name.toLowerCase().includes(q.toLowerCase())).slice(0, 7);
-  if (!list.length) { suggest.hidden = true; return; }
-  suggestIndex = Math.min(suggestIndex, list.length - 1);
-  suggest.replaceChildren(...list.map((e, i) => h('button', { type: 'button', class: i === suggestIndex ? 'on' : '', onmousedown: (ev: Event) => { ev.preventDefault(); insertMention(e); } }, h('span', { class: 'sw', style: `width:9px;height:9px;border-radius:3px;background:${e.color}` }), e.name, h('span', { class: 'k' }, e.kind))));
-  suggest.hidden = false;
-  (suggest as any)._list = list;
-}
-function insertMention(e: Entity) {
-  const q = mentionQuery(); if (q === null) return;
-  const start = textarea.selectionStart - q.length - 1;
-  textarea.setRangeText('@' + handleOf(e.name) + ' ', start, textarea.selectionStart, 'end');
-  suggest.hidden = true; textarea.focus();
-}
-textarea.addEventListener('input', () => { suggestIndex = 0; updateSuggest(); });
-textarea.addEventListener('keydown', ev => {
-  const list: Entity[] = (suggest as any)._list || [];
-  if (!suggest.hidden && list.length) {
-    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); suggestIndex = (suggestIndex + (ev.key === 'ArrowDown' ? 1 : list.length - 1)) % list.length; updateSuggest(); return; }
-    if (ev.key === 'Enter' || ev.key === 'Tab') { ev.preventDefault(); insertMention(list[suggestIndex]); return; }
-    if (ev.key === 'Escape') { suggest.hidden = true; return; }
-  }
-  if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); void send(); }
-});
-textarea.addEventListener('paste', ev => {
-  const files = Array.from(ev.clipboardData?.files || []).filter(f => f.type.startsWith('image/'));
-  if (files.length) { ev.preventDefault(); void uploadRefs(files, null, true); }
-});
-sendBtn.onclick = () => void send();
-routeSel.onchange = () => { mode = routeSel.value as typeof mode; renderRoute(); };
-fileInput.onchange = () => { void uploadRefs(Array.from(fileInput.files || []), null, true); fileInput.value = ''; };
-dropTarget(composer, files => uploadRefs(files, null, true));
-dropTarget(thread, files => uploadRefs(files, null, true));
-
 // Drop an image straight onto an object in the viewport to link it.
 viewport.addEventListener('dragover', ev => { if (ev.dataTransfer?.types.includes('Files')) { ev.preventDefault(); dropHint.hidden = false; const id = scene.pick(ev.clientX, ev.clientY); dropHint.textContent = id ? `Add as a look for ${entity(id)?.name}` : 'Drop on an object to link it — or anywhere to add a shot reference'; } });
 viewport.addEventListener('dragleave', ev => { if (!viewport.contains(ev.relatedTarget as Node)) dropHint.hidden = true; });
-viewport.addEventListener('drop', ev => { ev.preventDefault(); dropHint.hidden = true; const id = scene.pick(ev.clientX, ev.clientY); void uploadRefs(Array.from(ev.dataTransfer?.files || []), id, false).then(() => { if (id) select(id); }); });
+viewport.addEventListener('drop', ev => { ev.preventDefault(); dropHint.hidden = true; const id = scene.pick(ev.clientX, ev.clientY); void uploadRefs(Array.from(ev.dataTransfer?.files || []), id).then(() => { if (id) select(id); }); });
 
 // ---------- Playback ----------
 function togglePlay(force?: boolean) {
@@ -1500,7 +1271,6 @@ scrub.oninput = () => { playhead = Number(scrub.value); playing = false; scene.s
 monitor.onclick = () => setView('camera');
 monitor.onkeydown = ev => { if (ev.key === 'Enter') setView('camera'); };
 titleInput.onchange = () => void edit([{ op: 'set_project', patch: { title: titleInput.value } }]);
-directTab.onkeydown = shotTab.onkeydown = null;
 
 // ---------- Keyframes ----------
 const KEY_EPS = 0.005;
@@ -1531,9 +1301,15 @@ function jumpKey(dir: 1 | -1) {
 }
 function renderKeyTrack() {
   const s = shot(), start = s.start || 0, times = selectionKeyTimes();
+  const sig = JSON.stringify([s.id, start, s.duration, selection.ids, times]);
+  if (keyTrack.dataset.sig === sig) {
+    keyTrack.querySelectorAll<HTMLElement>('[data-time]').forEach(el => el.classList.toggle('on', Math.abs(start + playhead - Number(el.dataset.time)) <= KEY_EPS));
+    return;
+  }
+  keyTrack.dataset.sig = sig;
   keyTrack.replaceChildren(...times.filter(t => t >= start - KEY_EPS && t <= start + s.duration + KEY_EPS).map(t => {
     const on = Math.abs(start + playhead - t) <= KEY_EPS;
-    return h('button', { class: 'kf' + (on ? ' on' : ''), type: 'button', title: `Keyframe @ ${t.toFixed(2)}s (scene) · click to jump`, style: `left:calc(8px + (100% - 16px) * ${s.duration ? (t - start) / s.duration : 0})`, onclick: () => { playing = false; playhead = Math.max(0, Math.min(s.duration, t - start)); scene.setPlayhead(playhead); renderTransport(); renderInspector(); } });
+    return h('button', { class: 'kf' + (on ? ' on' : ''), 'data-time': t, type: 'button', title: `Keyframe @ ${t.toFixed(2)}s (scene) · click to jump`, style: `left:calc(8px + (100% - 16px) * ${s.duration ? (t - start) / s.duration : 0})`, onclick: () => { playing = false; playhead = Math.max(0, Math.min(s.duration, t - start)); scene.setPlayhead(playhead); renderTransport(); renderInspector(); } });
   }));
 }
 
@@ -1583,6 +1359,16 @@ let inspectorCollapsed = localStorage.getItem('previs.inspectorCollapsed') !== '
 function setSnap(on: boolean) { snapPref = on; localStorage.setItem('previs.snap', on ? '1' : '0'); scene.setSnap(on); snapBtn.setAttribute('aria-pressed', String(on)); snapBtn.classList.toggle('on', on); renderHelp(); }
 snapBtn.onclick = () => setSnap(!snapPref);
 let gridVisible = localStorage.getItem('previs.grid.v2') === '1'; // hidden by default
+/** Subjects to frame on open: characters/vehicles, minus stragglers far from the rest (a bird high overhead). */
+function openingSubjects(entities: typeof project.scene.entities) {
+  const subs = entities.filter(e => e.kind !== 'environment' && e.shape !== 'group' && e.shape !== 'terrain');
+  if (subs.length < 3) return subs.map(e => e.id);
+  const med = (v: number[]) => { const a = [...v].sort((x, y) => x - y); return a[a.length >> 1]; };
+  const c = [0, 1, 2].map(i => med(subs.map(e => e.position[i])));
+  const d = subs.map(e => Math.hypot(e.position[0] - c[0], e.position[1] - c[1], e.position[2] - c[2]));
+  const lim = Math.max(3 * med(d), 6);
+  return subs.filter((_, i) => d[i] <= lim).map(e => e.id);
+}
 function frameSelected() { scene.frame(selection.ids); }
 async function duplicateSelection() {
   const src = selection.ids.map(id => entity(id)).filter(Boolean) as Entity[];
@@ -1594,6 +1380,11 @@ async function duplicateSelection() {
 }
 const deleteDialog = h('dialog', { class: 'confirm', 'aria-labelledby': 'del-title' });
 document.body.append(deleteDialog);
+function requestDeleteShot(s: Shot) {
+  const cancel = h('button', { class: 'btn', type: 'button', onclick: () => deleteDialog.close() }, 'Cancel');
+  deleteDialog.replaceChildren(h('div', { class: 'dialog-body' }, h('h2', { id: 'del-title' }, `Delete “${s.title}”?`), h('p', {}, 'The shot is removed from the cut. Its saved images stay on disk.'), h('div', { class: 'bar' }, cancel, h('button', { class: 'btn primary', type: 'button', onclick: () => { deleteDialog.close(); void edit([{ op: 'remove_shot', id: s.id }]); } }, 'Delete'))));
+  deleteDialog.showModal(); cancel.focus();
+}
 function requestDelete() {
   const list = withDescendants(project.scene.entities, selection.ids).map(id => entity(id)).filter(Boolean) as Entity[];
   if (!list.length) return;
@@ -1624,13 +1415,18 @@ const HELP: [string, [string, string][]][] = [
   ['Animate', [['Insert keyframe', 'I'], ['Delete keyframe at playhead', 'Alt + I'], ['Previous / next keyframe', '‹◆ / ◆› on the timeline'], ['Move an animated object', 'Keys it at the playhead']]],
   ['Edit', [['Add object', 'Right-click or Shift + A'], ['Duplicate in place', 'Shift + D or Ctrl/Cmd + D'], ['Delete', 'X, Delete or Backspace (asks first)'], ['Group / Ungroup', 'Ctrl/Cmd + G / Shift + Ctrl/Cmd + G'], ['Undo / Redo', 'Ctrl/Cmd + Z / Shift + Ctrl/Cmd + Z'], ['Play shot', 'Space']]],
 ];
+let helpExplainers: { dispose(): void }[] = [];
 function renderHelp() {
+  helpExplainers.forEach(x => x.dispose()); helpExplainers = [];
   const grid = h('input', { type: 'checkbox', checked: gridVisible }); grid.onchange = () => { gridVisible = grid.checked; localStorage.setItem('previs.grid.v2', gridVisible ? '1' : '0'); scene.setGridVisible(gridVisible); };
   const snapBox = h('input', { type: 'checkbox', checked: snapPref }); snapBox.onchange = () => setSnap(snapBox.checked);
+  const labelMode = h('select', { 'aria-label': 'Object labels' }, ...['auto', 'all', 'none'].map(value => h('option', { value, selected: value === (localStorage.getItem('previs.labels') || 'auto') }, value === 'auto' ? 'Automatic' : value === 'all' ? 'All' : 'None')));
+  labelMode.onchange = () => { localStorage.setItem('previs.labels', labelMode.value); scene.setLabelMode(labelMode.value as 'auto' | 'all' | 'none'); };
   helpCard.replaceChildren(
     h('div', { class: 'help-head' }, h('strong', {}, 'Controls'), h('span', { class: 'muted' }, 'Viewport and shortcuts'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => { helpCard.hidden = true; } }, '✕')),
-    h('div', { class: 'help-cols' }, ...HELP.map(([title, rows]) => h('section', {}, h('strong', {}, title), ...rows.map(([a, b]) => h('div', { class: 'help-row' }, h('span', {}, a), h('kbd', {}, b)))))),
-    h('section', { class: 'help-settings' }, h('strong', {}, 'Viewport'), h('label', {}, h('span', {}, 'Show grid'), grid), h('label', {}, h('span', {}, 'Snap movement to grid'), snapBox), h('div', { class: 'help-row' }, h('span', {}, 'Grid step'), h('kbd', {}, `${scene.gridStep()} m`))));
+    h('div', { class: 'help-cols' }, ...HELP.map(([title, rows]) => h('section', { 'data-explain': title === 'Edit' ? 'groups' : title.toLowerCase() }, h('strong', {}, title), h('div', { class: 'help-explain' }), ...rows.map(([a, b]) => h('div', { class: 'help-row' }, h('span', {}, a), h('kbd', {}, b)))))),
+    h('section', { class: 'help-settings' }, h('strong', {}, 'Viewport'), h('label', {}, 'Object labels', labelMode), h('label', {}, h('span', {}, 'Show grid'), grid), h('label', {}, h('span', {}, 'Snap movement to grid'), snapBox), h('div', { class: 'help-row' }, h('span', {}, 'Grid step'), h('kbd', {}, `${scene.gridStep()} m`))));
+  helpCard.querySelectorAll<HTMLElement>('section[data-explain]').forEach(section => helpExplainers.push(mountExplainer(section.querySelector<HTMLElement>('.help-explain')!, section.dataset.explain!)));
 }
 // [director-phone] pair a phone and preview its aim in the shot camera (live only, not recorded). Lives in the Fly menu; its live chip sits in the transport.
 installPhoneDemo(flyPhoneSlot, scene, () => setView('camera'));
@@ -1660,6 +1456,7 @@ function renderFlyMenu() {
       h('span', {}, k === 'keyboard' ? 'W A S D to fly · Q E turn · R records' : k === 'gamepad' ? (fly.state().pad ? 'Connected · A arms and records' : 'Connect a controller and press any button') : (phoneConnected() ? 'Paired · aim along the shot’s path' : 'Pair by scanning a QR code')))),
     h('div', { class: 'menu-sep' }),
     flyPhoneSlot,
+    h('details', {}, h('summary', {}, 'Device controls'), d === 'keyboard' ? keyboardDiagram() : d === 'gamepad' ? gamepadDiagram() : phoneDiagram()),
     h('button', { type: 'button', class: 'menu-link', onclick: () => { flyMenu.hidden = true; goSection('camera'); requestAnimationFrame(() => document.querySelector('.op-panel')?.scrollIntoView({ block: 'center' })); } }, 'Fly settings, passes and takes →'));
 }
 flyBtn.onclick = () => {
@@ -1671,8 +1468,11 @@ flyBtn.onclick = () => {
   fly.start(d); renderFly();
   toast(fly.state().help);
 };
-flyDevice.onclick = () => { renderFlyMenu(); flyMenu.hidden = !flyMenu.hidden; };
+flyDevice.onclick = () => { renderFlyMenu(); menuState(flyMenu, flyMenu.hidden, flyDevice, true); };
 document.addEventListener('pointerdown', ev => { if (!flyMenu.hidden && !(ev.target as HTMLElement).closest?.('.fly, .fly-menu')) flyMenu.hidden = true; });
+menuKeys(helpMenu, helpMenuBtn); menuKeys(flyMenu, flyDevice);
+menuKeys(addMenu, rail.querySelector<HTMLElement>('.add-obj')!); menuKeys(addPopup, canvas);
+canvas.tabIndex = 0;
 fly.onChange(renderFly);
 window.addEventListener('gamepadconnected', () => renderFly());
 renderFly();
@@ -1688,7 +1488,7 @@ function setMonitor(open: boolean) {
 }
 monToggle.onclick = ev => { ev.stopPropagation(); setMonitor(!monOpen); };
 setMonitor(monOpen);
-setTransformMode('translate'); setSnap(snapPref); scene.setGridVisible(gridVisible); renderUndo();
+setTransformMode('translate'); setSnap(snapPref); scene.setGridVisible(gridVisible); scene.setLabelMode((localStorage.getItem('previs.labels') || 'auto') as 'auto' | 'all' | 'none'); renderUndo();
 
 // Keyboard: scene shortcuts never fire while a field, menu or dialog is using the key.
 window.addEventListener('keydown', ev => { if (ev.key === 'Control') scene.setCtrl(true); });
@@ -1732,35 +1532,8 @@ document.addEventListener('keydown', ev => {
 
 // ---------- Render hand-off ----------
 // Render a shot's camera video at a fixed 24 fps and record it on the shot (the source every workflow receives).
-async function captureShotVideo(s: Shot, o: { width: number; height: number; prompt: string; onFrame?: (url: string, i: number, n: number) => void; onStatus?: (t: string) => void }) {
-  if (shotId !== s.id) selectShot(s.id);
-  const idx = project.shots.indexOf(s), { width, height } = o;
-  const n = Math.min(120, Math.max(2, Math.round(s.duration * 24))), at = (i: number) => i / 24;
-  const motion = Array.from({ length: n }, (_, i) => { const p = scene.pose(at(i)); return { t: i / 24, p: p.p, q: scene.quaternionAt(at(i)), mm: Math.round(p.mm * 1000) / 1000 }; });
-  o.onStatus?.('Saving camera motion…');
-  const main = await api('project');
-  const target = entity(s.camera.target);
-  const sig = signature(project, s);
-  const saved = await api('browser-shot', {
-    revision: main.project.revision, title: `${project.title} · Shot ${idx + 1} · ${s.title}`.slice(0, 160), camera: motion[0], subject: target ? focusPoint(target) : [0, 1, 0], frames: motion,
-    png: scene.capture(at(0), 640, 360).split(',')[1], delivery: { width, height, fps: 24 },
-    director: { projectId: project.id, shotId: s.id, projectRevision: project.revision, sceneName: project.scene.name, shotTitle: s.title, camera: s.camera, entities: project.scene.entities },
-  });
-  const previsShot = saved.project.shots.filter((x: any) => x.browser?.director?.shotId === s.id).at(-1);
-  const { stage } = await api('video/browser/start', { revision: saved.project.revision, shotId: previsShot.id, width, height, fps: 24, frameCount: n });
-  let stageId: string | null = stage.id;
-  try {
-    for (let i = 0; i < n; i++) {
-      const url = scene.capture(at(i), width, height);
-      await api('video/browser/frame', { stageId, index: i, png: url.split(',')[1] });
-      o.onFrame?.(url, i, n);
-    }
-    o.onStatus?.('Encoding…');
-    const { asset } = await api('video/browser/finish', { stageId }); stageId = null;
-    const r = await api('director/render', { projectId, shotId: s.id, previsShotId: previsShot.id, assetId: asset.id, prompt: o.prompt, signature: sig });
-    apply(r.project);
-    return { asset, previsShotId: previsShot.id as string, project: r.project as DirectorProject };
-  } finally { if (stageId) await api('video/browser/abort', { stageId }).catch(() => {}); }
+async function captureShotVideo(s: Shot, o: CaptureOptions) {
+  return captureVideo({ api, scene, project: () => project, entity, signature, select: x => { if (shotId !== x.id) selectShot(x.id); }, apply }, s, o);
 }
 renderBtn.onclick = () => openRender();
 function openRender() {
@@ -1772,7 +1545,7 @@ function openRender() {
   const preview = h('img', { alt: 'Shot camera preview', src: scene.capture(s.duration / 2, 1280, 720, 'image/jpeg', 0.85) });
   const media = h('div', { class: 'render-media' }, preview);
   const facts = h('div', { class: 'facts' });
-  const showFacts = () => facts.replaceChildren('Frames', h('b', {}, `${frames()} @ 24 fps`), 'Duration', h('b', {}, `${(frames() / 24).toFixed(3)}s (shot ${s.duration}s)`), 'Size', h('b', {}, `${width}×${height} · 16:9`), 'Pass', h('b', {}, 'beauty (Three.js blockout)'));
+  const showFacts = () => facts.replaceChildren('Frames', h('b', {}, `${frames()} @ 24 fps`), 'Duration', h('b', {}, `${(frames() / 24).toFixed(3)}s (shot ${s.duration}s)`), 'Size', h('b', {}, `${width}×${height} · 16:9`));
   showFacts();
   const res = h('div', { class: 'radio-row' },
     ...[[1280, 720], [640, 360]].map(([w, hh]) => { const input = h('input', { type: 'radio', name: 'res', checked: w === 1280 }); input.onchange = () => { width = w; height = hh; showFacts(); }; return h('label', {}, input, `${w}×${hh}`); }));
@@ -1780,16 +1553,19 @@ function openRender() {
   const status = h('div', { class: 'status-line' });
   const capture = h('button', { class: 'btn camera', type: 'button' }, `Make blockout`);
   const prompt = h('textarea', { class: 'field', rows: 5, 'aria-label': 'Render prompt' }, shotPrompt(project, s, 'video'));
-  const open = h('a', { class: 'btn ghost sm', target: '_blank', 'aria-disabled': 'true', style: 'pointer-events:none;opacity:.45', title: 'Full workflow page: import graphs, map inputs, compare and review' }, 'Advanced workflow page ↗');
   const step1 = h('div', { class: 'step active' }, h('span', { class: 'n' }, '1'), h('div', {}, h('h3', {}, 'Blockout'), h('p', {}, 'The grey camera clip: every frame through the shot camera at 24 fps, the exact motion the video model follows.'), res, h('div', { style: 'height:8px' }), facts, h('div', { style: 'height:10px' }), capture, h('div', { style: 'height:8px' }), progress, status));
-  const refs = [...project.scene.entities.map(e => objectLooks(project, e.id)[0]).filter(Boolean) as Reference[], ...s.references];
+  const refsByFile = new Map<string, { ref: Reference; names: Set<string> }>();
+  const addRef = (ref: Reference, name?: string) => { const entry = refsByFile.get(ref.file) || { ref, names: new Set<string>() }; if (name) entry.names.add(name); refsByFile.set(ref.file, entry); };
+  for (const e of project.scene.entities) { const ref = objectLooks(project, e.id)[0]; if (ref) addRef(ref, e.name); }
+  for (const ref of s.references) addRef(ref, entity(ref.entityId)?.name);
+  const refs = [...refsByFile.values()];
   const step2 = h('div', { class: 'step' }, h('span', { class: 'n' }, '2'), h('div', {}, h('h3', {}, 'Prompt & images'), h('p', {}, 'Composed from the story, cast and camera. Edit freely.'), prompt,
-    refs.length ? h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:8px' }, ...refs.map(r => h('div', { style: 'display:flex;gap:8px;align-items:center;font-size:12px' }, h('img', { src: refUrl(r), alt: '', style: 'width:34px;height:34px;object-fit:cover;border-radius:6px' }), h('span', { style: 'flex:1' }, r.name), h('span', { class: entity(r.entityId) ? '' : 'muted' }, entity(r.entityId) ? `→ ${entity(r.entityId)!.name} · ${r.role}` : r.role === 'style' ? 'style' : 'not linked')))) : h('p', { class: 'note', style: 'margin-top:8px' }, 'No images for this shot.'),
+    refs.length ? h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:8px' }, ...refs.map(({ ref: r, names }) => h('div', { style: 'display:flex;gap:8px;align-items:center;font-size:12px' }, h('img', { src: refUrl(r), alt: '', style: 'width:34px;height:34px;flex:none;object-fit:cover;border-radius:6px' }), h('div', { style: 'flex:1;min-width:0;overflow-wrap:anywhere' }, h('div', {}, r.name), h('small', { class: 'muted' }, names.size > 1 ? `Shared by ${[...names].join(', ')}` : [...names][0] || (r.role === 'style' ? 'Style' : 'Shot image')))))) : h('p', { class: 'note', style: 'margin-top:8px' }, 'No images for this shot.'),
     h('p', { class: 'note', style: 'margin-top:8px' }, 'Cast images are named in the prompt and sent to models that take images.')));
   const gen = h('div', { class: 'gen-box' }, h('p', { class: 'note', style: 'margin:0' }, 'Make the blockout first.'));
   const step3 = h('div', { class: 'step' }, h('span', { class: 'n' }, '3'), h('div', {}, h('h3', {}, 'Generate the video'), h('p', { style: 'margin:0 0 8px' }, 'Run a Comfy video model on this exact blockout. You see the quote first; nothing runs until you approve it.'), gen));
-  const setOpen = (previsShotId: string, assetId: string) => { open.href = workflowUrl(previsShotId, assetId, prompt.value); open.removeAttribute('aria-disabled'); open.style.cssText = ''; renderGenerate(gen, s, previsShotId, assetId, () => prompt.value); };
-  prompt.oninput = () => { if (s.render && open.href) setOpen(s.render.previsShotId, s.render.assetId); };
+  const setOpen = (previsShotId: string, assetId: string) => { renderGenerate(gen, s, previsShotId, assetId, () => prompt.value); };
+  prompt.oninput = () => { if (s.render && s.render.signature === signature(project, s)) setOpen(s.render.previsShotId, s.render.assetId); };
   const sig = signature(project, s);
   if (s.render && s.render.signature === sig) {
     media.replaceChildren(h('video', { src: `/assets/${s.render.assetId}.mp4`, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
@@ -1817,7 +1593,7 @@ function openRender() {
   const dlg = h('dialog', { class: 'render', id: 'render-dialog', 'aria-labelledby': 'render-title' },
     h('div', { class: 'dialog-head' }, h('h2', { id: 'render-title' }, `Generate video · Shot ${String(idx + 1).padStart(2, '0')} · ${s.title}`), h('span', { class: 'muted', style: 'font-size:12px' }, describeCamera(s, project.scene.entities)), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'render-body' }, media, h('div', { class: 'render-steps' }, step1, step2, step3)),
-    h('div', { class: 'render-foot' }, h('p', { class: 'note' }, 'Nothing is uploaded or charged without a quote you approve.'), open));
+    h('div', { class: 'render-foot' }, h('p', { class: 'note' }, 'Nothing is uploaded or charged without a quote you approve.')));
   document.body.append(dlg); dlg.showModal();
 }
 
@@ -1830,7 +1606,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   const wf = h('select', { class: 'field', 'aria-label': 'Video model' }, ...choices.map(d => h('option', { value: d.id }, d.title)));
   const previous = st.jobs.filter(j => j.shotId === previsShotId && (j.sources?.sourceVideo?.id === assetId || j.sources?.controlVideo?.id === assetId)).at(-1);
   if (previous && choices.some(d => d.id === previous.definition?.id)) wf.value = previous.definition.id;
-  const backendSel = h('select', { class: 'field', 'aria-label': 'Backend' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
+  const backendSel = h('select', { class: 'field', 'aria-label': 'Runs on' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
   const note = h('p', { class: 'note', style: 'margin:0' });
   const showNote = () => { const d = choices.find(c => c.id === wf.value); note.textContent = d?.description || ''; backendSel.value = d?.id?.startsWith('wan-') ? 'local' : 'cloud'; };
   const useRefs = h('input', { type: 'checkbox', checked: localStorage.getItem('previs.seq.refs') !== '0' });
@@ -1869,7 +1645,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   };
   const drawJobs = () => {
     const mine = st.jobs.filter(j => j.shotId === previsShotId || (project.assets || []).some(a => a.kind === 'camera-render' && a.shotId === s.id && a.source.engineShotId === j.shotId)).slice(-4).reverse();
-    jobsBox.replaceChildren(...mine.map(j => h('div', { class: 'gen-job' }, h('b', { class: `st-${j.status}` }, j.status), h('span', {}, `${j.definition?.title?.split(' ·')[0] || 'Workflow'} · ${j.backend?.kind}`), h('small', { class: 'muted' }, j.message || ''))));
+    jobsBox.replaceChildren(...mine.map(j => h('div', { class: 'gen-job' }, h('b', { class: `st-${j.status}` }, j.status), h('span', {}, `${j.definition?.title?.split(' ·')[0] || 'Model'} · ${j.backend?.kind}`), h('small', { class: 'muted' }, j.message || ''))));
   };
   drawJobs();
   box.replaceChildren(h('div', { class: 'grid2' }, h('label', {}, 'Video model', wf), h('label', {}, 'Runs on', backendSel)), note,
@@ -1886,6 +1662,7 @@ function genQuote(job: any, def: any, request: any, s: Shot) {
   const go = h('button', { class: 'btn camera gen-send', type: 'button', disabled: true }, 'Approve & submit once');
   let dispatched = false;
   const status = h('div', { class: 'status-line' });
+  const live = h('div', { class: 'gen-live' }); // [live-progress] separate child; approval controls stay untouched
   const sync = () => { go.disabled = dispatched || !job.validation?.compatible || !approve.checked || (!free && !unknown.checked) || !Number.isFinite(Number(max.value)) || Number(max.value) < 0; };
   approve.onchange = unknown.onchange = sync;
   max.oninput = sync;
@@ -1903,29 +1680,29 @@ function genQuote(job: any, def: any, request: any, s: Shot) {
         setTimeout(poll, 5000);
       };
       setTimeout(poll, 4000);
+      // Display only, after the authoritative status poll is scheduled; it can never affect dispatch or tracking.
+      try { live.replaceChildren(progressSlot(projectId, 'generation', r.job.id, `Shot ${String(project.shots.indexOf(s) + 1).padStart(2, '0')} video`, 'quote')); } catch { /* polling continues */ }
     } catch (e) { status.className = 'status-line err'; status.textContent = `${(e as Error).message} · No retry. Inspect request ${job.id} before preparing anything else.`; }
   };
   return h('div', { class: 'prompt-box', style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
-    h('div', { class: 'facts' }, 'Workflow', h('b', {}, def.title), 'Backend', h('b', {}, request.backend.kind === 'cloud' ? 'Comfy Cloud' : 'Local ComfyUI'),
-      'Ready', h('b', { style: `color:${job.validation?.compatible ? 'var(--ok)' : 'var(--bad)'}` }, job.validation?.compatible ? 'Schema compatible' : 'Missing requirements'),
-      'Cost', h('b', { style: `color:${free ? 'var(--ok)' : 'var(--warn)'}` }, free ? 'No charge (local)' : est ? `≈ $${est.toFixed(3)} estimate; Cloud total unknown` : 'Unknown — needs approval'),
+    h('div', { class: 'facts' }, 'Model', h('b', {}, def.title), 'Runs on', h('b', {}, request.backend.kind === 'cloud' ? 'Comfy Cloud' : 'Local ComfyUI'),
+      'Ready', h('b', { style: `color:${job.validation?.compatible ? 'var(--ok)' : 'var(--bad)'}` }, job.validation?.compatible ? 'Inputs ready' : 'Missing requirements'),
+      'Estimated cost', h('b', { style: `color:${free ? 'var(--ok)' : 'var(--warn)'}` }, free ? 'No charge (local)' : est ? `≈ $${est.toFixed(3)} estimate; Cloud total unknown` : 'Unknown — needs approval'),
       'Quote', h('b', {}, String(job.fingerprint || '').slice(0, 12))),
     h('p', { class: 'note' }, `Exact source: ${job.sources?.sourceVideo?.id || job.sources?.controlVideo?.id || job.sources?.firstFrame?.id || 'see request'} · ${job.sources?.sourceVideo?.frameCount ?? 'image'} frames · ${job.sources?.sourceVideo?.duration ?? '—'} s. Preparation does not upload inputs.`),
     def.pricing?.partnerEstimate ? h('p', { class: 'note' }, `Published partner estimate: $${def.pricing.partnerEstimate.min.toFixed(4)}–$${def.pricing.partnerEstimate.max.toFixed(4)} USD. ${def.pricing.partnerEstimate.note}`) : null,
-    h('details', {}, h('summary', {}, 'Advanced · exact prompt and prepared graph'), h('pre', { style: 'max-height:240px;overflow:auto;white-space:pre-wrap' }, JSON.stringify({ prompt: job.binding?.prompt, sources: job.sources, graph: job.preparedGraph }, null, 2))),
+    h('details', {}, h('summary', {}, 'Details'), h('pre', { style: 'max-height:240px;overflow:auto;white-space:pre-wrap' }, JSON.stringify({ prompt: job.binding?.prompt, sources: job.sources, graph: job.preparedGraph }, null, 2))),
     issues.length ? h('ul', { class: 'note', style: 'margin:0;padding-left:16px' }, ...issues.slice(0, 5).map((i: any) => h('li', {}, i.message))) : null,
     h('label', {}, approve, ' I approve this exact request, with an allowance of ', max, ' USD.'),
-    !free ? h('label', {}, unknown, ' I accept unresolved provider/runtime charges. This allowance is not a provider-enforced spending cap.') : null,
-    h('div', {}, go), status);
+    !free ? h('label', {}, unknown, ' Cloud bills actual usage, which may be unknown. This is my spending allowance for this run, not a provider-enforced spending cap.') : null,
+    h('div', {}, go), status, live);
 }
 
 // ---------- Live sync ----------
 async function pollNow() {
   try {
     const r = await api(`director/project?id=${projectId}&since=${project.revision}`);
-    const changed = JSON.stringify(r.agent) !== JSON.stringify(agent);
-    agent = r.agent;
-    if (r.project) { const before = project; apply(r.project); announceChanges(before, r.project); } else if (changed) renderRoute();
+    if (r.project) { const before = project; apply(r.project); announceChanges(before, r.project); }
   } catch {}
 }
 /** Changes that arrive from outside (Claude over MCP): flash the objects in their kind colour and say what changed. */
@@ -1968,15 +1745,14 @@ async function boot() {
   if (!projectId) { location.href = '/'; return; }
   try {
     const [p, a] = await Promise.all([api(`director/project?id=${projectId}`), api('director/agent')]);
-    agent = a.agent; connect = a.connect;
+    connect = a.connect;
     void loadRefgen().then(pollJobs);
     apply(p.project);
     // Open on the action: frame subjects, not the buildings around them.
-    scene.frame(project.scene.entities.filter(e => e.kind !== 'environment').map(e => e.id), 3.5);
-    setTab('shot');
+    scene.frame(openingSubjects(project.scene.entities), 10);
+
     applyHidden();
     const v = params.get('view'); setStep(v === 'sequence' ? 'cut' : v === 'shoot' ? 'shoot' : 'build');
-    agentUi.connect(); // [agent] live steps + streaming reply
     setTimeout(poll, 1200);
   } catch (e) {
     app.replaceChildren(h('div', { class: 'empty-state', style: 'margin:80px auto;max-width:420px' }, (e as Error).message, h('br'), h('a', { href: '/', class: 'btn', style: 'margin-top:12px' }, 'Back to projects')));

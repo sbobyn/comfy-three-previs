@@ -33,7 +33,7 @@ export function shotVideoPrompt(project: DirectorProject, s: Shot, refs: VideoRe
 }
 
 async function definitionFor(st: GenState, id: string, refCount: number): Promise<Def> {
-  const base = baseOf(st, id); if (!base) throw Error('Choose a video workflow');
+  const base = baseOf(st, id); if (!base) throw Error('Choose a video model');
   const presetId = base.provenance?.presetId || base.id;
   const wanted = withReferenceImages({ ...base, provenance: { ...(base.provenance || {}), presetId } }, refCount) as Def;
   const n = wanted.provenance?.referenceImages || 0;
@@ -49,7 +49,7 @@ async function definitionFor(st: GenState, id: string, refCount: number): Promis
 /** Bind and quote one shot. Re-run this right before every submit: each submit needs a fresh binding. */
 export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot; st: GenState; definitionId: string; useReferences?: boolean; userPrompt?: string | null; backend?: 'cloud' | 'local'; acceptTimingChange?: boolean }) {
   const { project, shot: s, st } = o;
-  const r = s.render; if (!r) throw Error('Render the blockout first');
+  const r = s.render; if (!r) throw Error('Make the blockout first');
   const base = baseOf(st, o.definitionId);
   if (base?.task === 'first-frame') return prepareFirstFrame(o, base);
   const cap = o.useReferences === false ? 0 : referenceCapacity(st, o.definitionId);
@@ -85,7 +85,7 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   if (wantsLast && (!renderId || !lastId)) throw Error('Generate this shot’s start and end key frames first');
   const main = (await api('project')).project;
   if (!renderId) renderId = main.renders?.find((x: any) => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
-  if (!renderId) throw Error('No start image: generate a key frame for this shot, or render the blockout again');
+  if (!renderId) throw Error('No start image: generate a key frame for this shot, or make the blockout again');
   const def = await definitionFor(st, o.definitionId, 0);
   const parameters: Record<string, unknown> = {};
   for (const [k, m] of Object.entries(def.parameters || {})) parameters[k] = def.graph?.[m.nodeId]?.inputs?.[m.input];

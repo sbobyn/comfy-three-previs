@@ -10,6 +10,7 @@ import { atomicJson } from '../server/previs/atomic.mjs';
 import { validateWorkflowDefinition, validateGraph, hashValue, hashBytes, workflowCost, validateApproval, assertNoSecrets } from '../server/previs/workflows.mjs';
 import { createBackend, backendSnapshot, backendTransportKey, safeMediaLocation } from '../server/previs/backends.mjs';
 import { openGeneration, declaredOutputs, validateAssetConstraints } from '../server/previs/generation.mjs';
+import { createSlots } from '../server/previs/concurrency.mjs';
 
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==', 'base64');
 const graph = { '1': { class_type: 'LoadImage', inputs: { image: 'author.png' }, _meta: { title: 'Keep authored label' } }, '2': { class_type: 'SaveImage', inputs: { images: ['1', 0], filename_prefix: 'author/output' } } };
@@ -181,7 +182,7 @@ test('durable uncertain receipt, duplicate/concurrent submission, restart and de
   assert.equal((await generation.submit(input)).status, 'uncertain');
   assert.equal((await generation.track(input.requestId)).status, 'uncertain');
   const second = f.input(), secondQuote = await generation.quote(second);
-  await assert.rejects(generation.submit({ ...second, approval: approve(secondQuote) }), /existing backend request/);
+  await assert.rejects(generation.submit({ ...second, approval: approve(secondQuote) }), e => e.status === 409 && e.apiCode === 'busy' && /Backend busy: 1 of 1 local slot/.test(e.message));
   f.state.visible = true; f.state.mismatch = true;
   await generation.track(input.requestId); assert.equal(f.state.views, 0);
   f.state.mismatch = false;
@@ -208,14 +209,16 @@ test('default checkpoint blocks paid/unknown execution even after explicit unkno
 test('unresolved transport lock survives display aliases, loopback aliases and restart', async () => {
   for(const kind of ['local','cloud']){
     const f=await fixture();f.state.ambiguous=true;
-    let generation=await openGeneration(f.root,f.project,{backendFactory:f.backendFactory,allowPaid:true});
+    // An uncertain request holds its slot; with one slot per transport, nothing else may be sent.
+    const slots=()=>createSlots({env:{PREVIS_LIMIT_LOCAL:'1',PREVIS_LIMIT_CLOUD_IMAGES:'1',PREVIS_LIMIT_CLOUD_VIDEOS:'1'}});
+    let generation=await openGeneration(f.root,f.project,{backendFactory:f.backendFactory,allowPaid:true,slots:slots()});
     const first={...f.input(),backend:{kind,...(kind==='local'?{url:'http://localhost:8188'}:{})}},quote=await generation.quote(first);
     const approval={approved:true,fingerprint:quote.fingerprint,allowance:{currency:'USD',maxAmount:1,allowUnknownCharges:true}};
     assert.equal((await generation.submit({...first,approval})).status,'uncertain');
-    generation=await openGeneration(f.root,f.project,{backendFactory:f.backendFactory,allowPaid:true});
+    generation=await openGeneration(f.root,f.project,{backendFactory:f.backendFactory,allowPaid:true,slots:slots()});
     for(const url of kind==='local'?['http://127.0.0.1:8188','http://[::1]:8188']:['https://cloud.comfy.org']){
       const next={...f.input(),backend:{kind,url,id:'another-label'}},q=await generation.quote(next);
-      await assert.rejects(generation.submit({...next,approval:{...approval,fingerprint:q.fingerprint}}),/existing backend request/);
+      await assert.rejects(generation.submit({...next,approval:{...approval,fingerprint:q.fingerprint}}),e=>e.apiCode==='busy'&&/Backend busy: 1 of 1 /.test(e.message));
     }
     assert.equal(f.state.submits,1);assert.equal(f.state.uploads,1);
   }

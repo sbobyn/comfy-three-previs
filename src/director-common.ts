@@ -1,5 +1,5 @@
 import { SHAPES, entitySize } from '../shared/director.mjs';
-import type { Entity } from '../shared/director.mjs';
+import type { Entity, DirectorProject } from '../shared/director.mjs';
 
 export type RunnerStatus = { available: boolean; model: string; busy: string[]; runs: Record<string, { messageId: string; startedAt: string; text: string; steps: string[] } | null> }; // [agent]
 export type AgentStatus = { connected: boolean; waiting: boolean; lastSeen: string | null; name: string | null; runner?: RunnerStatus | null };
@@ -98,31 +98,30 @@ export function shapeIcon(shape: string) {
   return s;
 }
 
-export function agentPill(status: AgentStatus | null, onClick: () => void) {
-  const pill = h('button', { class: 'pill' + (status?.connected ? ' on' : ''), type: 'button', title: 'Connect an agent over MCP', onclick: onClick }, h('span', { class: 'dot' }), status?.connected ? `Agent connected${status.name ? ` · ${status.name}` : ''}` : 'Agent: not connected');
-  return pill;
-}
-
-const quote = (s: string) => (/^[\w./:@=-]+$/.test(s) ? s : `'${s.replace(/'/g, `'\\''`)}'`);
-export function connectDialog(status: AgentStatus | null, connect: Connect) {
-  const old = document.getElementById('connect-dialog'); old?.remove();
-  const claude = connect ? `claude mcp add comfy-previs -e PREVIS_URL=${connect.env.PREVIS_URL} -- ${quote(connect.command)} ${connect.args.map(quote).join(' ')}` : 'Start the Previs server first.';
-  const json = connect ? JSON.stringify({ mcpServers: { 'comfy-previs': { command: connect.command, args: connect.args, env: connect.env } } }, null, 2) : '';
-  const ask = 'Use the comfy-previs MCP tools to direct my Previs scene. Loop: call previs_director_wait_for_direction; read the project with previs_director_get; post a short previs_director_progress line before each step; make changes with previs_director_edit and previs_director_animate (keyframes); then previs_director_reply with what changed, and wait again. Keep going until I say stop in Previs.';
-  const code = (text: string) => { const b = h('button', { class: 'btn sm', type: 'button' }, 'Copy'); const box = h('div', { class: 'code' }, text, b); b.onclick = async () => { await navigator.clipboard.writeText(text).catch(() => {}); b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy'), 1400); }; return box; };
-  const dlg = h('dialog', { id: 'connect-dialog', 'aria-labelledby': 'connect-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'connect-title' }, 'Connect your agent'), agentPill(status, () => {}), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+const quote = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
+export function claudeDialog(connect: Connect, project?: DirectorProject) {
+  document.getElementById('connect-dialog')?.remove();
+  const opener = document.activeElement as HTMLElement | null;
+  const command = connect ? `claude mcp add comfy-previs -e ${quote(`PREVIS_URL=${location.origin}`)} -- ${quote(connect.command)} ${connect.args.map(quote).join(' ')}` : 'Start the Comfy Three Previs server to see the setup command.';
+  const code = (text: string) => {
+    const copy = h('button', { class: 'btn sm', type: 'button' }, 'Copy');
+    copy.onclick = async () => { try { await navigator.clipboard.writeText(text); copy.textContent = 'Copied'; } catch { toast('Could not copy. Select and copy the command below.', true); } };
+    return h('div', { class: 'code', style: 'white-space:pre-wrap;overflow-wrap:anywhere' }, text, copy);
+  };
+  const names = project?.scene.entities.filter(e => e.kind !== 'environment').slice(0, 2).map(e => e.name) || [];
+  const subject = names[0] || 'the main character';
+  const dlg = h('dialog', { id: 'connect-dialog', class: 'claude-help', 'aria-labelledby': 'connect-title' },
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'connect-title' }, 'Direct with Claude'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'dialog-body' },
-      h('p', { class: 'muted', style: 'margin:0' }, status?.runner?.available ? 'The built-in agent is ready: Previs runs Claude Code on this Mac with Previs tools only, on your existing login. You only need the steps below to use a different agent (Codex, another MCP client) instead.' : 'Install Claude Code and sign in once (run “claude” in a terminal) for the built-in agent. Or connect your own coding agent (Claude Code, Codex, any MCP client) over MCP: it reads the chat, edits the blockout, shots and camera, and replies here. Without an agent, a built-in parser handles simple directions.'),
-      h('ol', {},
-        h('li', {}, h('b', {}, 'Add the MCP server'), ' (Claude Code):', code(claude), h('details', {}, h('summary', { class: 'muted', style: 'cursor:pointer;margin-top:6px' }, 'Other MCP clients (JSON)'), code(json))),
-        h('li', {}, h('b', {}, 'Ask your agent to listen'), code(ask)),
-        h('li', {}, h('b', {}, 'Type direction here'), ' — the pill turns green while the agent is listening. Messages wait for it; you can hand any message to the built-in parser instead.'),
-      ),
-      h('p', { class: 'note', style: 'margin:0' }, 'Loopback only. Direction tools cannot submit renders or paid generations.'),
-    ));
-  document.body.append(dlg);
-  dlg.showModal();
+      h('p', {}, 'Connect Claude Desktop or Claude Code to Comfy Three Previs. Ask Claude to build and direct your scene; edits appear here live and can be undone.'),
+      h('h3', {}, 'Claude Code'), code(command),
+      connect ? h('details', {}, h('summary', {}, 'Claude Desktop configuration'), code(JSON.stringify({ mcpServers: { 'comfy-previs': { ...connect, env: { ...connect.env, PREVIS_URL: location.origin } } } }, null, 2))) : null,
+      h('h3', {}, 'Try asking'),
+      h('ul', {}, h('li', {}, `Open ${project?.title || 'my project'} and write a Cast Card for ${subject}.`), h('li', {}, `Make shot 1 a slow push-in on ${subject}.`), h('li', {}, names[1] ? `Add a reverse angle from ${names[1]} toward ${subject}.` : 'Add three shots that cover the key moment from different angles.')),
+      h('p', { class: 'note' }, 'Paid generation still requires your explicit approval.')));
+  dlg.addEventListener('keydown', ev => ev.stopPropagation());
+  dlg.addEventListener('close', () => { dlg.remove(); if (opener?.isConnected) opener.focus(); });
+  document.body.append(dlg); dlg.showModal();
 }
 
 export function readFileBase64(file: File): Promise<string> {

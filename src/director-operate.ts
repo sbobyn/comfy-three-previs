@@ -79,8 +79,8 @@ const padStatus = h('div', { class: 'op-pad' });
 const recBtn = h('button', { class: 'btn camera sm', type: 'button' });
 const releaseBtn = h('button', { class: 'btn sm ghost', type: 'button', title: 'Stop operating (B / Esc)' }, 'Release');
 const takeRow = h('div', { class: 'op-take' });
-const sourceSel = h('select', { class: 'field', 'aria-label': 'Operate source' });
-const passSeg = h('div', { class: 'seg op-pass', role: 'radiogroup', 'aria-label': 'Pass' });
+const sourceSel = h('select', { class: 'field', 'aria-label': 'Control with' });
+const passSeg = h('div', { class: 'seg op-pass', role: 'radiogroup', 'aria-label': 'What to record' });
 
 function select<T extends string>(label: string, value: T, options: [T, string][], onChange: (v: T) => void) {
   const el = h('select', { class: 'field', 'aria-label': label }, ...options.map(([k, v]) => h('option', { value: k, selected: k === value }, v)));
@@ -97,8 +97,8 @@ function slider(label: string, key: keyof FlightSettings, min: number, max: numb
 function buildPanel() {
   const passBtn = (p: Pass, text: string, tip: string) => h('button', { type: 'button', role: 'radio', class: opts.pass === p ? 'on' : '', 'aria-checked': String(opts.pass === p), title: tip, onclick: () => { if (phase === 'live') release(); opts.pass = p; save('pass', p); buildPanel(); } }, text);
   passSeg.replaceChildren(
-    passBtn('position', '1 · Position pass', 'Fly the path (position + heading)'),
-    passBtn('aim', '2 · Aim pass', 'Replay the path in real time and aim the camera'));
+    passBtn('position', 'Fly the path', 'Fly the camera: records where it goes and which way it faces'),
+    passBtn('aim', 'Aim along the path', 'Replays the path in real time while you aim the camera'));
   const sources: [string, string][] = opts.pass === 'position'
     ? [['keyboard', 'Keyboard'], ['gamepad', 'Gamepad']]
     : aimSources().map(id => [id, id === 'pointer' ? 'Mouse + keys' : id === 'gamepad' ? 'Gamepad' : id === 'phone' ? 'Phone' : id] as [string, string]);
@@ -107,16 +107,16 @@ function buildPanel() {
   sourceSel.onchange = () => { if (phase === 'live') release(); if (opts.pass === 'position') save('source', opts.source = sourceSel.value); else save('aim', opts.aim = sourceSel.value); buildPanel(); };
   const s = host.shot();
   const pathNote = opts.pass === 'aim'
-    ? h('p', { class: 'note op-note' }, positionTake && takeShot === s.id ? `Replays your position take (${positionTake.at(-1)!.t.toFixed(2)}s) while you aim.` : `No position take yet — replays the shot's current camera path (${s.duration}s) while you aim.`)
-    : h('p', { class: 'note op-note' }, opts.mode === 'drone' ? 'Free flight from the shot camera’s first frame. Heading becomes the aim; an aim pass can replace it.' : 'Rides the shot’s current camera path; forward/back sets speed, yaw/pitch aim.');
+    ? h('p', { class: 'note op-note' }, positionTake && takeShot === s.id ? `Replays your position take (${positionTake.at(-1)!.t.toFixed(2)}s) while you aim.` : `No flown path yet — replays the shot's current camera path (${s.duration}s) while you aim.`)
+    : h('p', { class: 'note op-note' }, opts.mode === 'drone' ? 'Free flight from the shot camera’s first frame. Where it faces becomes the aim; “Aim along the path” can replace it.' : 'Rides the shot’s current camera path; forward/back sets speed, turn/tilt aims.');
   panel.replaceChildren(...kids(
-    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Operate'), h('span', { class: 'muted op-sub' }, 'Fly or aim the shot camera live')),
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Fly settings'), h('span', { class: 'muted op-sub' }, 'Fly or aim the shot camera live')),
     passSeg,
     h('div', { class: 'grid2' },
       h('label', {}, opts.pass === 'position' ? 'Fly with' : 'Aim with', sourceSel),
       opts.pass === 'position'
-        ? select('Mode', opts.mode, [['drone', 'Drone free flight'], ['dolly', 'Dolly on path']], v => { opts.mode = v; save('mode', v); buildPanel(); })
-        : h('label', { class: 'check-row op-check' }, h('input', { type: 'checkbox', checked: opts.deshake, onchange: (ev: Event) => { opts.deshake = (ev.target as HTMLInputElement).checked; save('deshake', opts.deshake ? '1' : '0'); } }), 'Deshake aim')),
+        ? select('Mode', opts.mode, [['drone', 'Free flight'], ['dolly', 'Follow the path']], v => { opts.mode = v; save('mode', v); buildPanel(); })
+        : h('label', { class: 'check-row op-check' }, h('input', { type: 'checkbox', checked: opts.deshake, onchange: (ev: Event) => { opts.deshake = (ev.target as HTMLInputElement).checked; save('deshake', opts.deshake ? '1' : '0'); } }), 'Smooth the aim')),
     opts.pass === 'position' && opts.source === 'gamepad' ? h('div', { class: 'grid2' }, select('Stick layout', opts.layout, Object.entries(LAYOUTS) as [Layout, string][], v => { opts.layout = v; save('layout', v); buildPanel(); }), h('span')) : null,
     padStatus,
     opts.pass === 'position' ? h('details', { class: 'op-tune' }, h('summary', {}, 'Speeds'),
@@ -159,7 +159,7 @@ function refresh() {
   padStatus.textContent = (aim && phase === 'live' && src !== 'gamepad' ? aim.status() + ' · ' : '') + padText();
   padStatus.classList.toggle('ok', !!pickPad());
   const state = phase === 'live' ? recorder.state : 'idle';
-  recBtn.textContent = state === 'recording' ? '■ Stop' : state === 'armed' ? '● Record' : opts.pass === 'position' ? 'Arm · fly' : 'Arm · aim';
+  recBtn.textContent = state === 'recording' ? '■ Stop' : state === 'armed' ? '● Record' : 'Take control';
   recBtn.title = `${state === 'recording' ? 'Stop recording' : state === 'armed' ? 'Start recording' : 'Take control of the shot camera'} (${src === 'gamepad' ? 'A' : 'R'})`;
   recBtn.classList.toggle('rec', state === 'recording');
   releaseBtn.hidden = phase !== 'live';
@@ -168,7 +168,7 @@ function refresh() {
   if (take && phase !== 'live') {
     const len = take.at(-1)!.t;
     takeRow.replaceChildren(
-      h('span', { class: 'op-take-label' }, `${reviewing === 'aim' ? 'Aim' : 'Position'} take · ${len.toFixed(2)}s · ${take.length} samples`),
+      h('span', { class: 'op-take-label' }, `${reviewing === 'aim' ? 'Aim' : 'Flight'} take · ${len.toFixed(2)}s · ${take.length} samples`),
       h('button', { class: 'btn sm', type: 'button', onclick: () => playTake() }, phase === 'review' ? '↺ Replay' : '▶ Play take'),
       h('button', { class: 'btn sm primary', type: 'button', disabled: len < MIN_TAKE, title: len < MIN_TAKE ? `Takes need at least ${MIN_TAKE}s` : 'Apply as the shot camera (undoable)', onclick: () => void keep() }, 'Keep take'),
       h('button', { class: 'btn sm ghost', type: 'button', onclick: () => discard() }, 'Discard'));
@@ -286,7 +286,7 @@ async function keep() {
   const which = reviewing;
   phase = 'off'; hud.hidden = true; host.scene.setLivePose(null); host.setPlayhead(0);
   const ok = await host.runEntry({
-    label: which === 'aim' ? 'Aim pass' : 'Camera take',
+    label: which === 'aim' ? 'Aim take' : 'Camera take',
     redo: [{ op: 'update_shot', id: s.id, patch: takePatch(result) }],
     undo: [{ op: 'update_shot', id: s.id, patch: { duration: s.duration, camera: { ...before, timing: before.timing ?? 'ease' } } }],
   });
