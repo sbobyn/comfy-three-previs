@@ -109,6 +109,13 @@ export function loopbackDrivers(base) {
       try { return await fn((await get('/api/project')).project.revision); } catch (e) { if (e.status !== 409 || e.apiCode || !/Project changed/i.test(e.message) || i >= 9) throw e; await new Promise(r => setTimeout(r, 150 + Math.random() * 600)); }
     }
   }
+  // Engine writes inside a route (video-refs registering renders) can lose a race with the job tracker attaching
+  // results; the route is idempotent, so retry it on "Project changed".
+  async function retryChanged(fn) {
+    for (let i = 0; ; i++) {
+      try { return await fn(); } catch (e) { if (!/Project changed/i.test(e.message) || i >= 9) throw e; await new Promise(r => setTimeout(r, 200 + Math.random() * 800)); }
+    }
+  }
   async function patchSheets(projectId, entityId, fn) {
     const p = (await get(`/api/director/project?id=${projectId}`)).project, e = entityOf(p, entityId), sheets = structuredClone(e.sheets || []);
     fn(sheets);
@@ -155,7 +162,7 @@ export function loopbackDrivers(base) {
     let def, parameters;
     if (base.task === 'first-frame') {
       let wantsLast = !!base.inputs?.lastFrame;
-      const frames = (await post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast })).references;
+      const frames = (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast }))).references;
       let start = frames.find(x => x.label === 'start key frame')?.renderId; const end = frames.find(x => x.label === 'end key frame')?.renderId;
       if (wantsLast && !end && FIRST_FRAME_FALLBACK[base.id] && pick(FIRST_FRAME_FALLBACK[base.id])) { base = pick(FIRST_FRAME_FALLBACK[base.id]); wantsLast = false; }
       if (wantsLast && (!start || !end)) throw notSent('This model animates start → end: the shot needs both key frames');
@@ -167,7 +174,7 @@ export function loopbackDrivers(base) {
       prompt = (shotPrompt(p, s, 'video').trim() || compilePrompt(p, s)).replace('Preserve the supplied camera motion, framing and blocking.', 'Start from the supplied frame and keep its composition, characters and look.');
     } else {
       const cap = maxReferences(base);
-      const registered = cap ? (await post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap })).references : [];
+      const registered = cap ? (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap }))).references : [];
       const all = [...(p.scene.references || []), ...p.shots.flatMap(x => x.references)];
       refs = registered.map(x => ({ ref: all.find(y => y.id === x.referenceId), entityId: x.entityId, role: x.role, label: x.label })).filter(x => x.ref);
       def = await definitionFor(base, registered.length); parameters = parametersOf(def);
