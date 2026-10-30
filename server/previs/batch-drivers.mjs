@@ -106,7 +106,7 @@ export function loopbackDrivers(base) {
   // Engine-project writes are revision-checked; concurrent nodes retry with a fresh revision.
   async function withRevision(fn) {
     for (let i = 0; ; i++) {
-      try { return await fn((await get('/api/project')).project.revision); } catch (e) { if (e.status !== 409 || e.apiCode || !/Project changed/i.test(e.message) || i >= 4) throw e; }
+      try { return await fn((await get('/api/project')).project.revision); } catch (e) { if (e.status !== 409 || e.apiCode || !/Project changed/i.test(e.message) || i >= 9) throw e; await new Promise(r => setTimeout(r, 150 + Math.random() * 600)); }
     }
   }
   async function patchSheets(projectId, entityId, fn) {
@@ -176,11 +176,14 @@ export function loopbackDrivers(base) {
       prompt = user?.trim() && user.trim() !== auto.trim() ? [user.trim(), referenceLegend(refs)].filter(Boolean).join('\n') : compilePrompt(p, s, refs);
     }
     const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
-    const bind = await withRevision(revision => post('/api/generation/bind', { revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: true }));
     const local = def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-');
-    const request = { requestId: randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: local ? 'local' : 'cloud' } };
-    const job = (await post('/api/generation/quote', request)).job;
-    return { request, job, modelUsed: base.id };
+    // Bind and quote are both revision-checked; concurrent batches can move the revision in between, so retry them together.
+    return withRevision(async revision => {
+      const bind = await post('/api/generation/bind', { revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: true });
+      const request = { requestId: randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: local ? 'local' : 'cloud' } };
+      const job = (await post('/api/generation/quote', request)).job;
+      return { request, job, modelUsed: base.id };
+    });
   }
 
   return {
