@@ -21,6 +21,7 @@ import { openRefgen, refgenRoutes } from './refgen.mjs';
 import { setupChecks } from './setup-check.mjs';
 import { openHeadless } from './headless.mjs'; // [headless]
 import { renderRoutes } from './render-routes.mjs'; // [headless]
+import { openBatches } from './batch.mjs'; import { batchRoutes } from './batch-routes.mjs'; import { fakeBackend, loopbackDrivers, loopbackJobs } from './batch-drivers.mjs'; // [batch]
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -54,6 +55,7 @@ const serial = fn => { const next = operation.then(fn); operation = next.catch((
 const port = Number(process.env.PORT || 5190);
 agentRunner = await openAgentRunner({ root, dataDir: data, port, director }); // [agent] built-in Claude Code runner
 const headless = openHeadless({ port }), renderRoute = renderRoutes({ director, headless }); // [headless] C2 render routes
+const batches = await openBatches(data, { ...(process.env.PREVIS_BATCH_FAKE === '1' ? fakeBackend({ log: console.log }) : { drivers: loopbackDrivers(`http://127.0.0.1:${port}`), jobs: loopbackJobs(`http://127.0.0.1:${port}`) }), loadProject: id => director.get(id), log: console.log }), batchRoute = batchRoutes(batches); // [batch]
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
 async function body(req) {
   let text = ''; for await (const chunk of req) { text += chunk; if (text.length > 16 * 1024 * 1024) fail('Request too large', 413); }
@@ -79,6 +81,8 @@ const server = createServer(async (req, res) => {
       return send(await director.importZip(Buffer.concat(parts)));
     }
     if (renderRoute.handles(url.pathname)) return await renderRoute.serve(req, url, send, body); // [headless]
+    if (req.method === 'GET' && url.pathname === '/api/director/batch/stream') { const id = url.searchParams.get('id') || ''; if (!/^[a-f0-9-]{36}$/.test(id)) fail('Unknown batch', 404); return batches.stream(req, res, id); } // [batch]
+    if (/^\/api\/director\/batch(es|\/|$)/.test(url.pathname)) { if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415); return send(await batchRoute(req.method, url, req.method === 'POST' ? await body(req) : {})); } // [batch]
     if (url.pathname.startsWith('/api/director/')) {
       if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       if (!['GET', 'POST'].includes(req.method)) fail('Method not allowed', 405);
@@ -216,6 +220,6 @@ const server = createServer(async (req, res) => {
 });
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});
-server.listen(port, '127.0.0.1', () => console.log(`Comfy Previs: http://127.0.0.1:${port}`));
-async function stop() { agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await headless.close(); await releaseLock(); process.exit(0); }
+server.listen(port, '127.0.0.1', () => { console.log(`Comfy Previs: http://127.0.0.1:${port}`); batches.start(); });
+async function stop() { batches.close(); agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await headless.close(); await releaseLock(); process.exit(0); }
 process.on('SIGTERM', stop); process.on('SIGINT', stop);
