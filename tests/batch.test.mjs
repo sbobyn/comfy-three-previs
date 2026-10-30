@@ -85,6 +85,28 @@ test('start → end partner model in a final plan: the end still is optional', (
   assert.equal(v.estimateUsd, estimateFor('video', 'kling-40-flf-v1', { duration: dive.duration }));
 });
 
+test('plan: design sheets wait for the batch stills (optional deps)', () => {
+  const eagle = project.scene.entities.find(e => e.name === 'Bald eagle').id;
+  const plan = planBatch(project, { steps: ['sheets', 'stills'], objects: [eagle], maxCostUsd: 5 }).nodes;
+  const stills = plan.filter(n => n.type === 'still' && n.status === 'waiting').map(n => n.id), sheet = plan.find(n => n.type === 'sheet');
+  assert.ok(stills.length >= 2);
+  assert.deepEqual(sheet.optional, stills); assert.ok(stills.every(id => sheet.deps.includes(id)));
+});
+
+test('stills and videos go ahead of design sheets in the image slots', async () => {
+  const h = harness({ fake: { seconds: { still: 20, video: 60, sheet: 30 } } });
+  const batches = await h.open();
+  const eagle = project.scene.entities.find(e => e.name === 'Bald eagle').id;
+  const b = await batches.create({ projectId: project.id, steps: ['sheets', 'stills', 'videos'], objects: [eagle], maxCostUsd: 10 });
+  const done = await runUntil(batches, b.id, h.clock);
+  assert.equal(done.status, 'completed');
+  const order = h.fake.submits.map(x => x.type), firstSheet = order.indexOf('sheet');
+  assert.ok(firstSheet > order.lastIndexOf('still'), `every still is sent before the sheet: ${order.join(' ')}`);
+  const sheet = done.nodes.find(n => n.type === 'sheet'), lastStill = Math.max(...done.nodes.filter(n => n.type === 'still' && n.finishedAt).map(n => Date.parse(n.finishedAt)));
+  assert.ok(Date.parse(sheet.startedAt) >= lastStill, 'the sheet starts once the stills have landed');
+  assert.ok(done.nodes.filter(n => n.type === 'video').every(n => Date.parse(n.startedAt) <= Date.parse(sheet.startedAt)), 'videos start no later than the sheet');
+});
+
 test('draft plan: blockouts skipped, one look per family, start stills before videos', () => {
   const { nodes } = planBatch(project, { steps: ['looks', 'stills', 'videos'], tier: 'draft', maxCostUsd: 5 });
   const looks = nodes.filter(n => n.type === 'look');
