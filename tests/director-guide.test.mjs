@@ -88,12 +88,12 @@ test('workspace guide opens existing controls without editing, capturing or gene
   let options;
   const context = {
     project: { title: 'Scene', scene: { entities: [] }, shots: [{}] },
-    collapsed: { side: true },
+    collapsed: { side: true }, step: 'build',
     openJourney: o => { options = o; },
-    setMode: mode => calls.push(mode), setTab: tab => calls.push(tab),
+    setStep: k => { calls.push(['step', k]); context.step = k; }, setTab: tab => calls.push(tab),
     setCollapsed: (panel, value) => { calls.push([panel, value]); context.collapsed[panel] = value; },
     textarea: { focus: () => calls.push('direction focus') }, shotTab: { focus: () => calls.push('shot focus') },
-    seqModeBtn: { focus: () => calls.push('sequence focus') },
+    stepBtns: { cut: { focus: () => calls.push('cut focus') } },
     openLooks: () => calls.push('looks'), openRender: () => calls.push('render settings'),
     openAssets: () => calls.push('assets'), toast: msg => calls.push(msg),
   };
@@ -102,10 +102,13 @@ test('workspace guide opens existing controls without editing, capturing or gene
   assert.deepEqual(calls, []);
   assert.match(options.context, /0 saved video assets/);
   options.actions.scene();
-  assert.deepEqual(JSON.parse(JSON.stringify(calls)), ['scene', ['side', false], 'direct', 'direction focus']);
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['side', false], 'shot', 'shot focus']);
   calls.length = 0;
   for (const id of ['looks', 'shot', 'capture', 'workflow', 'compare', 'export']) options.actions[id]();
-  assert.deepEqual(calls, ['looks', 'scene', 'shot', 'shot focus', 'scene', 'render settings', 'sequence', 'sequence focus', 'sequence', 'sequence focus', 'assets']);
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)), ['looks', 'shot', 'shot focus', ['step', 'shoot'], 'render settings', ['step', 'cut'], 'cut focus', ['step', 'cut'], 'cut focus', 'assets']);
+  calls.length = 0;
+  options.actions.scene();
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['step', 'build'], 'shot', 'shot focus'], 'scene panel leaves the cut view');
   context.project = undefined; calls.length = 0;
   context.showJourney();
   assert.deepEqual(calls, ['Wait for the project to finish loading.']);

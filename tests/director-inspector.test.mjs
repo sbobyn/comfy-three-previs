@@ -14,7 +14,8 @@ test('additive and marquee selections expose the contextual object controls', ()
   const start = source.indexOf('  onClickSelect(id, mode) {');
   const end = source.indexOf('  onContextMenu(', start);
   assert.ok(start > 0 && end > start);
-  const context = { selection, scene: { view: () => 'set', frame: ids => frames.push([...ids]) }, setTab: tab => tabs.push(tab) };
+  const entities = new Map(['car', 'tree', 'lamp'].map(id => [id, { id }]));
+  const context = { selection, entity: id => entities.get(id) || null, scene: { view: () => 'set', frame: ids => frames.push([...ids]) }, setTab: tab => tabs.push(tab) };
   runInNewContext(compile(`globalThis.callbacks = {${source.slice(start, end)}};`), context);
   context.callbacks.onClickSelect('car', 'replace');
   context.callbacks.onClickSelect('tree', 'add');
