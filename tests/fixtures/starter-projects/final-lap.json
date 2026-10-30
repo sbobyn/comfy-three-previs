@@ -1,0 +1,4242 @@
+{
+ "version": 1,
+ "id": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+ "title": "Starter \u00b7 Final Lap",
+ "template": "empty",
+ "scene": {
+  "name": "Oval speedway",
+  "environment": {
+   "preset": "stage",
+   "description": "A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.",
+   "style": "Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+  },
+  "entities": [
+   {
+    "id": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "name": "Infield grass",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     -0.05,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     50,
+     0.1,
+     50
+    ],
+    "color": "#4f7a3e",
+    "notes": "Mown infield grass with painted logo-free surface.",
+    "look": "da9b4a56-d9d5-45c8-8a5d-d1994951aa89",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "name": "Turns 1\u20132 \u00b7 surface 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     65.221,
+     0,
+     -39.658
+    ],
+    "rotation": 352.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": "e1e295c4-cc73-41ed-9175-511b26559fcc",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "a2c9fd5e-53eb-4c37-b7ef-a54cc03e698d",
+    "name": "Turns 1\u20132 \u00b7 surface 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     75.307,
+     0,
+     -36.955
+    ],
+    "rotation": 337.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "24f3015a-1122-43bd-8281-fce6783da7bc",
+    "name": "Turns 1\u20132 \u00b7 surface 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     84.35,
+     0,
+     -31.734
+    ],
+    "rotation": 322.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "12d58254-b419-4e5a-96c5-1b1fc9aa6b8a",
+    "name": "Turns 1\u20132 \u00b7 surface 4",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     91.734,
+     0,
+     -24.35
+    ],
+    "rotation": 307.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "97ff2a72-8cc5-47b1-946f-bb4c76f3e571",
+    "name": "Turns 1\u20132 \u00b7 surface 5",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     96.955,
+     0,
+     -15.307
+    ],
+    "rotation": 292.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "600eb1c8-8f1d-4711-b1bc-26466102cc00",
+    "name": "Turns 1\u20132 \u00b7 surface 6",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     99.658,
+     0,
+     -5.221
+    ],
+    "rotation": 277.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "2490f736-a35b-4ad6-9648-8e499afcc169",
+    "name": "Turns 1\u20132 \u00b7 surface 7",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     99.658,
+     0,
+     5.221
+    ],
+    "rotation": 262.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "2f6a9cc6-69d2-4021-902b-aeb4502e27ae",
+    "name": "Turns 1\u20132 \u00b7 surface 8",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     96.955,
+     0,
+     15.307
+    ],
+    "rotation": 247.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "f9c968ed-8c51-4ee9-a1ef-ca73723b9f1e",
+    "name": "Turns 1\u20132 \u00b7 surface 9",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     91.734,
+     0,
+     24.35
+    ],
+    "rotation": 232.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "31050605-ef24-4f4c-8bcb-f13d016dfcef",
+    "name": "Turns 1\u20132 \u00b7 surface 10",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     84.35,
+     0,
+     31.734
+    ],
+    "rotation": 217.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "6683105d-b07d-47c3-a677-a79efbecf531",
+    "name": "Turns 1\u20132 \u00b7 surface 11",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     75.307,
+     0,
+     36.955
+    ],
+    "rotation": 202.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "36d6b486-5608-45f4-9d66-1caf48ff05aa",
+    "name": "Turns 1\u20132 \u00b7 surface 12",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     65.221,
+     0,
+     39.658
+    ],
+    "rotation": 187.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+   },
+   {
+    "id": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "name": "Turns 3\u20134 \u00b7 surface 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -65.221,
+     0,
+     39.658
+    ],
+    "rotation": 172.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": "249933ae-32dd-49d2-a618-3b51fc8321da",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "82f955da-d998-48aa-8e21-645ff005d1ed",
+    "name": "Turns 3\u20134 \u00b7 surface 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -75.307,
+     0,
+     36.955
+    ],
+    "rotation": 157.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "dddf89e7-f651-40e5-bfef-567e7845219f",
+    "name": "Turns 3\u20134 \u00b7 surface 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -84.35,
+     0,
+     31.734
+    ],
+    "rotation": 142.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "741d8d2d-2b0b-4e35-8aac-45f54ed3934c",
+    "name": "Turns 3\u20134 \u00b7 surface 4",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -91.734,
+     0,
+     24.35
+    ],
+    "rotation": 127.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "edd8facb-7c29-41c5-a790-9af9a2e90144",
+    "name": "Turns 3\u20134 \u00b7 surface 5",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -96.955,
+     0,
+     15.307
+    ],
+    "rotation": 112.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "1d741586-291e-4015-92fe-40b8a5598395",
+    "name": "Turns 3\u20134 \u00b7 surface 6",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -99.658,
+     0,
+     5.221
+    ],
+    "rotation": 97.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "3fe9f8ed-44c5-4f98-9f17-bdeb86e4f8fc",
+    "name": "Turns 3\u20134 \u00b7 surface 7",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -99.658,
+     0,
+     -5.221
+    ],
+    "rotation": 82.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "4fb1a31d-86d8-4263-98f6-2253a253e88a",
+    "name": "Turns 3\u20134 \u00b7 surface 8",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -96.955,
+     0,
+     -15.307
+    ],
+    "rotation": 67.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "a228b176-8d59-4318-8088-f46ededebfc1",
+    "name": "Turns 3\u20134 \u00b7 surface 9",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -91.734,
+     0,
+     -24.35
+    ],
+    "rotation": 52.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "ae78daa4-d1ca-485f-9329-9d15de8bc292",
+    "name": "Turns 3\u20134 \u00b7 surface 10",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -84.35,
+     0,
+     -31.734
+    ],
+    "rotation": 37.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "5734dbb7-0876-44a9-bacd-634ee08277c7",
+    "name": "Turns 3\u20134 \u00b7 surface 11",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -75.307,
+     0,
+     -36.955
+    ],
+    "rotation": 22.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "ee8bf8a0-baea-432e-8bac-a047d5959e66",
+    "name": "Turns 3\u20134 \u00b7 surface 12",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -65.221,
+     0,
+     -39.658
+    ],
+    "rotation": 7.5,
+    "scale": [
+     11,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+   },
+   {
+    "id": "a339e4ea-8fe5-483d-a29a-8466df6e46ad",
+    "name": "Start-finish line",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     20,
+     0.06,
+     40
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2,
+     0.05,
+     14
+    ],
+    "color": "#f4f1ea",
+    "notes": "Checkered start-finish line painted across the track.",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+    "name": "Flag stand",
+    "kind": "prop",
+    "shape": "box",
+    "position": [
+     20,
+     4,
+     49
+    ],
+    "rotation": 0,
+    "scale": [
+     2,
+     8,
+     2
+    ],
+    "color": "#d8d4cc",
+    "notes": "Starter flag stand above the start-finish line; official waving a checkered flag.",
+    "look": "55174ba8-4e18-4f7b-b30d-495c98b33441",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null,
+    "sheets": [
+     {
+      "id": "spbu7uvxd",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:09:54.258Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "r51bx96c",
+          "requestId": "36f5fe8a-17e8-48ba-b093-44d7da59d7c1",
+          "referenceId": "d1960cda-7831-4007-b412-c67f9679d24c",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 381824,
+          "error": "",
+          "createdAt": "2026-10-30T17:09:54.258Z"
+         }
+        ],
+        "selected": "r51bx96c",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "j5hea7d7",
+          "requestId": "478400d3-b041-40aa-83e7-68b28a74be03",
+          "referenceId": "9b8eb335-6148-47ea-b0e6-4117abc94489",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 564896,
+          "error": "",
+          "createdAt": "2026-10-30T17:09:54.258Z"
+         }
+        ],
+        "selected": "j5hea7d7",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "8569113d",
+          "requestId": "5569f61b-bd81-4c88-bf41-d0ad462dd74c",
+          "referenceId": "c96e9757-0771-4a63-9388-53d063c39bfb",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 489257,
+          "error": "",
+          "createdAt": "2026-10-30T17:09:54.258Z"
+         }
+        ],
+        "selected": "8569113d",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "l9bxc4md",
+          "requestId": "5c55fc93-8d55-43d1-9354-f7d46e5fe9e2",
+          "referenceId": "7ba8b373-2791-4c30-b365-812ec9f5b6e8",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 452706,
+          "error": "",
+          "createdAt": "2026-10-30T17:09:54.258Z"
+         }
+        ],
+        "selected": "l9bxc4md",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "10ae3f0d-6628-42d8-8908-bd199dce7e60",
+    "name": "Turns 1\u20132 stands 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     71.315,
+     4.5,
+     -56.886
+    ],
+    "rotation": 348.75,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "55c182b7-2731-4f12-a2ca-4105cd246391",
+    "name": "Turns 1\u20132 stands 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     92.223,
+     4.5,
+     -48.225
+    ],
+    "rotation": 326.25,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "46c10b83-dde1-4949-82d9-43251b161226",
+    "name": "Turns 1\u20132 stands 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     108.225,
+     4.5,
+     -32.223
+    ],
+    "rotation": 303.75,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "1ba1b6a4-cb60-41b9-81b8-7e5c1a6af2d2",
+    "name": "Turns 1\u20132 stands 4",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     116.886,
+     4.5,
+     -11.315
+    ],
+    "rotation": 281.25,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "84371ee4-a339-48ff-91e1-049672ec5d7c",
+    "name": "Turns 1\u20132 stands 5",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     116.886,
+     4.5,
+     11.315
+    ],
+    "rotation": 258.75,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "7f832cb0-11b6-4559-833c-1ec29671c7b6",
+    "name": "Turns 1\u20132 stands 6",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     108.225,
+     4.5,
+     32.223
+    ],
+    "rotation": 236.25,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "aa5542c8-5506-4221-a9bb-3e46862c45d3",
+    "name": "Turns 1\u20132 stands 7",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     92.223,
+     4.5,
+     48.225
+    ],
+    "rotation": 213.75,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "48cf0201-87b5-40bf-b30e-007cbd2094f4",
+    "name": "Turns 1\u20132 stands 8",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     71.315,
+     4.5,
+     56.886
+    ],
+    "rotation": 191.25,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "name": "Turns 3\u20134 stands 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -71.315,
+     4.5,
+     56.886
+    ],
+    "rotation": 168.75,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": "32a704e5-08df-4945-8261-8a88c28134e2",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "cccaa03b-89c2-42a2-93ea-ea7346fa21d7",
+    "name": "Turns 3\u20134 stands 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -92.223,
+     4.5,
+     48.225
+    ],
+    "rotation": 146.25,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "4f935319-e102-451e-ba0f-3372c310e811",
+    "name": "Turns 3\u20134 stands 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -108.225,
+     4.5,
+     32.223
+    ],
+    "rotation": 123.75,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "ce0ec112-219b-4934-b0f6-67ac1673b034",
+    "name": "Turns 3\u20134 stands 4",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -116.886,
+     4.5,
+     11.315
+    ],
+    "rotation": 101.25,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "3997d2eb-b9e6-456b-9fba-a17aa0a52958",
+    "name": "Turns 3\u20134 stands 5",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -116.886,
+     4.5,
+     -11.315
+    ],
+    "rotation": 78.75,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "050a3030-cab9-45a5-8d4a-6c7b766a422e",
+    "name": "Turns 3\u20134 stands 6",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -108.225,
+     4.5,
+     -32.223
+    ],
+    "rotation": 56.25,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "2d384c03-70ab-4917-a8a6-1c4fcabdd105",
+    "name": "Turns 3\u20134 stands 7",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -92.223,
+     4.5,
+     -48.225
+    ],
+    "rotation": 33.75,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "e1ec393c-e8b9-4f56-9a5e-c2d78091d08b",
+    "name": "Turns 3\u20134 stands 8",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -71.315,
+     4.5,
+     -56.886
+    ],
+    "rotation": 11.25,
+    "scale": [
+     16,
+     9,
+     10
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "603c30fc-7ae6-4991-9c8c-ce426f5b73be",
+    "name": "Press box",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     14,
+     70
+    ],
+    "rotation": 0,
+    "scale": [
+     40,
+     6,
+     6
+    ],
+    "color": "#c9c4ba",
+    "notes": "Glass-fronted press box and suites above the main grandstand.",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
+    "name": "Light tower 1",
+    "kind": "environment",
+    "shape": "lamp",
+    "position": [
+     -85,
+     0,
+     65
+    ],
+    "rotation": 0,
+    "scale": [
+     2,
+     6,
+     2
+    ],
+    "color": "#c9c27a",
+    "notes": "Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top.",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9",
+    "sheets": [
+     {
+      "id": "st13teytb",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:21:31.470Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "oepo8bc1",
+          "requestId": "5bedbe09-388d-466e-928c-a8d1a171205d",
+          "referenceId": "3b0ae9e6-bcf6-4319-9fc9-1520a7cbfd59",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 954726,
+          "error": "",
+          "createdAt": "2026-10-30T17:21:31.470Z"
+         }
+        ],
+        "selected": "oepo8bc1",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "yi38xtiy",
+          "requestId": "f66dde41-8604-46d9-8b62-7b797cd55082",
+          "referenceId": "4ecc8aee-1aa2-42bf-9772-70fabb985fd6",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 736265,
+          "error": "",
+          "createdAt": "2026-10-30T17:21:31.470Z"
+         }
+        ],
+        "selected": "yi38xtiy",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "3knbhz69",
+          "requestId": "b00c806b-0473-449e-9887-44cbc9ed2922",
+          "referenceId": "46e933ca-c201-4019-ad2b-dda1db3f719c",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 709224,
+          "error": "",
+          "createdAt": "2026-10-30T17:21:31.470Z"
+         }
+        ],
+        "selected": "3knbhz69",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "cew7s2su",
+          "requestId": "bf06ac62-3e64-4f0b-a9d4-3017c2838258",
+          "referenceId": "191cc75f-14c1-49c0-acbe-7dfa9ed95461",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 924282,
+          "error": "",
+          "createdAt": "2026-10-30T17:21:31.470Z"
+         }
+        ],
+        "selected": "cew7s2su",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "35c8a8c9-8d40-4a06-9419-c44947e51f81",
+    "name": "Light tower 2",
+    "kind": "environment",
+    "shape": "lamp",
+    "position": [
+     85,
+     0,
+     65
+    ],
+    "rotation": 0,
+    "scale": [
+     2,
+     6,
+     2
+    ],
+    "color": "#c9c27a",
+    "notes": "",
+    "look": null,
+    "lookFrom": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9"
+   },
+   {
+    "id": "7d41992d-3fd4-4314-9ae7-9d4a61809cf5",
+    "name": "Light tower 3",
+    "kind": "environment",
+    "shape": "lamp",
+    "position": [
+     -85,
+     0,
+     -65
+    ],
+    "rotation": 0,
+    "scale": [
+     2,
+     6,
+     2
+    ],
+    "color": "#c9c27a",
+    "notes": "",
+    "look": null,
+    "lookFrom": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9"
+   },
+   {
+    "id": "04b773a7-9c9c-41e5-9f9b-415f09ae6790",
+    "name": "Light tower 4",
+    "kind": "environment",
+    "shape": "lamp",
+    "position": [
+     85,
+     0,
+     -65
+    ],
+    "rotation": 0,
+    "scale": [
+     2,
+     6,
+     2
+    ],
+    "color": "#c9c27a",
+    "notes": "",
+    "look": null,
+    "lookFrom": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9"
+   },
+   {
+    "id": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "name": "Comfy car",
+    "kind": "vehicle",
+    "shape": "car",
+    "position": [
+     40,
+     0,
+     -37
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#2459D8",
+    "notes": "Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors.",
+    "look": "276e8e15-ec39-4603-b126-5d315a23575e",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": [
+     {
+      "t": 0,
+      "p": [
+       46,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 0.38,
+      "p": [
+       38,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 0.75,
+      "p": [
+       30,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 1.12,
+      "p": [
+       22,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 1.5,
+      "p": [
+       14.01,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 1.88,
+      "p": [
+       6.01,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 2.25,
+      "p": [
+       -1.99,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 2.62,
+      "p": [
+       -9.99,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 3,
+      "p": [
+       -17.99,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 3.38,
+      "p": [
+       -25.99,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 3.75,
+      "p": [
+       -33.99,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 4.12,
+      "p": [
+       -41.99,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 4.5,
+      "p": [
+       -49.98,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 4.88,
+      "p": [
+       -57.98,
+       0,
+       -42
+      ]
+     },
+     {
+      "t": 5.25,
+      "p": [
+       -65.96,
+       0,
+       -41.57
+      ]
+     },
+     {
+      "t": 5.62,
+      "p": [
+       -73.72,
+       0,
+       -39.69
+      ]
+     },
+     {
+      "t": 6,
+      "p": [
+       -80.99,
+       0,
+       -36.38
+      ]
+     },
+     {
+      "t": 6.38,
+      "p": [
+       -87.5,
+       0,
+       -31.75
+      ]
+     },
+     {
+      "t": 6.75,
+      "p": [
+       -93.01,
+       0,
+       -25.97
+      ]
+     },
+     {
+      "t": 7.12,
+      "p": [
+       -97.33,
+       0,
+       -19.25
+      ]
+     },
+     {
+      "t": 7.5,
+      "p": [
+       -100.3,
+       0,
+       -11.84
+      ]
+     },
+     {
+      "t": 7.88,
+      "p": [
+       -101.81,
+       0,
+       -4
+      ]
+     },
+     {
+      "t": 8.25,
+      "p": [
+       -101.81,
+       0,
+       3.99
+      ]
+     },
+     {
+      "t": 8.62,
+      "p": [
+       -100.3,
+       0,
+       11.83
+      ]
+     },
+     {
+      "t": 9,
+      "p": [
+       -97.33,
+       0,
+       19.25
+      ]
+     },
+     {
+      "t": 9.38,
+      "p": [
+       -93.01,
+       0,
+       25.97
+      ]
+     },
+     {
+      "t": 9.75,
+      "p": [
+       -87.5,
+       0,
+       31.75
+      ]
+     },
+     {
+      "t": 10.12,
+      "p": [
+       -80.99,
+       0,
+       36.38
+      ]
+     },
+     {
+      "t": 10.5,
+      "p": [
+       -73.73,
+       0,
+       39.69
+      ]
+     },
+     {
+      "t": 10.88,
+      "p": [
+       -65.97,
+       0,
+       41.57
+      ]
+     },
+     {
+      "t": 11.25,
+      "p": [
+       -57.99,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 11.62,
+      "p": [
+       -49.99,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 12,
+      "p": [
+       -41.99,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 12.38,
+      "p": [
+       -33.99,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 12.75,
+      "p": [
+       -25.99,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 13.12,
+      "p": [
+       -17.99,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 13.5,
+      "p": [
+       -9.99,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 13.88,
+      "p": [
+       -2,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 14.25,
+      "p": [
+       6,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 14.62,
+      "p": [
+       14,
+       0,
+       42
+      ]
+     },
+     {
+      "t": 15,
+      "p": [
+       22,
+       0,
+       42
+      ]
+     }
+    ],
+    "parent": null,
+    "sheets": [
+     {
+      "id": "s2mk946c3",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:08:08.457Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "paqgnsu2",
+          "requestId": "f8629fe5-2695-4ace-a1e9-87d6c5181cae",
+          "referenceId": "720d75f5-6946-46b3-a015-67c032abff75",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 205347,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:08.457Z"
+         }
+        ],
+        "selected": "paqgnsu2",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "6hzv9de5",
+          "requestId": "1263a04d-5879-4ccd-95fd-0abf423b1dce",
+          "referenceId": "14e91a80-a7e0-49be-af97-340d26d805cf",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 588790,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:08.457Z"
+         }
+        ],
+        "selected": "6hzv9de5",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "at26nx0n",
+          "requestId": "cdde60a7-7090-4c2a-9de8-e6e336d3dfbc",
+          "referenceId": "5be0f880-c43f-493c-a634-07990811a3db",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 232166,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:08.457Z"
+         }
+        ],
+        "selected": "at26nx0n",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "69uizmp3",
+          "requestId": "b31b399c-623a-4464-b016-4b270e28987e",
+          "referenceId": "22834a74-2ef2-4568-acd6-12c5b20fda5b",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 31428,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:08.457Z"
+         }
+        ],
+        "selected": "69uizmp3",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "5152add7-b749-4ce5-a4de-1aea29da0857",
+    "name": "Rival car",
+    "kind": "vehicle",
+    "shape": "car",
+    "position": [
+     48,
+     0,
+     -43
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#16181A",
+    "notes": "Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos.",
+    "look": "d055de8a-bf7e-4cd5-aaf0-88dacf52b4e0",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": [
+     {
+      "t": 0,
+      "p": [
+       36,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 0.38,
+      "p": [
+       28.77,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 0.75,
+      "p": [
+       21.54,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 1.12,
+      "p": [
+       14.31,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 1.5,
+      "p": [
+       7.08,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 1.88,
+      "p": [
+       -0.15,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 2.25,
+      "p": [
+       -7.39,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 2.62,
+      "p": [
+       -14.62,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 3,
+      "p": [
+       -21.85,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 3.38,
+      "p": [
+       -29.08,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 3.75,
+      "p": [
+       -36.31,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 4.12,
+      "p": [
+       -43.54,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 4.5,
+      "p": [
+       -50.77,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 4.88,
+      "p": [
+       -58,
+       0,
+       -37
+      ]
+     },
+     {
+      "t": 5.25,
+      "p": [
+       -65.22,
+       0,
+       -36.63
+      ]
+     },
+     {
+      "t": 5.62,
+      "p": [
+       -72.23,
+       0,
+       -34.92
+      ]
+     },
+     {
+      "t": 6,
+      "p": [
+       -78.78,
+       0,
+       -31.88
+      ]
+     },
+     {
+      "t": 6.38,
+      "p": [
+       -84.61,
+       0,
+       -27.63
+      ]
+     },
+     {
+      "t": 6.75,
+      "p": [
+       -89.51,
+       0,
+       -22.32
+      ]
+     },
+     {
+      "t": 7.12,
+      "p": [
+       -93.28,
+       0,
+       -16.17
+      ]
+     },
+     {
+      "t": 7.5,
+      "p": [
+       -95.79,
+       0,
+       -9.4
+      ]
+     },
+     {
+      "t": 7.88,
+      "p": [
+       -96.93,
+       0,
+       -2.27
+      ]
+     },
+     {
+      "t": 8.25,
+      "p": [
+       -96.67,
+       0,
+       4.95
+      ]
+     },
+     {
+      "t": 8.62,
+      "p": [
+       -95.01,
+       0,
+       11.97
+      ]
+     },
+     {
+      "t": 9,
+      "p": [
+       -92.02,
+       0,
+       18.54
+      ]
+     },
+     {
+      "t": 9.38,
+      "p": [
+       -87.81,
+       0,
+       24.41
+      ]
+     },
+     {
+      "t": 9.75,
+      "p": [
+       -82.54,
+       0,
+       29.34
+      ]
+     },
+     {
+      "t": 10.12,
+      "p": [
+       -76.41,
+       0,
+       33.16
+      ]
+     },
+     {
+      "t": 10.5,
+      "p": [
+       -69.66,
+       0,
+       35.72
+      ]
+     },
+     {
+      "t": 10.88,
+      "p": [
+       -62.54,
+       0,
+       36.91
+      ]
+     },
+     {
+      "t": 11.25,
+      "p": [
+       -55.31,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 11.62,
+      "p": [
+       -48.08,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 12,
+      "p": [
+       -40.85,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 12.38,
+      "p": [
+       -33.62,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 12.75,
+      "p": [
+       -26.39,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 13.12,
+      "p": [
+       -19.15,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 13.5,
+      "p": [
+       -11.92,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 13.88,
+      "p": [
+       -4.69,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 14.25,
+      "p": [
+       2.54,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 14.62,
+      "p": [
+       9.77,
+       0,
+       37
+      ]
+     },
+     {
+      "t": 15,
+      "p": [
+       17,
+       0,
+       37
+      ]
+     }
+    ],
+    "parent": null,
+    "sheets": [
+     {
+      "id": "sk5vjrl9n",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:08:08.457Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "d78yislh",
+          "requestId": "a2b98fd3-1bc2-468c-8f99-11c927a01af7",
+          "referenceId": "e0be5636-cee2-45cd-9a45-70347f14e34e",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 245735,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:08.457Z"
+         }
+        ],
+        "selected": "d78yislh",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "yvw7bxef",
+          "requestId": "b2ba5939-2afe-4546-bd07-0e01aa2307d6",
+          "referenceId": "e8ed9903-53f6-405d-bf5a-5de2f3d39b0b",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 821944,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:08.457Z"
+         }
+        ],
+        "selected": "yvw7bxef",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "5l3hg83g",
+          "requestId": "81d285b2-7048-4752-9d59-1810a19d0031",
+          "referenceId": "049fd30d-6586-4475-a535-6394d25253b0",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 219241,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:08.457Z"
+         }
+        ],
+        "selected": "5l3hg83g",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "fsnud83e",
+          "requestId": "1a76325e-5ea7-4658-8ca4-03b995d4764c",
+          "referenceId": "9fa59941-5298-4ea9-bfda-e5b6c8ab419d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 527148,
+          "error": "",
+          "createdAt": "2026-10-30T17:08:08.457Z"
+         }
+        ],
+        "selected": "fsnud83e",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+    "name": "Fan with phone",
+    "kind": "character",
+    "shape": "person",
+    "position": [
+     9.6,
+     0,
+     50.2
+    ],
+    "rotation": 180,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#E0A040",
+    "notes": "Excited race fan in a yellow Comfy cap and blue t-shirt, holding up a phone to film the finish.",
+    "look": "599fbd2f-aa79-41e5-9748-9564f1c28d00",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null,
+    "sheets": [
+     {
+      "id": "sn7ef9n1l",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:15:52.489Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "lc24le90",
+          "requestId": "e92c20b7-918e-4a51-848d-8288767aa7be",
+          "referenceId": "3bb61c35-ce2b-464d-b71e-d859743896e0",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 463788,
+          "error": "",
+          "createdAt": "2026-10-30T17:15:52.489Z"
+         }
+        ],
+        "selected": "lc24le90",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "mjo4eaqs",
+          "requestId": "1260a9f2-529e-4c81-bbf7-69e040f6a959",
+          "referenceId": "5cfdcac1-f1a2-4a86-8495-7fc4550d2ef2",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 729118,
+          "error": "",
+          "createdAt": "2026-10-30T17:15:52.489Z"
+         }
+        ],
+        "selected": "mjo4eaqs",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "93frx2xw",
+          "requestId": "f28f9bed-4e32-4fab-8cc1-ce1d0b59d51d",
+          "referenceId": "6827b1ae-07a3-4e9d-bb77-4036ca39e852",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 691201,
+          "error": "",
+          "createdAt": "2026-10-30T17:15:52.489Z"
+         }
+        ],
+        "selected": "93frx2xw",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "vax7pbrh",
+          "requestId": "6976577a-e9cf-4378-8baa-91b9d1d0cc8d",
+          "referenceId": "25933768-9453-448f-9db2-29a8ef8bd126",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 903641,
+          "error": "",
+          "createdAt": "2026-10-30T17:15:52.489Z"
+         }
+        ],
+        "selected": "vax7pbrh",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d",
+    "name": "Turns 1\u20132",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     85.53750000000002,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "ed28a388-bdbd-4faf-a41e-0476940a0e2a",
+    "name": "Turns 3\u20134",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     -85.53750000000002,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "00a1d9ec-8bc9-4030-8806-0952f7447aaa",
+    "name": "Oval track",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     0.6250000000000049,
+     0,
+     3.7500000000000004
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "955a776a-b960-4e80-91be-4060a7be2182",
+    "name": "Grandstands",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     1.853589745461131e-15,
+     0,
+     3.0434782608695654
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9",
+    "name": "Light towers",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     0,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "230b7768-07a6-444d-b467-749f42173a79",
+    "name": "Front stretch 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     0,
+     40
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "Banked asphalt racing surface, white lane lines, tyre rubber marks.",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "a90faaf6-3016-4794-957b-577930322b12",
+    "name": "Front stretch 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     0,
+     40
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "1d7115f6-cb7d-44dd-a205-bca52147f52f",
+    "name": "Front stretch 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     0,
+     40
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "96d8c102-ca1d-4942-b6e6-d4baf94c0629",
+    "name": "Back stretch 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     0,
+     -40
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "Asphalt back straight.",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "0e25b0c9-6698-4558-8d74-6aca859f9639",
+    "name": "Back stretch 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     0,
+     -40
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "d3737908-b1c7-4344-87d4-56036a4fcaae",
+    "name": "Back stretch 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     0,
+     -40
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     0.08,
+     14
+    ],
+    "color": "#3b3d42",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "e7918a79-8b59-4e45-bcb6-38ee6f015e63",
+    "name": "Outer wall \u00b7 front 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     0.6,
+     47.5
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     1.2,
+     0.4
+    ],
+    "color": "#e8e4dc",
+    "notes": "SAFER barrier wall with catch fence.",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "b2036080-0c39-4c8f-bbd3-583072538a2c",
+    "name": "Outer wall \u00b7 front 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     0.6,
+     47.5
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     1.2,
+     0.4
+    ],
+    "color": "#e8e4dc",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "1acc900a-8dec-4725-a23f-3bfae2b41544",
+    "name": "Outer wall \u00b7 front 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     0.6,
+     47.5
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     1.2,
+     0.4
+    ],
+    "color": "#e8e4dc",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "b200f2ef-56f4-492b-aaa9-fc3186713f8f",
+    "name": "Pit wall 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     0.5,
+     32.5
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     1,
+     0.4
+    ],
+    "color": "#e8e4dc",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "bc016ee4-24f1-40bb-a9b3-39a9a54e8977",
+    "name": "Pit wall 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     0.5,
+     32.5
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     1,
+     0.4
+    ],
+    "color": "#e8e4dc",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "fb447006-5364-4d7a-bd01-51c7ff0bb5b6",
+    "name": "Pit wall 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     0.5,
+     32.5
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     1,
+     0.4
+    ],
+    "color": "#e8e4dc",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "dceb46f3-70ff-496c-aaa8-e513b0728066",
+    "name": "Front stretch stands \u00b7 tier 1 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     1.5,
+     54
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     3,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "f6a3e725-aac5-41e6-8715-8e1eeba14b04",
+    "name": "Front stretch stands \u00b7 tier 1 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     1.5,
+     54
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     3,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "430f9374-2e95-44c6-87f7-109b2fc0a968",
+    "name": "Front stretch stands \u00b7 tier 1 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     1.5,
+     54
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     3,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "dce986d2-52e5-4184-908e-4462a6bae885",
+    "name": "Front stretch stands \u00b7 tier 2 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     4.5,
+     58
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     6,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "4ae39a2a-a31f-46c8-94a2-2dfc0279b07e",
+    "name": "Front stretch stands \u00b7 tier 2 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     4.5,
+     58
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     6,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "7423f5c9-a24a-4066-8b50-018a1323faa7",
+    "name": "Front stretch stands \u00b7 tier 2 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     4.5,
+     58
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     6,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "cbbf718f-447b-4261-afb9-b755ac69c482",
+    "name": "Front stretch stands \u00b7 tier 3 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     7.5,
+     62
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     9,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "5b52cb5a-37a5-4bfe-81a0-a028823917b6",
+    "name": "Front stretch stands \u00b7 tier 3 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     7.5,
+     62
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     9,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "1c098657-9858-49b3-a7a3-92d6defe5f29",
+    "name": "Front stretch stands \u00b7 tier 3 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     7.5,
+     62
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     9,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "bd19c9b1-08f5-450a-9536-a0f131309f6e",
+    "name": "Back stretch stands \u00b7 tier 1 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     1.5,
+     -54
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     3,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "3e1183e5-fc40-4a83-9178-3cd0cb83f726",
+    "name": "Back stretch stands \u00b7 tier 1 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     1.5,
+     -54
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     3,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "979143d7-b3b9-463e-808d-17420e3c4f60",
+    "name": "Back stretch stands \u00b7 tier 1 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     1.5,
+     -54
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     3,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "6e68917f-9837-418d-ba03-d4c84808957f",
+    "name": "Back stretch stands \u00b7 tier 2 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     4.5,
+     -58
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     6,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "4839eefc-1d96-4e05-b103-1271de2c3cd5",
+    "name": "Back stretch stands \u00b7 tier 2 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     4.5,
+     -58
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     6,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "a34ebe26-8db2-4561-9ea1-14aa8a36cd0b",
+    "name": "Back stretch stands \u00b7 tier 2 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     4.5,
+     -58
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     6,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "d2eee31b-8af2-4592-88c9-57886439bff4",
+    "name": "Back stretch stands \u00b7 tier 3 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     7.5,
+     -62
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     9,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "e100abd7-11ba-47b0-9e7e-4120ccaae28b",
+    "name": "Back stretch stands \u00b7 tier 3 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     7.5,
+     -62
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     9,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "8bb298fe-163a-4bbc-a1ec-4e1a4bf4ac41",
+    "name": "Back stretch stands \u00b7 tier 3 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     7.5,
+     -62
+    ],
+    "rotation": 0,
+    "scale": [
+     40.2,
+     9,
+     4
+    ],
+    "color": "#8d929b",
+    "notes": "",
+    "look": null,
+    "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+   },
+   {
+    "id": "eb3c70ef-8f9f-4146-b800-9cb8b5f0d690",
+    "name": "Infield grass 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     -40,
+     -0.05,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     40,
+     0.1,
+     50
+    ],
+    "color": "#4f7a3e",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   },
+   {
+    "id": "232d1f3b-6c6b-491a-bb31-8e61b273efbe",
+    "name": "Infield grass 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     40,
+     -0.05,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     40,
+     0.1,
+     50
+    ],
+    "color": "#4f7a3e",
+    "notes": "",
+    "look": null,
+    "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+   }
+  ],
+  "references": [
+   {
+    "id": "276e8e15-ec39-4603-b126-5d315a23575e",
+    "name": "Comfy car \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "276e8e15-ec39-4603-b126-5d315a23575e.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "note": "",
+    "createdAt": "2026-10-30T15:12:33.523Z"
+   },
+   {
+    "id": "d055de8a-bf7e-4cd5-aaf0-88dacf52b4e0",
+    "name": "Rival car \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "d055de8a-bf7e-4cd5-aaf0-88dacf52b4e0.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+    "note": "",
+    "createdAt": "2026-10-30T15:13:14.540Z"
+   },
+   {
+    "id": "599fbd2f-aa79-41e5-9748-9564f1c28d00",
+    "name": "Fan with phone \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "599fbd2f-aa79-41e5-9748-9564f1c28d00.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+    "note": "",
+    "createdAt": "2026-10-30T15:14:01.411Z"
+   },
+   {
+    "id": "af44fb66-a223-45ae-9894-0ee3ee325357",
+    "name": "Flag stand \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "af44fb66-a223-45ae-9894-0ee3ee325357.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+    "note": "",
+    "createdAt": "2026-10-30T15:18:52.792Z"
+   },
+   {
+    "id": "55174ba8-4e18-4f7b-b30d-495c98b33441",
+    "name": "Flag stand \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "55174ba8-4e18-4f7b-b30d-495c98b33441.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+    "note": "",
+    "createdAt": "2026-10-30T15:19:03.274Z"
+   },
+   {
+    "id": "720d75f5-6946-46b3-a015-67c032abff75",
+    "name": "Comfy car \u00b7 Front",
+    "file": "720d75f5-6946-46b3-a015-67c032abff75.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "note": "sheet:s2mk946c3:front",
+    "createdAt": "2026-10-30T17:09:02.791Z"
+   },
+   {
+    "id": "e0be5636-cee2-45cd-9a45-70347f14e34e",
+    "name": "Rival car \u00b7 Front",
+    "file": "e0be5636-cee2-45cd-9a45-70347f14e34e.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+    "note": "sheet:sk5vjrl9n:front",
+    "createdAt": "2026-10-30T17:09:04.813Z"
+   },
+   {
+    "id": "14e91a80-a7e0-49be-af97-340d26d805cf",
+    "name": "Comfy car \u00b7 Left side",
+    "file": "14e91a80-a7e0-49be-af97-340d26d805cf.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "note": "sheet:s2mk946c3:left-side",
+    "createdAt": "2026-10-30T17:09:10.774Z"
+   },
+   {
+    "id": "e8ed9903-53f6-405d-bf5a-5de2f3d39b0b",
+    "name": "Rival car \u00b7 Left side",
+    "file": "e8ed9903-53f6-405d-bf5a-5de2f3d39b0b.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+    "note": "sheet:sk5vjrl9n:left-side",
+    "createdAt": "2026-10-30T17:09:18.589Z"
+   },
+   {
+    "id": "22834a74-2ef2-4568-acd6-12c5b20fda5b",
+    "name": "Comfy car \u00b7 Right side",
+    "file": "22834a74-2ef2-4568-acd6-12c5b20fda5b.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "note": "sheet:s2mk946c3:right-side",
+    "createdAt": "2026-10-30T17:09:49.892Z"
+   },
+   {
+    "id": "5be0f880-c43f-493c-a634-07990811a3db",
+    "name": "Comfy car \u00b7 Back",
+    "file": "5be0f880-c43f-493c-a634-07990811a3db.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "note": "sheet:s2mk946c3:back",
+    "createdAt": "2026-10-30T17:10:02.453Z"
+   },
+   {
+    "id": "7fbc720a-fd3e-4c84-8dd5-00c1c30c95e1",
+    "name": "Comfy car \u00b7 design sheet",
+    "file": "7fbc720a-fd3e-4c84-8dd5-00c1c30c95e1.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "note": "sheet:s2mk946c3:composed",
+    "createdAt": "2026-10-30T17:10:04.637Z"
+   },
+   {
+    "id": "049fd30d-6586-4475-a535-6394d25253b0",
+    "name": "Rival car \u00b7 Back",
+    "file": "049fd30d-6586-4475-a535-6394d25253b0.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+    "note": "sheet:sk5vjrl9n:back",
+    "createdAt": "2026-10-30T17:10:13.085Z"
+   },
+   {
+    "id": "9fa59941-5298-4ea9-bfda-e5b6c8ab419d",
+    "name": "Rival car \u00b7 Right side",
+    "file": "9fa59941-5298-4ea9-bfda-e5b6c8ab419d.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+    "note": "sheet:sk5vjrl9n:right-side",
+    "createdAt": "2026-10-30T17:10:22.014Z"
+   },
+   {
+    "id": "6ddc8e6b-612d-4552-81c0-5dc5b270f89c",
+    "name": "Rival car \u00b7 design sheet",
+    "file": "6ddc8e6b-612d-4552-81c0-5dc5b270f89c.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+    "note": "sheet:sk5vjrl9n:composed",
+    "createdAt": "2026-10-30T17:10:25.203Z"
+   },
+   {
+    "id": "d1960cda-7831-4007-b412-c67f9679d24c",
+    "name": "Flag stand \u00b7 Front",
+    "file": "d1960cda-7831-4007-b412-c67f9679d24c.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+    "note": "sheet:spbu7uvxd:front",
+    "createdAt": "2026-10-30T17:14:40.175Z"
+   },
+   {
+    "id": "9b8eb335-6148-47ea-b0e6-4117abc94489",
+    "name": "Flag stand \u00b7 Left side",
+    "file": "9b8eb335-6148-47ea-b0e6-4117abc94489.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+    "note": "sheet:spbu7uvxd:left-side",
+    "createdAt": "2026-10-30T17:14:48.387Z"
+   },
+   {
+    "id": "c96e9757-0771-4a63-9388-53d063c39bfb",
+    "name": "Flag stand \u00b7 Back",
+    "file": "c96e9757-0771-4a63-9388-53d063c39bfb.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+    "note": "sheet:spbu7uvxd:back",
+    "createdAt": "2026-10-30T17:14:49.716Z"
+   },
+   {
+    "id": "7ba8b373-2791-4c30-b365-812ec9f5b6e8",
+    "name": "Flag stand \u00b7 Right side",
+    "file": "7ba8b373-2791-4c30-b365-812ec9f5b6e8.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+    "note": "sheet:spbu7uvxd:right-side",
+    "createdAt": "2026-10-30T17:16:07.921Z"
+   },
+   {
+    "id": "f7c96983-b5bf-41e3-bfb5-daefb5fa162a",
+    "name": "Flag stand \u00b7 design sheet",
+    "file": "f7c96983-b5bf-41e3-bfb5-daefb5fa162a.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+    "note": "sheet:spbu7uvxd:composed",
+    "createdAt": "2026-10-30T17:16:12.926Z"
+   },
+   {
+    "id": "da9b4a56-d9d5-45c8-8a5d-d1994951aa89",
+    "name": "Infield grass \u00b7 Flux.2 [pro] \u00b7 681099",
+    "file": "da9b4a56-d9d5-45c8-8a5d-d1994951aa89.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+    "note": "",
+    "createdAt": "2026-10-30T17:16:51.148Z"
+   },
+   {
+    "id": "3bb61c35-ce2b-464d-b71e-d859743896e0",
+    "name": "Fan with phone \u00b7 Front",
+    "file": "3bb61c35-ce2b-464d-b71e-d859743896e0.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+    "note": "sheet:sn7ef9n1l:front",
+    "createdAt": "2026-10-30T17:16:55.378Z"
+   },
+   {
+    "id": "5cfdcac1-f1a2-4a86-8495-7fc4550d2ef2",
+    "name": "Fan with phone \u00b7 Left",
+    "file": "5cfdcac1-f1a2-4a86-8495-7fc4550d2ef2.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+    "note": "sheet:sn7ef9n1l:left",
+    "createdAt": "2026-10-30T17:17:10.147Z"
+   },
+   {
+    "id": "6827b1ae-07a3-4e9d-bb77-4036ca39e852",
+    "name": "Fan with phone \u00b7 Back",
+    "file": "6827b1ae-07a3-4e9d-bb77-4036ca39e852.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+    "note": "sheet:sn7ef9n1l:back",
+    "createdAt": "2026-10-30T17:20:38.337Z"
+   },
+   {
+    "id": "249933ae-32dd-49d2-a618-3b51fc8321da",
+    "name": "Turns 3\u20134 \u00b7 surface 1 \u00b7 Flux.2 [pro] \u00b7 214963",
+    "file": "249933ae-32dd-49d2-a618-3b51fc8321da.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+    "note": "",
+    "createdAt": "2026-10-30T17:20:57.590Z"
+   },
+   {
+    "id": "25933768-9453-448f-9db2-29a8ef8bd126",
+    "name": "Fan with phone \u00b7 Right",
+    "file": "25933768-9453-448f-9db2-29a8ef8bd126.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+    "note": "sheet:sn7ef9n1l:right",
+    "createdAt": "2026-10-30T17:21:08.947Z"
+   },
+   {
+    "id": "3a382c2e-a790-441e-9aad-2f1347040d56",
+    "name": "Fan with phone \u00b7 design sheet",
+    "file": "3a382c2e-a790-441e-9aad-2f1347040d56.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+    "note": "sheet:sn7ef9n1l:composed",
+    "createdAt": "2026-10-30T17:21:11.141Z"
+   },
+   {
+    "id": "32a704e5-08df-4945-8261-8a88c28134e2",
+    "name": "Turns 3\u20134 stands 1 \u00b7 Flux.2 [pro] \u00b7 806441",
+    "file": "32a704e5-08df-4945-8261-8a88c28134e2.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+    "note": "",
+    "createdAt": "2026-10-30T17:21:22.652Z"
+   },
+   {
+    "id": "e1e295c4-cc73-41ed-9175-511b26559fcc",
+    "name": "Turns 1\u20132 \u00b7 surface 1 \u00b7 Flux.2 [pro] \u00b7 295042",
+    "file": "e1e295c4-cc73-41ed-9175-511b26559fcc.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "dcbcd81f-7482-4997-8d81-ab776564be69",
+    "note": "",
+    "createdAt": "2026-10-30T17:22:32.300Z"
+   }
+  ]
+ },
+ "shots": [
+  {
+   "id": "f686194e-b8b4-4b88-a531-92667d29a84c",
+   "title": "Final lap",
+   "description": "High aerial sweeping down behind @rival-car and @comfy-car as they exit turn four side by side onto the front stretch, the grandstands roaring.",
+   "duration": 4,
+   "start": 4,
+   "camera": {
+    "move": "crane-down",
+    "target": "5152add7-b749-4ce5-a4de-1aea29da0857",
+    "distance": 22,
+    "height": 10,
+    "angle": 150,
+    "mm": 40,
+    "keys": null
+   },
+   "references": [
+    {
+     "id": "6dbc2105-536c-4dfa-9c01-58ebe018cfcd",
+     "name": "Shot 01 Final lap \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "6dbc2105-536c-4dfa-9c01-58ebe018cfcd.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T15:29:34.091Z"
+    },
+    {
+     "id": "a69c3446-c5bd-4b98-89a1-e299146ca785",
+     "name": "Shot 01 Final lap \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "a69c3446-c5bd-4b98-89a1-e299146ca785.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame end",
+     "createdAt": "2026-10-30T15:31:05.340Z"
+    },
+    {
+     "id": "255efa4d-4d17-4644-afdd-f90cfcd6ef47",
+     "name": "Shot 01 Final lap \u00b7 Flux.2 [pro] \u00b7 388715",
+     "file": "255efa4d-4d17-4644-afdd-f90cfcd6ef47.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:45:11.705Z"
+    },
+    {
+     "id": "655db797-f56f-40be-b3ee-dd179c1fcf4b",
+     "name": "Shot 01 Final lap \u00b7 FLUX 3 Image \u00b7 638146",
+     "file": "655db797-f56f-40be-b3ee-dd179c1fcf4b.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T19:52:09.510Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "crane down",
+     "drone flyover"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "35mm natural"
+    ],
+    "filter": [
+     "saturated primaries"
+    ]
+   }
+  },
+  {
+   "id": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+   "title": "The draft",
+   "description": "Low tracking shot alongside as @comfy-car pulls out of @rival-car's draft and draws level.",
+   "duration": 4,
+   "start": 8,
+   "camera": {
+    "move": "truck-right",
+    "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "distance": 8,
+    "height": 1.8,
+    "angle": -90,
+    "mm": 35,
+    "keys": null
+   },
+   "references": [
+    {
+     "id": "2b1d4fc5-54e3-45c4-be50-5546d2abb9b6",
+     "name": "Shot 02 The draft \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "2b1d4fc5-54e3-45c4-be50-5546d2abb9b6.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T15:34:47.875Z"
+    },
+    {
+     "id": "3c7a11c2-fb2c-469d-b66f-7f7dde464db3",
+     "name": "Shot 02 The draft \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "3c7a11c2-fb2c-469d-b66f-7f7dde464db3.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame end",
+     "createdAt": "2026-10-30T15:41:42.231Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "dolly alongside",
+     "tracking shot"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "35mm natural"
+    ],
+    "filter": [
+     "saturated primaries"
+    ]
+   }
+  },
+  {
+   "id": "62ca4116-75ee-47e7-8b57-dd934421c864",
+   "title": "From the stands",
+   "description": "Handheld point of view from the front-stretch stands as @rival-car and @comfy-car thunder side by side toward the line, the crowd's arms in the bottom of frame.",
+   "duration": 4,
+   "start": 11,
+   "camera": {
+    "move": "custom",
+    "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "distance": 20,
+    "height": 11,
+    "angle": 20,
+    "mm": 26,
+    "keys": [
+     {
+      "t": 0,
+      "p": [
+       9,
+       3.3,
+       50.2
+      ],
+      "look": [
+       -72.71,
+       0.8,
+       39.94
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.083,
+      "p": [
+       9.04,
+       3.27,
+       50.22
+      ],
+      "look": [
+       -66.52,
+       0.53,
+       41.47
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.167,
+      "p": [
+       8.97,
+       3.35,
+       50.16
+      ],
+      "look": [
+       -61.17,
+       1.17,
+       41.6
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.25,
+      "p": [
+       9.05,
+       3.32,
+       50.23
+      ],
+      "look": [
+       -52.21,
+       0.96,
+       42.27
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.333,
+      "p": [
+       8.95,
+       3.26,
+       50.21
+      ],
+      "look": [
+       -42.61,
+       0.57,
+       42
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.417,
+      "p": [
+       9.02,
+       3.36,
+       50.17
+      ],
+      "look": [
+       -30.89,
+       1.05,
+       41.79
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.5,
+      "p": [
+       8.96,
+       3.28,
+       50.25
+      ],
+      "look": [
+       -19.68,
+       0.75,
+       42.1
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.583,
+      "p": [
+       9.06,
+       3.33,
+       50.18
+      ],
+      "look": [
+       -11.28,
+       0.9,
+       41.94
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.667,
+      "p": [
+       8.98,
+       3.25,
+       50.24
+      ],
+      "look": [
+       -6.55,
+       0.71,
+       42.09
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.75,
+      "p": [
+       9.03,
+       3.34,
+       50.15
+      ],
+      "look": [
+       -0.43,
+       0.84,
+       41.95
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.833,
+      "p": [
+       8.94,
+       3.31,
+       50.22
+      ],
+      "look": [
+       6.68,
+       0.81,
+       42.02
+      ],
+      "mm": 26
+     },
+     {
+      "t": 0.917,
+      "p": [
+       9.04,
+       3.27,
+       50.17
+      ],
+      "look": [
+       14.6,
+       0.77,
+       41.98
+      ],
+      "mm": 26
+     },
+     {
+      "t": 1,
+      "p": [
+       9,
+       3.32,
+       50.2
+      ],
+      "look": [
+       22,
+       0.83,
+       42
+      ],
+      "mm": 26
+     }
+    ]
+   },
+   "references": [
+    {
+     "id": "cd82f53c-1247-4381-b1e8-62f37de08c6d",
+     "name": "Shot 03 From the stands \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "cd82f53c-1247-4381-b1e8-62f37de08c6d.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T15:36:53.765Z"
+    },
+    {
+     "id": "468f5965-eba6-447c-84e9-0366468540d3",
+     "name": "Shot 03 From the stands \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "468f5965-eba6-447c-84e9-0366468540d3.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame end",
+     "createdAt": "2026-10-30T15:46:08.308Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "handheld"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "24mm wide"
+    ],
+    "filter": [
+     "high contrast"
+    ]
+   }
+  },
+  {
+   "id": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
+   "title": "Checkered flag",
+   "description": "Low angle at the start-finish line: @comfy-car blurs past and takes the checkered flag by a nose from @rival-car, the flag snapping above.",
+   "duration": 3,
+   "start": 12,
+   "camera": {
+    "move": "static",
+    "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+    "distance": 12,
+    "height": 0.6,
+    "angle": 120,
+    "mm": 24,
+    "keys": null
+   },
+   "references": [
+    {
+     "id": "7908fcc3-e9e0-4698-a743-2161345c68b5",
+     "name": "Shot 04 Checkered flag \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "7908fcc3-e9e0-4698-a743-2161345c68b5.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T15:43:42.313Z"
+    },
+    {
+     "id": "6dbcc531-af49-4a3f-b763-13a73ce59df2",
+     "name": "Shot 04 Checkered flag \u00b7 Flux.2 [pro] \u00b7 132909",
+     "file": "6dbcc531-af49-4a3f-b763-13a73ce59df2.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:45:21.008Z"
+    },
+    {
+     "id": "dd86859a-dcc9-4987-8f96-8752f2c7266b",
+     "name": "Shot 04 Checkered flag \u00b7 FLUX 3 Image \u00b7 793786",
+     "file": "dd86859a-dcc9-4987-8f96-8752f2c7266b.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T19:52:26.655Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": [
+     "9d6d1c24-cd50-482c-becf-ce4997f08c81"
+    ]
+   },
+   "style": {
+    "movement": [
+     "static locked-off shot"
+    ],
+    "cuts": [
+     "speed ramp"
+    ],
+    "lens": [
+     "24mm wide"
+    ],
+    "filter": [
+     "high contrast"
+    ]
+   }
+  }
+ ],
+ "note": "Copied from the live starter project on 30 Oct 2026 (generation provenance, assets and messages removed) for auto-prompt tests."
+}

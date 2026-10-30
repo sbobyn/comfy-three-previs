@@ -1,0 +1,1595 @@
+{
+ "version": 1,
+ "id": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+ "title": "Starter \u00b7 Breaking News",
+ "template": "empty",
+ "scene": {
+  "name": "News studio",
+  "environment": {
+   "preset": "interior",
+   "description": "A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.",
+   "style": "Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+  },
+  "entities": [
+   {
+    "id": "21c28a69-7b8d-4067-92e7-1f4e7ac9ad0c",
+    "name": "Studio floor",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     0,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     22,
+     0.05,
+     16
+    ],
+    "color": "#1b2230",
+    "notes": "Glossy dark blue studio floor with soft reflections.",
+    "look": "1aa40561-9161-404b-98ac-8cd91dc5220f",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+    "name": "Video wall",
+    "kind": "prop",
+    "shape": "wall",
+    "position": [
+     0,
+     0,
+     -4.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.5,
+     1.4,
+     1
+    ],
+    "color": "#2459D8",
+    "notes": "Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall.",
+    "look": "c75bd63b-2e06-465a-bc0c-e04c285f15da",
+    "lookFrom": null,
+    "styleNotes": "Clean broadcast motion graphics, crisp, no small type",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null,
+    "sheets": [
+     {
+      "id": "svfgnlsje",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:45:28.336Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "kso0ubef",
+          "requestId": "1c4cc4a6-80bd-495d-a536-ded66918e1cd",
+          "referenceId": "23a01b5d-fafb-4e97-a25f-358e4fc16272",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 143002,
+          "error": "",
+          "createdAt": "2026-10-30T17:45:28.336Z"
+         }
+        ],
+        "selected": "kso0ubef",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "pxujf8jz",
+          "requestId": "b7823f5e-f1d6-457e-9839-a11356e44777",
+          "referenceId": "49b8be91-c3c1-4182-8ac5-b663d066114a",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 347770,
+          "error": "",
+          "createdAt": "2026-10-30T17:45:28.336Z"
+         }
+        ],
+        "selected": "pxujf8jz",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "bkl2moau",
+          "requestId": "0ccaaeee-edb9-4de2-8c99-290c802da791",
+          "referenceId": "96ec359d-4146-4262-a3b5-b5415be28793",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 574477,
+          "error": "",
+          "createdAt": "2026-10-30T17:45:28.336Z"
+         }
+        ],
+        "selected": "bkl2moau",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "1i3gg62z",
+          "requestId": "d8047ad7-e8e6-43f1-99ab-d63e4774d131",
+          "referenceId": "42b5a05d-6a4b-457c-aa06-d6a26a608fac",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 617436,
+          "error": "",
+          "createdAt": "2026-10-30T17:45:28.336Z"
+         }
+        ],
+        "selected": "1i3gg62z",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "05487127-2ec2-4198-a1e5-5deb7b109044",
+    "name": "Anchor desk",
+    "kind": "prop",
+    "shape": "table",
+    "position": [
+     0,
+     0,
+     -1
+    ],
+    "rotation": 0,
+    "scale": [
+     1.6,
+     1.4,
+     1.1
+    ],
+    "color": "#e9e4da",
+    "notes": "Sleek white news desk with a glowing blue and yellow front panel strip.",
+    "look": "fd2f4ad8-f728-4dd9-becb-41fe750eda5f",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null,
+    "sheets": [
+     {
+      "id": "s9uf5vgri",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:03:41.478Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "r9zs4ruy",
+          "requestId": "b936214f-21db-4ed9-8d33-e862520d8b02",
+          "referenceId": "f72f9d1a-2e29-4c18-8306-479c850a83b4",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 469273,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "r9zs4ruy",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "jmeb4clz",
+          "requestId": "0d34ab20-ee05-40f7-819d-1790ed95d8e6",
+          "referenceId": "49946eed-2b38-43ab-bba2-24ae9226b78d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 821755,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "jmeb4clz",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "aqrkcn3w",
+          "requestId": "9ed33b6f-6995-4886-a6f0-44cc214e2141",
+          "referenceId": "707c6d55-c4e5-4101-80b0-45cc77549626",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 464369,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "aqrkcn3w",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "sznyyoxo",
+          "requestId": "a95779a5-0b34-4f60-a10b-15e407653fd7",
+          "referenceId": "5611b966-172d-4ac0-bf5c-f7820a10dc2d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 525662,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "sznyyoxo",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "name": "News anchor",
+    "kind": "character",
+    "shape": "person",
+    "position": [
+     0,
+     0,
+     -1.9
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#1d2a44",
+    "notes": "Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera.",
+    "look": "d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8",
+    "lookFrom": null,
+    "styleNotes": "Same face in every shot: the man from the primary reference",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null,
+    "sheets": [
+     {
+      "id": "s3isfd1xq",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:03:41.478Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "ojr41ihv",
+          "requestId": "dcb930f7-2614-494a-b3d4-3db8669550e7",
+          "referenceId": "d7cc8cbb-fad9-4cea-ac60-eaefe94aa3b5",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 339311,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "ojr41ihv",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "335dyn1p",
+          "requestId": "c33db7fe-58b2-4856-a06d-9bdfe26b120d",
+          "referenceId": "3c1c1d07-682c-45c9-a894-a52c7ff56e6d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 343513,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "335dyn1p",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "sifsnvwd",
+          "requestId": "d2511b4f-f815-4d71-9290-ecc478d44f6f",
+          "referenceId": "9297cd14-5d9f-47b2-8f41-48bd4cf370c4",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 206706,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "sifsnvwd",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "3a88kp90",
+          "requestId": "240d7470-542e-4805-b6d0-1189c7c53265",
+          "referenceId": "0e8ddbbb-f20b-456b-8c0e-0ede0cc4bd1c",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 501492,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "3a88kp90",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+    "name": "Studio camera 1",
+    "kind": "prop",
+    "shape": "cylinder",
+    "position": [
+     -3.2,
+     0,
+     6
+    ],
+    "rotation": 20,
+    "scale": [
+     0.9,
+     1.3,
+     1.4
+    ],
+    "color": "#2a2d33",
+    "notes": "Broadcast studio camera on a pedestal with a teleprompter hood.",
+    "look": "3b52e08b-434a-40a2-aa95-308acd555e3f",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "5e9a4e39-fece-4f22-bb65-ac6946f124f5",
+    "sheets": [
+     {
+      "id": "sp0y8cdux",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:03:41.478Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "uemj90c0",
+          "requestId": "59d34559-784e-4d3a-bc96-58bbc6bf34cf",
+          "referenceId": "75ec092b-781c-4068-9138-782630d4497c",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 294345,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "uemj90c0",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "krpfeza0",
+          "requestId": "5dbc3cae-94c5-436c-baf7-5fad883d4a11",
+          "referenceId": "f0db3f10-6e31-4170-aa4c-ad9505acc33f",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 39326,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "krpfeza0",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "6suosypa",
+          "requestId": "f81ce4eb-854e-4d3f-922c-4fdf1cb5b90e",
+          "referenceId": "3239b061-b080-42e8-af46-42e9d864ba64",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 822299,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "6suosypa",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "pil8y3g6",
+          "requestId": "a162babd-b365-4957-8275-872d90660d26",
+          "referenceId": "0f388fb2-4b81-4b20-8f3a-f30f31e08639",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 12367,
+          "error": "",
+          "createdAt": "2026-10-30T17:03:41.478Z"
+         }
+        ],
+        "selected": "pil8y3g6",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "13ac6cbd-a7fe-4a15-b160-763e2680bc53",
+    "name": "Studio camera 2",
+    "kind": "prop",
+    "shape": "cylinder",
+    "position": [
+     0,
+     0,
+     7
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9,
+     1.3,
+     1.4
+    ],
+    "color": "#2a2d33",
+    "notes": "",
+    "look": null,
+    "lookFrom": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "5e9a4e39-fece-4f22-bb65-ac6946f124f5"
+   },
+   {
+    "id": "df108bab-b049-4442-8151-3dfcec5cd4ea",
+    "name": "Studio camera 3",
+    "kind": "prop",
+    "shape": "cylinder",
+    "position": [
+     3.4,
+     0,
+     6
+    ],
+    "rotation": 340,
+    "scale": [
+     0.9,
+     1.3,
+     1.4
+    ],
+    "color": "#2a2d33",
+    "notes": "",
+    "look": null,
+    "lookFrom": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "5e9a4e39-fece-4f22-bb65-ac6946f124f5"
+   },
+   {
+    "id": "33a23d8a-2cc1-42e8-af89-dd7b5c644a98",
+    "name": "Light rig 1",
+    "kind": "prop",
+    "shape": "lamp",
+    "position": [
+     -7,
+     0,
+     3.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1.4,
+     1
+    ],
+    "color": "#c9c27a",
+    "notes": "",
+    "look": null,
+    "lookFrom": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717"
+   },
+   {
+    "id": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+    "name": "Light rig 2",
+    "kind": "prop",
+    "shape": "lamp",
+    "position": [
+     -3.5,
+     0,
+     3.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1.4,
+     1
+    ],
+    "color": "#c9c27a",
+    "notes": "",
+    "look": "19fdc35f-dd4e-4621-ae1e-0bd9d5a2892b",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717"
+   },
+   {
+    "id": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+    "name": "Light rig 3",
+    "kind": "prop",
+    "shape": "lamp",
+    "position": [
+     3.5,
+     0,
+     3.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1.4,
+     1
+    ],
+    "color": "#c9c27a",
+    "notes": "",
+    "look": "9b120724-d2d7-40ba-91f5-8c9825775824",
+    "lookFrom": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717",
+    "sheets": [
+     {
+      "id": "sy3gxz4ll",
+      "setId": "obj-turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:18:28.658Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "whole",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "iioiv4nq",
+          "requestId": "38bdf5cc-ec5d-40e2-9243-9d8ebba112c0",
+          "referenceId": "9b120724-d2d7-40ba-91f5-8c9825775824",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 402920,
+          "error": "",
+          "createdAt": "2026-10-30T17:18:28.658Z"
+         }
+        ],
+        "selected": "iioiv4nq",
+        "accepted": null
+       },
+       {
+        "id": "left-side",
+        "label": "Left side",
+        "spec": {
+         "framing": "whole",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "xr9wr24h",
+          "requestId": "1bab00c3-f569-4f0c-9638-7c0734cd30cc",
+          "referenceId": "213e79f0-1aff-4d5b-8dd0-642a7cfbb2e6",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 595458,
+          "error": "",
+          "createdAt": "2026-10-30T17:18:28.658Z"
+         }
+        ],
+        "selected": "xr9wr24h",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "whole",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "7bshg3gw",
+          "requestId": "a65a3170-6560-4ac0-acf5-fabf03f211d2",
+          "referenceId": "ad2c3324-622f-415c-8cf7-4b827cf69ce5",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 519949,
+          "error": "",
+          "createdAt": "2026-10-30T17:18:28.658Z"
+         }
+        ],
+        "selected": "7bshg3gw",
+        "accepted": null
+       },
+       {
+        "id": "right-side",
+        "label": "Right side",
+        "spec": {
+         "framing": "whole",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "j1dmw1uj",
+          "requestId": "2dc21d5f-8ee9-41cc-93c3-1930c2bfd161",
+          "referenceId": "50e8c58e-f0c4-463b-b107-4ab1175edfe1",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 799521,
+          "error": "",
+          "createdAt": "2026-10-30T17:18:28.658Z"
+         }
+        ],
+        "selected": "j1dmw1uj",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "66052317-dbc0-4912-b281-cbdd00b7cfb5",
+    "name": "Light rig 4",
+    "kind": "prop",
+    "shape": "lamp",
+    "position": [
+     7,
+     0,
+     3.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1.4,
+     1
+    ],
+    "color": "#c9c27a",
+    "notes": "",
+    "look": null,
+    "lookFrom": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717"
+   },
+   {
+    "id": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+    "name": "Camera operator",
+    "kind": "character",
+    "shape": "person",
+    "position": [
+     0.2,
+     0,
+     7.8
+    ],
+    "rotation": 180,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#2f3640",
+    "notes": "Studio camera operator in black, headset on, watching the viewfinder.",
+    "look": "47334e07-2256-4750-8686-6f6b6fff4730",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null,
+    "sheets": [
+     {
+      "id": "shtfj0z2c",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:14:51.790Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "xy5dea70",
+          "requestId": "c792e8a4-ae6c-40da-aaff-4d92474365ad",
+          "referenceId": "df6d53d6-7515-436a-a83f-af54b8f5f9ce",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 77322,
+          "error": "",
+          "createdAt": "2026-10-30T17:14:51.790Z"
+         }
+        ],
+        "selected": "xy5dea70",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "anpe6vzf",
+          "requestId": "71767f9e-1f04-44d1-b051-080bb31582ba",
+          "referenceId": "9a34d65c-3de8-4d37-8b5a-97da082d0a38",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 305784,
+          "error": "",
+          "createdAt": "2026-10-30T17:14:51.790Z"
+         }
+        ],
+        "selected": "anpe6vzf",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "en1hr7xo",
+          "requestId": "fd958fc3-ad26-4cf0-bc8e-93eb7a3fa26d",
+          "referenceId": "5c110746-4a9b-4303-8664-1c02bfa6bf98",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 402855,
+          "error": "",
+          "createdAt": "2026-10-30T17:14:51.790Z"
+         }
+        ],
+        "selected": "en1hr7xo",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "ygv8kuwu",
+          "requestId": "89e1d178-e5e9-4d13-937b-2e67a6b8b99f",
+          "referenceId": "b5a2d343-a9c2-42d1-8656-4c347fec5c9c",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 178812,
+          "error": "",
+          "createdAt": "2026-10-30T17:14:51.790Z"
+         }
+        ],
+        "selected": "ygv8kuwu",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "5e9a4e39-fece-4f22-bb65-ac6946f124f5",
+    "name": "Studio cameras",
+    "kind": "prop",
+    "shape": "group",
+    "position": [
+     0.06666666666666658,
+     0,
+     6.333333333333333
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "c7197e5f-3169-454a-aae3-e4cfcfe20717",
+    "name": "Lighting",
+    "kind": "prop",
+    "shape": "group",
+    "position": [
+     0,
+     0,
+     3.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   }
+  ],
+  "references": [
+   {
+    "id": "d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8",
+    "name": "News anchor \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "note": "",
+    "createdAt": "2026-10-30T15:22:23.591Z"
+   },
+   {
+    "id": "47334e07-2256-4750-8686-6f6b6fff4730",
+    "name": "Camera operator \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "47334e07-2256-4750-8686-6f6b6fff4730.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+    "note": "",
+    "createdAt": "2026-10-30T15:22:58.429Z"
+   },
+   {
+    "id": "fd2f4ad8-f728-4dd9-becb-41fe750eda5f",
+    "name": "Anchor desk \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "fd2f4ad8-f728-4dd9-becb-41fe750eda5f.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+    "note": "",
+    "createdAt": "2026-10-30T15:23:32.060Z"
+   },
+   {
+    "id": "4eb6c8be-98c4-4ad1-a7fb-62a994e924c3",
+    "name": "Video wall \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "4eb6c8be-98c4-4ad1-a7fb-62a994e924c3.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+    "note": "",
+    "createdAt": "2026-10-30T15:24:19.758Z"
+   },
+   {
+    "id": "3b52e08b-434a-40a2-aa95-308acd555e3f",
+    "name": "Studio camera 1 \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "3b52e08b-434a-40a2-aa95-308acd555e3f.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+    "note": "",
+    "createdAt": "2026-10-30T15:24:47.803Z"
+   },
+   {
+    "id": "f72f9d1a-2e29-4c18-8306-479c850a83b4",
+    "name": "Anchor desk \u00b7 Front",
+    "file": "f72f9d1a-2e29-4c18-8306-479c850a83b4.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+    "note": "sheet:s9uf5vgri:front",
+    "createdAt": "2026-10-30T17:04:42.646Z"
+   },
+   {
+    "id": "d7cc8cbb-fad9-4cea-ac60-eaefe94aa3b5",
+    "name": "News anchor \u00b7 Front",
+    "file": "d7cc8cbb-fad9-4cea-ac60-eaefe94aa3b5.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "note": "sheet:s3isfd1xq:front",
+    "createdAt": "2026-10-30T17:04:52.291Z"
+   },
+   {
+    "id": "75ec092b-781c-4068-9138-782630d4497c",
+    "name": "Studio camera 1 \u00b7 Front",
+    "file": "75ec092b-781c-4068-9138-782630d4497c.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+    "note": "sheet:sp0y8cdux:front",
+    "createdAt": "2026-10-30T17:05:04.647Z"
+   },
+   {
+    "id": "49946eed-2b38-43ab-bba2-24ae9226b78d",
+    "name": "Anchor desk \u00b7 Left side",
+    "file": "49946eed-2b38-43ab-bba2-24ae9226b78d.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+    "note": "sheet:s9uf5vgri:left-side",
+    "createdAt": "2026-10-30T17:06:12.049Z"
+   },
+   {
+    "id": "3c1c1d07-682c-45c9-a894-a52c7ff56e6d",
+    "name": "News anchor \u00b7 Left",
+    "file": "3c1c1d07-682c-45c9-a894-a52c7ff56e6d.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "note": "sheet:s3isfd1xq:left",
+    "createdAt": "2026-10-30T17:06:20.822Z"
+   },
+   {
+    "id": "707c6d55-c4e5-4101-80b0-45cc77549626",
+    "name": "Anchor desk \u00b7 Back",
+    "file": "707c6d55-c4e5-4101-80b0-45cc77549626.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+    "note": "sheet:s9uf5vgri:back",
+    "createdAt": "2026-10-30T17:06:21.984Z"
+   },
+   {
+    "id": "9297cd14-5d9f-47b2-8f41-48bd4cf370c4",
+    "name": "News anchor \u00b7 Back",
+    "file": "9297cd14-5d9f-47b2-8f41-48bd4cf370c4.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "note": "sheet:s3isfd1xq:back",
+    "createdAt": "2026-10-30T17:08:06.262Z"
+   },
+   {
+    "id": "5611b966-172d-4ac0-bf5c-f7820a10dc2d",
+    "name": "Anchor desk \u00b7 Right side",
+    "file": "5611b966-172d-4ac0-bf5c-f7820a10dc2d.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+    "note": "sheet:s9uf5vgri:right-side",
+    "createdAt": "2026-10-30T17:08:08.300Z"
+   },
+   {
+    "id": "ec9997a8-9d8a-48ad-9361-26ae36bd2649",
+    "name": "Anchor desk \u00b7 design sheet",
+    "file": "ec9997a8-9d8a-48ad-9361-26ae36bd2649.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+    "note": "sheet:s9uf5vgri:composed",
+    "createdAt": "2026-10-30T17:08:08.677Z"
+   },
+   {
+    "id": "0e8ddbbb-f20b-456b-8c0e-0ede0cc4bd1c",
+    "name": "News anchor \u00b7 Right",
+    "file": "0e8ddbbb-f20b-456b-8c0e-0ede0cc4bd1c.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "note": "sheet:s3isfd1xq:right",
+    "createdAt": "2026-10-30T17:08:13.738Z"
+   },
+   {
+    "id": "f53b450c-3f0f-4eef-97e6-0bf2d58a9d12",
+    "name": "News anchor \u00b7 design sheet",
+    "file": "f53b450c-3f0f-4eef-97e6-0bf2d58a9d12.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "note": "sheet:s3isfd1xq:composed",
+    "createdAt": "2026-10-30T17:08:14.163Z"
+   },
+   {
+    "id": "f0db3f10-6e31-4170-aa4c-ad9505acc33f",
+    "name": "Studio camera 1 \u00b7 Left side",
+    "file": "f0db3f10-6e31-4170-aa4c-ad9505acc33f.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+    "note": "sheet:sp0y8cdux:left-side",
+    "createdAt": "2026-10-30T17:08:18.600Z"
+   },
+   {
+    "id": "3239b061-b080-42e8-af46-42e9d864ba64",
+    "name": "Studio camera 1 \u00b7 Back",
+    "file": "3239b061-b080-42e8-af46-42e9d864ba64.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+    "note": "sheet:sp0y8cdux:back",
+    "createdAt": "2026-10-30T17:15:14.029Z"
+   },
+   {
+    "id": "0f388fb2-4b81-4b20-8f3a-f30f31e08639",
+    "name": "Studio camera 1 \u00b7 Right side",
+    "file": "0f388fb2-4b81-4b20-8f3a-f30f31e08639.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+    "note": "sheet:sp0y8cdux:right-side",
+    "createdAt": "2026-10-30T17:15:17.581Z"
+   },
+   {
+    "id": "6e1b23d9-86cb-4e69-bf73-94c16cba3653",
+    "name": "Studio camera 1 \u00b7 design sheet",
+    "file": "6e1b23d9-86cb-4e69-bf73-94c16cba3653.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+    "note": "sheet:sp0y8cdux:composed",
+    "createdAt": "2026-10-30T17:15:22.256Z"
+   },
+   {
+    "id": "1aa40561-9161-404b-98ac-8cd91dc5220f",
+    "name": "Studio floor \u00b7 Flux.2 [pro] \u00b7 942605",
+    "file": "1aa40561-9161-404b-98ac-8cd91dc5220f.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "21c28a69-7b8d-4067-92e7-1f4e7ac9ad0c",
+    "note": "",
+    "createdAt": "2026-10-30T17:15:25.834Z"
+   },
+   {
+    "id": "df6d53d6-7515-436a-a83f-af54b8f5f9ce",
+    "name": "Camera operator \u00b7 Front",
+    "file": "df6d53d6-7515-436a-a83f-af54b8f5f9ce.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+    "note": "sheet:shtfj0z2c:front",
+    "createdAt": "2026-10-30T17:15:32.612Z"
+   },
+   {
+    "id": "19fdc35f-dd4e-4621-ae1e-0bd9d5a2892b",
+    "name": "Light rig 2 \u00b7 Flux.2 [pro] \u00b7 58720",
+    "file": "19fdc35f-dd4e-4621-ae1e-0bd9d5a2892b.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+    "note": "",
+    "createdAt": "2026-10-30T17:15:50.316Z"
+   },
+   {
+    "id": "9a34d65c-3de8-4d37-8b5a-97da082d0a38",
+    "name": "Camera operator \u00b7 Left",
+    "file": "9a34d65c-3de8-4d37-8b5a-97da082d0a38.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+    "note": "sheet:shtfj0z2c:left",
+    "createdAt": "2026-10-30T17:19:29.895Z"
+   },
+   {
+    "id": "5c110746-4a9b-4303-8664-1c02bfa6bf98",
+    "name": "Camera operator \u00b7 Back",
+    "file": "5c110746-4a9b-4303-8664-1c02bfa6bf98.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+    "note": "sheet:shtfj0z2c:back",
+    "createdAt": "2026-10-30T17:19:34.164Z"
+   },
+   {
+    "id": "9b120724-d2d7-40ba-91f5-8c9825775824",
+    "name": "Light rig 3 \u00b7 Front",
+    "file": "9b120724-d2d7-40ba-91f5-8c9825775824.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+    "note": "sheet:sy3gxz4ll:front",
+    "createdAt": "2026-10-30T17:19:38.213Z"
+   },
+   {
+    "id": "213e79f0-1aff-4d5b-8dd0-642a7cfbb2e6",
+    "name": "Light rig 3 \u00b7 Left side",
+    "file": "213e79f0-1aff-4d5b-8dd0-642a7cfbb2e6.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+    "note": "sheet:sy3gxz4ll:left-side",
+    "createdAt": "2026-10-30T17:20:08.834Z"
+   },
+   {
+    "id": "ad2c3324-622f-415c-8cf7-4b827cf69ce5",
+    "name": "Light rig 3 \u00b7 Back",
+    "file": "ad2c3324-622f-415c-8cf7-4b827cf69ce5.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+    "note": "sheet:sy3gxz4ll:back",
+    "createdAt": "2026-10-30T17:20:23.181Z"
+   },
+   {
+    "id": "50e8c58e-f0c4-463b-b107-4ab1175edfe1",
+    "name": "Light rig 3 \u00b7 Right side",
+    "file": "50e8c58e-f0c4-463b-b107-4ab1175edfe1.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+    "note": "sheet:sy3gxz4ll:right-side",
+    "createdAt": "2026-10-30T17:20:45.794Z"
+   },
+   {
+    "id": "b5a2d343-a9c2-42d1-8656-4c347fec5c9c",
+    "name": "Camera operator \u00b7 Right",
+    "file": "b5a2d343-a9c2-42d1-8656-4c347fec5c9c.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+    "note": "sheet:shtfj0z2c:right",
+    "createdAt": "2026-10-30T17:20:46.789Z"
+   },
+   {
+    "id": "aa22ba26-e773-4666-a0ee-5d50b7030a26",
+    "name": "Light rig 3 \u00b7 design sheet",
+    "file": "aa22ba26-e773-4666-a0ee-5d50b7030a26.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+    "note": "sheet:sy3gxz4ll:composed",
+    "createdAt": "2026-10-30T17:20:49.916Z"
+   },
+   {
+    "id": "f7cd2a6e-bc1a-4761-8774-2c9fa9cf8018",
+    "name": "Camera operator \u00b7 design sheet",
+    "file": "f7cd2a6e-bc1a-4761-8774-2c9fa9cf8018.png",
+    "mime": "image/png",
+    "role": "character",
+    "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+    "note": "sheet:shtfj0z2c:composed",
+    "createdAt": "2026-10-30T17:20:50.402Z"
+   },
+   {
+    "id": "c75bd63b-2e06-465a-bc0c-e04c285f15da",
+    "name": "Video wall \u00b7 Flux.2 [pro] \u00b7 345311",
+    "file": "c75bd63b-2e06-465a-bc0c-e04c285f15da.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+    "note": "",
+    "createdAt": "2026-10-30T17:41:43.664Z"
+   },
+   {
+    "id": "23a01b5d-fafb-4e97-a25f-358e4fc16272",
+    "name": "Video wall \u00b7 Front",
+    "file": "23a01b5d-fafb-4e97-a25f-358e4fc16272.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+    "note": "sheet:svfgnlsje:front",
+    "createdAt": "2026-10-30T17:46:29.054Z"
+   },
+   {
+    "id": "49b8be91-c3c1-4182-8ac5-b663d066114a",
+    "name": "Video wall \u00b7 Left side",
+    "file": "49b8be91-c3c1-4182-8ac5-b663d066114a.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+    "note": "sheet:svfgnlsje:left-side",
+    "createdAt": "2026-10-30T17:47:17.405Z"
+   },
+   {
+    "id": "96ec359d-4146-4262-a3b5-b5415be28793",
+    "name": "Video wall \u00b7 Back",
+    "file": "96ec359d-4146-4262-a3b5-b5415be28793.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+    "note": "sheet:svfgnlsje:back",
+    "createdAt": "2026-10-30T17:47:34.912Z"
+   },
+   {
+    "id": "42b5a05d-6a4b-457c-aa06-d6a26a608fac",
+    "name": "Video wall \u00b7 Right side",
+    "file": "42b5a05d-6a4b-457c-aa06-d6a26a608fac.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+    "note": "sheet:svfgnlsje:right-side",
+    "createdAt": "2026-10-30T17:48:10.744Z"
+   },
+   {
+    "id": "374faec4-942c-4968-ac96-da6beb121da1",
+    "name": "Video wall \u00b7 design sheet",
+    "file": "374faec4-942c-4968-ac96-da6beb121da1.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+    "note": "sheet:svfgnlsje:composed",
+    "createdAt": "2026-10-30T17:48:14.999Z"
+   }
+  ]
+ },
+ "shots": [
+  {
+   "id": "a015ef8e-809e-4492-93ef-675772aba797",
+   "title": "Breaking",
+   "description": "Crane down from above the lighting rigs, past the glowing @video-wall, to @news-anchor seated at the @anchor-desk looking up to camera.",
+   "duration": 5,
+   "start": 0,
+   "camera": {
+    "move": "crane-down",
+    "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "distance": 7,
+    "height": 4.5,
+    "angle": 10,
+    "mm": 24,
+    "keys": null
+   },
+   "references": [
+    {
+     "id": "58d80f67-97f1-4e13-8c9c-999975936390",
+     "name": "Shot 01 Breaking \u00b7 Flux.2 [pro] \u00b7 964240",
+     "file": "58d80f67-97f1-4e13-8c9c-999975936390.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:46:21.603Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "crane down"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "24mm wide"
+    ],
+    "filter": [
+     "deep blue dusk"
+    ]
+   }
+  },
+  {
+   "id": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+   "title": "The headline",
+   "description": "Medium close-up: @news-anchor looks up and delivers the headline, the @video-wall glowing behind.",
+   "duration": 5,
+   "start": 5,
+   "camera": {
+    "move": "dolly-in",
+    "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "distance": 3,
+    "height": 1.4,
+    "angle": 0,
+    "mm": 50,
+    "keys": null
+   },
+   "references": [
+    {
+     "id": "541259b3-11e0-4bd4-a459-4532c24a7447",
+     "name": "Shot 02 The headline \u00b7 Flux.2 [pro] \u00b7 803981",
+     "file": "541259b3-11e0-4bd4-a459-4532c24a7447.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:18:30.727Z"
+    },
+    {
+     "id": "280eb1a2-6233-4317-9cd9-8e95bb56afc2",
+     "name": "Shot 02 The headline \u00b7 FLUX 3 Image \u00b7 803981",
+     "file": "280eb1a2-6233-4317-9cd9-8e95bb56afc2.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T19:16:54.694Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "slow push-in"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "50mm normal",
+     "shallow depth of field"
+    ],
+    "filter": [
+     "high contrast"
+    ]
+   }
+  },
+  {
+   "id": "597912bb-6c6f-4f3b-9274-c203578c538e",
+   "title": "On air",
+   "description": "Handheld over-the-shoulder from behind @camera-operator at the studio camera, pushing past the rig toward @news-anchor at the @anchor-desk as the floor manager counts him in.",
+   "duration": 5,
+   "start": 10,
+   "camera": {
+    "move": "custom",
+    "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+    "distance": 6,
+    "height": 1.6,
+    "angle": 0,
+    "mm": 28,
+    "keys": [
+     {
+      "t": 0,
+      "p": [
+       1.6,
+       1.7,
+       9.6
+      ],
+      "look": [
+       0,
+       1.3,
+       -1.9
+      ],
+      "mm": 28
+     },
+     {
+      "t": 1,
+      "p": [
+       0.9,
+       1.6,
+       8.4
+      ],
+      "look": [
+       0,
+       1.3,
+       -1.9
+      ],
+      "mm": 28
+     }
+    ]
+   },
+   "references": [
+    {
+     "id": "8fffdd90-5fba-491d-b147-c682fa689f36",
+     "name": "Shot 03 On air \u00b7 Flux.2 [pro] \u00b7 563435",
+     "file": "8fffdd90-5fba-491d-b147-c682fa689f36.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:46:24.847Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "handheld",
+     "steadicam follow"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "24mm wide"
+    ],
+    "filter": [
+     "deep blue dusk"
+    ]
+   }
+  }
+ ],
+ "note": "Copied from the live starter project on 30 Oct 2026 (generation provenance, assets and messages removed) for auto-prompt tests."
+}

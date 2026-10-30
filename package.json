@@ -16,6 +16,8 @@
     "typecheck": "tsc --noEmit",
     "check": "pnpm typecheck && pnpm build",
     "dev:camera": "vite --host 127.0.0.1 --port 5187",
+    "docs:models": "node scripts/models-table.mjs",
+    "starters:export": "node scripts/export-starters.mjs",
     "demo:build": "VITE_DEMO=1 vite build --base=/comfy-three-previs/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs"
   },
   "devDependencies": {
