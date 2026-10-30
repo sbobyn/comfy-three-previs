@@ -844,3 +844,6 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .progress i { background: var(--accent); }
 .note, .status-line { color: var(--ink-3); } .status-line.err { color: var(--bad); }
 
+
+/* mentions on the light theme */
+.mention { color: var(--ink); background: var(--paper-3); border-radius: 5px; padding: 0 4px; font-weight: 500; }
