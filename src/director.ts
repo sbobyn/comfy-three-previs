@@ -26,7 +26,7 @@ let selected: string | null = null;
 let tab: 'direct' | 'shot' | 'object' = 'direct';
 type Preset = { id: string; title: string; backend: 'cloud' | 'local'; note: string; pricing: { status: string; usdPerImage: number | null; creditsPerImage: number | null; rate?: string; source: string | null } };
 let refgen: { presets: Preset[]; jobs: any[]; paidExecutionEnabled: boolean; cloudCredential: boolean } = { presets: [], jobs: [], paidExecutionEnabled: false, cloudCredential: false };
-const genForm: Record<string, { prompt: string; presetId: string; aspect: string; count: number; seed: number; checkpoint: string; view: string; edited: boolean }> = {};
+const genForm: Record<string, { prompt: string; presetId: string; aspect: string; count: number; seed: number; checkpoint: string; view: string; edited: boolean; open?: boolean }> = {};
 let agent: AgentStatus | null = null, connect: Connect = null;
 let playhead = 0, playing = false, lastTick = 0;
 let mode: Route = 'auto'; // [agent]
@@ -97,7 +97,7 @@ const addPopup = h('div', { class: 'add-popup', hidden: true, role: 'menu', 'ari
 const dropHint = h('div', { class: 'drop-hint', hidden: true }, 'Drop an image on an object to add it as that object’s look');
 const viewport = h('div', { class: 'viewport' }, canvas, labels, camFrame, monitor,
   h('div', { class: 'vp-tools' }, viewSeg, modeSeg, snapBtn, h('button', { class: 'btn sm', type: 'button', onclick: () => frameSelected(), title: 'Frame selected, or everything (F, . or Numpad .)' }, 'Frame')),
-  inspector, dropHint, hud, helpCard, addPopup, h('div', { class: 'hint' }, 'Click select · Shift+drag box · G/R/S move/rotate/resize · right-click add · ? controls'));
+  dropHint, hud, helpCard, addPopup, h('div', { class: 'hint' }, 'Click select · Shift+drag box · G/R/S move/rotate/resize · right-click add · ? controls'));
 const playBtn = h('button', { class: 'btn sm icon', type: 'button', 'aria-label': 'Play' }, '▶');
 const scrub = h('input', { type: 'range', min: 0, max: 3, step: 0.01, value: 0, 'aria-label': 'Playhead' });
 const timeOut = h('span', { class: 'time' });
@@ -125,7 +125,7 @@ const composer = h('div', { class: 'composer' }, suggest, attsRow, textarea, h('
 const chips = h('div', { class: 'chips' });
 const directPane = h('div', { class: 'pane' }, thread, chips, composer);
 const shotPane = h('div', { class: 'pane shotpane', hidden: true });
-const objectPane = h('div', { class: 'pane shotpane', hidden: true });
+const objectPane = h('div', { class: 'pane shotpane objectpane', hidden: true });
 const side = h('aside', { class: 'side' }, h('div', { class: 'tabs', role: 'tablist' }, directTab, shotTab, objectTab, shotChip), h('div', { style: 'min-height:0;display:grid' }, directPane, shotPane, objectPane));
 const wsBody = h('div', { class: 'ws-body' }, rail, stage, side);
 // Sequence view (src/director-sequence.ts) shares the top bar and replaces the workspace body.
@@ -218,8 +218,9 @@ const scene = createDirectorScene(canvas, labels, monitor, camFrame, {
     if (mode === 'add') selection.add(id); else if (mode === 'toggle') selection.toggle(id); else selection.click(id);
     // Focus the editor camera on what you clicked (the orbit then pivots around it).
     if (mode === 'replace' && selection.has(id) && scene.view() === 'set') scene.frame([id], 1.2);
+    if (selection.ids.length) setTab('object');
   },
-  onMarquee(ids) { selection.addMany(ids); },
+  onMarquee(ids) { selection.addMany(ids); if (selection.ids.length) setTab('object'); },
   onContextMenu(x, y) { openAddPopup(x, y); },
   onTransformCommit(changes, label) { void commitTransforms(changes, label); },
   onModal(text) { hud.hidden = !text; hud.textContent = text || ''; },
@@ -274,7 +275,7 @@ function renderOutline() {
     outline.append(h('div', { class: 'group' }, kind === 'character' ? 'Characters' : kind === 'vehicle' ? 'Vehicles' : kind === 'prop' ? 'Props' : 'Environment'));
     for (const e of list) {
       const ref = objectLooks(project, e.id)[0] || allRefs().find(r => r.entityId === e.id && r.role !== 'style');
-      outline.append(h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : ''), type: 'button', onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.frame([e.id], 1.2); } }, ondblclick: () => scene.focusOn(e) },
+      outline.append(h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : ''), type: 'button', onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.frame([e.id], 1.2); } if (selection.ids.length) setTab('object'); }, ondblclick: () => scene.focusOn(e) },
         h('span', { class: 'sw', style: `background:${e.color}` }),
         h('span', { class: 'name' }, e.name),
         e.id === shot().camera.target ? h('span', { class: 'tgt', title: 'Camera target' }, '◎') : null,
@@ -438,26 +439,27 @@ function renderInspector() {
       const t = scene.sceneTime(), a = entityAt(e, t), keyR = e.path.some(k => Number.isFinite(k.r)), keyS = e.path.some(k => Array.isArray(k.s));
       patchUndo({ path: upsertKey(e.path, t, a.position, keyR ? a.rotation : undefined, keyS ? a.scale : undefined, { [axis]: v }) }, { path: structuredClone(e.path) }, `Key ${label.toLowerCase()}`);
     } });
-  const notes = h('input', { class: 'field', value: e.notes, placeholder: 'Notes for the render prompt', 'aria-label': 'Notes', maxlength: 500 });
-  notes.onchange = () => patchUndo({ notes: notes.value }, { notes: e.notes }, 'Edit notes');
   const isTarget = shot().camera.target === e.id;
-  inspector.classList.toggle('collapsed', inspectorCollapsed);
+  const transforms = h('details', { class: 'object-transforms', open: !inspectorCollapsed },
+    h('summary', {}, 'Transform & motion'),
+    h('div', { class: 'object-transform-body' },
+      h('div', { class: 'xyz' }, h('span', { class: 'xyz-l' }, 'Position'), pos(0, 'X'), pos(1, 'Y'), pos(2, 'Z')),
+      h('div', { class: 'xyz' }, h('span', { class: 'xyz-l' }, 'Scale'), scl(0, 'X'), scl(1, 'Y'), scl(2, 'Z')),
+      h('div', { class: 'xyz' }, h('span', { class: 'xyz-l' }, 'Rotation'), facing, tilt('pitch', 'Pitch'), tilt('roll', 'Roll')),
+      motionRow,
+      h('span', { class: 'note mono', title: 'Blockout object identifier' }, `Object ID · ${e.id}`),
+      h('button', { class: 'btn ghost sm', type: 'button', title: 'Delete (X / Delete)', onclick: () => requestDelete() }, 'Delete object…')));
+  transforms.ontoggle = () => { inspectorCollapsed = !transforms.open; localStorage.setItem('previs.inspectorCollapsed', inspectorCollapsed ? '1' : '0'); };
+  inspector.classList.remove('collapsed');
   inspector.replaceChildren(
-    h('div', { class: 'head' }, h('span', { class: 'muted', style: 'display:flex' }, shapeIcon(e.shape)), name,
-      h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': inspectorCollapsed ? 'Expand object panel' : 'Collapse object panel', title: inspectorCollapsed ? 'Expand' : 'Collapse', onclick: () => { inspectorCollapsed = !inspectorCollapsed; localStorage.setItem('previs.inspectorCollapsed', inspectorCollapsed ? '1' : '0'); inspector.dataset.key = ''; renderInspector(); } }, inspectorCollapsed ? '+' : '−'),
+    h('div', { class: 'head' }, h('span', { class: 'object-shape' }, shapeIcon(e.shape)), name,
       h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Deselect', onclick: () => selection.clear() }, '✕')),
-    h('div', { class: 'row' }, 'Type', kind),
-    h('div', { class: 'row' }, 'Colour', color),
-    h('div', { class: 'xyz' }, h('span', { class: 'xyz-l' }, 'Position'), pos(0, 'X'), pos(1, 'Y'), pos(2, 'Z')),
-    h('div', { class: 'xyz' }, h('span', { class: 'xyz-l' }, 'Scale'), scl(0, 'X'), scl(1, 'Y'), scl(2, 'Z')),
-    h('div', { class: 'xyz' }, h('span', { class: 'xyz-l' }, 'Rotation'), facing, tilt('pitch', 'Pitch'), tilt('roll', 'Roll')),
-    motionRow,
-    notes,
-    h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap' },
-      h('button', { class: 'btn sm', type: 'button', title: 'Reference images for this object', onclick: () => setTab('object') }, `Looks${objectLooks(project, e.id).length ? ' · ' + objectLooks(project, e.id).length : ''} ✦`),
-      h('button', { class: 'btn sm', type: 'button', disabled: isTarget, onclick: () => void runEntry({ label: 'Aim camera', redo: [{ op: 'update_shot', id: shotId, patch: { camera: { target: e.id } } }], undo: [{ op: 'update_shot', id: shotId, patch: { camera: { target: shot().camera.target } } }] }) }, isTarget ? '◎ Camera target' : 'Aim camera here'),
-      h('span', { style: 'flex:1' }),
-      h('button', { class: 'btn sm', type: 'button', title: 'Delete (X / Delete)', onclick: () => requestDelete() }, 'Delete…')));
+    h('div', { class: 'object-meta' }, kind, h('label', { class: 'object-color' }, 'Blockout colour', color)),
+    h('div', { class: 'object-actions' },
+      h('button', { class: 'btn sm', type: 'button', onclick: () => frameSelected() }, 'Frame object'),
+      h('button', { class: 'btn sm', type: 'button', disabled: isTarget, onclick: () => void runEntry({ label: 'Aim camera', redo: [{ op: 'update_shot', id: shotId, patch: { camera: { target: e.id } } }], undo: [{ op: 'update_shot', id: shotId, patch: { camera: { target: shot().camera.target } } }] }) }, isTarget ? '◎ Camera target' : 'Aim camera here')),
+    transforms);
+
 }
 
 function slider(label: string, min: number, max: number, step: number, value: number, unit: string, onInput: (v: number) => void, onChange: (v: number) => void) {
@@ -831,6 +833,7 @@ function renderObjectPane() {
   objectPane.dataset.id = selected || '';
   const e = entity(selected);
   if (!e) { objectPane.replaceChildren(h('div', { class: 'empty-state', style: 'margin:8px' }, 'Select an object to design its look. ', h('button', { class: 'btn sm', type: 'button', onclick: () => openLooks() }, 'Open Looks board'))); return; }
+  if (selection.ids.length > 1) { objectPane.replaceChildren(inspector, h('p', { class: 'note' }, 'Select one object to design or generate its image.')); return; }
   const looks = objectLooks(project, e.id), primary = looks[0];
   const source = lookSource(project, e.id), shared = source && source.id !== e.id ? source : null;
   const views = lookViews(e);
@@ -845,8 +848,8 @@ function renderObjectPane() {
   // Description and style feed every look and every shot prompt.
   const styleNotes = h('textarea', { class: 'field', rows: 2, maxlength: 300, 'aria-label': 'Style notes', placeholder: 'How it should look on screen: “weathered, dusty, warm rim light”, “clean showroom chrome”…' }, e.styleNotes || '');
   styleNotes.onchange = () => void edit([{ op: 'update_entity', id: e.id, patch: { styleNotes: styleNotes.value } }]).then(rerender).catch(() => {});
-  const notes = h('textarea', { class: 'field', rows: 3, maxlength: 400, 'aria-label': 'Description', placeholder: e.kind === 'character' ? 'Age, build, wardrobe, hair, materials…' : e.kind === 'vehicle' ? 'Make, era, paint, damage, details…' : 'Materials, colour, condition, details…' }, e.notes || '');
-  notes.onchange = () => void edit([{ op: 'update_entity', id: e.id, patch: { notes: notes.value } }]).then(rerender).catch(() => {});
+  const notes = h('textarea', { class: 'field', rows: 3, maxlength: 500, 'aria-label': 'Description', placeholder: e.kind === 'character' ? 'Age, build, wardrobe, hair, materials…' : e.kind === 'vehicle' ? 'Make, era, paint, damage, details…' : 'Materials, colour, condition, details…' }, e.notes || '');
+  notes.onchange = () => void runEntry({ label: 'Edit description', redo: [{ op: 'update_entity', id: e.id, patch: { notes: notes.value } }], undo: [{ op: 'update_entity', id: e.id, patch: { notes: e.notes } }] }).then(rerender).catch(() => {});
   const styleText = project.scene.environment.style;
 
   const prompt = h('textarea', { class: 'field', rows: 5, 'aria-label': 'Look prompt' }, form.prompt);
@@ -857,14 +860,14 @@ function renderObjectPane() {
   presetSel.onchange = () => { form.presetId = presetSel.value; localStorage.setItem('previs.looks.model', presetSel.value); rerender(); };
   const aspect = h('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Aspect' }, ...['1:1', '3:4', '4:3', '16:9'].map(a => h('button', { type: 'button', class: a === form.aspect ? 'on' : '', onclick: () => { form.aspect = a; form.edited = true; rerender(); } }, a)));
   const count = h('select', { class: 'field', 'aria-label': 'Images' }, ...[1, 2, 3, 4].map(n => h('option', { value: n, selected: n === form.count }, `${n} image${n > 1 ? 's' : ''}`)));
-  count.onchange = () => { form.count = Number(count.value); };
+  count.onchange = () => { form.count = Number(count.value); quoteBtn.textContent = `Generate image${form.count > 1 ? 's' : ''}${estLabel(form.presetId, form.count)}`; };
   const seed = h('input', { class: 'field', type: 'number', min: 0, value: form.seed, 'aria-label': 'Seed' });
   seed.onchange = () => { form.seed = Math.max(0, Math.floor(Number(seed.value) || 0)); };
   const ckpt = h('select', { class: 'field', 'aria-label': 'Checkpoint' }, ...(checkpoints === null ? [h('option', { value: '' }, 'Loading installed checkpoints…')] : checkpoints.length ? checkpoints.map(c => h('option', { value: c, selected: c === form.checkpoint }, c)) : [h('option', { value: '' }, checkpointError || 'No checkpoints installed')]));
   if (preset?.backend === 'local' && checkpoints === null) void loadCheckpoints();
   if (checkpoints?.length && !checkpoints.includes(form.checkpoint)) form.checkpoint = checkpoints.find(c => /v1-5|sd|xl/i.test(c)) || checkpoints[0];
   ckpt.onchange = () => { form.checkpoint = ckpt.value; };
-  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, `Generate${estLabel(form.presetId, form.count)}`);
+  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, `Generate image${form.count > 1 ? 's' : ''}${estLabel(form.presetId, form.count)}`);
   const quoteStatus = h('div', { class: 'status-line' });
   quoteBtn.onclick = async () => {
     quoteBtn.disabled = true; quoteStatus.className = 'status-line'; quoteStatus.textContent = 'Sending…';
@@ -894,23 +897,24 @@ function renderObjectPane() {
   const shareAll = !shared && looks.length && sameKind.length ? h('button', { class: 'btn sm', type: 'button', title: sameKind.map(x => x.name).join(', '), onclick: () => void runEntry({ label: 'Share look', redo: sameKind.map(x => ({ op: 'update_entity', id: x.id, patch: { lookFrom: e.id } })), undo: sameKind.map(x => ({ op: 'update_entity', id: x.id, patch: { lookFrom: null } })) }).then(() => toast(`${sameKind.length} object${sameKind.length === 1 ? '' : 's'} now use ${e.name}’s look`)) }, `Use for ${sameKind.length} similar ${e.shape}${sameKind.length === 1 ? '' : 's'} without a look`) : null;
   const usedBy = project.scene.entities.filter(x => x.lookFrom === e.id);
   objectPane.replaceChildren(...([
-    h('div', { class: 'block' },
-      h('div', { class: 'block-head' }, h('span', { class: 'muted', style: 'display:flex' }, shapeIcon(e.shape)), h('strong', { style: 'flex:1' }, e.name), h('span', { class: 'muted', style: 'font-size:11.5px' }, `${e.kind} · @${handleOf(e.name)}`)),
+    inspector,
+    h('div', { class: 'block object-visual' },
+      h('div', { class: 'block-head' }, h('strong', { style: 'flex:1' }, 'Visual reference'), h('button', { class: 'btn primary sm', type: 'button', onclick: () => { if (shared) { select(shared.id); return; } const form = objectPane.querySelector<HTMLDetailsElement>('.object-generate'); if (form) { form.open = true; form.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); form.querySelector<HTMLTextAreaElement>('textarea')?.focus({ preventScroll: true }); } } }, shared ? 'Edit shared image…' : 'Generate image…')),
       h('div', { class: 'ob-shots' }, ...(inShots.length ? [h('span', { class: 'muted' }, 'In shot'), ...inShots.map(x => h('button', { type: 'button', class: 'chip', title: x.s.title, onclick: () => selectShot(x.s.id) }, String(x.i + 1).padStart(2, '0')))] : [h('span', { class: 'muted' }, 'No shot camera sees this object yet.')])),
       hero, shared ? null : strip,
-      h('label', { class: 'ob-share' }, h('span', { class: 'muted' }, 'Look'), shareSel),
+      h('details', { class: 'object-reference-options' }, h('summary', {}, 'Reference sharing & project images'), h('label', { class: 'ob-share' }, h('span', { class: 'muted' }, 'Look'), shareSel), shared ? null : linkPicker(e), shareAll),
       shared ? h('p', { class: 'note', style: 'margin:0' }, `Uses ${shared.name}’s looks and description. Change them on `, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => select(shared.id) }, shared.name), '.') : null,
       usedBy.length ? h('p', { class: 'note', style: 'margin:0' }, `Shared with ${usedBy.map(x => x.name).join(', ')}.`) : null,
-      shareAll),
+      h('p', { class: 'note', style: 'margin:0' }, 'Associated with ', h('strong', {}, e.name), '. The primary image is offered as a reference when this object is in a shot; workflow limits still apply.')),
     h('div', { class: 'block cast-card' },
-      h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Cast Card'), h('span', { class: 'cc-id mono', title: 'Blockout ID: the rendered object this card belongs to' }, `#${e.id.slice(0, 8)}`)),
+      h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Appearance')),
       h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s Cast Card: ${shared.notes || '—'}`) : null, notes),
       h('label', { class: 'cc-field' }, h('span', {}, 'Style notes'), styleNotes),
-      h('div', { class: 'cc-field' }, h('span', {}, `Image references · ${looks.length}`), looks.length ? h('div', { class: 'cc-refs' }, ...looks.map(r => h('img', { src: refUrl(r), alt: r.name, title: r.name + (r.id === (shared || e).look ? ' · primary' : '') }))) : h('span', { class: 'note' }, 'None yet — generate, upload, or add one from the project.'), shared ? null : linkPicker(e)),
       h('div', { class: 'ob-style' }, h('span', { class: 'muted' }, 'Project style: '), styleText ? h('span', {}, styleText) : h('span', { class: 'muted' }, 'not set'), h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openLooks() }, styleText ? 'Edit' : 'Set style')),
       h('p', { class: 'note', style: 'margin:0' }, 'Description and style go into this object’s looks and into every shot it appears in. Its primary look is sent with those shots’ videos.')),
-    shared ? null : h('div', { class: 'block' },
-      h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Generate a look'), editedTag, h('button', { class: 'btn ghost sm', type: 'button', disabled: !form.edited, onclick: () => { form.edited = false; rerender(); } }, 'Reset')),
+    shared ? null : h('details', { class: 'block object-generate', open: form.open, ontoggle: (ev: Event) => { form.open = (ev.currentTarget as HTMLDetailsElement).open; } },
+      h('summary', {}, 'Generate an image for ', e.name),
+      h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Image request'), editedTag, h('button', { class: 'btn ghost sm', type: 'button', disabled: !form.edited, onclick: () => { form.edited = false; rerender(); } }, 'Reset')),
       viewChips, prompt,
       h('div', { class: 'grid2' }, h('label', {}, 'Model', presetSel), h('label', {}, 'Images', count)),
       preset ? h('p', { class: 'note', style: 'margin:0' }, preset.note, preset.backend === 'cloud' && !refgen.cloudCredential ? ' Cloud key not configured on this server — quoting will fail.' : '') : null,
@@ -985,7 +989,7 @@ function select(id: string | null) { if (id) selection.set([id], id); else selec
 function setTab(t: 'direct' | 'shot' | 'object') {
   tab = t; directTab.classList.toggle('on', t === 'direct'); shotTab.classList.toggle('on', t === 'shot'); objectTab.classList.toggle('on', t === 'object');
   directPane.hidden = t !== 'direct'; shotPane.hidden = t !== 'shot'; objectPane.hidden = t !== 'object';
-  if (t === 'object') { renderObjectPane(); void loadRefgen(); }
+  if (t === 'object') { if (collapsed.side) setCollapsed('side', false); renderObjectPane(); void loadRefgen(); }
 }
 function setView(v: 'set' | 'camera') {
   scene.setView(v); setBtn.classList.toggle('on', v === 'set'); camBtn.classList.toggle('on', v === 'camera');
@@ -1195,7 +1199,7 @@ function setTransformMode(m: ModalMode) {
   modeButtons.forEach((b, i) => { const on = (['translate', 'rotate', 'scale'] as ModalMode[])[i] === m; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); });
 }
 let snapPref = localStorage.getItem('previs.snap') === '1';
-let inspectorCollapsed = localStorage.getItem('previs.inspectorCollapsed') === '1';
+let inspectorCollapsed = localStorage.getItem('previs.inspectorCollapsed') !== '0';
 function setSnap(on: boolean) { snapPref = on; localStorage.setItem('previs.snap', on ? '1' : '0'); scene.setSnap(on); snapBtn.setAttribute('aria-pressed', String(on)); snapBtn.classList.toggle('on', on); renderHelp(); }
 snapBtn.onclick = () => setSnap(!snapPref);
 let gridVisible = localStorage.getItem('previs.grid.v2') === '1'; // hidden by default

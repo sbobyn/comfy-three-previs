@@ -855,3 +855,25 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .cast-style b { font-weight: 600; color: var(--ink-2, var(--text)); }
 .cast-imgs { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
 .cast-imgs img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); }
+
+/* One contextual object inspector; the camera viewport stays clear. */
+.objectpane > .inspector { position: static; width: auto; padding: 0; border: 0; border-radius: 0; background: none; color: var(--ink); box-shadow: none; backdrop-filter: none; gap: 12px; }
+.objectpane .inspector .head input { width: 0; min-width: 0; font-size: 16px; background: transparent; border-color: transparent; padding-left: 0; }
+.object-shape { display: flex; color: var(--ink-3); }
+.object-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; }
+.object-meta select { text-transform: capitalize; }
+.object-color { display: flex; align-items: center; justify-content: end; gap: 8px; font-size: 11px; color: var(--ink-3); }
+.objectpane .inspector input[type=color] { width: 30px; height: 28px; flex: none; }
+.object-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.object-transforms { border-top: 1px solid var(--line); padding-top: 10px; }
+.object-transforms summary, .object-reference-options > summary { cursor: pointer; color: var(--ink-3); font-size: 12px; }
+.object-transform-body { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }
+.object-visual .ob-hero { max-height: 190px; aspect-ratio: 16 / 9; }
+.object-visual .ob-hero.empty { background: var(--paper-2); border-style: dashed; }
+.object-visual .ob-hero.empty .ob-ph { color: var(--ink-3); }
+.object-reference-options > :not(summary) { margin-top: 10px; }
+.object-generate > summary { cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink); }
+.object-generate[open] > summary { margin-bottom: 14px; }
+.object-generate[open] > :not(summary) { margin-top: 10px; }
+.object-generate textarea { width: 100%; }
+.object-visual .block-head { flex-wrap: wrap; gap: 8px; }
