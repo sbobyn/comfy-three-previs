@@ -31,7 +31,7 @@
 .ap-chip { height: 24px; padding: 0 9px 0 7px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 35%, var(--line)); background: color-mix(in srgb, var(--c) 8%, var(--card)); color: var(--ink); font-size: var(--fs-xs); font-weight: 500; }
 .ap-chip small { color: var(--ink-3); }
 .ap-view, .ap-col .ap-text { background: var(--card); border-color: var(--line); padding: 12px 14px; font-size: var(--fs-sm); line-height: 1.75; color: var(--ink-2); }
-.ap-span { color: var(--ink); background: color-mix(in srgb, var(--c) 9%, transparent); border-bottom: 0; box-shadow: inset 0 -1.5px 0 color-mix(in srgb, var(--c) 70%, transparent); }
+.ap-span { color: var(--ink); background: color-mix(in srgb, var(--c) 7%, transparent); border-bottom: 0; box-shadow: inset 2px 0 0 color-mix(in srgb, var(--c) 75%, transparent); padding-left: 4px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .ap-span:hover { background: color-mix(in srgb, var(--c) 22%, transparent); }
 .ap-plain { text-decoration: underline dotted var(--ink-4); text-underline-offset: 3px; }
 .ap-auto { color: var(--ink-2); background: var(--paper-2); border: 0; }
