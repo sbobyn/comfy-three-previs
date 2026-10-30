@@ -1,4 +1,4 @@
-// Home / launch page: what Previs is, how it works in three steps, starters, and your projects.
+// Home / launch page: what Comfy Three Previs does, how it works in three steps, starters, and your projects.
 import './director-home.css';
 import { TEMPLATES, makeEntity, makeShot } from '../shared/director.mjs';
 import type { DirectorProject, Shot } from '../shared/director.mjs';
@@ -7,9 +7,10 @@ import { renderStill } from './director-scene';
 import { api, h, ago, connectDialog, toast } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
 import { openJourney } from './director-guide';
+import { checkList, openSetup } from './director-setup';
+import type { Check } from './director-setup';
 
 type Summary = { id: string; title: string; template: string; updatedAt: string; shots: number; entities: number; references: number; renders: number; assets: number; sceneName: string };
-type Check = { id: string; label: string; status: 'ok' | 'optional' | 'warn' | 'required'; detail: string; fix: string };
 /** One starter card: enough of the blockout to draw shot 1. `key` is what the server creates from. */
 export type Starter = { key: string; title: string; description: string; scene: DirectorProject['scene']; shot: Shot; shots?: number };
 
@@ -25,10 +26,10 @@ async function create(template: string) {
   } catch (e) { toast((e as Error).message, true); }
 }
 
-// What the first shot's camera sees at its first frame. Cached per key; '' when WebGL fails.
+// What the first shot's camera sees halfway through (the first frame can start inside the set). Cached per key; '' when WebGL fails.
 function still(project: Pick<DirectorProject, 'scene'>, shot: Shot, key: string) {
   let url = stills.get(key);
-  if (url === undefined) { try { url = renderStill(project, shot, 960, 540); } catch { url = ''; } stills.set(key, url); }
+  if (url === undefined) { try { url = renderStill(project, shot, 960, 540, (shot.duration || 0) / 2); } catch { url = ''; } stills.set(key, url); }
   return url;
 }
 function frame(url: string, cls = '') {
@@ -43,15 +44,20 @@ function templateStarters(): Starter[] {
   });
 }
 
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+/** One card for starters and projects: a frame, a title (full text in `title`) and a line under it. */
+function card(el: HTMLElement, img: HTMLElement | null, title: string, line: string, extra?: HTMLElement) {
+  if (img) el.append(img);
+  el.append(h('span', { class: 'home-card-meta' }, h('strong', { title }, title.replace(/^Starter · /, '')), h('span', {}, line), extra));
+  return el;
+}
+
 /** The starter grid. Every starter renders through here. */
 export function starterCards(starters: Starter[], onPick: (key: string) => void) {
   return h('div', { class: 'home-starters', 'data-count': String(Math.min(starters.length, 4)) }, ...starters.map(s =>
-    h('button', { class: 'home-starter', type: 'button', 'data-template': s.key, onclick: () => onPick(s.key) },
-      frame(still({ scene: s.scene }, s.shot, `starter:${s.key}`)),
-      h('span', { class: 'home-starter-meta' },
-        h('strong', {}, s.title),
-        h('span', {}, s.description),
-        h('span', { class: 'home-open', 'aria-hidden': 'true' }, s.shots && s.shots > 1 ? `${s.shots} shots` : 'Open', ' →')))));
+    card(h('button', { class: 'home-starter', type: 'button', 'data-template': s.key, onclick: () => onPick(s.key) }),
+      frame(still({ scene: s.scene }, s.shot, `starter:${s.key}`)), s.title, s.description,
+      h('span', { class: 'home-open', 'aria-hidden': 'true' }, s.shots && s.shots > 1 ? `${s.shots} shots` : 'Open', ' →'))));
 }
 
 const ICONS = {
@@ -74,9 +80,9 @@ function steps() {
     return h('li', { class: 'home-step' }, art, h('span', { class: 'home-step-n' }, String(n)), h('strong', {}, title), h('span', {}, line));
   };
   return h('ol', { class: 'home-steps', 'aria-label': 'How it works' },
-    step(1, ICONS.block, 'Block out', 'Place people, cars and sets.'),
-    step(2, ICONS.direct, 'Direct', 'Frame each shot, move the camera.'),
-    step(3, ICONS.generate, 'Generate', 'Comfy renders the video you blocked.'));
+    step(1, ICONS.block, 'Build', 'Place people, cars and sets.'),
+    step(2, ICONS.direct, 'Shoot', 'Frame each shot, move the camera.'),
+    step(3, ICONS.generate, 'Generate', 'Comfy turns your blockout into video.'));
 }
 
 // Quiet one-line readiness. Opens to the full check list; open by default only when something is required.
@@ -85,12 +91,10 @@ function setupStatus(checks: Check[], dataDir: string) {
   const cloud = checks.find(c => c.id === 'cloud');
   const [tone, text] = required.length ? ['bad', `Setup needs attention · ${required.length}`]
     : cloud?.status === 'ok' ? ['ok', 'Comfy Cloud ready'] : ['warn', 'Add a Comfy Cloud key to generate'];
-  const mark = { ok: '✓', optional: '–', warn: '!', required: '✗' };
   return h('details', { class: `home-status t-${tone}`, open: required.length > 0 },
     h('summary', {}, h('span', { class: 'home-dot' }), text),
-    h('div', { class: 'home-status-pop' },
-      h('ul', {}, ...checks.map(c => h('li', { class: `s-${c.status}` }, h('span', { class: 'mk' }, mark[c.status]), h('span', {}, h('b', {}, c.label), h('small', {}, c.detail, c.status !== 'ok' && c.fix ? ` — ${c.fix}` : ''))))),
-      h('p', {}, 'Projects live in ', h('code', {}, dataDir), '. ', h('a', { href: '/setup.html' }, 'Open setup'))));
+    h('div', { class: 'home-status-pop' }, checkList(checks),
+      h('p', {}, 'Projects live in ', h('code', {}, dataDir), '. ', h('button', { class: 'home-inline', type: 'button', onclick: () => openSetup() }, 'Open setup'))));
 }
 
 function claudeHint() {
@@ -125,24 +129,54 @@ async function importFile(file: File) {
   } catch (e) { toast((e as Error).message, true); }
 }
 
+// Small modal in the workspace's delete-dialog style. `field` adds a text input; resolves its value (or true), null on cancel.
+function ask(title: string, body: string, ok: string, field?: string): Promise<string | true | null> {
+  return new Promise(resolve => {
+    const input = field !== undefined ? h('input', { class: 'field', type: 'text', value: field, maxlength: 120, 'aria-label': 'Project name' }) : null;
+    let result: string | true | null = null;
+    const okBtn = h('button', { class: 'btn primary', type: 'submit' }, ok);
+    const dlg = h('dialog', { class: 'confirm', 'aria-labelledby': 'ask-title' },
+      h('form', { class: 'dialog-body', method: 'dialog', onsubmit: () => { result = input ? input.value.trim() || null : true; } },
+        h('h2', { id: 'ask-title', style: 'margin:0;font-size:15px' }, title),
+        body ? h('p', { class: 'muted', style: 'margin:0' }, body) : null, input,
+        h('div', { style: 'display:flex;gap:8px;justify-content:flex-end' }, h('button', { class: 'btn', type: 'button', onclick: () => dlg.close() }, 'Cancel'), okBtn)));
+    dlg.addEventListener('close', () => { dlg.remove(); resolve(result); });
+    document.body.append(dlg); dlg.showModal();
+    if (input) input.select(); else okBtn.focus();
+  });
+}
+
 function menu(p: Summary) {
-  const act = (label: string, fn: () => Promise<void>) => h('button', { role: 'menuitem', type: 'button', onclick: async () => { try { await fn(); } catch (e) { toast((e as Error).message, true); } } }, label);
+  const close = () => { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+  const act = (label: string, fn: () => Promise<void>) => h('button', { role: 'menuitem', type: 'button', onclick: async () => { close(); try { await fn(); } catch (e) { toast((e as Error).message, true); } } }, label);
   const pop = h('div', { class: 'home-menu', hidden: true, role: 'menu' },
+    act('Rename…', async () => { const name = await ask('Rename project', '', 'Rename', p.title); if (typeof name !== 'string' || name === p.title) return; await api('director/edit', { projectId: p.id, ops: [{ op: 'set_project', patch: { title: name } }] }); void render(); }),
     h('a', { role: 'menuitem', href: `/api/director/export?id=${p.id}`, download: '' }, 'Export (.zip)'),
     act('Duplicate', async () => { await api('director/duplicate', { projectId: p.id }); toast(`Duplicated “${p.title}”`); void render(); }),
-    act('Archive', async () => { if (!confirm(`Archive “${p.title}”? It moves to Archived and can be restored. Nothing is deleted.`)) return; await api('director/archive', { projectId: p.id }); toast('Archived'); void render(); }));
-  const btn = h('button', { class: 'home-more', type: 'button', 'aria-label': `More actions for ${p.title}`, 'aria-haspopup': 'menu', onclick: (ev: Event) => { ev.preventDefault(); ev.stopPropagation(); document.querySelectorAll('.home-menu').forEach(m => { if (m !== pop) (m as HTMLElement).hidden = true; }); pop.hidden = !pop.hidden; } }, '⋯');
+    act('Archive…', async () => { if (!await ask(`Archive “${p.title}”?`, 'It moves to Archived and can be restored. Nothing is deleted.', 'Archive')) return; await api('director/archive', { projectId: p.id }); toast('Archived'); void render(); }));
+  const items = () => Array.from(pop.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+  pop.onkeydown = ev => {
+    const list = items(), i = list.indexOf(document.activeElement as HTMLElement);
+    const go = (k: number) => { ev.preventDefault(); list[(k + list.length) % list.length]?.focus(); };
+    if (ev.key === 'ArrowDown') go(i + 1); else if (ev.key === 'ArrowUp') go(i - 1); else if (ev.key === 'Home') go(0); else if (ev.key === 'End') go(list.length - 1);
+    else if (ev.key === 'Escape' || ev.key === 'Tab') { if (ev.key === 'Escape') { ev.preventDefault(); btn.focus(); } close(); }
+  };
+  const btn = h('button', { class: 'home-more', type: 'button', 'aria-label': `More actions for ${p.title}`, 'aria-haspopup': 'menu', 'aria-expanded': 'false', onclick: (ev: Event) => {
+    ev.preventDefault(); ev.stopPropagation();
+    document.querySelectorAll('.home-menu').forEach(m => { if (m !== pop) (m as HTMLElement).hidden = true; });
+    pop.hidden = !pop.hidden; btn.setAttribute('aria-expanded', String(!pop.hidden));
+    if (!pop.hidden && (ev as MouseEvent).detail === 0) items()[0]?.focus();
+  } }, '⋯');
   return [btn, pop];
 }
 
 function projectCard(p: Summary) {
-  const card = h('a', { class: 'home-project', href: `/director.html?project=${p.id}` },
-    h('div', { class: 'home-frame is-loading' }),
-    h('span', { class: 'home-project-meta' }, h('strong', {}, p.title), h('span', {}, `${p.shots} shot${p.shots === 1 ? '' : 's'} · ${ago(p.updatedAt)}`)));
+  const el = card(h('a', { class: 'home-project', href: `/director.html?project=${p.id}` }), h('div', { class: 'home-frame is-loading' }),
+    p.title, `${plural(p.shots, 'shot')} · ${plural(p.entities, 'object')} · ${ago(p.updatedAt)}`);
   void api(`director/project?id=${p.id}`).then(({ project }) => {
-    card.firstElementChild!.replaceWith(frame(project.shots[0] ? still(project, project.shots[0], `${p.id}:${project.revision}`) : ''));
-  }).catch(() => card.firstElementChild!.classList.remove('is-loading'));
-  return h('div', { class: 'home-project-wrap' }, card, ...menu(p));
+    el.firstElementChild!.replaceWith(frame(project.shots[0] ? still(project, project.shots[0], `${p.id}:${project.revision}`) : ''));
+  }).catch(() => el.firstElementChild!.classList.remove('is-loading'));
+  return h('div', { class: 'home-project-wrap' }, el, ...menu(p));
 }
 
 async function render() {
@@ -163,20 +197,19 @@ async function render() {
   const list = projects.length
     ? h('div', { class: 'home-projects' }, ...projects.map(projectCard))
     : h('div', { class: 'home-empty' }, h('strong', {}, 'No projects yet'), h('span', {}, 'Start a new scene or open a starter. Your work saves here automatically.'), newScene('New scene', 'ghost'));
-  const archivedList = showArchived ? h('div', { class: 'home-projects is-archived' }, ...archived.map(p => h('div', { class: 'home-project' },
-    h('span', { class: 'home-project-meta' }, h('strong', {}, p.title), h('span', {}, `${p.shots} shot${p.shots === 1 ? '' : 's'} · archived`),
-      h('button', { class: 'home-btn ghost sm', type: 'button', onclick: async () => { try { await api('director/restore', { projectId: p.id }); toast(`Restored “${p.title}”`); void render(); } catch (e) { toast((e as Error).message, true); } } }, 'Restore'))))) : null;
+  const archivedList = showArchived ? h('div', { class: 'home-projects is-archived' }, ...archived.map(p => card(h('div', { class: 'home-project' }), null, p.title, `${plural(p.shots, 'shot')} · archived`,
+    h('button', { class: 'home-btn ghost sm', type: 'button', onclick: async () => { try { await api('director/restore', { projectId: p.id }); toast(`Restored “${p.title}”`); void render(); } catch (e) { toast((e as Error).message, true); } } }, 'Restore')))) : null;
 
   app.replaceChildren(
     h('header', { class: 'home-top' },
       h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Three Previs'),
       h('nav', {},
         h('button', { class: 'home-link', type: 'button', onclick: () => openJourney() }, 'Guide'),
-        h('a', { class: 'home-link', href: '/setup.html' }, 'Setup'))),
+        h('button', { class: 'home-link', type: 'button', onclick: () => openSetup() }, 'Setup'))),
     h('main', { class: 'home' },
       h('section', { class: 'home-hero' },
         h('div', { class: 'home-hero-copy' },
-          h('p', { class: 'home-eyebrow' }, 'Previs for AI video'),
+          h('p', { class: 'home-eyebrow' }, 'Previsualization for AI video'),
           h('h1', {}, 'Block out the scene.', h('br'), h('span', {}, 'Generate the shot you meant.')),
           h('p', { class: 'home-lede' }, 'Arrange a scene in 3D, direct the camera, and Comfy turns it into video.'),
           h('div', { class: 'home-actions' },
@@ -190,13 +223,12 @@ async function render() {
         h('div', { class: 'home-head' }, h('h2', { id: 'projects-title' }, 'Your projects'), projects.length ? h('span', {}, String(projects.length)) : null, h('i', { class: 'grow' }),
           fileInput, h('button', { class: 'home-link', type: 'button', onclick: () => fileInput.click() }, 'Import…'),
           archivedCount ? h('button', { class: 'home-link', type: 'button', 'aria-pressed': String(showArchived), onclick: () => { showArchived = !showArchived; void render(); } }, showArchived ? 'Hide archived' : `Archived · ${archivedCount}`) : null),
-        list, archivedList),
-      h('footer', { class: 'home-foot' }, h('span', {}, 'More tools'), h('a', { href: '/index.html' }, 'Camera studio'), h('a', { href: '/previs.html' }, 'Blender scenes'), h('a', { href: '/generation.html' }, 'Video workflows'))));
+        list, archivedList)));
 }
 
 export function renderHome() {
   document.addEventListener('click', ev => {
-    document.querySelectorAll('.home-menu').forEach(m => ((m as HTMLElement).hidden = true));
+    document.querySelectorAll('.home-menu').forEach(m => { (m as HTMLElement).hidden = true; m.previousElementSibling?.setAttribute('aria-expanded', 'false'); });
     const status = document.querySelector<HTMLDetailsElement>('.home-status[open]');
     if (status && !status.contains(ev.target as Node)) status.open = false;
   });
