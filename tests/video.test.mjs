@@ -282,3 +282,31 @@ test('fixed Python restores render state, context, camera markers and frame/subf
     } finally { releaseFrameStage(stage.directory); }
   }
 });
+
+// ---------- Start-still video model presets (image-to-video and start → end key frames) ----------
+test('start-still video presets validate against the live partner schema; partner models get the long timeout', async () => {
+  const { builtInPresets } = await import('../server/previs/presets.mjs');
+  const { validateGraph, validateWorkflowDefinition } = await import('../server/previs/workflows.mjs');
+  const { expectedSeconds } = await import('../server/previs/generation.mjs');
+  const { maxReferences } = await import('../shared/video-refs.mjs');
+  const live = JSON.parse(await readFile(new URL('./fixtures/partner-object-info.json', import.meta.url), 'utf8'));
+  const nodes = { 'seedance-25-i2v-v1': 'ByteDance2ReferenceNodeV2', 'seedance-25-flf-v1': 'ByteDance2FirstLastFrameNode', 'kling-40-i2v-v1': 'Kling4ImageToVideoNode', 'kling-40-flf-v1': 'Kling4ImageToVideoNode', 'veo-31-i2v-v1': 'Veo3VideoGenerationNode', 'veo-31-flf-v1': 'Veo3FirstLastFrameNode', 'hailuo-h3-i2v-v1': 'MinimaxHailuo03FirstLastFrameNode', 'hailuo-h3-flf-v1': 'MinimaxHailuo03FirstLastFrameNode', 'wan27-i2v-v1': 'Wan2ImageToVideoApi', 'wan27-flf-v1': 'Wan2ImageToVideoApi' };
+  for (const d of builtInPresets.filter(x => x.task === 'first-frame')) {
+    validateWorkflowDefinition(d);
+    const deferredInputs = ['firstFrame', 'lastFrame'].filter(k => d.inputs[k]).map(k => ({ ...d.inputs[k], kind: 'image', mime: 'image/png', filename: `${k}.png` }));
+    const v = validateGraph(d.graph, live, { deferredInputs });
+    assert.ok(v.compatible, `${d.id}: ${JSON.stringify(v.issues.slice(0, 2))}`);
+    const model = d.graph['2'];
+    if (nodes[d.id]) assert.equal(model.class_type, nodes[d.id], d.id);
+    // The start still is wired into the model, the end still too for start → end presets, and nothing else is loaded.
+    const links = Object.values(model.inputs).filter(x => Array.isArray(x)).map(x => x[0]).sort();
+    assert.deepEqual(links, d.inputs.lastFrame ? ['1', '4'] : ['1'], d.id);
+    for (const k of ['prompt', ...Object.keys(d.parameters)]) { const m = k === 'prompt' ? d.inputs.prompt : d.parameters[k]; assert.ok(m.input in d.graph[m.nodeId].inputs, `${d.id} maps ${k} to ${m.input}`); }
+    assert.equal(maxReferences(d), 0, `${d.id}: start-still presets take no cast images (the start still is image 1)`);
+    if (/generate_audio/.test(JSON.stringify(model.inputs))) assert.ok(Object.entries(model.inputs).every(([k, x]) => !/generate_audio$/.test(k) || x === false), `${d.id} keeps audio off`);
+    const job = { definition: d, preparedGraph: d.graph, binding: { parameters: { duration: 5 } } };
+    assert.equal(expectedSeconds(job), nodes[d.id] ? 420 : 270, d.id);
+  }
+  assert.equal(builtInPresets.find(d => d.id === 'seedance-25-i2v-v1').graph['2'].inputs['model.task_type'], 'reference', 'single image → Seedance reference-to-video with image 1 only');
+  assert.ok(!JSON.stringify(builtInPresets).includes('reference_assets'), 'never the real-human asset route');
+});

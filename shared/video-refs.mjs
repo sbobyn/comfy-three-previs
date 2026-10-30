@@ -12,6 +12,8 @@ export const REFERENCE_INPUTS = {
 
 /** { nodeId, spec } for the first node in the graph that accepts reference images, else null. */
 export function referenceTarget(definition) {
+  // Start-still models (Seedance 2.5 i2v uses the reference node) put the start still in image 1; no cast images.
+  if (definition?.task === 'first-frame') return null;
   for (const [nodeId, node] of Object.entries(definition?.graph || {})) {
     const spec = REFERENCE_INPUTS[node.class_type];
     if (spec) return { nodeId, spec };

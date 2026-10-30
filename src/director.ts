@@ -14,7 +14,7 @@ import { promptBlock, cameraStyleBlock } from './director-prompt';
 import { objectColors, KIND_COLORS } from '../shared/prompt.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
 import { openLooksBoard, aspectFor } from './director-looks';
-import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } from './director-videogen';
+import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences, clipSeconds, clipLengths, modelLabel, startOnlyFallback } from './director-videogen';
 import type { TransformChange } from './director-scene';
 import { Selection, UndoStack, targetConsumesKey, recreateOps, snap } from '../shared/editor-controls.mjs';
 import type { UndoEntry, ModalMode } from '../shared/editor-controls.mjs';
@@ -35,7 +35,7 @@ const app = document.getElementById('app')!;
 let project: DirectorProject;
 let shotId = params.get('shot') || '';
 let selected: string | null = null;
-type Preset = { id: string; title: string; backend: 'cloud' | 'local'; note: string; pricing: { status: string; usdPerImage: number | null; creditsPerImage: number | null; rate?: string; source: string | null } };
+type Preset = { id: string; title: string; backend: 'cloud' | 'local'; note: string; maxRefs?: number; pricing: { status: string; usdPerImage: number | null; creditsPerImage: number | null; rate?: string; source: string | null } };
 let refgen: { presets: Preset[]; jobs: any[]; paidExecutionEnabled: boolean; cloudCredential: boolean } = { presets: [], jobs: [], paidExecutionEnabled: false, cloudCredential: false };
 const genForm: Record<string, { prompt: string; presetId: string; aspect: string; count: number; seed: number; checkpoint: string; view: string; edited: boolean; open?: boolean }> = {};
 let connect: Connect = null;
@@ -705,7 +705,7 @@ function modelBlock(s: Shot) {
   if (!genCache) { loadGen(); return h('div', { class: 'block vm' }, h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted' }, 'Loading…'))); }
   const st = genCache, choices = videoChoices(st as any), def: any = shotModel(s);
   if (!def) return h('div', { class: 'block vm' }, h('span', { class: 'eyebrow' }, 'Video model'), h('p', { class: 'note' }, 'No video models are set up.'));
-  const pick = h('select', { class: 'field vm-pick', 'aria-label': 'Video model for this shot' }, ...choices.map((d: any) => h('option', { value: d.id, selected: d.id === def.id }, d.title)));
+  const pick = h('select', { class: 'field vm-pick', 'aria-label': 'Video model for this shot' }, ...choices.map((d: any) => h('option', { value: d.id, selected: d.id === def.id }, modelLabel(d))));
   pick.onchange = () => { localStorage.setItem(modelKey(s), pick.value); shotPane.dataset.shot = ''; renderShotPane(); };
   const cap = referenceCapacity(st as any, def.id), refs = cap ? plannedReferences(project, s, st as any, def.id) : [];
   const usesClip = def.task === 'transform-video' || def.task === 'control-video';
@@ -714,13 +714,14 @@ function modelBlock(s: Shot) {
   const hasStart = frames.some(r => r.note === 'key frame start' || !r.note), hasEnd = frames.some(r => r.note === 'key frame end');
   const maxLen = def.constraints?.promptMaxLength as number | undefined, promptLen = shotPrompt(project, s, 'video').length;
   const stale = s.render && s.render.signature && s.render.signature !== signature(project, s);
-  const rate = def.pricing?.ratePerSecond as number | undefined;
+  const rate = def.pricing?.ratePerSecond as number | undefined, secs = clipSeconds(def, s), lengths = clipLengths(def);
+  const fallback = twoFrames ? choices.find((d: any) => d.id === startOnlyFallback(def)) : null;
   const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const sent = new Set(refs.map(r => r.entityId));
   const slot = (ok: boolean | null, label: string, detail: Node | string, k?: string) => h('div', { class: 'vm-slot' + (ok === false ? ' warn' : ok ? ' ok' : ''), style: k ? `--k:${k}` : '' },
     h('span', { class: 'vm-dot' }, ok === false ? '!' : ok ? '✓' : '–'), h('span', { class: 'vm-label' }, label), h('span', { class: 'vm-detail' }, detail));
   return h('div', { class: 'block vm' },
-    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted', style: 'font-size:11.5px' }, rate ? `≈ $${(rate * s.duration).toFixed(2)} for ${s.duration}s` : 'Cost shown at quote')),
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted', style: 'font-size:11.5px' }, rate ? `≈ $${(rate * secs).toFixed(2)} for ${secs}s` : 'Cost shown at quote')),
     pick,
     def.description ? h('p', { class: 'note vm-desc', title: def.description }, def.description) : null,
     h('div', { class: 'vm-inputs' },
@@ -728,7 +729,9 @@ function modelBlock(s: Shot) {
       slot(!maxLen || promptLen <= maxLen, 'Text prompt', maxLen ? h('span', {}, `${promptLen.toLocaleString()} / ${maxLen.toLocaleString()} characters`, promptLen > maxLen ? h('b', { class: 'vm-over' }, ' · will be cut') : '') : `${promptLen.toLocaleString()} characters`),
       usesClip ? slot(s.render ? !stale : false, 'Blockout video', s.render ? (stale ? 'The scene changed since · a new blockout is made when you generate' : `Your camera move · ${s.render.duration}s, ${s.render.frameCount} frames`) : 'Made from your camera when you generate') : slot(null, 'Blockout video', 'Not used · describe the motion in the prompt'),
       usesFrames ? slot(hasStart, twoFrames ? 'Start frame' : 'First frame', hasStart ? 'Start still ready (Storyboard)' : 'Add a Start still in the Storyboard below') : null,
-      twoFrames ? slot(hasEnd, 'End frame', hasEnd ? 'End still ready (Storyboard)' : 'Add an End still in the Storyboard below') : null,
+      twoFrames ? (fallback ? slot(hasEnd || null, 'End frame (optional)', hasEnd ? 'End still ready (Storyboard)' : `Optional · without an End still, ${fallback.title.split(' ·')[0]} animates the start still alone`)
+        : slot(hasEnd, 'End frame', hasEnd ? 'End still ready (Storyboard)' : 'Add an End still in the Storyboard below')) : null,
+      usesFrames && lengths ? slot(null, 'Clip length', `${secs}s for this ${s.duration}s shot · the model makes ${lengths}`) : null,
       slot(cap ? refs.length > 0 : null, 'Cast images', cap ? `${refs.length} of up to ${cap}` : 'Not accepted by this model')),
     cap ? h('div', { class: 'vm-map' },
       h('div', { class: 'vm-head' }, 'Shot objects → model inputs'),
@@ -776,10 +779,10 @@ function renderActionBar() {
   const s = shot(); if (!s) return;
   const idx = project.shots.indexOf(s), stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
   if (!genCache) loadGen();
-  const rate = genCache ? (shotModel(s) as any)?.pricing?.ratePerSecond as number | undefined : undefined;
+  const model: any = genCache ? shotModel(s) : null, rate = model?.pricing?.ratePerSecond as number | undefined, secs = clipSeconds(model, s);
   const state = s.render ? (stale ? 'blockout changed' : 'blockout ready') : 'no blockout yet';
-  actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}` }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * s.duration).toFixed(2)}`)] : []));
-  actHint.title = `${s.title} · ${s.duration}s · ${state}${rate ? ` · about $${(rate * s.duration).toFixed(2)} to generate` : ''}`;
+  actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}` }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * secs).toFixed(2)}`)] : []));
+  actHint.title = `${s.title} · ${s.duration}s · ${state}${rate ? ` · about $${(rate * secs).toFixed(2)} to generate (${secs}s clip)` : ''}`;
   const ready = !!s.render && !stale;
   renderBtn.textContent = ready ? 'Generate video ▸' : 'Make blockout…';
   renderBtn.title = ready ? 'Generate this shot’s video from its blockout' : 'Make the camera blockout, then generate this shot’s video';
@@ -965,14 +968,15 @@ function keyFrameBlock(s: Shot) {
 
   // Composer for a still at the playhead.
   const t = at, guidePng = scene.capture(t, 1280, 720);
-  const cap = f.presetId === 'flux-3' ? 9 : f.presetId === 'flux-2-pro' ? 7 : 0;
+  // Reference images the chosen model takes besides the blockout guide (its preset's maxRefs).
+  const cap = refgen.presets.find(p => p.id === f.presetId)?.maxRefs ?? 0;
   const looks = cap ? videoReferences(project, s, cap).filter(r => r.role !== 'frame' && r.role !== 'style') : [];
   const prev = project.shots[project.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);
   const refIds = [...looks.map(r => r.ref.id), ...(prev ? [prev.id] : [])].slice(0, Math.max(0, cap - 1));
   const moment = h('input', { class: 'field', placeholder: 'At this moment… (optional) e.g. “the car is just leaving the ground”', 'aria-label': 'What happens at this moment' });
   const prompt = h('textarea', { class: 'field sb-prompt', rows: 5, 'aria-label': 'Still prompt' }, f.prompt ?? shotPrompt(project, s, 'image'));
   prompt.oninput = () => { f.prompt = prompt.value; };
-  const model = h('select', { class: 'field', 'aria-label': 'Image model' }, ...refgen.presets.filter(p => p.backend !== 'local').map(p => h('option', { value: p.id, selected: p.id === f.presetId }, p.title)));
+  const model = h('select', { class: 'field', 'aria-label': 'Image model' }, ...refgen.presets.filter(p => p.backend !== 'local').map(p => h('option', { value: p.id, selected: p.id === f.presetId }, `${p.title}${p.pricing?.usdPerImage ? ` · ≈ $${p.pricing.usdPerImage.toFixed(2)}/image` : ''}${p.maxRefs ? '' : ' · no cast images'}`)));
   model.onchange = () => { f.presetId = model.value; shotPane.dataset.shot = ''; renderShotPane(); };
   const count = h('select', { class: 'field', 'aria-label': 'Takes' }, ...[1, 2, 3, 4].map(n => h('option', { value: n, selected: n === f.count }, `${n} take${n > 1 ? 's' : ''}`)));
   count.onchange = () => { f.count = Number(count.value); go.textContent = `Generate${estLabel(f.presetId, f.count)}`; };
@@ -1064,8 +1068,8 @@ function openLooks() {
 async function loadRefgen() {
   try {
     refgen = await api(`director/refgen?projectId=${projectId}`);
-    // BFL image models only for now (FLUX 3 first).
-    refgen.presets = refgen.presets.filter(p => /^flux/.test(p.id)).sort((a, b) => (a.id === 'flux-3' ? -1 : b.id === 'flux-3' ? 1 : 0));
+    // Cloud image models (FLUX 3 first); local checkpoints stay in the Looks board's own flow.
+    refgen.presets = refgen.presets.filter(p => p.backend === 'cloud').sort((a, b) => (a.id === 'flux-3' ? -1 : b.id === 'flux-3' ? 1 : 0));
     renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); renderShotPips(); } catch (e) { toast((e as Error).message, true); }
 }
 function lookCard(e: Entity, r: Reference) {
@@ -1725,7 +1729,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   let st: GenState;
   try { st = await api('generation'); } catch (e) { box.replaceChildren(h('p', { class: 'status-line err' }, (e as Error).message)); return; }
   const choices = videoChoices(st as any);
-  const wf = h('select', { class: 'field', 'aria-label': 'Video model' }, ...choices.map(d => h('option', { value: d.id }, d.title)));
+  const wf = h('select', { class: 'field', 'aria-label': 'Video model' }, ...choices.map(d => h('option', { value: d.id }, modelLabel(d))));
   const previous = st.jobs.filter(j => j.shotId === previsShotId && (j.sources?.sourceVideo?.id === assetId || j.sources?.controlVideo?.id === assetId)).at(-1);
   if (previous && choices.some(d => d.id === previous.definition?.id)) wf.value = previous.definition.id;
   const backendSel = h('select', { class: 'field', 'aria-label': 'Runs on' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
