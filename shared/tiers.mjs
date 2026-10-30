@@ -15,6 +15,8 @@ export const VIDEO_PRICES = {
   'kling-o1-edit-v1': { ratePerSecond: 0.126 },
   'wan-vace-13b-edge-v1': { ratePerSecond: 0, local: true },
 };
+// A start→end video model falls back to its start-only sibling (same list price) when a shot's end still is missing.
+export const FIRST_FRAME_FALLBACK = { 'ltx-25-flf-v1': 'ltx-25-i2v-v1' };
 export const KEY_FRAME_SECONDS = [2, 3, 4, 5, 6, 8, 10];
 export const snapSeconds = d => KEY_FRAME_SECONDS.reduce((x, y) => (Math.abs(y - d) < Math.abs(x - d) ? y : x));
 const STEP_OF = { look: 'looks', sheet: 'sheets', still: 'stills', video: 'videos' };

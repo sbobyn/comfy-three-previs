@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { openBatches, planBatch } from '../server/previs/batch.mjs';
 import { batchRoutes } from '../server/previs/batch-routes.mjs';
-import { fakeBackend, loopbackDrivers } from '../server/previs/batch-drivers.mjs';
+import { fakeBackend } from '../server/previs/batch-drivers.mjs';
 import { builtInPresets } from '../server/previs/presets.mjs';
 import { imagePresets } from '../server/previs/refgen.mjs';
 import { TIERS, IMAGE_PRICES, VIDEO_PRICES, estimateFor, modelsFor } from '../shared/tiers.mjs';
@@ -193,7 +193,7 @@ test('persistence round-trip; a running batch resumes on open and a cut-off subm
   assert.equal(JSON.parse(await readFile(file, 'utf8')).status, 'completed');
 });
 
-test('HTTP routes and the SSE stream (batch first, then node events); real drivers are a clear TODO', async () => {
+test('HTTP routes and the SSE stream (batch first, then node events)', async () => {
   const h = harness();
   const batches = await h.open(), route = batchRoutes(batches);
   const server = createServer(async (req, res) => {
@@ -228,5 +228,45 @@ test('HTTP routes and the SSE stream (batch first, then node events); real drive
     assert.equal((await post('/api/director/batch/cancel', { id: batch.id })).body.batch.status, 'cancelled');
     assert.equal((await fetch(`${base}/api/director/batch?id=00000000-0000-0000-0000-000000000000`)).status, 404);
   } finally { batches.close(); server.close(); }
-  await assert.rejects(loopbackDrivers('http://127.0.0.1:1').video.submit({}), /not wired yet.*nothing was sent/);
 });
+
+test('restart resubmits a recorded request (never a new one); a refusal refunds and clears ids; a failing finish never fails paid work', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'previs-batch-'));
+  const h = harness({ fake: { seconds: { still: 0, video: 0 } } });
+  const first = await h.open(root);
+  const b = await first.create({ projectId: project.id, steps: ['stills'], shots: [dive.id], maxCostUsd: 1 });
+  first.close();
+  const file = join(root, 'batches', `${b.id}.json`), saved = JSON.parse(await readFile(file, 'utf8'));
+  const recorded = '11111111-2222-3333-4444-555555555555';
+  Object.assign(byId(saved.nodes, `still:${dive.id}start`), { status: 'running', submitting: true, reserved: 0.028, requestId: recorded, fingerprint: 'fp' }); saved.spentEstimateUsd = 0.028;
+  await writeFile(file, JSON.stringify(saved));
+  const second = await h.open(root);
+  const node = byId(second.get(b.id).nodes, `still:${dive.id}start`);
+  assert.deepEqual([node.status, node.resubmit, node.requestId, second.get(b.id).spentEstimateUsd], ['ready', true, recorded, 0]);
+  const done = await runUntil(second, b.id, h.clock);
+  assert.equal(done.status, 'completed');
+  assert.deepEqual(h.fake.submits.map(s => s.jobId), [recorded], 'the saved request id is the one dispatched');
+  assert.ok(done.events.some(e => /resubmitting its saved request/.test(e.text)));
+  second.close();
+
+  let refuse = true;
+  const drivers = { ...h.fake.drivers,
+    still: { async submit(ctx) { if (refuse) { await ctx.record({ requestId: 'draft-1', fingerprint: 'x' }); throw Object.assign(Error('Paid generation is disabled'), { status: 403, notDispatched: true }); } return h.fake.drivers.still.submit(ctx); } },
+    look: { ...h.fake.drivers.look, async finish() { throw Error('link failed'); } } };
+  const third = await openBatches(await mkdtemp(join(tmpdir(), 'previs-batch-')), { drivers, jobs: h.fake.jobs, loadProject: async () => structuredClone(project), now: h.clock.now });
+  const c = await third.create({ projectId: project.id, steps: ['looks', 'stills'], shots: [dive.id], maxCostUsd: 1 });
+  const ended = await runUntil(third, c.id, h.clock);
+  const still = byId(ended.nodes, `still:${dive.id}start`);
+  assert.deepEqual([still.status, still.requestId, still.fingerprint], ['failed', undefined, undefined]);
+  assert.ok(ended.events.some(e => /refused, nothing was sent/.test(e.text)));
+  const looks = ended.nodes.filter(n => n.type === 'look');
+  assert.ok(looks.length && looks.every(n => n.status === 'done' && /finishing failed: link failed/.test(n.error)));
+  assert.equal(ended.spentEstimateUsd, round4(looks.reduce((t, n) => t + n.estimateUsd, 0)), 'the refused still was refunded');
+  refuse = false;
+  await third.resume(c.id);
+  const again = await runUntil(third, c.id, h.clock);
+  assert.equal(again.status, 'completed');
+  assert.equal(h.fake.submits.filter(s => s.type === 'look').length, looks.length, 'done looks are not redone');
+  third.close();
+});
+const round4 = x => Math.round(x * 10000) / 10000;
