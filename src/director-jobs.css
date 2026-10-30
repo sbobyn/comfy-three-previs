@@ -68,6 +68,7 @@ dialog.jobs-sheet::backdrop { background: rgba(21, 19, 15, .14); backdrop-filter
 .jr-bar.bad i { background: var(--accent); }
 .jr-fail { border-left: 2px solid var(--accent-line); padding: 2px 0 2px 8px; margin-top: 2px; }
 .jr-fail.soft { border-left-color: var(--line-2); }
+.jr-fail.soft .jr-fail-head { color: var(--ink-3); }
 .jr-fail-head { font-size: var(--fs-2xs); font-weight: 600; color: var(--bad); margin-bottom: 3px; }
 .jr-fail pre { margin: 0; font: 400 var(--fs-2xs)/1.5 var(--mono); color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 9.5em; overflow: auto; }
 .jr-act { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 0 -8px; }

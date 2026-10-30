@@ -87,12 +87,14 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
   sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
   sheet.addEventListener('close', () => sheet.remove());
 
+  // A server without the S1/S3 routes answers 404 ("File not found", "Unknown director route"): stop asking.
+  const missing = (e: unknown) => /not found|unknown\b.*\broute|\(404\)/i.test((e as Error).message);
   async function load() {
     if (inflight) return; inflight = true;
     try {
       const [j, b] = await Promise.all([
-        jobsOk ? api<JobsSnapshot>('jobs').catch(e => { if (/not found|unknown|404/i.test((e as Error).message)) jobsOk = false; return null; }) : null,
-        batchesOk && projectId ? api<{ batches: BatchSummary[] }>(`director/batches?projectId=${encodeURIComponent(projectId)}`).catch(e => { if (/not found|unknown batch route|404/i.test((e as Error).message)) batchesOk = false; return null; }) : null,
+        jobsOk ? api<JobsSnapshot>('jobs').catch(e => { if (missing(e)) jobsOk = false; return null; }) : null,
+        batchesOk && projectId ? api<{ batches: BatchSummary[] }>(`director/batches?projectId=${encodeURIComponent(projectId)}`).catch(e => { if (missing(e)) batchesOk = false; return null; }) : null,
       ]);
       if (j && Array.isArray(j.jobs)) snap = j;
       if (b && Array.isArray(b.batches)) batches = b.batches;
@@ -142,7 +144,9 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     if (j.projectId !== projectId) return null;
     if (j.shotId) return j.shotId;
     const list = shots?.() || [];
-    return list.find(s => j.label === s.title || j.label.startsWith(`${s.title} · `))?.id || null;
+    // Labels look like "Starter · Wingspan · Shot 1 · The valley · LTX 2.5 Pro" or "Shot 02 The dive · FLUX 3 Image": match a shot title as a segment.
+    const parts = j.label.split(' · ').map(p => p.replace(/^Shot \d+\s+/, ''));
+    return list.find(s => j.label.startsWith(`${s.title} · `) || parts.includes(s.title))?.id || null;
   }
 
   function jobRow(j: JobRow) {
@@ -152,7 +156,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     const ratio = j.expectedSeconds > 0 ? j.ageSeconds / j.expectedSeconds : 0;
     const meta = [
       active ? `${dur(j.ageSeconds)} of ~${dur(j.expectedSeconds)}` : j.createdAt ? since(j.createdAt, now) : '',
-      active ? `checked ${since(j.lastTrackedAt, now)}${j.trackCount ? ` · ×${j.trackCount}` : ''}` : j.ageSeconds ? `took ${dur(j.ageSeconds)}` : '',
+      active ? `checked ${since(j.lastTrackedAt, now)}${j.trackCount ? ` · ×${j.trackCount}` : ''}` : j.status === 'completed' && j.ageSeconds ? `took ${dur(j.ageSeconds)}` : '',
       j.costUsd != null ? `$${j.costUsd.toFixed(2)}` : '',
       j.projectId && j.projectId !== projectId ? 'other project' : '',
     ].filter(Boolean);
@@ -163,10 +167,12 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
       active ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `track:${j.id}`, disabled: tracking, onclick: () => void trackNow(j) }, tracking ? 'Checking…' : 'Track now') : null,
       canReconcile ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `rec:${j.id}`, 'aria-expanded': String(reconcileOpen.has(j.id)), onclick: () => { if (reconcileOpen.has(j.id)) reconcileOpen.delete(j.id); else reconcileOpen.add(j.id); renderSheet(); } }, 'Reconcile…') : null,
       shot ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { sheet.close(); onOpenShot!(shot); } }, 'Open shot') : null);
-    const failure = j.failure ? h('div', { class: 'jr-fail' },
-      h('div', { class: 'jr-fail-head' }, `Failed at ${j.failure.phase || 'unknown step'}${j.failure.httpStatus ? ` · HTTP ${j.failure.httpStatus}` : ''}`),
-      j.failure.detail ? h('pre', {}, j.failure.detail) : null) : null;
-    const trackErr = j.trackingError && active ? h('div', { class: 'jr-fail soft' }, h('pre', {}, j.trackingError)) : null;
+    // On a job that is still active, a failure is the last status check, not the job: show it quietly.
+    const where = j.failure ? `${j.failure.phase || 'unknown step'}${j.failure.httpStatus ? ` · HTTP ${j.failure.httpStatus}` : ''}` : '';
+    const detail = j.failure?.detail || (active ? j.trackingError : '') || '';
+    const failure = j.failure || (active && j.trackingError) ? h('div', { class: `jr-fail${active ? ' soft' : ''}` },
+      where ? h('div', { class: 'jr-fail-head' }, active ? `Last check failed at ${where}` : `Failed at ${where}`) : null,
+      detail ? h('pre', {}, detail) : null) : null;
     let rec: HTMLElement | null = null;
     if (canReconcile && reconcileOpen.has(j.id)) {
       // Checkbox state survives the 4 s refresh.
@@ -187,7 +193,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
         h('div', { class: 'jr-top' }, h('span', { class: 'jr-label', title: j.label }, j.label), h('span', { class: `jr-status t-${tone}` }, status)),
         h('div', { class: 'jr-meta' }, meta.join(' · ')),
         active ? h('div', { class: `jr-bar${ratio > 1 ? ' over' : ''}${attention ? ' bad' : ''}`, role: 'progressbar', 'aria-label': 'Elapsed against expected time', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(Math.min(100, Math.round(ratio * 100))) }, h('i', { style: `width:${Math.min(100, Math.round(ratio * 100))}%` })) : null,
-        failure, trackErr, rec,
+        failure, rec,
         actions.childElementCount ? actions : null));
   }
 
