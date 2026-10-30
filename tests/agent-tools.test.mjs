@@ -25,7 +25,7 @@ async function fixture() {
   return p;
 }
 
-function fakePrevis(p, { jobs = 'ok', headless = true } = {}) {
+function fakePrevis(p, { jobs = 'ok', headless = true, unpriced = false } = {}) {
   const calls = [];
   let submits = 0, batchPolls = 0;
   const batch = status => ({ id: 'b0000000-0000-4000-8000-000000000001', projectId: p.id, status, tier: 'draft', steps: ['stills'], estimateUsd: 0.09, spentEstimateUsd: status === 'completed' ? 0.09 : 0, maxCostUsd: 1, budgetSkipped: 0,
@@ -33,11 +33,12 @@ function fakePrevis(p, { jobs = 'ok', headless = true } = {}) {
     events: Array.from({ length: 14 }, (_, i) => ({ at: '2026-10-30T10:00:00Z', text: `event ${i}` })) });
   const routes = {
     'GET /api/director/project': () => ({ project: p }),
+    'GET /api/generation': () => ({ presets: [{ id: 'unpriced-edit', title: 'Unpriced edit', task: 'transform-video', inputs: { sourceVideo: {} }, parameters: {}, pricing: null }], definitions: [] }),
     'GET /api/director/refgen': () => ({ presets: [{ id: 'flux-2-pro', title: 'FLUX 2 Pro', maxRefs: 7, pricing: { usdPerImage: 0.03 } }] }),
     'POST /api/director/render-blockout': b => (!headless ? [409, { error: 'Headless rendering is off', code: 'headless-unavailable' }] : b.force || !p.shots.find(s => s.id === b.shotId).render ? { asset: { id: 'a1', width: 1280, height: 720, fps: 24, frameCount: 120, duration: 5 }, previsShotId: 'ps1', project: p } : { skipped: true, previsShotId: 'ps0', asset: { id: 'a0' } }),
     'POST /api/director/frame': b => (headless ? { data: PNG.toString('base64'), mime: b.type || 'image/png', width: b.width, height: b.height } : [409, { error: 'Headless rendering is off', code: 'headless-unavailable' }]),
     'GET /api/director/asset-frame': (_, q) => (!(Number(q.get('cols')) >= 1 && Number(q.get('cols')) <= 6) ? [400, { error: 'cols must be a whole number from 1 to 6' }] : { data: JPEG.toString('base64'), mime: q.get('type'), width: 80, height: 45 }),
-    'POST /api/director/refgen/prepare': b => ({ job: { id: 'r' + calls.length, fingerprint: 'fp', quote: { estimate: 0.03 * (b.count || 1) } } }),
+    'POST /api/director/refgen/prepare': b => ({ job: { id: 'r' + calls.length, fingerprint: 'fp', quote: { estimate: unpriced ? null : 0.03 * (b.count || 1) } } }),
     'POST /api/director/refgen/submit': () => (++submits === 1 ? [409, { error: 'Backend busy: 4 of 4 cloud image slots in use; retry when a job finishes', code: 'busy', retryAfterSeconds: 0 }] : { job: { status: 'submitted' } }),
     'POST /api/director/refgen/track': () => ({ job: { status: 'completed', referenceIds: ['ref-' + calls.length] } }),
     'POST /api/director/edit': b => { for (const op of b.ops) if (op.op === 'update_entity' && op.patch.sheets) p.scene.entities.find(e => e.id === op.id).sheets = op.patch.sheets; return { project: p }; },
@@ -237,4 +238,26 @@ test('asset-frame: one downscaled frame at t, still references and tiled contact
     await assert.rejects(call(`width=5`), /width must be/);
     assert.ok(frameArgs([{ file: 'a', t: 0 }], { width: 100, cols: 1, type: 'image/png' }).includes('png'));
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('generate_image and generate_video refuse a model without a price estimate unless allowUnknownCost is true', async () => {
+  const p = await fixture(), fake = fakePrevis(p, { unpriced: true });
+  await withAgent(fake, async ({ rpc, call }) => {
+    const tools = (await rpc('tools/list', {})).result.tools;
+    for (const name of ['previs_director_generate_image', 'previs_director_generate_video']) {
+      const t = tools.find(x => x.name === name);
+      assert.equal(t.inputSchema.properties.allowUnknownCost.type, 'boolean', name); assert.match(t.description, /allowUnknownCost/);
+    }
+    const shot = p.shots.find(x => x.render);
+    const video = await call('previs_director_generate_video', { projectId: p.id, shot: shot.id, model: 'unpriced-edit', maxCostUsd: 1 });
+    assert.equal(video.submitted, false); assert.match(video.reason, /Cost unknown/);
+    assert.equal(fake.calls.filter(c => c.path.startsWith('/api/generation/') || c.path === '/api/director/video-refs').length, 0, 'nothing is bound or quoted');
+    const object = p.scene.entities.find(e => e.kind !== 'environment').name;
+    const refused = await call('previs_director_generate_image', { projectId: p.id, object, maxCostUsd: 1 });
+    assert.equal(refused.submitted, false); assert.match(refused.reason, /Cost unknown.*nothing was sent/);
+    assert.equal(fake.calls.filter(c => c.path === '/api/director/refgen/submit').length, 0);
+    const sent = await call('previs_director_generate_image', { projectId: p.id, object, maxCostUsd: 1, allowUnknownCost: true, makePrimary: false });
+    assert.equal(sent.status, 'completed');
+    assert.ok(fake.calls.some(c => c.path === '/api/director/refgen/submit' && c.body.approval.allowance.allowUnknownCharges === true));
+  });
 });

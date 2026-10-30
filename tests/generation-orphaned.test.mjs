@@ -84,7 +84,7 @@ async function settled(s) {
   return s.json('/api/jobs');
 }
 test('migration: restarting on existing data leaves no stuck job from archived or legacy receipts', async () => {
-  const dir = await mkdtemp(join(tmpdir(), 'previs-migrate-')), port = 15291;
+  const dir = await mkdtemp(join(tmpdir(), 'previs-migrate-')), port = 15293;
   let s = await bootServer(dir, port);
   const live = (await s.json('/api/director/projects', { title: 'Live' })).project.id, gone = (await s.json('/api/director/projects', { title: 'Gone' })).project.id;
   await s.json('/api/director/archive', { projectId: gone }); await s.stop();

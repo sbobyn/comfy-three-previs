@@ -70,7 +70,7 @@ Or with Claude Code:
 claude mcp add comfy-previs -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to/comfy-three-previs/server/previs/agent.mjs
 ```
 
-Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, and quote generations. Paid runs still need your approval.
+Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, and run generations. Claude can spend up to the maxCostUsd you allow in each tool call; the server must have PREVIS_ALLOW_PAID=1. Models without a price estimate are refused unless the call passes allowUnknownCost.
 
 ## Phone camera
 
