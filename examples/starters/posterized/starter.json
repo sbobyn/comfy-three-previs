@@ -1,0 +1,1399 @@
+{
+  "format": "comfy-previs-starter",
+  "version": 1,
+  "slug": "posterized",
+  "order": 3,
+  "title": "Posterized",
+  "description": "Comfy dunk in a packed arena",
+  "scene": {
+    "name": "Arena",
+    "environment": {
+      "preset": "interior",
+      "description": "A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron.",
+      "style": "Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+    },
+    "entities": [
+      {
+        "id": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
+        "name": "Court floor",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          28,
+          0.05,
+          15
+        ],
+        "color": "#C8955A",
+        "notes": "Polished maple hardwood basketball court with painted lines, glossy reflections.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+      },
+      {
+        "id": "f33945af-cec9-4a63-bed2-db955c077150",
+        "name": "Center circle",
+        "kind": "environment",
+        "shape": "cylinder",
+        "position": [
+          0,
+          0.03,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          3.6,
+          0.05,
+          3.6
+        ],
+        "color": "#2459D8",
+        "notes": "Blue center circle with a yellow ring.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+      },
+      {
+        "id": "3da529e7-0222-4ced-9423-beb9b452f787",
+        "name": "East paint",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          9.7,
+          0.02,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          5.8,
+          0.05,
+          4.9
+        ],
+        "color": "#2459D8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+      },
+      {
+        "id": "933f0c85-b621-4058-927b-577630edea46",
+        "name": "East stanchion",
+        "kind": "prop",
+        "shape": "box",
+        "position": [
+          14.2,
+          1.6,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          0.4,
+          3.2,
+          0.4
+        ],
+        "color": "#1d1f22",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11"
+      },
+      {
+        "id": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+        "name": "East backboard",
+        "kind": "prop",
+        "shape": "box",
+        "position": [
+          12.7,
+          3.35,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          0.06,
+          1.05,
+          1.8
+        ],
+        "color": "#e8f0f6",
+        "notes": "Clear glass backboard with a white border.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11"
+      },
+      {
+        "id": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+        "name": "East rim",
+        "kind": "prop",
+        "shape": "cylinder",
+        "position": [
+          12.25,
+          3.05,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          0.46,
+          0.05,
+          0.46
+        ],
+        "color": "#E2591C",
+        "notes": "Orange breakaway rim with a white net.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11"
+      },
+      {
+        "id": "21535720-bd48-45f3-9371-e4935952b362",
+        "name": "West paint",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -9.7,
+          0.02,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          5.8,
+          0.05,
+          4.9
+        ],
+        "color": "#2459D8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+      },
+      {
+        "id": "01194033-ad5e-4473-80c6-6073e0f5e6d0",
+        "name": "West stanchion",
+        "kind": "prop",
+        "shape": "box",
+        "position": [
+          -14.2,
+          1.6,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          0.4,
+          3.2,
+          0.4
+        ],
+        "color": "#1d1f22",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "d6fbfc22-92f9-4b4c-8cfa-3ac2e7b517d4"
+      },
+      {
+        "id": "c6f3fef1-e438-4dbb-970c-3360829c2bbd",
+        "name": "West backboard",
+        "kind": "prop",
+        "shape": "box",
+        "position": [
+          -12.7,
+          3.35,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          0.06,
+          1.05,
+          1.8
+        ],
+        "color": "#e8f0f6",
+        "notes": "Clear glass backboard with a white border.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "d6fbfc22-92f9-4b4c-8cfa-3ac2e7b517d4"
+      },
+      {
+        "id": "7eae4d0c-c98f-4372-a182-2276da77c19c",
+        "name": "West rim",
+        "kind": "prop",
+        "shape": "cylinder",
+        "position": [
+          -12.25,
+          3.05,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          0.46,
+          0.05,
+          0.46
+        ],
+        "color": "#E2591C",
+        "notes": "Orange breakaway rim with a white net.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "d6fbfc22-92f9-4b4c-8cfa-3ac2e7b517d4"
+      },
+      {
+        "id": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+        "name": "Sideline stands · tier 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          1,
+          12
+        ],
+        "rotation": 0,
+        "scale": [
+          26,
+          2,
+          2.2
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "a2fdbf66-8de0-41ae-b9e8-7aa6138520ed",
+        "name": "Sideline stands · tier 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          2.6,
+          14.2
+        ],
+        "rotation": 0,
+        "scale": [
+          26,
+          3.6,
+          2.2
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "62d70ffa-5138-46bf-9839-5fc21cd383e1",
+        "name": "Sideline stands · tier 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          4.2,
+          16.4
+        ],
+        "rotation": 0,
+        "scale": [
+          26,
+          5.2,
+          2.2
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "9c81a972-96b5-4415-8e7f-65d464edb5a5",
+        "name": "Far sideline stands · tier 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          1,
+          -12
+        ],
+        "rotation": 0,
+        "scale": [
+          26,
+          2,
+          2.2
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "ecc70a35-1c6a-4f3b-b38d-a9e4dc0e929d",
+        "name": "Far sideline stands · tier 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          2.6,
+          -14.2
+        ],
+        "rotation": 0,
+        "scale": [
+          26,
+          3.6,
+          2.2
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "e5add64a-323f-46b6-8e83-4eb0d044faa7",
+        "name": "Far sideline stands · tier 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          4.2,
+          -16.4
+        ],
+        "rotation": 0,
+        "scale": [
+          26,
+          5.2,
+          2.2
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "c77b4752-4eac-4d94-9d5d-4f484d2b4e6a",
+        "name": "East end stands 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          16.926,
+          2.5,
+          -14.712
+        ],
+        "rotation": 348.75,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "5e4c1052-d36f-45f2-96b2-7f6bfdac3a02",
+        "name": "East end stands 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          22.334,
+          2.5,
+          -12.472
+        ],
+        "rotation": 326.25,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "ff4433ed-98d0-4ea1-b3df-6c0332022f56",
+        "name": "East end stands 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          26.472,
+          2.5,
+          -8.334
+        ],
+        "rotation": 303.75,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "81dd75f3-b723-4981-a765-1a4165b9ab90",
+        "name": "East end stands 4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          28.712,
+          2.5,
+          -2.926
+        ],
+        "rotation": 281.25,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "fc3076a6-37fd-400c-84c7-e38b1023da60",
+        "name": "East end stands 5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          28.712,
+          2.5,
+          2.926
+        ],
+        "rotation": 258.75,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "84f81643-a55c-4637-8a96-a95df8714c3b",
+        "name": "East end stands 6",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          26.472,
+          2.5,
+          8.334
+        ],
+        "rotation": 236.25,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "c7336edb-b36c-4aad-b05f-2c01ff191ced",
+        "name": "East end stands 7",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          22.334,
+          2.5,
+          12.472
+        ],
+        "rotation": 213.75,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "b926819c-2ebc-42b1-9f3c-8b9976bfad28",
+        "name": "East end stands 8",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          16.926,
+          2.5,
+          14.712
+        ],
+        "rotation": 191.25,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "d6a31d05-4c73-4f33-bda6-2b25293e30ff",
+        "name": "West end stands 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -16.926,
+          2.5,
+          14.712
+        ],
+        "rotation": 168.75,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "0b28e69b-b6ca-48cb-a0b2-2b76e5bcf6aa",
+        "name": "West end stands 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -22.334,
+          2.5,
+          12.472
+        ],
+        "rotation": 146.25,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "7ae3c42b-815a-4023-b372-6cd260918b5e",
+        "name": "West end stands 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -26.472,
+          2.5,
+          8.334
+        ],
+        "rotation": 123.75,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "506fbb21-7667-456d-8025-f30c6e9a345d",
+        "name": "West end stands 4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -28.712,
+          2.5,
+          2.926
+        ],
+        "rotation": 101.25,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "ecec1c50-11aa-4d42-ba91-800062ccf275",
+        "name": "West end stands 5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -28.712,
+          2.5,
+          -2.926
+        ],
+        "rotation": 78.75,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "fa2b9dbf-423e-4fda-a5c5-aebb0ca3a24d",
+        "name": "West end stands 6",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -26.472,
+          2.5,
+          -8.334
+        ],
+        "rotation": 56.25,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "86566b99-79c7-4919-905f-5cdcb248a74b",
+        "name": "West end stands 7",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -22.334,
+          2.5,
+          -12.472
+        ],
+        "rotation": 33.75,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "d8ad2771-12b0-41ee-8df7-54fef8e978ed",
+        "name": "West end stands 8",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -16.926,
+          2.5,
+          -14.712
+        ],
+        "rotation": 11.25,
+        "scale": [
+          6,
+          5,
+          4
+        ],
+        "color": "#6f747d",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+      },
+      {
+        "id": "f853574c-2cf2-4176-8bfa-ecc511d2da73",
+        "name": "Jumbotron",
+        "kind": "prop",
+        "shape": "box",
+        "position": [
+          0,
+          13,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          6,
+          3,
+          6
+        ],
+        "color": "#1d1f22",
+        "notes": "Four-sided center-hung scoreboard with bright LED screens.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "name": "Comfy guard",
+        "kind": "character",
+        "shape": "person",
+        "position": [
+          -2,
+          0,
+          1.5
+        ],
+        "rotation": 90,
+        "scale": [
+          1.1,
+          1.12,
+          1.1
+        ],
+        "color": "#2459D8",
+        "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -6,
+              0,
+              2
+            ]
+          },
+          {
+            "t": 3,
+            "p": [
+              -1,
+              0,
+              2.5
+            ]
+          },
+          {
+            "t": 6,
+            "p": [
+              4,
+              0,
+              2.2
+            ]
+          },
+          {
+            "t": 9,
+            "p": [
+              8.6,
+              0,
+              1.2
+            ]
+          },
+          {
+            "t": 10.6,
+            "p": [
+              10.6,
+              0,
+              0.6
+            ]
+          },
+          {
+            "t": 11.6,
+            "p": [
+              11.6,
+              1,
+              0.25
+            ]
+          },
+          {
+            "t": 12.2,
+            "p": [
+              12,
+              1.15,
+              0.05
+            ]
+          },
+          {
+            "t": 13.2,
+            "p": [
+              12.1,
+              0,
+              0.4
+            ]
+          },
+          {
+            "t": 15,
+            "p": [
+              11.4,
+              0,
+              1.6
+            ]
+          }
+        ],
+        "parent": null
+      },
+      {
+        "id": "6c5f0096-a6b1-4c07-8bdf-de9798174c0e",
+        "name": "Comfy wing",
+        "kind": "character",
+        "shape": "person",
+        "position": [
+          4,
+          0,
+          -4.5
+        ],
+        "rotation": 90,
+        "scale": [
+          1.1,
+          1.12,
+          1.1
+        ],
+        "color": "#2459D8",
+        "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "1ace31d3-afba-4589-8a9e-8de04363ebd5",
+        "name": "Comfy center",
+        "kind": "character",
+        "shape": "person",
+        "position": [
+          7,
+          0,
+          5
+        ],
+        "rotation": 120,
+        "scale": [
+          1.1,
+          1.12,
+          1.1
+        ],
+        "color": "#2459D8",
+        "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "e94b786d-72f3-4881-85b2-2c05357e8367",
+        "name": "Rival defender",
+        "kind": "character",
+        "shape": "person",
+        "position": [
+          9,
+          0,
+          0.5
+        ],
+        "rotation": 270,
+        "scale": [
+          1.1,
+          1.12,
+          1.1
+        ],
+        "color": "#16181A",
+        "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              2,
+              0,
+              0
+            ]
+          },
+          {
+            "t": 6,
+            "p": [
+              8,
+              0,
+              0.5
+            ]
+          },
+          {
+            "t": 10,
+            "p": [
+              10.8,
+              0,
+              0.2
+            ],
+            "r": 270
+          },
+          {
+            "t": 11.6,
+            "p": [
+              11.4,
+              0.6,
+              -0.3
+            ],
+            "r": 270
+          },
+          {
+            "t": 12.4,
+            "p": [
+              11.6,
+              0,
+              -0.5
+            ],
+            "r": 270
+          },
+          {
+            "t": 15,
+            "p": [
+              11,
+              0,
+              -1.4
+            ],
+            "r": 240
+          }
+        ],
+        "parent": null
+      },
+      {
+        "id": "5cf9ca0b-51f8-4044-9a39-01ee27348fa7",
+        "name": "Rival forward",
+        "kind": "character",
+        "shape": "person",
+        "position": [
+          6,
+          0,
+          -3
+        ],
+        "rotation": 250,
+        "scale": [
+          1.1,
+          1.12,
+          1.1
+        ],
+        "color": "#16181A",
+        "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "4e8328c3-1083-4dfa-b12a-4c11dd02a683",
+        "name": "Rival guard",
+        "kind": "character",
+        "shape": "person",
+        "position": [
+          3,
+          0,
+          4
+        ],
+        "rotation": 240,
+        "scale": [
+          1.1,
+          1.12,
+          1.1
+        ],
+        "color": "#16181A",
+        "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+        "name": "Basketball",
+        "kind": "prop",
+        "shape": "sphere",
+        "position": [
+          -1.6,
+          1,
+          1.5
+        ],
+        "rotation": 0,
+        "scale": [
+          0.24,
+          0.24,
+          0.24
+        ],
+        "color": "#E2591C",
+        "notes": "Orange leather basketball with black seams.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -5.6,
+              1,
+              2.3
+            ]
+          },
+          {
+            "t": 3,
+            "p": [
+              -0.6,
+              0.6,
+              2.8
+            ]
+          },
+          {
+            "t": 6,
+            "p": [
+              4.4,
+              1,
+              2.5
+            ]
+          },
+          {
+            "t": 9,
+            "p": [
+              9,
+              0.7,
+              1.5
+            ]
+          },
+          {
+            "t": 10.6,
+            "p": [
+              10.9,
+              1.6,
+              0.6
+            ]
+          },
+          {
+            "t": 11.6,
+            "p": [
+              12,
+              3.2,
+              0.2
+            ]
+          },
+          {
+            "t": 12.2,
+            "p": [
+              12.25,
+              3.1,
+              0
+            ]
+          },
+          {
+            "t": 12.6,
+            "p": [
+              12.25,
+              1.6,
+              0
+            ]
+          },
+          {
+            "t": 13.4,
+            "p": [
+              12,
+              0.2,
+              0.3
+            ]
+          },
+          {
+            "t": 15,
+            "p": [
+              11.5,
+              0.2,
+              1.2
+            ]
+          }
+        ],
+        "parent": null
+      },
+      {
+        "id": "c45f5f71-dc94-45b5-8e35-383daa7ecd11",
+        "name": "East hoop",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          12.212499999999999,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "d6fbfc22-92f9-4b4c-8cfa-3ac2e7b517d4",
+        "name": "West hoop",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          -12.212499999999999,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "96bc0661-664b-4ce7-8f98-1e8a1954399f",
+        "name": "Arena stands",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          0,
+          0,
+          8.074349270001139e-17
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "1da57d85-2ce8-4466-b14e-0b9409dcd02e",
+        "name": "Court",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      }
+    ]
+  },
+  "shots": [
+    {
+      "title": "Fast break",
+      "description": "Wide arena shot as @comfy-guard pushes the ball up the court past half court, the crowd on its feet.",
+      "duration": 5,
+      "start": 1,
+      "camera": {
+        "move": "crane-down",
+        "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "distance": 18,
+        "height": 10,
+        "angle": 160,
+        "mm": 28,
+        "keys": null
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    },
+    {
+      "title": "The drive",
+      "description": "Tracking alongside @comfy-guard as he drives baseline past @rival-defender.",
+      "duration": 5,
+      "start": 6,
+      "camera": {
+        "move": "truck-right",
+        "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "distance": 5,
+        "height": 1.4,
+        "angle": -80,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    },
+    {
+      "title": "Posterized",
+      "description": "Low angle under the rim: @comfy-guard rises and dunks over @rival-defender, the net snaps, the arena erupts.",
+      "duration": 5,
+      "start": 10,
+      "camera": {
+        "move": "static",
+        "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "distance": 4.5,
+        "height": 0.5,
+        "angle": -35,
+        "mm": 18,
+        "keys": null
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "static locked-off shot"
+        ],
+        "cuts": [
+          "speed ramp"
+        ],
+        "lens": [
+          "14mm ultra-wide"
+        ],
+        "filter": [
+          "high contrast"
+        ]
+      }
+    }
+  ],
+  "media": []
+}

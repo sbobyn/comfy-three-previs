@@ -1,0 +1,457 @@
+{
+  "format": "comfy-previs-starter",
+  "version": 1,
+  "slug": "breaking-news",
+  "order": 0,
+  "title": "Breaking News",
+  "description": "News anchor delivers the headline",
+  "scene": {
+    "name": "News studio",
+    "environment": {
+      "preset": "interior",
+      "description": "A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.",
+      "style": "Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+    },
+    "entities": [
+      {
+        "id": "21c28a69-7b8d-4067-92e7-1f4e7ac9ad0c",
+        "name": "Studio floor",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          22,
+          0.05,
+          16
+        ],
+        "color": "#1b2230",
+        "notes": "Glossy dark blue studio floor with soft reflections.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+        "name": "Video wall",
+        "kind": "prop",
+        "shape": "wall",
+        "position": [
+          0,
+          0,
+          -4.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5,
+          1.4,
+          1
+        ],
+        "color": "#2459D8",
+        "notes": "Huge curved LED video wall in electric blue showing the headline \"BREAKING: COMFYUI COMMUNITY RELEASES OPEN-SOURCE AI PREVIS\" with the yellow Comfy wordmark.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "05487127-2ec2-4198-a1e5-5deb7b109044",
+        "name": "Anchor desk",
+        "kind": "prop",
+        "shape": "table",
+        "position": [
+          0,
+          0,
+          -1
+        ],
+        "rotation": 0,
+        "scale": [
+          1.6,
+          1.4,
+          1.1
+        ],
+        "color": "#e9e4da",
+        "notes": "Sleek white news desk with a glowing blue and yellow front panel strip.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "name": "News anchor",
+        "kind": "character",
+        "shape": "person",
+        "position": [
+          0,
+          0,
+          -1.9
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#1d2a44",
+        "notes": "Confident news anchor in a tailored navy suit with a small yellow Comfy lapel pin, neat hair, warm expression, speaking to camera.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "name": "Studio camera 1",
+        "kind": "prop",
+        "shape": "cylinder",
+        "position": [
+          -3.2,
+          0,
+          6
+        ],
+        "rotation": 20,
+        "scale": [
+          0.9,
+          1.3,
+          1.4
+        ],
+        "color": "#2a2d33",
+        "notes": "Broadcast studio camera on a pedestal with a teleprompter hood.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5e9a4e39-fece-4f22-bb65-ac6946f124f5"
+      },
+      {
+        "id": "13ac6cbd-a7fe-4a15-b160-763e2680bc53",
+        "name": "Studio camera 2",
+        "kind": "prop",
+        "shape": "cylinder",
+        "position": [
+          0,
+          0,
+          7
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9,
+          1.3,
+          1.4
+        ],
+        "color": "#2a2d33",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5e9a4e39-fece-4f22-bb65-ac6946f124f5"
+      },
+      {
+        "id": "df108bab-b049-4442-8151-3dfcec5cd4ea",
+        "name": "Studio camera 3",
+        "kind": "prop",
+        "shape": "cylinder",
+        "position": [
+          3.4,
+          0,
+          6
+        ],
+        "rotation": 340,
+        "scale": [
+          0.9,
+          1.3,
+          1.4
+        ],
+        "color": "#2a2d33",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5e9a4e39-fece-4f22-bb65-ac6946f124f5"
+      },
+      {
+        "id": "33a23d8a-2cc1-42e8-af89-dd7b5c644a98",
+        "name": "Light rig 1",
+        "kind": "prop",
+        "shape": "lamp",
+        "position": [
+          -7,
+          0,
+          3.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1.4,
+          1
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717"
+      },
+      {
+        "id": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+        "name": "Light rig 2",
+        "kind": "prop",
+        "shape": "lamp",
+        "position": [
+          -3.5,
+          0,
+          3.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1.4,
+          1
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717"
+      },
+      {
+        "id": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+        "name": "Light rig 3",
+        "kind": "prop",
+        "shape": "lamp",
+        "position": [
+          3.5,
+          0,
+          3.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1.4,
+          1
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717"
+      },
+      {
+        "id": "66052317-dbc0-4912-b281-cbdd00b7cfb5",
+        "name": "Light rig 4",
+        "kind": "prop",
+        "shape": "lamp",
+        "position": [
+          7,
+          0,
+          3.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1.4,
+          1
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717"
+      },
+      {
+        "id": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+        "name": "Camera operator",
+        "kind": "character",
+        "shape": "person",
+        "position": [
+          0.2,
+          0,
+          7.8
+        ],
+        "rotation": 180,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#2f3640",
+        "notes": "Studio camera operator in black, headset on, watching the viewfinder.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "5e9a4e39-fece-4f22-bb65-ac6946f124f5",
+        "name": "Studio cameras",
+        "kind": "prop",
+        "shape": "group",
+        "position": [
+          0.06666666666666658,
+          0,
+          6.333333333333333
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "c7197e5f-3169-454a-aae3-e4cfcfe20717",
+        "name": "Lighting",
+        "kind": "prop",
+        "shape": "group",
+        "position": [
+          0,
+          0,
+          3.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      }
+    ]
+  },
+  "shots": [
+    {
+      "title": "Breaking",
+      "description": "Crane down from above the lighting rigs past the @video-wall to the @news-anchor at the @anchor-desk.",
+      "duration": 5,
+      "start": 0,
+      "camera": {
+        "move": "crane-down",
+        "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "distance": 7,
+        "height": 4.5,
+        "angle": 10,
+        "mm": 24,
+        "keys": null
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    },
+    {
+      "title": "The headline",
+      "description": "Medium close-up: @news-anchor looks up and delivers the headline, the @video-wall glowing behind.",
+      "duration": 5,
+      "start": 5,
+      "camera": {
+        "move": "dolly-in",
+        "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "distance": 3,
+        "height": 1.4,
+        "angle": 0,
+        "mm": 50,
+        "keys": null
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    },
+    {
+      "title": "Live on air",
+      "description": "Handheld phone shot from behind @camera-operator: the studio camera's monitor shows the @news-anchor live as the shot pushes past it.",
+      "duration": 5,
+      "start": 10,
+      "camera": {
+        "move": "custom",
+        "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 28,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              1.6,
+              1.7,
+              9.6
+            ],
+            "look": [
+              0,
+              1.3,
+              -1.9
+            ],
+            "mm": 28
+          },
+          {
+            "t": 1,
+            "p": [
+              0.9,
+              1.6,
+              8.4
+            ],
+            "look": [
+              0,
+              1.3,
+              -1.9
+            ],
+            "mm": 28
+          }
+        ]
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    }
+  ],
+  "media": []
+}

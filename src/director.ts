@@ -78,8 +78,9 @@ const ICON = {
   eye: '<path d="M2.5 10s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5Z" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="2.3" stroke="currentColor" stroke-width="1.5"/>',
   eyeOff: '<path d="M2.5 10s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5Z" stroke="currentColor" stroke-width="1.5" opacity=".5"/><path d="M4 16 16 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
 };
-const previewBtn = h('button', { class: 'btn cta', type: 'button', title: 'Play the shot through the camera (Space)' }, '▶ Preview');
-const renderBtn = h('button', { class: 'btn cta', type: 'button', hidden: true, title: 'Make the blockout and generate this shot’s video' }, 'Generate video');
+// Preview and Generate live in the action bar pinned to the bottom of the right panel (Build and Shoot).
+const previewBtn = h('button', { class: 'btn act-preview', type: 'button', title: 'Play the shot through the camera (Space)' }, '▶ Preview');
+const renderBtn = h('button', { class: 'btn cta act-go', type: 'button', title: 'Make the blockout and generate this shot’s video' }, 'Generate video ▸');
 const filmBtn = h('button', { class: 'btn cta', type: 'button', hidden: true, title: 'Cut the shots together and export one film' }, 'Export film');
 const libraryBtn = h('button', { class: 'btn ghost sm', type: 'button', title: 'Library: every image, blockout, video and film in this project', onclick: () => void openAssets() }, svgIcon(ICON.library), h('span', { class: 'hide-md' }, 'Library'));
 const undoBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Undo', onclick: () => void undo() }, svgIcon(ICON.undo));
@@ -104,7 +105,7 @@ const top = h('header', { class: 'ws-top' },
     h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput, h('span', { hidden: true }, sceneLabel)),
     h('div', { class: 'undo-group' }, undoBtn, redoBtn)),
   modeSwitch,
-  h('div', { class: 'right' }, pillSlot, libraryBtn, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu), previewBtn, renderBtn, filmBtn));
+  h('div', { class: 'right' }, pillSlot, libraryBtn, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu), filmBtn));
 document.addEventListener('pointerdown', ev => { if (!helpMenu.hidden && !(ev.target as HTMLElement).closest?.('.menu-wrap')) helpMenu.hidden = true; });
 
 const shotList = h('div', { class: 'shots', role: 'listbox', 'aria-label': 'Shots' });
@@ -199,7 +200,9 @@ const directPane = h('div', { class: 'pane' }, thread, chips, composer);
 const shotPane = h('div', { class: 'pane shotpane', hidden: true });
 const objectPane = h('div', { class: 'pane shotpane objectpane', hidden: true });
 const readiness = h('div', { class: 'ready', role: 'status', 'aria-label': 'Shot readiness' });
-const side = h('aside', { class: 'side' }, h('div', { class: 'tabs side-head', role: 'tablist' }, directTab, shotTab, objectTab, shotChip, readiness), h('div', { style: 'min-height:0;display:grid' }, directPane, shotPane, objectPane));
+const actHint = h('div', { class: 'act-hint', 'aria-live': 'polite' });
+const actionBar = h('div', { class: 'side-act', role: 'toolbar', 'aria-label': 'Shot actions' }, actHint, h('div', { class: 'act-btns' }, previewBtn, renderBtn));
+const side = h('aside', { class: 'side' }, h('div', { class: 'tabs side-head', role: 'tablist' }, directTab, shotTab, objectTab, shotChip, readiness), h('div', { class: 'side-body', style: 'min-height:0;display:grid' }, directPane, shotPane, objectPane), actionBar);
 const wsBody = h('div', { class: 'ws-body' }, rail, stage, side);
 // Sequence view (src/director-sequence.ts) shares the top bar and replaces the workspace body.
 const sequence = createSequence({
@@ -221,7 +224,7 @@ function setStep(k: Step) {
   const from = step; step = k;
   setMode(k === 'cut' ? 'sequence' : 'scene');
   for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); }
-  previewBtn.hidden = k !== 'build'; renderBtn.hidden = k !== 'shoot'; filmBtn.hidden = k !== 'cut';
+  filmBtn.hidden = k !== 'cut';
   wsBody.classList.toggle('shooting', k === 'shoot');
   if (k === 'shoot') {
     setView('camera');
@@ -510,6 +513,7 @@ function renderTransport() {
   timeOut.textContent = `${fmt(playhead)} / ${fmt(s.duration)}${s.start ? ` · scene ${fmt((s.start || 0) + playhead)}` : ''}`;
   moveChip.textContent = describeCamera(s, project.scene.entities);
   playBtn.textContent = playing ? '❚❚' : '▶';
+  const pv = playing ? '❚❚ Pause' : '▶ Preview'; if (previewBtn.textContent !== pv) previewBtn.textContent = pv;
   renderKeyTrack();
   const label = `SHOT ${String(project.shots.indexOf(s) + 1).padStart(2, '0')} · ${MOVES[s.camera.move]} · ${Math.round(scene.pose().mm)}mm`;
   monLabel.replaceChildren(h('span', {}, label), h('span', {}, fmt(playhead)));
@@ -670,7 +674,7 @@ function semanticText(ta: HTMLTextAreaElement) {
 }
 // ---------- Video model: which model this shot uses, what it accepts, and what goes into each input ----------
 let genCache: GenState | null = null, genLoading = false;
-function loadGen() { if (genCache || genLoading) return; genLoading = true; api('generation').then(st => { genCache = st; shotPane.dataset.shot = ''; renderShotPane(); }).catch(() => {}).finally(() => { genLoading = false; }); }
+function loadGen() { if (genCache || genLoading) return; genLoading = true; api('generation').then(st => { genCache = st; shotPane.dataset.shot = ''; renderShotPane(); renderActionBar(); }).catch(() => {}).finally(() => { genLoading = false; }); }
 const modelKey = (s: Shot) => `previs.shot.model.${s.id}`;
 function shotModel(s: Shot) {
   const st = genCache!; const choices = videoChoices(st as any);
@@ -746,7 +750,21 @@ function renderReadiness() {
     item('camera', s.render ? (stale ? 'warn' : 'ok') : 'none', 'Blockout', s.render ? (stale ? 'changed' : '✓') : '–', s.render ? (stale ? 'The scene or camera changed since the blockout' : 'Blockout is up to date') : 'No blockout yet: the grey camera clip is made when you generate'),
     item('cast', need ? 'warn' : cast.length ? 'ok' : 'none', 'Cast', h('span', { class: 'rd-cast' }, ...cast.slice(0, 5).map(r => h('i', { style: `background:${KIND_COLORS[r.entity.kind]}`, title: r.entity.name })), `${cast.length}${need ? ` · ${need} need image${need === 1 ? '' : 's'}` : ''}`), need ? `${need} of ${cast.length} cast members have no image yet` : 'Every cast member has an image'),
     item('video', edited ? 'warn' : 'ok', 'Prompt', edited ? 'edited' : 'auto', edited ? 'You edited this shot’s prompt; your text is used' : 'The prompt is composed from the cast, camera and story'),
-    item('video', vids ? 'ok' : 'none', 'Video', vids ? `✓${vids > 1 ? ` ${vids}` : ''}` : '–', vids ? `${vids} generated video${vids === 1 ? '' : 's'}` : 'No video yet: Generate video'));
+    item('video', vids ? 'ok' : 'none', 'Video', vids ? `✓${vids > 1 ? ` ${vids}` : ''}` : '–', vids ? `${vids} generated video${vids === 1 ? '' : 's'}` : 'No video yet: Generate video (bottom of this panel)'));
+  renderActionBar();
+}
+/** Action bar: shot number, blockout state and cost on the left; Preview and Generate on the right. */
+function renderActionBar() {
+  const s = shot(); if (!s) return;
+  const idx = project.shots.indexOf(s), stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
+  if (!genCache) loadGen();
+  const rate = genCache ? (shotModel(s) as any)?.pricing?.ratePerSecond as number | undefined : undefined;
+  const state = s.render ? (stale ? 'blockout changed' : 'blockout ready') : 'no blockout yet';
+  actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}` }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * s.duration).toFixed(2)}`)] : []));
+  actHint.title = `${s.title} · ${s.duration}s · ${state}${rate ? ` · about $${(rate * s.duration).toFixed(2)} to generate` : ''}`;
+  const ready = !!s.render && !stale;
+  renderBtn.textContent = ready ? 'Generate video ▸' : 'Render blockout…';
+  renderBtn.title = ready ? 'Generate this shot’s video from its blockout' : 'Render the camera blockout, then generate this shot’s video';
 }
 function renderSteps() {
   const n = project.scene.entities.filter(e => e.shape !== 'group').length, shots = project.shots.length, vids = (project.assets || []).filter(a => a.kind === 'workflow-result').length;
@@ -1476,7 +1494,7 @@ function tick(now: number) {
 }
 requestAnimationFrame(tick);
 playBtn.onclick = () => togglePlay();
-previewBtn.onclick = () => { setView('camera'); playhead = 0; togglePlay(true); };
+previewBtn.onclick = () => { if (playing) { togglePlay(false); return; } setView('camera'); playhead = 0; togglePlay(true); };
 for (const k of Object.keys(stepBtns) as Step[]) stepBtns[k].onkeydown = (ev: KeyboardEvent) => { const order: Step[] = ['build', 'shoot', 'cut']; if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return; const n = order[(order.indexOf(k) + (ev.key === 'ArrowRight' ? 1 : 2)) % 3]; setStep(n); stepBtns[n].focus(); };
 scrub.oninput = () => { playhead = Number(scrub.value); playing = false; scene.setPlayhead(playhead); renderTransport(); renderInspector(); };
 monitor.onclick = () => setView('camera');
@@ -1942,7 +1960,7 @@ function renderFirstRun() {
     h('ol', {},
       stepEl(1, !!objs.length, 'Describe your scene to Claude, or add objects', 'Claude builds it here live. Or place characters, vehicles and props yourself.', h('div', { class: 'fr-actions' }, h('button', { class: 'btn sm primary', type: 'button', onclick: () => claudeDialog() }, '✳ Direct with Claude'), h('button', { class: 'btn sm', type: 'button', onclick: () => { const r = viewport.getBoundingClientRect(); openAddPopup(r.left + r.width / 2 - 90, r.top + 80); } }, '+ Add object'))),
       stepEl(2, hasImages, 'Give your cast an image', 'Open a cast member in the Cast panel and generate or drop an image.', null),
-      stepEl(3, hasVideo, 'Frame a shot and generate video', 'Switch to Shoot, frame or fly the camera, then Generate video.', null))));
+      stepEl(3, hasVideo, 'Frame a shot and generate video', 'Switch to Shoot, frame or fly the camera, then press Generate video in the bar at the bottom of the right panel.', null))));
 }
 async function poll() { await pollNow(); setTimeout(poll, 1200); }
 

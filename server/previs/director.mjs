@@ -13,6 +13,7 @@ import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
 import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
 import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
+import { loadStarters, starterCard, instantiateStarter } from './starters.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
@@ -40,12 +41,18 @@ export function summary(p) {
   return { assets: (p.assets || []).length, id: p.id, title: p.title, template: p.template, updatedAt: p.updatedAt, createdAt: p.createdAt, revision: p.revision, shots: p.shots.length, entities: p.scene.entities.length, references: p.shots.reduce((n, s) => n + s.references.length, 0), renders: p.shots.filter(s => s.render).length, sceneName: p.scene.name };
 }
 
-export function createProjectDocument({ title, template = 'street' } = {}, id = randomUUID()) {
-  const t = TEMPLATES[template] ? template : 'empty';
-  const spec = TEMPLATES[t];
+// template: a built-in blockout (TEMPLATES) or the slug of a starter snapshot passed in `starters`.
+export function createProjectDocument({ title, template = 'street' } = {}, id = randomUUID(), starters = []) {
+  const starter = starters.find(s => s.slug === template);
+  const t = starter ? starter.slug : TEMPLATES[template] ? template : 'empty';
+  const spec = starter || TEMPLATES[t];
+  const at = now();
+  if (starter) {
+    const { scene, shots } = instantiateStarter(starter);
+    return { version: 1, id, title: String(title || starter.title).slice(0, 120), template: t, createdAt: at, updatedAt: at, revision: 1, scene, shots, messages: [{ id: randomUUID(), shotId: null, role: 'system', text: `Started from the “${starter.title}” starter. Change anything — describe edits to your agent or drag things in the viewport.`, attachments: [], status: 'handled', createdAt: at }] };
+  }
   const entities = [];
   for (const e of spec.entities) entities.push(makeEntity({ ...e, name: uniqueName(entities, e.name) }, randomUUID()));
-  const at = now();
   const project = { version: 1, id, title: String(title || spec.title).slice(0, 120), template: t, createdAt: at, updatedAt: at, revision: 1, scene: { name: spec.title, environment: { ...spec.environment }, entities }, shots: [], messages: [] };
   project.shots.push(makeShot({ title: 'Shot 1', description: '' }, randomUUID(), 1, entities));
   project.messages.push({ id: randomUUID(), shotId: null, role: 'system', text: `Started from “${spec.title}”. Describe the blockout, camera and shots — or drag things in the viewport.`, attachments: [], status: 'handled', createdAt: at });
@@ -301,8 +308,9 @@ export async function openDirector(root, options = {}) {
     list,
     agentStatus,
     async get(id) { return structuredClone(await load(id)); },
+    async starters() { return (await loadStarters(options.startersDir)).map(starterCard); },
     create: input => serial(async () => {
-      const p = createProjectDocument(input);
+      const p = createProjectDocument(input, randomUUID(), await loadStarters(options.startersDir));
       await mkdir(join(dir, p.id, 'refs'), { recursive: true });
       p.revision = 0; return save(p);
     }),
@@ -629,6 +637,7 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
     if (method === 'GET') {
       if (path === '/api/director/projects') return { projects: await director.list(), archived: (await director.archived()).length, agent: director.agentStatus(), connect: connect() };
       if (path === '/api/director/archived') return { projects: await director.archived() };
+      if (path === '/api/director/starters') return { starters: await director.starters() };
       if (path === '/api/director/assets') { const { project: p } = await director.syncResults(url.searchParams.get('id')); return { assets: p.assets || [], shots: p.shots.map((s, i) => ({ id: s.id, number: i + 1, title: s.title })) }; }
       if (path === '/api/director/agent') return { agent: director.agentStatus(), connect: connect() };
       if (path === '/api/director/project') {

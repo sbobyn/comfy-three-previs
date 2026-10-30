@@ -1,0 +1,1954 @@
+{
+  "format": "comfy-previs-starter",
+  "version": 1,
+  "slug": "wingspan",
+  "order": 1,
+  "title": "Wingspan",
+  "description": "Eagle dives through an alpine valley",
+  "scene": {
+    "name": "Alpine valley",
+    "environment": {
+      "preset": "stage",
+      "description": "A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.",
+      "style": "Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour."
+    },
+    "entities": [
+      {
+        "id": "7cec2cda-aa9a-4c25-afcd-badfa860ef76",
+        "name": "Valley floor",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          -0.1,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.2,
+          50
+        ],
+        "color": "#6f8f4e",
+        "notes": "Lush green alpine meadow with wildflowers in summer.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "910451e8-e15e-4907-ac3a-a388cba96e01",
+        "name": "Alpine lake",
+        "kind": "environment",
+        "shape": "cylinder",
+        "position": [
+          0,
+          0.02,
+          -45
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.05,
+          44
+        ],
+        "color": "#2f7fa6",
+        "notes": "Clear turquoise glacial lake reflecting the peaks.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+        "name": "River 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          62.5,
+          0.03,
+          82.5
+        ],
+        "rotation": 120.95999999999998,
+        "scale": [
+          31.155,
+          0.05,
+          6
+        ],
+        "color": "#3d8fb5",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "83c26dc9-e3a6-48d9-bb88-ed6e8359d030",
+        "name": "River 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          48.5,
+          0.03,
+          59
+        ],
+        "rotation": 120.57999999999998,
+        "scale": [
+          27.554,
+          0.05,
+          6
+        ],
+        "color": "#3d8fb5",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "947a503d-f221-439e-aa92-6540ede5cc32",
+        "name": "River 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          35,
+          0.03,
+          39
+        ],
+        "rotation": 127.87,
+        "scale": [
+          24.804,
+          0.05,
+          6
+        ],
+        "color": "#3d8fb5",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "353a0feb-b328-41be-bebe-6788175954b7",
+        "name": "River 4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          23,
+          0.03,
+          21
+        ],
+        "rotation": 119.05000000000001,
+        "scale": [
+          22.591,
+          0.05,
+          6
+        ],
+        "color": "#3d8fb5",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "85bbe9ab-a681-4c2c-9b5f-471b5e175bdf",
+        "name": "River 5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          14,
+          0.03,
+          3
+        ],
+        "rotation": 113.95999999999998,
+        "scale": [
+          21.698,
+          0.05,
+          6
+        ],
+        "color": "#3d8fb5",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "2414bb8c-0206-468a-b65e-331feabdb678",
+        "name": "River 6",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          7,
+          0.03,
+          -14
+        ],
+        "rotation": 110.56,
+        "scale": [
+          19.088,
+          0.05,
+          6
+        ],
+        "color": "#3d8fb5",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "d4504ca2-bf6e-4801-82f7-a6b75abc5187",
+        "name": "Peak 1",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -150,
+          0,
+          -170
+        ],
+        "rotation": 165,
+        "scale": [
+          50,
+          50,
+          50
+        ],
+        "color": "#7c7f86",
+        "notes": "Jagged granite alpine peak with snowfields near the summit and scree slopes.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "219c490d-e4fa-48c6-a0ba-07f35c836e05",
+        "name": "Peak 2",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -40,
+          0,
+          -200
+        ],
+        "rotation": 77,
+        "scale": [
+          50,
+          50,
+          50
+        ],
+        "color": "#888a90",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "3b5c8be2-146e-46c9-af2a-0891da29e7da",
+        "name": "Peak 3",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          90,
+          0,
+          -180
+        ],
+        "rotation": 202,
+        "scale": [
+          50,
+          50,
+          50
+        ],
+        "color": "#7a7d84",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "7e607ec9-b48c-4e2b-9664-c0965e843e8a",
+        "name": "Peak 4",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          190,
+          0,
+          -80
+        ],
+        "rotation": 333,
+        "scale": [
+          50,
+          50,
+          50
+        ],
+        "color": "#80838a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "d56bd8ee-8408-415f-91d0-df30f75ba49c",
+        "name": "Peak 5",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -200,
+          0,
+          -40
+        ],
+        "rotation": 24,
+        "scale": [
+          50,
+          50,
+          50
+        ],
+        "color": "#7d8087",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "a8102e05-c83f-4582-b501-136a5e2b7241",
+        "name": "Peak 6",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          170,
+          0,
+          90
+        ],
+        "rotation": 37,
+        "scale": [
+          50,
+          50,
+          50
+        ],
+        "color": "#848790",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "5392fb86-46a1-45bf-b833-6d4d1043b196",
+        "name": "Peak 7",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -170,
+          0,
+          110
+        ],
+        "rotation": 274,
+        "scale": [
+          50,
+          50,
+          50
+        ],
+        "color": "#7b7e85",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "d95e63a7-6eab-44f5-b3f6-757db6e13dc8",
+        "name": "Rock ridge 1",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -60,
+          0,
+          -110
+        ],
+        "rotation": 48,
+        "scale": [
+          40,
+          22,
+          30
+        ],
+        "color": "#8e8f8c",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "41db468c-e9cc-407a-8c6d-82335e7149a2",
+        "name": "Rock ridge 2",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          60,
+          0,
+          -115
+        ],
+        "rotation": 187,
+        "scale": [
+          40,
+          22,
+          30
+        ],
+        "color": "#8e8f8c",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "03df6597-250d-4f29-9588-025de4fc8f9d",
+        "name": "Rock ridge 3",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          110,
+          0,
+          -20
+        ],
+        "rotation": 298,
+        "scale": [
+          40,
+          22,
+          30
+        ],
+        "color": "#8e8f8c",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "d9c3a9bf-b16d-4ca8-8685-57992200ce53",
+        "name": "Rock ridge 4",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -110,
+          0,
+          10
+        ],
+        "rotation": 29,
+        "scale": [
+          40,
+          22,
+          30
+        ],
+        "color": "#8e8f8c",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e"
+      },
+      {
+        "id": "82a23174-4a95-47ce-b8d5-9ce856f186f7",
+        "name": "Pine 30,40 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          39.8,
+          0,
+          33.2
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9601630635824202,
+          1.5362609017318725,
+          0.9601630635824202
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "b2c4252c-3e42-40a1-84d7-0512b3a3ea3a",
+        "name": "Pine 30,40 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          28,
+          0,
+          33.8
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2857330776539702,
+          2.0571729242463523,
+          1.2857330776539702
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "6b12bc98-093a-4f45-bc5c-869a95bc1405",
+        "name": "Pine 30,40 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          19.4,
+          0,
+          41.6
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5632147904952411,
+          2.501143664792386,
+          1.5632147904952411
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "6c6a111c-041a-48b8-b747-28ad16b82347",
+        "name": "Pine 30,40 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          33.1,
+          0,
+          42
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9433034338352984,
+          1.5092854941364775,
+          0.9433034338352984
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "c85189ad-ce30-4df1-bb56-14db334a3f1c",
+        "name": "Pine 30,40 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          32.1,
+          0,
+          29.2
+        ],
+        "rotation": 0,
+        "scale": [
+          1.0547572764203539,
+          1.6876116422725662,
+          1.0547572764203539
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "c11992cc-c705-4af1-b9e3-a8257ac1d2ef",
+        "name": "Pine 30,40 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          31.4,
+          0,
+          31.2
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1933973305000256,
+          1.909435728800041,
+          1.1933973305000256
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "9775db1d-db9d-49fc-9abc-71d0a4faa77b",
+        "name": "Pine 30,40 · 7",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          31,
+          0,
+          41.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.292180093908969,
+          2.0674881502543503,
+          1.292180093908969
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "520d360e-02ff-4a53-8c7b-bc5545c3e889",
+        "name": "Pine -25,-10 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -20.6,
+          0,
+          -19.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2998430739882547,
+          2.0797489183812075,
+          1.2998430739882547
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "b64c0e83-eeda-48c6-9610-0424c410985d",
+        "name": "Pine -25,-10 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -32.5,
+          0,
+          -19.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.3984775360223076,
+          2.237564057635692,
+          1.3984775360223076
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "81f45ec9-0ae2-4012-8c77-01ce5af2f909",
+        "name": "Pine -25,-10 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -23.5,
+          0,
+          -7.1
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2474901465794443,
+          1.995984234527111,
+          1.2474901465794443
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "98a8e209-fbcc-4a83-8372-266a13c3b667",
+        "name": "Pine -25,-10 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -24.2,
+          0,
+          -3.3
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2259213060877718,
+          1.961474089740435,
+          1.2259213060877718
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "7e4d775d-be32-4e28-8892-b157e868bf16",
+        "name": "Pine -25,-10 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -14.8,
+          0,
+          -13.3
+        ],
+        "rotation": 0,
+        "scale": [
+          1.0738986094002845,
+          1.7182377750404552,
+          1.0738986094002845
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "55498705-af3a-4c3e-8cb3-88b489496eb2",
+        "name": "Pine -25,-10 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -32.7,
+          0,
+          -3.3
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9572985075570389,
+          1.5316776120912623,
+          0.9572985075570389
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "918b4a0d-2989-4100-8410-cc2bea69e2a3",
+        "name": "Pine -25,-10 · 7",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -29.8,
+          0,
+          -10.1
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1404329829708613,
+          1.8246927727533782,
+          1.1404329829708613
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "2892f942-4050-4fd5-9600-b97c692f3e39",
+        "name": "Pine -25,-10 · 8",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -26.2,
+          0,
+          -7.4
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9512406072217676,
+          1.5219849715548284,
+          0.9512406072217676
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "c9e3c3ac-ed62-4284-8262-ebcaeab27a3d",
+        "name": "Pine 20,-20 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          20.3,
+          0,
+          -28
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1394390643119006,
+          1.823102502899041,
+          1.1394390643119006
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "f028ef6d-33e7-49ea-a59a-5b829cd96c15",
+        "name": "Pine 20,-20 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          30.4,
+          0,
+          -21.9
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5734133583884768,
+          2.517461373421563,
+          1.5734133583884768
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "2b046f26-461a-4950-83c9-4330f5ee829d",
+        "name": "Pine 20,-20 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          9.9,
+          0,
+          -18.6
+        ],
+        "rotation": 0,
+        "scale": [
+          1.4523659200432486,
+          2.323785472069198,
+          1.4523659200432486
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "fa6977c1-c9f1-4353-ac94-9efeee05709e",
+        "name": "Pine 20,-20 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          27.6,
+          0,
+          -23.8
+        ],
+        "rotation": 0,
+        "scale": [
+          1.145124871403418,
+          1.8321997942454686,
+          1.145124871403418
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "d9a01948-a5e8-4530-b789-e63a5def8821",
+        "name": "Pine 20,-20 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          19.9,
+          0,
+          -12.9
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9481340645848024,
+          1.5170145033356839,
+          0.9481340645848024
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "e36e50cd-4b29-4ca9-aefd-3d0db58042a1",
+        "name": "Pine 20,-20 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          10.2,
+          0,
+          -25.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.3879294474788497,
+          2.2206871159661596,
+          1.3879294474788497
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "e258d808-40cc-4d52-a100-961a930ce6c4",
+        "name": "Pine -45,-60 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -55.4,
+          0,
+          -54.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1167251635565623,
+          1.7867602616904996,
+          1.1167251635565623
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "150cacac-c987-40d1-b0bc-3dd674b6df21",
+        "name": "Pine -45,-60 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -43.1,
+          0,
+          -55.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2119485370756453,
+          1.9391176593210326,
+          1.2119485370756453
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "13f4eb4d-9fd8-44da-8e5d-694d0dbf682b",
+        "name": "Pine -45,-60 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -39.8,
+          0,
+          -50.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1429036789819156,
+          1.828645886371065,
+          1.1429036789819156
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "8d3b1304-acee-485d-a208-20782e7d7fc9",
+        "name": "Pine -45,-60 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -34.4,
+          0,
+          -63.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.327643680438154,
+          2.1242298887010462,
+          1.327643680438154
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "1beb6f3c-d216-43ac-b689-cba24e83a9aa",
+        "name": "Pine -45,-60 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -45.2,
+          0,
+          -66.8
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1012023485492033,
+          1.7619237576787254,
+          1.1012023485492033
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "e37b2f0a-b276-467b-ac7d-abdcc7e8e4ce",
+        "name": "Pine -45,-60 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -39.3,
+          0,
+          -62.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.541771358326043,
+          2.466834173321669,
+          1.541771358326043
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "fa8e4f34-eb14-45fe-b37a-c2c209333e0d",
+        "name": "Pine -45,-60 · 7",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -45.1,
+          0,
+          -68
+        ],
+        "rotation": 0,
+        "scale": [
+          1.181150979434013,
+          1.8898415670944209,
+          1.181150979434013
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "47194363-1e1a-4aea-bac5-48445f204e28",
+        "name": "Pine 45,-65 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          39.7,
+          0,
+          -73.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.201365155762353,
+          1.922184249219765,
+          1.201365155762353
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "7fd3e21f-2c40-4a08-bb94-7e77e5722ec5",
+        "name": "Pine 45,-65 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          46.2,
+          0,
+          -60
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5905269567008302,
+          2.5448431307213286,
+          1.5905269567008302
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "35d23ef3-0157-4b08-9472-d27c4a035b17",
+        "name": "Pine 45,-65 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          49.4,
+          0,
+          -67.9
+        ],
+        "rotation": 0,
+        "scale": [
+          1.0615260556760775,
+          1.698441689081724,
+          1.0615260556760775
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "d3cfec51-e0d1-4ad2-859c-abe5aac5500b",
+        "name": "Pine 45,-65 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          35,
+          0,
+          -73.4
+        ],
+        "rotation": 0,
+        "scale": [
+          1.3609616738806312,
+          2.17753867820901,
+          1.3609616738806312
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "6ae671b4-a8d8-48a9-a386-91cb162e916c",
+        "name": "Pine 45,-65 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          33.3,
+          0,
+          -57.1
+        ],
+        "rotation": 0,
+        "scale": [
+          1.027640011786838,
+          1.644224018858941,
+          1.027640011786838
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "3743d56a-947d-4d67-b0b3-272197050ae4",
+        "name": "Pine 45,-65 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          39.8,
+          0,
+          -73.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2742136736100727,
+          2.038741877776116,
+          1.2742136736100727
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "71c8eda8-820e-47f6-b753-d274cb46d70d",
+        "name": "Pine 60,80 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          62.6,
+          0,
+          75.6
+        ],
+        "rotation": 0,
+        "scale": [
+          0.987844058747184,
+          1.5805504939954944,
+          0.987844058747184
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "005d2470-1aa7-418d-841c-26a28c06c680",
+        "name": "Pine 60,80 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          68.6,
+          0,
+          90.8
+        ],
+        "rotation": 0,
+        "scale": [
+          1.35847652460143,
+          2.1735624393622883,
+          1.35847652460143
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "a726b1a2-87cb-4f2b-9b56-c4d97880cfc3",
+        "name": "Pine 60,80 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          65.8,
+          0,
+          79
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5096856508104404,
+          2.415497041296705,
+          1.5096856508104404
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "aa749c97-3146-47d5-afc4-7ff6ba5fdf48",
+        "name": "Pine 60,80 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          70.8,
+          0,
+          84.3
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2914902185996266,
+          2.0663843497594026,
+          1.2914902185996266
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "c76b6dbf-ef9d-4436-b42b-0d08ded2f6e4",
+        "name": "Pine 60,80 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          57.6,
+          0,
+          77.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2370659727156363,
+          1.9793055563450181,
+          1.2370659727156363
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "f8e76546-d2f0-4caf-9276-cbde518ae391",
+        "name": "Pine tree",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -30,
+          0,
+          20
+        ],
+        "rotation": 0,
+        "scale": [
+          1.4,
+          2.2,
+          1.4
+        ],
+        "color": "#2f5d3a",
+        "notes": "Tall subalpine fir and pine trees, dark green, dense.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "311a48d9-648a-4672-ba4e-1e047baf087f",
+        "name": "Elk 1",
+        "kind": "character",
+        "shape": "box",
+        "position": [
+          -14,
+          0.75,
+          -20
+        ],
+        "rotation": 40,
+        "scale": [
+          0.9,
+          1.5,
+          2.3
+        ],
+        "color": "#7a5534",
+        "notes": "Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+      },
+      {
+        "id": "b97a657b-5608-4482-a5a2-cad13f6eaab3",
+        "name": "Elk 2",
+        "kind": "character",
+        "shape": "box",
+        "position": [
+          -11,
+          0.75,
+          -24
+        ],
+        "rotation": 70,
+        "scale": [
+          0.9,
+          1.5,
+          2.3
+        ],
+        "color": "#7a5534",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+      },
+      {
+        "id": "784d7710-1963-47c5-8176-78f3363c2d6e",
+        "name": "Elk 3",
+        "kind": "character",
+        "shape": "box",
+        "position": [
+          -17,
+          0.75,
+          -25
+        ],
+        "rotation": 10,
+        "scale": [
+          0.9,
+          1.5,
+          2.3
+        ],
+        "color": "#7a5534",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+      },
+      {
+        "id": "bcec0c59-096d-472b-9218-b6af40adae68",
+        "name": "Bald eagle",
+        "kind": "character",
+        "shape": "box",
+        "position": [
+          80,
+          70,
+          120
+        ],
+        "rotation": 0,
+        "scale": [
+          2.2,
+          0.3,
+          0.9
+        ],
+        "color": "#3b2a1e",
+        "notes": "A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              95,
+              75,
+              135
+            ]
+          },
+          {
+            "t": 3,
+            "p": [
+              72,
+              55,
+              95
+            ]
+          },
+          {
+            "t": 5,
+            "p": [
+              55,
+              38,
+              66
+            ]
+          },
+          {
+            "t": 7,
+            "p": [
+              40,
+              22,
+              40
+            ]
+          },
+          {
+            "t": 9,
+            "p": [
+              22,
+              9,
+              14
+            ]
+          },
+          {
+            "t": 10.5,
+            "p": [
+              6,
+              4,
+              -8
+            ]
+          },
+          {
+            "t": 11.8,
+            "p": [
+              -8,
+              2.6,
+              -18
+            ]
+          },
+          {
+            "t": 13,
+            "p": [
+              -24,
+              6,
+              -32
+            ]
+          },
+          {
+            "t": 15,
+            "p": [
+              -45,
+              22,
+              -58
+            ]
+          }
+        ],
+        "parent": null
+      },
+      {
+        "id": "7bda122f-3ab3-4cc3-9568-6b7b132cd48e",
+        "name": "Mountains",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          -10,
+          0,
+          -64.0909090909091
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "10a9a848-8da4-43ee-95d9-d33975e4419c",
+        "name": "River",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          31.666666666666668,
+          0,
+          31.75
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "206c50a1-c23a-4cd1-be52-92d976ee68ee",
+        "name": "Forest",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          9.1325,
+          0,
+          -9.045
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "3197eeea-90f6-47db-86d8-15d534e592fe",
+        "name": "Elk herd",
+        "kind": "character",
+        "shape": "group",
+        "position": [
+          -14,
+          0,
+          -23
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      }
+    ]
+  },
+  "shots": [
+    {
+      "title": "The valley",
+      "description": "Sweeping aerial over the lake and peaks as a tiny @bald-eagle glides down from the ridge.",
+      "duration": 5,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 24,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -40,
+              45,
+              -95
+            ],
+            "look": [
+              40,
+              30,
+              60
+            ],
+            "mm": 24
+          },
+          {
+            "t": 1,
+            "p": [
+              -10,
+              38,
+              -85
+            ],
+            "look": [
+              55,
+              30,
+              70
+            ],
+            "mm": 24
+          }
+        ]
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    },
+    {
+      "title": "The dive",
+      "description": "FPV chase right behind @bald-eagle as it folds its wings and dives down the river canyon.",
+      "duration": 5,
+      "start": 5,
+      "camera": {
+        "move": "custom",
+        "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+        "distance": 7,
+        "height": 2.5,
+        "angle": 180,
+        "mm": 20,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              58.09,
+              42.89,
+              71.35
+            ],
+            "look": [
+              49.71,
+              32.36,
+              56.83
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.2,
+            "p": [
+              50.59,
+              34.89,
+              58.35
+            ],
+            "look": [
+              42.21,
+              24.36,
+              43.83
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.4,
+            "p": [
+              43.69,
+              26.26,
+              45.32
+            ],
+            "look": [
+              33.68,
+              17.44,
+              30.87
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.6,
+            "p": [
+              34.69,
+              19.76,
+              32.32
+            ],
+            "look": [
+              24.68,
+              10.94,
+              17.87
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.8,
+            "p": [
+              26.05,
+              11.87,
+              19.57
+            ],
+            "look": [
+              15.06,
+              6.83,
+              4.46
+            ],
+            "mm": 20
+          },
+          {
+            "t": 1,
+            "p": [
+              15.38,
+              8.53,
+              4.9
+            ],
+            "look": [
+              4.39,
+              3.5,
+              -10.21
+            ],
+            "mm": 20
+          }
+        ]
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "FPV drone chase"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "14mm ultra-wide"
+        ],
+        "filter": [
+          "golden hour light"
+        ]
+      }
+    },
+    {
+      "title": "The swoop",
+      "description": "Low tracking shot at the lakeshore as @bald-eagle skims the water past the grazing @elk-herd and climbs away.",
+      "duration": 5,
+      "start": 10,
+      "camera": {
+        "move": "truck-left",
+        "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+        "distance": 12,
+        "height": 2,
+        "angle": 80,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      }
+    }
+  ],
+  "media": []
+}

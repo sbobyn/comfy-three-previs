@@ -7,7 +7,7 @@ The director workspace is where you block out one scene, plan its shots, and sen
 The launch page (`http://127.0.0.1:5190`) shows:
 
 - **Setup**: what's ready on this machine (FFmpeg, Cloud key, local ComfyUI…). Fix any ✗ items first.
-- **New project**: name it, then pick a starting blockout (empty stage, night street, two-hander interior, hero reveal).
+- **New project**: name it, then **Start empty** or pick a starter project (Breaking News, Wingspan, Final Lap, Posterized). Starters are full multi-shot scenes you can change freely; see `examples/starters/`.
 - **Open project**: your projects, newest first. **⋯** gives you Export, Duplicate and Archive. **Import project…** loads a `.previs.zip`, and **Archived** lets you restore archived projects.
 
 ## 2. Block out the scene
@@ -72,7 +72,7 @@ The prompt numbers them ("Runner — looks exactly like reference image 1"). Kli
 
 ## 6. Render and hand off
 
-**Render shot →** renders each frame through the shot camera at 24 fps (1280×720 or 640×360) and saves the video into the project. Edit the compiled prompt if you like, then **Open in Comfy workflow →**. That page has the video and prompt preselected. Choose a workflow and backend there; it quotes and asks for approval before anything runs.
+**Render blockout…** (it becomes **Generate video ▸** once the blockout is current), in the action bar pinned to the bottom of the right panel next to **▶ Preview**, renders each frame through the shot camera at 24 fps (1280×720 or 640×360) and saves the video into the project. Edit the compiled prompt if you like, then **Open in Comfy workflow →**. That page has the video and prompt preselected. Choose a workflow and backend there; it quotes and asks for approval before anything runs.
 
 Workflow results come back automatically. They appear under **Workflow results** in the shot's Shot tab and in **Assets**.
 

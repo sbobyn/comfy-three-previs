@@ -155,6 +155,7 @@ textarea.field { resize: vertical; min-height: 64px; }
 .card .meta { padding: 11px 13px 13px; display: flex; flex-direction: column; gap: 3px; }
 .card .meta strong { font-weight: 600; font-size: 13px; }
 .card .meta span { color: var(--muted); font-size: 12px; }
+.card .meta small { color: var(--muted-2, var(--muted)); font: 10.5px/1.4 var(--mono); margin-top: 3px; opacity: .8; }
 .projects { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
 .empty-state { border: 1px dashed var(--line-2); border-radius: 14px; padding: 28px; color: var(--muted); text-align: center; }
 .foot-links { display: flex; gap: 18px; margin-top: 48px; color: var(--faint); font-size: 12px; border-top: 1px solid var(--line); padding-top: 18px; }
@@ -1310,3 +1311,44 @@ dialog.claude-help p { margin: 6px 0; line-height: 1.5; }
   .fly-btn { font-size: var(--fs-sm); }
 }
 .toast { bottom: 78px; }
+
+/* ---------- Right panel never scrolls sideways: every row fits the panel width ---------- */
+.side .shotpane :is(.sec, .sec-body, .block, .cast-row, .cast-slot, .cast-main, .vm, .vm-inputs, .vm-map, .vm-ref, .vm-slot, .grid2, .xyz) { min-width: 0; }
+.side .shotpane :is(img, video, canvas, svg) { max-width: 100%; }
+.side .shotpane .slider-row { grid-template-columns: minmax(0, 76px) minmax(0, 1fr) minmax(0, 54px); }
+.side .shotpane .slider-row > * { min-width: 0; }
+.side .shotpane .slider-row input[type=range] { width: 100%; }
+/* Storyboard pins are centred on their time: inset the track by half a pin so 0s and the end stay inside. */
+.side .shotpane .sb-track { margin-inline: 23px; }
+/* Final guard: whatever slips through is clipped, never a sideways scrollbar. */
+.side .shotpane, .side .thread { overflow-x: hidden; }
+
+/* ---------- Action bar: pinned to the bottom of the right panel, outside the scroller ---------- */
+.side { grid-template-rows: auto minmax(0, 1fr) auto; }
+.side-act { position: relative; z-index: 3; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 88%, transparent); backdrop-filter: blur(12px) saturate(1.15); -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  box-shadow: 0 -1px 0 rgba(255, 253, 249, .7) inset, 0 -12px 26px -18px rgba(21, 19, 15, .38); }
+/* Soft fade so content scrolls under the bar instead of being cut by a hard edge. */
+.side-act::before { content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 16px; pointer-events: none; background: linear-gradient(to top, color-mix(in srgb, var(--paper-2) 85%, transparent), transparent); }
+.act-hint { display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; row-gap: 1px; min-width: 0; font-size: var(--fs-xs); color: var(--ink-3); line-height: 1.35; }
+.act-hint strong { flex-basis: 100%; font: 600 var(--fs-sm)/1.3 var(--mono, monospace); color: var(--ink); letter-spacing: .01em; white-space: nowrap; }
+.act-state { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.act-state::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-4); }
+.act-state.ok::before { background: var(--ok); } .act-state.warn::before { background: #D9962B; }
+.act-cost { white-space: nowrap; font-family: var(--mono, monospace); font-size: var(--fs-2xs); color: var(--ink-2); }
+.act-cost::before { content: '·'; margin-right: 6px; color: var(--ink-4); font-family: inherit; }
+.act-btns { display: flex; gap: 8px; align-items: center; }
+.act-btns .btn { height: 34px; }
+.act-preview { border-radius: var(--r-full); padding: 0 14px; background: var(--card); }
+.act-preview:hover { background: var(--paper-3); }
+.act-go { white-space: nowrap; }
+.act-go:hover { background: var(--accent); border-color: var(--accent); }
+.ws-body.side-collapsed .side-act { display: none; }
+/* Narrow panel: hint on its own line, buttons share the full width below. */
+@container side (max-width: 400px) {
+  .side-act { grid-template-columns: minmax(0, 1fr); gap: 8px; padding-top: 9px; }
+  .act-hint strong { flex-basis: auto; }
+  .act-btns { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+  .act-btns .btn { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+}

@@ -146,14 +146,15 @@ function projectCard(p: Summary) {
 }
 
 async function render() {
-  let projects: Summary[] = [], archivedCount = 0, archived: Summary[] = [];
+  let projects: Summary[] = [], archivedCount = 0, archived: Summary[] = [], served: Starter[] = [];
   let setup: { checks: Check[]; dataDir: string } | null = null;
   try {
-    const [data, s] = await Promise.all([api('director/projects'), api('director/setup').catch(() => null)]);
+    const [data, s, st] = await Promise.all([api('director/projects'), api('director/setup').catch(() => null), api('director/starters').catch(() => ({ starters: [] }))]);
     projects = data.projects; agent = data.agent; connect = data.connect; archivedCount = data.archived; setup = s;
+    served = (st.starters || []).map((t: any) => ({ key: t.slug, title: String(t.title).replace(/^Starter · /, ''), description: t.description, shots: t.shots, scene: t.scene, shot: { ...t.shot, id: `starter-${t.slug}`, references: [], render: null } }));
     if (showArchived) archived = (await api('director/archived')).projects;
   } catch (e) { toast((e as Error).message, true); }
-  const starters = templateStarters();
+  const starters = served.length ? served : templateStarters();
   const starterSection = h('section', { class: 'home-section', id: 'starters', 'aria-labelledby': 'starters-title' },
     h('div', { class: 'home-head' }, h('h2', { id: 'starters-title' }, 'Starters'), h('span', {}, 'Open one and make it yours.')),
     starterCards(starters, key => void create(key)));
