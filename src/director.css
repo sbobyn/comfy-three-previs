@@ -414,17 +414,23 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .inspector .head .btn.icon { flex: none; }
 .inspector input[type=color] { width: 100%; height: 26px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--bg); padding: 2px; }
 .inspector.collapsed > :not(.head) { display: none !important; }
-/* Controls & shortcuts card */
-.help-card { position: absolute; top: 52px; left: 10px; z-index: 6; width: min(640px, calc(100% - 20px)); max-height: calc(100% - 70px); overflow: auto; background: var(--glass); border: 1px solid var(--glass-line); color: var(--on-stage); backdrop-filter: blur(10px); border-radius: 12px; padding: 12px 14px; box-shadow: 0 16px 50px rgba(0, 0, 0, .55); }
-.help-head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 8px; }
+/* Controls & shortcuts card: paper card; key list scrolls, viewport settings stay pinned */
+.help-card { position: absolute; top: 52px; left: 10px; z-index: 6; width: min(660px, calc(100% - 20px)); max-height: calc(100% - 64px); display: flex; flex-direction: column; overflow: hidden; background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sh-pop); }
+.help-head { flex: none; display: flex; gap: 10px; align-items: baseline; padding: 10px 10px 8px 16px; border-bottom: 1px solid var(--line); }
+.help-head strong { font-size: var(--fs-md); font-weight: 650; }
 .help-head .btn { margin-left: auto; }
-.help-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
-.help-card section { display: flex; flex-direction: column; gap: 4px; }
-.help-card section > strong { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin-bottom: 2px; }
-.help-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; }
-.help-row kbd, .help-settings kbd { font: 11px var(--mono); color: #cfd5de; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; white-space: nowrap; }
-.help-settings { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
-.help-settings label { display: flex; justify-content: space-between; font-size: 12px; }
+.help-cols { flex: 1 1 auto; min-height: 0; overflow: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; padding: 12px 16px 14px; }
+.help-card section { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.help-card section > strong { font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--ink-3); margin-bottom: 2px; }
+.help-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 12px; font-size: var(--fs-sm); color: var(--ink-2); }
+.help-row kbd { justify-self: end; max-width: 15em; white-space: normal; text-align: right; line-height: 1.35; }
+.help-explain { height: 96px; border-radius: var(--r-sm); background: var(--paper-2); overflow: hidden; }
+.help-explain:empty { display: none; }
+.help-card .help-settings { flex: none; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 20px; padding: 10px 16px 12px; border-top: 1px solid var(--line); background: var(--paper); }
+.help-settings > strong { flex-basis: 100%; }
+.help-settings label { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--ink-2); cursor: pointer; }
+.help-settings .help-row { display: inline-flex; gap: 8px; }
+@container vp (max-width: 560px) { .help-cols { grid-template-columns: minmax(0, 1fr); } }
 /* Right-click add popup */
 .add-popup { position: absolute; z-index: 7; width: 180px; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 10px; padding: 4px; box-shadow: 0 12px 34px rgba(0, 0, 0, .55); display: flex; flex-direction: column; }
 .add-popup button { display: flex; gap: 8px; align-items: center; border: 0; background: none; padding: 5px 8px; border-radius: 6px; cursor: pointer; text-align: left; text-transform: capitalize; font-size: 12.5px; }
