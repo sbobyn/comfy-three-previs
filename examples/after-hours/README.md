@@ -31,13 +31,13 @@ The director registers the three visible object looks in the order shown beside 
 
 Selected model: **MiniMax H3**, through **Comfy Cloud**, 768P, 16:9, four output seconds, seed 4242, watermark off. The complete source is supplied as Video 1, not reduced to its first frame. This is reference-video motion transfer, not a claim of deterministic geometric control. Native output dimensions may differ from the 1280×720 source, and H3 may generate stereo audio while the source is silent. Keep the full returned file and disclose all differences; do not fit or discard them automatically.
 
-Live schema validation alone establishes neither execution nor creative acceptance. No H3 run has been dispatched at this checkpoint.
+Live schema validation alone establishes neither execution nor creative acceptance. One owner-approved H3 run has now completed; see [the execution and visual qualification record](QUALIFICATION.md). The result is stylized, so it does not qualify the requested live-action appearance.
 
 ## Quote and approval
 
 The live Cloud reference-node price badge gives a partner estimate range of **$0.7722–$2.4453 USD** for 768P, four output seconds, one reference video and three images. Its formula is output seconds × $0.1287, plus a reference-video charge between 2 and 15 seconds at that rate. Three images remain within the included five. This is price-badge evidence, not a billed total; Cloud runtime/account charges remain unresolved. The durable quote correctly retains `status: unknown`.
 
-Proposed approval: **one H3 request, $3 USD allowance, explicitly accepting unresolved runtime/account charges, no retries**. An application allowance is not a provider-enforced cap. Stop if the bound source, prompt, references, model/settings, backend or live pricing changes; prepare a new quote. **Review request & quote** does not upload or submit. Spending checkboxes start unchecked. The separate submission button dispatches at most once.
+The owner approved **one H3 request, $3 USD allowance, explicitly accepting unresolved runtime/account charges, no retries**. That authorization was used for the recorded run and does not authorize another generation. An application allowance is not a provider-enforced cap. Stop if the bound source, prompt, references, model/settings, backend or live pricing changes; prepare a new quote and obtain fresh approval. **Review request & quote** does not upload or submit. Spending checkboxes start unchecked. The separate submission button dispatches at most once.
 
 ## Review criteria
 
