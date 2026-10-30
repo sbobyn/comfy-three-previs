@@ -1,0 +1,37 @@
+/* Comfy Three Previs — Setup (home dialog and /setup.html). Tokens from director.css. */
+.setup { display: flex; flex-direction: column; gap: 22px; }
+.setup h3 { margin: 0 0 10px; font-size: var(--fs-xs); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-3); }
+.setup .note { margin: 8px 0 0; }
+.setup code { font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2); word-break: break-all; }
+.setup-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.setup-checks li { display: grid; grid-template-columns: 16px 1fr; gap: 8px; font-size: var(--fs-sm); }
+.setup-checks li b { font-weight: 550; color: var(--ink); margin-right: 6px; }
+.setup-checks li small { color: var(--ink-3); font-size: var(--fs-xs); }
+.setup-checks .mk { font-weight: 700; color: var(--ink-3); }
+.setup-checks .s-ok .mk { color: var(--ok); }
+.setup-checks .s-warn .mk { color: var(--warn); }
+.setup-checks .s-required .mk { color: var(--bad); }
+.setup table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.setup th, .setup td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.setup thead th { font-size: var(--fs-xs); font-weight: 600; color: var(--ink-3); }
+.setup tbody th { font-weight: 550; color: var(--ink); }
+.setup td { color: var(--ink-2); }
+.setup-can td.yes { color: var(--ok); font-weight: 600; white-space: nowrap; }
+.setup-can td.no { color: var(--ink-3); }
+.setup-env th { width: 1%; white-space: nowrap; }
+.setup-opt { margin: 0; display: grid; gap: 4px; }
+.setup-opt dt { display: flex; align-items: baseline; gap: 10px; margin-top: 10px; font-weight: 600; color: var(--ink); }
+.setup-opt dt:first-child { margin-top: 0; }
+.setup-opt dt span { font-size: var(--fs-xs); font-weight: 500; color: var(--ink-3); }
+.setup-opt dt span.ok { color: var(--ok); }
+.setup-opt dd { margin: 0; font-size: var(--fs-sm); color: var(--ink-2); }
+dialog.setup-dialog { width: min(720px, 94vw); max-height: 90vh; }
+dialog.setup-dialog .dialog-body { overflow-y: auto; max-height: calc(90vh - 64px); }
+/* Standalone /setup.html */
+.setup-page { min-height: 100%; }
+.setup-page > header { display: flex; align-items: center; gap: 16px; height: 56px; padding: 0 max(28px, calc((100% - 760px) / 2)); }
+.setup-page > header a { color: var(--ink-3); font-size: var(--fs-sm); text-decoration: none; }
+.setup-page > header a:hover { color: var(--ink); }
+.setup-page > header .brand { color: var(--ink); font-weight: 600; margin-right: auto; }
+.setup-page > main { width: min(760px, 100% - 56px); margin: 0 auto; padding: 12px 0 56px; }
+.setup-page h1 { margin: 0 0 22px; font-family: var(--serif); font-weight: 500; font-size: 34px; letter-spacing: -.02em; }
