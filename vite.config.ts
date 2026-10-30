@@ -10,8 +10,20 @@ function vcamRelay(): PluginOption {
   };
 }
 
+// Static read-only demo (GitHub Pages): load the fetch/media shim before any
+// page code. Build with VITE_DEMO=1; see scripts/snapshot-demo.mjs.
+function demoShim(): PluginOption {
+  return {
+    name: "demo-shim",
+    transformIndexHtml: {
+      order: "pre",
+      handler: (html) => html.replace(/<script type="module"/, '<script type="module" src="/src/demo-shim.ts"></script>\n    $&'),
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [vcamRelay()],
+  plugins: [vcamRelay(), ...(process.env.VITE_DEMO ? [demoShim()] : [])],
   server: {
     // Quick tunnels hand out a random *.trycloudflare.com host, which Vite's
     // host check rejects by default.

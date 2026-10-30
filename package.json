@@ -15,7 +15,8 @@
     "build": "vite build && vite build --config vite.server.config.ts",
     "typecheck": "tsc --noEmit",
     "check": "pnpm typecheck && pnpm build",
-    "dev:camera": "vite --host 127.0.0.1 --port 5187"
+    "dev:camera": "vite --host 127.0.0.1 --port 5187",
+    "demo:build": "VITE_DEMO=1 vite build --base=/comfy-three-previs/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.0",

@@ -12,3 +12,4 @@ dist-server/
 .evidence/
 
 /node_modules
+dist-demo/
