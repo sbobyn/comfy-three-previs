@@ -16,6 +16,7 @@ import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } 
 import type { TransformChange } from './director-scene';
 import { Selection, UndoStack, targetConsumesKey, recreateOps, snap } from '../shared/editor-controls.mjs';
 import type { UndoEntry, ModalMode } from '../shared/editor-controls.mjs';
+import { openJourney } from './director-guide';
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -61,7 +62,7 @@ const modeSwitch = h('div', { class: 'seg ws-mode', role: 'tablist', 'aria-label
 const top = h('header', { class: 'ws-top' },
   h('a', { class: 'brand', href: '/', title: 'All projects' }, h('span', { class: 'brand-mark' })),
   h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep' }, '/'), titleInput, h('span', { class: 'sep' }, '·'), sceneLabel, modeSwitch),
-  h('div', { class: 'right' }, pillSlot, looksBtn, assetsBtn, previewBtn, renderBtn));
+  h('div', { class: 'right' }, h('button', { class: 'btn ghost sm', type: 'button', title: 'End-to-end guide and feature map', onclick: () => showJourney() }, 'Guide'), pillSlot, looksBtn, assetsBtn, previewBtn, renderBtn));
 
 const shotList = h('div', { class: 'shots', role: 'listbox', 'aria-label': 'Shots' });
 const outline = h('div', { class: 'outline', 'aria-label': 'Scene objects' });
@@ -146,6 +147,28 @@ function setMode(m: typeof wsMode) {
   const q = new URLSearchParams(location.search); if (m === 'sequence') q.set('view', 'sequence'); else q.delete('view'); history.replaceState(null, '', `?${q}`);
 }
 app.replaceChildren(top, wsBody, sequence.el);
+
+function showJourney() {
+  if (!project) { toast('Wait for the project to finish loading.'); return; }
+  const scenePanel = (t: 'direct' | 'shot') => {
+    setMode('scene');
+    if (collapsed.side) setCollapsed('side', false);
+    setTab(t);
+    (t === 'direct' ? textarea : shotTab).focus();
+  };
+  openJourney({
+    context: `${project.title} · Browser-owned scene · ${project.scene.entities.length} objects · ${project.shots.length} shots · ${project.assets?.length || 0} saved video assets. Counts describe saved work, not quality acceptance.`,
+    actions: {
+      scene: () => scenePanel('direct'),
+      looks: () => openLooks(),
+      shot: () => scenePanel('shot'),
+      capture: () => { setMode('scene'); openRender(); },
+      workflow: () => { setMode('sequence'); seqModeBtn.focus(); },
+      compare: () => { setMode('sequence'); seqModeBtn.focus(); },
+      export: () => { void openAssets(); },
+    },
+  });
+}
 
 // Draggable panel edges. Widths persist; double-click resets; arrows nudge when focused.
 const PANEL = { rail: { key: 'previs.railW', min: 168, max: 440, edge: 'right' as const }, side: { key: 'previs.sideW', min: 260, max: 620, edge: 'left' as const } };

@@ -877,3 +877,23 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .object-generate[open] > :not(summary) { margin-top: 10px; }
 .object-generate textarea { width: 100%; }
 .object-visual .block-head { flex-wrap: wrap; gap: 8px; }
+
+/* The feature guide navigates existing controls; it never dispatches work. */
+.journey button { padding: 7px 10px; border-radius: var(--r-sm); background: var(--paper-2); border: 1px solid var(--line); color: var(--ink); font-size: 12px; text-align: left; cursor: pointer; }
+.journey button:hover { background: var(--card); border-color: var(--ink-3); }
+.journey button b { font: 11px var(--mono); color: var(--ink-3); margin-right: 6px; }
+dialog.journey-dialog { width: min(820px, 94vw); max-height: 90vh; }
+.journey-dialog .dialog-head { position: sticky; top: 0; background: var(--card); z-index: 1; }
+.journey-intro { font-size: 15px; line-height: 1.5; margin: 0; }
+.journey-context { padding: 10px 12px; margin: 0; background: var(--paper-2); border-radius: var(--r-sm); font-size: 12px; line-height: 1.5; }
+.journey-steps { list-style: none; padding: 0 !important; }
+.journey-steps > li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; padding: 16px 0; border-top: 1px solid var(--line); scroll-margin-top: 75px; }
+.journey-steps > li.is-current { border-top-color: var(--accent); }
+.journey-number { font: 12px var(--mono); padding-top: 3px; color: var(--ink-3); }
+.journey-steps h3 { font-size: 15px; margin: 0 0 6px; color: var(--ink); }
+.journey-steps p { font-size: 13px; line-height: 1.6; margin: 0 0 10px; }
+.journey-boundaries { border-top: 1px solid var(--line); padding-top: 16px; }
+.journey-boundaries summary { cursor: pointer; font-weight: 600; }
+.journey-boundaries dt { font-size: 13px; font-weight: 600; margin-top: 16px; }
+.journey-boundaries dd { font-size: 13px; line-height: 1.6; margin: 5px 0 0; color: var(--ink-3); }
+.journey-boundaries nav { display: flex; flex-wrap: wrap; gap: 12px 18px; font-size: 13px; }

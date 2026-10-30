@@ -51,6 +51,8 @@ Then ask your agent to *“listen for Previs direction”*. It reads your chat m
 
 ## Using it
 
+Open **How it works** on the launch page, or **Guide** inside a project, for the seven-stage feature map. Workspace guide buttons open the existing controls without starting a capture or generation. Expand the feature limits for MCP, Blender, imported graphs/LoRAs, devices and AI qualification.
+
 See the [user guide](docs/director.md). In short: **New project** → describe or drag the blockout → add shots and camera moves → add looks to objects (upload or generate) → **Render shot** → **Open in Comfy workflow**.
 
 ## Your projects and files

@@ -10,6 +10,8 @@ http://127.0.0.1:5230/director.html?project=ec5bc096-7adb-40cd-91d6-9e77a878a844
 
 Use this explicit project link; do not choose a project by its ordering or title alone. Earlier instructions naming :5220/:5210 were superseded by the owner's instruction to use :5230 for the rest of the day. This checkpoint does not start those older servers.
 
+**Guide** in the workspace opens the end-to-end feature map: scene → looks → shots → source capture → AI request → comparison → export. Its buttons open existing controls; they never start a capture or generation. On the launch page, use **How it works** or any numbered stage. Expand **Other paths, power-user features & current limits** for the agent/MCP, Blender, device, imported-workflow and qualification boundaries.
+
 ## Sixty seconds
 
 1. **0–10 s — one scene, three shots.** Show the scene and the shot strip: the river channel, observatory, and interchange. These are editable blockouts and saved camera moves. Preview each shot. Do not describe them as device-recorded takes without a physical controller pass.

@@ -4,6 +4,7 @@ import type { DirectorProject, Shot } from '../shared/director.mjs';
 import { renderStill } from './director-scene';
 import { api, h, ago, agentPill, connectDialog, toast } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
+import { JOURNEY, openJourney } from './director-guide';
 
 type Summary = { id: string; title: string; template: string; updatedAt: string; shots: number; entities: number; references: number; renders: number; assets: number; sceneName: string };
 type Check = { id: string; label: string; status: 'ok' | 'optional' | 'warn' | 'required'; detail: string; fix: string };
@@ -94,6 +95,7 @@ async function render() {
     h('header', { class: 'launch-top' },
       h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Previs'),
       h('nav', {},
+        h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openJourney() }, 'How it works'),
         agentPill(agent, () => connectDialog(agent, connect)),
         h('a', { class: 'btn ghost sm', href: '/generation.html' }, 'Workflows'),
         h('a', { class: 'btn ghost sm', href: '/setup.html' }, 'Setup'))),
@@ -103,7 +105,7 @@ async function render() {
           h('div', { class: 'eyebrow' }, 'Previs for filmmakers'),
           h('h1', {}, 'Direct the scene.', h('br'), h('span', { class: 'muted' }, 'Then hand it to Comfy.')),
           h('p', {}, 'Block out a scene, describe each shot to your agent, drop in image references, preview the camera — and send the exact camera render to a Comfy workflow.')),
-        h('div', { class: 'journey', 'aria-label': 'Journey' }, ...['Block out', 'Describe shots', 'Reference', 'Preview camera', 'Render workflow'].map((s, i) => h('span', {}, h('b', {}, String(i + 1).padStart(2, '0')), s)))),
+        h('nav', { class: 'journey', 'aria-label': 'Explore the end-to-end journey' }, ...JOURNEY.map((s, i) => h('button', { type: 'button', onclick: () => openJourney({ stage: s.id }) }, h('b', {}, String(i + 1).padStart(2, '0')), s.title)))),
       setup ? setupCard(setup.checks, setup.dataDir) : null,
       h('div', { class: 'section-head' }, h('h2', {}, 'New project'), h('span', { class: 'muted' }, 'Pick a starting blockout — everything stays editable.')),
       h('div', { class: 'new-row' },
