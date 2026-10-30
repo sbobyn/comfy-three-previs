@@ -150,8 +150,8 @@ export function createSequence(ctx: SequenceCtx) {
     pick.onchange = () => { pick.checked ? picked.add(s.id) : picked.delete(s.id); syncPickAll(); };
     const bState = !s.render ? ['missing', 'No blockout'] : fresh(s) ? ['ok', 'Blockout ready'] : ['stale', 'Blockout changed'];
     const gState = job ? ['run', `Generating · ${job.status}`] : res.length ? ['ok', `${res.length} generated`] : ['none', 'Not generated'];
-    const version = h('select', { class: 'field', 'aria-label': `Version of shot ${i + 1} in the cut`, disabled: !inCut },
-      h('option', { value: '' }, 'Newest (generated, else blockout)'),
+    const version = h('select', { class: 'field', 'aria-label': `Version of shot ${i + 1} in the cut`, title: 'Newest uses the latest generated video, or the blockout if there is none', disabled: !inCut },
+      h('option', { value: '' }, 'Newest'),
       ...res.map((x, k) => h('option', { value: x.id, selected: c?.assetId === x.id }, `Generated ${res.length - k} · ${(x.source.workflow || '').split(' ·')[0]}`)),
       ...renders(s).map(x => h('option', { value: x.id, selected: c?.assetId === x.id }, `Blockout v${x.version ?? 1}`)));
     version.onchange = () => void writeCut(m => { const k = m.get(s.id); if (k) { k.assetId = version.value || null; k.in = 0; k.out = null; } }, 'Choose version');
@@ -269,7 +269,7 @@ export function createSequence(ctx: SequenceCtx) {
   function drawExports() {
     const p = P(), list = cutList(), total = list.reduce((t, x) => t + Math.max(0, (x.c.out ?? x.a.duration ?? 0) - (x.c.in || 0)), 0);
     const missing = p.shots.filter(s => clipFor(s) && !media(s)).length;
-    totals.textContent = `${list.length} of ${p.shots.length} shots · ${total.toFixed(2)}s${missing ? ` · ${missing} not rendered` : ''}`;
+    totals.textContent = `${list.length} of ${p.shots.length} shots · ${total.toFixed(2)}s${missing ? ` · ${missing} without a blockout` : ''}`;
     exportBtn.disabled = busy || !list.length || missing > 0;
     exportBtn.title = missing ? 'Make a blockout for every shot in the cut first' : '';
     const edits = (p.assets || []).filter(a => a.kind === 'edit').sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -415,7 +415,7 @@ export function createSequence(ctx: SequenceCtx) {
     banner.hidden = !customOrder();
     banner.textContent = 'The cut has a custom order or duplicate clips from the advanced timeline. Changes here put it back in shot order.';
     renderAllBtn.disabled = busy || p.shots.every(fresh);
-    renderAllBtn.textContent = p.shots.every(fresh) ? 'All blockouts ready' : `Render ${p.shots.filter(s => !fresh(s)).length} missing blockout${p.shots.filter(s => !fresh(s)).length === 1 ? '' : 's'}`;
+    renderAllBtn.textContent = p.shots.every(fresh) ? 'All blockouts ready' : `Make ${p.shots.filter(s => !fresh(s)).length} missing blockout${p.shots.filter(s => !fresh(s)).length === 1 ? '' : 's'}`;
     drawBoard(); syncPickAll(); drawExports();
     if (!seq) drawViewer();
   }

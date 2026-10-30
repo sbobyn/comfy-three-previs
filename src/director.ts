@@ -59,12 +59,12 @@ const claudeBtn = h('button', { class: 'btn ghost sm claude-btn', type: 'button'
 function claudeDialog() {
   const d = h('dialog', { class: 'claude-help' },
     h('h3', {}, 'Direct with Claude'),
-    h('p', {}, 'Previs is a connector in Claude Desktop and Claude Code. Ask Claude to build and direct this scene; edits appear here live, and every change can be undone.'),
+    h('p', {}, 'Comfy Three Previs is a connector in Claude Desktop and Claude Code. Ask Claude to build and direct this scene; edits appear here live, and every change can be undone.'),
     h('p', { class: 'muted' }, 'Try:'),
     h('ul', {},
-      h('li', {}, `“In Previs, open ${project?.title || 'my project'} and add a second creator watching from the bridge.”`),
-      h('li', {}, '“Write a Cast Card for every character, then make shot 1 a slow push-in on the car.”'),
-      h('li', {}, '“Add three shots that cover the lift-off from different angles.”')),
+      h('li', {}, `“In Comfy Three Previs, open ${project?.title || 'my project'} and add two more people behind the main character.”`),
+      h('li', {}, '“Write a Cast Card for every character, then make shot 1 a slow push-in on the subject.”'),
+      h('li', {}, '“Add three shots that cover the key moment from different angles.”')),
     h('p', { class: 'muted' }, 'Setup: add the “comfy-previs” MCP server (node server/previs/agent.mjs, PREVIS_URL=http://127.0.0.1:<port>) to Claude.'),
     h('div', { class: 'bar', style: 'display:flex;justify-content:flex-end;margin-top:12px' }, h('button', { class: 'btn sm', type: 'button', onclick: () => d.close() }, 'Done')));
   d.addEventListener('close', () => d.remove());
@@ -1263,7 +1263,7 @@ function renderObjectPane() {
       h('details', { class: 'object-reference-options' }, h('summary', {}, 'Reference sharing & project images'), h('label', { class: 'ob-share' }, h('span', { class: 'muted' }, 'Look'), shareSel), shared ? null : linkPicker(e), shareAll),
       shared ? h('p', { class: 'note', style: 'margin:0' }, `Uses ${shared.name}’s looks and description. Change them on `, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => select(shared.id) }, shared.name), '.') : null,
       usedBy.length ? h('p', { class: 'note', style: 'margin:0' }, `Shared with ${usedBy.map(x => x.name).join(', ')}.`) : null,
-      h('p', { class: 'note', style: 'margin:0' }, 'Associated with ', h('strong', {}, e.name), '. The primary image is offered as a reference when this object is in a shot; workflow limits still apply.')),
+      h('p', { class: 'note', style: 'margin:0' }, 'Associated with ', h('strong', {}, e.name), '. The primary image is offered as a reference when this object is in a shot; each video model takes a limited number of reference images.')),
     h('div', { class: 'block cast-card' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Appearance')),
       h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s Cast Card: ${shared.notes || '—'}`) : null, notes),

@@ -685,7 +685,7 @@ input[type=range].range { -webkit-appearance: none; appearance: none; width: 100
 input[type=range].range::-webkit-slider-runnable-track { height: 3px; background: var(--line-2); border-radius: 2px; }
 input[type=range].range::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--card); border: 1.5px solid var(--ink); margin-top: -5.5px; box-shadow: var(--sh-1); }
 .slider-row { display: grid; grid-template-columns: 76px 1fr 54px; gap: 10px; align-items: center; font-size: var(--fs-sm); color: var(--ink-3); }
-.slider-row output { font: var(--fs-xs)/1 var(--mono); text-align: right; color: var(--ink); }
+.slider-row output { font: var(--fs-xs)/1 var(--mono); text-align: right; color: var(--ink); white-space: nowrap; justify-self: end; }
 .numfield { display: inline-flex; align-items: center; gap: 4px; background: var(--card); border: 1px solid var(--line-2); border-radius: 7px; padding: 0 7px; height: 28px; font: var(--fs-xs)/1 var(--mono); color: var(--ink); cursor: ns-resize; }
 .numfield span { color: var(--ink-4); font-family: var(--font); font-size: var(--fs-2xs); }
 
@@ -861,7 +861,7 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .objectpane > .inspector { position: static; width: auto; padding: 0; border: 0; border-radius: 0; background: none; color: var(--ink); box-shadow: none; backdrop-filter: none; gap: 12px; }
 .objectpane .inspector .head input { width: 0; min-width: 0; font-size: 16px; background: transparent; border-color: transparent; padding-left: 0; }
 .object-shape { display: flex; color: var(--ink-3); }
-.object-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; }
+.object-meta { display: grid; grid-template-columns: max-content 1fr; gap: 12px; align-items: center; }
 .object-meta select { text-transform: capitalize; }
 .object-color { display: flex; align-items: center; justify-content: end; gap: 8px; font-size: 11px; color: var(--ink-3); }
 .objectpane .inspector input[type=color] { width: 30px; height: 28px; flex: none; }
@@ -1264,7 +1264,7 @@ dialog.claude-help p { margin: 6px 0; line-height: 1.5; }
 .sec { border-bottom: 1px solid var(--line); }
 .sec:last-child { border-bottom: 0; }
 .sec-headrow { display: flex; align-items: center; gap: 8px; position: sticky; top: -4px; z-index: 2; background: var(--panel, var(--paper-2)); padding: 10px 0 8px; }
-.sec-head { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; border: 0; background: transparent; padding: 2px 0; cursor: pointer; color: var(--ink); text-align: left; }
+.sec-head { flex: 1 0 auto; min-width: 0; display: flex; align-items: center; gap: 8px; border: 0; background: transparent; padding: 2px 0; cursor: pointer; color: var(--ink); text-align: left; }
 .sec-title { font-size: var(--fs-md); font-weight: 650; letter-spacing: var(--track-tight); }
 .sec-chev { width: 16px; display: inline-grid; place-items: center; color: var(--ink-4); transition: transform var(--t-base) var(--ease); font-size: 14px; }
 .sec.open .sec-chev { transform: rotate(90deg); }
