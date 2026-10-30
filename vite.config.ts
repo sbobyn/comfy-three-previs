@@ -39,6 +39,13 @@ export default defineConfig({
         phone: "phone.html",
         render: "render.html",
       },
+      output: {
+        // three in two chunks (core math/scene graph, then renderer + examples) instead of one 550 kB chunk.
+        manualChunks(id) {
+          if (id.includes("node_modules/three/build/three.core")) return "three-core";
+          if (id.includes("node_modules/three/")) return "three";
+        },
+      },
     },
   },
 });

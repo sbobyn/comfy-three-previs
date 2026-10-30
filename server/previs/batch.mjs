@@ -13,6 +13,7 @@ import { planSlots } from '../../shared/sheet-presets.mjs';
 import { TIERS, modelsFor, estimateFor, VIDEO_PRICES, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 
 export const STEPS = ['looks', 'sheets', 'stills', 'videos'];
+export const DRY_RUN_TTL_MS = 3600e3;
 const uuid = /^[a-f0-9-]{36}$/;
 const SATISFIED = ['done', 'skipped'], ENDED = ['done', 'skipped', 'failed', 'budget'], OPEN = ['waiting', 'ready', 'running'];
 const PRIORITY = { video: 0, still: 1, blockout: 2, sheet: 3, look: 4 };
@@ -147,9 +148,12 @@ export async function openBatches(root, options = {}) {
   const batches = new Map(), listeners = new Map(), timers = new Map(), ticking = new Map(), inflight = new Set();
   let started = false, closed = false;
 
+  // A dry run is a plan, not work: it is kept in memory for an hour (batch_status, resume) and never written.
+  // Older servers saved them; those files are left alone but not loaded once they are an hour old.
+  const expiredPlan = b => b.dryRun === true && b.status === 'planned' && now() - Date.parse(b.createdAt) > DRY_RUN_TTL_MS;
   for (const f of await readdir(dir)) {
     if (!/^[a-f0-9-]{36}\.json$/.test(f)) continue;
-    try { const b = JSON.parse(await readFile(join(dir, f), 'utf8')); batches.set(b.id, b); } catch (e) { log(`batch ${f} unreadable: ${e.message}`); }
+    try { const b = JSON.parse(await readFile(join(dir, f), 'utf8')); if (!expiredPlan(b)) batches.set(b.id, b); } catch (e) { log(`batch ${f} unreadable: ${e.message}`); }
   }
   // A submit cut off by a restart goes back to ready: without an id nothing was dispatched; with one the driver resubmits the
   // same saved request, which the store answers with the saved job when it was already sent (never a second dispatch).
@@ -294,7 +298,8 @@ export async function openBatches(root, options = {}) {
     try { return await run; } finally { ticking.delete(id); }
   }
 
-  const get = id => { const b = batches.get(id); if (!b) fail('Unknown batch', 404); return b; };
+  const prune = () => { for (const b of batches.values()) if (expiredPlan(b)) batches.delete(b.id); };
+  const get = id => { prune(); const b = batches.get(id); if (!b) fail('Unknown batch', 404); return b; };
   return {
     /** Begin ticking (after the HTTP server listens, so loopback drivers can reach it). Resumes running batches. */
     start() { started = true; for (const b of batches.values()) if (watching(b)) { if (b.status === 'running') event(b, 'Resumed after server start'); schedule(b.id, 0); } },
@@ -307,12 +312,12 @@ export async function openBatches(root, options = {}) {
         maxCostUsd: input.maxCostUsd, estimateUsd, spentEstimateUsd: 0, budgetSkipped: 0, dryRun: input.dryRun, ...(input.shots ? { shots: input.shots } : {}), ...(input.objects ? { objects: input.objects } : {}), nodes, events: [] };
       event(b, `Planned ${nodes.length} nodes for “${project.title}”: ≈ ${usd(estimateUsd)} (${input.tier}), cap ${usd(input.maxCostUsd)}${input.dryRun ? '; dry run, nothing submitted' : ''}`);
       if (!input.dryRun) resolve(b);
-      batches.set(b.id, b); await persist(b);
+      batches.set(b.id, b); if (!input.dryRun) await persist(b);
       if (!input.dryRun) schedule(b.id, 0);
       return structuredClone(b);
     },
     get: id => structuredClone(get(id)),
-    list(projectId) { return [...batches.values()].filter(b => !projectId || b.projectId === projectId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(summary); },
+    list(projectId) { prune(); return [...batches.values()].filter(b => !projectId || b.projectId === projectId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(summary); },
     async cancel(id) {
       const b = get(id);
       if (!['running', 'paused', 'planned'].includes(b.status)) return structuredClone(b);

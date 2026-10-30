@@ -18,7 +18,7 @@ const require=createRequire(import.meta.url),root=resolve(dirname(new URL(import
 function load(relative,extra={}){
   const file=resolve(root,relative),exports={};
   const code=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
-  runInNewContext(code,{exports,require:id=>id.startsWith('.')?load(resolve(dirname(file),id+'.ts'),extra):require(id),console,URL,Buffer,...extra});return exports;
+  runInNewContext(code,{exports,require:id=>id.startsWith('.')?load(resolve(dirname(file),id+'.ts'),extra):id==='three'?THREE:require(id),console,URL,Buffer,...extra});return exports;
 }
 const game=load('src/gamepad.ts'),flight=load('src/flight.ts'),protocol=load('server/phone-protocol.ts');
 function pad(){return{connected:true,index:0,id:'Xbox One',mapping:'standard',axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false,value:0}))};}

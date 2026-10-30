@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, readdir } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -238,7 +238,7 @@ test('persistence round-trip; a running batch resumes on open and a cut-off subm
   Object.assign(n, { status: 'running', submitting: true, reserved: 0.028 }); saved.spentEstimateUsd = 0.028;
   await writeFile(file, JSON.stringify(saved));
   const second = await openBatches(root, { drivers: h.fake.drivers, jobs: h.fake.jobs, loadProject: async () => project, intervalMs: 5 });
-  assert.deepEqual(second.get(planned.id), planned);
+  assert.throws(() => second.get(planned.id), /Unknown batch/, 'a dry run is never written to disk');
   const reopened = second.get(b.id);
   assert.equal(byId(reopened.nodes, `still:${dive.id}start`).status, 'ready');
   assert.equal(reopened.spentEstimateUsd, 0);
@@ -248,7 +248,7 @@ test('persistence round-trip; a running batch resumes on open and a cut-off subm
   const finished = second.get(b.id);
   assert.equal(finished.status, 'completed');
   assert.ok(finished.events.some(e => /Resumed after server start/.test(e.text)));
-  assert.equal(second.list(project.id).length, 2);
+  assert.equal(second.list(project.id).length, 1);
   assert.equal(JSON.parse(await readFile(file, 'utf8')).status, 'completed');
 });
 
@@ -345,4 +345,23 @@ test('exhausted output recovery pauses a batch and resume never resubmits the pa
   await batches.resume(b.id); await batches.tick(b.id); await batches.idle();
   assert.equal(h.fake.submits.length, submissions);
   batches.close();
+});
+
+test('dry runs live in memory for an hour and are never persisted; old saved dry runs are not loaded', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'previs-batch-')), h = harness();
+  const batches = await h.open(root);
+  const dry = await batches.create({ projectId: project.id, steps: ['stills'], maxCostUsd: 1, dryRun: true });
+  assert.deepEqual(await readdir(join(root, 'batches')), []);
+  assert.equal(batches.get(dry.id).status, 'planned'); assert.equal(batches.list(project.id).length, 1);
+  h.clock.advance(3601);
+  assert.equal(batches.list(project.id).length, 0); assert.throws(() => batches.get(dry.id), /Unknown batch/);
+  batches.close();
+  // A dry run saved by an older server: loaded while fresh, skipped once it is an hour old (the file stays).
+  const legacy = { ...dry, id: '0d0d0d0d-0000-4000-8000-000000000001', createdAt: new Date(h.clock.now() - 2 * 3600e3).toISOString() };
+  const fresh = { ...dry, id: '0d0d0d0d-0000-4000-8000-000000000002', createdAt: new Date(h.clock.now() - 60e3).toISOString() };
+  for (const b of [legacy, fresh]) await writeFile(join(root, 'batches', `${b.id}.json`), JSON.stringify(b));
+  const reopened = await h.open(root);
+  assert.deepEqual(reopened.list(project.id).map(b => b.id), [fresh.id]);
+  assert.equal((await readdir(join(root, 'batches'))).length, 2);
+  reopened.close();
 });

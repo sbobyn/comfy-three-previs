@@ -19,7 +19,8 @@ const endOf = job => time(job.completedAt) ?? time(job.finishedAt) ?? time(job.c
 export function createJobTracker({ sources, intervalMs = 5000, maxIntervalMs = 30000, factor = 1.5, giveUpMs = 2 * 3600e3, now = Date.now, log = () => {},
   limits = () => ({}), holdMs = uncertainHoldMs(), recentMs = 24 * 3600e3, tickMs = 1000 } = {}) {
   const byName = new Map(sources.map(source => [source.name, source]));
-  const entries = new Map(), finished = new Set();
+  // finished: key → when its terminal outcome was handled (guards a double onTerminal); pruned on scan so it stays bounded.
+  const entries = new Map(), finished = new Map();
   let timer = null, startedAt = null, resumed = 0, lastScan = -Infinity, ticking = null;
   const sourceOf = name => { const source = byName.get(name); if (!source) throw Error(`Unknown job source ${name}`); return source; };
   const keyOf = (name, id) => `${name}:${String(id).toLowerCase()}`;
@@ -39,7 +40,7 @@ export function createJobTracker({ sources, intervalMs = 5000, maxIntervalMs = 3
   async function finish(entry, job) {
     entries.delete(entry.key);
     if (finished.has(entry.key)) return;
-    finished.add(entry.key);
+    finished.set(entry.key, now());
     log(`${entry.name} ${entry.id.slice(0, 8)} ${job?.status || 'gone'}`);
     if (!job) return;
     try { await sourceOf(entry.name).onTerminal?.(job); }
@@ -75,6 +76,7 @@ export function createJobTracker({ sources, intervalMs = 5000, maxIntervalMs = 3
 
   function scan() {
     lastScan = now();
+    for (const [key, at] of finished) if (lastScan - at > 10 * maxIntervalMs) finished.delete(key);
     let found = 0;
     for (const source of sources) {
       const seen = new Set();
@@ -113,10 +115,12 @@ export function createJobTracker({ sources, intervalMs = 5000, maxIntervalMs = 3
       return run(entries.get(keyOf(name, id)));
     },
     tick,
+    /** Test hook: how many terminal keys are remembered. */
+    finishedCount: () => finished.size,
     snapshot() {
       const at = now(), jobs = [];
       for (const source of sources) for (const job of source.list()) {
-        if (DRAFT.has(job.status) && !job.lastAttempt) continue;
+        if ((DRAFT.has(job.status) && !job.lastAttempt) || job.dismissedAt) continue;
         const active = source.isActive(job), entry = entries.get(keyOf(source.name, job.id));
         const start = startOf(job) ?? at, end = active ? at : endOf(job) ?? at;
         if (!active && at - end > recentMs) continue;

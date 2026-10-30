@@ -9,7 +9,7 @@ export type JobRow = {
   createdAt: string | null; submittedAt: string | null; lastTrackedAt: string | null; trackCount: number; nextTrackAt: string | null;
   ageSeconds: number; expectedSeconds: number; stuck: boolean; uncertain: boolean; costUsd: number | null;
   backend: { kind: string | null; id: string | null }; failure: { phase: string | null; httpStatus: number | null; detail: string | null } | null;
-  trackingError?: string; results: { id: string; kind: string; url: string }[]; shotId?: string;
+  trackingError?: string; results?: { id: string; kind: string; url: string }[]; shotId?: string; // results: not on live-stream rows
 };
 export type JobsSnapshot = { jobs: JobRow[]; limits: Record<string, { limit: number; active: number }>; tracker: { running: boolean; startedAt: string | null; resumed: number } };
 export type BatchSummary = {
@@ -21,11 +21,16 @@ type Api = <T = any>(path: string, body?: unknown) => Promise<T>;
 type Options = { projectId: string; api: Api; onOpenShot?: (shotId: string) => void; shots?: () => { id: string; title: string }[] };
 
 // ---- pure helpers (tests/director-jobs.test.mjs slices this block) ----
-const DONE = new Set(['completed', 'failed', 'closed', 'invalidated', 'cancelled']);
+const DONE = new Set(['completed', 'failed', 'closed', 'invalidated', 'cancelled', 'orphaned']);
 export const isActive = (j: JobRow) => !DONE.has(j.status);
 /** Red: stuck, uncertain, or running past twice the expected time. */
 export const needsAttention = (j: JobRow) => isActive(j) && (j.stuck || j.uncertain || j.status === 'uncertain' || (j.expectedSeconds > 0 && j.ageSeconds > 2 * j.expectedSeconds));
-export const batchLive = (b: BatchSummary) => b.status === 'running' || b.status === 'planned' || b.status === 'paused';
+export const batchLive = (b: BatchSummary) => b.status === 'running' || b.status === 'paused';
+/** The panel's batches: live ones, failed ones, then up to 3 finished in the last day. A dry-run plan is not work: never shown. */
+export function shownBatches(batches: BatchSummary[], now = Date.now()) {
+  const recent = batches.filter(b => !batchLive(b) && b.status !== 'failed' && b.status !== 'planned' && now - Date.parse(b.updatedAt || b.createdAt) < 864e5).slice(0, 3);
+  return [...batches.filter(batchLive), ...batches.filter(b => b.status === 'failed'), ...recent];
+}
 export function batchCounts(b: BatchSummary) {
   const c = b.counts || (b.nodes || []).reduce<Record<string, number>>((m, n) => ({ ...m, [n.status]: (m[n.status] || 0) + 1 }), {});
   const total = Object.values(c).reduce((a, n) => a + n, 0);
@@ -122,7 +127,8 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     if (inflight) return; inflight = true;
     try {
       const [j, b] = await Promise.all([
-        jobsOk ? api<JobsSnapshot>('jobs').catch(e => { if (missing(e)) jobsOk = false; return null; }) : null,
+        // A project sees only its own jobs; the global list is for home (projectId '').
+        jobsOk ? api<JobsSnapshot>(projectId ? `jobs?projectId=${encodeURIComponent(projectId)}` : 'jobs').catch(e => { if (missing(e)) jobsOk = false; return null; }) : null,
         batchesOk && projectId ? api<{ batches: BatchSummary[] }>(`director/batches?projectId=${encodeURIComponent(projectId)}`).catch(e => { if (missing(e)) batchesOk = false; return null; }) : null,
       ]);
       if (j && Array.isArray(j.jobs)) snap = j;
@@ -131,7 +137,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
       render();
     } finally { inflight = false; }
   }
-  function busyNow() { return snap.jobs.some(isActive) || batches.some(b => b.status === 'running' || b.status === 'planned'); }
+  function busyNow() { return snap.jobs.some(isActive) || batches.some(b => b.status === 'running'); }
   function schedule() {
     clearTimeout(timer);
     if (document.hidden || (!jobsOk && !batchesOk)) return;
@@ -167,6 +173,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     ? api('director/refgen/track', { projectId: j.projectId, requestId: j.id })
     : api('generation/track', { jobId: j.id }));
   const reconcile = (j: JobRow) => act(`rec:${j.id}`, async () => { await api('generation/reconcile', { jobId: j.id, backendIdle: true, historyReviewed: true }); reconcileOpen.delete(j.id); recChecks.delete(j.id); }, 'Receipt closed: outcome unknown, nothing was cancelled or retried');
+  const dismiss = (j: JobRow) => act(`dis:${j.id}`, () => api('generation/dismiss', { jobId: j.id }));
   const batchCall = (b: BatchSummary, what: 'cancel' | 'resume') => act(`${what}:${b.id}`, () => api(`director/batch/${what}`, { id: b.id }), what === 'cancel' ? 'Batch cancelled' : 'Batch resumed');
 
   function shotOf(j: JobRow) {
@@ -187,7 +194,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
       active ? `${dur(j.ageSeconds)} of ~${dur(j.expectedSeconds)}` : j.createdAt ? since(j.createdAt, now) : '',
       active ? `checked ${since(j.lastTrackedAt, now)}${j.trackCount ? ` · ×${j.trackCount}` : ''}` : j.status === 'completed' && j.ageSeconds ? `took ${dur(j.ageSeconds)}` : '',
       j.costUsd != null ? `$${j.costUsd.toFixed(2)}` : '',
-      j.projectId && j.projectId !== projectId ? 'other project' : '',
+      j.status === 'orphaned' ? 'project archived or deleted · output kept' : '',
     ].filter(Boolean);
     const shot = onOpenShot ? shotOf(j) : null;
     const tracking = busy.has(`track:${j.id}`);
@@ -195,7 +202,8 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     const actions = h('div', { class: 'jr-act' },
       active ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `track:${j.id}`, disabled: tracking, onclick: () => void trackNow(j) }, tracking ? 'Checking…' : 'Track now') : null,
       canReconcile ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `rec:${j.id}`, 'aria-expanded': String(reconcileOpen.has(j.id)), onclick: () => { if (reconcileOpen.has(j.id)) reconcileOpen.delete(j.id); else reconcileOpen.add(j.id); renderSheet(); } }, 'Reconcile…') : null,
-      shot ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { sheet.close(); onOpenShot!(shot); } }, 'Open shot') : null);
+      shot ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { sheet.close(); onOpenShot!(shot); } }, 'Open shot') : null,
+      j.status === 'orphaned' ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `dis:${j.id}`, disabled: busy.has(`dis:${j.id}`), onclick: () => void dismiss(j) }, 'Dismiss') : null);
     // On a job that is still active, a failure is the last status check, not the job: show it quietly.
     const where = j.failure ? `${j.failure.phase || 'unknown step'}${j.failure.httpStatus ? ` · HTTP ${j.failure.httpStatus}` : ''}` : '';
     const detail = j.failure?.detail || (active ? j.trackingError : '') || '';
@@ -229,7 +237,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
   function batchRow(b: BatchSummary) {
     const c = batchCounts(b), pct = (n: number) => (c.total ? (n / c.total) * 100 : 0);
     const canCancel = batchLive(b), canResume = b.status === 'paused' || b.status === 'failed';
-    const tone = b.status === 'failed' ? 'bad' : b.status === 'paused' ? 'warn' : b.status === 'running' || b.status === 'planned' ? 'run' : b.status === 'completed' ? 'ok' : 'muted';
+    const tone = b.status === 'failed' ? 'bad' : b.status === 'paused' ? 'warn' : b.status === 'running' ? 'run' : b.status === 'completed' ? 'ok' : 'muted';
     const cb = busy.has(`cancel:${b.id}`), rb = busy.has(`resume:${b.id}`);
     return h('li', { class: `jr batch t-${tone}` },
       h('span', { class: 'jr-kind' }, icon('batch')),
@@ -257,8 +265,8 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     const slots = Object.entries(snap.limits || {}).filter(([, v]) => v && v.limit > 0).map(([k, v]) =>
       h('span', { class: 'js-slot', title: `${SLOT_NAMES[k] || k}: ${v.active} of ${v.limit} slots in use` }, h('span', { class: 'js-slot-name' }, SLOT_NAMES[k] || k),
         h('span', { class: 'js-pips', 'aria-hidden': 'true' }, ...Array.from({ length: Math.min(v.limit, 8) }, (_, i) => h('i', { class: i < v.active ? 'on' : '' })))));
-    const liveBatches = batches.filter(batchLive), doneBatches = batches.filter(b => !batchLive(b)).slice(0, 3);
-    const nothing = !snap.jobs.length && !batches.length;
+    const listed = shownBatches(batches, fetchedAt);
+    const nothing = !snap.jobs.length && !listed.length;
     const sub = !jobsOk ? 'Job tracking is not available on this server yet.' : g.attention.length ? `${g.attention.length} need${g.attention.length === 1 ? 's' : ''} attention` : g.running.length ? `${g.running.length} running` : 'Nothing running';
     sheet.replaceChildren(
       h('header', { class: 'js-head' },
@@ -268,7 +276,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
       h('div', { class: 'js-body' },
         section('Needs attention', 'bad', g.attention.map(jobRow)),
         section('Running', 'run', g.running.map(jobRow)),
-        section('Batches', 'batches', [...liveBatches, ...doneBatches].map(batchRow)),
+        section('Batches', 'batches', listed.map(batchRow)),
         section('Recent', 'recent', g.recent.map(jobRow)),
         nothing ? h('div', { class: 'js-idle' }, h('span', { class: 'js-idle-mark', 'aria-hidden': 'true' }), h('p', {}, 'No generation jobs yet. Images and videos you generate show up here while they run.')) : null),
       h('footer', { class: 'js-foot' }, !jobsOk ? 'Waiting for the job tracker' : `${snap.tracker.running ? 'Tracker on' : 'Tracker paused'} · refreshes every ${busyNow() ? 4 : 20} s`));

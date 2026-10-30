@@ -1,7 +1,8 @@
 import { startPhoneLan } from './phone-lan.mjs';
 import { attachRelay } from '../../dist-server/relay.js';
 import { createServer } from 'node:http';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, mkdir, stat } from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
 import { resolve, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BlenderMcp } from './mcp-client.mjs';
@@ -29,6 +30,7 @@ import { WebSocket } from 'ws';
 import { createJobProgress, createProgressSocketFactory } from './job-progress.mjs'; // [live-progress]
 import { createJobProgressRoutes } from './job-progress-routes.mjs';
 import { createProgressCoordinator } from './job-progress-coordinator.mjs';
+import { keyedLock } from './keyed-lock.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -70,6 +72,13 @@ function blenderReadiness() { return { configured: Boolean(process.env.PREVIS_BL
 let catalog = null;
 let operation = Promise.resolve();
 const serial = fn => { const next = operation.then(fn); operation = next.catch(() => {}); return next; };
+// Routes of the retired Blender/workbench pages: Blender MCP, camera transfer, raw Comfy passthrough, handoff and
+// Blender previews. Nothing in the director uses them; they answer only when PREVIS_LEGACY_ROUTES=1.
+const legacyRoutes = process.env.PREVIS_LEGACY_ROUTES === '1';
+const LEGACY_ROUTE = /^\/api\/(transfer|handoff|render|shots|readiness|comfy\/[a-z]+|blender\/[a-z]+|video\/blender)$/;
+// Video capture runs on its own queue, one chain per frame stage (a 120-frame capture never waits behind
+// generation or another capture). Blender video stays on the global queue with every other Blender call.
+const videoLock = keyedLock();
 const port = Number(process.env.PORT || 5190);
 agentRunner = await openAgentRunner({ root, dataDir: data, port, director }); // [agent] built-in Claude Code runner
 const headless = openHeadless({ port }), renderRoute = renderRoutes({ director, headless }); // [headless] C2 render routes
@@ -86,6 +95,7 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
+    if (!legacyRoutes && LEGACY_ROUTE.test(url.pathname)) fail('Retired route (Blender/workbench pages); start Previs with PREVIS_LEGACY_ROUTES=1 to use it', 404);
     if (await progressRoutes.handle(req, res)) return; // [live-progress] GET /api/jobs/stream, /api/jobs/{source}/{id}/preview
     if (req.method === 'GET' && url.pathname === '/api/director/agent/stream') { const id = url.searchParams.get('id') || ''; if (!/^[a-f0-9-]{36}$/.test(id)) fail('Unknown project', 404); return agentRunner.stream(req, res, id); } // [agent] live steps + reply text (SSE)
     if (req.method === 'GET' && url.pathname === '/api/director/setup') return send({ ...(await setupChecks({ root, data })), agent: director.agentStatus(), dataDir: data });
@@ -132,10 +142,12 @@ const server = createServer(async (req, res) => {
     if (req.method === 'POST'  && url.pathname.startsWith('/api/')) {
       if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       const input = await body(req);
+      // Generation serializes per request id inside the engine; it never waits on this queue.
+      if (url.pathname.startsWith('/api/generation/')) return send(await generation.route(url.pathname, input));
+      if (url.pathname.startsWith('/api/video/') && url.pathname !== '/api/video/blender') return send(await videoLock(`stage:${typeof input.stageId === 'string' ? input.stageId : ''}`, () => videos(url.pathname, input)));
       const result = await serial(async () => {
         if (url.pathname === '/api/phone/pair') return phoneLan.pair();
         if (url.pathname === '/api/phone/revoke') { phoneLan.revoke(); return {revoked:true}; }
-        if (url.pathname.startsWith('/api/generation/')) return generation.route(url.pathname,input);
         if (url.pathname.startsWith('/api/video/')) return videos(url.pathname,input);
         if (url.pathname === '/api/transfer') {
           if (!/^[a-f0-9-]{36}$/.test(input.requestId || '') || input.disposableProject !== true) fail('Confirm a disposable Blender project and provide a transfer request UUID');
@@ -236,12 +248,17 @@ const server = createServer(async (req, res) => {
       file = resolve(root, 'dist', '.' + decodeURIComponent(path));
       if (!file.startsWith(join(root, 'dist') + '/')) fail('Invalid path', 403);
     }
-    const bytes = await readFile(file);
     const media = ['.mp4','.webm','.mov','.mkv'].includes(extname(file));
-    const range = media && req.headers.range?.match(/^bytes=(\d+)-(\d*)$/);
-    const start = range ? Number(range[1]) : 0, end = range ? Math.min(bytes.length-1, range[2] ? Number(range[2]) : bytes.length-1) : bytes.length-1;
-    if (range && (start > end || start >= bytes.length)) { res.writeHead(416,{'Content-Range':`bytes */${bytes.length}`}); return res.end(); }
-    res.writeHead(range ? 206 : 200, { ...(media ? {'Accept-Ranges':'bytes','Content-Length':end-start+1,...(range ? {'Content-Range':`bytes ${start}-${end}/${bytes.length}`} : {})} : {}), 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(range ? bytes.subarray(start,end+1) : bytes);
+    const headers = { 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
+    if (!media) { const bytes = await readFile(file); res.writeHead(200, headers); return res.end(bytes); }
+    // Media: stream only the requested range (scrubbing a 40 MB film no longer reads 40 MB per request).
+    const { size } = await stat(file);
+    const range = req.headers.range?.match(/^bytes=(\d+)-(\d*)$/);
+    const start = range ? Number(range[1]) : 0, end = range ? Math.min(size-1, range[2] ? Number(range[2]) : size-1) : size-1;
+    if (range && (start > end || start >= size)) { res.writeHead(416,{'Content-Range':`bytes */${size}`}); return res.end(); }
+    res.writeHead(range ? 206 : 200, { 'Accept-Ranges':'bytes','Content-Length':Math.max(0, end-start+1),...(range ? {'Content-Range':`bytes ${start}-${end}/${size}`} : {}), ...headers });
+    if (!size) return res.end();
+    const stream = createReadStream(file, { start, end }); stream.on('error', () => res.destroy()); res.on('close', () => stream.destroy()); stream.pipe(res);
   } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
 const relay = attachRelay(server);

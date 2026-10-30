@@ -19,6 +19,21 @@ const ENV: Record<string, { sky: number; ground: number; fog: [number, number] }
   street: { sky: 0x0e131b, ground: 0x24272c, fog: [55, 190] },
   interior: { sky: 0x17130f, ground: 0x3a322c, fog: [40, 150] },
 };
+// Scenes with terrain are outdoors whatever their preset: a daylight sky that follows the camera, haze on distant
+// slopes (shot camera only), and enough sky fill that slopes facing away from the sun still read.
+const OUTDOOR = { zenith: '#4f86c6', upper: '#8fb6dc', horizon: '#d3dfe8', below: '#a3ab96', hemi: [0xd4e4f5, 0x7a735f, 2.2] as const, sun: [0xfff1dc, 3.0] as const, sunAt: [-14, 12, 5] as const, fog: [30, 620] as const };
+const STUDIO = { hemi: [0xc4ccd8, 0x2a2420, 1.1] as const, sun: [0xffffff, 1.7] as const, sunAt: [9, 16, 11] as const };
+let skyTexture: THREE.Texture | null = null;
+function outdoorSky() {
+  if (skyTexture) return skyTexture;
+  const c = document.createElement('canvas'); c.width = 4; c.height = 256;
+  const g = c.getContext('2d')!, grad = g.createLinearGradient(0, 0, 0, 256);
+  grad.addColorStop(0, OUTDOOR.zenith); grad.addColorStop(0.36, OUTDOOR.upper); grad.addColorStop(0.5, OUTDOOR.horizon); grad.addColorStop(0.53, OUTDOOR.below); grad.addColorStop(1, OUTDOOR.below);
+  g.fillStyle = grad; g.fillRect(0, 0, 4, 256);
+  skyTexture = new THREE.CanvasTexture(c); skyTexture.mapping = THREE.EquirectangularReflectionMapping; skyTexture.colorSpace = THREE.SRGBColorSpace;
+  return skyTexture;
+}
+export const isOutdoor = (entities: Pick<Entity, 'shape'>[]) => entities.some(e => e.shape === 'terrain');
 
 function material(color: string) { return new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0.02 }); }
 function part(geometry: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0) {
@@ -74,14 +89,15 @@ function buildShape(shape: string, color: string): THREE.Group {
       for (let i = 0; i < pos.count; i++) pos.setY(i, terrainHeight(base, pos.getX(i), pos.getZ(i)));
       geo.computeVertexNormals();
       const nrm = geo.attributes.normal as THREE.BufferAttribute;
-      const meadow = new THREE.Color('#7fa35a'), forest = new THREE.Color('#46663a'), rock = new THREE.Color('#8b857b'), snow = new THREE.Color('#f3f4f2'), c = new THREE.Color(), tmp = new THREE.Color();
+      const meadow = new THREE.Color('#7fa35a'), forest = new THREE.Color('#3f6236'), rock = new THREE.Color('#a39a8c'), snow = new THREE.Color('#f3f4f2'), c = new THREE.Color(), tmp = new THREE.Color();
       const ramp = (v: number, a0: number, a1: number) => Math.min(1, Math.max(0, (v - a0) / (a1 - a0)));
       for (let i = 0; i < pos.count; i++) {
         const y = pos.getY(i), steep = 1 - nrm.getY(i), x = pos.getX(i), z = pos.getZ(i);
         const jitter = (Math.sin(x * 0.37 + z * 0.21) * Math.sin(z * 0.29 - x * 0.13)) * 0.5; // soft patchiness
         c.copy(meadow).lerp(forest, ramp(y + jitter * 4, 3, 22));
-        c.lerp(rock, Math.max(ramp(y + jitter * 10, 55, 110), ramp(steep, 0.28, 0.5) * ramp(y, 10, 40)));
-        c.lerp(snow, ramp(y + jitter * 12, 165, 195) * (1 - ramp(steep, 0.45, 0.65)));
+        // Forest climbs the lower slopes to a ragged tree line; granite above and on cliffs; snowfields near the summits.
+        c.lerp(rock, Math.max(ramp(y + jitter * 14, 70, 125), ramp(steep, 0.34, 0.58) * ramp(y, 12, 45)));
+        c.lerp(snow, ramp(y + jitter * 14, 140, 175) * (1 - ramp(steep, 0.5, 0.7)));
         c.lerp(tmp.setRGB(c.r * 1.06, c.g * 1.04, c.b * 0.98), jitter + 0.5); // slight hue variation
         cols.push(c.r, c.g, c.b);
       }
@@ -108,9 +124,9 @@ function buildShape(shape: string, color: string): THREE.Group {
 export function createStage() {
   const scene = new THREE.Scene();
   scene.fog = null; // fog off for now: it hid distant set pieces in previs shots
-  const hemi = new THREE.HemisphereLight(0xc4ccd8, 0x2a2420, 1.1);
-  const sun = new THREE.DirectionalLight(0xffffff, 1.7);
-  sun.position.set(9, 16, 11); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+  const hemi = new THREE.HemisphereLight(...STUDIO.hemi);
+  const sun = new THREE.DirectionalLight(...STUDIO.sun);
+  sun.position.set(...STUDIO.sunAt); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -25, right: 25, top: 25, bottom: -25, near: 1, far: 70 });
   scene.add(hemi, sun);
   // Flat ground layers all sit at y = 0. Depth can't separate coplanar surfaces (especially far away),
@@ -128,14 +144,24 @@ export function createStage() {
   // Opaque (pre-blended) grid so it stays in the ordered pass instead of the transparent one.
   const grid = new THREE.GridHelper(80, 80, 0x3d434d, 0x30353d);
   Object.assign(grid.material as THREE.Material, { transparent: false, depthTest: false, depthWrite: false }); grid.renderOrder = -7; scene.add(grid);
-  return { scene, ground, road, grid };
+  return { scene, ground, road, grid, hemi, sun };
 }
 
-function applyEnv(stage: Pick<ReturnType<typeof createStage>, 'scene' | 'ground' | 'road'>, presetName: string) {
-  const e = ENV[presetName] || ENV.stage;
-  stage.scene.background = new THREE.Color(e.sky);
-  const fog = stage.scene.fog as THREE.Fog | null; if (fog) { fog.color.setHex(e.sky); fog.near = e.fog[0]; fog.far = e.fog[1]; }
+function applyEnv(stage: Pick<ReturnType<typeof createStage>, 'scene' | 'ground' | 'road' | 'hemi' | 'sun'>, presetName: string, outdoor = false) {
+  const e = ENV[presetName] || ENV.stage, light = outdoor ? OUTDOOR : STUDIO;
+  stage.scene.background = outdoor ? outdoorSky() : new THREE.Color(e.sky);
+  stage.scene.fog = outdoor ? new THREE.Fog(OUTDOOR.horizon, ...OUTDOOR.fog) : null; // studio sets stay fog-free: fog hid distant set pieces
+  stage.hemi.color.setHex(light.hemi[0]); stage.hemi.groundColor.setHex(light.hemi[1]); stage.hemi.intensity = light.hemi[2];
+  stage.sun.color.setHex(light.sun[0]); stage.sun.intensity = light.sun[1]; stage.sun.position.set(light.sunAt[0], light.sunAt[1], light.sunAt[2]); // a lower, side-on sun models the slopes
   (stage.ground.material as THREE.MeshStandardMaterial).color.setHex(e.ground); stage.road.visible = presetName === 'street';
+}
+/** Shot-camera renders of an outdoor scene: the terrain is the ground, so the flat y = 0 plane, road and grid (drawn
+ * without depth test) would cover dips in the meadow and show through the sky. Returns a restore function. */
+function hideFlatGround(stage: Pick<ReturnType<typeof createStage>, 'ground' | 'road' | 'grid'>, outdoor: boolean) {
+  if (!outdoor) return () => {};
+  const was = [stage.ground.visible, stage.road.visible, stage.grid.visible];
+  stage.ground.visible = stage.road.visible = stage.grid.visible = false;
+  return () => { [stage.ground.visible, stage.road.visible, stage.grid.visible] = was; };
 }
 
 // One shared offscreen renderer for card thumbnails: renders a shot camera frame.
@@ -145,8 +171,8 @@ export function renderStill(project: Pick<DirectorProject, 'scene'>, shot: Shot,
     stillRenderer = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: true, preserveDrawingBuffer: true });
     stillRenderer.shadowMap.enabled = true; stillRenderer.shadowMap.type = THREE.PCFShadowMap; stillRenderer.outputColorSpace = THREE.SRGBColorSpace;
   }
-  const stage = createStage();
-  applyEnv(stage, project.scene.environment.preset);
+  const stage = createStage(), outdoor = isOutdoor(project.scene.entities);
+  applyEnv(stage, project.scene.environment.preset, outdoor); hideFlatGround(stage, outdoor);
   for (const e of entitiesAt(project.scene.entities, shot.start || 0)) {
     const g = buildShape(e.shape, e.color);
     g.position.set(...e.position); g.rotation.set(rad(e.pitch || 0), rad(e.rotation), rad(e.roll || 0), 'YXZ'); g.scale.set(...e.scale);
@@ -202,7 +228,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   capturer.shadowMap.enabled = true; capturer.shadowMap.type = THREE.PCFShadowMap; capturer.outputColorSpace = THREE.SRGBColorSpace;
   const overlay = canvas.parentElement!;
 
-  const { scene, ground, road, grid } = createStage();
+  const { scene, ground, road, grid, hemi, sun } = createStage();
 
   // Editor cameras: perspective by default, orthographic on Numpad 5.
   const persp = new THREE.PerspectiveCamera(45, 1, 0.1, 6000);
@@ -331,8 +357,8 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
 
   function sync(project: DirectorProject, current: Shot) {
     entities = project.scene.entities; shot = current;
-    const preset = ENV[project.scene.environment.preset] ? project.scene.environment.preset : 'stage';
-    if (preset !== env || !scene.background) { env = preset; applyEnv({ scene, ground, road }, env); }
+    const preset = (ENV[project.scene.environment.preset] ? project.scene.environment.preset : 'stage') + (isOutdoor(entities) ? ':outdoor' : '');
+    if (preset !== env || !scene.background) { env = preset; applyEnv({ scene, ground, road, hemi, sun }, preset.split(':')[0], preset.endsWith(':outdoor')); }
     const seen = new Set<string>();
     for (const e of entities) {
       seen.add(e.id);
@@ -413,7 +439,9 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     const v = gizmoHelper.visible; gizmoHelper.visible = false;
     const shown = all ? [...hiddenIds].map(id => groups.get(id)?.group).filter(Boolean) as THREE.Group[] : [];
     for (const g of shown) g.visible = true;
+    const restore = hideFlatGround({ ground, road, grid }, env.endsWith(':outdoor'));
     r.render(scene, cam);
+    restore();
     for (const g of shown) g.visible = false;
     gizmoHelper.visible = v;
   }

@@ -5,7 +5,9 @@ import { inspectOutputVideo } from './media-inspect.mjs';
 import { builtInPresets } from './presets.mjs';
 
 export async function generationRoutes(data, project, options = {}) {
-  const generation = await openGeneration(data,project,{probeVideo:inspectOutputVideo,allowPaid:process.env.PREVIS_ALLOW_PAID === '1',...options,requireAttachment:true});
+  // A legacy result is attached when every one of its results is already in the engine library.
+  const attached=job=>(job.results||[]).every(r=>(project.get().assets||[]).some(a=>a.generationJobId===job.id&&a.key===r.key));
+  const generation = await openGeneration(data,project,{probeVideo:inspectOutputVideo,allowPaid:process.env.PREVIS_ALLOW_PAID === '1',attached,...options,requireAttachment:true});
   const state = () => ({presets:builtInPresets,definitions:project.get().workflowDefinitions || [],jobs:generation.list(),paidExecutionEnabled:process.env.PREVIS_ALLOW_PAID === '1'});
   let tracker=null, attaching=Promise.resolve();
   // The tracker and HTTP routes can both attach one job: serialize, and re-check inside the engine write queue
@@ -29,7 +31,9 @@ export async function generationRoutes(data, project, options = {}) {
     const id=job.shot?.browser?.director?.projectId;
     if(id){
       if(!resultDirector)throw Error('Director attachment handler is unavailable');
-      const synced=await resultDirector.syncResults(id);
+      let synced;
+      try{synced=await resultDirector.syncResults(id);}
+      catch(error){if(error.status===404)throw Object.assign(Error(`Project ${id} was archived or deleted`),{orphaned:true});throw error;}
       if((job.results||[]).some(r=>!synced.project.assets?.some(a=>a.source?.jobId===job.id&&a.source?.resultId===r.id)))throw Error('Director result attachment is incomplete');
     }
   });
@@ -72,6 +76,7 @@ export async function generationRoutes(data, project, options = {}) {
     if(path==='/api/generation/quote')return {job:await generation.quote(input)};
     if(path==='/api/generation/submit'){const job=await generation.submit(input);tracker?.watch('generation',job.id);return {job};}
     if(path==='/api/generation/track'){const job=await track(input.jobId);await attach(job);return {job,project:project.get()};}
+    if(path==='/api/generation/dismiss')return {job:await generation.dismiss(input)};
     if(path==='/api/generation/reconcile'){const job=await generation.reconcile(input);await attach(job);return {job,project:project.get()};}
     if(path==='/api/generation/review'){
       const job=generation.get(input.jobId);
