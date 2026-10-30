@@ -1,6 +1,6 @@
 {
   "format": "comfy-previs-starter",
-  "version": 1,
+  "version": 2,
   "slug": "final-lap",
   "order": 2,
   "title": "Final Lap",
@@ -36,7 +36,8 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+        "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa",
+        "look": "da9b4a56-d9d5-45c8-8a5d-d1994951aa89"
       },
       {
         "id": "dcbcd81f-7482-4997-8d81-ab776564be69",
@@ -61,7 +62,8 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d"
+        "parent": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d",
+        "look": "e1e295c4-cc73-41ed-9175-511b26559fcc"
       },
       {
         "id": "a2c9fd5e-53eb-4c37-b7ef-a54cc03e698d",
@@ -81,7 +83,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -106,7 +108,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -131,7 +133,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -156,7 +158,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -181,7 +183,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -206,7 +208,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -231,7 +233,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -256,7 +258,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -281,7 +283,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -306,7 +308,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -331,7 +333,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -361,7 +363,8 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a"
+        "parent": "ed28a388-bdbd-4faf-a41e-0476940a0e2a",
+        "look": "249933ae-32dd-49d2-a618-3b51fc8321da"
       },
       {
         "id": "82f955da-d998-48aa-8e21-645ff005d1ed",
@@ -381,7 +384,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -406,7 +409,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -431,7 +434,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -456,7 +459,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -481,7 +484,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -506,7 +509,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -531,7 +534,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -556,7 +559,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -581,7 +584,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -606,7 +609,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -631,7 +634,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -656,7 +659,7 @@
         ],
         "color": "#f4f1ea",
         "notes": "Checkered start-finish line painted across the track.",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -686,7 +689,116 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": null
+        "parent": null,
+        "look": "55174ba8-4e18-4f7b-b30d-495c98b33441",
+        "sheets": [
+          {
+            "id": "spbu7uvxd",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:09:54.258Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "r51bx96c",
+                    "requestId": null,
+                    "referenceId": "d1960cda-7831-4007-b412-c67f9679d24c",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 381824,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:09:54.258Z"
+                  }
+                ],
+                "selected": "r51bx96c",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "j5hea7d7",
+                    "requestId": null,
+                    "referenceId": "9b8eb335-6148-47ea-b0e6-4117abc94489",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 564896,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:09:54.258Z"
+                  }
+                ],
+                "selected": "j5hea7d7",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "8569113d",
+                    "requestId": null,
+                    "referenceId": "c96e9757-0771-4a63-9388-53d063c39bfb",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 489257,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:09:54.258Z"
+                  }
+                ],
+                "selected": "8569113d",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "l9bxc4md",
+                    "requestId": null,
+                    "referenceId": "7ba8b373-2791-4c30-b365-812ec9f5b6e8",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 452706,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:09:54.258Z"
+                  }
+                ],
+                "selected": "l9bxc4md",
+                "accepted": null
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "10ae3f0d-6628-42d8-8908-bd199dce7e60",
@@ -706,7 +818,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -731,7 +843,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -756,7 +868,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -781,7 +893,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -806,7 +918,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -831,7 +943,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -856,7 +968,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -881,7 +993,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -911,7 +1023,8 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "955a776a-b960-4e80-91be-4060a7be2182"
+        "parent": "955a776a-b960-4e80-91be-4060a7be2182",
+        "look": "32a704e5-08df-4945-8261-8a88c28134e2"
       },
       {
         "id": "cccaa03b-89c2-42a2-93ea-ea7346fa21d7",
@@ -931,7 +1044,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -956,7 +1069,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -981,7 +1094,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1006,7 +1119,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1031,7 +1144,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1056,7 +1169,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1081,7 +1194,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1106,7 +1219,7 @@
         ],
         "color": "#c9c4ba",
         "notes": "Glass-fronted press box and suites above the main grandstand.",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1116,7 +1229,7 @@
       {
         "id": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
         "name": "Light tower 1",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "lamp",
         "position": [
           -85,
@@ -1130,7 +1243,7 @@
           2
         ],
         "color": "#c9c27a",
-        "notes": "",
+        "notes": "Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top.",
         "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
@@ -1141,7 +1254,7 @@
       {
         "id": "35c8a8c9-8d40-4a06-9419-c44947e51f81",
         "name": "Light tower 2",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "lamp",
         "position": [
           85,
@@ -1156,7 +1269,7 @@
         ],
         "color": "#c9c27a",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1166,7 +1279,7 @@
       {
         "id": "7d41992d-3fd4-4314-9ae7-9d4a61809cf5",
         "name": "Light tower 3",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "lamp",
         "position": [
           -85,
@@ -1181,7 +1294,7 @@
         ],
         "color": "#c9c27a",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1191,7 +1304,7 @@
       {
         "id": "04b773a7-9c9c-41e5-9f9b-415f09ae6790",
         "name": "Light tower 4",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "lamp",
         "position": [
           85,
@@ -1206,7 +1319,7 @@
         ],
         "color": "#c9c27a",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1565,7 +1678,116 @@
             ]
           }
         ],
-        "parent": null
+        "parent": null,
+        "look": "276e8e15-ec39-4603-b126-5d315a23575e",
+        "sheets": [
+          {
+            "id": "s2mk946c3",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:08:08.457Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "paqgnsu2",
+                    "requestId": null,
+                    "referenceId": "720d75f5-6946-46b3-a015-67c032abff75",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 205347,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:08.457Z"
+                  }
+                ],
+                "selected": "paqgnsu2",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "6hzv9de5",
+                    "requestId": null,
+                    "referenceId": "14e91a80-a7e0-49be-af97-340d26d805cf",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 588790,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:08.457Z"
+                  }
+                ],
+                "selected": "6hzv9de5",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "at26nx0n",
+                    "requestId": null,
+                    "referenceId": "5be0f880-c43f-493c-a634-07990811a3db",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 232166,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:08.457Z"
+                  }
+                ],
+                "selected": "at26nx0n",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "69uizmp3",
+                    "requestId": null,
+                    "referenceId": "22834a74-2ef2-4568-acd6-12c5b20fda5b",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 31428,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:08.457Z"
+                  }
+                ],
+                "selected": "69uizmp3",
+                "accepted": null
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "5152add7-b749-4ce5-a4de-1aea29da0857",
@@ -1919,7 +2141,116 @@
             ]
           }
         ],
-        "parent": null
+        "parent": null,
+        "look": "d055de8a-bf7e-4cd5-aaf0-88dacf52b4e0",
+        "sheets": [
+          {
+            "id": "sk5vjrl9n",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:08:08.457Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "d78yislh",
+                    "requestId": null,
+                    "referenceId": "e0be5636-cee2-45cd-9a45-70347f14e34e",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 245735,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:08.457Z"
+                  }
+                ],
+                "selected": "d78yislh",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "yvw7bxef",
+                    "requestId": null,
+                    "referenceId": "e8ed9903-53f6-405d-bf5a-5de2f3d39b0b",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 821944,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:08.457Z"
+                  }
+                ],
+                "selected": "yvw7bxef",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "5l3hg83g",
+                    "requestId": null,
+                    "referenceId": "049fd30d-6586-4475-a535-6394d25253b0",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 219241,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:08.457Z"
+                  }
+                ],
+                "selected": "5l3hg83g",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "fsnud83e",
+                    "requestId": null,
+                    "referenceId": "9fa59941-5298-4ea9-bfda-e5b6c8ab419d",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 527148,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:08.457Z"
+                  }
+                ],
+                "selected": "fsnud83e",
+                "accepted": null
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
@@ -1944,7 +2275,116 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": null
+        "parent": null,
+        "look": "599fbd2f-aa79-41e5-9748-9564f1c28d00",
+        "sheets": [
+          {
+            "id": "sn7ef9n1l",
+            "setId": "turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:15:52.489Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "full",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "lc24le90",
+                    "requestId": null,
+                    "referenceId": "3bb61c35-ce2b-464d-b71e-d859743896e0",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 463788,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:15:52.489Z"
+                  }
+                ],
+                "selected": "lc24le90",
+                "accepted": null
+              },
+              {
+                "id": "left",
+                "label": "Left",
+                "spec": {
+                  "framing": "full",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "mjo4eaqs",
+                    "requestId": null,
+                    "referenceId": "5cfdcac1-f1a2-4a86-8495-7fc4550d2ef2",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 729118,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:15:52.489Z"
+                  }
+                ],
+                "selected": "mjo4eaqs",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "full",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "93frx2xw",
+                    "requestId": null,
+                    "referenceId": "6827b1ae-07a3-4e9d-bb77-4036ca39e852",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 691201,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:15:52.489Z"
+                  }
+                ],
+                "selected": "93frx2xw",
+                "accepted": null
+              },
+              {
+                "id": "right",
+                "label": "Right",
+                "spec": {
+                  "framing": "full",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "vax7pbrh",
+                    "requestId": null,
+                    "referenceId": "25933768-9453-448f-9db2-29a8ef8bd126",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 903641,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:15:52.489Z"
+                  }
+                ],
+                "selected": "vax7pbrh",
+                "accepted": null
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "b8a56b48-185e-4aa5-a907-3ab709eb2c7d",
@@ -2049,7 +2489,7 @@
       {
         "id": "b6fe0a31-72c6-4cb4-88da-c9b1a7c426e9",
         "name": "Light towers",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "group",
         "position": [
           0,
@@ -2089,7 +2529,7 @@
         ],
         "color": "#3b3d42",
         "notes": "Banked asphalt racing surface, white lane lines, tyre rubber marks.",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2114,7 +2554,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2139,7 +2579,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2164,7 +2604,7 @@
         ],
         "color": "#3b3d42",
         "notes": "Asphalt back straight.",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2189,7 +2629,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2214,7 +2654,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2239,7 +2679,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "SAFER barrier wall with catch fence.",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2264,7 +2704,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2289,7 +2729,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2314,7 +2754,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2339,7 +2779,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2364,7 +2804,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2389,7 +2829,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2414,7 +2854,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2439,7 +2879,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2464,7 +2904,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2489,7 +2929,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2514,7 +2954,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2539,7 +2979,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2564,7 +3004,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2589,7 +3029,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2614,7 +3054,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2639,7 +3079,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2664,7 +3104,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2689,7 +3129,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2714,7 +3154,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2739,7 +3179,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2764,7 +3204,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2789,7 +3229,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2814,7 +3254,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2839,7 +3279,7 @@
         ],
         "color": "#4f7a3e",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2864,36 +3304,513 @@
         ],
         "color": "#4f7a3e",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
         "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
       }
+    ],
+    "references": [
+      {
+        "id": "da9b4a56-d9d5-45c8-8a5d-d1994951aa89",
+        "name": "Infield grass · Flux.2 [pro] · 681099",
+        "file": "da9b4a56-d9d5-45c8-8a5d-d1994951aa89.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "note": "",
+        "createdAt": "2026-10-30T17:16:51.148Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 681099,
+          "prompt": "Reference photo of Infield grass, Mown infield grass with painted logo-free surface. in A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.."
+        }
+      },
+      {
+        "id": "e1e295c4-cc73-41ed-9175-511b26559fcc",
+        "name": "Turns 1–2 · surface 1 · Flux.2 [pro] · 295042",
+        "file": "e1e295c4-cc73-41ed-9175-511b26559fcc.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "note": "",
+        "createdAt": "2026-10-30T17:22:32.300Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 295042,
+          "prompt": "Reference photo of Turns 1–2 · surface 1 in A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.."
+        }
+      },
+      {
+        "id": "249933ae-32dd-49d2-a618-3b51fc8321da",
+        "name": "Turns 3–4 · surface 1 · Flux.2 [pro] · 214963",
+        "file": "249933ae-32dd-49d2-a618-3b51fc8321da.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "note": "",
+        "createdAt": "2026-10-30T17:20:57.590Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 214963,
+          "prompt": "Reference photo of Turns 3–4 · surface 1 in A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.."
+        }
+      },
+      {
+        "id": "55174ba8-4e18-4f7b-b30d-495c98b33441",
+        "name": "Flag stand · FLUX 3 Image · 7301",
+        "file": "55174ba8-4e18-4f7b-b30d-495c98b33441.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+        "note": "",
+        "createdAt": "2026-10-30T15:19:03.274Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Product reference photo of Flag stand, Starter flag stand above the start-finish line; official waving a checkered flag., silver. Whole object in frame, three-quarter view, plain studio background, soft even lighting, photorealistic. Show exactly one object. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.."
+        }
+      },
+      {
+        "id": "d1960cda-7831-4007-b412-c67f9679d24c",
+        "name": "Flag stand · Front",
+        "file": "d1960cda-7831-4007-b412-c67f9679d24c.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+        "note": "sheet:spbu7uvxd:front",
+        "createdAt": "2026-10-30T17:14:40.175Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 381824,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from the front, the front of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Starter flag stand above the start-finish line; official waving a checkered flag.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "9b8eb335-6148-47ea-b0e6-4117abc94489",
+        "name": "Flag stand · Left side",
+        "file": "9b8eb335-6148-47ea-b0e6-4117abc94489.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+        "note": "sheet:spbu7uvxd:left-side",
+        "createdAt": "2026-10-30T17:14:48.387Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 564896,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the left edge of the image (viewer’s left). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Starter flag stand above the start-finish line; official waving a checkered flag.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "c96e9757-0771-4a63-9388-53d063c39bfb",
+        "name": "Flag stand · Back",
+        "file": "c96e9757-0771-4a63-9388-53d063c39bfb.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+        "note": "sheet:spbu7uvxd:back",
+        "createdAt": "2026-10-30T17:14:49.716Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 489257,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from behind, the back of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Starter flag stand above the start-finish line; official waving a checkered flag.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "7ba8b373-2791-4c30-b365-812ec9f5b6e8",
+        "name": "Flag stand · Right side",
+        "file": "7ba8b373-2791-4c30-b365-812ec9f5b6e8.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+        "note": "sheet:spbu7uvxd:right-side",
+        "createdAt": "2026-10-30T17:16:07.921Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 452706,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the right edge of the image (viewer’s right). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Starter flag stand above the start-finish line; official waving a checkered flag.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "f7c96983-b5bf-41e3-bfb5-daefb5fa162a",
+        "name": "Flag stand · design sheet",
+        "file": "f7c96983-b5bf-41e3-bfb5-daefb5fa162a.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "018da5ee-d2fa-4179-bea0-f0760f89f390",
+        "note": "sheet:spbu7uvxd:composed",
+        "createdAt": "2026-10-30T17:16:12.926Z"
+      },
+      {
+        "id": "32a704e5-08df-4945-8261-8a88c28134e2",
+        "name": "Turns 3–4 stands 1 · Flux.2 [pro] · 806441",
+        "file": "32a704e5-08df-4945-8261-8a88c28134e2.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "note": "",
+        "createdAt": "2026-10-30T17:21:22.652Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 806441,
+          "prompt": "Reference photo of Turns 3–4 stands 1 in A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.."
+        }
+      },
+      {
+        "id": "276e8e15-ec39-4603-b126-5d315a23575e",
+        "name": "Comfy car · FLUX 3 Image · 7301",
+        "file": "276e8e15-ec39-4603-b126-5d315a23575e.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "note": "",
+        "createdAt": "2026-10-30T15:12:33.523Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Reference photo of Comfy car, Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors., a blue car. Whole vehicle in frame, front three-quarter view, plain studio background, soft even lighting, photorealistic. Show exactly one vehicle. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.."
+        }
+      },
+      {
+        "id": "720d75f5-6946-46b3-a015-67c032abff75",
+        "name": "Comfy car · Front",
+        "file": "720d75f5-6946-46b3-a015-67c032abff75.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "note": "sheet:s2mk946c3:front",
+        "createdAt": "2026-10-30T17:09:02.791Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 205347,
+          "prompt": "Draw the exact same vehicle as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the vehicle seen straight from the front, the front of the vehicle facing the viewer. Framing: the whole vehicle inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one vehicle, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nVehicle notes: Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "14e91a80-a7e0-49be-af97-340d26d805cf",
+        "name": "Comfy car · Left side",
+        "file": "14e91a80-a7e0-49be-af97-340d26d805cf.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "note": "sheet:s2mk946c3:left-side",
+        "createdAt": "2026-10-30T17:09:10.774Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 588790,
+          "prompt": "Draw the exact same vehicle as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the vehicle exact side view, the front of the vehicle pointing toward the left edge of the image (viewer’s left). Framing: the whole vehicle inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one vehicle, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nVehicle notes: Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "5be0f880-c43f-493c-a634-07990811a3db",
+        "name": "Comfy car · Back",
+        "file": "5be0f880-c43f-493c-a634-07990811a3db.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "note": "sheet:s2mk946c3:back",
+        "createdAt": "2026-10-30T17:10:02.453Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 232166,
+          "prompt": "Draw the exact same vehicle as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the vehicle seen straight from behind, the back of the vehicle facing the viewer. Framing: the whole vehicle inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one vehicle, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nVehicle notes: Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "22834a74-2ef2-4568-acd6-12c5b20fda5b",
+        "name": "Comfy car · Right side",
+        "file": "22834a74-2ef2-4568-acd6-12c5b20fda5b.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "note": "sheet:s2mk946c3:right-side",
+        "createdAt": "2026-10-30T17:09:49.892Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 31428,
+          "prompt": "Draw the exact same vehicle as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the vehicle exact side view, the front of the vehicle pointing toward the right edge of the image (viewer’s right). Framing: the whole vehicle inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one vehicle, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nVehicle notes: Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "7fbc720a-fd3e-4c84-8dd5-00c1c30c95e1",
+        "name": "Comfy car · design sheet",
+        "file": "7fbc720a-fd3e-4c84-8dd5-00c1c30c95e1.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
+        "note": "sheet:s2mk946c3:composed",
+        "createdAt": "2026-10-30T17:10:04.637Z"
+      },
+      {
+        "id": "d055de8a-bf7e-4cd5-aaf0-88dacf52b4e0",
+        "name": "Rival car · FLUX 3 Image · 7301",
+        "file": "d055de8a-bf7e-4cd5-aaf0-88dacf52b4e0.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+        "note": "",
+        "createdAt": "2026-10-30T15:13:14.540Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Reference photo of Rival car, Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos., a black car. Whole vehicle in frame, front three-quarter view, plain studio background, soft even lighting, photorealistic. Show exactly one vehicle. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.."
+        }
+      },
+      {
+        "id": "e0be5636-cee2-45cd-9a45-70347f14e34e",
+        "name": "Rival car · Front",
+        "file": "e0be5636-cee2-45cd-9a45-70347f14e34e.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+        "note": "sheet:sk5vjrl9n:front",
+        "createdAt": "2026-10-30T17:09:04.813Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 245735,
+          "prompt": "Draw the exact same vehicle as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the vehicle seen straight from the front, the front of the vehicle facing the viewer. Framing: the whole vehicle inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one vehicle, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nVehicle notes: Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "e8ed9903-53f6-405d-bf5a-5de2f3d39b0b",
+        "name": "Rival car · Left side",
+        "file": "e8ed9903-53f6-405d-bf5a-5de2f3d39b0b.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+        "note": "sheet:sk5vjrl9n:left-side",
+        "createdAt": "2026-10-30T17:09:18.589Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 821944,
+          "prompt": "Draw the exact same vehicle as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the vehicle exact side view, the front of the vehicle pointing toward the left edge of the image (viewer’s left). Framing: the whole vehicle inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one vehicle, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nVehicle notes: Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "049fd30d-6586-4475-a535-6394d25253b0",
+        "name": "Rival car · Back",
+        "file": "049fd30d-6586-4475-a535-6394d25253b0.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+        "note": "sheet:sk5vjrl9n:back",
+        "createdAt": "2026-10-30T17:10:13.085Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 219241,
+          "prompt": "Draw the exact same vehicle as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the vehicle seen straight from behind, the back of the vehicle facing the viewer. Framing: the whole vehicle inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one vehicle, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nVehicle notes: Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "9fa59941-5298-4ea9-bfda-e5b6c8ab419d",
+        "name": "Rival car · Right side",
+        "file": "9fa59941-5298-4ea9-bfda-e5b6c8ab419d.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+        "note": "sheet:sk5vjrl9n:right-side",
+        "createdAt": "2026-10-30T17:10:22.014Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 527148,
+          "prompt": "Draw the exact same vehicle as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the vehicle exact side view, the front of the vehicle pointing toward the right edge of the image (viewer’s right). Framing: the whole vehicle inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one vehicle, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nVehicle notes: Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "6ddc8e6b-612d-4552-81c0-5dc5b270f89c",
+        "name": "Rival car · design sheet",
+        "file": "6ddc8e6b-612d-4552-81c0-5dc5b270f89c.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "5152add7-b749-4ce5-a4de-1aea29da0857",
+        "note": "sheet:sk5vjrl9n:composed",
+        "createdAt": "2026-10-30T17:10:25.203Z"
+      },
+      {
+        "id": "599fbd2f-aa79-41e5-9748-9564f1c28d00",
+        "name": "Fan with phone · FLUX 3 Image · 7301",
+        "file": "599fbd2f-aa79-41e5-9748-9564f1c28d00.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+        "note": "",
+        "createdAt": "2026-10-30T15:14:01.411Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Character reference photo of Fan with phone, Excited race fan in a yellow Comfy cap and blue t-shirt, holding up a phone to film the finish.. Full body, standing, front three-quarter view, gold accents in the wardrobe. Plain light grey studio background, soft even lighting, photorealistic, sharp focus. Wardrobe suits A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Show exactly one person. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.."
+        }
+      },
+      {
+        "id": "3bb61c35-ce2b-464d-b71e-d859743896e0",
+        "name": "Fan with phone · Front",
+        "file": "3bb61c35-ce2b-464d-b71e-d859743896e0.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+        "note": "sheet:sn7ef9n1l:front",
+        "createdAt": "2026-10-30T17:16:55.378Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 463788,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character facing the viewer, front view. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Excited race fan in a yellow Comfy cap and blue t-shirt, holding up a phone to film the finish.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "5cfdcac1-f1a2-4a86-8495-7fc4550d2ef2",
+        "name": "Fan with phone · Left",
+        "file": "5cfdcac1-f1a2-4a86-8495-7fc4550d2ef2.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+        "note": "sheet:sn7ef9n1l:left",
+        "createdAt": "2026-10-30T17:17:10.147Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 729118,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the left edge of the image (viewer’s left). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Excited race fan in a yellow Comfy cap and blue t-shirt, holding up a phone to film the finish.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "6827b1ae-07a3-4e9d-bb77-4036ca39e852",
+        "name": "Fan with phone · Back",
+        "file": "6827b1ae-07a3-4e9d-bb77-4036ca39e852.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+        "note": "sheet:sn7ef9n1l:back",
+        "createdAt": "2026-10-30T17:20:38.337Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 691201,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character back view, facing directly away from the viewer. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Excited race fan in a yellow Comfy cap and blue t-shirt, holding up a phone to film the finish.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "25933768-9453-448f-9db2-29a8ef8bd126",
+        "name": "Fan with phone · Right",
+        "file": "25933768-9453-448f-9db2-29a8ef8bd126.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+        "note": "sheet:sn7ef9n1l:right",
+        "createdAt": "2026-10-30T17:21:08.947Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 903641,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the right edge of the image (viewer’s right). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Excited race fan in a yellow Comfy cap and blue t-shirt, holding up a phone to film the finish.\n\nRendering style: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours."
+        }
+      },
+      {
+        "id": "3a382c2e-a790-441e-9aad-2f1347040d56",
+        "name": "Fan with phone · design sheet",
+        "file": "3a382c2e-a790-441e-9aad-2f1347040d56.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
+        "note": "sheet:sn7ef9n1l:composed",
+        "createdAt": "2026-10-30T17:21:11.141Z"
+      }
     ]
   },
   "shots": [
     {
+      "id": "f686194e-b8b4-4b88-a531-92667d29a84c",
       "title": "Final lap",
-      "description": "Wide aerial as @rival-car leads @comfy-car out of turn four onto the front stretch, the grandstands roaring.",
+      "description": "High aerial sweeping down behind @rival-car and @comfy-car as they exit turn four side by side onto the front stretch, the grandstands roaring.",
       "duration": 4,
       "start": 4,
       "camera": {
         "move": "crane-down",
         "target": "5152add7-b749-4ce5-a4de-1aea29da0857",
-        "distance": 45,
-        "height": 26,
+        "distance": 22,
+        "height": 10,
         "angle": 150,
-        "mm": 35,
+        "mm": 40,
         "keys": null
       },
       "cast": {
         "include": [],
         "exclude": []
-      }
+      },
+      "style": {
+        "movement": [
+          "crane down",
+          "drone flyover"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm natural"
+        ],
+        "filter": [
+          "saturated primaries"
+        ]
+      },
+      "references": [
+        {
+          "id": "a69c3446-c5bd-4b98-89a1-e299146ca785",
+          "name": "Shot 01 Final lap · FLUX 3 Image · 4242",
+          "file": "a69c3446-c5bd-4b98-89a1-e299146ca785.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-30T15:31:05.340Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 4242,
+            "prompt": "Cinematic film still, single frame. Wide aerial as Rival car leads Comfy car out of turn four onto the front stretch, the grandstands roaring. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Mown infield grass with painted logo-free surface. Asphalt back straight. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. This is the last frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. Image 4 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks."
+          }
+        },
+        {
+          "id": "655db797-f56f-40be-b3ee-dd179c1fcf4b",
+          "name": "Shot 01 Final lap · FLUX 3 Image · 638146",
+          "file": "655db797-f56f-40be-b3ee-dd179c1fcf4b.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-10-30T19:52:09.510Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 638146,
+            "prompt": "Cinematic film still, single frame. High aerial sweeping down behind Rival car and Comfy car as they exit turn four side by side onto the front stretch, the grandstands roaring. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Mown infield grass with painted logo-free surface.; Banked asphalt racing surface, white lane lines, tyre rubber marks. Mown infield grass with painted logo-free surface.; Asphalt back straight. Mown infield grass with painted logo-free surface. Mown infield grass with painted logo-free surface.; SAFER barrier wall with catch fence. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. Filter: saturated primaries.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Turns 3–4 · surface 5 looks exactly like image 4. The Turns 3–4 stands 4 looks exactly like image 5. The Front stretch 1 looks exactly like image 6. No text, captions or labels."
+          }
+        }
+      ]
     },
     {
+      "id": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
       "title": "The draft",
       "description": "Low tracking shot alongside as @comfy-car pulls out of @rival-car's draft and draws level.",
       "duration": 4,
@@ -2910,11 +3827,61 @@
       "cast": {
         "include": [],
         "exclude": []
-      }
+      },
+      "style": {
+        "movement": [
+          "dolly alongside",
+          "tracking shot"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm natural"
+        ],
+        "filter": [
+          "saturated primaries"
+        ]
+      },
+      "references": [
+        {
+          "id": "3c7a11c2-fb2c-469d-b66f-7f7dde464db3",
+          "name": "Shot 02 The draft · FLUX 3 Image · 4242",
+          "file": "3c7a11c2-fb2c-469d-b66f-7f7dde464db3.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-30T15:41:42.231Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 4242,
+            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy car pulls out of Rival car's draft and draws level. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. Asphalt back straight. SAFER barrier wall with catch fence. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Checkered start-finish line painted across the track. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. This is the last frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks."
+          }
+        },
+        {
+          "id": "2b1d4fc5-54e3-45c4-be50-5546d2abb9b6",
+          "name": "Shot 02 The draft · FLUX 3 Image · 4242",
+          "file": "2b1d4fc5-54e3-45c4-be50-5546d2abb9b6.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-10-30T15:34:47.875Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 4242,
+            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy car pulls out of Rival car's draft and draws level. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. Asphalt back straight. SAFER barrier wall with catch fence. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Checkered start-finish line painted across the track. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. This is the first frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks."
+          }
+        }
+      ]
     },
     {
+      "id": "62ca4116-75ee-47e7-8b57-dd934421c864",
       "title": "From the stands",
-      "description": "Handheld phone view from @fan-with-phone in the front stretch stands as both cars thunder side by side toward the line.",
+      "description": "Handheld point of view from the front-stretch stands as @rival-car and @comfy-car thunder side by side toward the line, the crowd's arms in the bottom of frame.",
       "duration": 4,
       "start": 11,
       "camera": {
@@ -2929,27 +3896,181 @@
             "t": 0,
             "p": [
               9,
-              3.4,
+              3.3,
               50.2
             ],
             "look": [
-              -14,
+              -72.71,
               0.8,
-              41
+              39.94
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.083,
+            "p": [
+              9.04,
+              3.27,
+              50.22
+            ],
+            "look": [
+              -66.52,
+              0.53,
+              41.47
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.167,
+            "p": [
+              8.97,
+              3.35,
+              50.16
+            ],
+            "look": [
+              -61.17,
+              1.17,
+              41.6
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.25,
+            "p": [
+              9.05,
+              3.32,
+              50.23
+            ],
+            "look": [
+              -52.21,
+              0.96,
+              42.27
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.333,
+            "p": [
+              8.95,
+              3.26,
+              50.21
+            ],
+            "look": [
+              -42.61,
+              0.57,
+              42
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.417,
+            "p": [
+              9.02,
+              3.36,
+              50.17
+            ],
+            "look": [
+              -30.89,
+              1.05,
+              41.79
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.5,
+            "p": [
+              8.96,
+              3.28,
+              50.25
+            ],
+            "look": [
+              -19.68,
+              0.75,
+              42.1
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.583,
+            "p": [
+              9.06,
+              3.33,
+              50.18
+            ],
+            "look": [
+              -11.28,
+              0.9,
+              41.94
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.667,
+            "p": [
+              8.98,
+              3.25,
+              50.24
+            ],
+            "look": [
+              -6.55,
+              0.71,
+              42.09
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.75,
+            "p": [
+              9.03,
+              3.34,
+              50.15
+            ],
+            "look": [
+              -0.43,
+              0.84,
+              41.95
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.833,
+            "p": [
+              8.94,
+              3.31,
+              50.22
+            ],
+            "look": [
+              6.68,
+              0.81,
+              42.02
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.917,
+            "p": [
+              9.04,
+              3.27,
+              50.17
+            ],
+            "look": [
+              14.6,
+              0.77,
+              41.98
             ],
             "mm": 26
           },
           {
             "t": 1,
             "p": [
-              9.3,
-              3.3,
-              50.1
+              9,
+              3.32,
+              50.2
             ],
             "look": [
-              21,
-              0.6,
-              41.5
+              22,
+              0.83,
+              42
             ],
             "mm": 26
           }
@@ -2958,11 +4079,60 @@
       "cast": {
         "include": [],
         "exclude": []
-      }
+      },
+      "style": {
+        "movement": [
+          "handheld"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "24mm wide"
+        ],
+        "filter": [
+          "high contrast"
+        ]
+      },
+      "references": [
+        {
+          "id": "468f5965-eba6-447c-84e9-0366468540d3",
+          "name": "Shot 03 From the stands · FLUX 3 Image · 4242",
+          "file": "468f5965-eba6-447c-84e9-0366468540d3.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-30T15:46:08.308Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 4242,
+            "prompt": "Cinematic film still, single frame. Handheld phone view from Fan with phone in the front stretch stands as both cars thunder side by side toward the line. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Checkered start-finish line painted across the track. Starter flag stand above the start-finish line; official waving a checkered flag. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Asphalt back straight. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 26mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. This is the last frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Flag stand looks exactly like image 3. The Rival car looks exactly like image 4. Image 5 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks."
+          }
+        },
+        {
+          "id": "cd82f53c-1247-4381-b1e8-62f37de08c6d",
+          "name": "Shot 03 From the stands · FLUX 3 Image · 4242",
+          "file": "cd82f53c-1247-4381-b1e8-62f37de08c6d.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-10-30T15:36:53.765Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 4242,
+            "prompt": "Cinematic film still, single frame. Handheld phone view from Fan with phone in the front stretch stands as both cars thunder side by side toward the line. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Checkered start-finish line painted across the track. Starter flag stand above the start-finish line; official waving a checkered flag. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Asphalt back straight. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 26mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. This is the first frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Flag stand looks exactly like image 3. The Rival car looks exactly like image 4. One single photographic frame, no split panels, no captions or watermarks."
+          }
+        }
+      ]
     },
     {
+      "id": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
       "title": "Checkered flag",
-      "description": "Low angle at the start-finish line: @comfy-car crosses first by a nose as the checkered flag waves.",
+      "description": "Low angle at the start-finish line: @comfy-car blurs past and takes the checkered flag by a nose from @rival-car, the flag snapping above.",
       "duration": 3,
       "start": 12,
       "camera": {
@@ -2976,9 +4146,589 @@
       },
       "cast": {
         "include": [],
-        "exclude": []
+        "exclude": [
+          "9d6d1c24-cd50-482c-becf-ce4997f08c81"
+        ]
+      },
+      "style": {
+        "movement": [
+          "static locked-off shot"
+        ],
+        "cuts": [
+          "speed ramp"
+        ],
+        "lens": [
+          "24mm wide"
+        ],
+        "filter": [
+          "high contrast"
+        ]
+      },
+      "references": [
+        {
+          "id": "dd86859a-dcc9-4987-8f96-8752f2c7266b",
+          "name": "Shot 04 Checkered flag · FLUX 3 Image · 793786",
+          "file": "dd86859a-dcc9-4987-8f96-8752f2c7266b.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-10-30T19:52:26.655Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 793786,
+            "prompt": "Cinematic film still, single frame. Low angle at the start-finish line: Comfy car blurs past and takes the checkered flag by a nose from Rival car, the flag snapping above. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Mown infield grass with painted logo-free surface.; Checkered start-finish line painted across the track. Glass-fronted press box and suites above the main grandstand. Mown infield grass with painted logo-free surface.; Banked asphalt racing surface, white lane lines, tyre rubber marks. Mown infield grass with painted logo-free surface.; SAFER barrier wall with catch fence. Starter flag stand above the start-finish line; official waving a checkered flag. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 24mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. Filter: high contrast.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The Comfy car looks exactly like image 2. The Flag stand looks exactly like image 3. The Rival car looks exactly like image 4. The Light tower 1 looks exactly like image 5. The Infield grass looks exactly like image 6. The Press box looks exactly like image 7. The Turns 3–4 · surface 1 looks exactly like image 8. Image 9 is the previous shot: keep lighting and style continuous. No text, captions or labels."
+          }
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "path": "media/refs/da9b4a56-d9d5-45c8-8a5d-d1994951aa89.webp",
+      "kind": "image",
+      "bytes": 183730,
+      "sha256": "eae5c70d7730167040882060985398f5032d21cefbfd732386d7b7a1c8fbb85b",
+      "sourceSha256": "676f66d105c4d9236e95db968bea28a9a6123da3cbd9f3333a2c3730c1299ee6",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/e1e295c4-cc73-41ed-9175-511b26559fcc.webp",
+      "kind": "image",
+      "bytes": 187044,
+      "sha256": "c840c9359f75b18da21c2f04fafdd7571cd3f9cbf946b803ebbb7f4c1adb1bd9",
+      "sourceSha256": "3d4c575962308242ac70a08e0996ec1962a2a4cb847450bbf855504f0d004ec5",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/249933ae-32dd-49d2-a618-3b51fc8321da.webp",
+      "kind": "image",
+      "bytes": 210356,
+      "sha256": "971ec60d5927095a1e284b4cee8fe6a6e91aa05ea242918a895b0c0437e78507",
+      "sourceSha256": "c7bc787cdbb6e3fb6ff20e9e5d8a2902bd8481d4eba9cb3bcb51573fbe7bbd6a",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/55174ba8-4e18-4f7b-b30d-495c98b33441.webp",
+      "kind": "image",
+      "bytes": 78338,
+      "sha256": "16fe9af4ab99b5295e08ff542988721e545481ff05af343a6a77b9bd55d3f69a",
+      "sourceSha256": "a9152cbc8e98e63e7cbc7b049c5f611cd97756cb9b8f2441989acb05041180a2",
+      "width": 1184,
+      "height": 880
+    },
+    {
+      "path": "media/refs/d1960cda-7831-4007-b412-c67f9679d24c.webp",
+      "kind": "image",
+      "bytes": 25802,
+      "sha256": "0ebc9782cd50b9590e36f152568c456ab63c24ecdee98881b5b0cd6daa379f49",
+      "sourceSha256": "93d6470365552c622ba32900f8b2f69ddace8bdc86a3dde6e1bf4d8274671f98",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/9b8eb335-6148-47ea-b0e6-4117abc94489.webp",
+      "kind": "image",
+      "bytes": 30310,
+      "sha256": "b1f9a7d798954d483f5a6f0c843b4795f269bea1b49e5d9220a46a8e2a6f467a",
+      "sourceSha256": "24a38844fba276553eeed3b5e49a4c351e3c91096d7fb885c77f220d67d8a9af",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/c96e9757-0771-4a63-9388-53d063c39bfb.webp",
+      "kind": "image",
+      "bytes": 34550,
+      "sha256": "10265d85395bbddc3db390d27f6c4f10dcbcd67026028915f6d015bb50322ddb",
+      "sourceSha256": "10ce303812aa0f15b2dbf969b1080ceb0da74e6d47f003399893588f68e3fc86",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/7ba8b373-2791-4c30-b365-812ec9f5b6e8.webp",
+      "kind": "image",
+      "bytes": 61084,
+      "sha256": "cfc928e0825415e12c7badd28adc2fc0e51b107449b3dbc571ecb0f8e3a2db0f",
+      "sourceSha256": "4633e5ad7ba8cf9277a329726e0614796027b017dcb312bf436f999baa37fbeb",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/f7c96983-b5bf-41e3-bfb5-daefb5fa162a.webp",
+      "kind": "image",
+      "bytes": 38446,
+      "sha256": "b250059d23041876e61142e9a41c4a2dfe4900a4cafb201ce445f904b05264d4",
+      "sourceSha256": "df942f0ab8f86870dbba1f8567064f8e761287aa6806a54e897bd647f568731b",
+      "width": 1600,
+      "height": 484
+    },
+    {
+      "path": "media/refs/32a704e5-08df-4945-8261-8a88c28134e2.webp",
+      "kind": "image",
+      "bytes": 193920,
+      "sha256": "52f9cd0c63cd9733696b0b060cc937e1bba6a41bcceb744d47864668b4abd33e",
+      "sourceSha256": "70f4f21c4c54d9d5b0ee5d9fdac3fdec277acd47497157d75a1758fd75cd20ed",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/276e8e15-ec39-4603-b126-5d315a23575e.webp",
+      "kind": "image",
+      "bytes": 69406,
+      "sha256": "ed626ad9126e4f8c4b1d0bf48fbde6879271621a815066076f5a707150773c4a",
+      "sourceSha256": "4b419dc17781555ee6aa3a1dafbfc18bde45efcbc4fd651d921274f95940cc4b",
+      "width": 1184,
+      "height": 880
+    },
+    {
+      "path": "media/refs/720d75f5-6946-46b3-a015-67c032abff75.webp",
+      "kind": "image",
+      "bytes": 65346,
+      "sha256": "4de6ecdc80b6e8e93047e3e0e61c2ad52b0b4e39370d27e36847f80d91e968e9",
+      "sourceSha256": "e7a9cf0fc8e6b1e825adf67adae956403008de87b9150f703300f7e2054b6ad1",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/14e91a80-a7e0-49be-af97-340d26d805cf.webp",
+      "kind": "image",
+      "bytes": 48222,
+      "sha256": "56e4c00385c2d056bc711f2b5d4c9836ce8a08709fe52b889015f9a951d086bd",
+      "sourceSha256": "5630c9e8338892b5f25d166cc1aee0e4e8d1539ce48802dc9740e421b20015fe",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/5be0f880-c43f-493c-a634-07990811a3db.webp",
+      "kind": "image",
+      "bytes": 50174,
+      "sha256": "6fef6f69616ce8972e05a66bedd2985cc4eb0d79f98a6e8b1b6715798d435e43",
+      "sourceSha256": "3d2f653e4aa0c9a5cb6466af7341a176b92b0424878052613144c9eb575405a4",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/22834a74-2ef2-4568-acd6-12c5b20fda5b.webp",
+      "kind": "image",
+      "bytes": 41332,
+      "sha256": "e0d67309d06539a77a9884b28b08c920a6fe4a2cd8e3f1b71e6ef0ebb82baf1f",
+      "sourceSha256": "df62f2153d6f68eb70d26fd51ae4b05abfd208cf21dc90393c466a391873d80f",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/7fbc720a-fd3e-4c84-8dd5-00c1c30c95e1.webp",
+      "kind": "image",
+      "bytes": 26668,
+      "sha256": "8b47e6afa2d566b40e0628ae42eee05fbd0849c46e4bcb2316227616cb4a1c25",
+      "sourceSha256": "bba9c3ebe9a81f8e35e9cc9f6035d25d3ce3397eca496baa0330605f4d81bd9c",
+      "width": 1600,
+      "height": 319
+    },
+    {
+      "path": "media/refs/d055de8a-bf7e-4cd5-aaf0-88dacf52b4e0.webp",
+      "kind": "image",
+      "bytes": 71828,
+      "sha256": "9dc5a078a5cf4330287df10e7195f55350cf25d8d15aae91e76411bfc2e49fcf",
+      "sourceSha256": "a31f3dd91ac4b0f4561e4bbc94193a03c4458ef2f7c05b5453b6564c2c447b14",
+      "width": 1184,
+      "height": 880
+    },
+    {
+      "path": "media/refs/e0be5636-cee2-45cd-9a45-70347f14e34e.webp",
+      "kind": "image",
+      "bytes": 51988,
+      "sha256": "470e235ecffe443df14ec78bd6a644a6dbd9556f8989bc22f89cb2678477c4ef",
+      "sourceSha256": "688180826b42181e9a40843f4da702bce3fdfddad3100a3359d61571313d1079",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/e8ed9903-53f6-405d-bf5a-5de2f3d39b0b.webp",
+      "kind": "image",
+      "bytes": 50844,
+      "sha256": "050292d9cc51982cbc4c65b730e6e9e20be5edca8d3d4896e69ac4b8f925a5da",
+      "sourceSha256": "419bc7c7e123c82292aa31cd1ebdd25e15eb668ba4b28cb4e4b510e671046076",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/049fd30d-6586-4475-a535-6394d25253b0.webp",
+      "kind": "image",
+      "bytes": 39968,
+      "sha256": "3608551ff7f452a327b48ea77c8c804c88c5339b431b94ff623495155e6484ac",
+      "sourceSha256": "6a34c4a12bb1f498992455561598d3b7a1af225eaf283001d1ee42c15f2cf693",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/9fa59941-5298-4ea9-bfda-e5b6c8ab419d.webp",
+      "kind": "image",
+      "bytes": 55692,
+      "sha256": "ea397edb8827b952401071e1efb21409d722e585857998359aafaf7d1419a03d",
+      "sourceSha256": "629ca561279bae7fb01415af7bef2b8257f88ab790eebaac73028384e698de65",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/6ddc8e6b-612d-4552-81c0-5dc5b270f89c.webp",
+      "kind": "image",
+      "bytes": 27312,
+      "sha256": "17058079636b609520493d4312a49106c94ee38285cc3ddd1ba9561e0cc3c2a1",
+      "sourceSha256": "0cd8d33b5084b7798ebacfbbdb74ce27c4ad00c4de3963a3318a2d3f63409495",
+      "width": 1600,
+      "height": 321
+    },
+    {
+      "path": "media/refs/599fbd2f-aa79-41e5-9748-9564f1c28d00.webp",
+      "kind": "image",
+      "bytes": 44320,
+      "sha256": "359516ef595e6b9be15a9d886bb929f7a9edad4f3d590a38f704d779f6b75c84",
+      "sourceSha256": "4e2b5ddc6f86c3f93e72553db76022e3cd4796e18cfec834d65bfe0d55dbe483",
+      "width": 880,
+      "height": 1184
+    },
+    {
+      "path": "media/refs/3bb61c35-ce2b-464d-b71e-d859743896e0.webp",
+      "kind": "image",
+      "bytes": 26734,
+      "sha256": "dcf7464bfa93be1c8e34a1ee2e023f7ffb277e48374c20860cdcb215a517dca5",
+      "sourceSha256": "48a9ca653221a3605a2be31ae3337f5cecdb565126e6638a742ac4065289abf0",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/5cfdcac1-f1a2-4a86-8495-7fc4550d2ef2.webp",
+      "kind": "image",
+      "bytes": 28616,
+      "sha256": "ea83b1359eae12e1e80908d1e30654c9d5c4847046a5657e8ed58b7ccb2a37ce",
+      "sourceSha256": "0439100f82a6ed8a39ff2e47ce92cc1d4c0c478c890f3d3ce67b61cc2004eccd",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/6827b1ae-07a3-4e9d-bb77-4036ca39e852.webp",
+      "kind": "image",
+      "bytes": 23496,
+      "sha256": "d7e849f55443315e6dc7850a7a44e5db217c330d33ee08fc4706184f27b41219",
+      "sourceSha256": "bf7c240db9c91f2b7fb11aa4abebde5ff4df8ff03456910ba4622961f14e1a94",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/25933768-9453-448f-9db2-29a8ef8bd126.webp",
+      "kind": "image",
+      "bytes": 31924,
+      "sha256": "c91140537df1c52e995f06372c0843a28b176a1413e7495002d3173d86f3c0da",
+      "sourceSha256": "32b1190ef8807c63ef3c42581b7ab098f1b06a68cca823252485478309537ad5",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/3a382c2e-a790-441e-9aad-2f1347040d56.webp",
+      "kind": "image",
+      "bytes": 53706,
+      "sha256": "506476c0410f9bc38ac214658591d886081b6c237b74a2ca57dfa3a67fed808c",
+      "sourceSha256": "9ef6751c2cb98cc2d8cf1649973261edbce54081e3b3fc72285d33082ade499d",
+      "width": 1600,
+      "height": 817
+    },
+    {
+      "path": "media/refs/a69c3446-c5bd-4b98-89a1-e299146ca785.webp",
+      "kind": "image",
+      "bytes": 222346,
+      "sha256": "46df18fb399d8f6da2fbfbeaf7a7687f9547ea94cff031e3100b8ccd9036e6cc",
+      "sourceSha256": "a70a863c0923cf637bb9267110df77c20340e43c18868bba905e8060a17c9f95",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/refs/655db797-f56f-40be-b3ee-dd179c1fcf4b.webp",
+      "kind": "image",
+      "bytes": 253950,
+      "sha256": "40f57f64671d0d6a4961fd774e5b66ea33b0d947e56affc63cc6a787235882f8",
+      "sourceSha256": "491ee2403cb734ff6d48598c160183ca03e5bfc176bcb3c3cc6b3e5fcfa8ee17",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/de8f5d7e-f06e-4d87-9e56-109f4b05b262.mp4",
+      "kind": "video",
+      "bytes": 945013,
+      "sha256": "f166b64bc5b1da74bd526793872d504209cac845754f0f6269b1bb5ec0fee180",
+      "sourceSha256": "3a3d5a8786108c4ffcbf82d44657bf2fd7ebea5a1f08ac56aa4adb6181f92a6f",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/a74d045c-d21c-4fb5-8533-24698723b946.mp4",
+      "kind": "video",
+      "bytes": 866423,
+      "sha256": "f0510f94c23ccedf2425d7fa68a41ed9a37b5e40dceee305a8d3b79ce20d29a5",
+      "sourceSha256": "0d64bab01a2c65960cfc1317c49ed7421995f0f090227e34267f380607c2ba71",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 97,
+      "duration": 4.042
+    },
+    {
+      "path": "media/refs/3c7a11c2-fb2c-469d-b66f-7f7dde464db3.webp",
+      "kind": "image",
+      "bytes": 183300,
+      "sha256": "c046ca8aeb61d3e7f50ec43fa77328cbc76f62dcd4f10ee8478f54ba817cec16",
+      "sourceSha256": "13568acb86d2eb39877f500c40510223fbcadbc72e39758f6b4260951849ff1e",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/refs/2b1d4fc5-54e3-45c4-be50-5546d2abb9b6.webp",
+      "kind": "image",
+      "bytes": 183262,
+      "sha256": "de240ae2a43bde6b0abb357778bf01064785b3474f5f611e4286e3d5b244df66",
+      "sourceSha256": "1816e5da878ee298b19d5c0252da914eb7e6d56a973590bf59663e410c79dd50",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/6cebf9bd-038f-4dce-952b-1b028638900a.mp4",
+      "kind": "video",
+      "bytes": 760884,
+      "sha256": "fd9d63dd75c15bab3fa77da9b7a352f34a0a1b68a6e9e23e9d0a2fa07d90245d",
+      "sourceSha256": "4ae50932885392b3cf3650f29a396cbc22919896216957991fc24c6fa45ea0a1",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/7459275a-225c-486e-8b85-815f0a1df7fa.mp4",
+      "kind": "video",
+      "bytes": 1068796,
+      "sha256": "d53172ba7a6eb8ed585c130ee388de07e1a55c421acaf1a5e385c634a1104070",
+      "sourceSha256": "863937f0b0b7122e0b7eb69d78eb4a7befd4bc38c3915120db84a9ef58e032be",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 97,
+      "duration": 4.042
+    },
+    {
+      "path": "media/refs/468f5965-eba6-447c-84e9-0366468540d3.webp",
+      "kind": "image",
+      "bytes": 160954,
+      "sha256": "9fbe19c22a8d935fa38d38ecc2ed4d96924bdef960d197c3095689f207d22374",
+      "sourceSha256": "1d7b36b41762e425103a625f542c18885b11bb1ebf03329f2a5ac7e3848390a1",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/refs/cd82f53c-1247-4381-b1e8-62f37de08c6d.webp",
+      "kind": "image",
+      "bytes": 137960,
+      "sha256": "311360b004851e175ee92d0a94ea4105f91741698ada21af3f0b36eca956aee3",
+      "sourceSha256": "4d71565515d98f1b721dee545bcfa58a8999e9b6b5adb823a31368a62c9814fb",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/06daefa3-e0a0-48f5-8365-9d1427fbb482.mp4",
+      "kind": "video",
+      "bytes": 931756,
+      "sha256": "47c4c6b573cd7330423223c92109d9761b37af10b166659d0502b148781d7bcf",
+      "sourceSha256": "d9200165877ee0a40a59512f861bb894799509457eec959a4bbe5c2da74e520e",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/0610918b-217b-4612-b9ef-1d4c95d81de2.mp4",
+      "kind": "video",
+      "bytes": 943986,
+      "sha256": "ab8ebda24348d8a7bbdb480aa836dd689816c52f3bda0e6db9ab2f6acb3ec088",
+      "sourceSha256": "b4b8c28ec9518fb7c96e8ade4d5c64f319c9d550251d88ad2f289113ac11d680",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 97,
+      "duration": 4.042
+    },
+    {
+      "path": "media/refs/dd86859a-dcc9-4987-8f96-8752f2c7266b.webp",
+      "kind": "image",
+      "bytes": 191068,
+      "sha256": "cc4db97b768944039899564cffbbcb7d7c8b1f427ce48240d1c400a8874bdac6",
+      "sourceSha256": "79ee359abf5fb34c04c145aac3454a503192a3357ee386174fe2ec2dba60d71f",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/a05373de-ef4e-4240-8b59-0467c2a3b7f3.mp4",
+      "kind": "video",
+      "bytes": 411896,
+      "sha256": "45d09a9567cb533826a7c86cefd1864d19e5e1f49dfda4c68ec82c87a2fe7576",
+      "sourceSha256": "b09d1965d2f9fe4986bfec4d08a5bf7261d63c673b23166323dbbb8348548839",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 72,
+      "duration": 3
+    },
+    {
+      "path": "media/assets/20486bf2-4c07-4831-bd5d-bdffa2baad85.mp4",
+      "kind": "video",
+      "bytes": 841259,
+      "sha256": "23a3d030066545c249654554be16269b23f0bfa0161f560814bb660d08edd6d6",
+      "sourceSha256": "0aa210f4991aef8f3986a839bb4809f663c2f5497583d85e70197dd8ca9ed242",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 73,
+      "duration": 3.042
+    }
+  ],
+  "assets": [
+    {
+      "id": "de8f5d7e-f06e-4d87-9e56-109f4b05b262",
+      "kind": "camera-render",
+      "shotId": "f686194e-b8b4-4b88-a531-92667d29a84c",
+      "file": "assets/de8f5d7e-f06e-4d87-9e56-109f4b05b262.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-10-30T17:39:00.793Z",
+      "source": {
+        "engineShotId": null
+      }
+    },
+    {
+      "id": "a74d045c-d21c-4fb5-8533-24698723b946",
+      "kind": "workflow-result",
+      "shotId": "f686194e-b8b4-4b88-a531-92667d29a84c",
+      "file": "assets/a74d045c-d21c-4fb5-8533-24698723b946.mp4",
+      "mime": "video/mp4",
+      "duration": 4.041667,
+      "createdAt": "2026-10-30T19:53:42.938Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. High aerial sweeping down behind Rival car and Comfy car as they exit turn four side by side onto the front stretch, the grandstands roaring. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Mown infield grass with painted logo-free surface.; Banked asphalt racing surface, white lane lines, tyre rubber marks. Mown infield grass with painted logo-free surface.; Asphalt back straight. Mown infield grass with painted logo-free surface. Mown infield grass with painted logo-free surface.; SAFER barrier wall with catch fence. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Camera: Crane down on Rival car, 40mm normal, high angle, 4s. Follow the supplied camera motion exactly. Movement: crane down, drone flyover. Cuts: continuous take, no cuts. Lens: 35mm natural. Filter: saturated primaries."
+      }
+    },
+    {
+      "id": "6cebf9bd-038f-4dce-952b-1b028638900a",
+      "kind": "camera-render",
+      "shotId": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "file": "assets/6cebf9bd-038f-4dce-952b-1b028638900a.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-10-30T15:14:20.540Z",
+      "source": {
+        "engineShotId": null
+      }
+    },
+    {
+      "id": "7459275a-225c-486e-8b85-815f0a1df7fa",
+      "kind": "workflow-result",
+      "shotId": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "file": "assets/7459275a-225c-486e-8b85-815f0a1df7fa.mp4",
+      "mime": "video/mp4",
+      "duration": 4.041667,
+      "createdAt": "2026-10-30T17:05:16.392Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Low tracking shot alongside as Comfy car pulls out of Rival car's draft and draws level. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. Asphalt back straight. SAFER barrier wall with catch fence. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Checkered start-finish line painted across the track. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Camera: Truck right on Comfy car, 35mm normal, eye level, 4s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 35mm natural."
+      }
+    },
+    {
+      "id": "06daefa3-e0a0-48f5-8365-9d1427fbb482",
+      "kind": "camera-render",
+      "shotId": "62ca4116-75ee-47e7-8b57-dd934421c864",
+      "file": "assets/06daefa3-e0a0-48f5-8365-9d1427fbb482.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-10-30T15:29:46.100Z",
+      "source": {
+        "engineShotId": null
+      }
+    },
+    {
+      "id": "0610918b-217b-4612-b9ef-1d4c95d81de2",
+      "kind": "workflow-result",
+      "shotId": "62ca4116-75ee-47e7-8b57-dd934421c864",
+      "file": "assets/0610918b-217b-4612-b9ef-1d4c95d81de2.mp4",
+      "mime": "video/mp4",
+      "duration": 4.041667,
+      "createdAt": "2026-10-30T17:05:03.919Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Handheld phone view from Fan with phone in the front stretch stands as both cars thunder side by side toward the line. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Checkered start-finish line painted across the track. Starter flag stand above the start-finish line; official waving a checkered flag. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Asphalt back straight. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Camera: Custom keys, 26mm normal, high angle, 4s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 24mm wide."
+      }
+    },
+    {
+      "id": "a05373de-ef4e-4240-8b59-0467c2a3b7f3",
+      "kind": "camera-render",
+      "shotId": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
+      "file": "assets/a05373de-ef4e-4240-8b59-0467c2a3b7f3.mp4",
+      "mime": "video/mp4",
+      "duration": 3,
+      "createdAt": "2026-10-30T15:14:23.024Z",
+      "source": {
+        "engineShotId": null
+      }
+    },
+    {
+      "id": "20486bf2-4c07-4831-bd5d-bdffa2baad85",
+      "kind": "workflow-result",
+      "shotId": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
+      "file": "assets/20486bf2-4c07-4831-bd5d-bdffa2baad85.mp4",
+      "mime": "video/mp4",
+      "duration": 3.041667,
+      "createdAt": "2026-10-30T19:53:58.089Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Low angle at the start-finish line: Comfy car blurs past and takes the checkered flag by a nose from Rival car, the flag snapping above. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Mown infield grass with painted logo-free surface.; Checkered start-finish line painted across the track. Glass-fronted press box and suites above the main grandstand. Mown infield grass with painted logo-free surface.; Banked asphalt racing surface, white lane lines, tyre rubber marks. Mown infield grass with painted logo-free surface.; SAFER barrier wall with catch fence. Starter flag stand above the start-finish line; official waving a checkered flag. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Camera: Locked-off on Comfy car, 24mm wide, low angle, 3s. Follow the supplied camera motion exactly. Movement: static locked-off shot. Cuts: speed ramp. Lens: 24mm wide. Filter: high contrast."
       }
     }
   ],
-  "media": []
+  "edit": {
+    "clips": [
+      {
+        "shotId": "f686194e-b8b4-4b88-a531-92667d29a84c",
+        "assetId": "a74d045c-d21c-4fb5-8533-24698723b946",
+        "in": 0,
+        "out": 1.5
+      },
+      {
+        "shotId": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+        "assetId": "7459275a-225c-486e-8b85-815f0a1df7fa",
+        "in": 0,
+        "out": 2.5
+      },
+      {
+        "shotId": "62ca4116-75ee-47e7-8b57-dd934421c864",
+        "assetId": "0610918b-217b-4612-b9ef-1d4c95d81de2",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
+        "assetId": "20486bf2-4c07-4831-bd5d-bdffa2baad85",
+        "in": 0,
+        "out": 1.4
+      }
+    ]
+  }
 }

@@ -1,6 +1,6 @@
 {
   "format": "comfy-previs-starter",
-  "version": 1,
+  "version": 2,
   "slug": "posterized",
   "order": 3,
   "title": "Posterized",
@@ -9,8 +9,8 @@
     "name": "Arena",
     "environment": {
       "preset": "interior",
-      "description": "A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron.",
-      "style": "Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+      "description": "A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.",
+      "style": "Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action."
     },
     "entities": [
       {
@@ -36,7 +36,8 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+        "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e",
+        "look": "7a3ba3aa-337d-43d3-8006-75565321d885"
       },
       {
         "id": "f33945af-cec9-4a63-bed2-db955c077150",
@@ -61,7 +62,8 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e"
+        "parent": "1da57d85-2ce8-4466-b14e-0b9409dcd02e",
+        "look": "530f7854-9e0b-4e28-9832-e607e0ce85a6"
       },
       {
         "id": "3da529e7-0222-4ced-9423-beb9b452f787",
@@ -81,7 +83,7 @@
         ],
         "color": "#2459D8",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -90,8 +92,8 @@
       },
       {
         "id": "933f0c85-b621-4058-927b-577630edea46",
-        "name": "East stanchion",
-        "kind": "prop",
+        "name": "East hoop support",
+        "kind": "environment",
         "shape": "box",
         "position": [
           14.2,
@@ -105,7 +107,7 @@
           0.4
         ],
         "color": "#1d1f22",
-        "notes": "",
+        "notes": "Padded base and steel arm that hold the basketball backboard over the baseline.",
         "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
@@ -136,7 +138,116 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11"
+        "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11",
+        "look": "7d1c9733-7313-41c2-9684-07461c874677",
+        "sheets": [
+          {
+            "id": "sfqpn9xcu",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:16:08.072Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "41cvgcwl",
+                    "requestId": null,
+                    "referenceId": "7d1c9733-7313-41c2-9684-07461c874677",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 265761,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:16:08.072Z"
+                  }
+                ],
+                "selected": "41cvgcwl",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "90ijnbhw",
+                    "requestId": null,
+                    "referenceId": "c6515805-b4b7-443d-af2c-0320d04299f1",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 712275,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:16:08.072Z"
+                  }
+                ],
+                "selected": "90ijnbhw",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "i5phbdzj",
+                    "requestId": null,
+                    "referenceId": "2edbc317-12b8-4ad4-a364-233d952e4dc7",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 938668,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:16:08.072Z"
+                  }
+                ],
+                "selected": "i5phbdzj",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "nec5qzpo",
+                    "requestId": null,
+                    "referenceId": "58f6398c-51e9-4d57-847b-d491e5bcf662",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 148185,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:16:08.072Z"
+                  }
+                ],
+                "selected": "nec5qzpo",
+                "accepted": null
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
@@ -161,7 +272,116 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11"
+        "parent": "c45f5f71-dc94-45b5-8e35-383daa7ecd11",
+        "look": "fd36fea2-8a0c-488f-86cc-e463794253cd",
+        "sheets": [
+          {
+            "id": "snza47csx",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:24:33.040Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "rch2382z",
+                    "requestId": null,
+                    "referenceId": "e5d80152-6842-4354-99aa-8c6538a878e8",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 983349,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:24:33.040Z"
+                  }
+                ],
+                "selected": "rch2382z",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "tw3iolzs",
+                    "requestId": null,
+                    "referenceId": "f3801765-7683-4e8c-9ca6-5be877e22e13",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 694000,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:24:33.040Z"
+                  }
+                ],
+                "selected": "tw3iolzs",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "0t5ifftz",
+                    "requestId": null,
+                    "referenceId": "261fbeee-1c63-41b5-b972-471e04cc25a7",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 37145,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:24:33.040Z"
+                  }
+                ],
+                "selected": "0t5ifftz",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "2vg8dd3g",
+                    "requestId": null,
+                    "referenceId": "7e274e7f-df45-4217-874f-fe0c08fe9756",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 546987,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:24:33.040Z"
+                  }
+                ],
+                "selected": "2vg8dd3g",
+                "accepted": null
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "21535720-bd48-45f3-9371-e4935952b362",
@@ -181,7 +401,7 @@
         ],
         "color": "#2459D8",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -190,8 +410,8 @@
       },
       {
         "id": "01194033-ad5e-4473-80c6-6073e0f5e6d0",
-        "name": "West stanchion",
-        "kind": "prop",
+        "name": "West hoop support",
+        "kind": "environment",
         "shape": "box",
         "position": [
           -14.2,
@@ -205,7 +425,7 @@
           0.4
         ],
         "color": "#1d1f22",
-        "notes": "",
+        "notes": "Padded base and steel arm that hold the basketball backboard over the baseline.",
         "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
@@ -231,7 +451,7 @@
         ],
         "color": "#e8f0f6",
         "notes": "Clear glass backboard with a white border.",
-        "lookFrom": null,
+        "lookFrom": "ff04a50c-5167-4501-acbf-aefe23e66f49",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -256,7 +476,7 @@
         ],
         "color": "#E2591C",
         "notes": "Orange breakaway rim with a white net.",
-        "lookFrom": null,
+        "lookFrom": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -286,7 +506,8 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f"
+        "parent": "96bc0661-664b-4ce7-8f98-1e8a1954399f",
+        "look": "49b20a6f-8d7b-4fb8-a748-27e7cbdb0957"
       },
       {
         "id": "a2fdbf66-8de0-41ae-b9e8-7aa6138520ed",
@@ -306,7 +527,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -331,7 +552,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -356,7 +577,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -381,7 +602,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -406,7 +627,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -431,7 +652,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -456,7 +677,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -481,7 +702,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -506,7 +727,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -531,7 +752,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -556,7 +777,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -581,7 +802,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -606,7 +827,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -631,7 +852,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -656,7 +877,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -681,7 +902,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -706,7 +927,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -731,7 +952,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -756,7 +977,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -781,7 +1002,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -806,7 +1027,7 @@
         ],
         "color": "#6f747d",
         "notes": "",
-        "lookFrom": null,
+        "lookFrom": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -816,7 +1037,7 @@
       {
         "id": "f853574c-2cf2-4176-8bfa-ecc511d2da73",
         "name": "Jumbotron",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "box",
         "position": [
           0,
@@ -855,9 +1076,9 @@
           1.1
         ],
         "color": "#2459D8",
-        "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
+        "notes": "Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.",
         "lookFrom": null,
-        "styleNotes": "",
+        "styleNotes": "Blue and yellow only; never black, white or green on this player",
         "pitch": 0,
         "roll": 0,
         "path": [
@@ -934,7 +1155,222 @@
             ]
           }
         ],
-        "parent": null
+        "parent": null,
+        "look": "6e60c0e9-d930-4a49-b083-fbc4485d7e1d",
+        "sheets": [
+          {
+            "id": "sd20aztkk",
+            "setId": "turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:04:37.464Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "full",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "alrfq4wt",
+                    "requestId": null,
+                    "referenceId": "8000d100-2dbf-4825-a0bc-89c10382fe6c",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 396892,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:04:37.464Z"
+                  }
+                ],
+                "selected": "alrfq4wt",
+                "accepted": null
+              },
+              {
+                "id": "left",
+                "label": "Left",
+                "spec": {
+                  "framing": "full",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "dz6shx1m",
+                    "requestId": null,
+                    "referenceId": "32cb978d-d436-4b0c-9c6f-68d1aaa22535",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 184826,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:04:37.464Z"
+                  }
+                ],
+                "selected": "dz6shx1m",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "full",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "3rex6fqn",
+                    "requestId": null,
+                    "referenceId": "64cb59d7-d53d-4d38-98b9-4641967a1d5d",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 781759,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:04:37.464Z"
+                  }
+                ],
+                "selected": "3rex6fqn",
+                "accepted": null
+              },
+              {
+                "id": "right",
+                "label": "Right",
+                "spec": {
+                  "framing": "full",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "sc8u2531",
+                    "requestId": null,
+                    "referenceId": "35723f25-67df-4684-a370-fe096c83a2ee",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 956673,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:04:37.464Z"
+                  }
+                ],
+                "selected": "sc8u2531",
+                "accepted": null
+              }
+            ]
+          },
+          {
+            "id": "srbrmr8vy",
+            "setId": "turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:45:28.308Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "full",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "a4xtsniq",
+                    "requestId": null,
+                    "referenceId": "31a37d1b-16de-4c8f-818a-d6357cf82436",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 560252,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:45:28.308Z"
+                  }
+                ],
+                "selected": "a4xtsniq",
+                "accepted": null
+              },
+              {
+                "id": "left",
+                "label": "Left",
+                "spec": {
+                  "framing": "full",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "3yknyndu",
+                    "requestId": null,
+                    "referenceId": "88027289-2f3c-4162-9a13-33cc8830c067",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 291534,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:45:28.308Z"
+                  }
+                ],
+                "selected": "3yknyndu",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "full",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "7d55ucfj",
+                    "requestId": null,
+                    "referenceId": "1251c81f-09b5-4450-841e-e61189597f0b",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 623310,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:45:28.308Z"
+                  }
+                ],
+                "selected": "7d55ucfj",
+                "accepted": null
+              },
+              {
+                "id": "right",
+                "label": "Right",
+                "spec": {
+                  "framing": "full",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "vg3hm10t",
+                    "requestId": null,
+                    "referenceId": "baff0e42-1ae0-432f-a337-5b040038384b",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 70929,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:45:28.308Z"
+                  }
+                ],
+                "selected": "vg3hm10t",
+                "accepted": null
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "6c5f0096-a6b1-4c07-8bdf-de9798174c0e",
@@ -954,7 +1390,7 @@
         ],
         "color": "#2459D8",
         "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
-        "lookFrom": null,
+        "lookFrom": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -979,7 +1415,7 @@
         ],
         "color": "#2459D8",
         "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
-        "lookFrom": null,
+        "lookFrom": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1003,9 +1439,9 @@
           1.1
         ],
         "color": "#16181A",
-        "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.",
+        "notes": "Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.",
         "lookFrom": null,
-        "styleNotes": "",
+        "styleNotes": "Black and neon green only; never white, red or blue on this player",
         "pitch": 0,
         "roll": 0,
         "path": [
@@ -1062,7 +1498,116 @@
             "r": 240
           }
         ],
-        "parent": null
+        "parent": null,
+        "look": "0248f460-ffea-4e12-86ad-fa3eb083b609",
+        "sheets": [
+          {
+            "id": "sgo49c1oq",
+            "setId": "turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:08:14.155Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "full",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "raiq5onf",
+                    "requestId": null,
+                    "referenceId": "5d01a364-3687-4c21-9fb4-fffe32048b3d",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 481020,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:14.155Z"
+                  }
+                ],
+                "selected": "raiq5onf",
+                "accepted": null
+              },
+              {
+                "id": "left",
+                "label": "Left",
+                "spec": {
+                  "framing": "full",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "4encfw6y",
+                    "requestId": null,
+                    "referenceId": "b662d8aa-94db-4be1-bd00-75d2a668ba6d",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 137683,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:14.155Z"
+                  }
+                ],
+                "selected": "4encfw6y",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "full",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "swiiynxk",
+                    "requestId": null,
+                    "referenceId": "83ad42b2-ddab-434a-bb33-775a542697ad",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 71152,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:14.155Z"
+                  }
+                ],
+                "selected": "swiiynxk",
+                "accepted": null
+              },
+              {
+                "id": "right",
+                "label": "Right",
+                "spec": {
+                  "framing": "full",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "zljwbi1m",
+                    "requestId": null,
+                    "referenceId": "1cfbfb2e-bb9c-4142-bc09-7d6294cedd3f",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 289869,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:14.155Z"
+                  }
+                ],
+                "selected": "zljwbi1m",
+                "accepted": null
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "5cf9ca0b-51f8-4044-9a39-01ee27348fa7",
@@ -1082,7 +1627,7 @@
         ],
         "color": "#16181A",
         "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers.",
-        "lookFrom": null,
+        "lookFrom": "e94b786d-72f3-4881-85b2-2c05357e8367",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1107,7 +1652,7 @@
         ],
         "color": "#16181A",
         "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers.",
-        "lookFrom": null,
+        "lookFrom": "e94b786d-72f3-4881-85b2-2c05357e8367",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1218,7 +1763,116 @@
             ]
           }
         ],
-        "parent": null
+        "parent": null,
+        "look": "6a525369-1df1-4883-ad37-d623f9ae39c9",
+        "sheets": [
+          {
+            "id": "s5deriu3w",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:08:19.180Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "9c71ynsr",
+                    "requestId": null,
+                    "referenceId": "67dba558-2aea-4d77-a2fb-5490d2213022",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 143434,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:19.180Z"
+                  }
+                ],
+                "selected": "9c71ynsr",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "2310y0ta",
+                    "requestId": null,
+                    "referenceId": "f6fad414-8bf1-4d11-9f0d-710850141aa5",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 375334,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:19.180Z"
+                  }
+                ],
+                "selected": "2310y0ta",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "kf6u0r3j",
+                    "requestId": null,
+                    "referenceId": "ba9a5d73-8304-46e0-bde3-24bc3b9efc80",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 432070,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:19.180Z"
+                  }
+                ],
+                "selected": "kf6u0r3j",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "v9colzhs",
+                    "requestId": null,
+                    "referenceId": "abd804ae-5282-4345-bc07-616ba65dbfc9",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 73599,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:08:19.180Z"
+                  }
+                ],
+                "selected": "v9colzhs",
+                "accepted": null
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "c45f5f71-dc94-45b5-8e35-383daa7ecd11",
@@ -1320,12 +1974,571 @@
         "path": null,
         "parent": null
       }
+    ],
+    "references": [
+      {
+        "id": "7a3ba3aa-337d-43d3-8006-75565321d885",
+        "name": "Court floor · Flux.2 [pro] · 604858",
+        "file": "7a3ba3aa-337d-43d3-8006-75565321d885.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
+        "note": "",
+        "createdAt": "2026-10-30T17:14:45.785Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 604858,
+          "prompt": "Reference photo of Court floor, Polished maple hardwood basketball court with painted lines, glossy reflections. in A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups.."
+        }
+      },
+      {
+        "id": "530f7854-9e0b-4e28-9832-e607e0ce85a6",
+        "name": "Center circle · Flux.2 [pro] · 6244",
+        "file": "530f7854-9e0b-4e28-9832-e607e0ce85a6.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "f33945af-cec9-4a63-bed2-db955c077150",
+        "note": "",
+        "createdAt": "2026-10-30T17:15:52.909Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 6244,
+          "prompt": "Reference photo of Center circle, Blue center circle with a yellow ring. in A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups.."
+        }
+      },
+      {
+        "id": "7d1c9733-7313-41c2-9684-07461c874677",
+        "name": "East backboard · Front",
+        "file": "7d1c9733-7313-41c2-9684-07461c874677.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+        "note": "sheet:sfqpn9xcu:front",
+        "createdAt": "2026-10-30T17:21:31.254Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 265761,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from the front, the front of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Clear glass backboard with a white border.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "c6515805-b4b7-443d-af2c-0320d04299f1",
+        "name": "East backboard · Left side",
+        "file": "c6515805-b4b7-443d-af2c-0320d04299f1.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+        "note": "sheet:sfqpn9xcu:left-side",
+        "createdAt": "2026-10-30T17:22:00.388Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 712275,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the left edge of the image (viewer’s left). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Clear glass backboard with a white border.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "2edbc317-12b8-4ad4-a364-233d952e4dc7",
+        "name": "East backboard · Back",
+        "file": "2edbc317-12b8-4ad4-a364-233d952e4dc7.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+        "note": "sheet:sfqpn9xcu:back",
+        "createdAt": "2026-10-30T17:23:17.881Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 938668,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from behind, the back of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Clear glass backboard with a white border.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "58f6398c-51e9-4d57-847b-d491e5bcf662",
+        "name": "East backboard · Right side",
+        "file": "58f6398c-51e9-4d57-847b-d491e5bcf662.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+        "note": "sheet:sfqpn9xcu:right-side",
+        "createdAt": "2026-10-30T17:23:49.066Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 148185,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the right edge of the image (viewer’s right). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Clear glass backboard with a white border.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "3fd3dd96-91ff-46ab-963c-ed726bd3920f",
+        "name": "East backboard · design sheet",
+        "file": "3fd3dd96-91ff-46ab-963c-ed726bd3920f.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ff04a50c-5167-4501-acbf-aefe23e66f49",
+        "note": "sheet:sfqpn9xcu:composed",
+        "createdAt": "2026-10-30T17:23:52.134Z"
+      },
+      {
+        "id": "fd36fea2-8a0c-488f-86cc-e463794253cd",
+        "name": "East rim · Flux.2 [pro] · 561150",
+        "file": "fd36fea2-8a0c-488f-86cc-e463794253cd.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+        "note": "",
+        "createdAt": "2026-10-30T17:24:32.871Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 561150,
+          "prompt": "Product reference photo of East rim, Orange breakaway rim with a white net., red. Whole object in frame, three-quarter view, plain studio background, soft even lighting, photorealistic. Show exactly one object. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups.."
+        }
+      },
+      {
+        "id": "e5d80152-6842-4354-99aa-8c6538a878e8",
+        "name": "East rim · Front",
+        "file": "e5d80152-6842-4354-99aa-8c6538a878e8.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+        "note": "sheet:snza47csx:front",
+        "createdAt": "2026-10-30T17:25:21.451Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 983349,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from the front, the front of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Orange breakaway rim with a white net.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "f3801765-7683-4e8c-9ca6-5be877e22e13",
+        "name": "East rim · Left side",
+        "file": "f3801765-7683-4e8c-9ca6-5be877e22e13.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+        "note": "sheet:snza47csx:left-side",
+        "createdAt": "2026-10-30T17:25:43.135Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 694000,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the left edge of the image (viewer’s left). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Orange breakaway rim with a white net.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "261fbeee-1c63-41b5-b972-471e04cc25a7",
+        "name": "East rim · Back",
+        "file": "261fbeee-1c63-41b5-b972-471e04cc25a7.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+        "note": "sheet:snza47csx:back",
+        "createdAt": "2026-10-30T17:25:54.383Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 37145,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from behind, the back of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Orange breakaway rim with a white net.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "7e274e7f-df45-4217-874f-fe0c08fe9756",
+        "name": "East rim · Right side",
+        "file": "7e274e7f-df45-4217-874f-fe0c08fe9756.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+        "note": "sheet:snza47csx:right-side",
+        "createdAt": "2026-10-30T17:26:23.646Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 546987,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the right edge of the image (viewer’s right). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Orange breakaway rim with a white net.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "bf835786-020b-4b4b-b483-b5391dbd3c6a",
+        "name": "East rim · design sheet",
+        "file": "bf835786-020b-4b4b-b483-b5391dbd3c6a.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
+        "note": "sheet:snza47csx:composed",
+        "createdAt": "2026-10-30T17:26:24.035Z"
+      },
+      {
+        "id": "49b20a6f-8d7b-4fb8-a748-27e7cbdb0957",
+        "name": "Sideline stands · tier 1 · Flux.2 [pro] · 168158",
+        "file": "49b20a6f-8d7b-4fb8-a748-27e7cbdb0957.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "cc2bbf0b-f26b-4325-a011-fa3387cc255e",
+        "note": "",
+        "createdAt": "2026-10-30T17:21:56.371Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 168158,
+          "prompt": "Reference photo of Sideline stands · tier 1 in A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups.."
+        }
+      },
+      {
+        "id": "6e60c0e9-d930-4a49-b083-fbc4485d7e1d",
+        "name": "Comfy guard · Flux.2 [pro] · 96424",
+        "file": "6e60c0e9-d930-4a49-b083-fbc4485d7e1d.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "",
+        "createdAt": "2026-10-30T17:41:20.229Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 96424,
+          "prompt": "Character reference photo of Comfy guard, Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.. Full body, standing, front three-quarter view, blue accents in the wardrobe. Plain light grey studio background, soft even lighting, photorealistic, sharp focus. Wardrobe suits A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Blue and yellow only; never black, white or green on this player. Show exactly one person. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action.."
+        }
+      },
+      {
+        "id": "8000d100-2dbf-4825-a0bc-89c10382fe6c",
+        "name": "Comfy guard · Front",
+        "file": "8000d100-2dbf-4825-a0bc-89c10382fe6c.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:sd20aztkk:front",
+        "createdAt": "2026-10-30T17:05:30.304Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 396892,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character facing the viewer, front view. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "32cb978d-d436-4b0c-9c6f-68d1aaa22535",
+        "name": "Comfy guard · Left",
+        "file": "32cb978d-d436-4b0c-9c6f-68d1aaa22535.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:sd20aztkk:left",
+        "createdAt": "2026-10-30T17:05:41.808Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 184826,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the left edge of the image (viewer’s left). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "64cb59d7-d53d-4d38-98b9-4641967a1d5d",
+        "name": "Comfy guard · Back",
+        "file": "64cb59d7-d53d-4d38-98b9-4641967a1d5d.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:sd20aztkk:back",
+        "createdAt": "2026-10-30T17:07:54.460Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 781759,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character back view, facing directly away from the viewer. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "35723f25-67df-4684-a370-fe096c83a2ee",
+        "name": "Comfy guard · Right",
+        "file": "35723f25-67df-4684-a370-fe096c83a2ee.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:sd20aztkk:right",
+        "createdAt": "2026-10-30T17:07:42.856Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 956673,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the right edge of the image (viewer’s right). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "35bea06f-8e12-4d0c-bb6f-543a04a5668a",
+        "name": "Comfy guard · design sheet",
+        "file": "35bea06f-8e12-4d0c-bb6f-543a04a5668a.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:sd20aztkk:composed",
+        "createdAt": "2026-10-30T17:07:58.934Z"
+      },
+      {
+        "id": "31a37d1b-16de-4c8f-818a-d6357cf82436",
+        "name": "Comfy guard · Front",
+        "file": "31a37d1b-16de-4c8f-818a-d6357cf82436.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:srbrmr8vy:front",
+        "createdAt": "2026-10-30T17:46:26.915Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 560252,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character facing the viewer, front view. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.\n\nLook: Blue and yellow only; never black, white or green on this player\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action."
+        }
+      },
+      {
+        "id": "88027289-2f3c-4162-9a13-33cc8830c067",
+        "name": "Comfy guard · Left",
+        "file": "88027289-2f3c-4162-9a13-33cc8830c067.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:srbrmr8vy:left",
+        "createdAt": "2026-10-30T17:47:27.657Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 291534,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the left edge of the image (viewer’s left). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.\n\nLook: Blue and yellow only; never black, white or green on this player\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action."
+        }
+      },
+      {
+        "id": "1251c81f-09b5-4450-841e-e61189597f0b",
+        "name": "Comfy guard · Back",
+        "file": "1251c81f-09b5-4450-841e-e61189597f0b.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:srbrmr8vy:back",
+        "createdAt": "2026-10-30T17:47:30.561Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 623310,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character back view, facing directly away from the viewer. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.\n\nLook: Blue and yellow only; never black, white or green on this player\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action."
+        }
+      },
+      {
+        "id": "baff0e42-1ae0-432f-a337-5b040038384b",
+        "name": "Comfy guard · Right",
+        "file": "baff0e42-1ae0-432f-a337-5b040038384b.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:srbrmr8vy:right",
+        "createdAt": "2026-10-30T17:48:08.152Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 70929,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the right edge of the image (viewer’s right). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.\n\nLook: Blue and yellow only; never black, white or green on this player\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action."
+        }
+      },
+      {
+        "id": "43817e73-bb30-4087-a356-d8bc02b45f0c",
+        "name": "Comfy guard · design sheet",
+        "file": "43817e73-bb30-4087-a356-d8bc02b45f0c.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
+        "note": "sheet:srbrmr8vy:composed",
+        "createdAt": "2026-10-30T17:48:09.915Z"
+      },
+      {
+        "id": "0248f460-ffea-4e12-86ad-fa3eb083b609",
+        "name": "Rival defender · Flux.2 [pro] · 657566",
+        "file": "0248f460-ffea-4e12-86ad-fa3eb083b609.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+        "note": "",
+        "createdAt": "2026-10-30T17:41:24.773Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 657566,
+          "prompt": "Character reference photo of Rival defender, Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.. Full body, standing, front three-quarter view, black accents in the wardrobe. Plain light grey studio background, soft even lighting, photorealistic, sharp focus. Wardrobe suits A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Black and neon green only; never white, red or blue on this player. Show exactly one person. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action.."
+        }
+      },
+      {
+        "id": "5d01a364-3687-4c21-9fb4-fffe32048b3d",
+        "name": "Rival defender · Front",
+        "file": "5d01a364-3687-4c21-9fb4-fffe32048b3d.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+        "note": "sheet:sgo49c1oq:front",
+        "createdAt": "2026-10-30T17:12:40.690Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 481020,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character facing the viewer, front view. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "b662d8aa-94db-4be1-bd00-75d2a668ba6d",
+        "name": "Rival defender · Left",
+        "file": "b662d8aa-94db-4be1-bd00-75d2a668ba6d.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+        "note": "sheet:sgo49c1oq:left",
+        "createdAt": "2026-10-30T17:13:32.747Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 137683,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the left edge of the image (viewer’s left). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "83ad42b2-ddab-434a-bb33-775a542697ad",
+        "name": "Rival defender · Back",
+        "file": "83ad42b2-ddab-434a-bb33-775a542697ad.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+        "note": "sheet:sgo49c1oq:back",
+        "createdAt": "2026-10-30T17:14:02.572Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 71152,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character back view, facing directly away from the viewer. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "1cfbfb2e-bb9c-4142-bc09-7d6294cedd3f",
+        "name": "Rival defender · Right",
+        "file": "1cfbfb2e-bb9c-4142-bc09-7d6294cedd3f.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+        "note": "sheet:sgo49c1oq:right",
+        "createdAt": "2026-10-30T17:14:12.554Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 289869,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the right edge of the image (viewer’s right). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "82bf3201-d094-4511-aa7d-58b950580996",
+        "name": "Rival defender · design sheet",
+        "file": "82bf3201-d094-4511-aa7d-58b950580996.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "e94b786d-72f3-4881-85b2-2c05357e8367",
+        "note": "sheet:sgo49c1oq:composed",
+        "createdAt": "2026-10-30T17:14:16.850Z"
+      },
+      {
+        "id": "6a525369-1df1-4883-ad37-d623f9ae39c9",
+        "name": "Basketball · FLUX 3 Image · 7301",
+        "file": "6a525369-1df1-4883-ad37-d623f9ae39c9.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+        "note": "",
+        "createdAt": "2026-10-30T15:21:03.125Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Product reference photo of Basketball, Orange leather basketball with black seams., red. Whole object in frame, three-quarter view, plain studio background, soft even lighting, photorealistic. Show exactly one object. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups.."
+        }
+      },
+      {
+        "id": "67dba558-2aea-4d77-a2fb-5490d2213022",
+        "name": "Basketball · Front",
+        "file": "67dba558-2aea-4d77-a2fb-5490d2213022.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+        "note": "sheet:s5deriu3w:front",
+        "createdAt": "2026-10-30T17:13:29.513Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 143434,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from the front, the front of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Orange leather basketball with black seams.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "f6fad414-8bf1-4d11-9f0d-710850141aa5",
+        "name": "Basketball · Left side",
+        "file": "f6fad414-8bf1-4d11-9f0d-710850141aa5.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+        "note": "sheet:s5deriu3w:left-side",
+        "createdAt": "2026-10-30T17:13:39.724Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 375334,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the left edge of the image (viewer’s left). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Orange leather basketball with black seams.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "ba9a5d73-8304-46e0-bde3-24bc3b9efc80",
+        "name": "Basketball · Back",
+        "file": "ba9a5d73-8304-46e0-bde3-24bc3b9efc80.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+        "note": "sheet:s5deriu3w:back",
+        "createdAt": "2026-10-30T17:14:06.548Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 432070,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from behind, the back of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Orange leather basketball with black seams.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "abd804ae-5282-4345-bc07-616ba65dbfc9",
+        "name": "Basketball · Right side",
+        "file": "abd804ae-5282-4345-bc07-616ba65dbfc9.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+        "note": "sheet:s5deriu3w:right-side",
+        "createdAt": "2026-10-30T17:14:18.219Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 73599,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the right edge of the image (viewer’s right). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Orange leather basketball with black seams.\n\nRendering style: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups."
+        }
+      },
+      {
+        "id": "a5431a78-accc-4bdb-863d-fc14c8149856",
+        "name": "Basketball · design sheet",
+        "file": "a5431a78-accc-4bdb-863d-fc14c8149856.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "ea912404-1b47-4e18-80ee-8c68e3459c3b",
+        "note": "sheet:s5deriu3w:composed",
+        "createdAt": "2026-10-30T17:14:22.331Z"
+      }
     ]
   },
   "shots": [
     {
+      "id": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
       "title": "Fast break",
-      "description": "Wide arena shot as @comfy-guard pushes the ball up the court past half court, the crowd on its feet.",
+      "description": "Wide arena shot as @comfy-guard sprints the ball up the court on a fast break, @comfy-wing and @comfy-center filling the lanes, the rival defenders backpedalling, the crowd on its feet.",
       "duration": 5,
       "start": 1,
       "camera": {
@@ -1340,11 +2553,44 @@
       "cast": {
         "include": [],
         "exclude": []
-      }
+      },
+      "style": {
+        "movement": [
+          "crane down"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "24mm wide"
+        ],
+        "filter": [
+          "saturated primaries"
+        ]
+      },
+      "references": [
+        {
+          "id": "70c992c1-d32d-4f72-b005-75c2f1508564",
+          "name": "Shot 01 Fast break · Flux.2 [pro] · 484291",
+          "file": "70c992c1-d32d-4f72-b005-75c2f1508564.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-10-30T17:44:45.837Z",
+          "generated": {
+            "presetId": "flux-2-pro",
+            "model": "Flux.2 [pro] (BFL)",
+            "seed": 484291,
+            "prompt": "Cinematic film still, single frame. Wide arena shot as Comfy guard sprints the ball up the court on a fast break, Comfy wing and Comfy center filling the lanes, the rival defenders backpedalling, the crowd on its feet. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival t"
+          }
+        }
+      ]
     },
     {
+      "id": "4feea365-12b8-456f-878e-80be456c4c27",
       "title": "The drive",
-      "description": "Tracking alongside @comfy-guard as he drives baseline past @rival-defender.",
+      "description": "Low tracking shot alongside as @comfy-guard drives hard along the baseline past @rival-defender, crossing the ball between his legs, sneakers squeaking.",
       "duration": 5,
       "start": 6,
       "camera": {
@@ -1359,20 +2605,54 @@
       "cast": {
         "include": [],
         "exclude": []
-      }
+      },
+      "style": {
+        "movement": [
+          "tracking shot",
+          "dolly alongside"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm natural"
+        ],
+        "filter": [
+          "high contrast"
+        ]
+      },
+      "references": [
+        {
+          "id": "8a719256-c46e-4833-b6a0-37ae0eb91fdf",
+          "name": "Shot 02 The drive · Flux.2 [pro] · 366018",
+          "file": "8a719256-c46e-4833-b6a0-37ae0eb91fdf.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-10-30T17:48:24.303Z",
+          "generated": {
+            "presetId": "flux-2-pro",
+            "model": "Flux.2 [pro] (BFL)",
+            "seed": 366018,
+            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy guard drives hard along the baseline past Rival defender, crossing the ball between his legs, sneakers squeaking. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Clear glass backboard with a white border. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Photoreal live"
+          }
+        }
+      ]
     },
     {
+      "id": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
       "title": "Posterized",
-      "description": "Low angle under the rim: @comfy-guard rises and dunks over @rival-defender, the net snaps, the arena erupts.",
+      "description": "Low angle under the rim: @comfy-guard explodes upward and throws down a two-handed dunk over @rival-defender, the net snaps, the camera rises with him, the arena erupts.",
       "duration": 5,
       "start": 10,
       "camera": {
-        "move": "static",
+        "move": "crane-up",
         "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
-        "distance": 4.5,
-        "height": 0.5,
+        "distance": 5,
+        "height": 0.8,
         "angle": -35,
-        "mm": 18,
+        "mm": 20,
         "keys": null
       },
       "cast": {
@@ -1381,7 +2661,7 @@
       },
       "style": {
         "movement": [
-          "static locked-off shot"
+          "crane up"
         ],
         "cuts": [
           "speed ramp"
@@ -1392,8 +2672,562 @@
         "filter": [
           "high contrast"
         ]
+      },
+      "prompts": {},
+      "references": [
+        {
+          "id": "d0177bfd-0e15-4eeb-b1e8-91a08760f1b2",
+          "name": "Shot 03 Posterized · FLUX 3 Image · 792113",
+          "file": "d0177bfd-0e15-4eeb-b1e8-91a08760f1b2.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-10-30T19:51:14.937Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 792113,
+            "prompt": "Cinematic film still, single frame. Low angle under the rim: Comfy guard explodes upward and throws down a two-handed dunk over Rival defender, the net snaps, the camera rises with him, the arena erupts. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Orange breakaway rim with a white net. Orange leather basketball with black seams. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action.. Framing: 20mm lens, match the supplied blockout frame's composition. Lens: 14mm ultra-wide. Filter: high contrast.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and e"
+          }
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "path": "media/refs/7a3ba3aa-337d-43d3-8006-75565321d885.webp",
+      "kind": "image",
+      "bytes": 57056,
+      "sha256": "d83d4ac8b7317eab511cbaaad688bd78a49792a85547fe810c1978689cdf1843",
+      "sourceSha256": "898466f0b11786e1dee4745c5a4cdc22ea5ee75616eba512ecb47b4ab220c94d",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/530f7854-9e0b-4e28-9832-e607e0ce85a6.webp",
+      "kind": "image",
+      "bytes": 98260,
+      "sha256": "77943a960e3794ce67b49c45de39c80a1820d661f26f9e5b051b6c0155a3ecce",
+      "sourceSha256": "429d5ede4ca786eaa77acbba405a085cd47f37ae35f64d2c7771c29e1c736287",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/7d1c9733-7313-41c2-9684-07461c874677.webp",
+      "kind": "image",
+      "bytes": 18904,
+      "sha256": "f4dbbce44ae61cd36781e62a0c0c511597bb98006c47ae5e09c2a29103061a04",
+      "sourceSha256": "a69627317ef18f307e50fcf4cae6b5e7882bae04953e06b217326685ef3f0e59",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/c6515805-b4b7-443d-af2c-0320d04299f1.webp",
+      "kind": "image",
+      "bytes": 16886,
+      "sha256": "fdff1fe64b8c863c4208861caafb620d3e9da1b0891360bc80242a5a178bfb4c",
+      "sourceSha256": "305b60ece214b92f8000d61e85855e6ef48a19448955cba6c7e6afb8a27a135e",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/2edbc317-12b8-4ad4-a364-233d952e4dc7.webp",
+      "kind": "image",
+      "bytes": 8318,
+      "sha256": "1560021cb7119aded1d97dfff5838eea5e726ecd75637b039a4691c50d68eb79",
+      "sourceSha256": "cec8e3841eaf1a1ea2d4c3d5992cd03a8843826101ff33a8ffb7b7a74eec9cad",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/58f6398c-51e9-4d57-847b-d491e5bcf662.webp",
+      "kind": "image",
+      "bytes": 18986,
+      "sha256": "957780869428ab1a88018e23a1fd6b88ff3c62795cb3c7cb36261be371809188",
+      "sourceSha256": "5ede3ce27e7dfbae1e49979b1867f5b20d705b487b0bc1c66668ac78622ce890",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/3fd3dd96-91ff-46ab-963c-ed726bd3920f.webp",
+      "kind": "image",
+      "bytes": 18832,
+      "sha256": "527a4965fb343d6761d5177f65d25bdc5638c43f2b20e26999c159d084abc78a",
+      "sourceSha256": "eee0ac23a6e8287c2dd5ec94aacc88b4d4861527125584d06363fae7580124dd",
+      "width": 1600,
+      "height": 467
+    },
+    {
+      "path": "media/refs/fd36fea2-8a0c-488f-86cc-e463794253cd.webp",
+      "kind": "image",
+      "bytes": 32708,
+      "sha256": "734c4b2b7780fd34c3d21959e2ae949cd839473571cdb353c7fd3d72f0be382d",
+      "sourceSha256": "cede1114d37448b5c06de3989c4caaa12e10d3d6701a66b10616f729d2dad287",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/e5d80152-6842-4354-99aa-8c6538a878e8.webp",
+      "kind": "image",
+      "bytes": 39890,
+      "sha256": "653e301e151e95ccbbdd3e7348fb5045251e8a264861982a176336627a1ccaf3",
+      "sourceSha256": "5ec57d7ac195ff510490970ec5803f3c6b1e34b7bfa388138780e8f6f80a7051",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/f3801765-7683-4e8c-9ca6-5be877e22e13.webp",
+      "kind": "image",
+      "bytes": 35578,
+      "sha256": "090ca75bcbc8b7116f749a1df927866e1d35d7662c60ecdef77bbd16fac5d2d5",
+      "sourceSha256": "bef05bb13fe8b4b7141db3ac18adc3f99ec1902677c267573353956eca6e846b",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/261fbeee-1c63-41b5-b972-471e04cc25a7.webp",
+      "kind": "image",
+      "bytes": 36606,
+      "sha256": "aca1fa5ddec1cc2e7194046c2951b0bfe38c4e6c74ae47bfc8397f51233e4d79",
+      "sourceSha256": "eb55c1fff286bfa53cfdc00dac2a87fbe0bbc7e3f5dac0db07f620b1999cd0d2",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/7e274e7f-df45-4217-874f-fe0c08fe9756.webp",
+      "kind": "image",
+      "bytes": 32378,
+      "sha256": "b0c35d51b71483dc1505a8a2496f770fe26e2bdb86b167c076921950a8dce3b0",
+      "sourceSha256": "426f4ba7678e3758863548aa79fbfdc901319b82ba5f0bad64e3b6ab537f6324",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/bf835786-020b-4b4b-b483-b5391dbd3c6a.webp",
+      "kind": "image",
+      "bytes": 36234,
+      "sha256": "f199dc4cca43d4808a40d7e8f2036736954e6b3cebb663d3069dceede93343a3",
+      "sourceSha256": "b648e80d3c8fe527001737428bf69bc7496534703ac46bc24f53beda4e6bc749",
+      "width": 1600,
+      "height": 415
+    },
+    {
+      "path": "media/refs/49b20a6f-8d7b-4fb8-a748-27e7cbdb0957.webp",
+      "kind": "image",
+      "bytes": 113546,
+      "sha256": "7337d1d020c3eb75b3636be8ba83378a4fda5cbc36cb0f912fd2bcd3c8cd001d",
+      "sourceSha256": "261f3996429e56bbcb2c841d7ce7e0af1ee6b86aa120c7a294394298d939c3e0",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/6e60c0e9-d930-4a49-b083-fbc4485d7e1d.webp",
+      "kind": "image",
+      "bytes": 43972,
+      "sha256": "76771ce5c99adf84f37ce1bf947301f7e4d8b680666b3d128a82693ab5758572",
+      "sourceSha256": "df6e9f71ae3e270251cd57a157609e15eae37db0be6d0bda226cefb550904cc3",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/8000d100-2dbf-4825-a0bc-89c10382fe6c.webp",
+      "kind": "image",
+      "bytes": 41674,
+      "sha256": "92b21b5c50ecbc238432401458ece91f6198983ee034c73462fcc30fd891c283",
+      "sourceSha256": "e8e9e7a0bf52b0fefc57247f7f00c066f9f432ad0a01075c6294e3308be95a39",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/32cb978d-d436-4b0c-9c6f-68d1aaa22535.webp",
+      "kind": "image",
+      "bytes": 40590,
+      "sha256": "7faf6573e54e8876e720fd3745a9fbfcdfeb69ca2dc3daf8bc5c21cecfac8c62",
+      "sourceSha256": "9d5b079ec9ca7453e16fa44ea209697ce45e2ccc633366ba40ab9433de841a65",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/64cb59d7-d53d-4d38-98b9-4641967a1d5d.webp",
+      "kind": "image",
+      "bytes": 30336,
+      "sha256": "04697a006f0dfa1a52eaf8b2a1baa32bf385ecadcdd2ce62ed719c04e9731cff",
+      "sourceSha256": "945efb0346092375edb48e156e006344681eab4ede71da026f2b312a2766d7a3",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/35723f25-67df-4684-a370-fe096c83a2ee.webp",
+      "kind": "image",
+      "bytes": 31992,
+      "sha256": "f718a551a8d33bf5264a146171424044efda136a165e9169445e697972fdd452",
+      "sourceSha256": "3cba3c17f132d8d53e03820a6c8c58195c0aff59332d9bf39895b09863bafc3e",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/35bea06f-8e12-4d0c-bb6f-543a04a5668a.webp",
+      "kind": "image",
+      "bytes": 66488,
+      "sha256": "771bf530d1ef2757fdc39b7b430300d024a7e3332ec3683db54229d2597d9428",
+      "sourceSha256": "0c064796bcfbd42475dccd69c9cabfb6f3247c29751c90c01eab48ced41b4dc4",
+      "width": 1600,
+      "height": 817
+    },
+    {
+      "path": "media/refs/31a37d1b-16de-4c8f-818a-d6357cf82436.webp",
+      "kind": "image",
+      "bytes": 35302,
+      "sha256": "3d9cac96a74c278143bc51b6497926d1e7991d5218f6dcd5b8107c038447f231",
+      "sourceSha256": "3df2f2dfffce433ccaf2256563b09a0dcbe34d1cf1c437ff0f4ad167cd576c5e",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/88027289-2f3c-4162-9a13-33cc8830c067.webp",
+      "kind": "image",
+      "bytes": 35604,
+      "sha256": "888054af098adb3022ced5180d03611a87bfe076a03e82a35bdb6a42358fdfaa",
+      "sourceSha256": "53aaea73621a5da191c939365a80f9c46524397b2379352eaa06c256ce4b2ad7",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/1251c81f-09b5-4450-841e-e61189597f0b.webp",
+      "kind": "image",
+      "bytes": 37440,
+      "sha256": "0ad7122194306e47d0bb7672f6448744c0619d6ec6b8b75b7072a988fce0463e",
+      "sourceSha256": "7bce7a32170e7407265c1be21453d08fb6fdc448eb497213a2cc98384a0fa404",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/baff0e42-1ae0-432f-a337-5b040038384b.webp",
+      "kind": "image",
+      "bytes": 34502,
+      "sha256": "c95e9450743ee471663ae56d5e085cee8a59f041b12defd480ca8efdbb4d8dbf",
+      "sourceSha256": "8a60e7d158f304b72432d2891f6a525f54e0294a09ffa4b9a0239948986e6830",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/43817e73-bb30-4087-a356-d8bc02b45f0c.webp",
+      "kind": "image",
+      "bytes": 65882,
+      "sha256": "8c7d37d54ca2639e1a93e848874de923ec5ebf5fa8eb7fcda8b3d35896ff852e",
+      "sourceSha256": "c6aeabd657bdd6fd50bbb12683aa1b9046d7b0927b4092f018460f49d0a9abda",
+      "width": 1600,
+      "height": 817
+    },
+    {
+      "path": "media/refs/0248f460-ffea-4e12-86ad-fa3eb083b609.webp",
+      "kind": "image",
+      "bytes": 30568,
+      "sha256": "8c692adfee3341d460bb5394a23db510b6ab90babb69a232b352876eb01c709c",
+      "sourceSha256": "60adff78cb60a92470dc9b4b099fba72fc59b957faa2c5b2fe96368febfa99ad",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/5d01a364-3687-4c21-9fb4-fffe32048b3d.webp",
+      "kind": "image",
+      "bytes": 23676,
+      "sha256": "4c5e14f883214840734e9e2009061d2c5d1e2b3beec91a60635f8c3731532387",
+      "sourceSha256": "0f04bf7b8f1be7b4adf1fb692dbfc5cbb3f52e95ffc95f06b3a09e811b3955e0",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/b662d8aa-94db-4be1-bd00-75d2a668ba6d.webp",
+      "kind": "image",
+      "bytes": 29572,
+      "sha256": "fbbe47dfb5b362803caf235ab1f484cbd03c5d5ee7025be2ac2dd884e200301c",
+      "sourceSha256": "dbeb24de853744c4d6760f5cf9e37a8556a6e06ee9d17d8ca2136a1d16d14ec1",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/83ad42b2-ddab-434a-bb33-775a542697ad.webp",
+      "kind": "image",
+      "bytes": 29880,
+      "sha256": "51ab9a48552444f85d16219d8601f26aaeeaed1b936b6ed4e7d52d9ab347ab49",
+      "sourceSha256": "7571bcc32216bed8210cef88520179d3d9da658c8708d8e319cf53dceb7b55de",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/1cfbfb2e-bb9c-4142-bc09-7d6294cedd3f.webp",
+      "kind": "image",
+      "bytes": 22066,
+      "sha256": "e5f8d1b6d523dd1e370c65c8e09786d09fdf7cd3688759592933fcc121e81cf7",
+      "sourceSha256": "215d817a0e6c2f8897fcb98521f5b79196c73027e7824ab2575ee9960f31a353",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/82bf3201-d094-4511-aa7d-58b950580996.webp",
+      "kind": "image",
+      "bytes": 36502,
+      "sha256": "2a323c4ac4434d7b058ed6c4cde4d9c957936b943a73e271c229a87819ba07fa",
+      "sourceSha256": "a8ac468ca0cd4245b8947db07071c541435840fd9368295817e373eddeeee67f",
+      "width": 1600,
+      "height": 667
+    },
+    {
+      "path": "media/refs/6a525369-1df1-4883-ad37-d623f9ae39c9.webp",
+      "kind": "image",
+      "bytes": 98560,
+      "sha256": "3e807f975429456c11c10028702b615dd7997f05a5e71f788bb45e4a5a3d835f",
+      "sourceSha256": "67e52485cae54a6b31f7c807b3e028aa9f90b1fb68371fb60e5220a17984bf27",
+      "width": 1184,
+      "height": 880
+    },
+    {
+      "path": "media/refs/67dba558-2aea-4d77-a2fb-5490d2213022.webp",
+      "kind": "image",
+      "bytes": 81912,
+      "sha256": "e67cf25d227df44fdeaaa2cb1815e27599d7782a09c1cffddabd86e88a2dcdda",
+      "sourceSha256": "b2500757e39813cadb481dceb080e16ec5a13138084740922a911927a2c54870",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/f6fad414-8bf1-4d11-9f0d-710850141aa5.webp",
+      "kind": "image",
+      "bytes": 76076,
+      "sha256": "4d05163481ea4a5e81626e7a6a221e8b64723f85e88380000c5f8c66b8483fc0",
+      "sourceSha256": "2c6d384b575a41370a9a071353a0ec799a9c57b26dcdb2f71f6546dd2edd9f56",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/ba9a5d73-8304-46e0-bde3-24bc3b9efc80.webp",
+      "kind": "image",
+      "bytes": 83744,
+      "sha256": "2221f1c5d050557ddeea6cc15fda64f4589fbeca38c0ff6217c7f7b8b85ddb84",
+      "sourceSha256": "0c7fe3e70f365922f2ef902a412292eb0a3059815c442b89e3c42917f2a2dff7",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/abd804ae-5282-4345-bc07-616ba65dbfc9.webp",
+      "kind": "image",
+      "bytes": 70330,
+      "sha256": "84bdd6a464ca587bf75adbabbb239ccaf11368c87739e5a2573ea8a1abf53011",
+      "sourceSha256": "c5a3c9409dc77fb039f018f4589854241885bcafe13a7e90c8ff5eac77b42dde",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/a5431a78-accc-4bdb-863d-fc14c8149856.webp",
+      "kind": "image",
+      "bytes": 49450,
+      "sha256": "5bfec8b952d4cdee3c5c4d7317ebce5a7e749856fc49edc1bb8dccd7223ee55e",
+      "sourceSha256": "feb42f2d78807905629b710b97ea20a707b967728c39a5692175b711152d37ab",
+      "width": 1600,
+      "height": 479
+    },
+    {
+      "path": "media/refs/70c992c1-d32d-4f72-b005-75c2f1508564.webp",
+      "kind": "image",
+      "bytes": 89990,
+      "sha256": "011621f7cad55ddc90f5b32a638a7aba810d47a472804ecb1824997ff0116ccd",
+      "sourceSha256": "530c11b42bffba35f40aa4c5c814efa0e577843b166514162ee8afa358128e44",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/assets/02c2d4ca-0757-4e0f-8a97-d05775d4c747.mp4",
+      "kind": "video",
+      "bytes": 1134831,
+      "sha256": "936ee9bc2a706e4e223ec9609737a5a691520e86d8543d1044131d55689632aa",
+      "sourceSha256": "1eaca31bde81d37a385b34cde1de769f99c2aac539cf5ca4d659fa804dbcdab1",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/b0d8ceda-828f-4770-a0de-b358d2982789.mp4",
+      "kind": "video",
+      "bytes": 1461886,
+      "sha256": "0c1da9d7b81ac1b62fb6d8e58c83f062d90d2e034b7f93554e263867b8933269",
+      "sourceSha256": "9c241afe48d0ea8853b15e63fbafa12aebb2fdbbb66cda0c57bbda5643782f05",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 121,
+      "duration": 5.042
+    },
+    {
+      "path": "media/refs/8a719256-c46e-4833-b6a0-37ae0eb91fdf.webp",
+      "kind": "image",
+      "bytes": 70492,
+      "sha256": "20398311a0d2fd0c5919623fcfc9dc9569634211d1a44a0ad7255d754c818f7f",
+      "sourceSha256": "4aa84c3f4e9266a848765d3ecbad281124a4d96ec71a6dc7b3c68a46ab1de00e",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/assets/0ae71643-16f5-4b7a-b84f-5beddef01b1b.mp4",
+      "kind": "video",
+      "bytes": 1002370,
+      "sha256": "e721841bcb3e65d84635019f542cd0407e1e78c00f6c4aee2b4a378a332e079a",
+      "sourceSha256": "b0bc7878f6846eb89daf9722a42638242aee2319979070d3af4bfb7ab2be2eb8",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/b59ed1dd-2ccc-40b1-8daf-113266bcdc09.mp4",
+      "kind": "video",
+      "bytes": 1376108,
+      "sha256": "b0bd546ef4c4f196ce8d8f52d43faa3c0d2ef51e4ea2c42b0c92323cc32bb4c5",
+      "sourceSha256": "25e1d9044c8c1e4a71ef5aa25cb62c5312b5e39b05ba402a0e3f72b3935103fa",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 121,
+      "duration": 5.042
+    },
+    {
+      "path": "media/refs/d0177bfd-0e15-4eeb-b1e8-91a08760f1b2.webp",
+      "kind": "image",
+      "bytes": 193128,
+      "sha256": "66c83fb3d53595403cc81da8d6da58f60017163f2bc19b5c62e62e902ccf7501",
+      "sourceSha256": "108938c498222d373e2f8e41cebd67d47165f26378f6b8c94bec87ec3738453d",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/10ff2446-6e1d-4ad6-a553-66cc8ed1e7b1.mp4",
+      "kind": "video",
+      "bytes": 1076020,
+      "sha256": "a3a65fb53180f306b98dd38e75a76681d63343f4dbfa3f724220fbcc91387951",
+      "sourceSha256": "7e0ebaa21affc6d137e6d273c5cc410efb94bd8b8e50089c242ba53bae4d2cde",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/ae75dc86-eeaf-4d2b-b66c-97ef9403e70b.mp4",
+      "kind": "video",
+      "bytes": 1252307,
+      "sha256": "e4cfaf406650637b9407ad854a5b6517b4d89bb6665a60b1dd67235ae96a8472",
+      "sourceSha256": "aa98d1f57e5a9f8e8d09d47af3d1beaf30796dbb3da3d54f52bd87354a81a202",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 121,
+      "duration": 5.042
+    }
+  ],
+  "assets": [
+    {
+      "id": "02c2d4ca-0757-4e0f-8a97-d05775d4c747",
+      "kind": "camera-render",
+      "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "file": "assets/02c2d4ca-0757-4e0f-8a97-d05775d4c747.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-10-30T15:14:33.778Z",
+      "source": {
+        "engineShotId": null
+      }
+    },
+    {
+      "id": "b0d8ceda-828f-4770-a0de-b358d2982789",
+      "kind": "workflow-result",
+      "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "file": "assets/b0d8ceda-828f-4770-a0de-b358d2982789.mp4",
+      "mime": "video/mp4",
+      "duration": 5.041667,
+      "createdAt": "2026-10-30T17:51:35.562Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Wide arena shot as Comfy guard sprints the ball up the court on a fast break, Comfy wing and Comfy center filling the lanes, the rival defenders backpedalling, the crowd on its feet. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in b"
+      }
+    },
+    {
+      "id": "0ae71643-16f5-4b7a-b84f-5beddef01b1b",
+      "kind": "camera-render",
+      "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
+      "file": "assets/0ae71643-16f5-4b7a-b84f-5beddef01b1b.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-10-30T15:14:35.413Z",
+      "source": {
+        "engineShotId": null
+      }
+    },
+    {
+      "id": "b59ed1dd-2ccc-40b1-8daf-113266bcdc09",
+      "kind": "workflow-result",
+      "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
+      "file": "assets/b59ed1dd-2ccc-40b1-8daf-113266bcdc09.mp4",
+      "mime": "video/mp4",
+      "duration": 5.041667,
+      "createdAt": "2026-10-30T19:26:30.403Z",
+      "source": {
+        "workflow": "LTX 2.5 Pro · animate the key frame",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Tracking alongside Comfy guard as he drives baseline past Rival defender. Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers. Clear glass backboard with a white border. Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron.. Look: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups.. Camera: Truck right on Comfy guard, 35mm normal, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 35mm natural."
+      }
+    },
+    {
+      "id": "10ff2446-6e1d-4ad6-a553-66cc8ed1e7b1",
+      "kind": "camera-render",
+      "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
+      "file": "assets/10ff2446-6e1d-4ad6-a553-66cc8ed1e7b1.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-10-30T17:39:02.967Z",
+      "source": {
+        "engineShotId": null
+      }
+    },
+    {
+      "id": "ae75dc86-eeaf-4d2b-b66c-97ef9403e70b",
+      "kind": "workflow-result",
+      "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
+      "file": "assets/ae75dc86-eeaf-4d2b-b66c-97ef9403e70b.mp4",
+      "mime": "video/mp4",
+      "duration": 5.041667,
+      "createdAt": "2026-10-30T19:53:46.234Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Low angle under the rim: the Comfy guard explodes upward and throws down a two-handed dunk over the rival defender, the net snaps, the camera cranes up with him, the arena erupts. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7. Orange leather basketball. Clear glass backboard, orange breakaway rim with a white net. Setting: a packed indoor basketball arena at night, only two teams on the court, blue-and-yellow versus black-and-neon-green. Look: photoreal live-action sports broadcast, crisp arena light, fast shutter. Camera: crane up from a low angle under the rim, 14mm ultra-wide, speed ramp into the dunk, 5s. Follow the supplied camera motion exactly."
       }
     }
   ],
-  "media": []
+  "edit": {
+    "clips": [
+      {
+        "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+        "assetId": "b0d8ceda-828f-4770-a0de-b358d2982789",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
+        "assetId": "b59ed1dd-2ccc-40b1-8daf-113266bcdc09",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
+        "assetId": "ae75dc86-eeaf-4d2b-b66c-97ef9403e70b",
+        "in": 0,
+        "out": null
+      }
+    ]
+  }
 }
