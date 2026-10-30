@@ -1,5 +1,5 @@
 import './director.css';
-import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf } from '../shared/director.mjs';
+import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf, keyStills } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
 import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge } from './director-common';
 import type { Connect } from './director-common';
@@ -31,6 +31,7 @@ import { initMobile } from './director-mobile'; // [mobile]
 import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY, moments, useTakeEntry, keyFrameCopy } from './director-desktop-core';
 import type { ShotPips } from './director-desktop-core';
 import { VIDEO_PRICES } from '../shared/tiers.mjs';
+import { cameraSourceOf, CAMERA_SOURCE_LABELS } from '../shared/camera-source.mjs';
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -719,11 +720,12 @@ function modelBlock(s: Shot) {
   const pick = h('select', { class: 'field vm-pick', 'aria-label': 'Video model for this shot' }, ...choices.map((d: any) => h('option', { value: d.id, selected: d.id === def.id }, modelLabel(d))));
   pick.onchange = () => { localStorage.setItem(modelKey(s), pick.value); shotPane.dataset.shot = ''; renderShotPane(); };
   const cap = referenceCapacity(st as any, def.id), refs = cap ? plannedReferences(project, s, st as any, def.id) : [];
+  const cam = cameraSourceOf(def), ks = keyStills(s);
   const usesClip = def.task === 'transform-video' || def.task === 'control-video';
   const usesFrames = def.task === 'first-frame', twoFrames = usesFrames && !!def.inputs?.lastFrame;
   const frames = s.references.filter(r => r.role === 'frame');
   const hasStart = frames.some(r => r.note === 'key frame start' || !r.note), hasEnd = frames.some(r => r.note === 'key frame end');
-  const maxLen = def.constraints?.promptMaxLength as number | undefined, promptLen = shotPrompt(project, s, 'video').length;
+  const maxLen = def.constraints?.promptMaxLength as number | undefined, promptLen = shotPrompt(project, s, 'video', { cameraSource: cameraSourceOf(def) }).length;
   const stale = s.render && s.render.signature && s.render.signature !== signature(project, s);
   const rate = def.pricing?.ratePerSecond as number | undefined, secs = clipSeconds(def, s), lengths = clipLengths(def);
   const fallback = twoFrames ? choices.find((d: any) => d.id === startOnlyFallback(def)) : null;
@@ -734,11 +736,22 @@ function modelBlock(s: Shot) {
   return h('div', { class: 'block vm' },
     h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted', style: 'font-size:11.5px' }, rate ? `≈ $${(rate * secs).toFixed(2)} for ${secs}s` : 'Cost shown at quote')),
     pick,
+    h('div', { class: 'vm-camsrc' + (cam === 'blockout' ? ' ok' : ' warn'), title: cam === 'blockout' ? 'The model follows the blockout clip: your camera move is the camera.' : cam === 'keyframes' ? 'The model moves between the start and end stills made from the blockout’s first and last frames; the move in between is its guess.' : 'The model animates one still; it never sees your camera move.' }, CAMERA_SOURCE_LABELS[cam]),
     def.description ? h('p', { class: 'note vm-desc', title: def.description }, def.description) : null,
+    // What goes in, in order: the camera (blockout clip, or the stills standing in for it), the look, then the cast.
+    h('div', { class: 'vm-row', role: 'list', 'aria-label': 'Model inputs' },
+      h('div', { class: 'vm-in' + (cam === 'blockout' ? (s.render && !stale ? ' ok' : ' warn') : ' off'), role: 'listitem', title: cam === 'blockout' ? (s.render ? (stale ? 'The scene changed since; a new blockout is made when you generate' : 'Your camera move, sent as the video input') : 'Made from your camera when you generate') : 'Not used by this model' },
+        cam === 'blockout' && s.render ? h('video', { src: `/assets/${s.render.assetId}.mp4#t=0.1`, muted: true, playsinline: true, preload: 'metadata', 'aria-hidden': 'true' }) : h('span', { class: 'vm-ph' }),
+        h('small', {}, cam === 'blockout' ? 'Camera · blockout' : 'Blockout · not used')),
+      ...([['start', ks.start], ['end', ks.end]] as const).filter(([k, r]) => r || k === 'start' || twoFrames).map(([k, r]) => h('div', { class: 'vm-in' + (r ? ' ok' : ' warn'), role: 'listitem', title: r ? `${k === 'start' ? 'Start' : 'End'} still: ${r.name}` : `No ${k} still yet: add one in the Storyboard` },
+        r ? h('img', { src: refUrl(r), alt: '' }) : h('span', { class: 'vm-ph' }), h('small', {}, `${cam === 'blockout' ? 'Look' : 'Camera + look'} · ${k}`))),
+      cap ? h('div', { class: 'vm-in' + (refs.some(r => r.role !== 'frame') ? ' ok' : ''), role: 'listitem', title: `${refs.filter(r => r.role !== 'frame').length} cast image(s) of up to ${cap} images` }, h('b', {}, String(refs.filter(r => r.role !== 'frame').length)), h('small', {}, 'Cast refs')) : null),
     h('div', { class: 'vm-inputs' },
       h('div', { class: 'vm-head' }, 'What this model takes'), modelInputsDiagram(def.task, { twoFrames, castImages: refs.length }),
       slot(!maxLen || promptLen <= maxLen, 'Text prompt', maxLen ? h('span', {}, `${promptLen.toLocaleString()} / ${maxLen.toLocaleString()} characters`, promptLen > maxLen ? h('b', { class: 'vm-over' }, ' · will be cut') : '') : `${promptLen.toLocaleString()} characters`),
-      usesClip ? slot(s.render ? !stale : false, 'Blockout video', s.render ? (stale ? 'The scene changed since · a new blockout is made when you generate' : `Your camera move · ${s.render.duration}s, ${s.render.frameCount} frames`) : 'Made from your camera when you generate') : slot(null, 'Blockout video', 'Not used · describe the motion in the prompt'),
+      usesClip ? slot(s.render ? !stale : false, 'Blockout video', s.render ? (stale ? 'The scene changed since · a new blockout is made when you generate' : `Your camera move · ${s.render.duration}s, ${s.render.frameCount} frames`) : 'Made from your camera when you generate')
+        : cam === 'keyframes' ? slot(null, 'Blockout video', 'Not sent · the start and end stills from its first and last frames stand in (approximate)')
+        : slot(false, 'Blockout video', 'Not used · this model guesses the camera from one still; pick a blockout model to keep your move'),
       usesFrames ? slot(hasStart, twoFrames ? 'Start frame' : 'First frame', hasStart ? 'Start still ready (Storyboard)' : 'Add a Start still in the Storyboard below') : null,
       twoFrames ? (fallback ? slot(hasEnd || null, 'End frame (optional)', hasEnd ? 'End still ready (Storyboard)' : `Optional · without an End still, ${fallback.title.split(' ·')[0]} animates the start still alone`)
         : slot(hasEnd, 'End frame', hasEnd ? 'End still ready (Storyboard)' : 'Add an End still in the Storyboard below')) : null,
@@ -862,7 +875,7 @@ function renderShotPane() {
   const refsGrid = h('div', { class: 'refs' }, ...s.references.map(r => refCard(s, r)));
   const drop = h('label', { class: 'dropzone' }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => { const files = Array.from((ev.target as HTMLInputElement).files || []); void uploadRefs(files, null); } }), 'Drop images here or click to add references for this shot');
   dropTarget(drop, files => uploadRefs(files, null));
-  const ctx = { project: () => project, runEntry: (e: any) => runEntry(e as any), select: (id: string) => { select(id); openObject(); }, refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); } };
+  const ctx = { project: () => project, runEntry: (e: any) => runEntry(e as any), select: (id: string) => { select(id); openObject(); }, refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); }, cameraSource: (x: Shot) => (genCache ? cameraSourceOf(shotModel(x)) : 'blockout' as const) };
   const rows = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const blockoutInfo = rendered ? h('details', { class: 'facts-more' },
     h('summary', {}, h('span', { class: 'info-i', 'aria-hidden': 'true' }, 'i'), 'Blockout clip', stale ? h('span', { class: 'fm-warn' }, ' · scene changed since') : h('span', { class: 'fm-ok' }, ' · up to date')),

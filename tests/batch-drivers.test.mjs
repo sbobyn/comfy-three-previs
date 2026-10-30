@@ -188,6 +188,30 @@ test('video: LTX start→end falls back to start-only without an end still; pres
   } finally { await m.close(); }
 });
 
+test('video: a blockout-driven model binds the blockout clip, leads the references with the stills and names no move', async () => {
+  const refs = [{ label: 'start still', role: 'frame', renderId: 'r-start', referenceId: 'x1' }, { label: 'Bald eagle', role: 'character', renderId: 'r-eagle', referenceId: 'x2' }];
+  const m = await mockServer({ on: { 'POST /api/director/video-refs': () => ({ references: refs }) } }), d = loopbackDrivers(m.base);
+  try {
+    const ctx = ctxFor(m, { id: `video:${dive.id}`, type: 'video', model: 'kling-o1-edit-v1', estimateUsd: 0.63, target: { shotId: dive.id } });
+    await d.video.submit(ctx);
+    assert.equal(m.calls('POST /api/director/video-refs')[0].body.stills, true, 'start/end stills requested as the look');
+    const bind = m.calls('POST /api/generation/bind').at(-1).body;
+    assert.deepEqual(bind.assetBindings, { sourceVideo: { assetId: dive.render.assetId }, referenceImage1: { renderId: 'r-start' }, referenceImage2: { renderId: 'r-eagle' } });
+    assert.match(bind.prompt, /Follow the camera motion and framing of the blockout video exactly; it is the camera\./);
+    assert.ok(!/Custom keys|eye level|FPV drone chase/.test(bind.prompt), 'no camera move in the prompt');
+    assert.equal(ctx.node.cameraSource, 'blockout');
+
+    // A blockout older than the shot is never sent: nothing is bound.
+    const stale = await mockServer(), before = stale.project.shots.find(s => s.id === dive.id);
+    before.render = { ...before.render, signature: 'not-this-shot' };
+    try {
+      const c2 = ctxFor(stale, { id: `video:${dive.id}`, type: 'video', model: 'kling-o1-edit-v1', estimateUsd: 0.63, target: { shotId: dive.id } });
+      await assert.rejects(loopbackDrivers(stale.base).video.submit(c2), e => e.notDispatched && /make the blockout again/.test(e.message));
+      assert.equal(stale.calls('POST /api/generation/bind').length, 0);
+    } finally { await stale.close(); }
+  } finally { await m.close(); }
+});
+
 test('sheet: every view quoted and listed on the object first; refused views are marked; compose only when every view landed', async () => {
   let refuse = 1;
   const m = await mockServer({ on: { 'POST /api/director/refgen/submit': (b, { refgen }) => { if (refgen.get(b.requestId).body.sheet.slotId && refuse-- > 0) return Promise.reject([400, { error: 'Explicit approval must match the current quote fingerprint' }]); } } });

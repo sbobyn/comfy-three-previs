@@ -1,5 +1,6 @@
 // Contract C2: server-side blockout, frame and sheet rendering through the headless page pool (headless.mjs).
 import { opQuery, unavailable } from './headless.mjs';
+import { blockoutStale } from '../../shared/director.mjs';
 
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
 const ROUTES = new Set(['/api/director/render-blockout', '/api/director/frame', '/api/director/sheet/compose', '/api/director/headless']);
@@ -31,7 +32,8 @@ export function renderRoutes({ director, headless }) {
       return headless.run(opQuery('frame', { project: p.id, shot: s.id, t, width, height, type, ...(input.guide === true ? { guide: 1 } : {}) }));
     }
     // render-blockout
-    if (s.render && input.force !== true) return { skipped: true, previsShotId: s.render.previsShotId, asset: pickAsset((p.assets || []).find(a => a.id === s.render.assetId)) || { id: s.render.assetId, width: s.render.width, height: s.render.height, fps: 24, frameCount: s.render.frameCount, duration: s.render.duration } };
+    // A stale blockout (the camera, timing or scene changed since) is made again: it is the camera every video follows.
+    if (s.render && input.force !== true && !blockoutStale(p, s)) return { skipped: true, previsShotId: s.render.previsShotId, asset: pickAsset((p.assets || []).find(a => a.id === s.render.assetId)) || { id: s.render.assetId, width: s.render.width, height: s.render.height, fps: 24, frameCount: s.render.frameCount, duration: s.render.duration } };
     if (!headless.enabled) unavailable(headless.reason);
     return oneAtATime(async () => {
       const run = () => headless.run(opQuery('blockout', { project: p.id, shot: s.id, width, height }));
