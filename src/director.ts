@@ -23,6 +23,7 @@ import type { UndoEntry, ModalMode } from '../shared/editor-controls.mjs';
 import { openJourney } from './director-guide';
 import { initSheets, sheetSection } from './director-sheet'; // [designsheet]
 import { moveHelp } from './director-camhelp'; // [camhelp]
+import { mountJobsPip } from './director-jobs'; // [jobs]
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -351,6 +352,7 @@ const undoStack = new UndoStack();
 // [agent] Built-in agent UI: live stream, proposal cards, prompt actions. Undo entries land on the same stack.
 initSheets({ projectId, project: () => project, apply: p => apply(p), refgen: () => refgen, loadRefgen: () => loadRefgen() }); // [designsheet]
 const agentUi = createAgentUi({ projectId, project: () => project, apply: p => apply(p), runEntry: e => runEntry(e), pushUndo: e => { undoStack.push(e); renderUndo(); }, refresh: () => pollNow(), resend: (text, sid) => { textarea.value = text; if (sid) shotId = sid; void send(); }, selectShot: id => { selectShot(id); setTab('shot'); } });
+mountJobsPip(top.querySelector<HTMLElement>('.right')!, { projectId, api, shots: () => project.shots, onOpenShot: id => { selectShot(id); setStep('shoot'); } }); // [jobs] status-bar pip + panel
 selection.subscribe(sel => { selected = sel.primary; viewport.classList.toggle('has-sel', sel.ids.length > 0); scene.setSelection(sel.ids, sel.primary); scene.setOutlineColor(colorOf(sel.primary)); renderOutline(); renderInspector(); renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); renderKeyTrack(); });
 
 // ---------- Rendering ----------
