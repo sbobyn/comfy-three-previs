@@ -7,7 +7,7 @@ const source = await readFile(new URL('../src/director-jobs.ts', import.meta.url
 const a = source.indexOf('// ---- pure helpers'), b = source.indexOf('// ---- end pure helpers');
 const exports = {};
 runInNewContext(ts.transpileModule(source.slice(a, b), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText, { exports, Date, Set, Math, String, Object });
-const { pipState, groupJobs, settledState, batchCounts, needsAttention, dur } = exports;
+const { pipState, groupJobs, settledState, batchCounts, needsAttention, dur, shownBatches } = exports;
 const { jobs } = JSON.parse(await readFile(new URL('./fixtures/jobs.json', import.meta.url), 'utf8'));
 const { batches } = JSON.parse(await readFile(new URL('./fixtures/batches.json', import.meta.url), 'utf8'));
 const byStatus = s => jobs.find(j => j.status === s);
@@ -64,4 +64,11 @@ test('the pip in a project reads only that project\'s jobs; home shows the globa
   const home = await readFile(new URL('../src/director-home.ts', import.meta.url), 'utf8'), director = await readFile(new URL('../src/director.ts', import.meta.url), 'utf8');
   assert.match(home, /mountJobsPip\(jobsHost, \{ projectId: '', api \}\)/);
   assert.match(director, /mountJobsPip\([^;]*\{ projectId, api/);
+});
+
+test('batches: a dry-run plan never lights the pip or lists in Jobs; failed and recent finished batches do', () => {
+  const at = Date.parse('2026-10-30T12:00:00Z'), b = (id, status, hoursAgo = 1) => ({ ...batches[0], id, status, updatedAt: new Date(at - hoursAgo * 3600e3).toISOString() });
+  assert.equal(pipState([], [b('plan', 'planned')]), null);
+  const list = [b('plan', 'planned'), b('done1', 'completed'), b('run', 'running'), b('bad', 'failed', 30), b('done2', 'cancelled'), b('old', 'completed', 30), b('done3', 'completed'), b('done4', 'completed')];
+  assert.deepEqual([...shownBatches(list, at).map(x => x.id)], ['run', 'bad', 'done1', 'done2', 'done3']);
 });

@@ -25,7 +25,12 @@ const DONE = new Set(['completed', 'failed', 'closed', 'invalidated', 'cancelled
 export const isActive = (j: JobRow) => !DONE.has(j.status);
 /** Red: stuck, uncertain, or running past twice the expected time. */
 export const needsAttention = (j: JobRow) => isActive(j) && (j.stuck || j.uncertain || j.status === 'uncertain' || (j.expectedSeconds > 0 && j.ageSeconds > 2 * j.expectedSeconds));
-export const batchLive = (b: BatchSummary) => b.status === 'running' || b.status === 'planned' || b.status === 'paused';
+export const batchLive = (b: BatchSummary) => b.status === 'running' || b.status === 'paused';
+/** The panel's batches: live ones, failed ones, then up to 3 finished in the last day. A dry-run plan is not work: never shown. */
+export function shownBatches(batches: BatchSummary[], now = Date.now()) {
+  const recent = batches.filter(b => !batchLive(b) && b.status !== 'failed' && b.status !== 'planned' && now - Date.parse(b.updatedAt || b.createdAt) < 864e5).slice(0, 3);
+  return [...batches.filter(batchLive), ...batches.filter(b => b.status === 'failed'), ...recent];
+}
 export function batchCounts(b: BatchSummary) {
   const c = b.counts || (b.nodes || []).reduce<Record<string, number>>((m, n) => ({ ...m, [n.status]: (m[n.status] || 0) + 1 }), {});
   const total = Object.values(c).reduce((a, n) => a + n, 0);
@@ -132,7 +137,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
       render();
     } finally { inflight = false; }
   }
-  function busyNow() { return snap.jobs.some(isActive) || batches.some(b => b.status === 'running' || b.status === 'planned'); }
+  function busyNow() { return snap.jobs.some(isActive) || batches.some(b => b.status === 'running'); }
   function schedule() {
     clearTimeout(timer);
     if (document.hidden || (!jobsOk && !batchesOk)) return;
@@ -232,7 +237,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
   function batchRow(b: BatchSummary) {
     const c = batchCounts(b), pct = (n: number) => (c.total ? (n / c.total) * 100 : 0);
     const canCancel = batchLive(b), canResume = b.status === 'paused' || b.status === 'failed';
-    const tone = b.status === 'failed' ? 'bad' : b.status === 'paused' ? 'warn' : b.status === 'running' || b.status === 'planned' ? 'run' : b.status === 'completed' ? 'ok' : 'muted';
+    const tone = b.status === 'failed' ? 'bad' : b.status === 'paused' ? 'warn' : b.status === 'running' ? 'run' : b.status === 'completed' ? 'ok' : 'muted';
     const cb = busy.has(`cancel:${b.id}`), rb = busy.has(`resume:${b.id}`);
     return h('li', { class: `jr batch t-${tone}` },
       h('span', { class: 'jr-kind' }, icon('batch')),
@@ -260,8 +265,8 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     const slots = Object.entries(snap.limits || {}).filter(([, v]) => v && v.limit > 0).map(([k, v]) =>
       h('span', { class: 'js-slot', title: `${SLOT_NAMES[k] || k}: ${v.active} of ${v.limit} slots in use` }, h('span', { class: 'js-slot-name' }, SLOT_NAMES[k] || k),
         h('span', { class: 'js-pips', 'aria-hidden': 'true' }, ...Array.from({ length: Math.min(v.limit, 8) }, (_, i) => h('i', { class: i < v.active ? 'on' : '' })))));
-    const liveBatches = batches.filter(batchLive), doneBatches = batches.filter(b => !batchLive(b)).slice(0, 3);
-    const nothing = !snap.jobs.length && !batches.length;
+    const listed = shownBatches(batches, fetchedAt);
+    const nothing = !snap.jobs.length && !listed.length;
     const sub = !jobsOk ? 'Job tracking is not available on this server yet.' : g.attention.length ? `${g.attention.length} need${g.attention.length === 1 ? 's' : ''} attention` : g.running.length ? `${g.running.length} running` : 'Nothing running';
     sheet.replaceChildren(
       h('header', { class: 'js-head' },
@@ -271,7 +276,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
       h('div', { class: 'js-body' },
         section('Needs attention', 'bad', g.attention.map(jobRow)),
         section('Running', 'run', g.running.map(jobRow)),
-        section('Batches', 'batches', [...liveBatches, ...doneBatches].map(batchRow)),
+        section('Batches', 'batches', listed.map(batchRow)),
         section('Recent', 'recent', g.recent.map(jobRow)),
         nothing ? h('div', { class: 'js-idle' }, h('span', { class: 'js-idle-mark', 'aria-hidden': 'true' }), h('p', {}, 'No generation jobs yet. Images and videos you generate show up here while they run.')) : null),
       h('footer', { class: 'js-foot' }, !jobsOk ? 'Waiting for the job tracker' : `${snap.tracker.running ? 'Tracker on' : 'Tracker paused'} · refreshes every ${busyNow() ? 4 : 20} s`));
