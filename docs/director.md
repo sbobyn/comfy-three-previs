@@ -72,7 +72,7 @@ The prompt numbers them ("Runner — looks exactly like reference image 1"). Kli
 
 ## 6. Render and hand off
 
-**Render shot →** renders each frame through the shot camera at 24 fps (1280×720 or 640×360) and saves the video into the project. Edit the compiled prompt if you like, then **Open in Comfy workflow →**. That page has the video and prompt preselected. Choose a workflow and backend there; it quotes and asks for approval before anything runs.
+**Render blockout…** (it becomes **Generate video ▸** once the blockout is current), in the action bar pinned to the bottom of the right panel next to **▶ Preview**, renders each frame through the shot camera at 24 fps (1280×720 or 640×360) and saves the video into the project. Edit the compiled prompt if you like, then **Open in Comfy workflow →**. That page has the video and prompt preselected. Choose a workflow and backend there; it quotes and asks for approval before anything runs.
 
 Workflow results come back automatically. They appear under **Workflow results** in the shot's Shot tab and in **Assets**.
 
