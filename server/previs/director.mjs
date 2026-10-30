@@ -12,7 +12,8 @@ import { atomicJson } from './atomic.mjs';
 import { interpret } from './director-parse.mjs';
 import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
 import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
-import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
+import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, keyStills, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
+import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
 import { loadStarters, starterCard, instantiateStarter } from './starters.mjs';
 
@@ -506,7 +507,7 @@ export async function openDirector(root, options = {}) {
           const file = `assets/${r.id}.${EXT[r.mime]}`;
           await mkdir(join(dir, p.id, 'assets'), { recursive: true });
           await saveResultBytes(join(dir, p.id, file), bytes);
-          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null } });
+          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, cameraSource: job.cameraSource || cameraSourceOf(job.definition, job.binding?.assetBindings), prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null } });
           known.add(r.id); added++;
         }
       }
@@ -675,11 +676,9 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
         if (!engineShot || engineShot.browser?.director?.shotId !== s.id) fail('Render this shot’s blockout first');
         const references = [];
         // First-frame workflows take one image: the shot's newest key frame.
-        const frames = s.references.filter(r => r.role === 'frame');
-        const startFrame = frames.filter(r => r.note === 'key frame start').at(-1) || frames.filter(r => !r.note).at(-1) || frames.filter(r => r.note !== 'key frame end').at(0);
-        const endFrame = frames.filter(r => r.note === 'key frame end').at(-1);
-        // keyFrames: [start, end?] for first/last-frame workflows.
-        const picks = input.firstFrame ? [startFrame && { ref: startFrame, entityId: null, role: 'frame', label: 'start key frame' }, input.lastFrame && endFrame && { ref: endFrame, entityId: null, role: 'frame', label: 'end key frame' }].filter(Boolean) : videoReferences(p, s, max);
+        const { start: startFrame, end: endFrame } = keyStills(s);
+        // keyFrames: [start, end?] for first/last-frame workflows. `stills`: blockout-driven models get the start/end stills first, as the look.
+        const picks = input.firstFrame ? [startFrame && { ref: startFrame, entityId: null, role: 'frame', label: 'start key frame' }, input.lastFrame && endFrame && { ref: endFrame, entityId: null, role: 'frame', label: 'end key frame' }].filter(Boolean) : videoReferences(p, s, max, { stills: input.stills === true });
         for (const x of picks) {
           const file = await director.refFile(p.id, x.ref.file);
           const bytes = await readFile(file), sha256 = createHash('sha256').update(bytes).digest('hex');

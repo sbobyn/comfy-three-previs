@@ -3,6 +3,7 @@ import { join, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { RECOVERY_ATTEMPTS, recoveryAttempts, beginRecovery, recoveryId, saveResultBytes } from './result-recovery.mjs';
 import { atomicJson } from './atomic.mjs';
+import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { createBackend, backendSnapshot, safeMediaLocation, errorDetail } from './backends.mjs';
 import { telemetryHooks } from './job-progress.mjs';
 import { slotsFor } from './concurrency.mjs';
@@ -187,7 +188,7 @@ export async function openGeneration(root, project, options = {}) {
     if (definition.constraints.timingChange && binding.acceptTimingChange !== true) validation.issues.push({code:'timing-review',message:'Explicit timing/framing acknowledgment required: '+definition.constraints.timingChange});
     validation.compatible = !validation.issues.length;
     const quote = workflowCost(graph, inspected.objectInfo, selection);
-    const context = { requestId: identity(input), projectId: p.id, shotId: shot.id, shot, workflowBindingId: binding.id, binding, definition, definitionHash: definition.definitionHash, graphHash: definition.graphHash, preparedGraph: graph, sources, references: p.references || [], backend: selection, schemaHash: validation.schemaHash, quote };
+    const context = { requestId: identity(input), projectId: p.id, shotId: shot.id, shot, workflowBindingId: binding.id, binding, cameraSource: cameraSourceOf(definition, assetBindings), definition, definitionHash: definition.definitionHash, graphHash: definition.graphHash, preparedGraph: graph, sources, references: p.references || [], backend: selection, schemaHash: validation.schemaHash, quote };
     assertNoSecrets(context);
     // requestRevision is provenance only; it stays out of the fingerprint.
     return { context: { ...context, requestRevision: Number.isInteger(input.revision) ? input.revision : p.revision }, fingerprint: hashValue(context), validation, adapter, bytes, deferredInputs };

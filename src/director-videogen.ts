@@ -5,7 +5,7 @@ import { compilePrompt, referenceLegend, videoReferences } from '../shared/direc
 import type { DirectorProject, Shot, VideoRef } from '../shared/director.mjs';
 import { withReferenceImages, maxReferences } from '../shared/video-refs.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
-import { cameraSourceOf, withCameraLine } from '../shared/camera-source.mjs';
+import { cameraSourceOf, motionInput, withCameraLine } from '../shared/camera-source.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
 import { api } from './director-common';
 
@@ -24,8 +24,8 @@ function allVideoChoices(st: GenState): Def[] {
 const baseOf = (st: GenState, id: string) => st.presets.find(p => p.id === id) || st.definitions.find(d => d.id === id) || null;
 export const referenceCapacity = (st: GenState, id: string) => { const b = baseOf(st, id); return b ? maxReferences(b) : 0; };
 
-/** Which references a shot would use with this model, before anything is registered. */
-export function plannedReferences(project: DirectorProject, s: Shot, st: GenState, id: string) { return videoReferences(project, s, referenceCapacity(st, id)); }
+/** Which references a shot would use with this model, before anything is registered. A model that follows the blockout clip gets the start/end stills first, as the look. */
+export function plannedReferences(project: DirectorProject, s: Shot, st: GenState, id: string) { return videoReferences(project, s, referenceCapacity(st, id), { stills: cameraSourceOf(baseOf(st, id)) === 'blockout' }); }
 
 /**
  * The prompt a shot uses: compiled with numbered references, or the user's text plus a reference legend.
@@ -58,11 +58,12 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   const base = baseOf(st, o.definitionId);
   if (base?.task === 'first-frame') return prepareFirstFrame(o, base);
   const cap = o.useReferences === false ? 0 : referenceCapacity(st, o.definitionId);
-  const registered: EngineRef[] = cap ? (await api('director/video-refs', { projectId: project.id, shotId: s.id, previsShotId: r.previsShotId, max: cap })).references : [];
+  // The blockout clip is the camera; the start (and end) still lead the reference images as the look, then the cast.
+  const registered: EngineRef[] = cap ? (await api('director/video-refs', { projectId: project.id, shotId: s.id, previsShotId: r.previsShotId, max: cap, stills: cameraSourceOf(base) === 'blockout' })).references : [];
   const all = [...(project.scene.references || []), ...project.shots.flatMap(x => x.references)];
   const refs: VideoRef[] = registered.map(x => ({ ref: all.find(y => y.id === x.referenceId)!, entityId: x.entityId, role: x.role, label: x.label })).filter(x => x.ref);
   const def = await definitionFor(st, o.definitionId, registered.length);
-  const role = def.inputs?.controlVideo ? 'controlVideo' : 'sourceVideo';
+  const role = motionInput(def) || 'sourceVideo';
   const parameters: Record<string, unknown> = {};
   for (const [k, m] of Object.entries(def.parameters || {})) parameters[k] = def.graph?.[m.nodeId]?.inputs?.[m.input];
   const assetBindings: Record<string, unknown> = { [role]: { assetId: r.assetId } };
@@ -77,7 +78,7 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   const job = (await api('generation/quote', request)).job;
   const src = job.sources?.sourceVideo || job.sources?.controlVideo;
   const est = def.pricing?.ratePerSecond && src?.duration ? def.pricing.ratePerSecond * src.duration : null;
-  return { def, job, request, est, refs: registered, prompt };
+  return { def, job, request, est, refs: registered, prompt, cameraSource };
 }
 
 const LTX_DURATIONS = [2, 3, 4, 5, 6, 8, 10];
@@ -107,5 +108,5 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   const request = { requestId: crypto.randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: o.backend || 'cloud' } };
   const job = (await api('generation/quote', request)).job;
   const est = def.pricing?.ratePerSecond ? def.pricing.ratePerSecond * secs : null;
-  return { def, job, request, est, refs: frame, prompt };
+  return { def, job, request, est, refs: frame, prompt, cameraSource };
 }

@@ -5,7 +5,9 @@ import { createProjectDocument } from '../server/previs/director.mjs';
 import { loadStarters } from '../server/previs/starters.mjs';
 import { builtInPresets } from '../server/previs/presets.mjs';
 import { autoPromptText, autoPromptSegments, shotPrompt, shotStyle } from '../shared/prompt.mjs';
-import { compilePrompt, describeCamera, MOVES } from '../shared/director.mjs';
+import { compilePrompt, describeCamera, MOVES, videoReferences, keyStills, blockoutStale, shotSignature } from '../shared/director.mjs';
+import { planBatch } from '../server/previs/batch.mjs';
+import { readFile } from 'node:fs/promises';
 import { CAMERA_LINES, cameraSourceOf, motionInput, withCameraLine } from '../shared/camera-source.mjs';
 
 const SOURCES = ['blockout', 'keyframes', 'still'];
@@ -79,4 +81,31 @@ test('edited prompts keep the user’s words but get the right camera line', asy
   const seg = autoPromptSegments(p, shot, 'video', { cameraSource: 'blockout' }).find(s => s.key === 'camera');
   assert.equal(seg.text, CAMERA_LINES.blockout);
   assert.match(seg.source, /Blockout/);
+});
+
+test('a blockout-driven model gets the start and end stills first, then the cast; other callers are unchanged', async () => {
+  const p = JSON.parse(await readFile(new URL('./fixtures/wingspan-project.json', import.meta.url), 'utf8'));
+  const shot = p.shots[0], ref = (id, note) => ({ id, name: id, file: `${id}.png`, mime: 'image/png', role: 'frame', entityId: null, note, createdAt: '' });
+  shot.references.push(ref('mid', 'key frame @2s'), ref('end', 'key frame end'));
+  const ks = keyStills(shot);
+  assert.equal(ks.end.id, 'end'); assert.equal(ks.start.note, 'key frame start');
+  const led = videoReferences(p, shot, 4, { stills: true });
+  assert.deepEqual(led.slice(0, 2).map(x => x.label), ['start still', 'end still']);
+  assert.ok(led.length <= 4 && led.slice(2).every(x => x.role !== 'frame'), 'the cast follows the stills');
+  const plain = videoReferences(p, shot, 4);
+  assert.ok(plain.every(x => x.label !== 'start still'), 'stills prompts and other callers keep the old order');
+});
+
+test('a stale blockout is planned again; the video waits on the stills it will use as its look', async () => {
+  const p = JSON.parse(await readFile(new URL('./fixtures/wingspan-project.json', import.meta.url), 'utf8'));
+  const [valley, dive] = p.shots;
+  assert.equal(blockoutStale(p, valley), false); assert.equal(valley.render.signature, shotSignature(p, valley));
+  dive.duration += 1; // the camera timing changed after the blockout was made
+  assert.equal(blockoutStale(p, dive), true);
+  const { nodes } = planBatch(p, { steps: ['stills', 'videos'], maxCostUsd: 10, shots: [valley.id, dive.id], models: { videos: 'kling-o1-edit-v1' } });
+  const by = id => nodes.find(n => n.id === id);
+  assert.equal(by(`blockout:${valley.id}`).status, 'skipped');
+  assert.equal(by(`blockout:${dive.id}`).status, 'waiting', 'made again');
+  assert.ok(by(`video:${dive.id}`).deps.includes(`still:${dive.id}start`));
+  assert.ok(by(`video:${dive.id}`).optional.includes(`still:${dive.id}start`), 'a failed still does not block the video');
 });

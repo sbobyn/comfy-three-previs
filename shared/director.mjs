@@ -296,23 +296,38 @@ export function shotCast(project, shot, { samples = 12, aspect = 16 / 9, minCove
   return entities.filter(e => best.has(e.id)).map(e => ({ entity: e, coverage: Math.min(1, best.get(e.id)) , lead: e.id === shot.camera.target })).sort((a, b) => (b.lead - a.lead) || (b.coverage - a.coverage));
 }
 
+/** Hash of what a blockout clip depends on: same text as src/director-capture.ts shotSignature (tests/headless.test.mjs). */
+export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+/** The shot's blockout clip no longer matches its camera, timing or scene (it is made again before a video uses it). */
+export const blockoutStale = (project, shot) => !!(shot.render && shot.render.signature && shot.render.signature !== shotSignature(project, shot));
+
+/** The shot's chosen start still and end still (its newest key frames), each null when missing. */
+export function keyStills(shot) {
+  const frames = (shot.references || []).filter(r => r.role === 'frame');
+  const start = frames.filter(r => r.note === 'key frame start').at(-1) || frames.filter(r => !r.note).at(-1) || frames.filter(r => r.note !== 'key frame end').at(0) || null;
+  return { start, end: frames.filter(r => r.note === 'key frame end').at(-1) || null };
+}
+
 /**
  * Reference images a shot's video generation should use, in order, capped at `max`:
  * the look of each object in the shot (subject first), then environment references, then style, then key frames.
- * Returns [{ ref, entityId, role, label }].
+ * With `stills` (a model that follows the blockout clip) the start and end stills lead instead, as the look
+ * of the shot, and the cast follows. Returns [{ ref, entityId, role, label }].
  */
-export function videoReferences(project, shot, max = 4) {
+export function videoReferences(project, shot, max = 4, { stills = false } = {}) {
   const cast = shotObjects(project, shot);
   const look = id => objectLooks(project, id)[0] || shot.references.find(r => r.entityId === id && r.role !== 'frame') || null;
   const subjects = cast.filter(c => c.entity.kind !== 'environment').map(c => ({ ref: look(c.entity.id), entityId: c.entity.id, role: c.entity.kind, label: c.entity.name })).filter(x => x.ref);
   const envObjects = cast.filter(c => c.entity.kind === 'environment').map(c => ({ ref: look(c.entity.id), entityId: c.entity.id, role: 'environment', label: c.entity.name })).filter(x => x.ref);
   const envShot = shot.references.filter(r => r.role === 'environment' && !r.entityId).map(r => ({ ref: r, entityId: null, role: 'environment', label: 'environment' }));
   const style = shot.references.filter(r => r.role === 'style').map(r => ({ ref: r, entityId: null, role: 'style', label: 'style' }));
-  const frames = shot.references.filter(r => r.role === 'frame').slice(-1).map(r => ({ ref: r, entityId: null, role: 'frame', label: 'key frame' }));
+  const ks = keyStills(shot);
+  const lead = stills ? [ks.start && { ref: ks.start, entityId: null, role: 'frame', label: 'start still' }, ks.end && ks.end.id !== ks.start?.id && { ref: ks.end, entityId: null, role: 'frame', label: 'end still' }].filter(Boolean) : [];
+  const frames = stills ? [] : shot.references.filter(r => r.role === 'frame').slice(-1).map(r => ({ ref: r, entityId: null, role: 'frame', label: 'key frame' }));
   const env = [...envShot, ...envObjects];
   // Keep a slot for the environment when there is one, so every shot shares the same world.
-  const room = Math.max(0, max - (env.length ? 1 : 0));
-  const out = [...subjects.slice(0, room), ...env, ...style, ...subjects.slice(room), ...frames];
+  const room = Math.max(0, max - lead.length - (env.length ? 1 : 0));
+  const out = [...lead, ...subjects.slice(0, room), ...env, ...style, ...subjects.slice(room), ...frames];
   const seen = new Set();
   return out.filter(x => !seen.has(x.ref.id) && seen.add(x.ref.id)).slice(0, Math.max(0, max));
 }

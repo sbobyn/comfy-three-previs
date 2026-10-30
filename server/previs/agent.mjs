@@ -1,8 +1,8 @@
 import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
 import { autoPromptSegments, autoPromptText, shotPrompt, shotStyle, normalizeStyle, CAMERA_TERMS } from '../../shared/prompt.mjs';
-import { cameraSourceOf } from '../../shared/camera-source.mjs';
-import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, handleOf, videoReferences } from '../../shared/director.mjs';
+import { cameraSourceOf, motionInput } from '../../shared/camera-source.mjs';
+import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, handleOf, videoReferences, blockoutStale } from '../../shared/director.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { setsFor, planSlots, slotAspect, viewPrompt, EXPRESSION_PACKS, INTENSITIES, MAX_SHEET_SLOTS } from '../../shared/sheet-presets.mjs';
 const base = process.env.PREVIS_URL || 'http://127.0.0.1:5190';
@@ -126,11 +126,18 @@ function shotInputs(p, s, d) {
     leftOut: [...withImg.slice(cap).map(r => ({ object: r.entity.name, why: 'over the model’s image limit' })), ...rows.filter(r => !objectLooks(p, r.entity.id).length).map(r => ({ object: r.entity.name, why: 'no image yet' }))],
     estimateUsd: m.costPerSecondUsd ? +(m.costPerSecondUsd * s.duration).toFixed(2) : null };
 }
-async function generateVideo(a) {
+async function generateVideo(a, rendered = false) {
   const p = await project(a.projectId), s = shotOf(p, a.shot), gen = await get('/api/generation'), d = videoDefs(gen).find(x => x.id === a.model);
   if (!d) throw Error(`Unknown video model ${a.model}`);
-  if (!s.render) return { submitted: false, reason: 'The shot’s blockout is not rendered. Render it with previs_director_render_blockout (or ask the user to click Render shot), then call again.' };
-  const m = describeVideoModel(d), r = s.render;
+  const m = describeVideoModel(d);
+  // The blockout clip is the camera: make it (again) when it is missing or the shot changed since.
+  if (!rendered && (!s.render || blockoutStale(p, s))) {
+    try { await post('/api/director/render-blockout', { projectId: p.id, shotId: s.id }); }
+    catch (err) { return { submitted: false, reason: `The shot’s blockout is ${s.render ? 'out of date' : 'not rendered'} and could not be made here (${err.message}). Render it with previs_director_render_blockout (or ask the user to click Make blockout), then call again.` }; }
+    return generateVideo(a, true);
+  }
+  if (!s.render) return { submitted: false, reason: 'The shot’s blockout is not rendered. Render it with previs_director_render_blockout (or ask the user to click Make blockout), then call again.' };
+  const r = s.render;
   let assetBindings = {}, refs = [], parameters = {};
   for (const [k, map] of Object.entries(d.parameters || {})) parameters[k] = d.graph?.[map.nodeId]?.inputs?.[map.input];
   if (d.task === 'first-frame') {
@@ -142,8 +149,9 @@ async function generateVideo(a) {
     if ('duration' in parameters) parameters.duration = String(secs);
   } else {
     const cap = a.useReferences === false ? 0 : m.inputs.referenceImages;
-    refs = cap ? (await post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap })).references : [];
-    assetBindings = { [d.inputs?.controlVideo ? 'controlVideo' : 'sourceVideo']: { assetId: r.assetId }, ...Object.fromEntries(refs.map((x, i) => [`referenceImage${i + 1}`, { renderId: x.renderId }])) };
+    // The start (and end) still lead the reference images as the look of the shot, then the cast.
+    refs = cap ? (await post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap, stills: cameraSourceOf(d) === 'blockout' })).references : [];
+    assetBindings = { [motionInput(d) || 'sourceVideo']: { assetId: r.assetId }, ...Object.fromEntries(refs.map((x, i) => [`referenceImage${i + 1}`, { renderId: x.renderId }])) };
   }
   const cameraSource = cameraSourceOf(d, assetBindings);
   let prompt = shotPrompt(p, s, 'video', { cameraSource }) + (refs.length ? ' ' + refs.map((x, i) => `Image ${i + 1} shows ${x.label}.`).join(' ') : '');
