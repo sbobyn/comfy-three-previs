@@ -1,5 +1,5 @@
-/* Comfy Previs — director workspace and launch page. */
-/* Comfy Previs — Beret Labs theme tokens (warm white + ink).
+/* Comfy Three Previs — director workspace and launch page. */
+/* Comfy Three Previs — Beret Labs theme tokens (warm white + ink).
    One file, no dependencies. Drop-in replacement for the :root block in src/director.css. */
 :root {
   color-scheme: light;
@@ -604,7 +604,7 @@ dialog.editor { width: min(1240px, 97vw); max-height: 94vh; }
 /* ===== Beret Labs theme (design-20261029 quick wins) ===== */
 html, body { background: var(--paper); color: var(--ink); font: var(--fs-md)/var(--lh) var(--font); }
 :focus-visible { outline: none; box-shadow: var(--focus); border-radius: var(--r-xs); }
-/* Comfy Previs — Beret Labs components. Requires tokens.css. Vanilla CSS, no frameworks. */
+/* Comfy Three Previs — Beret Labs components. Requires tokens.css. Vanilla CSS, no frameworks. */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); font: var(--fs-md)/var(--lh) var(--font); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; font-feature-settings: "ss01", "cv11"; }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -1245,6 +1245,7 @@ dialog.claude-help p { margin: 6px 0; line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) { .fly-btn.live .fly-dot { animation: none; } }
 @media (max-width: 1500px) { .transport .movechip { display: none; } }
 @media (max-width: 980px) { .transport .kf-nav .btn:first-child, .transport .kf-nav .btn:last-child { display: none; } .fly-btn { padding: 0 12px; } }
+.fly-btn, .fly-device { flex: none; white-space: nowrap; }
 
 /* Right panel: header with readiness strip; collapsible sections in workflow order. */
 .side-head { height: auto !important; min-height: 44px; flex-wrap: wrap; gap: 6px 8px !important; padding: 8px 12px !important; }
@@ -1303,11 +1304,14 @@ dialog.claude-help p { margin: 6px 0; line-height: 1.5; }
   .shot { grid-template-columns: minmax(0, 1fr); gap: 6px; }
   .shot .shot-frame { width: 100%; height: auto; aspect-ratio: 16 / 9; }
 }
+/* The right panel squeezes the viewport up to ~1400px: show only the device chevron. */
+@media (max-width: 1400px) {
+  .fly-device > span:first-child { display: none; }
+  .fly-device { min-width: 34px; justify-content: center; padding: 0 12px 0 8px; }
+}
 @media (max-width: 1000px) {
   .transport { gap: 6px; padding-inline: 8px; }
   .transport .time { font-size: var(--fs-2xs); min-width: 0; }
-  .fly-device > span:first-child { display: none; }
-  .fly-device { padding: 0 10px 0 8px; }
   .fly-btn { font-size: var(--fs-sm); }
 }
 .toast { bottom: 78px; }
