@@ -1,7 +1,7 @@
 // Headless render worker (render.html, driven by server/previs/headless.mjs). Runs one op from the query string
 // with the same client code the workspace uses, then sets window.__previsResult = { ok, ...payload } | { ok:false, error }.
 //   op=blockout&project&shot&width&height       → { asset, previsShotId }
-//   op=frame&project&shot&t&width&height&type   → { data, mime, width, height }
+//   op=frame&project&shot&t&width&height&type[&guide=1] → { data, mime, width, height } (guide: still-guide look)
 //   op=sheet&project&entity&sheet&options        → { referenceId }
 import { objectLooks } from '../shared/director.mjs';
 import type { DirectorProject, Reference } from '../shared/director.mjs';
@@ -31,7 +31,7 @@ async function run(): Promise<Record<string, unknown>> {
   if (op === 'frame') {
     const t = Number(q.get('t') ?? 0); if (!Number.isFinite(t)) throw Error('Invalid t');
     const width = int('width', 1280), height = int('height', 720), mime = q.get('type') === 'image/jpeg' ? 'image/jpeg' : 'image/png';
-    const url = scene.capture(Math.min(s.duration, Math.max(0, t)), width, height, mime, 0.9);
+    const url = scene.capture(Math.min(s.duration, Math.max(0, t)), width, height, mime, 0.9, { guide: q.get('guide') === '1' });
     return { data: url.split(',')[1], mime, width, height };
   }
   if (op === 'blockout') {

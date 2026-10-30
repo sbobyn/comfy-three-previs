@@ -11,6 +11,7 @@ import { builtInPresets } from './presets.mjs';
 import { castRows, lookSource, objectLooks } from '../../shared/director.mjs';
 import { planSlots } from '../../shared/sheet-presets.mjs';
 import { TIERS, modelsFor, estimateFor, VIDEO_PRICES, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
+import { retryModelFor, WEAK_MATCH } from '../../shared/still-match.mjs';
 
 export const STEPS = ['looks', 'sheets', 'stills', 'videos'];
 const uuid = /^[a-f0-9-]{36}$/;
@@ -49,7 +50,7 @@ export function normalizeInput(input = {}) {
   if (input.maxCostUsd === null || input.maxCostUsd === '' || !Number.isFinite(maxCostUsd) || maxCostUsd < 0) fail('maxCostUsd is required (USD, 0 or more)');
   const stillsAt = input.stillsAt == null ? null : (Array.isArray(input.stillsAt) ? input.stillsAt : [input.stillsAt]).map(x => (x === 'start' || x === 'end' ? x : Number.isFinite(Number(x)) && x !== '' && x !== null && Number(x) >= 0 ? Math.round(Number(x) * 100) / 100 : fail('stillsAt takes start, end or seconds')));
   const tier = input.tier || 'draft';
-  return { steps: STEPS.filter(s => steps.includes(s)), tier, models: modelsFor(tier, input.models), maxCostUsd, shots: ids(input.shots, 'shots'), objects: ids(input.objects, 'objects'), stillsAt: stillsAt?.length ? [...new Set(stillsAt)] : null, dryRun: input.dryRun === true };
+  return { steps: STEPS.filter(s => steps.includes(s)), tier, models: modelsFor(tier, input.models), maxCostUsd, shots: ids(input.shots, 'shots'), objects: ids(input.objects, 'objects'), stillsAt: stillsAt?.length ? [...new Set(stillsAt)] : null, dryRun: input.dryRun === true, retryWeakMatch: input.retryWeakMatch === true };
 }
 
 /**
@@ -214,6 +215,13 @@ export async function openBatches(root, options = {}) {
       const ok = list.filter((j, i) => states[i] === 'done'), results = ok.flatMap(j => j.results || []);
       if (!ok.length) { const f = list.find(j => j.failure)?.failure; setNode(b, n, { status: 'failed', finishedAt: iso(now()), error: String(f?.detail || f?.phase || 'Job failed').slice(0, 500) }, `${n.label}: failed`); continue; }
       const patch = n.type === 'video' ? { assetId: results.find(r => r.kind === 'video')?.id || results[0]?.id } : n.type === 'sheet' ? { referenceIds: results.map(r => r.id) } : { referenceId: results[0]?.id };
+      // retryWeakMatch: a still graded below WEAK_MATCH against its blockout is redone once with a strong-guide model
+      // (a new paid request through the normal budget check; the weak still stays on the shot as an earlier take).
+      const graded = results.find(r => Number.isFinite(r.guideMatch)), retry = retryModelFor(n.model);
+      if (n.type === 'still' && b.retryWeakMatch && !n.retriedFrom && graded && graded.guideMatch < WEAK_MATCH && estimateFor('still', retry) != null) {
+        setNode(b, n, { ...NO_IDS, status: 'ready', model: retry, estimateUsd: estimateFor('still', retry), retriedFrom: { model: n.model, referenceId: graded.id, guideMatch: graded.guideMatch } }, `${n.label}: matches the blockout ${graded.guideMatch}/10; retrying once with ${retry}`);
+        continue;
+      }
       try {
         const extra = drivers[n.type]?.finish ? await drivers[n.type].finish(context(b, n), list) : null;
         setNode(b, n, { ...patch, ...(extra || {}), status: 'done', finishedAt: iso(now()), ...(ok.length < list.length ? { error: `${list.length - ok.length} of ${list.length} images failed` } : {}) }, `${n.label}: done`);
@@ -300,7 +308,7 @@ export async function openBatches(root, options = {}) {
       const { input, nodes } = planBatch(project, raw, { definitions: definitions(project) });
       const estimateUsd = round(nodes.filter(n => !['skipped', 'failed'].includes(n.status)).reduce((s, n) => s + (n.estimateUsd || 0), 0));
       const t = iso(now()), b = { id: randomUUID(), projectId: project.id, status: input.dryRun ? 'planned' : 'running', createdAt: t, updatedAt: t, steps: input.steps, tier: input.tier, models: input.models,
-        maxCostUsd: input.maxCostUsd, estimateUsd, spentEstimateUsd: 0, budgetSkipped: 0, dryRun: input.dryRun, ...(input.shots ? { shots: input.shots } : {}), ...(input.objects ? { objects: input.objects } : {}), nodes, events: [] };
+        maxCostUsd: input.maxCostUsd, estimateUsd, spentEstimateUsd: 0, budgetSkipped: 0, dryRun: input.dryRun, ...(input.retryWeakMatch ? { retryWeakMatch: true } : {}), ...(input.shots ? { shots: input.shots } : {}), ...(input.objects ? { objects: input.objects } : {}), nodes, events: [] };
       event(b, `Planned ${nodes.length} nodes for “${project.title}”: ≈ ${usd(estimateUsd)} (${input.tier}), cap ${usd(input.maxCostUsd)}${input.dryRun ? '; dry run, nothing submitted' : ''}`);
       if (!input.dryRun) resolve(b);
       batches.set(b.id, b); await persist(b);

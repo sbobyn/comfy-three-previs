@@ -53,6 +53,18 @@ Make the grey blockout, then ask a video model to turn it into the shot.
 
 [Watch the blockout](../public/guide/final-lap-s2-blockout.mp4) · [Watch the generated shot](../public/guide/final-lap-s2-generated.mp4)
 
+### Stills that match the blockout
+
+Storyboard stills (key frames) get three things so the image keeps the blockout's camera and blocking:
+
+- **A guide frame (image 1)** rendered in a guide look: vehicles get bright headlights, a pale nose and windscreen and red tail lights; people get a pale face and shoes; a light ground grid, a light sky (dim indoors) and shadows near the shot. Labels never appear. The workspace viewport and blockout videos look as before.
+- **The camera in words**, measured from the scene through the shot camera: move and moment, lens, shot size, camera height and angle, which side of the subject we see, the horizon, and each visible object's place, size, crop and heading ("nose pointing screen-right: a flat side profile… front end cut off by the right edge"). The composer shows it under the inputs.
+- **Fewer cast images**: looks of objects actually in frame, one environment image and the previous shot's last still, labelled as design-only so their pose doesn't override the guide.
+
+**FLUX 3** follows the blockout best and is the storyboard default; **Nano Banana 2.1** also follows it well, phrased as an edit of image 1, but tends to turn side profiles into chase angles. See `.evidence/stillmatch-20261030/RESULTS.md` in the integration checkout for the comparison.
+
+**Match check.** With `PREVIS_MATCH_GRADER=gemini` (and paid generation on), each new key frame is graded 0–10 for camera and blocking by Gemini 3.5 Flash on Comfy Cloud (a few cents; about 20 s before the still attaches). The storyboard shows "matches blockout N/10", and a batch with `retryWeakMatch: true` redoes a still graded below 5 once with FLUX 3 (or Nano Banana 2.1 if it was FLUX 3), charged to the batch budget. Without the flag a free local edge-and-light score is stored with `rough: true`; it did not track camera match on hand-labelled stills, so it is never shown as a match score and never triggers a retry.
+
 ![Generate: review inputs and estimate](../public/guide/generate.webp)
 
 ## 5. Cut

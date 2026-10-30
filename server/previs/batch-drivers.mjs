@@ -3,6 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import { castCard, compilePrompt, lookPrompt, lookSource, objectLooks, objectNotes, referenceLegend, videoReferences } from '../../shared/director.mjs';
 import { shotPrompt } from '../../shared/prompt.mjs';
+import { stillPrompt, stillReferences } from '../../shared/still-match.mjs';
 import { planSlots, setsFor, slotAspect, viewPrompt } from '../../shared/sheet-presets.mjs';
 import { withReferenceImages, maxReferences } from '../../shared/video-refs.mjs';
 import { snapSeconds, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
@@ -221,12 +222,12 @@ export function loopbackDrivers(base) {
         return refgen(ctx, p.id, async () => {
           const t = at === 'start' ? 0 : at === 'end' ? s.duration : Number(at);
           const cap = (await presets(p.id)).find(x => x.id === ctx.node.model)?.maxRefs || 0;
-          const looks = cap ? videoReferences(p, s, cap).filter(r => r.role !== 'frame' && r.role !== 'style') : [];
+          const looks = stillReferences(p, s, t, cap).looks; // objects in frame, one environment image
           const prev = p.shots[p.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);
           const refIds = [...looks.map(r => r.ref.id), ...(prev ? [prev.id] : [])].slice(0, Math.max(0, cap - 1));
-          const legend = `\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. ${looks.slice(0, refIds.length).map((r, i) => `The ${r.label} looks exactly like image ${i + 2}.`).join(' ')}${prev && refIds.includes(prev.id) ? ` Image ${refIds.indexOf(prev.id) + 2} is the previous shot: keep lighting and style continuous.` : ''} No text, captions or labels.`;
-          const guide = (await post('/api/director/frame', { projectId: p.id, shotId: s.id, t })).data;
-          return { projectId: p.id, target: 'shot', shotId: s.id, frameAt: at, presetId: ctx.node.model, prompt: (shotPrompt(p, s, 'image').trim() + legend).slice(0, 2500), aspect: '16:9', count: 1, seed: randomSeed(), referenceIds: refIds, guide };
+          const prompt = stillPrompt({ project: p, shot: s, t, text: shotPrompt(p, s, 'image'), presetId: ctx.node.model, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null });
+          const guide = (await post('/api/director/frame', { projectId: p.id, shotId: s.id, t, guide: true })).data;
+          return { projectId: p.id, target: 'shot', shotId: s.id, frameAt: at, presetId: ctx.node.model, prompt, aspect: '16:9', count: 1, seed: randomSeed(), referenceIds: refIds, guide };
         });
       },
     },

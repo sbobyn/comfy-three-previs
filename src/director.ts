@@ -13,6 +13,7 @@ import { createSequence } from './director-sequence';
 import { promptBlock, cameraStyleBlock } from './director-prompt';
 import { objectColors, KIND_COLORS } from '../shared/prompt.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
+import { describeFrame, stillPrompt, stillReferences, STRONG_GUIDE_MODEL } from '../shared/still-match.mjs';
 import { openLooksBoard, aspectFor } from './director-looks';
 import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } from './director-videogen';
 import type { TransformChange } from './director-scene';
@@ -32,8 +33,10 @@ const app = document.getElementById('app')!;
 let project: DirectorProject;
 let shotId = params.get('shot') || '';
 let selected: string | null = null;
-type Preset = { id: string; title: string; backend: 'cloud' | 'local'; note: string; pricing: { status: string; usdPerImage: number | null; creditsPerImage: number | null; rate?: string; source: string | null } };
+type Preset = { id: string; title: string; backend: 'cloud' | 'local'; note: string; maxRefs?: number; followsGuide?: 'strong' | 'weak'; pricing: { status: string; usdPerImage: number | null; creditsPerImage: number | null; rate?: string; source: string | null } };
 let refgen: { presets: Preset[]; jobs: any[]; paidExecutionEnabled: boolean; cloudCredential: boolean } = { presets: [], jobs: [], paidExecutionEnabled: false, cloudCredential: false };
+// Storyboard stills: cloud models that take the blockout guide, the ones that follow it best first.
+let stillPresets: Preset[] = [];
 const genForm: Record<string, { prompt: string; presetId: string; aspect: string; count: number; seed: number; checkpoint: string; view: string; edited: boolean; open?: boolean }> = {};
 let connect: Connect = null;
 let playhead = 0, playing = false, lastTick = 0;
@@ -809,7 +812,7 @@ const fmtT = (t: number) => `${t.toFixed(t % 1 ? 2 : 0)}s`;
 function seekShot(t: number) { playing = false; playhead = Math.max(0, Math.min(shot().duration, t)); scene.setPlayhead(playhead); renderTransport(); renderInspector(); }
 // ---------- Storyboard: cheap, perfected stills of the shot at chosen moments, before any video ----------
 function keyFrameBlock(s: Shot) {
-  const f = frameForm[s.id] ||= { open: false, presetId: 'flux-2-pro', count: 1, seed: Math.floor(Math.random() * 1e6), prompt: null, guide: true, checkpoint: '' };
+  const f = frameForm[s.id] ||= { open: false, presetId: STRONG_GUIDE_MODEL, count: 1, seed: Math.floor(Math.random() * 1e6), prompt: null, guide: true, checkpoint: '' };
   const frames = s.references.filter(r => r.role === 'frame');
   const jobs = refgen.jobs.filter(j => j.target === 'shot' && j.shotId === s.id);
   const running = jobs.filter(j => j.status === 'submitted' || j.status === 'submitting');
@@ -836,21 +839,22 @@ function keyFrameBlock(s: Shot) {
     return h('div', { class: 'sb-moment' + (m.t !== null && Math.abs(m.t - playhead) < 0.02 ? ' here' : '') },
       h('button', { type: 'button', class: 'sb-hero', title: 'Jump here', onclick: () => { if (m.t !== null) { seekShot(m.t); shotPane.dataset.shot = ''; renderShotPane(); } } }, h('img', { src: refUrl(used), alt: used.name, loading: 'lazy' }), h('span', { class: 'sb-when' }, label(m.t))),
       m.takes.length > 1 ? h('div', { class: 'sb-takes' }, ...m.takes.slice(0, -1).reverse().slice(0, 4).map(r => h('img', { src: refUrl(r), alt: '', title: `Earlier take · ${r.generated?.model || ''}` }))) : null,
-      h('div', { class: 'sb-meta' }, `${m.takes.length} take${m.takes.length === 1 ? '' : 's'}`, m.t !== null ? h('button', { class: 'linklike', type: 'button', onclick: () => open(m.t!) }, 'New take') : null));
+      h('div', { class: 'sb-meta' }, `${m.takes.length} take${m.takes.length === 1 ? '' : 's'}`, matchBadge(used), m.t !== null ? h('button', { class: 'linklike', type: 'button', onclick: () => open(m.t!) }, 'New take') : null));
   })) : h('div', { class: 'sb-empty' }, h('strong', {}, 'Picture the shot before you film it.'), h('span', {}, 'A still costs a few cents. Pin one at the start, the end, or any moment: it uses the blockout frame there, your cast’s images and this shot’s prompt. Start→end video models use the start and end stills.'));
   const head = h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Storyboard · ${frames.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, running.length ? `Generating ${running.length}…` : 'Stills of the shot, moment by moment'));
   if (!f.open) return h('div', { class: 'block sb' }, head, track, adds, strip, ...jobs.filter(j => j.status === 'failed').slice(0, 1).map(jobRow));
 
   // Composer for a still at the playhead.
-  const t = at, guidePng = scene.capture(t, 1280, 720);
-  const cap = f.presetId === 'flux-3' ? 9 : f.presetId === 'flux-2-pro' ? 7 : 0;
-  const looks = cap ? videoReferences(project, s, cap).filter(r => r.role !== 'frame' && r.role !== 'style') : [];
+  const t = at, guidePng = scene.capture(t, 1280, 720, 'image/png', undefined, { guide: true });
+  const chosen = stillPresets.find(p => p.id === f.presetId), cap = chosen?.maxRefs ?? 0;
+  const words = describeFrame(project, s, t);
+  const looks = stillReferences(project, s, t, cap).looks; // objects in frame, one environment image
   const prev = project.shots[project.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);
   const refIds = [...looks.map(r => r.ref.id), ...(prev ? [prev.id] : [])].slice(0, Math.max(0, cap - 1));
   const moment = h('input', { class: 'field', placeholder: 'At this moment… (optional) e.g. “the car is just leaving the ground”', 'aria-label': 'What happens at this moment' });
   const prompt = h('textarea', { class: 'field sb-prompt', rows: 5, 'aria-label': 'Still prompt' }, f.prompt ?? shotPrompt(project, s, 'image'));
   prompt.oninput = () => { f.prompt = prompt.value; };
-  const model = h('select', { class: 'field', 'aria-label': 'Image model' }, ...refgen.presets.filter(p => p.backend !== 'local').map(p => h('option', { value: p.id, selected: p.id === f.presetId }, p.title)));
+  const model = h('select', { class: 'field', 'aria-label': 'Image model' }, ...stillPresets.map(p => h('option', { value: p.id, selected: p.id === f.presetId }, `${p.title}${p.id === STRONG_GUIDE_MODEL ? ' · matches the blockout best' : p.followsGuide === 'strong' ? ' · follows the blockout' : ''}`)));
   model.onchange = () => { f.presetId = model.value; shotPane.dataset.shot = ''; renderShotPane(); };
   const count = h('select', { class: 'field', 'aria-label': 'Takes' }, ...[1, 2, 3, 4].map(n => h('option', { value: n, selected: n === f.count }, `${n} take${n > 1 ? 's' : ''}`)));
   count.onchange = () => { f.count = Number(count.value); go.textContent = `Generate${estLabel(f.presetId, f.count)}`; };
@@ -859,11 +863,10 @@ function keyFrameBlock(s: Shot) {
   go.onclick = async () => {
     go.disabled = true; status.className = 'status-line'; status.textContent = 'Sending…';
     try {
-      const first = 2;
-      const legend = `\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. ${looks.slice(0, refIds.length).map((r, i) => `The ${r.label} looks exactly like image ${i + first}.`).join(' ')}${prev && refIds.includes(prev.id) ? ` Image ${refIds.indexOf(prev.id) + first} is the previous shot: keep lighting and style continuous.` : ''} No text, captions or labels.`;
       const text = [prompt.value.trim(), moment.value.trim() ? `At this moment: ${moment.value.trim()}.` : ''].filter(Boolean).join(' ');
       const frameAt = t === 0 ? 'start' : Math.abs(t - s.duration) < 0.01 ? 'end' : t;
-      const { job } = await api('director/refgen/prepare', { projectId, target: 'shot', shotId: s.id, frameAt, presetId: f.presetId, prompt: (text + legend).slice(0, 2500), aspect: '16:9', count: f.count, seed: f.seed, referenceIds: refIds, guide: guidePng.split(',')[1] });
+      const full = stillPrompt({ project, shot: s, t, text, presetId: f.presetId, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null, frame: words });
+      const { job } = await api('director/refgen/prepare', { projectId, target: 'shot', shotId: s.id, frameAt, presetId: f.presetId, prompt: full, aspect: '16:9', count: f.count, seed: f.seed, referenceIds: refIds, guide: guidePng.split(',')[1] });
       await generateNow(job); f.open = false; f.seed = Math.floor(Math.random() * 1e6);
       toast(`Generating ${f.count > 1 ? `${f.count} takes` : 'a still'} at ${label(t)} · it pins to the storyboard when ready`);
       shotPane.dataset.shot = ''; renderShotPane();
@@ -875,12 +878,21 @@ function keyFrameBlock(s: Shot) {
     h('div', { class: 'sb-in' }, h('figure', {}, h('img', { src: guidePng, alt: 'Blockout frame' }), h('figcaption', {}, h('b', {}, 'Image 1'), ' blockout frame · composition')),
       ...looks.slice(0, refIds.length).map((r, i) => h('figure', { style: `--k:${KIND_COLORS[entity(r.entityId!)?.kind || 'prop']}` }, h('img', { src: refUrl(r.ref), alt: '' }), h('figcaption', {}, h('b', {}, `Image ${i + 2}`), ' ', r.label))),
       prev && refIds.includes(prev.id) ? h('figure', {}, h('img', { src: refUrl(prev), alt: '' }), h('figcaption', {}, h('b', {}, `Image ${refIds.indexOf(prev.id) + 2}`), ' previous shot · continuity')) : null),
-    !cap ? h('p', { class: 'note', style: 'margin:0' }, 'This model takes no cast images; only the prompt and blockout frame guide it.') : null);
+    !cap ? h('p', { class: 'note', style: 'margin:0' }, 'This model takes no cast images; only the prompt and blockout frame guide it.') : null,
+    h('p', { class: 'note sb-camera', style: 'margin:0', title: 'Added to the prompt: the shot camera and blocking in words, measured from the blockout' }, h('b', {}, 'Camera in words · '), words.text),
+    chosen && chosen.followsGuide !== 'strong' ? h('p', { class: 'note', style: 'margin:0' }, `To match the blockout closely, ${stillPresets.find(p => p.id === STRONG_GUIDE_MODEL)?.title || 'FLUX 3'} follows the camera and blocking best.`) : null);
   return h('div', { class: 'block sb' }, head, track, adds,
     h('div', { class: 'sb-composer' }, inputs, moment, prompt,
       h('div', { class: 'grid2' }, h('label', {}, 'Image model', model), h('label', {}, 'Takes', count)),
       h('div', { class: 'sb-actions' }, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { f.open = false; shotPane.dataset.shot = ''; renderShotPane(); } }, 'Cancel'), go), status),
     strip);
+}
+
+/** "Matches blockout 8/10" for a key frame that was checked against its guide frame. */
+function matchBadge(r: Reference) {
+  // Only graded scores are shown; the free local score is too rough to call a match (it stays in the data).
+  const g = r.generated?.guideMatch; if (!g || g.rough) return null;
+  return h('span', { class: `sb-match${g.score < 5 ? ' weak' : ''}`, title: `Camera and blocking graded against the blockout frame by ${g.method.split(':')[1] || g.method}${g.why ? `: ${g.why}` : ''}` }, `matches blockout ${Math.round(g.score)}/10`);
 }
 
 // ---------- Results & assets ----------
@@ -942,6 +954,7 @@ function openLooks() {
 async function loadRefgen() {
   try {
     refgen = await api(`director/refgen?projectId=${projectId}`);
+    stillPresets = refgen.presets.filter(p => p.backend === 'cloud' && (p.maxRefs ?? 0) > 0).sort((a, b) => (a.id === STRONG_GUIDE_MODEL ? -1 : b.id === STRONG_GUIDE_MODEL ? 1 : 0) || (a.followsGuide === 'strong' ? 0 : 1) - (b.followsGuide === 'strong' ? 0 : 1));
     // BFL image models only for now (FLUX 3 first).
     refgen.presets = refgen.presets.filter(p => /^flux/.test(p.id)).sort((a, b) => (a.id === 'flux-3' ? -1 : b.id === 'flux-3' ? 1 : 0));
     renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); } catch (e) { toast((e as Error).message, true); }

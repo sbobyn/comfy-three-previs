@@ -148,13 +148,14 @@ test('generate_still mirrors the storyboard composer, retries a busy backend and
     const r = await call('previs_director_generate_still', { projectId: p.id, shot: '2', at: 'start', maxCostUsd: 0.1, moment: 'the eagle folds its wings' });
     assert.equal(r.status, 'completed'); assert.equal(r.at, 'start'); assert.ok(r.referenceIds.length);
     const frame = fake.calls.find(c => c.path === '/api/director/frame');
-    assert.deepEqual(frame.body, { projectId: p.id, shotId: p.shots[1].id, t: 0, width: 1280, height: 720 });
+    assert.deepEqual(frame.body, { projectId: p.id, shotId: p.shots[1].id, t: 0, width: 1280, height: 720, guide: true }, 'still guides use the guide look');
     const prep = fake.calls.find(c => c.path === '/api/director/refgen/prepare').body;
     assert.equal(prep.target, 'shot'); assert.equal(prep.frameAt, 'start'); assert.equal(prep.aspect, '16:9'); assert.equal(prep.presetId, 'flux-2-pro');
     assert.equal(prep.guide, PNG.toString('base64'));
     const prev = p.shots[0].references.filter(x => x.role === 'frame').at(-1);
     assert.equal(prep.referenceIds.at(-1), prev.id, 'previous shot’s last still for continuity');
     assert.match(prep.prompt, /Image 1 is a grey 3D blockout of this exact frame/); assert.match(prep.prompt, /At this moment: the eagle folds its wings\./);
+    assert.match(prep.prompt, /^Image 1[^\n]*\nCamera: First frame of /, 'camera words come right after the guide line, before the shot text');
     assert.match(prep.prompt, new RegExp(`Image ${prep.referenceIds.length + 1} is the previous shot`));
     assert.equal(fake.calls.filter(c => c.path === '/api/director/refgen/submit').length, 2, 'one busy 409, then one submit');
     const over = await call('previs_director_generate_still', { projectId: p.id, shot: '2', at: 2, count: 4, maxCostUsd: 0.05 });

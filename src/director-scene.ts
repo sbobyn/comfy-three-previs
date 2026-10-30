@@ -29,6 +29,21 @@ function part(geometry: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0,
   return mesh;
 }
 
+// Guide-only parts: hidden everywhere except still-guide captures (capture(..., { guide: true })), where they show
+// image models which way things face. Never cast or picked.
+function guidePart(geometry: THREE.BufferGeometry, color: string, x: number, y: number, z: number, glow = 0) {
+  const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...(glow ? { emissive: color, emissiveIntensity: glow } : {}) }));
+  mesh.position.set(x, y, z); mesh.castShadow = false; mesh.visible = false; mesh.userData.guide = true;
+  return mesh;
+}
+/** A flat wedge on the ground pointing forward (+z) from z0, length len. */
+function guideWedge(z0: number, len: number, half: number) {
+  const tri = new THREE.Shape([new THREE.Vector2(-half, z0), new THREE.Vector2(half, z0), new THREE.Vector2(0, z0 + len)]);
+  const geo = new THREE.ShapeGeometry(tri).rotateX(Math.PI / 2); // shape y → world +z
+  const mesh = guidePart(geo, '#e8ecf2', 0, 0.12, 0); // above thin set floors and the guide grid (mesh.material as THREE.Material).side = THREE.DoubleSide;
+  return mesh;
+}
+
 // Base-size geometry for each blockout shape. Forward is +z (rotation 0 faces the default camera).
 function buildShape(shape: string, color: string): THREE.Group {
   const g = new THREE.Group(), m = material(color);
@@ -38,6 +53,10 @@ function buildShape(shape: string, color: string): THREE.Group {
       g.add(part(new THREE.CapsuleGeometry(0.21, 0.95, 4, 12), m, 0, 0.21 + 0.48 + 0.1, 0));
       g.add(part(new THREE.SphereGeometry(0.15, 16, 12), m, 0, 1.62, 0));
       g.add(part(new THREE.BoxGeometry(0.1, 0.06, 0.14), material('#f2f2f2'), 0, 1.62, 0.13));
+      // Guide: a pale face, shoes pointing forward and a ground wedge, so front and back read even from behind.
+      g.add(guidePart(new THREE.SphereGeometry(0.13, 16, 12).scale(0.9, 1.1, 0.55), '#d9dde2', 0, 1.61, 0.105)); // pale oval face
+      for (const x of [-0.1, 0.1]) g.add(guidePart(new THREE.BoxGeometry(0.11, 0.09, 0.3), '#202226', x, 0.045, 0.09));
+      g.add(guideWedge(0.3, 0.55, 0.16));
       break;
     }
     case 'car': {
@@ -47,6 +66,12 @@ function buildShape(shape: string, color: string): THREE.Group {
       for (const [x, z] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) g.add(part(wheel, tyre, x * (w / 2 - 0.08), 0.34, z * (d / 2 - 0.8)));
       const light = new THREE.MeshStandardMaterial({ color: '#fff3c4', emissive: '#fff3c4', emissiveIntensity: 1.2 });
       for (const x of [-1, 1]) g.add(part(new THREE.BoxGeometry(0.34, 0.14, 0.04), light, x * (w / 2 - 0.3), 0.72, d / 2 + 0.01));
+      // Guide: bright headlights on a pale nose, a pale windscreen on the cabin front, red tail lights and a ground wedge.
+      g.add(guidePart(new THREE.BoxGeometry(w * 0.94, 0.34, 0.04), '#dfe3e8', 0, 0.55, d / 2 + 0.03));
+      for (const x of [-1, 1]) g.add(guidePart(new THREE.BoxGeometry(0.42, 0.18, 0.05), '#fff6cf', x * (w / 2 - 0.3), 0.72, d / 2 + 0.06, 3));
+      g.add(guidePart(new THREE.BoxGeometry(w * 0.8, 0.42, 0.04), '#c6d6e6', 0, 1.17, -0.15 + d * 0.25 + 0.03));
+      for (const x of [-1, 1]) g.add(guidePart(new THREE.BoxGeometry(0.5, 0.24, 0.05), '#ff3b2f', x * (w / 2 - 0.32), 0.74, -d / 2 - 0.03, 2.5));
+      g.add(guideWedge(d / 2 + 0.4, 1.4, 0.45));
       break;
     }
     case 'table': {
@@ -112,7 +137,7 @@ export function createStage() {
   const sun = new THREE.DirectionalLight(0xffffff, 1.7);
   sun.position.set(9, 16, 11); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -25, right: 25, top: 25, bottom: -25, near: 1, far: 70 });
-  scene.add(hemi, sun);
+  scene.add(hemi, sun, sun.target);
   // Flat ground layers all sit at y = 0. Depth can't separate coplanar surfaces (especially far away),
   // so they never depth-test: they paint in a fixed order — ground, road, lane markings, grid — before
   // any object. The ground alone writes depth, so cars and people standing on it hide the layers above
@@ -128,8 +153,14 @@ export function createStage() {
   // Opaque (pre-blended) grid so it stays in the ordered pass instead of the transparent one.
   const grid = new THREE.GridHelper(80, 80, 0x3d434d, 0x30353d);
   Object.assign(grid.material as THREE.Material, { transparent: false, depthTest: false, depthWrite: false }); grid.renderOrder = -7; scene.add(grid);
-  return { scene, ground, road, grid };
+  // Still guides only: a light ground grid just above flat set surfaces (track, floor, grass) for perspective and depth.
+  const guideGrid = new THREE.GridHelper(400, 200, 0xa3abb5, 0x8a929c);
+  Object.assign(guideGrid.material as THREE.Material, { transparent: true, opacity: 0.4, depthWrite: false });
+  guideGrid.position.y = 0.1; guideGrid.visible = false; scene.add(guideGrid);
+  return { scene, ground, road, grid, sun, guideGrid };
 }
+// Light sky outdoors so the horizon reads; a dim ceiling tone for interiors.
+const GUIDE_SKY: Record<string, number> = { stage: 0xbcc6d1, street: 0x9aa7b6, interior: 0x3b3f46 }, GUIDE_GROUND = 0x5d636b;
 
 function applyEnv(stage: Pick<ReturnType<typeof createStage>, 'scene' | 'ground' | 'road'>, presetName: string) {
   const e = ENV[presetName] || ENV.stage;
@@ -202,7 +233,8 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   capturer.shadowMap.enabled = true; capturer.shadowMap.type = THREE.PCFShadowMap; capturer.outputColorSpace = THREE.SRGBColorSpace;
   const overlay = canvas.parentElement!;
 
-  const { scene, ground, road, grid } = createStage();
+  const { scene, ground, road, grid, sun, guideGrid } = createStage();
+  const guideParts: THREE.Object3D[] = [];
 
   // Editor cameras: perspective by default, orthographic on Numpad 5.
   const persp = new THREE.PerspectiveCamera(45, 1, 0.1, 6000);
@@ -339,9 +371,9 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       const key = `${e.shape}|${e.color}`;
       let item = groups.get(e.id);
       if (!item || item.key !== key) {
-        if (item) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); }
+        if (item) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); dropGuideParts(item.group); }
         const group = buildShape(e.shape, e.color); group.userData.entityId = e.id;
-        group.traverse(o => { o.userData.entityId = e.id; });
+        group.traverse(o => { o.userData.entityId = e.id; if (o.userData.guide) guideParts.push(o); });
         scene.add(group);
         const label = document.createElement('div'); label.className = 'label'; label.dataset.id = e.id; label.style.display = 'none'; labelsEl.append(label);
         item = { group, entity: e, label, key, lkey: '', lead: null, topOff: null, span: null, lw: 0, lh: 0, lx: NaN, ly: NaN, shown: false, crowded: false }; groups.set(e.id, item);
@@ -362,7 +394,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       const tgt = e.id === current.camera.target;
       if (item.label.classList.contains('tgt') !== tgt) { item.label.classList.toggle('tgt', tgt); item.lw = 0; }
     }
-    for (const [id, item] of groups) if (!seen.has(id)) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); groups.delete(id); }
+    for (const [id, item] of groups) if (!seen.has(id)) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); dropGuideParts(item.group); groups.delete(id); }
     // Motion trails for animated objects.
     for (const [id, line] of trails) if (!entities.some(e => e.id === id && e.path && e.path.length > 1)) { scene.remove(line); line.geometry.dispose(); trails.delete(id); }
     for (const e of entities) {
@@ -737,10 +769,31 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   }
 
   // ---------- Capture ----------
-  function capture(t: number, width: number, height: number, type = 'image/png', quality?: number) {
+  function dropGuideParts(group: THREE.Object3D) { group.traverse(o => { const i = guideParts.indexOf(o); if (i >= 0) guideParts.splice(i, 1); }); }
+  /**
+   * Still-guide look for one render: front markers on, a light sky so the horizon reads, a lighter ground with a grid,
+   * and the sun's shadow box moved to the shot so objects cast shadows wherever they are on the set.
+   */
+  function withGuide(look: Vec3, render: () => void) {
+    const bg = scene.background, gm = ground.material as THREE.MeshStandardMaterial, gc = gm.color.getHex(), sp = sun.position.clone(), st = sun.target.position.clone();
+    for (const o of guideParts) o.visible = true;
+    guideGrid.visible = true; guideGrid.position.set(Math.round(look[0] / 2) * 2, 0.1, Math.round(look[2] / 2) * 2);
+    scene.background = new THREE.Color(GUIDE_SKY[env] ?? GUIDE_SKY.stage); gm.color.setHex(GUIDE_GROUND);
+    sun.target.position.set(look[0], 0, look[2]); sun.position.set(look[0] + 9, 16, look[2] + 11); sun.target.updateMatrixWorld();
+    try { render(); }
+    finally {
+      for (const o of guideParts) o.visible = false;
+      guideGrid.visible = false; scene.background = bg; gm.color.setHex(gc);
+      sun.position.copy(sp); sun.target.position.copy(st); sun.target.updateMatrixWorld(); markDirty();
+    }
+  }
+  /** The shot camera frame at t. guide: the still-guide look (front markers, grid, light sky, local shadows; never in the viewport). */
+  function capture(t: number, width: number, height: number, type = 'image/png', quality?: number, opts: { guide?: boolean } = {}) {
     capturer.setPixelRatio(1); capturer.setSize(width, height, false);
-    const cam = shotCam.clone(); cam.aspect = width / height; poseCamera(cam, pose(t));
-    applyTime(sceneTime(t)); cleanRender(capturer, cam, true); applyTime(sceneTime());
+    const cam = shotCam.clone(); cam.aspect = width / height; const at = pose(t); poseCamera(cam, at);
+    applyTime(sceneTime(t));
+    if (opts.guide) withGuide(at.look, () => cleanRender(capturer, cam, true)); else cleanRender(capturer, cam, true);
+    applyTime(sceneTime());
     return captureCanvas.toDataURL(type, quality);
   }
   const thumbs = new Map<string, HTMLCanvasElement>();
