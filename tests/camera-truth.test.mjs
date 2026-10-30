@@ -5,10 +5,10 @@ import { createProjectDocument } from '../server/previs/director.mjs';
 import { loadStarters } from '../server/previs/starters.mjs';
 import { builtInPresets } from '../server/previs/presets.mjs';
 import { autoPromptText, autoPromptSegments, shotPrompt, shotStyle } from '../shared/prompt.mjs';
-import { compilePrompt, describeCamera, MOVES, videoReferences, keyStills, blockoutStale, shotSignature } from '../shared/director.mjs';
+import { compilePrompt, describeCamera, MOVES, referenceLegend, videoReferences, keyStills, blockoutStale, shotSignature } from '../shared/director.mjs';
 import { planBatch } from '../server/previs/batch.mjs';
 import { readFile } from 'node:fs/promises';
-import { CAMERA_LINES, cameraSourceOf, motionInput, withCameraLine } from '../shared/camera-source.mjs';
+import { CAMERA_LINES, cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../shared/camera-source.mjs';
 
 const SOURCES = ['blockout', 'keyframes', 'still'];
 const count = (text, part) => text.split(part).length - 1;
@@ -92,6 +92,10 @@ test('a blockout-driven model gets the start and end stills first, then the cast
   const led = videoReferences(p, shot, 4, { stills: true });
   assert.deepEqual(led.slice(0, 2).map(x => x.label), ['start still', 'end still']);
   assert.ok(led.length <= 4 && led.slice(2).every(x => x.role !== 'frame'), 'the cast follows the stills');
+  // The stills already show the set: subjects fill the slots first, the environment only takes one that is left.
+  const roles = led.slice(2).map(x => x.role), firstEnv = roles.indexOf('environment');
+  assert.ok(firstEnv < 0 || roles.slice(firstEnv).every(r => r === 'environment' || r === 'style'), 'no subject after the set');
+  assert.equal(referenceLegend(led.slice(0, 2)), 'Reference images: 1 = start still; 2 = end still.');
   const plain = videoReferences(p, shot, 4);
   assert.ok(plain.every(x => x.label !== 'start still'), 'stills prompts and other callers keep the old order');
 });
@@ -126,4 +130,14 @@ test('tiers: draft animates a still (approximate camera), final follows the bloc
   // Without the stills step and without an end still, a start → end model falls back to its start-only sibling.
   const noEnd = planBatch(p, { steps: ['videos'], maxCostUsd: 10, shots: [p.shots[0].id], models: { videos: 'ltx-25-flf-v1' } }).nodes.find(n => n.type === 'video');
   assert.equal(noEnd.cameraSource, 'still');
+});
+
+test('a prompt over the model’s limit is shortened in its description, never in its camera line or legend', () => {
+  const legend = 'Reference images: 1 = start still; 2 = Comfy car.';
+  const long = `${'A very long cast description. '.repeat(120)}${CAMERA_LINES.blockout} Lens: 35mm.\n${legend}`;
+  const fit = fitPrompt(long, 2500, 'blockout');
+  assert.ok(fit.length <= 2500);
+  assert.equal(count(fit, CAMERA_LINES.blockout), 1);
+  assert.ok(fit.endsWith(legend));
+  assert.equal(fitPrompt('short', 2500, 'blockout'), 'short');
 });

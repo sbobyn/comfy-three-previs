@@ -58,3 +58,19 @@ export function withCameraLine(text, source) {
   else out = [out.trim(), line].filter(Boolean).join(out.includes('\n') ? '\n' : ' ');
   return out.trim();
 }
+
+/**
+ * A prompt cut to `max` characters that keeps its camera line and reference legend ("Reference images: …"):
+ * the description is shortened instead, so the model always knows which input is the camera.
+ */
+export function fitPrompt(text, max, source) {
+  const t = String(text || '');
+  if (!Number.isInteger(max) || t.length <= max) return t;
+  const line = cameraLine(source), lines = t.split('\n');
+  const legend = lines.filter(l => /^Reference images: /.test(l)).join('\n');
+  const body = lines.filter(l => !/^Reference images: /.test(l)).join('\n').split(line).join('').replace(/ {2,}/g, ' ').trim();
+  const tail = [line, legend].filter(Boolean).join('\n'), room = max - tail.length - 1;
+  if (room < 1) return t.slice(0, max);
+  const cut = body.length > room ? body.slice(0, room).replace(/\s+\S*$/, '') : body;
+  return `${cut} ${line}${legend ? `\n${legend}` : ''}`.slice(0, max);
+}

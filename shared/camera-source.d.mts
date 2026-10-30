@@ -7,3 +7,4 @@ export function cameraLine(source: CameraSource | string | null | undefined): st
 export const CAMERA_SOURCE_LABELS: Record<CameraSource, string>;
 export const CAMERA_SOURCE_GLYPHS: Record<CameraSource, string>;
 export function withCameraLine(text: string, source: CameraSource | string | null | undefined): string;
+export function fitPrompt(text: string, max: number | undefined, source: CameraSource | string | null | undefined): string;

@@ -325,8 +325,8 @@ export function videoReferences(project, shot, max = 4, { stills = false } = {})
   const lead = stills ? [ks.start && { ref: ks.start, entityId: null, role: 'frame', label: 'start still' }, ks.end && ks.end.id !== ks.start?.id && { ref: ks.end, entityId: null, role: 'frame', label: 'end still' }].filter(Boolean) : [];
   const frames = stills ? [] : shot.references.filter(r => r.role === 'frame').slice(-1).map(r => ({ ref: r, entityId: null, role: 'frame', label: 'key frame' }));
   const env = [...envShot, ...envObjects];
-  // Keep a slot for the environment when there is one, so every shot shares the same world.
-  const room = Math.max(0, max - lead.length - (env.length ? 1 : 0));
+  // Keep a slot for the environment when there is one, so every shot shares the same world (the stills already show it).
+  const room = Math.max(0, max - lead.length - (env.length && !lead.length ? 1 : 0));
   const out = [...lead, ...subjects.slice(0, room), ...env, ...style, ...subjects.slice(room), ...frames];
   const seen = new Set();
   return out.filter(x => !seen.has(x.ref.id) && seen.add(x.ref.id)).slice(0, Math.max(0, max));
@@ -373,7 +373,7 @@ export function compilePrompt(project, shot, refs = null, { cameraSource = 'bloc
 
 /** Short legend appended to a hand-edited prompt so numbered references still map to objects. */
 export function referenceLegend(refs) {
-  return refs.length ? `Reference images: ${refs.map((x, i) => `${i + 1} = ${x.role === 'frame' ? 'key frame' : x.role === 'style' ? 'style' : x.role === 'environment' && !x.entityId ? 'environment' : x.label}`).join('; ')}.` : '';
+  return refs.length ? `Reference images: ${refs.map((x, i) => `${i + 1} = ${x.role === 'frame' ? (/^(start|end) still$/.test(x.label) ? x.label : 'key frame') : x.role === 'style' ? 'style' : x.role === 'environment' && !x.entityId ? 'environment' : x.label}`).join('; ')}.` : '';
 }
 
 const ent = (name, shape, position, extra = {}) => ({ name, shape, position, ...extra });

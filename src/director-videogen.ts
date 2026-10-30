@@ -5,7 +5,7 @@ import { compilePrompt, referenceLegend, videoReferences } from '../shared/direc
 import type { DirectorProject, Shot, VideoRef } from '../shared/director.mjs';
 import { withReferenceImages, maxReferences } from '../shared/video-refs.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
-import { cameraSourceOf, motionInput, withCameraLine } from '../shared/camera-source.mjs';
+import { cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../shared/camera-source.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
 import { api } from './director-common';
 
@@ -70,7 +70,7 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   registered.forEach((x, i) => { assetBindings[`referenceImage${i + 1}`] = { renderId: x.renderId }; });
   const cameraSource = cameraSourceOf(def);
   let prompt = shotVideoPrompt(project, s, refs, o.userPrompt ?? shotPrompt(project, s, 'video', { cameraSource }), cameraSource);
-  const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
+  prompt = fitPrompt(prompt, def.constraints?.promptMaxLength, cameraSource); // keeps the camera line and the reference legend
   const main = (await api('project')).project;
   const bind = await api('generation/bind', { revision: main.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
   const backend = o.backend || (def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-') ? 'local' : 'cloud');
@@ -103,7 +103,7 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   const cameraSource: CameraSource = wantsLast ? 'keyframes' : 'still';
   const chosen = (o.userPrompt ?? shotPrompt(project, s, 'video', { cameraSource })).trim();
   let prompt = withCameraLine(chosen || compilePrompt(project, s, null, { cameraSource }), cameraSource);
-  const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
+  prompt = fitPrompt(prompt, def.constraints?.promptMaxLength, cameraSource); // keeps the camera line and the reference legend
   const bind = await api('generation/bind', { revision: (await api('project')).project.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings: { firstFrame: { renderId }, ...(wantsLast ? { lastFrame: { renderId: lastId } } : {}) }, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
   const request = { requestId: crypto.randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: o.backend || 'cloud' } };
   const job = (await api('generation/quote', request)).job;

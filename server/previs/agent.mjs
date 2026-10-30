@@ -1,7 +1,7 @@
 import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
 import { autoPromptSegments, autoPromptText, shotPrompt, shotStyle, normalizeStyle, CAMERA_TERMS } from '../../shared/prompt.mjs';
-import { cameraSourceOf, motionInput, CAMERA_SOURCE_LABELS } from '../../shared/camera-source.mjs';
+import { cameraSourceOf, fitPrompt, motionInput, CAMERA_SOURCE_LABELS } from '../../shared/camera-source.mjs';
 import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, handleOf, videoReferences, blockoutStale } from '../../shared/director.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { setsFor, planSlots, slotAspect, viewPrompt, EXPRESSION_PACKS, INTENSITIES, MAX_SHEET_SLOTS } from '../../shared/sheet-presets.mjs';
@@ -158,7 +158,7 @@ async function generateVideo(a, rendered = false) {
   }
   const cameraSource = cameraSourceOf(d, assetBindings);
   let prompt = shotPrompt(p, s, 'video', { cameraSource }) + (refs.length ? ' ' + refs.map((x, i) => `Image ${i + 1} shows ${x.label}.`).join(' ') : '');
-  const maxLen = d.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
+  prompt = fitPrompt(prompt, d.constraints?.promptMaxLength, cameraSource); // keeps the camera line and the reference legend
   const main = (await get('/api/project')).project;
   const bind = await post('/api/generation/bind', { revision: main.revision, definitionId: d.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: true });
   const request = { requestId: randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: m.local ? 'local' : 'cloud' } };

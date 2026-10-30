@@ -3,7 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import { blockoutStale, castCard, compilePrompt, lookPrompt, lookSource, objectLooks, objectNotes, referenceLegend, videoReferences } from '../../shared/director.mjs';
 import { shotPrompt } from '../../shared/prompt.mjs';
-import { cameraSourceOf, motionInput, withCameraLine } from '../../shared/camera-source.mjs';
+import { cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../../shared/camera-source.mjs';
 import { planSlots, setsFor, slotAspect, viewPrompt } from '../../shared/sheet-presets.mjs';
 import { withReferenceImages, maxReferences } from '../../shared/video-refs.mjs';
 import { snapSeconds, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
@@ -185,7 +185,7 @@ export function loopbackDrivers(base) {
       const cameraSource = cameraSourceOf(def), auto = compilePrompt(p, s, null, { cameraSource }), user = shotPrompt(p, s, 'video', { cameraSource });
       prompt = user?.trim() && user.trim() !== auto.trim() ? [withCameraLine(user, cameraSource), referenceLegend(refs)].filter(Boolean).join('\n') : compilePrompt(p, s, refs, { cameraSource });
     }
-    const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
+    prompt = fitPrompt(prompt, def.constraints?.promptMaxLength, cameraSourceOf(def, assetBindings)); // keeps the camera line and the reference legend
     const local = def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-');
     // Bind and quote are both revision-checked; concurrent batches can move the revision in between, so retry them together.
     return withRevision(async revision => {
