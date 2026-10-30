@@ -96,6 +96,10 @@ Your phone streams its orientation to the app over HTTPS on your local network.
 
 Open one from the home page and make it yours: **Breaking News** (a news anchor delivers the headline), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage.
 
+## Guide
+
+[Build · Cast · Shoot · Generate · Cut](docs/director.md) — the user guide, with captured examples. The in-app **Guide** adds interactive viewport examples and before/after comparisons.
+
 ## Development
 
 ```sh

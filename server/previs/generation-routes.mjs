@@ -4,31 +4,43 @@ import { validateWorkflowDefinition, assertNoSecrets, validateGraph } from './wo
 import { inspectOutputVideo } from './media-inspect.mjs';
 import { builtInPresets } from './presets.mjs';
 
-export async function generationRoutes(data, project) {
-  const generation = await openGeneration(data,project,{probeVideo:inspectOutputVideo,allowPaid:process.env.PREVIS_ALLOW_PAID === '1'});
+export async function generationRoutes(data, project, options = {}) {
+  const generation = await openGeneration(data,project,{probeVideo:inspectOutputVideo,allowPaid:process.env.PREVIS_ALLOW_PAID === '1',...options,requireAttachment:true});
   const state = () => ({presets:builtInPresets,definitions:project.get().workflowDefinitions || [],jobs:generation.list(),paidExecutionEnabled:process.env.PREVIS_ALLOW_PAID === '1'});
   let tracker=null, attaching=Promise.resolve();
-  // The tracker and HTTP routes can both attach one job: serialize, re-check inside the mutation, retry on a stale revision.
+  // The tracker and HTTP routes can both attach one job: serialize, and re-check inside the engine write queue
+  // (project.append), so a concurrent bind, video-refs registration or edit never fails the attach with "Project changed".
   const attach=job=>{const task=attaching.then(()=>attachNow(job));attaching=task.catch(()=>{});return task;};
   async function attachNow(job) {
     const missing=assets=>(job.results||[]).filter(r=>!(assets || []).some(a=>a.generationJobId===job.id&&a.key===r.key));
-    for(let attempt=0;;attempt++){
-      const p=project.get();
-      if(!missing(p.assets).length)return;
-      try{await project.mutate(p.revision,next=>{
-      for(const result of missing(next.assets))(next.assets ||= []).push({...result,version:1,source:'comfy',binding:(job.sources.sourceVideo||job.sources.controlVideo||job.sources.firstFrame||job.sources.image||job.sources.referenceImage)?.binding||job.shot.binding,pass:job.definition.task,provenance:{requestShot:job.shot,generationJobId:job.id,sourceAssets:job.sources,definitionHash:job.definitionHash,backend:job.backend,prompt:job.binding.prompt,parameters:job.binding.parameters}});
-      });return;}catch(error){if(error.status!==409||attempt>=2)throw error;}
-    }
+    if(!missing(project.get().assets).length)return;
+    await project.append(next=>{
+      const add=missing(next.assets); if(!add.length)return false;
+      for(const result of add)(next.assets ||= []).push({...result,version:1,source:'comfy',binding:(job.sources.sourceVideo||job.sources.controlVideo||job.sources.firstFrame||job.sources.image||job.sources.referenceImage)?.binding||job.shot.binding,pass:job.definition.task,provenance:{requestShot:job.shot,generationJobId:job.id,sourceAssets:job.sources,definitionHash:job.definitionHash,backend:job.backend,prompt:job.binding.prompt,parameters:job.binding.parameters}});
+    });
   }
+  // Presets and bindings are additive and validated against the latest project inside the write queue, so a revision
+  // moved by another writer (a batch on another shot, the tracker attaching a result) no longer refuses them.
+  // A revision from the future is still a client bug.
+  const additive=(revision,fn)=>{if(revision!==undefined&&(!Number.isInteger(revision)||revision>project.get().revision)){const e=Error('Unknown project revision; refresh first');e.status=409;throw e;}return project.append(fn);};
+  let resultDirector;
+  generation.setAttachment(async job=>{
+    await attach(job);
+    const id=job.shot?.browser?.director?.projectId;
+    if(id){
+      if(!resultDirector)throw Error('Director attachment handler is unavailable');
+      const synced=await resultDirector.syncResults(id);
+      if((job.results||[]).some(r=>!synced.project.assets?.some(a=>a.source?.jobId===job.id&&a.source?.resultId===r.id)))throw Error('Director result attachment is incomplete');
+    }
+  });
   const track=id=>tracker?tracker.trackNow('generation',id):generation.track(id);
-  // Job-tracker source (contract C1). onTerminal copies results into the main project, then into the director project.
-  const trackerSource=({director}={})=>({
+  // Attachment runs inside the durable job lifecycle, before completed; the tracker's best-effort onTerminal is not used.
+  const trackerSource=({director}={})=>{resultDirector=director;return ({
     name:'generation',list:generation.list,get:id=>generation.get(id),isActive:generation.isActive,track:(id,tracking)=>generation.track(id,tracking),
     expectedSeconds:generation.expectedSeconds,label:generation.label,kindOf:generation.kindOf,
     projectIdOf:job=>job.shot?.browser?.director?.projectId||null,costOf:job=>job.quote?.amount??job.quote?.estimate??null,
     resultsOf:job=>(job.results||[]).map(r=>({id:r.id,kind:r.kind,url:r.url})),
-    async onTerminal(job){await attach(job);const id=job.shot?.browser?.director?.projectId;if(id&&director)await director.syncResults(id);},
-  });
+  });};
   async function route(path,input) {
     assertNoSecrets(input);
     if(path==='/api/generation/inspect')return generation.inspect(input.backend);
@@ -39,12 +51,12 @@ export async function generationRoutes(data, project) {
     }
     if(path==='/api/generation/preset') {
       const definition=validateWorkflowDefinition({...input.definition,id:randomUUID(),verification:{status:'imported'}});
-      const saved=await project.mutate(input.revision,p=>{(p.workflowDefinitions ||= []).push(definition);});
+      const saved=await additive(input.revision,p=>{(p.workflowDefinitions ||= []).push(definition);});
       return {project:saved,definition};
     }
     if(path==='/api/generation/bind') {
       const id=randomUUID();
-      const saved=await project.mutate(input.revision,p=>{
+      const saved=await additive(input.revision,p=>{
         if(!p.shots.some(s=>s.id===input.shotId))throw Error('Choose a saved originating shot');
         const definition=p.workflowDefinitions?.find(d=>d.id===input.definitionId);
         if(!definition)throw Error('Save the mapped workflow preset first');

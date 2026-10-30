@@ -23,6 +23,19 @@ export async function openProject(root) {
       });
       chain = task.catch(() => {}); return task;
     },
+    /**
+     * Additive, idempotent server-side writes (attach results, register reference renders, save a binding or preset).
+     * Runs in the same queue as mutate() but against the latest revision, so it never fails with "Project changed".
+     * fn must re-check state on the project it is given; returning false means "nothing to write" (no revision bump).
+     */
+    append(fn) {
+      const task = chain.then(async () => {
+        const next = structuredClone(project);
+        if (await fn(next) === false) return structuredClone(project);
+        next.revision++; return save(next);
+      });
+      chain = task.catch(() => {}); return task;
+    },
     async image(bytes) {
       if (bytes.length < 24 || bytes.length > 32 * 1024 * 1024 || !bytes.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) throw Error('Expected a PNG under 32 MB');
       const width = bytes.readUInt32BE(16), height = bytes.readUInt32BE(20);

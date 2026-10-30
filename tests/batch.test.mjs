@@ -270,3 +270,20 @@ test('restart resubmits a recorded request (never a new one); a refusal refunds 
   third.close();
 });
 const round4 = x => Math.round(x * 10000) / 10000;
+
+test('exhausted output recovery pauses a batch and resume never resubmits the paid node', async () => {
+  const h = harness();
+  const batches = await h.open();
+  const b = await batches.create({ projectId: project.id, steps: ['stills'], shots: [dive.id], maxCostUsd: 5 });
+  await batches.tick(b.id); await batches.idle();
+  const jobs = h.fake.all(); assert.ok(jobs.length);
+  for (const j of jobs) j.status = 'recovery-required';
+  await batches.tick(b.id); await batches.idle();
+  const paused = batches.get(b.id);
+  assert.equal(paused.status, 'paused');
+  assert.ok(paused.nodes.some(n => n.recoveryRequired && n.status === 'failed'));
+  const submissions = h.fake.submits.length;
+  await batches.resume(b.id); await batches.tick(b.id); await batches.idle();
+  assert.equal(h.fake.submits.length, submissions);
+  batches.close();
+});

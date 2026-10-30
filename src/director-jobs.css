@@ -66,6 +66,8 @@ dialog.jobs-sheet::backdrop { background: rgba(21, 19, 15, .14); backdrop-filter
 .jr-bar i { display: block; height: 100%; border-radius: inherit; background: #D9962B; transition: width var(--t-reveal) var(--ease); }
 .jr-bar.over i { background: repeating-linear-gradient(90deg, #D9962B 0 6px, color-mix(in srgb, #D9962B 55%, transparent) 6px 10px); }
 .jr-bar.bad i { background: var(--accent); }
+.jr-progress { margin-top: 6px; }
+.jr-progress .dp-media { max-width: 320px; }
 .jr-fail { border-left: 2px solid var(--accent-line); padding: 2px 0 2px 8px; margin-top: 2px; }
 .jr-fail.soft { border-left-color: var(--line-2); }
 .jr-fail.soft .jr-fail-head { color: var(--ink-3); }

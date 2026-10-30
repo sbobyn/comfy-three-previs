@@ -55,6 +55,7 @@ async function fixture(t, { blender, operations, failSave = false } = {}) {
   let state = structuredClone({ revision: 7, assets: [], shots: [{ id: 'browser', binding: browserBinding, browser }, { id: 'blender', binding: blenderBinding }] });
   const project = {
     get: () => structuredClone(state),
+    async append(change) { return this.mutate(state.revision, change); },
     async mutate(revision, change) {
       if (revision !== state.revision) throw Object.assign(Error('simulated revision conflict'), { status: 409 });
       const next = structuredClone(state); await change(next);

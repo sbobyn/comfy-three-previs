@@ -19,6 +19,7 @@ function harness() {
       showModal() { this.open = true; },
       close() { this.open = false; listeners.close?.(); },
       remove() { this.isConnected = false; },
+      append(...items) { this.children.push(...items); },
       focus() { document.activeElement = this; },
       scrollIntoView() { this.scrolled = true; },
       querySelector(selector) { return walk(this).find(n => n.tag === selector); },
@@ -28,7 +29,9 @@ function harness() {
   document.body = { append(node) { node.isConnected = true; } };
   const opener = h('button'); opener.isConnected = true; opener.focus();
   const exports = {};
-  runInNewContext(compile(source), { exports, require: () => ({ h }), document });
+  const visual = () => h('figure');
+  const deps = { h, explainerTabs: () => ({ el: h('canvas'), dispose() {} }), keyboardDiagram: visual, gamepadDiagram: visual, phoneDiagram: visual, phonePairDiagram: visual, guideManifest: async () => new Map(), guideUrl: f => f };
+  runInNewContext(compile(source), { exports, require: () => deps, document });
   return { ...exports, document, opener, dialog: () => document.getElementById('journey-dialog') };
 }
 function walk(node) { return [node, ...(node.children || []).flatMap(c => typeof c === 'object' ? walk(c) : [])]; }
@@ -40,21 +43,21 @@ test('the complete guide is read-only until an explicit navigation choice', () =
   g.openJourney({ actions, context: 'Saved demo · 3 shots' });
   const dlg = g.dialog();
   assert.equal(dlg.open, true);
-  assert.equal(walk(dlg).filter(n => n.tag === 'li').length, 7);
+  assert.equal(walk(dlg).filter(n => n.class?.includes('jy-stage')).length, 5);
   assert.deepEqual(visited, []);
   assert.match(text(dlg), /Saved demo · 3 shots/);
-  const navigation = walk(dlg).find(n => n.tag === 'button' && text(n) === 'Review render settings');
+  const navigation = walk(dlg).find(n => n.tag === 'button' && text(n) === 'Open Generate video');
   navigation.onclick();
-  assert.deepEqual(visited, ['capture']);
+  assert.deepEqual(visited, ['generate']);
   assert.equal(g.dialog(), null);
 });
 
 test('launch guidance works without a project; close restores the invoking control', () => {
   const g = harness();
-  g.openJourney({ stage: 'workflow' });
+  g.openJourney({ stage: 'generate' });
   const dlg = g.dialog();
   assert.equal(g.document.activeElement.tag, 'h3');
-  assert.equal(text(g.document.activeElement), 'Review the AI request');
+  assert.equal(text(g.document.activeElement), 'Generate');
   assert.equal(walk(dlg).filter(n => n.tag === 'button').length, 1, 'no project means no workspace actions');
   assert.match(text(dlg), /Open or create a project/);
   let stopped = false;
@@ -65,15 +68,14 @@ test('launch guidance works without a project; close restores the invoking contr
   assert.equal(g.dialog(), null);
 });
 
-test('all stages navigate only their supplied action and preserve qualification warnings', () => {
+test('five stages navigate only their supplied action and explain costs and limits', () => {
   const g = harness(), visited = [];
   for (const step of g.JOURNEY) {
     g.openJourney({ actions: { [step.id]: () => visited.push(step.id) } });
     const dlg = g.dialog(), copy = text(dlg);
-    assert.match(copy, /first-frame\/key-frame animation receives stills/);
-    assert.match(copy, /Local framewise SD was quality-rejected/);
-    assert.match(copy, /Unknown acceptance is not cancellation/);
-    assert.match(copy, /hardware qualification/);
+    assert.match(copy, /Nothing is charged without the approval box/);
+    assert.match(copy, /do not see your camera move/);
+    assert.doesNotMatch(copy, /Blender|LoRA|framewise SD|Take One/);
     walk(dlg).find(n => n.tag === 'button' && text(n) === step.action).onclick();
   }
   assert.deepEqual(visited, Array.from(g.JOURNEY, s => s.id));
@@ -86,30 +88,41 @@ test('workspace guide opens existing controls without editing, capturing or gene
   assert.ok(start > 0 && end > start);
   const calls = [];
   let options;
+  const forbidden = name => () => calls.push(`FORBIDDEN ${name}`);
   const context = {
     project: { title: 'Scene', scene: { entities: [] }, shots: [{}] },
-    collapsed: { side: true }, step: 'build',
+    collapsed: { side: true }, step: 'cut',
     openJourney: o => { options = o; },
-    setStep: k => { calls.push(['step', k]); context.step = k; }, setTab: tab => calls.push(tab),
+    setStep: k => { calls.push(['step', k]); context.step = k; },
     setCollapsed: (panel, value) => { calls.push([panel, value]); context.collapsed[panel] = value; },
-    textarea: { focus: () => calls.push('direction focus') }, shotTab: { focus: () => calls.push('shot focus') },
-    stepBtns: { cut: { focus: () => calls.push('cut focus') } },
-    openLooks: () => calls.push('looks'), openRender: () => calls.push('render settings'),
-    openAssets: () => calls.push('assets'), toast: msg => calls.push(msg),
+    stepBtns: Object.fromEntries(['build', 'shoot', 'cut'].map(k => [k, { focus: () => calls.push(`${k} focus`) }])),
+    openLooks: () => calls.push('looks'), openRender: () => calls.push('render settings'), toast: msg => calls.push(msg),
+    // Anything that edits, captures or generates must never run from the guide.
+    edit: forbidden('edit'), runEntry: forbidden('runEntry'), captureShotVideo: forbidden('capture'),
+    genQuote: forbidden('genQuote'), submitGeneration: forbidden('generate'), select: forbidden('select'),
   };
   runInNewContext(compile(workspace.slice(start, end)), context);
   context.showJourney();
-  assert.deepEqual(calls, []);
-  assert.match(options.context, /0 saved video assets/);
-  options.actions.scene();
-  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['side', false], 'shot', 'shot focus']);
-  calls.length = 0;
-  for (const id of ['looks', 'shot', 'capture', 'workflow', 'compare', 'export']) options.actions[id]();
-  assert.deepEqual(JSON.parse(JSON.stringify(calls)), ['looks', 'shot', 'shot focus', ['step', 'shoot'], 'render settings', ['step', 'cut'], 'cut focus', ['step', 'cut'], 'cut focus', 'assets']);
-  calls.length = 0;
-  options.actions.scene();
-  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['step', 'build'], 'shot', 'shot focus'], 'scene panel leaves the cut view');
+  assert.deepEqual(calls, [], 'opening the guide performs no action');
+  assert.match(options.context, /Scene · 0 objects · 1 shots · 0 saved video assets/);
+  assert.deepEqual(Object.keys(options.actions), ['build', 'cast', 'shoot', 'generate', 'cut']);
+  const run = id => { calls.length = 0; options.actions[id](); return JSON.parse(JSON.stringify(calls)); };
+  assert.deepEqual(run('build'), [['step', 'build'], ['side', false], 'build focus'], 'build leaves Cut and reopens the side panel');
+  assert.deepEqual(run('build'), [['step', 'build'], 'build focus'], 'an open side panel is left alone');
+  assert.deepEqual(run('cast'), ['looks']);
+  assert.deepEqual(run('shoot'), [['step', 'shoot'], 'shoot focus']);
+  assert.deepEqual(run('generate'), [['step', 'shoot'], 'render settings'], 'generate only opens the settings/quote dialog');
+  assert.deepEqual(run('cut'), [['step', 'cut'], 'cut focus']);
   context.project = undefined; calls.length = 0;
   context.showJourney();
   assert.deepEqual(calls, ['Wait for the project to finish loading.']);
+});
+
+test('stage ids are the five integration hooks; legacy callers still navigate', () => {
+  const g = harness(), visited = [];
+  assert.deepEqual(Array.from(g.JOURNEY, s => s.id), ['build', 'cast', 'shoot', 'generate', 'cut']);
+  g.openJourney({ stage: 'looks', actions: { looks: () => visited.push('cast') } });
+  assert.equal(text(g.document.activeElement), 'Cast');
+  walk(g.dialog()).find(n => n.tag === 'button' && text(n) === 'Open cast images').onclick();
+  assert.deepEqual(visited, ['cast']);
 });

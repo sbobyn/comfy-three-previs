@@ -139,6 +139,22 @@
       body.director-mode #director b { font-size:17px; } body.director-mode #directorAim { font-size:22px; font-variant-numeric:tabular-nums; color:#F2FF59; }
       body.director-mode #bar button { padding:16px 18px; font-size:15px; }
       @media(max-width:600px){#touchPads{bottom:180px;flex-wrap:wrap}.touch-pad{height:90px;}#touchPads button{padding:8px;}}
+      /* Mobile camera uses the same warm stage and controls as the workspace HUD. */
+      :root { --stage:#121110; --on-stage:#F5F2EC; --on-stage-2:#B5AFA5; --accent:#C8401F; }
+      html, body { background:var(--stage); color:var(--on-stage); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; font-size:15px; }
+      #start { background:rgba(18,17,16,.9); }
+      #start p, #status { color:var(--on-stage-2); font-size:13px; }
+      #status { font-variant-numeric:tabular-nums; }
+      #bar { background:rgba(18,17,16,.82); border-color:rgba(245,242,236,.2); border-radius:22px; }
+      button, select, .ghost { min-height:44px; color:var(--on-stage); background:rgba(245,242,236,.12); border-color:rgba(245,242,236,.3); border-radius:999px; }
+      select { font-size:16px; }
+      #enable { background:var(--accent); color:var(--on-stage); border-color:var(--accent); }
+      input[type="range"] { height:44px; accent-color:var(--on-stage); }
+      #zoomValue, .touch-pad { font-size:13px; }
+      .touch-pad { background:rgba(18,17,16,.65); border-color:var(--on-stage-2); }
+      body.director-mode #director { color:var(--on-stage); }
+      body.director-mode #directorAim { color:var(--on-stage); }
+      :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
     </style>
   </head>
   <body>

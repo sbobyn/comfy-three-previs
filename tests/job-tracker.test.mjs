@@ -144,9 +144,9 @@ test('backend errors keep redacted detail; per-call timeouts; Cloud provider err
   const env = { COMFY_CLOUD_API_KEY: 'k'.repeat(20) };
   const json = (value, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
   let behaviour;
-  const backend = createBackend({ kind: 'cloud' }, { env, timeouts: { queue: 20, upload: 5000 }, fetch: async (url, init) => behaviour(url, init) });
+  const backend = createBackend({ kind: 'cloud' }, { env, timeouts: { queue: 20, upload: 5000 }, retry: { delaysMs: [1] }, fetch: async (url, init) => behaviour(url, init) });
   behaviour = async () => { throw new TypeError('fetch failed', { cause: Error('connect ECONNREFUSED 1.2.3.4:443') }); };
-  await assert.rejects(backend.inspect(), e => e.message === 'Backend transport failed; no automatic retry' && /ECONNREFUSED/.test(e.detail));
+  await assert.rejects(backend.inspect(), e => e.message === 'Backend transport failed' && /ECONNREFUSED/.test(e.detail) && e.attempts === 3);
   behaviour = (url, init) => new Promise((_, reject) => init.signal.addEventListener('abort', () => reject(init.signal.reason)));
   const keepAlive = setInterval(() => {}, 1000); // AbortSignal.timeout timers do not hold the event loop open
   try { await assert.rejects(backend.queue(), e => /\/queue: timed out/.test(e.detail)); } finally { clearInterval(keepAlive); }

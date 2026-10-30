@@ -200,7 +200,7 @@ export function browserSnapshotHash(snapshot) {
   return createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
 }
 
-/** Appends a versioned immutable file and asset using openProject's revision gate.
+/** Appends a versioned immutable file and asset using openProject's mutation queue and semantic snapshot checks.
  * Call outside project.mutate, inside the server's serial queue. Keep stages on disk.
  * Browser provenance requires browserSnapshot equal to the originating saved shot.browser.
  */
@@ -212,7 +212,8 @@ export async function saveVideoAsset({ root, project, revision, shotId, file, me
   const sourceBinding = structuredClone(binding), sourceProvenance = structuredClone(provenance);
   const id = randomUUID(), assetPath = join(resolve(root), 'assets', id + '.mp4');
   let asset;
-  const saved = await project.mutate(revision, async p => {
+  if (!Number.isInteger(revision) || revision > project.get().revision) throw Error('Unknown project revision');
+  const saved = await project.append(async p => {
     const shot = p.shots.find(s => s.id === shotId);
     if (!shot || !isDeepStrictEqual(shot.binding, sourceBinding)) throw Error('Saved shot binding changed before video attachment');
     if (!['three', 'blender'].includes(sourceBinding.source)) throw Error('Unsupported video source');

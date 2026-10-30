@@ -193,3 +193,94 @@ test('job tracker drives refgen to completion; the track route keeps its shape a
   assert.equal(row.results.length, 2, 'the mock backend returns two images'); assert.match(row.results[0].url, new RegExp(`^/director-refs/${project.id}/[a-f0-9-]{36}\\.png$`));
   assert.match(row.label, /Runner · Local ComfyUI/);
 });
+
+test('refgen restart distinguishes an interrupted upload from an uncertain dispatch without resubmitting', async () => {
+  const { writeFile } = await import('node:fs/promises');
+  const { root, director, project, refgen, log, runner } = await setup();
+  const input = { projectId: project.id, entityId: runner.id, presetId: 'local-checkpoint', checkpoint: 'sd15.safetensors', prompt: 'runner', seed: 7 };
+  const upload = await refgen.prepare(input), dispatch = await refgen.prepare(input);
+  const file = job => join(root, 'director', project.id, 'refgen', job.id + '.json');
+  await writeFile(file(upload), JSON.stringify({ ...upload, status: 'uploading' }));
+  await writeFile(file(dispatch), JSON.stringify({ ...dispatch, status: 'submitting' }));
+  const reopened = await openRefgen(root, director, { backend: mockBackend(log), allowPaid: false });
+  assert.equal(reopened.all().find(j => j.id === upload.id).status, 'quoted');
+  assert.equal(reopened.all().find(j => j.id === dispatch.id).status, 'uncertain');
+  assert.equal(log.filter(x => x === 'submit').length, 0);
+  const tracker = createJobTracker({ sources: [reopened.trackerSource()], tickMs: 0 });
+  tracker.start(); await tracker.tick();
+  assert.equal(tracker.snapshot().tracker.resumed, 1); tracker.stop();
+  assert.equal(log.filter(x => x === 'submit').length, 0);
+});
+
+test('refgen refuses concurrent identical requests before a second backend submit', async () => {
+  const { project, refgen, log, runner } = await setup();
+  const input = { projectId: project.id, entityId: runner.id, presetId: 'local-checkpoint', checkpoint: 'sd15.safetensors', prompt: 'runner', seed: 7 };
+  const a = await refgen.prepare(input), b = await refgen.prepare(input);
+  const submit = j => refgen.submit({ projectId: project.id, requestId: j.id, approval: { approved: true, fingerprint: j.fingerprint, allowance: { currency: 'USD', maxAmount: 0 } } });
+  await submit(a); await assert.rejects(submit(b), e => e.apiCode === 'duplicate' && e.existingId === a.id);
+  assert.equal(log.filter(x => x === 'submit').length, 1);
+});
+
+test('refgen recovers partial transfers from durable outputs without history or duplicate references', async () => {
+  const { root, director, project, refgen, log, runner } = await setup();
+  const job = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'local-checkpoint', checkpoint: 'sd15.safetensors', prompt: 'runner', seed: 7 });
+  await refgen.submit({ projectId: project.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 0 } } });
+  log.done = true;
+  let views = 0;
+  const backend = input => ({ ...mockBackend(log)(input), view: async () => { if (++views === 2) throw Error('fixture transfer failure'); return PNG; } });
+  let resumed = await openRefgen(root, director, { backend, allowPaid: false });
+  const partial = await resumed.track({ projectId: project.id, requestId: job.id });
+  assert.equal(partial.status, 'collecting'); assert.equal(partial.results.length, 1);
+  const firstId = partial.referenceIds[0];
+  resumed = await openRefgen(root, director, { backend: input => ({ ...backend(input), history: async () => { throw Error('History expired'); } }), allowPaid: false });
+  const done = await resumed.track({ projectId: project.id, requestId: job.id });
+  assert.equal(done.status, 'completed'); assert.equal(done.referenceIds.length, 2); assert.equal(done.referenceIds[0], firstId);
+  assert.equal(views, 3); assert.equal(log.filter(x => x === 'submit').length, 1);
+  assert.equal((await director.get(project.id)).scene.references.filter(r => r.generated?.requestId === job.id).length, 2);
+});
+
+test('refgen reuses an already imported output after attachment acknowledgement loss', async () => {
+  const { root, director, project, refgen, log, runner } = await setup();
+  const job = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'local-checkpoint', checkpoint: 'sd15.safetensors', prompt: 'runner', seed: 8 });
+  await refgen.submit({ projectId: project.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 0 } } });
+  log.done = true;
+  const interrupted = { ...director, reference: async (...args) => { await director.reference(...args); throw Error('fixture crash after import'); } };
+  let resumed = await openRefgen(root, interrupted, { backend: mockBackend(log), allowPaid: false });
+  const failed = await resumed.track({ projectId: project.id, requestId: job.id });
+  assert.equal(failed.status, 'collecting'); assert.equal(failed.results, undefined);
+  const imported = (await director.get(project.id)).scene.references.find(r => r.generated?.requestId === job.id);
+  resumed = await openRefgen(root, director, { backend: mockBackend(log), allowPaid: false });
+  const done = await resumed.track({ projectId: project.id, requestId: job.id });
+  assert.equal(done.status, 'completed'); assert.ok(done.referenceIds.includes(imported.id));
+  assert.equal(log.filter(x => x === 'view').length, 2, 'already imported output is not downloaded again');
+  assert.equal(log.filter(x => x === 'submit').length, 1);
+  const refs = (await director.get(project.id)).scene.references.filter(r => r.generated?.requestId === job.id);
+  assert.equal(refs.length, 2); assert.equal(new Set(refs.map(r => r.generated.outputKey)).size, 2);
+  const duplicate = await director.reference(project.id, { scope: 'object', entityId: runner.id, generated: imported.generated, data: PNG.toString('base64') });
+  assert.equal(duplicate.referenceId, imported.id);
+});
+
+test('legacy partial imports without output keys stop safely rather than duplicate assets', async () => {
+  const { director, project, refgen, log, runner } = await setup();
+  const job = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'local-checkpoint', checkpoint: 'sd15.safetensors', prompt: 'runner', seed: 9 });
+  await refgen.submit({ projectId: project.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 0 } } });
+  await director.reference(project.id, { scope: 'object', entityId: runner.id, data: PNG.toString('base64'), generated: { requestId: job.id } });
+  log.done = true;
+  assert.equal((await refgen.track({ projectId: project.id, requestId: job.id })).status, 'recovery-required');
+  assert.equal(log.filter(x => x === 'view').length, 0); assert.equal(log.filter(x => x === 'submit').length, 1);
+  assert.equal((await director.get(project.id)).scene.references.filter(r => r.generated?.requestId === job.id).length, 1);
+});
+
+test('refgen collection attempts remain bounded across restart', async () => {
+  const { root, director, project, refgen, log, runner } = await setup();
+  const job = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'local-checkpoint', checkpoint: 'sd15.safetensors', prompt: 'runner', seed: 10 });
+  await refgen.submit({ projectId: project.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 0 } } });
+  log.done = true; let views = 0;
+  const backend = input => ({ ...mockBackend(log)(input), view: async () => { views++; throw Error('fixture transfer unavailable'); } });
+  for (let i = 0; i < 5; i++) {
+    const resumed = await openRefgen(root, director, { backend, allowPaid: false });
+    const result = await resumed.track({ projectId: project.id, requestId: job.id });
+    assert.equal(result.status, i < 2 ? 'collecting' : 'recovery-required');
+  }
+  assert.equal(views, 3); assert.equal(log.filter(x => x === 'submit').length, 1);
+});

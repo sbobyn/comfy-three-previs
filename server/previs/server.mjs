@@ -25,6 +25,10 @@ import { frameRoutes } from './frames.mjs'; // [frames]
 import { openBatches } from './batch.mjs'; import { batchRoutes } from './batch-routes.mjs'; import { fakeBackend, loopbackDrivers, loopbackJobs } from './batch-drivers.mjs'; // [batch]
 import { createJobTracker } from './job-tracker.mjs';
 import { slotsFor } from './concurrency.mjs';
+import { WebSocket } from 'ws';
+import { createJobProgress, createProgressSocketFactory } from './job-progress.mjs'; // [live-progress]
+import { createJobProgressRoutes } from './job-progress-routes.mjs';
+import { createProgressCoordinator } from './job-progress-coordinator.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -34,12 +38,21 @@ const project = await openProject(data);
 const blender = new BlenderMcp();
 const operations = await openOperations(data);
 const comfy = await openComfy(data, project);
-const generation = await generationRoutes(data,project);
+// [live-progress] Ephemeral observer; stores get nonthrowing hooks, the tracker stays the only authority.
+let tracker; const jobSources = {};
+const observe = createJobProgress({ connect: createProgressSocketFactory({ WebSocket }), trackNow: (source, id) => tracker?.trackNow(source, id) });
+const progress = createProgressCoordinator({ observe, sources: jobSources });
+const generation = await generationRoutes(data,project,{ telemetry: progress.telemetry('generation') });
 let refgen, agentRunner; // [agent]
 const director = await openDirector(data, { engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
-refgen = await openRefgen(data, director);
-const tracker = createJobTracker({ sources: [generation.trackerSource({ director }), refgen.trackerSource()], limits: () => slotsFor(data).snapshot(), log: line => console.log(`[jobs] ${line}`) });
+refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen') });
+jobSources.generation = generation.trackerSource({ director }); jobSources.refgen = refgen.trackerSource();
+tracker = createJobTracker({ sources: [jobSources.generation, jobSources.refgen], limits: () => slotsFor(data).snapshot(), log: line => console.log(`[jobs] ${line}`) });
 generation.useTracker(tracker); refgen.useTracker(tracker); tracker.start();
+progress.restore(); progress.start(tracker); // [live-progress] observe accepted receipts; reconcile from C1
+// Same policy as every route (loopback host/origin, checked before this runs) plus an existing director project.
+const projectExists = async id => { try { await director.get(id); return true; } catch { return false; } };
+const progressRoutes = createJobProgressRoutes({ observe, resolveProject: async (_req, id) => (await projectExists(id)) ? progress.scope(id) : null });
 const refgenRoute = refgenRoutes(refgen);
 const directorRoute = directorRoutes(director, project, () => ({ command: process.execPath, args: [join(root, 'server/previs/agent.mjs')], env: { PREVIS_URL: `http://127.0.0.1:${port}` } }), () => agentRunner);
 const videos = videoRoutes({data,project,blender,operations,refreshBlender});
@@ -73,6 +86,7 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
+    if (await progressRoutes.handle(req, res)) return; // [live-progress] GET /api/jobs/stream, /api/jobs/{source}/{id}/preview
     if (req.method === 'GET' && url.pathname === '/api/director/agent/stream') { const id = url.searchParams.get('id') || ''; if (!/^[a-f0-9-]{36}$/.test(id)) fail('Unknown project', 404); return agentRunner.stream(req, res, id); } // [agent] live steps + reply text (SSE)
     if (req.method === 'GET' && url.pathname === '/api/director/setup') return send({ ...(await setupChecks({ root, data })), agent: director.agentStatus(), dataDir: data });
     if (req.method === 'GET' && url.pathname === '/api/director/export') {
@@ -99,7 +113,11 @@ const server = createServer(async (req, res) => {
     }
     if (req.method === 'GET' && url.pathname === '/api/phone') return send(phoneLan.readiness());
     if (req.method === 'GET' && url.pathname === '/api/generation') return send(generation.state());
-    if (req.method === 'GET' && url.pathname === '/api/jobs') return send(tracker.snapshot());
+    if (req.method === 'GET' && url.pathname === '/api/jobs') {
+      const id = url.searchParams.get('projectId'), snap = tracker.snapshot(); if (id === null) return send(snap);
+      if (!(await projectExists(id))) fail('Unknown project', 404);
+      return send({ ...snap, jobs: snap.jobs.filter(job => job.projectId === id) });
+    }
     if (req.method === 'GET' && url.pathname === '/api/project') return send({ project: project.get(), catalog, blender: blenderReadiness(), comfyJobs: comfy.list() });
     if (req.method === 'GET' && url.pathname === '/api/readiness') return send({ blender: blenderReadiness(), comfy: comfy.readiness(), browser: { available: true, scope: 'Editable camera-study set' } });
     if (req.method === 'GET' && url.pathname === '/api/comfy/jobs') return send({ jobs: comfy.list() });
@@ -229,5 +247,5 @@ const server = createServer(async (req, res) => {
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});
 server.listen(port, '127.0.0.1', () => { console.log(`Comfy Previs: http://127.0.0.1:${port}`); batches.start(); });
-async function stop() { tracker.stop(); batches.close(); agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await headless.close(); await releaseLock(); process.exit(0); }
+async function stop() { progressRoutes.stop(); progress.stop(); tracker.stop(); batches.close(); agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await headless.close(); await releaseLock(); process.exit(0); }
 process.on('SIGTERM', stop); process.on('SIGINT', stop);

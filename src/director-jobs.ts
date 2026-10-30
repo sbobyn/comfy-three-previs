@@ -1,5 +1,7 @@
 import './director-jobs.css';
 import { h, toast } from './director-common';
+import './director-progress.css';
+import { acquireProgress, mountProgressView } from './director-progress';
 
 // Jobs pip (top bar) + side sheet. Reads GET /api/jobs (contract C1) and GET /api/director/batches (C3); additive to pollJobs().
 export type JobRow = {
@@ -85,7 +87,34 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
 
   const sheet = h('dialog', { class: 'jobs-sheet', 'aria-labelledby': 'jobs-title' });
   sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
-  sheet.addEventListener('close', () => sheet.remove());
+  sheet.addEventListener('close', () => { sheet.remove(); for (const key of [...views.keys()]) dropView(key); });
+
+  // Live progress for this project's rows: one shared lease. Ticks update keyed views in place; the
+  // sheet itself is rebuilt only when a row's status changes, so focus and scroll stay put.
+  const lease = projectId ? acquireProgress(projectId) : null;
+  const views = new Map<string, { el: HTMLElement; dispose: () => void }>();
+  const rowKey = (j: JobRow) => `${j.source}:${j.id}`;
+  const shape = (jobs: JobRow[]) => jobs.map(j => `${rowKey(j)}:${j.status}:${j.stuck}:${j.uncertain}`).join('|');
+  function dropView(key: string) { views.get(key)?.dispose(); views.get(key)?.el.remove(); views.delete(key); }
+  function progressFor(j: JobRow) {
+    if (!lease || j.projectId !== projectId || !isActive(j)) return null;
+    let view = views.get(rowKey(j));
+    if (!view) { const el = h('div', { class: 'jr-progress' }); view = { el, dispose: mountProgressView(el, lease.client, j.source, j.id, j.label) }; views.set(rowKey(j), view); }
+    return view.el;
+  }
+  let liveSeen = false;
+  lease?.client.subscribe(() => {
+    // Merge only once the shared client holds an authoritative snapshot (SSE or C1 poll).
+    if (['live', 'polling'].includes(lease.client.connection())) liveSeen = true;
+    if (!liveSeen) return;
+    const live = lease.client.snapshot().jobs as unknown as JobRow[];
+    const before = shape(snap.jobs), byKey = new Map(live.map(j => [rowKey(j), j]));
+    const merged = snap.jobs.filter(j => j.projectId !== projectId || byKey.has(rowKey(j))).map(j => byKey.get(rowKey(j)) || j);
+    for (const j of live) if (!merged.some(m => rowKey(m) === rowKey(j))) merged.push(j);
+    merged.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    snap = { ...snap, jobs: merged };
+    if (shape(merged) !== before) render();
+  });
 
   // A server without the S1/S3 routes answers 404 ("File not found", "Unknown director route"): stop asking.
   const missing = (e: unknown) => /not found|unknown\b.*\broute|\(404\)/i.test((e as Error).message);
@@ -193,7 +222,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
         h('div', { class: 'jr-top' }, h('span', { class: 'jr-label', title: j.label }, j.label), h('span', { class: `jr-status t-${tone}` }, status)),
         h('div', { class: 'jr-meta' }, meta.join(' · ')),
         active ? h('div', { class: `jr-bar${ratio > 1 ? ' over' : ''}${attention ? ' bad' : ''}`, role: 'progressbar', 'aria-label': 'Elapsed against expected time', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(Math.min(100, Math.round(ratio * 100))) }, h('i', { style: `width:${Math.min(100, Math.round(ratio * 100))}%` })) : null,
-        failure, rec,
+        progressFor(j), failure, rec,
         actions.childElementCount ? actions : null));
   }
 
@@ -243,6 +272,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
         section('Recent', 'recent', g.recent.map(jobRow)),
         nothing ? h('div', { class: 'js-idle' }, h('span', { class: 'js-idle-mark', 'aria-hidden': 'true' }), h('p', {}, 'No generation jobs yet. Images and videos you generate show up here while they run.')) : null),
       h('footer', { class: 'js-foot' }, !jobsOk ? 'Waiting for the job tracker' : `${snap.tracker.running ? 'Tracker on' : 'Tracker paused'} · refreshes every ${busyNow() ? 4 : 20} s`));
+    for (const key of [...views.keys()]) if (!views.get(key)!.el.isConnected) dropView(key);
     const body = sheet.querySelector('.js-body'); if (body) body.scrollTop = scroll;
     if (focusKey) sheet.querySelector<HTMLElement>(`[data-k="${focusKey}"]`)?.focus();
   }

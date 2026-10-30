@@ -1,6 +1,7 @@
 // Server-side job tracker (contract C1). Polls every active generation/refgen job with backoff
 // until it is terminal, so outcomes land without a client calling track. It only ever calls
 // the stores' own track(); it never submits, retries or resubmits anything.
+import { classifyFailure } from './failures.mjs';
 import { errorDetail } from './backends.mjs';
 import { uncertainHoldMs, uncertainSince } from './concurrency.mjs';
 
@@ -57,7 +58,8 @@ export function createJobTracker({ sources, intervalMs = 5000, maxIntervalMs = 3
         if (entry.attempts === 1 || job?.status !== entry.status) log(`${entry.name} ${entry.id.slice(0, 8)} tracked #${entry.trackCount} → ${job?.status}`);
         entry.status = job?.status;
         if (!job || !source.isActive(job)) { await finish(entry, job); return job; }
-        if (at - (startOf(job) ?? at) > giveUpMs && !entry.gaveUp) { entry.gaveUp = true; log(`${entry.name} ${entry.id.slice(0, 8)} still ${job.status} after ${Math.round(giveUpMs / 60000)} min; automatic tracking stopped`); }
+        if (['collecting', 'attaching'].includes(job.status)) entry.gaveUp = false;
+        if (!['collecting', 'attaching'].includes(job.status) && at - (startOf(job) ?? at) > giveUpMs && !entry.gaveUp) { entry.gaveUp = true; log(`${entry.name} ${entry.id.slice(0, 8)} still ${job.status} after ${Math.round(giveUpMs / 60000)} min; automatic tracking stopped`); }
         return job;
       } catch (error) {
         const detail = errorDetail(error);
@@ -114,18 +116,20 @@ export function createJobTracker({ sources, intervalMs = 5000, maxIntervalMs = 3
     snapshot() {
       const at = now(), jobs = [];
       for (const source of sources) for (const job of source.list()) {
-        if (DRAFT.has(job.status)) continue;
+        if (DRAFT.has(job.status) && !job.lastAttempt) continue;
         const active = source.isActive(job), entry = entries.get(keyOf(source.name, job.id));
         const start = startOf(job) ?? at, end = active ? at : endOf(job) ?? at;
         if (!active && at - end > recentMs) continue;
         const ageSeconds = Math.max(0, Math.round((end - start) / 1000)), expectedSeconds = source.expectedSeconds(job), uncertain = job.status === 'uncertain';
-        const stuck = active && (ageSeconds > 2 * expectedSeconds || Boolean(entry?.gaveUp) || (uncertain && at - (uncertainSince(job) ?? start) > holdMs));
+        const stuck = job.status === 'recovery-required' || active && (ageSeconds > 2 * expectedSeconds || Boolean(entry?.gaveUp) || (uncertain && at - (uncertainSince(job) ?? start) > holdMs));
         jobs.push({
           id: job.id, kind: source.kindOf?.(job) || 'image', source: source.name, projectId: source.projectIdOf(job) ?? null, label: source.label(job), status: job.status,
           createdAt: job.createdAt || null, submittedAt: job.dispatchStartedAt || job.submittedAt || job.acceptedAt || null,
           lastTrackedAt: iso(entry?.lastTrackedAt) ?? job.tracking?.lastTrackedAt ?? null, trackCount: entry?.trackCount ?? job.tracking?.trackCount ?? 0,
           nextTrackAt: active && entry && !entry.gaveUp ? iso(entry.nextAt) : null, ageSeconds, expectedSeconds, stuck, uncertain,
           costUsd: source.costOf(job) ?? null, backend: { kind: job.backend?.kind ?? null, id: job.backend?.id ?? null },
+          diagnosis: classifyFailure(job),
+          ...(job.lastAttempt ? { lastAttempt: job.lastAttempt } : {}),
           failure: job.failure ? { phase: job.failure.phase ?? null, httpStatus: job.failure.httpStatus ?? null, detail: job.failure.detail ?? null } : null,
           ...(entry?.error || job.tracking?.error ? { trackingError: entry?.error || job.tracking.error } : {}),
           results: source.resultsOf?.(job) || [],

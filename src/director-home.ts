@@ -1,10 +1,11 @@
 // Home / launch page: what Comfy Three Previs does, how it works in three steps, starters, and your projects.
 import './director-home.css';
+import './director-home-mobile.css'; // [mobile]
 import { TEMPLATES, makeEntity, makeShot } from '../shared/director.mjs';
 import type { DirectorProject, Shot } from '../shared/director.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
 import { renderStill } from './director-scene';
-import { api, h, ago, connectDialog, toast } from './director-common';
+import { api, h, ago, claudeDialog, toast } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
 import { openJourney } from './director-guide';
 import { checkList, openSetup } from './director-setup';
@@ -99,7 +100,7 @@ function setupStatus(checks: Check[], dataDir: string) {
 
 function claudeHint() {
   const text = agent?.connected ? `Claude connected${agent.name ? ` · ${agent.name}` : ''}` : 'Works with Claude — direct your scene in chat';
-  return h('button', { class: 'home-claude' + (agent?.connected ? ' on' : ''), type: 'button', onclick: () => connectDialog(agent, connect) }, h('span', { class: 'home-claude-mark', 'aria-hidden': 'true' }, '✳'), text);
+  return h('button', { class: 'home-claude' + (agent?.connected ? ' on' : ''), type: 'button', onclick: () => claudeDialog(connect) }, h('span', { class: 'home-claude-mark', 'aria-hidden': 'true' }, '✳'), text);
 }
 
 // Hero visual: the starters' first frames, cross-fading like a monitor.

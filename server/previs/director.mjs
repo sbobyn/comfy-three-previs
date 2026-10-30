@@ -7,6 +7,7 @@ import { renderEdit, withTemp, imageToPng } from './edit.mjs';
 import { normalizePrompts, normalizeStyle } from '../../shared/prompt.mjs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { recoveryId, saveResultBytes } from './result-recovery.mjs';
 import { atomicJson } from './atomic.mjs';
 import { interpret } from './director-parse.mjs';
 import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
@@ -360,13 +361,20 @@ export async function openDirector(root, options = {}) {
       const objectScope = input.scope === 'object';
       const shot = objectScope ? null : resolveShot(p, input.shotId);
       if (!objectScope && !shot) fail('Choose a shot for this reference');
+      const outputKey = input.generated?.outputKey, requestId = input.generated?.requestId;
+      if (outputKey && requestId) {
+        const refs = objectScope ? p.scene.references || [] : shot.references;
+        const existing = refs.find(r => r.generated?.requestId === requestId && r.generated?.outputKey === outputKey);
+        if (existing) return { project: p, referenceId: existing.id };
+      }
       if (shot && shot.references.length >= 24) fail('A shot supports at most 24 references');
       const bytes = Buffer.from(String(input.data || ''), 'base64');
       if (!bytes.length || bytes.length > MAX_IMAGE) fail('Reference images must be PNG, JPEG or WebP under 10 MB');
       const mime = sniff(bytes); if (!mime) fail('Reference images must be PNG, JPEG or WebP under 10 MB');
-      const refId = randomUUID(), file = `${refId}.${MIME[mime]}`;
+      const refId = outputKey && requestId ? recoveryId(requestId, outputKey) : randomUUID(), file = `${refId}.${MIME[mime]}`;
       await mkdir(join(dir, p.id, 'refs'), { recursive: true });
-      await writeFile(join(dir, p.id, 'refs', file), bytes, { flag: 'wx', mode: 0o600 });
+      if (outputKey && requestId) await saveResultBytes(join(dir, p.id, 'refs', file), bytes);
+      else await writeFile(join(dir, p.id, 'refs', file), bytes, { flag: 'wx', mode: 0o600 });
       const entity = input.entityId ? resolveEntity(p, input.entityId) : null;
       if (objectScope && !entity) fail('Choose an object for this look');
       if (objectScope && (p.scene.references || []).filter(r => r.entityId === entity.id).length >= 64) fail('An object supports at most 64 looks');
@@ -491,7 +499,7 @@ export async function openDirector(root, options = {}) {
           if (r.sha256 && sha(bytes) !== r.sha256) continue;
           const file = `assets/${r.id}.${EXT[r.mime]}`;
           await mkdir(join(dir, p.id, 'assets'), { recursive: true });
-          try { await writeFile(join(dir, p.id, file), bytes, { flag: 'wx', mode: 0o600 }); } catch (e) { if (e.code !== 'EEXIST') throw e; }
+          await saveResultBytes(join(dir, p.id, file), bytes);
           (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null } });
           known.add(r.id); added++;
         }
@@ -669,12 +677,17 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
         for (const x of picks) {
           const file = await director.refFile(p.id, x.ref.file);
           const bytes = await readFile(file), sha256 = createHash('sha256').update(bytes).digest('hex');
-          let render = previs.get().renders.find(r => r.shotId === engineShot.id && r.directorRef?.sha256 === sha256);
+          const same = r => r.shotId === engineShot.id && r.directorRef?.sha256 === sha256;
+          let render = previs.get().renders.find(same);
           if (!render) {
-            const image = await previs.image(await imageToPng(file));
-            render = { id: image.id, shotId: engineShot.id, source: 'director-ref', pass: 'reference', width: image.width, height: image.height, binding: structuredClone(engineShot.binding), directorRef: { projectId: p.id, referenceId: x.ref.id, sha256 }, createdAt: new Date().toISOString() };
-            const rec = render;
-            await previs.mutate(previs.get().revision, q => { q.renders.push(rec); });
+            // Check and insert inside the engine write queue: concurrent registrations, result attachment and binds
+            // never race on the revision ("Project changed"), and two callers never register the same image twice.
+            await previs.append(async q => {
+              render = q.renders.find(same); if (render) return false;
+              const image = await previs.image(await imageToPng(file));
+              render = { id: image.id, shotId: engineShot.id, source: 'director-ref', pass: 'reference', width: image.width, height: image.height, binding: structuredClone(engineShot.binding), directorRef: { projectId: p.id, referenceId: x.ref.id, sha256 }, createdAt: new Date().toISOString() };
+              q.renders.push(render);
+            });
           }
           references.push({ renderId: render.id, referenceId: x.ref.id, entityId: x.entityId, role: x.role, label: x.label, name: x.ref.name, file: x.ref.file });
         }

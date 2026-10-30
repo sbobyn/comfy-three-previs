@@ -1,0 +1,718 @@
+{
+  "capturedAt": "2026-10-30T17:50:12.993Z",
+  "source": "scripts/guide-media.mjs",
+  "entries": [
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-s2-blockout",
+      "file": "breaking-news-s2-blockout.mp4",
+      "kind": "video",
+      "asset": "c5dc1216-7dda-4c1e-8de6-ff38d7881451",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "shot": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "label": "Breaking News · The headline",
+      "bytes": 29631
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-s2-generated",
+      "file": "breaking-news-s2-generated.mp4",
+      "kind": "video",
+      "asset": "6b33169b-ba1a-4948-8ec8-e1787dd3542b",
+      "model": "LTX 2.5 Fast",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "shot": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "label": "Breaking News · The headline",
+      "bytes": 206451
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-s2-blockout-poster",
+      "file": "breaking-news-s2-blockout.webp",
+      "kind": "image",
+      "asset": "c5dc1216-7dda-4c1e-8de6-ff38d7881451",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "shot": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "label": "Breaking News · The headline",
+      "bytes": 1594
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-s2-generated-poster",
+      "file": "breaking-news-s2-generated.webp",
+      "kind": "image",
+      "asset": "6b33169b-ba1a-4948-8ec8-e1787dd3542b",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "shot": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "label": "Breaking News · The headline",
+      "bytes": 19888
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-s2-still",
+      "file": "breaking-news-s2-still.webp",
+      "kind": "image",
+      "asset": "541259b3-11e0-4bd4-a459-4532c24a7447",
+      "model": "Flux.2 [pro] (BFL)",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "shot": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "label": "Breaking News · The headline",
+      "bytes": 23830
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-s2-still-blockout",
+      "file": "breaking-news-s2-still-blockout.webp",
+      "kind": "image",
+      "asset": "c5dc1216-7dda-4c1e-8de6-ff38d7881451",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "shot": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "label": "Breaking News · The headline",
+      "bytes": 1604
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-cast-1",
+      "file": "breaking-news-cast-1.webp",
+      "kind": "image",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "asset": "d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8",
+      "label": "News anchor",
+      "bytes": 4512
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-cast-2",
+      "file": "breaking-news-cast-2.webp",
+      "kind": "image",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "asset": "47334e07-2256-4750-8686-6f6b6fff4730",
+      "label": "Camera operator",
+      "bytes": 2746
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-cast-3",
+      "file": "breaking-news-cast-3.webp",
+      "kind": "image",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "asset": "fd2f4ad8-f728-4dd9-becb-41fe750eda5f",
+      "label": "Anchor desk",
+      "bytes": 1710
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-cast-4",
+      "file": "breaking-news-cast-4.webp",
+      "kind": "image",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "asset": "4eb6c8be-98c4-4ad1-a7fb-62a994e924c3",
+      "label": "Video wall",
+      "bytes": 5916
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "breaking-news-sheet",
+      "file": "breaking-news-sheet.webp",
+      "kind": "image",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "asset": "945ce178-464c-4257-b009-b15b7b9ce71c",
+      "label": "Video wall · design sheet",
+      "bytes": 13430
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-s2-blockout",
+      "file": "final-lap-s2-blockout.mp4",
+      "kind": "video",
+      "asset": "6cebf9bd-038f-4dce-952b-1b028638900a",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 90146
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-s2-generated",
+      "file": "final-lap-s2-generated.mp4",
+      "kind": "video",
+      "asset": "7459275a-225c-486e-8b85-815f0a1df7fa",
+      "model": "LTX 2.5 Fast",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 450501
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-s2-blockout-poster",
+      "file": "final-lap-s2-blockout.webp",
+      "kind": "image",
+      "asset": "6cebf9bd-038f-4dce-952b-1b028638900a",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 2840
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-s2-generated-poster",
+      "file": "final-lap-s2-generated.webp",
+      "kind": "image",
+      "asset": "7459275a-225c-486e-8b85-815f0a1df7fa",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 36984
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-s2-still",
+      "file": "final-lap-s2-still.webp",
+      "kind": "image",
+      "asset": "2b1d4fc5-54e3-45c4-be50-5546d2abb9b6",
+      "model": "FLUX 3 Image (BFL)",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 43590
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-s2-still-blockout",
+      "file": "final-lap-s2-still-blockout.webp",
+      "kind": "image",
+      "asset": "6cebf9bd-038f-4dce-952b-1b028638900a",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 2924
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-cast-1",
+      "file": "final-lap-cast-1.webp",
+      "kind": "image",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "asset": "599fbd2f-aa79-41e5-9748-9564f1c28d00",
+      "label": "Fan with phone",
+      "bytes": 3002
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-cast-2",
+      "file": "final-lap-cast-2.webp",
+      "kind": "image",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "asset": "276e8e15-ec39-4603-b126-5d315a23575e",
+      "label": "Comfy car",
+      "bytes": 4434
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-cast-3",
+      "file": "final-lap-cast-3.webp",
+      "kind": "image",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "asset": "d055de8a-bf7e-4cd5-aaf0-88dacf52b4e0",
+      "label": "Rival car",
+      "bytes": 3860
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-cast-4",
+      "file": "final-lap-cast-4.webp",
+      "kind": "image",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "asset": "55174ba8-4e18-4f7b-b30d-495c98b33441",
+      "label": "Flag stand",
+      "bytes": 4510
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "final-lap-sheet",
+      "file": "final-lap-sheet.webp",
+      "kind": "image",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "asset": "7fbc720a-fd3e-4c84-8dd5-00c1c30c95e1",
+      "label": "Comfy car · design sheet",
+      "bytes": 7242
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "wingspan-s2-blockout",
+      "file": "wingspan-s2-blockout.mp4",
+      "kind": "video",
+      "asset": "be4f46fd-1308-4908-bb26-02c8151f8eb5",
+      "project": "f158baf1-2cac-4311-859a-e5c590d381d4",
+      "shot": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "label": "Wingspan · The dive",
+      "bytes": 165572
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "wingspan-s2-generated",
+      "file": "wingspan-s2-generated.mp4",
+      "kind": "video",
+      "asset": "b0a9b5e8-32e4-4355-9c78-76e4d7f21869",
+      "model": "LTX 2.5 Fast",
+      "project": "f158baf1-2cac-4311-859a-e5c590d381d4",
+      "shot": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "label": "Wingspan · The dive",
+      "bytes": 794763
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "wingspan-s2-blockout-poster",
+      "file": "wingspan-s2-blockout.webp",
+      "kind": "image",
+      "asset": "be4f46fd-1308-4908-bb26-02c8151f8eb5",
+      "project": "f158baf1-2cac-4311-859a-e5c590d381d4",
+      "shot": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "label": "Wingspan · The dive",
+      "bytes": 4672
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "wingspan-s2-generated-poster",
+      "file": "wingspan-s2-generated.webp",
+      "kind": "image",
+      "asset": "b0a9b5e8-32e4-4355-9c78-76e4d7f21869",
+      "project": "f158baf1-2cac-4311-859a-e5c590d381d4",
+      "shot": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "label": "Wingspan · The dive",
+      "bytes": 48564
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "wingspan-s2-still",
+      "file": "wingspan-s2-still.webp",
+      "kind": "image",
+      "asset": "46987310-01b1-49b3-a0dc-e09d669bd56a",
+      "model": "FLUX 3 Image (BFL)",
+      "project": "f158baf1-2cac-4311-859a-e5c590d381d4",
+      "shot": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "label": "Wingspan · The dive",
+      "bytes": 61902
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "wingspan-s2-still-blockout",
+      "file": "wingspan-s2-still-blockout.webp",
+      "kind": "image",
+      "asset": "be4f46fd-1308-4908-bb26-02c8151f8eb5",
+      "project": "f158baf1-2cac-4311-859a-e5c590d381d4",
+      "shot": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "label": "Wingspan · The dive",
+      "bytes": 4764
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "wingspan-cast-1",
+      "file": "wingspan-cast-1.webp",
+      "kind": "image",
+      "project": "f158baf1-2cac-4311-859a-e5c590d381d4",
+      "asset": "9b06d6d6-2f59-4612-a960-f348d5116241",
+      "label": "Bald eagle",
+      "bytes": 6762
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "wingspan-cast-2",
+      "file": "wingspan-cast-2.webp",
+      "kind": "image",
+      "project": "f158baf1-2cac-4311-859a-e5c590d381d4",
+      "asset": "eb8bde51-a7df-40c5-9060-90fc87391217",
+      "label": "Elk 1",
+      "bytes": 7684
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "wingspan-sheet",
+      "file": "wingspan-sheet.webp",
+      "kind": "image",
+      "project": "f158baf1-2cac-4311-859a-e5c590d381d4",
+      "asset": "07f6e185-78eb-4ed0-a9c2-5de7e83531bf",
+      "label": "Bald eagle · design sheet",
+      "bytes": 16928
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-s1-blockout",
+      "file": "posterized-s1-blockout.mp4",
+      "kind": "video",
+      "asset": "02c2d4ca-0757-4e0f-8a97-d05775d4c747",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "shot": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "label": "Posterized · Fast break",
+      "bytes": 94119
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-s1-generated",
+      "file": "posterized-s1-generated.mp4",
+      "kind": "video",
+      "asset": "78f74e15-b42d-4c4d-b24a-17c4f7e93ba1",
+      "model": "LTX 2.5 Fast",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "shot": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "label": "Posterized · Fast break",
+      "bytes": 478527
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-s1-blockout-poster",
+      "file": "posterized-s1-blockout.webp",
+      "kind": "image",
+      "asset": "02c2d4ca-0757-4e0f-8a97-d05775d4c747",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "shot": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "label": "Posterized · Fast break",
+      "bytes": 6990
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-s1-generated-poster",
+      "file": "posterized-s1-generated.webp",
+      "kind": "image",
+      "asset": "78f74e15-b42d-4c4d-b24a-17c4f7e93ba1",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "shot": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "label": "Posterized · Fast break",
+      "bytes": 22344
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-s1-still",
+      "file": "posterized-s1-still.webp",
+      "kind": "image",
+      "asset": "02162c27-f7e1-4fc7-9230-1114f1fa4201",
+      "model": "Flux.2 [pro] (BFL)",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "shot": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "label": "Posterized · Fast break",
+      "bytes": 27272
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-s1-still-blockout",
+      "file": "posterized-s1-still-blockout.webp",
+      "kind": "image",
+      "asset": "02c2d4ca-0757-4e0f-8a97-d05775d4c747",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "shot": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "label": "Posterized · Fast break",
+      "bytes": 7086
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-cast-1",
+      "file": "posterized-cast-1.webp",
+      "kind": "image",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "asset": "32072d1e-c469-44e6-8db6-8a5835874bd3",
+      "label": "Comfy guard",
+      "bytes": 5704
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-cast-2",
+      "file": "posterized-cast-2.webp",
+      "kind": "image",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "asset": "379c6bab-3390-470a-baa8-fa73980375c1",
+      "label": "Rival defender",
+      "bytes": 4686
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-cast-3",
+      "file": "posterized-cast-3.webp",
+      "kind": "image",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "asset": "6a525369-1df1-4883-ad37-d623f9ae39c9",
+      "label": "Basketball",
+      "bytes": 2794
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-cast-4",
+      "file": "posterized-cast-4.webp",
+      "kind": "image",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "asset": "2da9e5ab-2b11-480e-b9bb-1f0d154f8ce5",
+      "label": "Jumbotron",
+      "bytes": 3454
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "posterized-sheet",
+      "file": "posterized-sheet.webp",
+      "kind": "image",
+      "project": "5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6",
+      "asset": "35bea06f-8e12-4d0c-bb6f-543a04a5668a",
+      "label": "Comfy guard · design sheet",
+      "bytes": 17282
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "cast-before",
+      "file": "breaking-news-s2-still-blockout.webp",
+      "kind": "image",
+      "asset": "c5dc1216-7dda-4c1e-8de6-ff38d7881451",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "shot": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "label": "Breaking News · The headline",
+      "bytes": 1604
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "cast-after",
+      "file": "breaking-news-s2-still.webp",
+      "kind": "image",
+      "asset": "541259b3-11e0-4bd4-a459-4532c24a7447",
+      "model": "Flux.2 [pro] (BFL)",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "shot": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "label": "Breaking News · The headline",
+      "bytes": 23830
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "cast-image-1",
+      "file": "breaking-news-cast-1.webp",
+      "kind": "image",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "asset": "d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8",
+      "label": "News anchor",
+      "bytes": 4512
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "cast-image-2",
+      "file": "breaking-news-cast-2.webp",
+      "kind": "image",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "asset": "47334e07-2256-4750-8686-6f6b6fff4730",
+      "label": "Camera operator",
+      "bytes": 2746
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "cast-image-3",
+      "file": "breaking-news-cast-3.webp",
+      "kind": "image",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "asset": "fd2f4ad8-f728-4dd9-becb-41fe750eda5f",
+      "label": "Anchor desk",
+      "bytes": 1710
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "cast-image-4",
+      "file": "breaking-news-cast-4.webp",
+      "kind": "image",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "asset": "4eb6c8be-98c4-4ad1-a7fb-62a994e924c3",
+      "label": "Video wall",
+      "bytes": 5916
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "generate-before",
+      "file": "final-lap-s2-blockout.mp4",
+      "kind": "video",
+      "asset": "6cebf9bd-038f-4dce-952b-1b028638900a",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 90146
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "generate-after",
+      "file": "final-lap-s2-generated.mp4",
+      "kind": "video",
+      "asset": "7459275a-225c-486e-8b85-815f0a1df7fa",
+      "model": "LTX 2.5 Fast",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 450501
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "generate-before-poster",
+      "file": "final-lap-s2-blockout.webp",
+      "kind": "image",
+      "asset": "6cebf9bd-038f-4dce-952b-1b028638900a",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 2840
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "generate-after-poster",
+      "file": "final-lap-s2-generated.webp",
+      "kind": "image",
+      "asset": "7459275a-225c-486e-8b85-815f0a1df7fa",
+      "project": "ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f",
+      "shot": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "label": "Final Lap · The draft",
+      "bytes": 36984
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "home",
+      "file": "home.webp",
+      "kind": "image",
+      "label": "Home",
+      "bytes": 35130
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "build",
+      "file": "build.webp",
+      "kind": "image",
+      "label": "Build",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "bytes": 67112
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "shoot",
+      "file": "shoot.webp",
+      "kind": "image",
+      "label": "Shoot",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "bytes": 52946
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "generate",
+      "file": "generate.webp",
+      "kind": "image",
+      "label": "Generate video dialog",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "bytes": 49834
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "cut",
+      "file": "cut.webp",
+      "kind": "image",
+      "label": "Cut",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "callouts": [
+        {
+          "label": "Drag to reorder",
+          "x": 0.01953125,
+          "y": 0.60099609375,
+          "w": 0.0109375,
+          "h": 0.02173828125
+        },
+        {
+          "label": "Version used in the cut",
+          "x": 0.75546875,
+          "y": 0.56625,
+          "w": 0.171875,
+          "h": 0.0425
+        },
+        {
+          "label": "Trim in → out",
+          "x": 0.75546875,
+          "y": 0.615,
+          "w": 0.171875,
+          "h": 0.0425
+        },
+        {
+          "label": "In cut or left out",
+          "x": 0.93792724609375,
+          "y": 0.554375,
+          "w": 0.04254150390625,
+          "h": 0.035
+        },
+        {
+          "label": "Compare blockout and generated",
+          "x": 0.0109375,
+          "y": 0.0775,
+          "w": 0.40625,
+          "h": 0.365625
+        },
+        {
+          "label": "Export the film",
+          "x": 0.428125,
+          "y": 0.185,
+          "w": 0.10968017578125,
+          "h": 0.0425
+        }
+      ],
+      "bytes": 57208
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "cut-board",
+      "file": "cut.webp",
+      "kind": "image",
+      "label": "Cut",
+      "project": "ff685e99-00bf-4f5f-979a-944f0caca7c9",
+      "callouts": [
+        {
+          "label": "Drag to reorder",
+          "x": 0.01953125,
+          "y": 0.60099609375,
+          "w": 0.0109375,
+          "h": 0.02173828125
+        },
+        {
+          "label": "Version used in the cut",
+          "x": 0.75546875,
+          "y": 0.56625,
+          "w": 0.171875,
+          "h": 0.0425
+        },
+        {
+          "label": "Trim in → out",
+          "x": 0.75546875,
+          "y": 0.615,
+          "w": 0.171875,
+          "h": 0.0425
+        },
+        {
+          "label": "In cut or left out",
+          "x": 0.93792724609375,
+          "y": 0.554375,
+          "w": 0.04254150390625,
+          "h": 0.035
+        },
+        {
+          "label": "Compare blockout and generated",
+          "x": 0.0109375,
+          "y": 0.0775,
+          "w": 0.40625,
+          "h": 0.365625
+        },
+        {
+          "label": "Export the film",
+          "x": 0.428125,
+          "y": 0.185,
+          "w": 0.10968017578125,
+          "h": 0.0425
+        }
+      ],
+      "bytes": 57208
+    },
+    {
+      "capturedAt": "2026-10-30T17:50:12.993Z",
+      "id": "phone",
+      "file": "phone.webp",
+      "kind": "image",
+      "label": "Phone camera page (J9)",
+      "bytes": 10030
+    }
+  ],
+  "missing": [
+    "J12: one design sheet per starter is captured, not one per sheet type"
+  ]
+}

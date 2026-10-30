@@ -208,6 +208,7 @@ export async function openBatches(root, options = {}) {
       delete n.missing;
       const states = list.map(jobState);
       if (list.some(j => j.stuck) && !n.stuck) setNode(b, n, { stuck: true }, `${n.label}: job is taking far longer than expected`);
+      if (list.some(j => j.status === 'recovery-required')) { setNode(b, n, { status: 'failed', recoveryRequired: true, finishedAt: iso(now()), error: 'Output recovery exhausted; recover existing media only, never resend this node.' }, `${n.label}: output recovery required`); pause(b); continue; }
       if (states.includes('uncertain')) { setNode(b, n, { status: 'failed', uncertain: true, finishedAt: iso(now()), error: 'Dispatch outcome unknown (uncertain); never resent. Check the jobs panel.' }, `${n.label}: uncertain`); pause(b); continue; }
       if (states.includes('running')) continue;
       const ok = list.filter((j, i) => states[i] === 'done'), results = ok.flatMap(j => j.results || []);
@@ -320,7 +321,7 @@ export async function openBatches(root, options = {}) {
       const b = get(id);
       if (b.status === 'running') return structuredClone(b);
       if (maxCostUsd != null) { const cap = Number(maxCostUsd); if (!Number.isFinite(cap) || cap < b.spentEstimateUsd) fail(`maxCostUsd must be at least the ${usd(b.spentEstimateUsd)} already committed`); b.maxCostUsd = cap; }
-      for (const n of b.nodes) if (n.cancelled || n.status === 'budget' || (n.status === 'failed' && !n.uncertain && !n.planError))
+      for (const n of b.nodes) if (n.cancelled || n.status === 'budget' || (n.status === 'failed' && !n.uncertain && !n.recoveryRequired && !n.planError))
         setNode(b, n, { status: 'waiting', cancelled: undefined, blockedBy: undefined, error: undefined, retryAt: undefined, stuck: undefined, startedAt: undefined, finishedAt: undefined, ...(n.status === 'failed' && !n.blockedBy ? NO_IDS : {}) });
       setBatch(b, { status: 'running', dryRun: false }, `Resumed (cap ${usd(b.maxCostUsd)})`);
       resolve(b); await persist(b); schedule(b.id, 0);

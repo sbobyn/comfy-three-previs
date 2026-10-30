@@ -10,20 +10,31 @@ const source = await readFile(new URL('../src/director.ts', import.meta.url), 'u
 const compile = text => ts.transpileModule(text, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 
 test('additive and marquee selections expose the contextual object controls', () => {
-  const selection = new Selection(), tabs = [], frames = [];
+  const selection = new Selection(), frames = [], pivots = [];
+  let opened = 0, view = 'set';
   const start = source.indexOf('  onClickSelect(id, mode) {');
   const end = source.indexOf('  onContextMenu(', start);
   assert.ok(start > 0 && end > start);
   const entities = new Map(['car', 'tree', 'lamp'].map(id => [id, { id }]));
-  const context = { selection, entity: id => entities.get(id) || null, scene: { view: () => 'set', frame: ids => frames.push([...ids]) }, setTab: tab => tabs.push(tab) };
+  const scene = { view: () => view, pivotOn: id => pivots.push(id), frame: ids => frames.push([...ids]), focusOn: e => frames.push([e.id]) };
+  const context = { selection, entity: id => entities.get(id) || null, scene, openObject: () => opened++ };
   runInNewContext(compile(`globalThis.callbacks = {${source.slice(start, end)}};`), context);
   context.callbacks.onClickSelect('car', 'replace');
   context.callbacks.onClickSelect('tree', 'add');
   context.callbacks.onClickSelect('tree', 'toggle');
   context.callbacks.onMarquee(['tree', 'lamp']);
   assert.deepEqual(selection.ids, ['car', 'tree', 'lamp']);
-  assert.deepEqual(tabs, ['object', 'object', 'object', 'object']);
-  assert.deepEqual(frames, [['car']], 'additive selection keeps the current framing');
+  assert.equal(opened, 4, 'every non-empty selection opens the object controls');
+  assert.deepEqual(pivots, ['car'], 'only a replacing click moves the orbit pivot');
+  assert.deepEqual(frames, [], 'selection never reframes the camera');
+  view = 'shot';
+  context.callbacks.onClickSelect('lamp', 'replace');
+  assert.deepEqual(selection.ids, ['lamp']);
+  assert.deepEqual(pivots, ['car'], 'the shot camera view keeps its pivot');
+  assert.deepEqual(frames, []);
+  context.callbacks.onClickSelect(null, 'replace');
+  assert.deepEqual(selection.ids, []);
+  assert.equal(opened, 5, 'clearing the selection opens nothing');
 });
 
 test('object description editing records the original value for undo', async () => {

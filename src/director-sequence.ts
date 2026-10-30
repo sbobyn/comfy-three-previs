@@ -3,6 +3,7 @@
 // choose the version each shot uses in the cut, trim, play the whole cut and export the film.
 import './director-sequence.css';
 import type { DirectorProject, Shot, Asset, EditClip } from '../shared/director.mjs';
+import { progressSlot } from './director-progress'; // [live-progress]
 import { api, h, toast } from './director-common';
 import { shotCast, objectLooks } from '../shared/director.mjs';
 import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } from './director-videogen';
@@ -20,7 +21,10 @@ export type SequenceCtx = {
   openShot(id: string): void;
   /** Unused: the Cut board is the only editor. Kept so the workspace can drop it in its own change. */
   openEditor?(): void;
+  /** [mobile] compact row template; the parts are today's controls, re-arranged by the mobile layer. */
+  rowTemplate?(parts: RowParts): HTMLElement;
 };
+export type RowParts = { s: Shot; i: number; count: number; on: boolean; inCut: boolean; thumb: HTMLCanvasElement; pick: HTMLInputElement; version: HTMLSelectElement; trimIn: HTMLInputElement; trimOut: HTMLInputElement; include: HTMLButtonElement; moveUp: HTMLButtonElement; moveDown: HTMLButtonElement; open: HTMLButtonElement; bState: string[]; gState: string[]; progress?: HTMLElement | null; select(): void; reorder(from: number, to: number): Promise<void> };
 
 type Job = { id: string; shotId: string; status: string; message?: string; definition?: { title?: string; task?: string } };
 type Quoted = { shot: Shot; est: number | null; ok: boolean; issue?: string; refs?: EngineRef[] };
@@ -169,6 +173,10 @@ export function createSequence(ctx: SequenceCtx) {
     const include = h('button', { class: 'btn sm' + (inCut ? ' on' : ''), type: 'button', 'aria-pressed': String(inCut), title: inCut ? 'In the cut — click to leave it out' : 'Left out of the cut — click to include' }, inCut ? 'In cut' : 'Excluded');
     include.onclick = () => void writeCut(m => m.set(s.id, inCut ? null : { id: crypto.randomUUID(), shotId: s.id, assetId: null, in: 0, out: null }), inCut ? 'Leave shot out of cut' : 'Include shot in cut');
     const move = (d: -1 | 1) => h('button', { class: 'btn ghost sm icon', type: 'button', disabled: i + d < 0 || i + d >= p.shots.length, 'aria-label': d < 0 ? 'Move earlier' : 'Move later', onclick: (ev: Event) => { ev.stopPropagation(); void reorder(i, i + d); } }, d < 0 ? '↑' : '↓');
+    const trimIn = trim('in'), trimOut = trim('out'), moveUp = move(-1), moveDown = move(1), open = h('button', { class: 'btn ghost sm', type: 'button', title: 'Open this shot in the scene', onclick: (ev: Event) => { ev.stopPropagation(); ctx.openShot(s.id); } }, 'Open');
+    // [live-progress] A new version's progress, separate from the version selected for the cut.
+    const progress = job ? progressSlot(p.id, 'generation', job.id, `Shot ${i + 1} new version`, 'cut') : null;
+    if (ctx.rowTemplate) return ctx.rowTemplate({ s, i, count: p.shots.length, on: s.id === selected, inCut, thumb, pick, version, trimIn, trimOut, include, moveUp, moveDown, open, bState, gState, progress, select: () => select(s.id), reorder });
     const el = h('div', { class: 'sq-row' + (s.id === selected ? ' on' : '') + (inCut ? '' : ' out'), role: 'listitem', draggable: true, tabindex: 0, 'aria-label': `Shot ${i + 1} ${s.title}` },
       h('span', { class: 'sq-grip', title: 'Drag to reorder', 'aria-hidden': 'true' }, '⋮⋮'), pick,
       h('span', { class: 'sq-num mono' }, String(i + 1).padStart(2, '0')),
@@ -178,13 +186,12 @@ export function createSequence(ctx: SequenceCtx) {
         h('div', { class: 'sq-acts' },
           b ? h('button', { class: 'btn sm', type: 'button', 'aria-label': `Play the blockout of shot ${i + 1}`, title: 'Play the blockout', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'blockout'); } }, '▶') : null,
           h('button', { class: 'btn sm', type: 'button', disabled: busy, 'aria-label': `${s.render ? 'Remake' : 'Make'} the blockout of shot ${i + 1}`, onclick: (ev: Event) => { ev.stopPropagation(); void renderShots([s]); } }, s.render ? 'Remake' : 'Make'))),
-      h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${gState[0]}` }, gState[1]),
+      h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${gState[0]}` }, gState[1]), progress,
         h('div', { class: 'sq-acts' },
           res.length ? h('button', { class: 'btn sm', type: 'button', 'aria-label': `Play the generated video of shot ${i + 1}`, title: 'Play the generated video', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'generated'); } }, '▶') : null,
           h('button', { class: 'btn sm', type: 'button', disabled: busy || !!job, title: 'Generate this shot with the selected model', 'aria-label': `Generate shot ${i + 1}`, onclick: (ev: Event) => { ev.stopPropagation(); picked = new Set([s.id]); void quote(); } }, 'Generate'))),
-      h('div', { class: 'sq-cell sq-cut' }, version, h('div', { class: 'sq-trim' }, trim('in'), h('span', { class: 'muted' }, '→'), trim('out'))),
-      h('div', { class: 'sq-side' }, include, h('div', { class: 'sq-move' }, move(-1), move(1)),
-        h('button', { class: 'btn ghost sm', type: 'button', title: 'Open this shot in the scene', onclick: (ev: Event) => { ev.stopPropagation(); ctx.openShot(s.id); } }, 'Open')));
+      h('div', { class: 'sq-cell sq-cut' }, version, h('div', { class: 'sq-trim' }, trimIn, h('span', { class: 'muted' }, '→'), trimOut)),
+      h('div', { class: 'sq-side' }, include, h('div', { class: 'sq-move' }, moveUp, moveDown), open));
     el.onclick = ev => { if ((ev.target as HTMLElement).closest('input,select,button')) return; select(s.id); };
     el.onkeydown = ev => { if (ev.target !== el) return; if (ev.key === 'Enter') select(s.id); if (ev.altKey && (ev.key === 'ArrowUp' || ev.key === 'ArrowDown')) { ev.preventDefault(); void reorder(i, i + (ev.key === 'ArrowUp' ? -1 : 1)); } };
     el.ondragstart = ev => { dragFrom = i; ev.dataTransfer?.setData('text/plain', String(i)); el.classList.add('dragging'); };
@@ -393,6 +400,9 @@ export function createSequence(ctx: SequenceCtx) {
         const allowance = { currency: 'USD', maxAmount: Math.max(0.01, Math.min(cap - spent, Math.ceil(cost * 150) / 100 || cap - spent)), allowUnknownCharges: true };
         const sub = (await api('generation/submit', { ...request, approval: { approved: true, fingerprint: job.fingerprint, allowance } })).job;
         spent += cost;
+        // [live-progress] Display only: reload jobs so the row shows the new version's progress while it runs
+        // (the periodic refresh is paused while busy). Never affects dispatch or tracking.
+        try { await loadGen(); draw(); } catch { /* tracking continues */ }
         const l = line(`${label}: ${sub.status}…`);
         let t = sub; const t0 = Date.now();
         while (!DONE.includes(t.status)) {
@@ -428,7 +438,8 @@ export function createSequence(ctx: SequenceCtx) {
   }
   let timer = 0;
   return {
-    el,
+    el, parts: { viewer: el.querySelector<HTMLElement>('.sq-viewer')!, board, batch, toolbar: el.querySelector<HTMLElement>('.sq-toolbar')! }, // [mobile]
+    mobile(o: Pick<SequenceCtx, 'rowTemplate'>) { Object.assign(ctx, o); if (!el.hidden) draw(); }, // [mobile]
     async show(on: boolean) {
       el.hidden = !on;
       clearInterval(timer);
