@@ -5,7 +5,7 @@ import { castCard, compilePrompt, lookPrompt, lookSource, objectLooks, objectNot
 import { shotPrompt } from '../../shared/prompt.mjs';
 import { planSlots, setsFor, slotAspect, viewPrompt } from '../../shared/sheet-presets.mjs';
 import { withReferenceImages, maxReferences } from '../../shared/video-refs.mjs';
-import { snapSeconds, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
+import { clipSecondsFor, durationValue, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 
 const SECONDS = { look: 20, sheet: 30, still: 20, video: 90 };
 const busyError = (pool, retryAfterSeconds) => Object.assign(Error(`Backend busy: fake ${pool} slots in use; retry when a job finishes`), { status: 409, apiCode: 'busy', retryAfterSeconds });
@@ -169,7 +169,7 @@ export function loopbackDrivers(base) {
       if (!start) start = (await get('/api/project')).project.renders?.find(x => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
       if (!start) throw notSent('No start image: generate a key frame for this shot, or render the blockout again');
       def = await definitionFor(base, 0); parameters = parametersOf(def);
-      if ('duration' in parameters) parameters.duration = String(snapSeconds(s.duration));
+      if ('duration' in parameters) parameters.duration = durationValue(parameters.duration, clipSecondsFor(base, s.duration));
       assetBindings = { firstFrame: { renderId: start }, ...(wantsLast ? { lastFrame: { renderId: end } } : {}) };
       prompt = (shotPrompt(p, s, 'video').trim() || compilePrompt(p, s)).replace('Preserve the supplied camera motion, framing and blocking.', 'Start from the supplied frame and keep its composition, characters and look.');
     } else {

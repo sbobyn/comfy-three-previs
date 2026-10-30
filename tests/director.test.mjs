@@ -113,7 +113,7 @@ test('HTTP director routes and the stdio MCP agent loop', async () => {
     assert.equal(carLook.generated, undefined, 'clients cannot mark uploads as generated');
     assert.equal(look.project.scene.entities.find(e => e.name === 'Car').look, carLook.id, 'first look becomes primary');
     const refgenState = await (await fetch(`${base}/api/director/refgen?projectId=${p.id}`)).json();
-    assert.deepEqual(refgenState.presets.map(x => x.id), ['flux-ultra', 'flux-3', 'flux-2-pro', 'nano-banana-pro', 'nano-banana-2-1', 'nano-banana-2', 'local-checkpoint']);
+    assert.deepEqual(refgenState.presets.map(x => x.id), ['flux-ultra', 'flux-3', 'flux-2-pro', 'flux-2-max', 'gpt-image-25', 'seedream-5-pro', 'nano-banana-pro', 'nano-banana-2-1', 'nano-banana-2', 'local-checkpoint']);
     assert.equal(refgenState.paidExecutionEnabled, false);
     const served = await fetch(`${base}/director-refs/${p.id}/${stored.file}`);
     assert.equal(served.status, 200); assert.equal(served.headers.get('content-type'), 'image/png');

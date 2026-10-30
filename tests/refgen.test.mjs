@@ -1,15 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, readFile } from 'node:fs/promises';
+import { deflateSync } from 'node:zlib';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { openDirector } from '../server/previs/director.mjs';
-import { openRefgen, imagePresets } from '../server/previs/refgen.mjs';
+import { openRefgen, imagePresets, GUIDE_INPUT } from '../server/previs/refgen.mjs';
+import { validateGraph } from '../server/previs/workflows.mjs';
 import { backendSnapshot } from '../server/previs/backends.mjs';
 import { createSlots } from '../server/previs/concurrency.mjs';
 import { createJobTracker } from '../server/previs/job-tracker.mjs';
 import { lookPrompt, compilePrompt, objectLooks } from '../shared/director.mjs';
+import { IMAGE_PRICES } from '../shared/tiers.mjs';
 
+// Live Comfy Cloud /object_info for the partner nodes the presets use (captured 2026-10-30, trimmed to the schema).
+const liveInfo = JSON.parse(await readFile(new URL('./fixtures/partner-object-info.json', import.meta.url), 'utf8'));
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==', 'base64');
 const n = (input, output, extra = {}) => ({ input: { required: input }, output, python_module: 'nodes', ...extra });
 const objectInfo = {
@@ -103,6 +108,64 @@ test('presets build schema-shaped graphs with one save per request', () => {
     assert.ok(Object.values(g).some(node => node.class_type === 'SaveImage'), p.id);
   }
   assert.equal(Object.values(imagePresets[0].build({ prompt: 'x', aspect: '1:1', count: 3, seed: 1 })).filter(x => x.class_type === 'FluxProUltraImageNode').length, 3);
+});
+
+test('every Cloud image preset validates against the live schema with the guide and its maximum references', () => {
+  const refInput = i => ({ nodeId: `${200 + i}`, input: 'image', kind: 'image', mime: 'image/png', filename: `previs-ref-${i}.png` });
+  const cloud = imagePresets.filter(p => p.backend === 'cloud');
+  assert.deepEqual(cloud.map(p => p.id), ['flux-ultra', 'flux-3', 'flux-2-pro', 'flux-2-max', 'gpt-image-25', 'seedream-5-pro', 'nano-banana-pro', 'nano-banana-2-1', 'nano-banana-2']);
+  for (const p of cloud) {
+    assert.ok(liveInfo[p.node], `${p.node} in the captured schema`);
+    for (const [guide, refs] of [[false, 0], [true, 0], [true, p.maxRefs || 0], [false, p.maxRefs || 0]]) {
+      const graph = p.build({ prompt: 'x', aspect: guide ? '16:9' : '3:4', count: 2, seed: 1, guide, refs });
+      const v = validateGraph(graph, liveInfo, { deferredInputs: [...(guide ? [GUIDE_INPUT] : []), ...Array.from({ length: refs }, (_, i) => refInput(i + 1))] });
+      assert.ok(v.compatible, `${p.id} guide=${guide} refs=${refs}: ${JSON.stringify(v.issues.slice(0, 2))}`);
+      // Every image loader feeds the model: the guide first, then the references in order.
+      const loaders = Object.entries(graph).filter(([, n]) => n.class_type === 'LoadImage').map(([id]) => id);
+      assert.deepEqual(loaders, [...(guide ? ['100'] : []), ...Array.from({ length: refs }, (_, i) => `${201 + i}`)].sort(), p.id);
+      const fed = new Set(Object.values(graph).flatMap(n => Object.values(n.inputs)).filter(x => Array.isArray(x)).map(x => x[0]));
+      assert.ok(loaders.every(id => fed.has(id)), `${p.id}: every loaded image is wired in`);
+    }
+    if (p.maxRefs) assert.equal(IMAGE_PRICES[p.id], p.pricing.usdPerImage, `${p.id} has a batch price`);
+  }
+  // Nano Banana Pro takes one IMAGE input: guide + references are padded to one size and batched in order.
+  const pro = imagePresets.find(p => p.id === 'nano-banana-pro').build({ prompt: 'x', aspect: '16:9', count: 1, seed: 1, guide: true, refs: 2 });
+  assert.deepEqual(pro[399].inputs, { 'images.image0': ['301', 0], 'images.image1': ['302', 0], 'images.image2': ['303', 0] });
+  assert.deepEqual([pro[301].inputs.image, pro[302].inputs.image, pro[303].inputs.image, pro[301].inputs.target_width, pro[301].inputs.target_height], [['100', 0], ['201', 0], ['202', 0], 1344, 768]);
+  assert.deepEqual(pro[1].inputs.images, ['399', 0]);
+  const nb21 = imagePresets.find(p => p.id === 'nano-banana-2-1').build({ prompt: 'x', aspect: '16:9', count: 1, seed: 1, guide: true, refs: 2 })[1].inputs;
+  assert.deepEqual([nb21['model.images.image_1'], nb21['model.images.image_2'], nb21['model.images.image_3']], [['100', 0], ['201', 0], ['202', 0]]);
+});
+
+// A small valid RGB PNG (references are normalised through ffmpeg).
+function rgbPng(width = 32, height = 32, color = 90) {
+  const chunk = (kind, bytes) => {
+    const body = Buffer.concat([Buffer.from(kind), bytes]); let crc = 0xffffffff;
+    for (const byte of body) { crc ^= byte; for (let i = 0; i < 8; i++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0); }
+    const len = Buffer.alloc(4), sum = Buffer.alloc(4); len.writeUInt32BE(bytes.length); sum.writeUInt32BE((crc ^ 0xffffffff) >>> 0);
+    return Buffer.concat([len, body, sum]);
+  };
+  const header = Buffer.alloc(13); header.writeUInt32BE(width); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = 2;
+  const rows = Buffer.alloc(height * (width * 3 + 1), color); for (let y = 0; y < height; y++) rows[y * (width * 3 + 1)] = 0;
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', header), chunk('IDAT', deflateSync(rows)), chunk('IEND', Buffer.alloc(0))]);
+}
+test('Nano Banana Pro and 2.1 take cast references on the single-request route; FLUX Ultra still refuses them', async () => {
+  const { director, project, refgen, log, runner } = await setup({ allowPaid: true });
+  log.objectInfo = liveInfo;
+  const looks = [];
+  for (const n of [1, 2]) looks.push((await director.reference(project.id, { scope: 'object', entityId: runner.id, name: `Runner look ${n}`, data: rgbPng(32, 32, 40 * n).toString('base64') })).referenceId);
+  const shot = project.shots[0], base = { projectId: project.id, target: 'shot', shotId: shot.id, prompt: 'Image 1 is the blockout; the runner looks like images 2 and 3.', aspect: '16:9', count: 1, seed: 3, referenceIds: looks, guide: PNG.toString('base64') };
+  for (const presetId of ['nano-banana-pro', 'nano-banana-2-1', 'gpt-image-25', 'seedream-5-pro', 'flux-2-max']) {
+    const job = await refgen.prepare({ ...base, presetId });
+    assert.equal(job.refs.length, 2, presetId); assert.equal(job.status, 'quoted');
+    assert.equal(job.quote.estimate, IMAGE_PRICES[presetId], `${presetId} quotes its list estimate`);
+  }
+  const pro = await refgen.prepare({ ...base, presetId: 'nano-banana-pro', seed: 4 });
+  await refgen.submit({ projectId: project.id, requestId: pro.id, approval: consent(pro) });
+  assert.deepEqual([log.graph[100].inputs.image, log.graph[201].inputs.image, log.graph[202].inputs.image], [`previs/${pro.id}-guide.png`, `previs/${pro.id}-ref1.png`, `previs/${pro.id}-ref2.png`]);
+  assert.equal(log.graph[1].class_type, 'GeminiImage2Node'); assert.deepEqual(log.graph[1].inputs.images, ['399', 0]);
+  await assert.rejects(refgen.prepare({ ...base, presetId: 'flux-ultra' }), /can’t take reference images; choose a model that does/);
+  await assert.rejects(refgen.prepare({ ...base, presetId: 'flux-2-max', referenceIds: [...looks, ...looks, ...looks, looks[0], looks[1]] }), /at most 7 reference images/);
 });
 
 test('shot key frames: blockout guide is quoted, uploaded at submit and attached to the shot', async () => {

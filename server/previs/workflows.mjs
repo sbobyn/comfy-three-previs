@@ -79,7 +79,9 @@ export function inputSchema(schema, inputs) {
       // only the first `min` slots are required and the group key itself is never sent.
       if (spec?.[0] === 'COMFY_AUTOGROW_V3') {
         const template = spec[1]?.template || {}, inner = Object.values(template.input?.required || {})[0];
-        (template.names || []).forEach((slot, i) => { fields[`${key}.${slot}`] = { spec: inner, required: i < (template.min || 0) }; });
+        // Slots are listed by `names`, or numbered from 0 after a `prefix` up to `max` (core Batch Images: image0 …).
+        const names = template.names || (template.prefix ? Array.from({ length: template.max || 0 }, (_, i) => `${template.prefix}${i}`) : []);
+        names.forEach((slot, i) => { fields[`${key}.${slot}`] = { spec: inner, required: i < (template.min || 0) }; });
         continue;
       }
       fields[key] = { spec, required: group === 'required' };

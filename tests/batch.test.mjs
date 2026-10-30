@@ -9,7 +9,7 @@ import { batchRoutes } from '../server/previs/batch-routes.mjs';
 import { fakeBackend } from '../server/previs/batch-drivers.mjs';
 import { builtInPresets } from '../server/previs/presets.mjs';
 import { imagePresets } from '../server/previs/refgen.mjs';
-import { TIERS, IMAGE_PRICES, VIDEO_PRICES, estimateFor, modelsFor } from '../shared/tiers.mjs';
+import { TIERS, IMAGE_PRICES, VIDEO_PRICES, FIRST_FRAME_FALLBACK, KEY_FRAME_SECONDS, estimateFor, modelsFor, clipSecondsFor, durationValue } from '../shared/tiers.mjs';
 
 const project = JSON.parse(await readFile(new URL('./fixtures/wingspan-project.json', import.meta.url), 'utf8'));
 const [valley, dive, swoop] = project.shots;
@@ -44,8 +44,45 @@ test('tiers match preset prices and the LTX Fast preset is the Pro graph with th
   assert.equal(estimateFor('video', 'ltx-25-flf-v1', { duration: 7 }), 1.032); // LTX bills the snapped 6 s
   assert.equal(estimateFor('sheet', 'flux-3', { count: 4 }), 0.264);
   assert.equal(estimateFor('blockout', 'any'), 0);
-  assert.equal(estimateFor('look', 'nano-banana-pro'), null);
+  assert.equal(estimateFor('look', 'nano-banana-pro'), 0.161, 'Nano Banana Pro is priced for batches (live badge ≈ $0.1608 per 1K image)');
+  assert.equal(estimateFor('look', 'not-a-model'), null);
   assert.deepEqual(modelsFor('final', { videos: 'kling-o1-edit-v1', bogus: 'x' }), { ...TIERS.final, videos: 'kling-o1-edit-v1' });
+});
+
+test('start-still video presets: prices, clip lengths and start-only fallbacks stay in sync', () => {
+  const frames = builtInPresets.filter(d => d.task === 'first-frame');
+  assert.deepEqual(frames.map(d => d.id), ['ltx-25-flf-v1', 'ltx-25-i2v-v1', 'ltx-25-i2v-fast-v1', 'seedance-25-i2v-v1', 'seedance-25-flf-v1', 'kling-40-i2v-v1', 'kling-40-flf-v1', 'veo-31-i2v-v1', 'veo-31-flf-v1', 'hailuo-h3-i2v-v1', 'hailuo-h3-flf-v1', 'wan27-i2v-v1', 'wan27-flf-v1']);
+  for (const d of frames) {
+    const p = VIDEO_PRICES[d.id];
+    assert.ok(p.keyFrames, d.id); assert.deepEqual(p.durations, d.constraints.durations, d.id);
+    assert.ok(d.inputs.firstFrame && d.inputs.prompt && d.parameters.duration, d.id);
+    const current = d.graph[d.parameters.duration.nodeId].inputs[d.parameters.duration.input];
+    assert.ok(d.constraints.durations.includes(Number(current)), `${d.id} default ${current}s is a clip length it accepts`);
+    for (let s = 1; s <= 12; s++) assert.ok(estimateFor('video', d.id, { duration: s }) > 0, `${d.id} priced at ${s}s`);
+    if (d.inputs.lastFrame) {
+      const sibling = builtInPresets.find(x => x.id === FIRST_FRAME_FALLBACK[d.id]);
+      assert.ok(sibling && !sibling.inputs.lastFrame, `${d.id} falls back to a start-only preset`);
+      assert.deepEqual([sibling.pricing.ratePerSecond, sibling.constraints.durations], [d.pricing.ratePerSecond, d.constraints.durations], `${d.id} fallback keeps price and lengths`);
+    } else assert.ok(!(d.id in FIRST_FRAME_FALLBACK), d.id);
+  }
+  assert.equal(estimateFor('video', 'veo-31-flf-v1', { duration: 5 }), 0.8, 'Veo makes 4, 6 or 8 s: 5 s snaps to 4');
+  assert.equal(estimateFor('video', 'kling-40-i2v-v1', { duration: 7 }), 1.3476);
+  assert.equal(estimateFor('video', 'seedance-25-i2v-v1', { duration: 3 }), 1.336, 'Seedance starts at 4 s');
+  assert.equal(estimateFor('video', 'hailuo-h3-flf-v1', { duration: 5 }), 0.6435);
+  assert.equal(estimateFor('video', 'wan27-i2v-v1', { duration: 10 }), 1);
+  assert.deepEqual([clipSecondsFor(builtInPresets.find(d => d.id === 'veo-31-i2v-v1'), 7), clipSecondsFor({ id: 'saved', provenance: { presetId: 'kling-40-flf-v1' } }, 2), clipSecondsFor(null, 12)], [6, 3, KEY_FRAME_SECONDS.at(-1)]);
+  assert.deepEqual([durationValue('3', 6), durationValue(5, 6)], ['6', 6], 'LTX takes a combo string, the partner nodes an integer');
+  for (const [id, usd] of Object.entries({ 'flux-2-max': 0.071, 'gpt-image-25': 0.076, 'seedream-5-pro': 0.045, 'nano-banana-pro': 0.161 })) {
+    assert.equal(IMAGE_PRICES[id], usd, id); assert.equal(imagePresets.find(p => p.id === id).pricing.usdPerImage, usd, id);
+  }
+});
+
+test('start → end partner model in a final plan: the end still is optional', () => {
+  const kling = planBatch(project, { steps: ['stills', 'videos'], tier: 'final', models: { videos: 'kling-40-flf-v1' }, maxCostUsd: 20 }).nodes;
+  const v = byId(kling, `video:${dive.id}`);
+  assert.deepEqual(v.deps, [`blockout:${dive.id}`, `still:${dive.id}start`, `still:${dive.id}end`]);
+  assert.deepEqual(v.optional, [`still:${dive.id}end`], 'the end still is optional: Kling 4.0 has a start-only fallback');
+  assert.equal(v.estimateUsd, estimateFor('video', 'kling-40-flf-v1', { duration: dive.duration }));
 });
 
 test('draft plan: blockouts skipped, one look per family, start stills before videos', () => {
@@ -82,7 +119,7 @@ test('final plan adds end stills; reference models depend on looks instead; miss
   assert.deepEqual([sheets.length, sheets[0].target.setId, sheets[0].count, sheets[0].estimateUsd], [1, 'turn4', 4, 0.112]);
   assert.throws(() => planBatch(project, { steps: ['videos'], maxCostUsd: 1, models: { videos: 'nope' } }), /Unknown video model/);
   assert.throws(() => planBatch(project, { steps: ['stills'] }), /maxCostUsd/);
-  assert.throws(() => planBatch(project, { steps: ['looks'], maxCostUsd: 1, models: { looks: 'nano-banana-pro' } }), /unpriced/);
+  assert.throws(() => planBatch(project, { steps: ['looks'], maxCostUsd: 1, models: { looks: 'not-a-model' } }), /unpriced/);
 });
 
 test('a shot’s video starts as soon as its still lands while other stills still run', async () => {
