@@ -2,7 +2,9 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
-import { createBackend, backendSnapshot, backendTransportKey, safeMediaLocation } from './backends.mjs';
+import { createBackend, backendSnapshot, safeMediaLocation, errorDetail } from './backends.mjs';
+import { slotsFor } from './concurrency.mjs';
+import { uploadCacheFor } from './upload-cache.mjs';
 import { assertNoSecrets, hashBytes, hashValue, validateWorkflowDefinition, legacyWorkflowDefinition, validateGraph, workflowCost, validateApproval } from './workflows.mjs';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -10,6 +12,22 @@ const draft = job => ['prepared', 'quoted', 'invalidated'].includes(job.status);
 const active = job => ['uploading', 'submitting', 'queued', 'running', 'uncertain', 'collecting'].includes(job.status);
 const fail = (message, status = 400) => { const error = Error(message); error.status = status; throw error; };
 const now = () => new Date().toISOString();
+export const generationKind = job => job.definition?.outputs?.length && job.definition.outputs.every(output => output.mediaType?.startsWith('image/')) ? 'image' : 'video';
+function clipSeconds(job) {
+  const value = Number(job.binding?.parameters?.duration);
+  if (Number.isFinite(value) && value > 0) return value;
+  const b = job.shot?.binding, frames = Number(b?.end) - Number(b?.start) + 1;
+  return b && Number(b.fps) > 0 && frames > 0 ? frames / Number(b.fps) : 5;
+}
+/** Typical wall time before the tracker calls a job stuck (at 2×). */
+export function expectedSeconds(job) {
+  if (job.backend?.kind === 'local') return 600;
+  if (generationKind(job) === 'image') return 90;
+  const model = `${job.definition?.title || ''} ${Object.values(job.preparedGraph || {}).map(node => node?.class_type).join(' ')}`;
+  if (/kling|seedance/i.test(model)) return 420;
+  return Math.round(120 + 30 * clipSeconds(job));
+}
+export const generationLabel = job => `${job.shot?.title || 'Shot'} · ${job.definition?.title || 'Workflow'}`;
 const extensions = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'video/mp4': '.mp4', 'video/webm': '.webm', 'video/quicktime': '.mov', 'video/x-matroska': '.mkv', 'audio/wav': '.wav', 'audio/mpeg': '.mp3' };
 
 export function probePng(bytes) {
@@ -58,6 +76,7 @@ export async function openGeneration(root, project, options = {}) {
   const jobs = new Map();
   const writer = options.persist || atomicJson;
   const persist = async job => {
+    if (job.status === 'uncertain' && !job.uncertainAt) job = { ...job, uncertainAt: now() };
     assertNoSecrets(job);
     await writer(join(dir, job.id + '.json'), job);
     jobs.set(job.id, structuredClone(job));
@@ -70,6 +89,8 @@ export async function openGeneration(root, project, options = {}) {
     if (job.status === 'uploading') { job.status = 'failed'; job.message = 'Stopped before dispatch; uploaded inputs may remain. This request will not be retried.'; }
     await persist(job);
   }
+  const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root);
+  slots.register('generation', () => [...jobs.values()].filter(active).map(job => ({ id: job.id, backend: job.backend, kind: generationKind(job), status: job.status, uncertainAt: job.uncertainAt, dispatchStartedAt: job.dispatchStartedAt, createdAt: job.createdAt })));
   // Serialize journal operations, including duplicate simultaneous submits.
   let chain = Promise.resolve();
   const serial = fn => (...args) => { const task = chain.then(() => fn(...args)); chain = task.catch(() => {}); return task; };
@@ -100,8 +121,10 @@ export async function openGeneration(root, project, options = {}) {
     return bytes;
   }
   async function resolve(input) {
+    // Revalidation is scoped to this binding: its definition, shot, source bytes, backend, schema and
+    // quote are fingerprinted below. Unrelated project edits (other bindings, other shots) do not invalidate.
     const p = project.get();
-    if (input.revision !== p.revision) fail('Project changed; prepare and quote again', 409);
+    if (input.revision !== undefined && (!Number.isInteger(input.revision) || input.revision > p.revision)) fail('Unknown project revision; refresh and prepare again', 409);
     const binding = p.workflowBindings?.find(item => item.id === input.workflowBindingId);
     if (!binding) fail('Save an explicit workflow binding first');
     const definition = binding.definition ? validateWorkflowDefinition(binding.definition) : binding.definitionId ? validateWorkflowDefinition(p.workflowDefinitions?.find(item => item.id === binding.definitionId)) : legacyWorkflowDefinition(binding);
@@ -152,9 +175,10 @@ export async function openGeneration(root, project, options = {}) {
     if (definition.constraints.timingChange && binding.acceptTimingChange !== true) validation.issues.push({code:'timing-review',message:'Explicit timing/framing acknowledgment required: '+definition.constraints.timingChange});
     validation.compatible = !validation.issues.length;
     const quote = workflowCost(graph, inspected.objectInfo, selection);
-    const context = { requestId: identity(input), projectId: p.id, requestRevision: p.revision, shotId: shot.id, shot, workflowBindingId: binding.id, binding, definition, definitionHash: definition.definitionHash, graphHash: definition.graphHash, preparedGraph: graph, sources, references: p.references || [], backend: selection, schemaHash: validation.schemaHash, quote };
+    const context = { requestId: identity(input), projectId: p.id, shotId: shot.id, shot, workflowBindingId: binding.id, binding, definition, definitionHash: definition.definitionHash, graphHash: definition.graphHash, preparedGraph: graph, sources, references: p.references || [], backend: selection, schemaHash: validation.schemaHash, quote };
     assertNoSecrets(context);
-    return { context, fingerprint: hashValue(context), validation, adapter, bytes, deferredInputs };
+    // requestRevision is provenance only; it stays out of the fingerprint.
+    return { context: { ...context, requestRevision: Number.isInteger(input.revision) ? input.revision : p.revision }, fingerprint: hashValue(context), validation, adapter, bytes, deferredInputs };
   }
   async function prepare(input, quoted = false) {
     const id = identity(input), previous = jobs.get(id);
@@ -168,7 +192,10 @@ export async function openGeneration(root, project, options = {}) {
     if (saved.workflowBindingId !== input.workflowBindingId) fail('Request UUID belongs to another binding', 409);
     if (!draft(saved)) return saved;
     if (saved.status !== 'quoted') fail('Prepare and quote this request before submission', 409);
-    if ([...jobs.values()].some(job => job.id !== id && active(job) && backendTransportKey(job.backend) === backendTransportKey(saved.backend))) fail('Resolve the existing backend request before another submission; uncertainty must never cause a retry', 409);
+    const release = slots.acquire({ id, backend: saved.backend, kind: generationKind(saved) });
+    try { return await dispatch(input, id, saved); } finally { release(); }
+  }
+  async function dispatch(input, id, saved) {
     const current = await resolve(input);
     if (saved.fingerprint !== current.fingerprint) {
       await persist({ ...saved, status: 'invalidated', validation: current.validation, message: 'Graph, inputs, project, backend, pricing or live schema changed. Prepare and approve a new quote.' });
@@ -190,7 +217,7 @@ export async function openGeneration(root, project, options = {}) {
       const graph = structuredClone(saved.preparedGraph), uploads = {};
       for (const [name, source] of Object.entries(saved.sources)) {
         const mapping = saved.definition.inputs[name];
-        const upload = await adapter.upload(current.bytes[name], { filename: `${id}-${name}${extensions[source.mime]}`, mime: source.mime, subfolder: `previs/${id}` });
+        const upload = await uploadCache.upload(adapter, current.bytes[name], { filename: `${id}-${name}${extensions[source.mime]}`, mime: source.mime, subfolder: `previs/${id}` });
         uploads[name] = upload; graph[mapping.nodeId].inputs[mapping.input] = upload.value;
       }
       // Revalidate after uploads, immediately before the durable dispatch boundary.
@@ -202,15 +229,17 @@ export async function openGeneration(root, project, options = {}) {
       const accepted = await adapter.submit({ graph, requestId: id, projectId: saved.projectId, partnerNodes: saved.quote.nodes.some(node => node.apiNode) });
       return await persist({ ...job, promptId: accepted.promptId, status: 'queued', message: 'Backend accepted the request. Track the saved prompt ID.', acceptedAt: now() });
     } catch (error) {
-      // Do not persist backend response bodies or arbitrary exception strings: they can contain credentials.
+      // Never persist raw response bodies or exception strings (they can carry credentials): only errorDetail's redacted ≤500 chars.
       const definitelyRejected = [400, 401, 402, 403, 422, 429].includes(error.httpStatus);
       const status = dispatchStarted && !definitelyRejected ? 'uncertain' : 'failed';
-      return persist({ ...job, status, message: status === 'uncertain' ? 'Dispatch outcome is unknown. Preserve this receipt and inspect backend history; never resubmit.' : 'Preparation failed or backend rejected the request. No automatic retry.', failure: { phase: dispatchStarted ? 'dispatch' : 'preparation', httpStatus: error.httpStatus || null } });
+      return persist({ ...job, status, message: status === 'uncertain' ? 'Dispatch outcome is unknown. Preserve this receipt and inspect backend history; never resubmit.' : 'Preparation failed or backend rejected the request. No automatic retry.', failure: { phase: dispatchStarted ? 'dispatch' : 'preparation', httpStatus: error.httpStatus || null, detail: errorDetail(error) } });
     }
   }
-  async function track(id) {
+  // `tracking` ({ lastTrackedAt, trackCount, nextTrackAt }) comes from the job tracker and is saved with the result.
+  async function track(id, tracking) {
     let job = get(id);
     if (draft(job) || ['failed', 'closed', 'completed'].includes(job.status)) return job;
+    if (tracking) job = { ...job, tracking: { lastTrackedAt: tracking.lastTrackedAt ?? null, trackCount: tracking.trackCount ?? 0, nextTrackAt: tracking.nextTrackAt ?? null } };
     if (!job.promptId) return persist({ ...job, status: 'uncertain', message: 'Cloud acceptance ID was not received. Inspect the account history using this request UUID. No retry or guessed prompt ID.' });
     const adapter = backendFor(job.backend);
     if (hashValue(adapter.snapshot) !== hashValue(job.backend)) fail('This request belongs to another backend', 409);
@@ -224,7 +253,11 @@ export async function openGeneration(root, project, options = {}) {
       }
       phase = 'identity';
       if (entry.promptId !== job.promptId || entry.requestId !== job.id || hashValue(entry.graph) !== job.submittedGraphHash) fail('Backend history does not match this saved request');
-      if (['error', 'non_retryable_error', 'cancelled', 'lost'].includes(entry.status?.status_str)) return persist({ ...job, status: 'failed', message: 'Backend reports failure; execution may have incurred charges. No retry.' });
+      if (['error', 'non_retryable_error', 'cancelled', 'lost'].includes(entry.status?.status_str)) {
+        const provider = { status: entry.status.status_str, ...(entry.error ? { error: entry.error } : {}) };
+        const detail = entry.error ? errorDetail({ message: `${entry.error.nodeType || 'Node'}${entry.error.nodeId ? ` #${entry.error.nodeId}` : ''}: ${entry.error.message}` }) : null;
+        return persist({ ...job, status: 'failed', provider, failure: { phase: 'execution', httpStatus: null, detail }, finishedAt: now(), message: `Backend reports failure${detail ? ` (${detail.slice(0, 240)})` : ''}; execution may have incurred charges. No retry.` });
+      }
       if (entry.status?.completed !== true) return persist({ ...job, status: 'running', message: 'Backend has not marked execution complete.' });
       phase = 'declared-outputs';
       const declared = declaredOutputs(job.definition, entry.outputs);
@@ -251,8 +284,8 @@ export async function openGeneration(root, project, options = {}) {
         job = await persist({ ...job, results: [...job.results, result] });
       }
       return persist({ ...job, status: 'completed', completedAt: now(), message: 'Only declared outputs were probed and saved. Timing and visual quality require review; no timing fit was performed.' });
-    } catch {
-      return persist({ ...job, failure: { phase }, message: `Tracking failed at ${phase}. Preserve the receipt; no resubmission or undeclared output collection occurred.` });
+    } catch (error) {
+      return persist({ ...job, failure: { phase }, tracking: { ...job.tracking, error: errorDetail(error) }, message: `Tracking failed at ${phase}. Preserve the receipt; no resubmission or undeclared output collection occurred.` });
     }
   }
   async function reconcile(input) {
@@ -264,5 +297,5 @@ export async function openGeneration(root, project, options = {}) {
     if (queue.queue_running.length || queue.queue_pending.length) fail('Backend queue must be empty before closing an uncertain receipt', 409);
     return persist({ ...checked, status: 'closed', closedAt: now(), message: 'Operator reviewed backend history and confirmed idle. Outcome remains unknown; no cancellation or retry.' });
   }
-  return { prepare: serial(input => prepare(input)), quote: serial(input => prepare(input, true)), submit: serial(submit), track: serial(track), reconcile: serial(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect() };
+  return { prepare: serial(input => prepare(input)), quote: serial(input => prepare(input, true)), submit: serial(submit), track: serial(track), reconcile: serial(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect(), isActive: active, kindOf: generationKind, expectedSeconds, label: generationLabel };
 }
