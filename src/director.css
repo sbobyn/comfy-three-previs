@@ -20,6 +20,8 @@
   /* The one accent: tally red (camera, record, primary attention) */
   --accent:     #C8401F;
   --accent-ink: var(--on-ink);
+  /* The one primary-action colour, desktop and mobile (coral stays for the live camera: Fly, record, shutter). */
+  --cta: var(--ink); --cta-hover: #2A2621; --cta-ink: var(--on-ink);
   --accent-soft:#F6E3DC;
   --accent-line:#E3A491;
   /* Semantic (always with a word or icon) */
@@ -120,8 +122,8 @@ code, .mono { font-family: var(--mono); font-size: .95em; font-variant-numeric: 
 .btn.on-stage { background: var(--glass); border-color: var(--glass-line); color: var(--on-stage); box-shadow: none; backdrop-filter: blur(10px); }
 .btn.on-stage:hover { background: rgba(40,37,32,.85); }
 .btn.on-stage.on { background: var(--on-stage); color: var(--ink); border-color: var(--on-stage); }
-.btn.cta { background: var(--ink); border-color: var(--ink); color: var(--on-ink); font-weight: 600; padding: 0 16px; border-radius: var(--r-full); box-shadow: 0 1px 2px rgba(21,19,15,.2), 0 6px 16px -8px rgba(21,19,15,.5); }
-.btn.cta:hover { background: #2A2621; border-color: #2A2621; }
+.btn.cta { background: var(--cta); border-color: var(--cta); color: var(--cta-ink); font-weight: 600; padding: 0 16px; border-radius: var(--r-full); box-shadow: 0 1px 2px rgba(21,19,15,.2), 0 6px 16px -8px rgba(21,19,15,.5); }
+.btn.cta:hover { background: var(--cta-hover); border-color: var(--cta-hover); }
 .linklike { all: unset; cursor: pointer; color: var(--ink); font-weight: 600; font-size: inherit; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; background: none; border: 0; padding: 0; }
 .linklike:hover { text-decoration: underline; text-decoration-color: var(--ink); }
 

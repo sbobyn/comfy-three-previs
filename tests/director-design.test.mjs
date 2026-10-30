@@ -176,3 +176,28 @@ test('demo mode: no Cloud status, the notice in the header (never over the trans
   assert.match(read('src/director.ts'), /DEMO \? demoBadge\(\) : null/);
   assert.match(read('src/director-common.ts'), /export const DEMO = Boolean\(import\.meta\.env\.VITE_DEMO\)/);
 });
+
+test('one vocabulary and one CTA colour: the glossary’s terms are the UI’s terms', () => {
+  const read = f => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+  const glossary = read('docs/glossary.md');
+  for (const term of ['**Cast image**', '**Blockout**', '**Make blockout**', '**Remake blockout**', '**Compare**', '**Overlay**', '`--cta`']) assert.ok(glossary.includes(term), term);
+  // UI strings (quoted text, not comments) use the glossary's words.
+  const { readdirSync } = require('node:fs');
+  const ui = readdirSync(new URL('../src/', import.meta.url)).filter(f => f.endsWith('.ts') && f !== 'director-agent.ts').map(f => read(`src/${f}`).split('\n').filter(l => !/^\s*(\/\/|\/\*|\*)/.test(l)).join('\n')).join('\n');
+  const quoted = ui.match(/'[^'\n]*'|`[^`\n]*`/g).join('\n');
+  for (const old of ['Cast looks', 'Make again', 'Cast Card', 'Looks board', 'as a look for', 'object’s look']) assert.doesNotMatch(quoted, new RegExp(old), old);
+  assert.match(ui, /s\.render \? 'Remake blockout' : 'Make blockout'/, 'Make the first time, Remake after');
+  // The primary action shares one token on desktop and mobile; coral stays on the camera.
+  assert.match(read('src/director.css'), /\.btn\.cta \{ background: var\(--cta\)/);
+  assert.match(read('src/director-mobile.css'), /\.side-act \.act-go \{ background: var\(--cta\)/);
+  assert.match(read('src/director-mobile.css'), /\.m-btn\.m-cta \{ background: var\(--cta\)/);
+  assert.match(read('src/director-home.css'), /\.home-btn\.primary \{ background: var\(--cta\)/);
+});
+
+test('mobile home: starters first for someone new, Archived on the header row', () => {
+  const read = f => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+  assert.match(read('src/director-home.ts'), /projects\.length < 3 \? ' is-new' : ''/);
+  const css = read('src/director-home-mobile.css');
+  assert.match(css, /\.home\.is-new #starters \{ order: 2; \}/);
+  assert.match(css, /\.home-head \{ flex-wrap: nowrap;/);
+});

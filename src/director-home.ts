@@ -243,7 +243,8 @@ async function render() {
       h('nav', {}, DEMO ? demoBadge() : null,
         h('button', { class: 'home-link', type: 'button', onclick: () => openJourney() }, 'Guide'),
         h('button', { class: 'home-link', type: 'button', onclick: () => openSetup() }, 'Setup'))),
-    h('main', { class: 'home' },
+    // Phones list projects before starters, except for someone new (fewer than 3 projects): starters first.
+    h('main', { class: 'home' + (projects.length < 3 ? ' is-new' : '') },
       h('section', { class: 'home-hero' },
         h('div', { class: 'home-hero-copy' },
           h('p', { class: 'home-eyebrow' }, 'Previsualization for AI video'),
@@ -259,7 +260,7 @@ async function render() {
       h('section', { class: 'home-section', 'aria-labelledby': 'projects-title' },
         h('div', { class: 'home-head' }, h('h2', { id: 'projects-title' }, 'Your projects'), projects.length ? h('span', {}, String(projects.length)) : null, h('i', { class: 'grow' }),
           fileInput, h('button', { class: 'home-link', type: 'button', onclick: () => fileInput.click() }, 'Import…'),
-          archivedCount ? h('button', { class: 'home-link', type: 'button', 'aria-pressed': String(showArchived), onclick: () => { showArchived = !showArchived; void render(); } }, showArchived ? 'Hide archived' : `Archived · ${archivedCount}`) : null),
+          archivedCount ? h('button', { class: 'home-link home-archived', type: 'button', 'aria-pressed': String(showArchived), onclick: () => { showArchived = !showArchived; void render(); } }, showArchived ? 'Hide archived' : `Archived · ${archivedCount}`) : null),
         list, archivedList)));
 }
 

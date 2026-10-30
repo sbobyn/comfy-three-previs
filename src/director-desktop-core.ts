@@ -17,9 +17,9 @@ export type StepFacts = {
   exportOk: boolean; exportReason: string; exportBusy: boolean;
 };
 export type StepAction = { kind: 'looks' | 'still' | 'video' | 'export'; label: string; title: string; disabled: boolean; at?: 'start' | 'end' };
-/** Build: Cast looks · Shoot: Generate still (a key-frame model still missing its stills) or Generate video · Cut: Export film. */
+/** Build: Cast images · Shoot: Generate still (a key-frame model still missing its stills) or Generate video · Cut: Export film. */
 export function stepAction(step: Step, f: StepFacts): StepAction {
-  if (step === 'build') return { kind: 'looks', label: 'Cast looks', disabled: false, title: f.castNeed ? `${f.castNeed} cast member${f.castNeed === 1 ? '' : 's'} in this shot need${f.castNeed === 1 ? 's' : ''} an image` : 'Every cast member’s image and the project style in one board' };
+  if (step === 'build') return { kind: 'looks', label: 'Cast images', disabled: false, title: f.castNeed ? `${f.castNeed} cast member${f.castNeed === 1 ? '' : 's'} in this shot need${f.castNeed === 1 ? 's' : ''} an image` : 'Every cast member’s image and the project style in one board' };
   if (step === 'cut') return { kind: 'export', label: f.exportBusy ? 'Exporting…' : 'Export film', disabled: !f.exportOk || f.exportBusy, title: f.exportOk ? 'Export the cut as one film (1280×720, 24 fps)' : f.exportReason || 'Nothing in the cut yet' };
   if (f.keyFrames && !f.hasStart) return { kind: 'still', at: 'start', label: 'Generate still', disabled: false, title: 'This video model animates from a start still: make one first (a few cents)' };
   if (f.keyFrames === 'start+end' && !f.hasEnd) return { kind: 'still', at: 'end', label: 'Generate still', disabled: false, title: 'This video model animates start → end: make the end still next' };
@@ -177,7 +177,7 @@ export function externalChanges(before: DirectorProject, after: DirectorProject)
 // ---------- First-run tour ----------
 export const TOUR = [
   { id: 'block', title: 'Block', body: 'Drag objects in the viewport to place them. Right-click or Shift+A adds one.' },
-  { id: 'cast', title: 'Cast', body: 'Give each cast member an image: Cast looks puts the whole cast on one board.' },
+  { id: 'cast', title: 'Cast', body: 'Give each cast member an image: Cast images puts the whole cast on one board.' },
   { id: 'shoot', title: 'Shoot', body: 'Shoot looks through the shot camera. Frame it, or fly it with keys, a gamepad or your phone.' },
   { id: 'generate', title: 'Generate', body: 'Generate makes a still or the shot’s video. You see the cost first; nothing is charged without your approval.' },
 ] as const;

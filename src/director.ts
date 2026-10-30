@@ -175,7 +175,7 @@ const snapBtn = h('button', { class: 'btn sm', type: 'button', 'aria-pressed': '
 const hud = h('div', { class: 'modal-hud', hidden: true, role: 'status' });
 const helpCard = h('div', { class: 'help-card', hidden: true, role: 'dialog', 'aria-label': 'Viewport controls' });
 const addPopup = h('div', { class: 'add-popup', hidden: true, role: 'menu', 'aria-label': 'Add object' });
-const dropHint = h('div', { class: 'drop-hint', hidden: true }, 'Drop an image on an object to add it as that object’s look');
+const dropHint = h('div', { class: 'drop-hint', hidden: true }, 'Drop an image on an object to add it as that object’s cast image');
 const monToggle = h('button', { class: 'mon-toggle', type: 'button', 'aria-pressed': 'true', title: 'Show or hide the shot monitor' });
 const coach = h('div', { class: 'coach', role: 'note', hidden: localStorage.getItem('previs.coach.viewport') === '1' },
   h('span', { class: 'coach-dot', 'aria-hidden': 'true' }),
@@ -1060,7 +1060,7 @@ async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' 
   };
   draw();
   const dlg = h('dialog', { class: 'assets', id: 'assets-dialog', 'aria-labelledby': 'assets-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Design every cast member’s look and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Every cast member’s image and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'assets-body' }, seg, h('p', { class: 'note', style: 'margin:0' }, 'Everything here lives in this project’s own folder, so exporting it carries videos, films, blockouts and images together.'), grid));
   document.body.append(dlg); dlg.showModal();
 }
@@ -1129,7 +1129,7 @@ function castBlock(s: Shot) {
     const id = r.entity.id;
     return h('div', { class: 'cast-row' + (r.inCast ? ' in' : '') + (open ? ' open' : '') + (c ? ' colored' : ''), 'data-cast': id, style: c ? `--c:${c}` : '',
       onmouseenter: () => { scene.setHover(id); highlightPrompt(id); }, onmouseleave: () => { scene.setHover(null); highlightPrompt(selected); } },
-      h('div', { class: 'cast-head', role: 'button', tabindex: 0, 'aria-expanded': String(open), title: open ? 'Close' : 'Open: Cast Card, images and generation',
+      h('div', { class: 'cast-head', role: 'button', tabindex: 0, 'aria-expanded': String(open), title: open ? 'Close' : 'Open: description, cast images and generation',
         onkeydown: (ev: KeyboardEvent) => { if (ev.target === ev.currentTarget && ['Enter', ' '].includes(ev.key)) { ev.preventDefault(); ev.stopPropagation(); (ev.currentTarget as HTMLElement).click(); } },
         onclick: () => { if (selected === id) selection.clear(); else { selection.set([id], id); if (scene.view() === 'set') scene.pivotOn(id); openObject(); } } },
         box,
@@ -1179,7 +1179,7 @@ function linkPicker(e: Entity) {
   const seen = new Set<string>(), list = pool.filter(r => !seen.has(r.file) && seen.add(r.file));
   if (!list.length) return null;
   return h('details', { class: 'cc-link' }, h('summary', {}, 'Add from project images'),
-    h('div', { class: 'cc-grid' }, ...list.slice(0, 40).map(r => h('button', { type: 'button', title: `${r.name}${r.entityId ? ` · ${entity(r.entityId)?.name}` : ''}`, onclick: () => void edit([{ op: 'link_look', entityId: e.id, referenceId: r.id }]).then(() => toast(`Added to ${e.name}’s Cast Card`)).catch(() => {}) }, h('img', { src: refUrl(r), alt: r.name, loading: 'lazy' })))));
+    h('div', { class: 'cc-grid' }, ...list.slice(0, 40).map(r => h('button', { type: 'button', title: `${r.name}${r.entityId ? ` · ${entity(r.entityId)?.name}` : ''}`, onclick: () => void edit([{ op: 'link_look', entityId: e.id, referenceId: r.id }]).then(() => toast(`Added to ${e.name}’s cast images`)).catch(() => {}) }, h('img', { src: refUrl(r), alt: r.name, loading: 'lazy' })))));
 }
 function renderObjectPane() {
   if (objectPane.contains(document.activeElement) && objectPane.dataset.id === (selected || '')) return;
@@ -1262,7 +1262,7 @@ function renderObjectPane() {
       h('p', { class: 'note', style: 'margin:0' }, 'Sent with every shot that includes ', h('strong', {}, e.name), '; each video model takes a limited number of images.')),
     h('div', { class: 'block cast-card' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Appearance')),
-      h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s Cast Card: ${shared.notes || '—'}`) : null, notes),
+      h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s description: ${shared.notes || '—'}`) : null, notes),
       h('label', { class: 'cc-field' }, h('span', {}, 'Style notes'), styleNotes),
       h('div', { class: 'ob-style' }, h('span', { class: 'muted' }, 'Project style: '), styleText ? h('span', {}, styleText) : h('span', { class: 'muted' }, 'not set'), h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openLooks() }, styleText ? 'Edit' : 'Set style')),
       h('p', { class: 'note', style: 'margin:0' }, 'Description and style go into this object’s images and every shot it appears in. Its primary image is sent with those shots’ videos.')),
@@ -1397,7 +1397,7 @@ async function uploadRefs(files: File[], entityId: string | null) {
     try {
       const r = await api('director/reference', { projectId, shotId, name: f.name, data: await readFileBase64(f), entityId, ...(entityId ? { scope: 'object' } : {}) });
       apply(r.project);
-      if (entityId) toast(`${f.name} added as a look for ${entity(entityId)?.name}`);
+      if (entityId) toast(`${f.name} added as a cast image for ${entity(entityId)?.name}`);
     } catch (e) { toast((e as Error).message, true); }
   }
 }
@@ -1410,7 +1410,7 @@ function dropTarget(el: HTMLElement, onFiles: (files: File[]) => void, onState?:
 }
 
 // Drop an image straight onto an object in the viewport to link it.
-viewport.addEventListener('dragover', ev => { if (ev.dataTransfer?.types.includes('Files')) { ev.preventDefault(); dropHint.hidden = false; const id = scene.pick(ev.clientX, ev.clientY); dropHint.textContent = id ? `Add as a look for ${entity(id)?.name}` : 'Drop on an object to link it — or anywhere to add a shot reference'; } });
+viewport.addEventListener('dragover', ev => { if (ev.dataTransfer?.types.includes('Files')) { ev.preventDefault(); dropHint.hidden = false; const id = scene.pick(ev.clientX, ev.clientY); dropHint.textContent = id ? `Add as a cast image for ${entity(id)?.name}` : 'Drop on an object to link it — or anywhere to add a shot reference'; } });
 viewport.addEventListener('dragleave', ev => { if (!viewport.contains(ev.relatedTarget as Node)) dropHint.hidden = true; });
 viewport.addEventListener('drop', ev => { ev.preventDefault(); dropHint.hidden = true; const id = scene.pick(ev.clientX, ev.clientY); void uploadRefs(Array.from(ev.dataTransfer?.files || []), id).then(() => { if (id) select(id); }); });
 
@@ -1742,7 +1742,7 @@ function openRender() {
     ...[[1280, 720], [640, 360]].map(([w, hh]) => { const input = h('input', { type: 'radio', name: 'res', checked: w === 1280 }); input.onchange = () => { width = w; height = hh; showFacts(); }; return h('label', {}, input, `${w}×${hh}`); }));
   const bar = h('i'); const progress = h('div', { class: 'progress', hidden: true }, bar);
   const status = h('div', { class: 'status-line' });
-  const capture = h('button', { class: 'btn camera', type: 'button' }, `Make blockout`);
+  const capture = h('button', { class: 'btn camera', type: 'button' }, s.render ? 'Remake blockout' : 'Make blockout');
   const prompt = h('textarea', { class: 'field', rows: 5, 'aria-label': 'Render prompt' }, shotPrompt(project, s, 'video'));
   const step1 = h('div', { class: 'step active' }, h('span', { class: 'n' }, '1'), h('div', {}, h('h3', {}, 'Blockout'), h('p', {}, 'The grey camera clip: every frame through the shot camera at 24 fps, the exact motion the video model follows.'), res, h('div', { style: 'height:8px' }), facts, h('div', { style: 'height:10px' }), capture, h('div', { style: 'height:8px' }), progress, status));
   const refsByFile = new Map<string, { ref: Reference; names: Set<string> }>();
@@ -1762,7 +1762,7 @@ function openRender() {
   const sig = signature(project, s);
   if (s.render && s.render.signature === sig) {
     if (!seam) media.replaceChildren(h('video', { src: `/assets/${s.render.assetId}.mp4`, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
-    step1.className = 'step done'; status.textContent = `Up to date: ${s.render.frameCount} frames · ${Number(s.render.duration).toFixed(2)}s · ${s.render.width}×${s.render.height}. Make again to replace.`;
+    step1.className = 'step done'; status.textContent = `Up to date: ${s.render.frameCount} frames · ${Number(s.render.duration).toFixed(2)}s · ${s.render.width}×${s.render.height}. Remake blockout to replace it.`;
     step2.className = 'step active'; setOpen(s.render.previsShotId, s.render.assetId);
   }
   capture.onclick = async () => {
@@ -1780,7 +1780,7 @@ function openRender() {
     } catch (e) {
       status.className = 'status-line err'; status.textContent = (e as Error).message; if (seam) media.replaceChildren(seam);
     } finally {
-      capture.disabled = false; progress.hidden = true; capture.textContent = 'Make again';
+      capture.disabled = false; progress.hidden = true; capture.textContent = 'Remake blockout';
     }
   };
   hGo.onclick = async () => {

@@ -24,7 +24,7 @@ const frame = (id, note, name = id) => ({ id, name, file: `${id}.png`, mime: 'im
 
 test('the top bar offers one primary action per step and follows what the shot has', () => {
   const f = { castNeed: 0, keyFrames: false, hasStart: false, hasEnd: false, exportOk: true, exportReason: '', exportBusy: false };
-  assert.equal(core.stepAction('build', f).label, 'Cast looks');
+  assert.equal(core.stepAction('build', f).label, 'Cast images');
   assert.match(core.stepAction('build', { ...f, castNeed: 2 }).title, /2 cast members/);
   assert.equal(core.stepAction('shoot', f).label, 'Generate video', 'a blockout-clip model needs no still');
   const still = core.stepAction('shoot', { ...f, keyFrames: 'start' });

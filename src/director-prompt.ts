@@ -41,11 +41,11 @@ export function promptBlock(s: Shot, ctx: Ctx) {
   // Chips: one per contributing field/object, colour + label (+ source on hover).
   const chips = h('div', { class: 'ap-chips' }, ...segs.filter(g => g.key !== 'intro').map(g => {
     const objId = g.key.startsWith('obj:') ? g.key.slice(4) : null;
-    return h('button', { type: 'button', class: 'ap-chip', style: `--c:${g.color}`, 'data-ids': (g.ids || []).join(' '), title: `From ${g.source}${objId ? ' · click to open the Cast Card' : ''}`, onclick: objId ? () => ctx.select(objId) : undefined }, h('i'), g.label, objId ? h('small', {}, 'Cast Card') : null);
+    return h('button', { type: 'button', class: 'ap-chip', style: `--c:${g.color}`, 'data-ids': (g.ids || []).join(' '), title: `From ${g.source}${objId ? ' · click to open the object' : ''}`, onclick: objId ? () => ctx.select(objId) : undefined }, h('i'), g.label, objId ? h('small', {}, 'Cast') : null);
   }));
 
   const seg = h('div', { class: 'seg', role: 'tablist', 'aria-label': 'Prompt type' }, ...(['video', 'image'] as const).map(k => h('button', { type: 'button', role: 'tab', class: k === kind ? 'on' : '', 'aria-selected': String(k === kind), title: k === 'video' ? 'For the video model (includes camera motion)' : 'For stills (no motion)', onclick: () => { kind = k; editing = preview = false; rerender(); } }, k === 'video' ? 'Video prompt' : 'Still prompt')));
-  const marker = edited ? h('span', { class: 'ap-edited', title: 'You edited this prompt; your text is what generation uses' }, 'Edited') : h('span', { class: 'ap-auto', title: 'Composed from the Cast Cards, world, action and camera — assembled text, not a model' }, 'Auto');
+  const marker = edited ? h('span', { class: 'ap-edited', title: 'You edited this prompt; your text is what generation uses' }, 'Edited') : h('span', { class: 'ap-auto', title: 'Composed from the cast descriptions, world, action and camera — assembled text, not a model' }, 'Auto');
 
   let body: Node;
   if (editing) {
@@ -71,7 +71,7 @@ export function promptBlock(s: Shot, ctx: Ctx) {
     chips, body,
     editing || preview ? null : h('div', { class: 'ap-actions' },
       h('button', { class: 'btn sm', type: 'button', onclick: () => { editing = true; rerender(); } }, 'Edit'),
-      h('button', { class: 'btn sm ghost', type: 'button', title: edited ? 'Preview the new auto-prompt next to your edit before replacing it' : 'Rebuild from the Cast Cards and camera', onclick: () => { if (edited) { preview = true; rerender(); } else { toast('Auto-prompt is already up to date with the Cast Cards'); } } }, 'Regenerate'),
+      h('button', { class: 'btn sm ghost', type: 'button', title: edited ? 'Preview the new auto-prompt next to your edit before replacing it' : 'Rebuild from the cast and camera', onclick: () => { if (edited) { preview = true; rerender(); } else { toast('Auto-prompt is already up to date with the cast'); } } }, 'Regenerate'),
       h('button', { class: 'btn sm ghost', type: 'button', onclick: () => void navigator.clipboard.writeText(text).then(() => toast('Prompt copied')) }, 'Copy'),
       h('span', { class: 'note', style: 'margin-left:auto' }, edited ? 'Your edit is used for generation.' : 'Composed from the cast · edit to override')));
   return block;

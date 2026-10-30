@@ -23,7 +23,7 @@
 .sq-log .ok { color: var(--ok); } .sq-log .err { color: var(--bad); } .sq-log .muted { color: var(--muted); }
 
 .sq-board { flex: none; padding: 10px 14px 24px; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
-.sq-row { display: grid; grid-template-columns: 14px 16px 22px 112px minmax(110px, 1fr) minmax(128px, 150px) minmax(128px, 150px) minmax(170px, 220px) auto; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); background: var(--card); box-shadow: var(--sh-1); border-radius: var(--radius); cursor: default; }
+.sq-row { display: grid; grid-template-columns: 14px 16px 22px 112px minmax(110px, 1fr) minmax(162px, 180px) minmax(128px, 150px) minmax(170px, 220px) auto; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); background: var(--card); box-shadow: var(--sh-1); border-radius: var(--radius); cursor: default; }
 .sq-row:hover { border-color: var(--line-2); }
 .sq-row.on { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink), var(--sh-2); }
 .sq-row.out { background: var(--paper-2); box-shadow: none; }
