@@ -174,23 +174,26 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   const ortho = new THREE.OrthographicCamera(-10, 10, 10, -10, -6000, 6000); ortho.layers.enableAll();
   let world: THREE.PerspectiveCamera | THREE.OrthographicCamera = persp;
   const controls = new OrbitControls(persp, canvas);
-  controls.target.set(0, 1, 0); controls.enableDamping = true; controls.dampingFactor = 0.12; controls.minDistance = 0.08; controls.maxDistance = 250;
+  controls.target.set(0, 1, 0); controls.enableDamping = true; controls.dampingFactor = 0.12; controls.minDistance = 0.08; controls.maxDistance = 3000;
   // Wheel zoom heads toward the cursor. Orbit zoom scales the distance to the pivot, so it stalls as it
   // gets close; within DOLLY_NEAR the wheel instead flies camera and pivot forward together at a steady pace.
   controls.zoomToCursor = true; controls.zoomSpeed = 1.2;
-  const DOLLY_NEAR = 2;
+  // Zoom-in is ours: a steady step (a fifth of the distance, never tiny) toward the cursor, so it never stalls;
+  // once the step would pass the pivot, camera and pivot move together (fly through). Zoom-out stays with OrbitControls.
   canvas.addEventListener('wheel', ev => {
     if (world !== persp || ev.deltaY >= 0 || ev.ctrlKey) return;
     const dist = persp.position.distanceTo(controls.target);
-    if (dist > DOLLY_NEAR) return;
     ev.preventDefault(); ev.stopImmediatePropagation();
     const notches = Math.min(4, Math.abs(ev.deltaY) / (ev.deltaMode === 1 ? 3 : 100));
     // Direction: toward the point under the cursor, like zoomToCursor.
     const r = canvas.getBoundingClientRect();
     const ndc = new THREE.Vector2(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
     const dir = new THREE.Vector3(ndc.x, ndc.y, 0.5).unproject(persp).sub(persp.position).normalize();
-    const step = dir.multiplyScalar(Math.max(0.12, dist * 0.25) * notches);
-    persp.position.add(step); controls.target.add(step); controls.update();
+    const len = Math.min(Math.max(0.12, dist * 0.2) * notches, 400);
+    const step = dir.multiplyScalar(len);
+    persp.position.add(step);
+    if (dist - len < 1.5) controls.target.add(step); // close to the pivot: carry it along instead of stopping
+    controls.update(); markDirty();
   }, { capture: true, passive: false });
   const shotCam = new THREE.PerspectiveCamera(40, 16 / 9, 0.1, 6000); shotCam.layers.set(0);
 

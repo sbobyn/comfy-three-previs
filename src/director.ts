@@ -216,6 +216,8 @@ const scene = createDirectorScene(canvas, labels, monitor, camFrame, {
   onClickSelect(id, mode) {
     if (!id) { if (mode === 'replace') selection.clear(); return; }
     if (mode === 'add') selection.add(id); else if (mode === 'toggle') selection.toggle(id); else selection.click(id);
+    // Focus the editor camera on what you clicked (the orbit then pivots around it).
+    if (mode === 'replace' && selection.has(id) && scene.view() === 'set') scene.frame([id], 1.2);
   },
   onMarquee(ids) { selection.addMany(ids); },
   onContextMenu(x, y) { openAddPopup(x, y); },
@@ -272,7 +274,7 @@ function renderOutline() {
     outline.append(h('div', { class: 'group' }, kind === 'character' ? 'Characters' : kind === 'vehicle' ? 'Vehicles' : kind === 'prop' ? 'Props' : 'Environment'));
     for (const e of list) {
       const ref = objectLooks(project, e.id)[0] || allRefs().find(r => r.entityId === e.id && r.role !== 'style');
-      outline.append(h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : ''), type: 'button', onclick: (ev: MouseEvent) => (ev.shiftKey || ev.ctrlKey || ev.metaKey ? selection.toggle(e.id) : selection.set([e.id], e.id)), ondblclick: () => scene.focusOn(e) },
+      outline.append(h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : ''), type: 'button', onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.frame([e.id], 1.2); } }, ondblclick: () => scene.focusOn(e) },
         h('span', { class: 'sw', style: `background:${e.color}` }),
         h('span', { class: 'name' }, e.name),
         e.id === shot().camera.target ? h('span', { class: 'tgt', title: 'Camera target' }, '◎') : null,
