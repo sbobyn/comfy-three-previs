@@ -1,5 +1,4 @@
 /* Sequence view: shot board + viewer. Uses the variables from director.css. */
-.ws-mode { margin-left: 8px; }
 .sequence { display: grid; grid-template-columns: minmax(0, 1fr) clamp(360px, 36vw, 640px); min-height: 0; }
 .sequence[hidden] { display: none; }
 .sq-main { display: flex; flex-direction: column; min-height: 0; min-width: 0; border-right: 1px solid var(--line); }
@@ -30,7 +29,7 @@
 .sq-num { color: var(--muted); font-size: 12px; }
 .sq-row canvas { width: 112px; height: 63px; border-radius: 6px; background: #000; display: block; }
 .sq-title { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
-.sq-title strong { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-title strong { font-weight: 600; letter-spacing: var(--track-tight); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sq-title span { font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sq-cell { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .sq-acts { display: flex; gap: 4px; }
