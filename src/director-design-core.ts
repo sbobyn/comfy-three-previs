@@ -98,3 +98,11 @@ export function heroSweepAt(u: number): number {
   const t = Math.max(0, Math.min(1, u));
   return t < 0.6 ? 100 - 100 * e(t / 0.6) : 50 * e((t - 0.6) / 0.4);
 }
+
+// ---------- Generate dialog ----------
+/** The header's estimate: rate × shot length, free when it runs locally, else priced at the quote. */
+export function dialogEstimate(def: { pricing?: { ratePerSecond?: number } } | null, seconds: number, backend: string): string {
+  if (backend === 'local') return 'Free · local';
+  const rate = def?.pricing?.ratePerSecond;
+  return rate ? `≈ $${(rate * seconds).toFixed(2)}` : 'Priced at quote';
+}

@@ -897,10 +897,24 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .activity { margin: 6px 0 0; padding: 0; list-style: none; font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
 
 /* ---------- Generate dialog ---------- */
-dialog.render { width: min(1080px, 96vw); max-height: 92vh; }
+dialog.render { width: min(1180px, 96vw); max-height: 92vh; }
+/* Header row: title · model · runs on · estimate · Generate — the decision, above the fold. */
+.rg-head h2 { flex: 1 1 160px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rg-controls { display: flex; align-items: center; gap: 10px; flex: none; }
+.rg-f { display: flex; align-items: center; gap: 6px; font-size: var(--fs-xs); color: var(--ink-3); }
+.rg-f select { width: auto; max-width: clamp(130px, 21vw, 280px); height: 32px; }
+@media (max-width: 1100px) { .rg-f > span { display: none; } }
+.rg-est { font-size: var(--fs-md); font-weight: 600; color: var(--ink); white-space: nowrap; padding: 0 4px; }
 .render-body { display: grid; grid-template-columns: 1.35fr 1fr; min-height: 420px; max-height: calc(88vh - 120px); }
-.render-media { background: var(--stage); display: grid; place-items: center; position: relative; border-right: 1px solid var(--line); }
+.render-visual { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-right: 1px solid var(--line); overflow: auto; background: var(--paper-2); }
+.render-media { background: var(--stage); display: grid; place-items: center; position: relative; border-radius: var(--r-md); overflow: hidden; flex: none; }
 .render-media video, .render-media img { width: 100%; display: block; }
+.render-media .ba { border-radius: 0; }
+.rg-cam { margin: 0; font-size: var(--fs-xs); }
+.rg-diagram:empty { display: none; }
+.rg-diagram { display: flex; align-items: center; gap: 14px; padding: 8px 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); }
+.rg-diagram .ex-diagram { margin: 0; flex: 0 0 min(240px, 45%); }
+.rg-diagram p { margin: 0; font-size: var(--fs-xs); line-height: 1.45; color: var(--ink-3); } .rg-diagram p b { color: var(--ink); font-weight: 600; }
 .render-steps { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; overflow: auto; max-height: calc(88vh - 120px); }
 .render-foot { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-top: 1px solid var(--line); background: var(--paper); }
 .render-foot .note { flex: 1; margin: 0; }

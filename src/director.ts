@@ -24,6 +24,8 @@ import { moveHelp } from './director-camhelp'; // [camhelp]
 import { mountJobsPip } from './director-jobs'; // [jobs]
 import { progressSlot, acquireProgress } from './director-progress'; // [live-progress]
 import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
+import { beforeAfter } from './director-media';
+import { dialogEstimate } from './director-design-core';
 import { initMobile } from './director-mobile'; // [mobile]
 import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY, moments, useTakeEntry, keyFrameCopy } from './director-desktop-core';
 import type { ShotPips } from './director-desktop-core';
@@ -1665,8 +1667,34 @@ function openRender() {
   const s = shot(), idx = project.shots.indexOf(s);
   let width = 1280, height = 720;
   const frames = () => Math.min(120, Math.max(2, Math.round(s.duration * 24)));
-  const preview = h('img', { alt: 'Shot camera preview', src: scene.capture(s.duration / 2, 1280, 720, 'image/jpeg', 0.85) });
+  // The visual: blockout ↔ start still on one frame when the shot has a start still, else the blockout itself.
+  const start = [...s.references].reverse().find(r => r.role === 'frame' && (r.note === 'key frame start' || !r.note)) || null;
+  const seam = start ? beforeAfter({ before: scene.capture(0, 1280, 720, 'image/jpeg', 0.85), after: refUrl(start), kind: 'image', labels: ['Blockout', 'Start still'], sweep: 'once', alt: 'The blockout’s first frame on the left and the start still on the right. Drag the seam or use the arrow keys.' }) : null;
+  const preview = seam || h('img', { alt: 'Shot camera preview', src: scene.capture(s.duration / 2, 1280, 720, 'image/jpeg', 0.85) });
   const media = h('div', { class: 'render-media' }, preview);
+  const diagram = h('div', { class: 'rg-diagram' });
+  const visual = h('div', { class: 'render-visual' }, media, h('p', { class: 'rg-cam muted' }, describeCamera(s, project.scene.entities)), diagram);
+  // Header row: model · runs on · estimate · Generate. Generate makes the blockout if needed, then quotes; nothing runs before approval.
+  const hWf = h('select', { class: 'field', 'aria-label': 'Video model' }, h('option', {}, 'Loading models…'));
+  const hBackend = h('select', { class: 'field', 'aria-label': 'Runs on' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
+  const hEst = h('span', { class: 'rg-est mono', title: 'Rate × shot length. The quote shows the exact estimate before anything runs.' }, '');
+  const hGo = h('button', { class: 'btn cta', type: 'button', title: 'Make the blockout if needed, then quote. Nothing runs until you approve the quote.' }, 'Generate ▸');
+  const headModel = () => {
+    const st = genCache, def: any = st ? videoChoices(st as any).find(d => d.id === hWf.value) : null; if (!st || !def) return;
+    const refs = referenceCapacity(st as any, def.id) ? plannedReferences(project, s, st as any, def.id) : [];
+    hEst.textContent = dialogEstimate(def, s.duration, hBackend.value);
+    const fig = modelInputsDiagram(def.task, { twoFrames: def.task === 'first-frame' && !!def.inputs?.lastFrame, castImages: refs.length });
+    diagram.replaceChildren(fig, h('p', {}, h('b', {}, 'What this model takes. '), fig.querySelector('[aria-label]')?.getAttribute('aria-label') || ''));
+  };
+  hWf.addEventListener('change', () => { localStorage.setItem(modelKey(s), hWf.value); hBackend.value = hWf.value.startsWith('wan-') ? 'local' : 'cloud'; headModel(); });
+  hBackend.addEventListener('change', headModel);
+  const fillModels = () => {
+    if (!genCache) return;
+    hWf.replaceChildren(...videoChoices(genCache as any).map(d => h('option', { value: d.id }, d.title)));
+    const def = shotModel(s); if (def) hWf.value = def.id;
+    hBackend.value = hWf.value.startsWith('wan-') ? 'local' : 'cloud'; headModel();
+  };
+  if (genCache) fillModels(); else void api('generation').then(st => { genCache = st; fillModels(); }).catch(() => { hWf.replaceChildren(h('option', {}, 'Models unavailable')); });
   const facts = h('div', { class: 'facts' });
   const showFacts = () => facts.replaceChildren('Frames', h('b', {}, `${frames()} @ 24 fps`), 'Duration', h('b', {}, `${(frames() / 24).toFixed(3)}s (shot ${s.duration}s)`), 'Size', h('b', {}, `${width}×${height} · 16:9`));
   showFacts();
@@ -1687,11 +1715,11 @@ function openRender() {
     h('p', { class: 'note', style: 'margin-top:8px' }, 'Cast images are named in the prompt and sent to models that take images.')));
   const gen = h('div', { class: 'gen-box' }, h('p', { class: 'note', style: 'margin:0' }, 'Make the blockout first.'));
   const step3 = h('div', { class: 'step' }, h('span', { class: 'n' }, '3'), h('div', {}, h('h3', {}, 'Generate the video'), h('p', { style: 'margin:0 0 8px' }, 'Run a Comfy video model on this exact blockout. You see the quote first; nothing runs until you approve it.'), gen));
-  const setOpen = (previsShotId: string, assetId: string) => { renderGenerate(gen, s, previsShotId, assetId, () => prompt.value); };
+  const setOpen = (previsShotId: string, assetId: string) => renderGenerate(gen, s, previsShotId, assetId, () => prompt.value, { wf: hWf, backendSel: hBackend });
   prompt.oninput = () => { if (s.render && s.render.signature === signature(project, s)) setOpen(s.render.previsShotId, s.render.assetId); };
   const sig = signature(project, s);
   if (s.render && s.render.signature === sig) {
-    media.replaceChildren(h('video', { src: `/assets/${s.render.assetId}.mp4`, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
+    if (!seam) media.replaceChildren(h('video', { src: `/assets/${s.render.assetId}.mp4`, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
     step1.className = 'step done'; status.textContent = `Up to date: ${s.render.frameCount} frames · ${Number(s.render.duration).toFixed(2)}s · ${s.render.width}×${s.render.height}. Make again to replace.`;
     step2.className = 'step active'; setOpen(s.render.previsShotId, s.render.assetId);
   }
@@ -1703,33 +1731,43 @@ function openRender() {
       const { asset, previsShotId, project: saved } = await captureShotVideo(s, { width, height, prompt: prompt.value, onFrame: (url, i, n) => { if (i % 4 === 0) img.src = url; bar.style.width = `${((i + 1) / n) * 100}%`; status.textContent = `Blockout frame ${i + 1} / ${n}`; }, onStatus: t => { status.textContent = t; } });
       const previsShot = { id: previsShotId }; const r = { project: saved };
       apply(r.project);
-      media.replaceChildren(h('video', { src: asset.url, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
+      media.replaceChildren(seam || h('video', { src: asset.url, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
       status.textContent = `Saved: ${asset.frameCount} frames · ${Number(asset.duration).toFixed(2)}s · ${asset.width}×${asset.height} in ${((performance.now() - started) / 1000).toFixed(1)}s.`;
       step1.className = 'step done'; step2.className = 'step done'; step3.className = 'step active';
-      setOpen(previsShot.id, asset.id);
+      await setOpen(previsShot.id, asset.id);
     } catch (e) {
-      status.className = 'status-line err'; status.textContent = (e as Error).message;
+      status.className = 'status-line err'; status.textContent = (e as Error).message; if (seam) media.replaceChildren(seam);
     } finally {
       capture.disabled = false; progress.hidden = true; capture.textContent = 'Make again';
     }
   };
+  hGo.onclick = async () => {
+    hGo.disabled = true;
+    try {
+      if (!(s.render && s.render.signature === signature(project, s))) await (capture.onclick as () => Promise<void>)();
+      else if (!gen.querySelector('.gen-quote')) await setOpen(s.render.previsShotId, s.render.assetId);
+      const q = gen.querySelector<HTMLButtonElement>('.gen-quote');
+      if (q) { q.click(); step3.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+    } finally { hGo.disabled = false; }
+  };
   const dlg = h('dialog', { class: 'render', id: 'render-dialog', 'aria-labelledby': 'render-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'render-title' }, `Generate video · Shot ${String(idx + 1).padStart(2, '0')} · ${s.title}`), h('span', { class: 'muted', style: 'font-size:12px' }, describeCamera(s, project.scene.entities)), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
-    h('div', { class: 'render-body' }, media, h('div', { class: 'render-steps' }, step1, step2, step3)),
+    h('div', { class: 'dialog-head rg-head' }, h('h2', { id: 'render-title' }, `Generate video · Shot ${String(idx + 1).padStart(2, '0')} · ${s.title}`),
+      h('div', { class: 'rg-controls' }, h('label', { class: 'rg-f' }, h('span', {}, 'Model'), hWf), h('label', { class: 'rg-f' }, h('span', {}, 'Runs on'), hBackend), hEst, hGo),
+      h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'render-body' }, visual, h('div', { class: 'render-steps' }, step1, step2, step3)),
     h('div', { class: 'render-foot' }, h('p', { class: 'note' }, 'Nothing is uploaded or charged without a quote you approve.')));
   document.body.append(dlg); dlg.showModal();
 }
 
 // ---------- In-app video generation (uses the workflow engine: preset → bind → quote → approve → submit → track) ----------
 type GenState = { presets: any[]; definitions: any[]; jobs: any[]; paidExecutionEnabled: boolean };
-async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, assetId: string, getPrompt: () => string) {
+/** The quote and approval step of the Generate dialog. The model and runs-on selects live in the dialog's header row. */
+async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, assetId: string, getPrompt: () => string, head: { wf: HTMLSelectElement; backendSel: HTMLSelectElement }) {
   let st: GenState;
   try { st = await api('generation'); } catch (e) { box.replaceChildren(h('p', { class: 'status-line err' }, (e as Error).message)); return; }
   const choices = videoChoices(st as any);
-  const wf = h('select', { class: 'field', 'aria-label': 'Video model' }, ...choices.map(d => h('option', { value: d.id }, d.title)));
-  const previous = st.jobs.filter(j => j.shotId === previsShotId && (j.sources?.sourceVideo?.id === assetId || j.sources?.controlVideo?.id === assetId)).at(-1);
-  if (previous && choices.some(d => d.id === previous.definition?.id)) wf.value = previous.definition.id;
-  const backendSel = h('select', { class: 'field', 'aria-label': 'Runs on' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
+  const { wf, backendSel } = head;
+  if (!choices.some(d => d.id === wf.value)) { wf.replaceChildren(...choices.map(d => h('option', { value: d.id }, d.title))); const def = shotModel(s); if (def) wf.value = def.id; }
   const note = h('p', { class: 'note', style: 'margin:0' });
   const showNote = () => { const d = choices.find(c => c.id === wf.value); note.textContent = d?.description || ''; backendSel.value = d?.id?.startsWith('wan-') ? 'local' : 'cloud'; };
   const useRefs = h('input', { type: 'checkbox', checked: localStorage.getItem('previs.seq.refs') !== '0' });
@@ -1745,7 +1783,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   backendSel.onchange = () => out.replaceChildren();
   const timing = h('input', { type: 'checkbox' });
   timing.onchange = () => out.replaceChildren();
-  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Review request & quote');
+  const quoteBtn = h('button', { class: 'btn camera gen-quote', type: 'button' }, 'Review request & quote');
   const out = h('div', { class: 'gen-out' });
   const jobsBox = h('div', { class: 'gen-jobs' });
   quoteBtn.onclick = async () => {
@@ -1771,7 +1809,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
     jobsBox.replaceChildren(...mine.map(j => h('div', { class: 'gen-job' }, h('b', { class: `st-${j.status}` }, j.status), h('span', {}, `${j.definition?.title?.split(' ·')[0] || 'Model'} · ${j.backend?.kind}`), h('small', { class: 'muted' }, j.message || ''))));
   };
   drawJobs();
-  box.replaceChildren(h('div', { class: 'grid2' }, h('label', {}, 'Video model', wf), h('label', {}, 'Runs on', backendSel)), note,
+  box.replaceChildren(note,
     h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, useRefs, 'Send the cast’s images with the request'), refsBox,
     h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, timing, 'I have reviewed that output timing/resolution may differ from the source; originals will not be fitted or replaced.'),
     h('div', {}, quoteBtn), out, jobsBox);

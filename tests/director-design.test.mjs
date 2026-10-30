@@ -86,3 +86,17 @@ test('the home hero sweeps once — all blockout, all generated, then rests at t
   const media = readFileSync(new URL('../src/director-media.ts', import.meta.url), 'utf8');
   assert.match(media, /set\(o\.reveal \? 0 :/, 'a reveal card starts on the generated frame');
 });
+
+test('the Generate dialog leads with model · runs on · estimate · Generate, and quotes before anything runs', () => {
+  assert.equal(core.dialogEstimate({ pricing: { ratePerSecond: 0.16 } }, 4, 'cloud'), '≈ $0.64');
+  assert.equal(core.dialogEstimate({ pricing: {} }, 4, 'cloud'), 'Priced at quote');
+  assert.equal(core.dialogEstimate({ pricing: { ratePerSecond: 0.16 } }, 4, 'local'), 'Free · local');
+  const src = readFileSync(new URL('../src/director.ts', import.meta.url), 'utf8');
+  const open = src.slice(src.indexOf('function openRender()'), src.indexOf('// ---------- In-app video generation'));
+  assert.match(open, /rg-controls.*hWf.*hBackend.*hEst.*hGo/s, 'the header row holds the decision');
+  assert.match(open, /labels: \['Blockout', 'Start still'\]/, 'blockout ↔ start still seam when a still exists');
+  assert.match(open, /modelInputsDiagram\(def\.task/);
+  // Generate never submits: it makes the blockout if needed, then presses the quote button (approval stays in the quote card).
+  const go = open.slice(open.indexOf('hGo.onclick'), open.indexOf('const dlg ='));
+  assert.match(go, /\.gen-quote/); assert.doesNotMatch(go, /generation\/submit/);
+});
