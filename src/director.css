@@ -240,6 +240,7 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .top-strip { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; }
 .top-status { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-3); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
 .top-status .ts-short { display: none; }
+@media (max-width: 960px) { .top-strip:has(.jobs-pip:not([hidden])) .top-status { display: none; } }
 .top-claude { display: inline-flex; align-items: center; flex: none; height: 24px; padding: 0 9px 0 7px; border-radius: var(--r-full); border: 1px solid var(--line); background: var(--card); color: var(--ink-2); font-size: var(--fs-xs); font-weight: 500; cursor: pointer; }
 .top-claude:hover { border-color: var(--line-2); color: var(--ink); }
 .top-claude .claude-mark { margin-right: 4px; font-size: 12px; }
@@ -444,6 +445,21 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .inspector input[type=color] { width: 100%; height: 26px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--bg); padding: 2px; }
 .inspector.collapsed > :not(.head) { display: none !important; }
 /* Controls & shortcuts card: paper card; key list scrolls, viewport settings stay pinned */
+/* Shoot: camera controls hero (bottom-left of the viewport); opens the camera guide in the Controls card. */
+.cam-hero { position: absolute; left: 12px; bottom: 12px; z-index: 5; display: flex; align-items: center; gap: 2px; max-width: calc(100% - 24px); padding: 4px 4px 4px 12px; border-radius: var(--r-full); background: rgba(255,253,249,.94); color: var(--ink-2); box-shadow: var(--sh-3); font-size: var(--fs-sm); backdrop-filter: blur(10px); animation: hero-in var(--t-reveal) var(--ease-out) both .3s; }
+@keyframes hero-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.cam-hero .ch-title { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; color: var(--ink); margin-right: 6px; white-space: nowrap; }
+.cam-hero .ch-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.cam-hero .ch-way { height: 28px; padding: 0 10px; border: 0; border-radius: var(--r-full); background: transparent; color: var(--ink-2); font: inherit; font-size: var(--fs-xs); font-weight: 550; cursor: pointer; white-space: nowrap; }
+.cam-hero .ch-way:hover { background: var(--paper-2); color: var(--ink); }
+.cam-hero .ch-way:focus-visible, .cam-hero .ch-x:focus-visible { outline: none; box-shadow: var(--focus); }
+.cam-hero .ch-x { width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--ink-4); cursor: pointer; font-size: 11px; flex: none; }
+.cam-hero .ch-x:hover { background: var(--paper-2); color: var(--ink); }
+@container vp (max-width: 520px) { .cam-hero .ch-title { display: none; } .cam-hero { padding-left: 4px; } }
+.cam-guide { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 14px; overflow: auto; min-height: 0; }
+.cam-guide .help-explain { min-height: 0; }
+.cam-guide .ex-diagram { margin: 0; }
+.cam-guide-act { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .help-card { position: absolute; top: 52px; left: 10px; z-index: 6; width: min(660px, calc(100% - 20px)); max-height: calc(100% - 64px); display: flex; flex-direction: column; overflow: hidden; background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sh-pop); }
 .help-head { flex: none; display: flex; gap: 10px; align-items: baseline; padding: 10px 10px 8px 16px; border-bottom: 1px solid var(--line); }
 .help-head strong { font-size: var(--fs-md); font-weight: 650; }
@@ -483,9 +499,20 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 @container vp (max-height: 420px) { .monitor { width: 30%; } }
 
 /* ---------- Transport + Fly camera ---------- */
-.transport { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; min-width: 0; min-height: 56px; height: auto; overflow: hidden; padding: 8px 12px 10px; background: var(--paper); border-top: 0; }
-.transport > * { flex: none; }
-.transport > .btn.icon:first-child { width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+.transport { display: flex; flex-direction: column; gap: 5px; min-width: 0; min-height: 56px; height: auto; overflow: hidden; padding: 7px 12px 10px; background: var(--paper); border-top: 0; container-type: inline-size; container-name: transport; }
+.transport-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; min-width: 0; }
+.transport-row > * { flex: none; }
+.transport .time .t-film { color: var(--ink-4); }
+/* Film track: every shot in Cut order; the current one carries the playhead. */
+.film-track { display: flex; gap: 2px; height: 14px; min-width: 0; }
+.ft-seg { position: relative; min-width: 6px; height: 100%; padding: 0 0 0 5px; border: 0; border-radius: 3px; background: var(--paper-3); color: var(--ink-4); font: 600 9px/14px var(--mono); text-align: left; overflow: hidden; cursor: pointer; transition: background var(--t-fast); }
+.ft-seg:hover { background: var(--line-2); color: var(--ink-2); }
+.ft-seg.on { background: var(--ink); color: var(--on-ink); cursor: default; }
+.ft-seg.out { opacity: .45; background: repeating-linear-gradient(135deg, var(--paper-3) 0 4px, var(--paper-2) 4px 8px); }
+.ft-seg .ft-n { pointer-events: none; }
+.ft-head { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--accent); border-radius: 1px; pointer-events: none; }
+@container transport (max-width: 520px) { .transport .time .t-film { display: none; } .ft-seg .ft-n { display: none; } }
+.transport-row > .btn.icon:first-child { width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 .transport .btn.icon { font-size: 11px; }
 .transport .time { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink-2); min-width: 92px; white-space: nowrap; flex: none; }
 .transport input[type=range] { flex: 1; min-width: 60px; accent-color: var(--camera); }
@@ -524,8 +551,10 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
   .fly-device > span:first-child { display: none; }
   .fly-device { min-width: 34px; justify-content: center; padding: 0 12px 0 8px; }
 }
+@container transport (max-width: 460px) { .fly-device { display: none; } .fly-btn { border-radius: var(--r-full); } .transport-row { gap: 6px; } }
 @media (max-width: 1000px) {
-  .transport { gap: 6px; padding-inline: 8px; }
+  .transport { padding-inline: 8px; }
+  .transport-row { gap: 6px; }
   .transport .time { font-size: var(--fs-2xs); min-width: 0; }
   .fly-btn { font-size: var(--fs-sm); }
 }

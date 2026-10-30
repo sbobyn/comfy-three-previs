@@ -60,3 +60,11 @@ test('rail pips show blockout, still and video, with running jobs, and the films
   assert.equal(core.midStill(shot([frame('u', 'something else')])), null, 'unpinned stills are not placed on the strip');
   assert.equal(core.midStill(shot()), null);
 });
+
+test('the shot scrubber places shots in the Cut’s order, with shots left out of the cut at the end', () => {
+  const p = { shots: [shot([], { id: 'a', duration: 2 }), shot([], { id: 'b', duration: 3 }), shot([], { id: 'c', duration: 4 })] };
+  assert.deepEqual(plain(core.filmSegments(p)), { segments: [{ shotId: 'a', start: 0, duration: 2, inCut: true }, { shotId: 'b', start: 2, duration: 3, inCut: true }, { shotId: 'c', start: 5, duration: 4, inCut: true }], total: 9 });
+  p.edit = { clips: [{ shotId: 'c' }, { shotId: 'a' }] };
+  const f = core.filmSegments(p);
+  assert.deepEqual(plain(f.segments.map(x => [x.shotId, x.start, x.inCut])), [['c', 0, true], ['a', 4, true], ['b', 6, false]]);
+});

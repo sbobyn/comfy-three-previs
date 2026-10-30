@@ -25,7 +25,7 @@ import { mountJobsPip } from './director-jobs'; // [jobs]
 import { progressSlot, acquireProgress } from './director-progress'; // [live-progress]
 import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
 import { initMobile } from './director-mobile'; // [mobile]
-import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill } from './director-desktop-core';
+import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments } from './director-desktop-core';
 import type { ShotPips } from './director-desktop-core';
 import { VIDEO_PRICES } from '../shared/tiers.mjs';
 
@@ -177,11 +177,17 @@ const coach = h('div', { class: 'coach', role: 'note', hidden: localStorage.getI
   h('span', {}, h('b', {}, 'Drag'), ' to orbit · ', h('b', {}, 'click'), ' to select · ', h('b', {}, 'right-click'), ' to add', h('span', { class: 'coach-more' }, ' · ', h('b', {}, 'C'), ' for the shot camera')),
   h('button', { class: 'btn sm', type: 'button', onclick: () => { coach.hidden = true; localStorage.setItem('previs.coach.viewport', '1'); } }, 'Got it'));
 const firstRun = h('div', { class: 'first-run', hidden: true });
+// Shoot: a quiet way into the camera controls. Each choice opens the camera guide in the Controls card.
+const HERO_KEY = 'previs.hero.camera';
+const camHero = h('div', { class: 'cam-hero', role: 'group', 'aria-label': 'Camera controls', hidden: true });
+camHero.append(h('span', { class: 'ch-title' }, h('i', { class: 'ch-dot', 'aria-hidden': 'true' }), 'Fly camera'),
+  ...(['orbit', 'fly', 'gamepad', 'phone'] as const).map(k => h('button', { type: 'button', class: 'ch-way', 'data-way': k, onclick: () => renderCameraGuide(k) }, k === 'orbit' ? 'Orbit' : k === 'fly' ? 'Keys' : k === 'gamepad' ? 'Gamepad' : 'Phone')),
+  h('button', { type: 'button', class: 'ch-x', 'aria-label': 'Hide the camera controls tip', title: 'Hide (Show tips again brings it back)', onclick: () => { localStorage.setItem(HERO_KEY, '1'); renderCamHero(); } }, '✕'));
 const helpToggle = h('button', { class: 'btn sm help-toggle', type: 'button', title: 'Controls & shortcuts (?)', 'aria-label': 'Controls & shortcuts', 'aria-expanded': 'false', onclick: () => { if (helpCard.hidden) renderHelp(); helpCard.hidden = !helpCard.hidden; } }, '?');
 new MutationObserver(() => helpToggle.setAttribute('aria-expanded', String(!helpCard.hidden))).observe(helpCard, { attributes: true, attributeFilter: ['hidden'] });
 const viewport = h('div', { class: 'viewport' }, canvas, labels, camFrame, monitor, monToggle, viewSeg,
   h('div', { class: 'vp-tools' }, modeSeg, snapBtn, h('button', { class: 'btn sm', type: 'button', onclick: () => frameSelected(), title: 'Frame selected, or everything (F, . or Numpad .)' }, 'Frame'), helpToggle),
-  dropHint, hud, helpCard, addPopup, coach, firstRun);
+  dropHint, hud, helpCard, addPopup, coach, firstRun, camHero);
 const playBtn = h('button', { class: 'btn sm icon', type: 'button', 'aria-label': 'Play' }, '▶');
 const scrub = h('input', { type: 'range', min: 0, max: 3, step: 0.01, value: 0, 'aria-label': 'Playhead' });
 const timeOut = h('span', { class: 'time' });
@@ -197,7 +203,9 @@ const flyDevice = h('button', { class: 'fly-device', type: 'button', 'aria-haspo
 const flyMenu = h('div', { class: 'menu fly-menu', hidden: true, role: 'menu' });
 const flyPhoneSlot = h('div', { class: 'fly-phone' });
 const flyGroup = h('div', { class: 'fly' }, flyBtn, flyDevice);
-const stage = h('section', { class: 'stage' }, viewport, h('div', { class: 'transport' }, playBtn, timeOut, h('div', { class: 'kf-nav' }, prevKeyBtn, keyBtn, nextKeyBtn), scrubWrap, moveChip, flyGroup), flyMenu);
+// The shot's place in the film, in the Cut's order: one segment per shot, the playhead inside the current one.
+const filmTrack = h('div', { class: 'film-track', role: 'group', 'aria-label': 'Shots in film order' });
+const stage = h('section', { class: 'stage' }, viewport, h('div', { class: 'transport' }, filmTrack, h('div', { class: 'transport-row' }, playBtn, timeOut, h('div', { class: 'kf-nav' }, prevKeyBtn, keyBtn, nextKeyBtn), scrubWrap, moveChip, flyGroup)), flyMenu);
 
 const shotPane = h('div', { class: 'pane shotpane' });
 const objectPane = h('div', { class: 'pane shotpane objectpane', hidden: true });
@@ -229,7 +237,7 @@ function setStep(k: Step) {
   mobile?.onStep(k);
   for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); b.tabIndex = key === k ? 0 : -1; }
   wsBody.classList.toggle('shooting', k === 'shoot');
-  top.dataset.step = k; renderSteps();
+  top.dataset.step = k; renderSteps(); renderCamHero();
   if (k === 'shoot') {
     setView('camera');
     if (collapsed.side) setCollapsed('side', false);
@@ -478,7 +486,11 @@ monLabel.append(h('span'), h('span')); frameLabel.append(h('span'), h('span'));
 function renderTransport() {
   const s = shot();
   scrub.value = String(playhead);
-  textIfChanged(timeOut, `${fmt(playhead)} / ${fmt(s.duration)}${s.start ? ` · scene ${fmt((s.start || 0) + playhead)}` : ''}`);
+  if (!timeOut.firstChild) timeOut.append(h('span'), h('span', { class: 't-film' }));
+  textIfChanged(timeOut.children[0] as HTMLElement, `${fmt(playhead)} / ${fmt(s.duration)}`);
+  const film = filmSegments(project), seg = film.segments.find(x => x.shotId === s.id);
+  textIfChanged(timeOut.children[1] as HTMLElement, seg ? ` · film ${fmt(seg.start + playhead)}` : '');
+  renderFilmTrack(film);
   textIfChanged(moveChip, describeCamera(s, project.scene.entities));
   textIfChanged(playBtn, playing ? '❚❚' : '▶');
   playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play'); playBtn.title = playing ? 'Pause' : 'Play';
@@ -489,6 +501,42 @@ function renderTransport() {
   textIfChanged(frameLabel.children[0] as HTMLElement, label); textIfChanged(frameLabel.children[1] as HTMLElement, `${fmt(playhead)} / ${fmt(s.duration)}`);
 }
 
+function renderFilmTrack(film = filmSegments(project)) {
+  const s = shot(), sig = JSON.stringify([s.id, film.segments, project.shots.map(x => x.title)]);
+  if (filmTrack.dataset.sig !== sig) {
+    filmTrack.dataset.sig = sig;
+    filmTrack.replaceChildren(...film.segments.map(x => {
+      const i = project.shots.findIndex(y => y.id === x.shotId), t = project.shots[i];
+      return h('button', { type: 'button', tabindex: -1, class: 'ft-seg' + (x.shotId === s.id ? ' on' : '') + (x.inCut ? '' : ' out'), 'data-shot': x.shotId, style: `flex:${x.duration} 1 0`, title: `Shot ${String(i + 1).padStart(2, '0')} · ${t.title} · ${x.duration}s${x.inCut ? '' : ' · left out of the cut'}`, onclick: () => { if (x.shotId !== shotId) selectShot(x.shotId); } },
+        h('span', { class: 'ft-n' }, String(i + 1).padStart(2, '0')), x.shotId === s.id ? h('i', { class: 'ft-head' }) : null);
+    }));
+  }
+  const head = filmTrack.querySelector<HTMLElement>('.ft-head'); if (head) head.style.left = `${(playhead / Math.max(0.01, s.duration)) * 100}%`;
+}
+/** Show the camera hero in Shoot (until dismissed), and never while flying. */
+function renderCamHero() { camHero.hidden = step !== 'shoot' || localStorage.getItem(HERO_KEY) === '1' || fly.state().phase === 'live' || !!mobile?.active(); }
+/** The camera guide in the Controls card (one popover for every control help): orbit, keys, gamepad, phone. */
+function renderCameraGuide(way: 'orbit' | 'fly' | 'gamepad' | 'phone') {
+  helpExplainers.forEach(x => x.dispose()); helpExplainers = [];
+  const ways = [['orbit', 'Orbit'], ['fly', 'Keys'], ['gamepad', 'Gamepad'], ['phone', 'Phone']] as const;
+  const tabs = h('div', { class: 'ex-tabs', role: 'tablist', 'aria-label': 'Camera controls' }, ...ways.map(([k, label]) => h('button', { type: 'button', role: 'tab', class: 'ex-tab', 'aria-selected': String(k === way), tabindex: k === way ? 0 : -1, onclick: () => renderCameraGuide(k) }, label)));
+  tabs.onkeydown = ev => { const i = ways.findIndex(w => w[0] === way), n = ev.key === 'ArrowRight' ? i + 1 : ev.key === 'ArrowLeft' ? i - 1 : null; if (n === null) return; ev.preventDefault(); renderCameraGuide(ways[(n + ways.length) % ways.length][0]); helpCard.querySelector<HTMLElement>('.ex-tab[aria-selected="true"]')?.focus(); };
+  const live = h('div', { class: 'help-explain' });
+  const device: FlyDevice | null = way === 'fly' ? 'keyboard' : way === 'gamepad' ? 'gamepad' : way === 'phone' ? 'phone' : null;
+  const text = way === 'orbit' ? 'Drag to orbit the set, right-drag to pan, scroll to zoom. C looks through the shot camera; Set start / end from view keys the camera from here.'
+    : way === 'fly' ? 'Fly the shot camera live with the keyboard and record a take along the shot. R records, Esc lets go.'
+    : way === 'gamepad' ? (fly.state().pad ? 'Controller connected. A arms and records, B lets go.' : 'Connect a controller and press any button. A arms and records, B lets go.')
+    : phoneConnected() ? 'Phone paired. Hold it like a camera to aim the shot.' : 'Pair your phone by scanning a QR code, then hold it like a camera to aim the shot.';
+  const act = device ? h('button', { class: 'btn camera sm', type: 'button', onclick: () => { helpCard.hidden = true; flyPick = device; localStorage.setItem('previs.fly.device', device); fly.setDevice(device); renderFly(); if (device === 'phone' && !phoneConnected()) { openPhonePairing(); return; } flyBtn.click(); } }, device === 'phone' && !phoneConnected() ? 'Pair phone…' : `Fly with ${device === 'keyboard' ? 'the keyboard' : `the ${device}`}`)
+    : h('button', { class: 'btn sm', type: 'button', onclick: () => { helpCard.hidden = true; setView('set'); } }, 'Orbit the set');
+  helpCard.replaceChildren(
+    h('div', { class: 'help-head' }, h('strong', {}, 'Camera'), h('span', { class: 'muted' }, 'Orbit, fly, gamepad or phone'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => { helpCard.hidden = true; } }, '✕')),
+    h('div', { class: 'cam-guide' }, tabs, h('p', { class: 'note', style: 'margin:0' }, text), way === 'orbit' || way === 'fly' ? live : null,
+      way === 'fly' ? keyboardDiagram() : way === 'gamepad' ? gamepadDiagram() : way === 'phone' ? phoneDiagram() : null,
+      h('div', { class: 'cam-guide-act' }, act, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { helpCard.hidden = true; goSection('camera'); requestAnimationFrame(() => document.querySelector('.op-panel')?.scrollIntoView({ block: 'center' })); } }, 'Fly settings →'))));
+  if (way === 'orbit' || way === 'fly') helpExplainers.push(mountExplainer(live, way === 'orbit' ? 'navigate' : 'fly'));
+  helpCard.hidden = false;
+}
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
 /** Number field: type to preview, Enter/blur commits, Esc reverts; drag up/down to scrub (Shift fine, Ctrl snaps). */
 function numberField(label: string, value: number, opts: { rate: number; snapTo: number; min?: number; max?: number; unit?: string; onPreview(v: number): void; onCommit(v: number, from: number): void }) {
@@ -760,7 +808,7 @@ function openStill(at: 'start' | 'end') {
   goSection('video'); shotPane.dataset.shot = ''; renderShotPane();
   requestAnimationFrame(() => shotPane.querySelector('.sb-composer')?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }));
 }
-function showTipsAgain() { localStorage.removeItem('previs.coach.viewport'); coach.hidden = false; }
+function showTipsAgain() { localStorage.removeItem('previs.coach.viewport'); localStorage.removeItem(HERO_KEY); coach.hidden = false; renderCamHero(); }
 let rigExplainer: { dispose(): void } | undefined;
 function renderShotPane() {
   const key = `${shotId}|${project.revision}`;
@@ -1533,7 +1581,7 @@ document.addEventListener('pointerdown', ev => { if (!flyMenu.hidden && !(ev.tar
 menuKeys(helpMenu, helpMenuBtn); menuKeys(flyMenu, flyDevice);
 menuKeys(addMenu, rail.querySelector<HTMLElement>('.add-obj')!); menuKeys(addPopup, canvas);
 canvas.tabIndex = 0;
-fly.onChange(renderFly);
+fly.onChange(() => { renderFly(); renderCamHero(); });
 window.addEventListener('gamepadconnected', () => renderFly());
 renderFly();
 // Shot monitor (picture in picture) can fold away.
