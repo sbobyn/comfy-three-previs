@@ -169,7 +169,7 @@ async function render() {
 
   app.replaceChildren(
     h('header', { class: 'home-top' },
-      h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Previs'),
+      h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Three Previs'),
       h('nav', {},
         h('button', { class: 'home-link', type: 'button', onclick: () => openJourney() }, 'Guide'),
         h('a', { class: 'home-link', href: '/setup.html' }, 'Setup'))),
