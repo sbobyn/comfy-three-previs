@@ -4,6 +4,8 @@ import type { DirectorProject, Shot, Entity, Reference, Message, Vec3, Asset, Ed
 import { api, h, toast, connectDialog, shapeIcon, readFileBase64 } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
+import { captureShotVideo as captureVideo } from './director-capture';
+import type { CaptureOptions } from './director-capture';
 import { initOperate, operateBlock, fly } from './director-operate'; // [operate]
 import type { FlyDevice } from './director-operate';
 import { installPhoneDemo, openPhonePairing, phoneConnected } from './director-phone'; // [director-phone]
@@ -1742,35 +1744,8 @@ document.addEventListener('keydown', ev => {
 
 // ---------- Render hand-off ----------
 // Render a shot's camera video at a fixed 24 fps and record it on the shot (the source every workflow receives).
-async function captureShotVideo(s: Shot, o: { width: number; height: number; prompt: string; onFrame?: (url: string, i: number, n: number) => void; onStatus?: (t: string) => void }) {
-  if (shotId !== s.id) selectShot(s.id);
-  const idx = project.shots.indexOf(s), { width, height } = o;
-  const n = Math.min(120, Math.max(2, Math.round(s.duration * 24))), at = (i: number) => i / 24;
-  const motion = Array.from({ length: n }, (_, i) => { const p = scene.pose(at(i)); return { t: i / 24, p: p.p, q: scene.quaternionAt(at(i)), mm: Math.round(p.mm * 1000) / 1000 }; });
-  o.onStatus?.('Saving camera motion…');
-  const main = await api('project');
-  const target = entity(s.camera.target);
-  const sig = signature(project, s);
-  const saved = await api('browser-shot', {
-    revision: main.project.revision, title: `${project.title} · Shot ${idx + 1} · ${s.title}`.slice(0, 160), camera: motion[0], subject: target ? focusPoint(target) : [0, 1, 0], frames: motion,
-    png: scene.capture(at(0), 640, 360).split(',')[1], delivery: { width, height, fps: 24 },
-    director: { projectId: project.id, shotId: s.id, projectRevision: project.revision, sceneName: project.scene.name, shotTitle: s.title, camera: s.camera, entities: project.scene.entities },
-  });
-  const previsShot = saved.project.shots.filter((x: any) => x.browser?.director?.shotId === s.id).at(-1);
-  const { stage } = await api('video/browser/start', { revision: saved.project.revision, shotId: previsShot.id, width, height, fps: 24, frameCount: n });
-  let stageId: string | null = stage.id;
-  try {
-    for (let i = 0; i < n; i++) {
-      const url = scene.capture(at(i), width, height);
-      await api('video/browser/frame', { stageId, index: i, png: url.split(',')[1] });
-      o.onFrame?.(url, i, n);
-    }
-    o.onStatus?.('Encoding…');
-    const { asset } = await api('video/browser/finish', { stageId }); stageId = null;
-    const r = await api('director/render', { projectId, shotId: s.id, previsShotId: previsShot.id, assetId: asset.id, prompt: o.prompt, signature: sig });
-    apply(r.project);
-    return { asset, previsShotId: previsShot.id as string, project: r.project as DirectorProject };
-  } finally { if (stageId) await api('video/browser/abort', { stageId }).catch(() => {}); }
+async function captureShotVideo(s: Shot, o: CaptureOptions) {
+  return captureVideo({ api, scene, project: () => project, entity, signature, select: x => { if (shotId !== x.id) selectShot(x.id); }, apply }, s, o);
 }
 renderBtn.onclick = () => openRender();
 function openRender() {
