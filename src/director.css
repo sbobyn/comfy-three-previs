@@ -229,12 +229,25 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
   & .undo-group .btn { width: 30px; height: 30px; color: var(--ink-2); }
   & .undo-group .btn svg, & .right .btn svg { width: 17px; height: 17px; }
   & .undo-group .btn:disabled { opacity: .3; }
-  & .right { justify-self: end; display: flex; align-items: center; gap: 6px; min-width: 0; margin: 0; flex: none; flex-wrap: nowrap; white-space: nowrap; }
+  & .right { justify-self: end; display: flex; align-items: center; justify-content: flex-end; gap: 6px; width: 100%; min-width: 0; margin: 0; flex: none; flex-wrap: nowrap; white-space: nowrap; }
   & .right > * { flex: none; }
+  & .right > .top-strip { flex: 0 1 auto; }
   & .right [data-tip]:hover::after, & .right [data-tip]:focus-visible::after { left: auto; right: 0; transform: none; }
   & > .panel-toggle[data-tip]:hover::after, & > .panel-toggle[data-tip]:focus-visible::after { left: 0; transform: none; }
 }
 .claude-mark { color: var(--accent); margin-right: 5px; font-size: 13px; }
+/* Status strip: what the current step is on, Claude's presence, the jobs pip. */
+.top-strip { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; }
+.top-status { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-3); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.top-status .ts-short { display: none; }
+.top-claude { display: inline-flex; align-items: center; flex: none; height: 24px; padding: 0 9px 0 7px; border-radius: var(--r-full); border: 1px solid var(--line); background: var(--card); color: var(--ink-2); font-size: var(--fs-xs); font-weight: 500; cursor: pointer; }
+.top-claude:hover { border-color: var(--line-2); color: var(--ink); }
+.top-claude .claude-mark { margin-right: 4px; font-size: 12px; }
+.top-strip .jobs-pip { flex: none; }
+.top-go { height: 32px; flex: none; }
+.top-go:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.help-menu > button strong svg { width: 15px; height: 15px; color: var(--ink-3); }
+.help-menu-btn { font-size: 16px; letter-spacing: .04em; }
 .claude-btn .claude-mark { font-size: 14px; }
 .help-menu { right: 0; top: calc(100% + 8px); }
 .steps { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: var(--r-full); background: var(--paper-2); border: 1px solid var(--line); }
@@ -243,6 +256,9 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .step-btn:hover { color: var(--ink); }
 .step-btn.on { background: var(--card); color: var(--ink); box-shadow: var(--sh-1), 0 2px 6px -2px rgba(21,19,15,.12); }
 .step-btn .st-count { font-size: var(--fs-2xs); color: var(--ink-4); font-weight: 500; font-variant-numeric: tabular-nums; }
+.step-btn .st-n { align-self: center; width: 17px; height: 17px; border-radius: 50%; display: inline-grid; place-items: center; font: 600 var(--fs-2xs)/1 var(--mono); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--line-2); flex: none; }
+.step-btn.on .st-n { background: var(--ink); color: var(--on-ink); box-shadow: none; }
+.step-btn:focus-visible { outline: none; box-shadow: var(--focus); }
 .step-btn.on .st-count { color: var(--ink-3); }
 .panel-toggle .pane-fill { opacity: .35; transition: opacity .12s; }
 .panel-toggle.off .pane-fill { opacity: 0; }
@@ -252,6 +268,8 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
   .ws-top .right .btn { padding-inline: 10px; }
   .step-btn .st-count { display: none; }
   .step-btn { padding: 0 12px; }
+  .top-status .ts-long { display: none; }
+  .top-status .ts-short { display: inline; }
 }
 @media (max-width: 980px) {
   .ws-top .crumbs > span.muted, .ws-top .crumbs > .sep:nth-of-type(2), .ws-top .crumbs > a, .ws-top .crumbs > .sep:first-of-type { display: none; }

@@ -25,6 +25,8 @@ import { mountJobsPip } from './director-jobs'; // [jobs]
 import { progressSlot } from './director-progress'; // [live-progress]
 import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
 import { initMobile } from './director-mobile'; // [mobile]
+import { stepAction, stepStatus, keyFrameSlots } from './director-desktop-core';
+import { VIDEO_PRICES } from '../shared/tiers.mjs';
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -52,8 +54,6 @@ async function edit(ops: unknown[], quiet = false) {
 
 // ---------- Layout ----------
 const titleInput = h('input', { 'aria-label': 'Project name', maxlength: 120 });
-const pillSlot = h('span');
-const claudeBtn = h('button', { class: 'btn ghost sm claude-btn', type: 'button', title: 'Direct this scene from Claude', onclick: () => claudeDialog() }, h('span', { class: 'claude-mark', 'aria-hidden': 'true' }, '✳'), 'Claude');
 const claudeDialog = () => showClaudeDialog(connect, project);
 const svgIcon = (paths: string) => { const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); el.setAttribute('viewBox', '0 0 20 20'); el.setAttribute('fill', 'none'); el.setAttribute('aria-hidden', 'true'); el.innerHTML = paths; return el; };
 const ICON = {
@@ -66,11 +66,10 @@ const ICON = {
 // Preview and Generate live in the action bar pinned to the bottom of the right panel (Build and Shoot).
 const previewBtn = h('button', { class: 'btn act-preview', type: 'button', title: 'Play the shot through the camera (Space)' }, '▶ Preview');
 const renderBtn = h('button', { class: 'btn cta act-go', type: 'button', title: 'Make the blockout and generate this shot’s video' }, 'Generate video ▸');
-const libraryBtn = h('button', { class: 'btn ghost sm', type: 'button', 'aria-label': 'Library', title: 'Library: every image, blockout, video and film in this project', onclick: () => void openAssets() }, svgIcon(ICON.library), h('span', { class: 'hide-md' }, 'Library'));
 const undoBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Undo', onclick: () => void undo() }, svgIcon(ICON.undo));
 const redoBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Redo', onclick: () => void redo() }, svgIcon(ICON.redo));
 type Step = 'build' | 'shoot' | 'cut';
-const stepBtn = (k: Step, label: string, tip: string) => h('button', { type: 'button', role: 'tab', class: 'step-btn', 'data-step': k, 'aria-selected': 'false', title: tip, onclick: () => setStep(k) }, h('span', { class: 'st-label' }, label), h('span', { class: 'st-count' }));
+const stepBtn = (k: Step, label: string, tip: string) => h('button', { type: 'button', role: 'tab', class: 'step-btn', 'data-step': k, 'aria-selected': 'false', title: tip, onclick: () => setStep(k) }, h('span', { class: 'st-n', 'aria-hidden': 'true' }, String(['build', 'shoot', 'cut'].indexOf(k) + 1)), h('span', { class: 'st-label' }, label), h('span', { class: 'st-count' }));
 const stepBtns: Record<Step, HTMLElement> = {
   build: stepBtn('build', 'Build', 'Build the scene: arrange objects and give your cast images'),
   shoot: stepBtn('shoot', 'Shoot', 'Shoot the selected shot: frame the camera, fly it, generate its video'),
@@ -97,19 +96,30 @@ function menuKeys(menu: HTMLElement, opener: HTMLElement) {
     items[next]?.focus();
   });
 }
+// One "More" menu holds what used to be loose top-bar buttons (Library, Claude, Guide, shortcuts, tips, export).
 const helpMenu = h('div', { class: 'menu help-menu', hidden: true, role: 'menu' });
-const helpMenuBtn = h('button', { class: 'btn ghost sm icon help-menu-btn', type: 'button', 'aria-label': 'Help', title: 'Guide and shortcuts', onclick: () => { menuState(helpMenu, helpMenu.hidden, helpMenuBtn, true); } }, '?');
+const helpMenuBtn = h('button', { class: 'btn ghost sm icon help-menu-btn', type: 'button', 'aria-label': 'More', title: 'Library, Claude, guide and shortcuts', onclick: () => { menuState(helpMenu, helpMenu.hidden, helpMenuBtn, true); } }, '⋯');
+const menuItem = (title: string, line: string, run: () => void, icon?: string) => h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; run(); } }, h('strong', {}, icon ? svgIcon(icon) : null, title), h('span', {}, line));
 helpMenu.append(
-  h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; showJourney(); } }, h('strong', {}, 'Guide'), h('span', {}, 'The whole journey, scene to film')),
-  h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; renderHelp(); helpCard.hidden = false; } }, h('strong', {}, 'Controls & shortcuts'), h('span', {}, 'Viewport, keys and grid · ?')),
-  h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; localStorage.removeItem('previs.coach.viewport'); coach.hidden = false; } }, h('strong', {}, 'Show tips again'), h('span', {}, 'The first-run hints')));
+  menuItem('Library', 'Every image, blockout, video and film', () => void openAssets(), ICON.library),
+  menuItem('Direct with Claude', 'Edit this scene from Claude; changes show here live', () => claudeDialog()),
+  h('div', { class: 'menu-sep' }),
+  menuItem('Guide', 'The whole journey, scene to film', () => showJourney()),
+  menuItem('Controls & shortcuts', 'Viewport, keys and grid · ?', () => { renderHelp(); helpCard.hidden = false; }),
+  menuItem('Show tips again', 'The first-run hints and tour', () => showTipsAgain()),
+  h('div', { class: 'menu-sep' }),
+  menuItem('Export project (.zip)', 'Everything in this project, in one file', () => { location.href = `/api/director/export?id=${projectId}`; }));
+// Status strip: what the current step is working on, Claude's presence and the jobs pip (mounted below).
+const topStatus = h('div', { class: 'top-status', role: 'status', 'aria-live': 'polite' });
+const claudeChip = h('button', { class: 'top-claude', type: 'button', hidden: true, title: 'Claude is connected · open the setup', onclick: () => claudeDialog() }, h('span', { class: 'claude-mark', 'aria-hidden': 'true' }, '✳'), 'Claude');
+const topGo = h('button', { class: 'btn cta top-go', type: 'button' });
 const top = h('header', { class: 'ws-top' },
   h('div', { class: 'top-left' },
     h('a', { class: 'brand', href: '/', title: 'Comfy Three Previs · all projects', 'aria-label': 'Comfy Three Previs · all projects' }, h('span', { class: 'brand-mark' })),
     h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput),
     h('div', { class: 'undo-group' }, undoBtn, redoBtn)),
   modeSwitch,
-  h('div', { class: 'right' }, pillSlot, libraryBtn, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu)));
+  h('div', { class: 'right' }, h('div', { class: 'top-strip' }, topStatus, claudeChip), topGo, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu)));
 document.addEventListener('pointerdown', ev => { if (!helpMenu.hidden && !(ev.target as HTMLElement).closest?.('.menu-wrap')) helpMenu.hidden = true; });
 
 const shotList = h('div', { class: 'shots', role: 'listbox', 'aria-label': 'Shots' });
@@ -202,6 +212,7 @@ const sequence = createSequence({
   prompt: s => shotPrompt(project, s, 'video'),
   capture: (s, o) => captureShotVideo(s, { width: 1280, height: 720, prompt: shotPrompt(project, s, 'video'), ...o }),
   openShot: id => { selectShot(id); setStep('shoot'); },
+  onExportState: st => { exportState = { exportOk: st.ok, exportReason: st.reason, exportBusy: st.busy }; renderSteps(); },
 });
 let wsMode: 'scene' | 'sequence' = 'scene';
 let step: Step = 'build';
@@ -215,8 +226,9 @@ function setStep(k: Step) {
   const from = step; step = k;
   setMode(k === 'cut' ? 'sequence' : 'scene');
   mobile?.onStep(k);
-  for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); }
+  for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); b.tabIndex = key === k ? 0 : -1; }
   wsBody.classList.toggle('shooting', k === 'shoot');
+  top.dataset.step = k; renderSteps();
   if (k === 'shoot') {
     setView('camera');
     if (collapsed.side) setCollapsed('side', false);
@@ -330,7 +342,8 @@ const selection = new Selection();
 const undoStack = new UndoStack();
 initSheets({ projectId, project: () => project, apply: p => apply(p), refgen: () => refgen, loadRefgen: () => loadRefgen() }); // [designsheet]
 // [jobs-pip] mount point
-mountJobsPip(top.querySelector<HTMLElement>('.right')!, { projectId, api, shots: () => project.shots, onOpenShot: id => { selectShot(id); setStep('shoot'); } }); // [jobs] status-bar pip + panel
+mountJobsPip(top.querySelector<HTMLElement>('.top-strip')!, { projectId, api, shots: () => project.shots, onOpenShot: id => { selectShot(id); setStep('shoot'); } }); // [jobs] status-bar pip + panel
+{ const strip = top.querySelector<HTMLElement>('.top-strip')!, pip = strip.querySelector('.jobs-pip'); if (pip) strip.append(pip); }
 const mobile = initMobile({ // [mobile] compact/medium layout; no-op on desktop widths
   app, top, wsBody, stage, viewport, shotList, outline, filterInput, shotPane, objectPane, readiness, actionBar, transport: { playBtn, scrub, timeOut }, modeSeg, snapBtn, coach, labels, titleInput, undoBtn, redoBtn,
   sequence, scene, selection, project: () => project, shot, step: () => step, setStep, selectShot, addShot, setView, setSection, openRender, openAssets, claudeDialog, requestDelete, frameSelected, duplicateSelection, toggleHidden, entity, runEntry, edit, undo, redo,
@@ -434,7 +447,6 @@ async function ungroupSelection() {
   if (ok) selection.set(members, members[0] ?? null);
 }
 
-pillSlot.append(claudeBtn);
 const textIfChanged = (el: HTMLElement, value: string) => { if (el.textContent !== value) el.textContent = value; };
 monLabel.append(h('span'), h('span')); frameLabel.append(h('span'), h('span'));
 function renderTransport() {
@@ -694,13 +706,35 @@ function renderActionBar() {
   const ready = !!s.render && !stale;
   renderBtn.textContent = ready ? 'Generate video ▸' : 'Make blockout…';
   renderBtn.title = ready ? 'Generate this shot’s video from its blockout' : 'Make the camera blockout, then generate this shot’s video';
+  renderSteps();
 }
+/** Top bar: step counts, the status strip and the one primary action for the current step. */
 function renderSteps() {
+  if (!project) return;
   const n = project.scene.entities.filter(e => e.shape !== 'group').length, shots = project.shots.length, vids = (project.assets || []).filter(a => a.kind === 'workflow-result').length;
   stepBtns.build.querySelector('.st-count')!.textContent = `${n} object${n === 1 ? '' : 's'}`;
   stepBtns.shoot.querySelector('.st-count')!.textContent = `${shots} shot${shots === 1 ? '' : 's'}`;
   stepBtns.cut.querySelector('.st-count')!.textContent = `${vids} video${vids === 1 ? '' : 's'}`;
+  const s = shot(), stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
+  const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment'), castNeed = cast.filter(r => !objectLooks(project, r.entity.id).length).length;
+  const st = stepStatus(step, project, s, { stale, videos: shotVideos(s.id).length, castNeed, castTotal: cast.length }), text = st.parts.join(' · ');
+  if (topStatus.title !== text) { topStatus.title = text; topStatus.replaceChildren(h('span', { class: 'ts-long' }, text), h('span', { class: 'ts-short', 'aria-hidden': 'true' }, st.short)); }
+  const def = genCache ? shotModel(s) : null, slots = keyFrameSlots(def as any, VIDEO_PRICES), frames = s.references.filter(r => r.role === 'frame');
+  const a = stepAction(step, { castNeed, keyFrames: slots.length ? (slots.includes('end') ? 'start+end' : 'start') : false, hasStart: frames.some(r => r.note === 'key frame start' || !r.note), hasEnd: frames.some(r => r.note === 'key frame end'), ...exportState });
+  topGo.textContent = a.label; topGo.title = a.title; topGo.disabled = a.disabled; topGo.dataset.kind = a.kind;
+  topGo.onclick = () => a.kind === 'looks' ? openLooks() : a.kind === 'still' ? openStill(a.at || 'start') : a.kind === 'video' ? openRender() : sequence.exportFilm();
 }
+let exportState = { exportOk: false, exportReason: '', exportBusy: false };
+/** Open the storyboard composer for a still at the start or end of the shot (the top bar's Generate still). */
+function openStill(at: 'start' | 'end') {
+  const s = shot();
+  frameForm[s.id] = { ...(frameForm[s.id] || { presetId: 'flux-2-pro', count: 1, seed: Math.floor(Math.random() * 1e6), guide: true, checkpoint: '' }), open: true, prompt: null };
+  seekShot(at === 'start' ? 0 : s.duration);
+  if (!refgen.presets.length) void loadRefgen();
+  goSection('video'); shotPane.dataset.shot = ''; renderShotPane();
+  requestAnimationFrame(() => shotPane.querySelector('.sb-composer')?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }));
+}
+function showTipsAgain() { localStorage.removeItem('previs.coach.viewport'); coach.hidden = false; }
 let rigExplainer: { dispose(): void } | undefined;
 function renderShotPane() {
   const key = `${shotId}|${project.revision}`;
@@ -1702,6 +1736,7 @@ function genQuote(job: any, def: any, request: any, s: Shot) {
 async function pollNow() {
   try {
     const r = await api(`director/project?id=${projectId}&since=${project.revision}`);
+    if (r.agent) claudeChip.hidden = !r.agent.connected;
     if (r.project) { const before = project; apply(r.project); announceChanges(before, r.project); }
   } catch {}
 }
@@ -1745,7 +1780,7 @@ async function boot() {
   if (!projectId) { location.href = '/'; return; }
   try {
     const [p, a] = await Promise.all([api(`director/project?id=${projectId}`), api('director/agent')]);
-    connect = a.connect;
+    connect = a.connect; claudeChip.hidden = !a.agent?.connected;
     void loadRefgen().then(pollJobs);
     apply(p.project);
     // Open on the action: frame subjects, not the buildings around them.
