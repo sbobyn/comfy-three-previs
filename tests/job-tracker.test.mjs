@@ -157,3 +157,15 @@ test('backend errors keep redacted detail; per-call timeouts; Cloud provider err
   assert.deepEqual(history.error, { nodeId: '2', nodeType: 'LtxApi25ImageToVideo', message: 'Server side error' });
   assert.equal(history.status.status_str, 'error'); assert.equal(JSON.stringify(history).includes('secret trace'), false);
 });
+
+test('the tracker forgets finished jobs after a while, so its memory stays bounded; onTerminal still fires once', async () => {
+  clock.t = T0;
+  const gen = fakeSource('generation', Array.from({ length: 50 }, (_, i) => ({ id: `j${i}`, status: 'queued', createdAt: ago(1000), doneAfter: 1 })));
+  const tracker = createJobTracker({ sources: [gen.source], ...options() });
+  tracker.start(); await tracker.tick();
+  assert.equal(gen.terminal.length, 50); assert.equal(tracker.finishedCount(), 50);
+  for (let i = 0; i < 70; i++) { clock.t += 5000; await tracker.tick(); }
+  assert.equal(tracker.finishedCount(), 0);
+  assert.equal(gen.terminal.length, 50, 'no second onTerminal');
+  tracker.stop();
+});

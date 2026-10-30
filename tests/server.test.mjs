@@ -64,6 +64,9 @@ test('retired Blender/workbench routes answer 404 by default; the director\'s ro
     assert.equal(saved.status, 200);
     assert.equal((await post('/api/video/readiness')).status, 200);
     assert.equal((await fetch(base + '/api/generation')).status, 200);
+    // Every page names its icon (no /favicon.ico 404 in the console).
+    const icon = await fetch(base + '/favicon.svg'); assert.equal(icon.status, 200); assert.equal(icon.headers.get('content-type'), 'image/svg+xml'); await icon.arrayBuffer();
+    for (const page of ['/', '/director.html', '/setup.html', '/phone.html']) assert.match(await (await fetch(base + page)).text(), /<link rel="icon" href="\/favicon\.svg"/, page);
   } finally { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; }
 });
 
