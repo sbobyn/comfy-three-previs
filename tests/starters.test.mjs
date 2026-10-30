@@ -57,6 +57,8 @@ test('a project from a starter gets its media copied in, with fresh ids, and cop
     for (const e of p.scene.entities) if (e.look) assert.ok(p.scene.references.some(r => r.id === e.look && r.entityId === e.id));
     for (const e of p.scene.entities) for (const sh of e.sheets || []) for (const sl of sh.slots) assert.ok(p.scene.references.some(r => r.id === sl.attempts[0].referenceId), `${e.name} sheet slot`);
     for (const c of p.edit.clips) assert.equal(p.assets.find(a => a.id === c.assetId)?.shotId, c.shotId);
+    // Each chosen video still points at the blockout clip it was made from (Compare and the seam pair them).
+    for (const c of p.edit.clips) { const v = p.assets.find(a => a.id === c.assetId), b = p.assets.find(a => a.id === v.source.sourceAssetId); assert.equal(b?.kind, 'camera-render', `shot ${c.shotId}`); assert.equal(b.shotId, c.shotId); }
     const trims = p.edit.clips.map(c => c.out);
     assert.deepEqual(trims, snap.edit.clips.map(c => c.out));
     // Idempotent: attaching the same files again copies nothing.

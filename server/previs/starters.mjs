@@ -82,7 +82,9 @@ export function starterSnapshot(project, { slug, title, description, order = 0, 
   const assets = [], clips = [];
   const takeAsset = a => {
     files.push({ path: `media/assets/${a.id}.mp4`, from: a.file, kind: 'video' });
-    const source = a.kind === 'workflow-result' ? { workflow: a.source?.workflow || 'Video', backend: a.source?.backend || null, prompt: a.source?.prompt || '' } : { engineShotId: null };
+    // A video keeps the link to the blockout clip it was made from, so Compare and the seam can pair them.
+    const from = a.source?.sourceAssetId && picks.some(pk => pk.blockout?.id === a.source.sourceAssetId) ? a.source.sourceAssetId : null;
+    const source = a.kind === 'workflow-result' ? { workflow: a.source?.workflow || 'Video', backend: a.source?.backend || null, prompt: a.source?.prompt || '', sourceAssetId: from } : { engineShotId: null };
     return { id: a.id, kind: a.kind, shotId: a.shotId, file: `assets/${a.id}.mp4`, mime: 'video/mp4', duration: a.duration ?? null, createdAt: a.createdAt, source };
   };
   const shots = project.shots.map((s, i) => {
@@ -179,6 +181,7 @@ export function instantiateStarter(s, { has = () => true } = {}) {
     const m = (s.media || []).find(x => x.path === path);
     return [{ ...structuredClone(a), id, shotId, file: `assets/${id}.mp4`, sha256: m?.sha256 ?? null, width: m?.width ?? null, height: m?.height ?? null, fps: m?.fps ?? null, frameCount: m?.frameCount ?? null, duration: m?.duration ?? a.duration ?? null, starter: s.slug, source: { ...(a.source || {}), ...(a.kind === 'camera-render' ? { engineShotId: null } : { resultId: null }) } }];
   });
+  for (const a of assets) if (a.source.sourceAssetId) a.source.sourceAssetId = assetMap.get(a.source.sourceAssetId) || null;
   const clips = (s.edit?.clips || []).filter(c => shotMap.has(c.shotId) && assetMap.has(c.assetId)).map(c => ({ id: randomUUID(), shotId: shotMap.get(c.shotId), assetId: assetMap.get(c.assetId), in: c.in ?? 0, out: c.out ?? null }));
   const out = { scene: { name: s.scene.name || s.title, environment: structuredClone(s.scene.environment || {}), entities }, shots, files };
   if (references.length) out.scene.references = references;
