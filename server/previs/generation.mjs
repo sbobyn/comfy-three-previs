@@ -6,6 +6,7 @@ import { atomicJson } from './atomic.mjs';
 import { createBackend, backendSnapshot, safeMediaLocation, errorDetail } from './backends.mjs';
 import { telemetryHooks } from './job-progress.mjs';
 import { slotsFor } from './concurrency.mjs';
+import { keyedLock } from './keyed-lock.mjs';
 import { uploadCacheFor } from './upload-cache.mjs';
 import { assertNoSecrets, hashBytes, hashValue, validateWorkflowDefinition, legacyWorkflowDefinition, validateGraph, workflowCost, validateApproval } from './workflows.mjs';
 
@@ -110,9 +111,11 @@ export async function openGeneration(root, project, options = {}) {
   }
   const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root);
   slots.register('generation', () => [...jobs.values()].filter(active).map(job => ({ id: job.id, backend: job.backend, kind: generationKind(job), status: job.status, uncertainAt: job.uncertainAt, dispatchStartedAt: job.dispatchStartedAt, createdAt: job.createdAt })));
-  // Serialize journal operations, including duplicate simultaneous submits.
-  let chain = Promise.resolve();
-  const serial = fn => (...args) => { const task = chain.then(() => fn(...args)); chain = task.catch(() => {}); return task; };
+  // Journal operations are serialized per request id (a slow download for one job never delays another job).
+  // Submits of identical content also share a lock, so duplicate simultaneous submits are still refused.
+  const lock = keyedLock();
+  const serial = (fn, keyOf) => (input, ...rest) => lock(String(keyOf(input) ?? '').toLowerCase(), () => fn(input, ...rest));
+  const byRequest = fn => serial(fn, input => input?.requestId), byJob = fn => serial(fn, id => id), byJobId = fn => serial(fn, input => input?.jobId);
   const get = id => {
     const job = jobs.get(String(id).toLowerCase());
     if (!job) fail('Generation request not found', 404);
@@ -225,7 +228,7 @@ export async function openGeneration(root, project, options = {}) {
     try {
       if (saved.status !== 'quoted') fail('Prepare and quote this request before submission', 409);
       const release = slots.acquire({ id, backend: saved.backend, kind: generationKind(saved) });
-      try { return await dispatch(input, id, saved); } finally { release(); }
+      try { return await lock(`content:${contentKey(saved)}`, () => dispatch(input, id, saved)); } finally { release(); }
     } catch (error) { await noteRefusal(id, error); throw error; }
   }
   async function dispatch(input, id, saved) {
@@ -366,5 +369,5 @@ export async function openGeneration(root, project, options = {}) {
     if (job.status !== 'orphaned') fail('Only a job whose project was archived or deleted can be dismissed', 409);
     return job.dismissedAt ? job : persist({ ...job, dismissedAt: now() });
   }
-  return { setAttachment: fn => { attachResults = fn; }, dismiss: serial(dismiss), prepare: serial(input => prepare(input)), quote: serial(input => prepare(input, true)), submit: serial(submit), track: serial(track), reconcile: serial(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect(), isActive: active, kindOf: generationKind, expectedSeconds, label: generationLabel, duplicateOf: job => duplicateOf(job) };
+  return { setAttachment: fn => { attachResults = fn; }, dismiss: byJobId(dismiss), prepare: byRequest(input => prepare(input)), quote: byRequest(input => prepare(input, true)), submit: byRequest(submit), track: byJob(track), reconcile: byJobId(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect(), isActive: active, kindOf: generationKind, expectedSeconds, label: generationLabel, duplicateOf: job => duplicateOf(job) };
 }

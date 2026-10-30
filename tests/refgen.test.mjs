@@ -32,7 +32,7 @@ function mockBackend(log) {
     async upload(bytes, o) { log.push('upload:' + bytes.length); return { value: `previs/${o.filename}` }; },
     async submit(req) { log.push('submit'); log.graph = req.graph; if (log.submitError) throw log.submitError(); if (log.failSubmit) throw Error('socket hang up'); return { promptId: 'p-' + req.requestId.slice(0, 8) }; },
     async history() { log.push('history'); if (log.historyError) return { status: { status_str: 'error', completed: false }, error: log.historyError }; return log.done ? { status: { completed: true, status_str: 'success' }, outputs: { 7: { images: [{ filename: 'a.png', subfolder: '', type: 'output' }, { filename: 'b.png', subfolder: '', type: 'output' }] } } } : null; },
-    async view() { log.push('view'); return PNG; },
+    async view() { log.push('view'); return log.view ? log.view() : PNG; },
   });
 }
 
@@ -283,4 +283,27 @@ test('refgen collection attempts remain bounded across restart', async () => {
     assert.equal(result.status, i < 2 ? 'collecting' : 'recovery-required');
   }
   assert.equal(views, 3); assert.equal(log.filter(x => x === 'submit').length, 1);
+});
+
+test('refgen: a stalled /view for one job never delays another job\'s submit; concurrent identical submits still send once', async () => {
+  const { project, refgen, log, runner } = await setup({ allowPaid: true, slots: createSlots({ env: { PREVIS_LIMIT_CLOUD_IMAGES: '4' } }) });
+  let release, viewing; const stalled = new Promise(r => { release = r; }), started = new Promise(r => { viewing = r; });
+  const a = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'local-checkpoint', checkpoint: 'sd15.safetensors', prompt: 'one', seed: 1 });
+  await refgen.submit({ projectId: project.id, requestId: a.id, approval: { approved: true, fingerprint: a.fingerprint, allowance: { currency: 'USD', maxAmount: 0 } } });
+  log.done = true; log.view = async () => { viewing(); await stalled; return PNG; };
+  const tracking = refgen.trackerSource().track(a.id); // the tracker's path
+  await started;
+  const b = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'two' });
+  const t0 = Date.now(), sent = await refgen.submit({ projectId: project.id, requestId: b.id, approval: consent(b) });
+  assert.equal(sent.status, 'submitted'); assert.ok(Date.now() - t0 < 1000);
+  assert.equal(refgen.list(project.id).find(j => j.id === a.id).status, 'collecting');
+  log.view = null; release();
+  assert.equal((await tracking).status, 'completed');
+  // Two different request ids for identical work, submitted at the same moment: one is sent, one is refused.
+  const input = { projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'same', seed: 3 };
+  const [c, d] = [await refgen.prepare(input), await refgen.prepare(input)];
+  const results = await Promise.allSettled([c, d].map(j => refgen.submit({ projectId: project.id, requestId: j.id, approval: consent(j) })));
+  assert.deepEqual(results.map(r => r.status).sort(), ['fulfilled', 'rejected']);
+  assert.equal(results.find(r => r.status === 'rejected').reason.apiCode, 'duplicate');
+  assert.equal(log.filter(x => x === 'submit').length, 3);
 });

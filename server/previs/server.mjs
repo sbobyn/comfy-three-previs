@@ -29,6 +29,7 @@ import { WebSocket } from 'ws';
 import { createJobProgress, createProgressSocketFactory } from './job-progress.mjs'; // [live-progress]
 import { createJobProgressRoutes } from './job-progress-routes.mjs';
 import { createProgressCoordinator } from './job-progress-coordinator.mjs';
+import { keyedLock } from './keyed-lock.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -70,6 +71,9 @@ function blenderReadiness() { return { configured: Boolean(process.env.PREVIS_BL
 let catalog = null;
 let operation = Promise.resolve();
 const serial = fn => { const next = operation.then(fn); operation = next.catch(() => {}); return next; };
+// Video capture runs on its own queue, one chain per frame stage (a 120-frame capture never waits behind
+// generation or another capture). Blender video stays on the global queue with every other Blender call.
+const videoLock = keyedLock();
 const port = Number(process.env.PORT || 5190);
 agentRunner = await openAgentRunner({ root, dataDir: data, port, director }); // [agent] built-in Claude Code runner
 const headless = openHeadless({ port }), renderRoute = renderRoutes({ director, headless }); // [headless] C2 render routes
@@ -132,10 +136,12 @@ const server = createServer(async (req, res) => {
     if (req.method === 'POST'  && url.pathname.startsWith('/api/')) {
       if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       const input = await body(req);
+      // Generation serializes per request id inside the engine; it never waits on this queue.
+      if (url.pathname.startsWith('/api/generation/')) return send(await generation.route(url.pathname, input));
+      if (url.pathname.startsWith('/api/video/') && url.pathname !== '/api/video/blender') return send(await videoLock(`stage:${typeof input.stageId === 'string' ? input.stageId : ''}`, () => videos(url.pathname, input)));
       const result = await serial(async () => {
         if (url.pathname === '/api/phone/pair') return phoneLan.pair();
         if (url.pathname === '/api/phone/revoke') { phoneLan.revoke(); return {revoked:true}; }
-        if (url.pathname.startsWith('/api/generation/')) return generation.route(url.pathname,input);
         if (url.pathname.startsWith('/api/video/')) return videos(url.pathname,input);
         if (url.pathname === '/api/transfer') {
           if (!/^[a-f0-9-]{36}$/.test(input.requestId || '') || input.disposableProject !== true) fail('Confirm a disposable Blender project and provide a transfer request UUID');

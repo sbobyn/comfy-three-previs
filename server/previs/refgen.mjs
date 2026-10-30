@@ -10,6 +10,7 @@ import { RECOVERY_ATTEMPTS, recoveryAttempts, beginRecovery } from './result-rec
 import { atomicJson } from './atomic.mjs';
 import { imageToPng } from './edit.mjs';
 import { createBackend, errorDetail, safeMediaLocation } from './backends.mjs';
+import { keyedLock } from './keyed-lock.mjs';
 import { telemetryHooks } from './job-progress.mjs';
 import { slotsFor } from './concurrency.mjs';
 import { uploadCacheFor } from './upload-cache.mjs';
@@ -157,8 +158,8 @@ export async function openRefgen(root, director, options = {}) {
     }
   }
   for (const { id } of await director.list()) await load(id);
-  let chain = Promise.resolve();
-  const serial = fn => { const next = chain.then(fn); chain = next.catch(() => {}); return next; };
+  // Per request id (and per identical request on submit), so one slow download never blocks another job.
+  const lock = keyedLock();
   const active = j => ['uploading', 'submitting', 'submitted', 'uncertain', 'collecting'].includes(j.status);
   const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root);
   slots.register('refgen', () => [...jobs.values()].filter(active).map(j => ({ id: j.id, backend: j.backend, kind: 'image', status: j.status, uncertainAt: j.uncertainAt, dispatchStartedAt: j.dispatchStartedAt, createdAt: j.createdAt })));
@@ -264,7 +265,7 @@ export async function openRefgen(root, director, options = {}) {
     // Job-tracker source (contract C1); images attach inside track, so onTerminal has nothing extra to do.
     trackerSource: () => ({
       name: 'refgen', list: () => [...jobs.values()].map(j => structuredClone(j)), get: id => { const j = jobs.get(id); if (!j) fail('Unknown request', 404); return structuredClone(j); },
-      isActive: active, track: (id, tracking) => serial(() => trackJob(id, tracking)), kindOf: () => 'image', label, projectIdOf: j => j.projectId,
+      isActive: active, track: (id, tracking) => lock(id, () => trackJob(id, tracking)), kindOf: () => 'image', label, projectIdOf: j => j.projectId,
       expectedSeconds: j => j.backend?.kind === 'local' ? 600 : 90, costOf: j => j.quote?.amount ?? j.quote?.estimate ?? null,
       resultsOf: j => j.results || (j.referenceIds || []).map(id => ({ id, kind: 'image', url: null })), onTerminal() {},
     }),
@@ -275,7 +276,7 @@ export async function openRefgen(root, director, options = {}) {
       const list = objectInfo.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0];
       return Array.isArray(list) ? list.filter(x => typeof x === 'string') : [];
     },
-    prepare: input => serial(async () => {
+    prepare: async input => { // a fresh request id: no lock needed
       const guideBytes = input.target === 'shot' && input.guide ? Buffer.from(String(input.guide), 'base64') : null;
       if (guideBytes && guideBytes.length > 12 * 1024 * 1024) fail('The composition guide is too large');
       // Reference images: director references (object looks, earlier key frames), normalised to PNG.
@@ -297,8 +298,8 @@ export async function openRefgen(root, director, options = {}) {
       // Design-sheet views name their image after the view and note which sheet slot it fills.
       const sheet = !r.shot && input.sheet && typeof input.sheet === 'object' ? { sheetId: String(input.sheet.sheetId || '').slice(0, 48), slotId: String(input.sheet.slotId || '').slice(0, 48), label: String(input.sheet.label || '').slice(0, 60) } : null;
       return persist({ id, projectId: input.projectId, ...target, ...(sheet ? { sheet } : {}), ...r.settings, guide, refs, backend: r.adapter.snapshot, graph: r.graph, graphHash: hashValue(r.graph), quote: r.quote, partnerNodes: r.partnerNodes, fingerprint: r.fingerprint, status: 'quoted', message: 'Quoted. Nothing was sent.', createdAt: now() });
-    }),
-    submit: input => serial(async () => {
+    },
+    submit: input => lock(String(input.requestId), () => lock(`content:${jobs.get(input.requestId)?.fingerprint}`, async () => {
       const saved = jobs.get(input.requestId); if (!saved || saved.projectId !== input.projectId) fail('Unknown request', 404);
       if (saved.status !== 'quoted') return structuredClone(saved);
       const twin = input.allowDuplicate === true ? null : [...jobs.values()].find(j => j.id !== saved.id && j.projectId === saved.projectId && j.entityId === saved.entityId && j.shotId === saved.shotId && j.fingerprint === saved.fingerprint && (active(j) || j.status === 'recovery-required'));
@@ -311,11 +312,11 @@ export async function openRefgen(root, director, options = {}) {
       if (!free && !allowPaid()) fail('Paid and unknown-cost generation is disabled on this server (PREVIS_ALLOW_PAID is not 1). Nothing was sent.', 403);
       const release = slots.acquire({ id: saved.id, backend: saved.backend, kind: 'image' });
       try { return await dispatch(saved, input); } finally { release(); }
-    }),
+    })),
     // Without a tracker (tests, tools) this tracks directly; with one, the tracker records the attempt.
     track: (input, tracking) => {
       const job = jobs.get(input.requestId); if (!job || job.projectId !== input.projectId) return Promise.reject(Object.assign(Error('Unknown request'), { status: 404 }));
-      return tracker && !tracking ? tracker.trackNow('refgen', job.id) : serial(() => trackJob(job.id, tracking));
+      return tracker && !tracking ? tracker.trackNow('refgen', job.id) : lock(job.id, () => trackJob(job.id, tracking));
     },
   };
   async function dispatch(saved, input) {
