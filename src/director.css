@@ -155,6 +155,7 @@ textarea.field { resize: vertical; min-height: 64px; }
 .card .meta { padding: 11px 13px 13px; display: flex; flex-direction: column; gap: 3px; }
 .card .meta strong { font-weight: 600; font-size: 13px; }
 .card .meta span { color: var(--muted); font-size: 12px; }
+.card .meta small { color: var(--muted-2, var(--muted)); font: 10.5px/1.4 var(--mono); margin-top: 3px; opacity: .8; }
 .projects { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
 .empty-state { border: 1px dashed var(--line-2); border-radius: 14px; padding: 28px; color: var(--muted); text-align: center; }
 .foot-links { display: flex; gap: 18px; margin-top: 48px; color: var(--faint); font-size: 12px; border-top: 1px solid var(--line); padding-top: 18px; }

@@ -1,5 +1,5 @@
 import './director.css';
-import { TEMPLATES, makeEntity, makeShot, MOVES } from '../shared/director.mjs';
+import { MOVES } from '../shared/director.mjs';
 import type { DirectorProject, Shot } from '../shared/director.mjs';
 import { renderStill } from './director-scene';
 import { api, h, ago, agentPill, connectDialog, toast } from './director-common';
@@ -7,6 +7,7 @@ import type { AgentStatus, Connect } from './director-common';
 import { JOURNEY, openJourney } from './director-guide';
 
 type Summary = { id: string; title: string; template: string; updatedAt: string; shots: number; entities: number; references: number; renders: number; assets: number; sceneName: string };
+type Starter = { slug: string; title: string; description: string; shots: number; entities: number; scene: DirectorProject['scene']; shot: Omit<Shot, 'id' | 'references' | 'render'> };
 type Check = { id: string; label: string; status: 'ok' | 'optional' | 'warn' | 'required'; detail: string; fix: string };
 const app = document.getElementById('app')!;
 let agent: AgentStatus | null = null, connect: Connect = null;
@@ -63,21 +64,17 @@ function setupCard(checks: Check[], dataDir: string) {
 }
 
 async function render() {
-  let projects: Summary[] = [], archivedCount = 0, archived: Summary[] = [];
+  let projects: Summary[] = [], archivedCount = 0, archived: Summary[] = [], starters: Starter[] = [];
   let setup: { checks: Check[]; dataDir: string } | null = null;
   try {
-    const [data, s] = await Promise.all([api('director/projects'), api('director/setup').catch(() => null)]);
-    projects = data.projects; agent = data.agent; connect = data.connect; archivedCount = data.archived; setup = s;
+    const [data, s, st] = await Promise.all([api('director/projects'), api('director/setup').catch(() => null), api('director/starters').catch(() => ({ starters: [] }))]);
+    projects = data.projects; agent = data.agent; connect = data.connect; archivedCount = data.archived; setup = s; starters = st.starters;
     if (showArchived) archived = (await api('director/archived')).projects;
   } catch (e) { toast((e as Error).message, true); }
   const name = h('input', { class: 'field', id: 'new-name', placeholder: 'Untitled scene', maxlength: 120, autocomplete: 'off' });
-  const templates = Object.entries(TEMPLATES).map(([key, t]) => {
-    const entities = t.entities.map((e, i) => makeEntity(e, String(i)));
-    const scene = { name: t.title, environment: t.environment, entities };
-    return h('button', { class: 'card', type: 'button', 'data-template': key, onclick: () => open(key, name.value) },
-      thumb({ scene }, makeShot({ title: 'Shot 1' }, 'starter', 1, entities), `template:${key}`),
-      h('div', { class: 'meta' }, h('strong', {}, t.title), h('span', {}, t.description)));
-  });
+  const templates = starters.map(t => h('button', { class: 'card', type: 'button', 'data-template': t.slug, onclick: () => open(t.slug, name.value) },
+    thumb({ scene: t.scene }, { ...t.shot, id: `starter-${t.slug}`, references: [], render: null }, `starter:${t.slug}`),
+    h('div', { class: 'meta' }, h('strong', {}, t.title), h('span', {}, t.description), h('small', {}, `${t.shots} shots · ${t.entities} objects`))));
   const fileInput = h('input', { type: 'file', accept: '.zip,application/zip', hidden: true, onchange: (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (f) void importFile(f); } });
   const list = projects.length
     ? h('div', { class: 'projects' }, ...projects.map(p => {
@@ -87,7 +84,7 @@ async function render() {
         void thumbFor(p.id).then(el => card.firstElementChild!.replaceWith(el)).catch(() => {});
         return h('div', { class: 'card-wrap' }, card, ...menu(p));
       }))
-    : h('div', { class: 'empty-state' }, 'No projects yet. Start from a blockout above, or import an exported project.');
+    : h('div', { class: 'empty-state' }, 'No projects yet. Start from a starter above, or import an exported project.');
   const archivedList = showArchived ? h('div', { class: 'projects', style: 'margin-top:14px' }, ...archived.map(p => h('div', { class: 'card', style: 'cursor:default' },
     h('div', { class: 'meta' }, h('strong', {}, p.title), h('span', {}, `${p.shots} shots · archived`), h('button', { class: 'btn sm', type: 'button', style: 'margin-top:8px;align-self:flex-start', onclick: async () => { try { await api('director/restore', { projectId: p.id }); toast(`Restored “${p.title}”`); void render(); } catch (e) { toast((e as Error).message, true); } } }, 'Restore'))))) : null;
 
@@ -107,7 +104,7 @@ async function render() {
           h('p', {}, 'Block out a scene, describe each shot to your agent, drop in image references, preview the camera — and send the exact camera render to a Comfy workflow.')),
         h('nav', { class: 'journey', 'aria-label': 'Explore the end-to-end journey' }, ...JOURNEY.map((s, i) => h('button', { type: 'button', onclick: () => openJourney({ stage: s.id }) }, h('b', {}, String(i + 1).padStart(2, '0')), s.title)))),
       setup ? setupCard(setup.checks, setup.dataDir) : null,
-      h('div', { class: 'section-head' }, h('h2', {}, 'New project'), h('span', { class: 'muted' }, 'Pick a starting blockout — everything stays editable.')),
+      h('div', { class: 'section-head' }, h('h2', {}, 'New project'), h('span', { class: 'muted' }, 'Start from a starter project — every object, camera and shot stays editable.')),
       h('div', { class: 'new-row' },
         h('div', { class: 'new-name' }, h('label', { for: 'new-name' }, 'Project name'), name, h('p', { class: 'note', style: 'margin:0' }, 'One scene per project for now. Add as many shots as you need.'), h('div', { style: 'flex:1' }), h('button', { class: 'btn', type: 'button', onclick: () => open('empty', name.value) }, 'Start empty')),
         h('div', { class: 'templates' }, ...templates)),

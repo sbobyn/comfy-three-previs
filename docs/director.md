@@ -7,7 +7,7 @@ The director workspace is where you block out one scene, plan its shots, and sen
 The launch page (`http://127.0.0.1:5190`) shows:
 
 - **Setup**: what's ready on this machine (FFmpeg, Cloud key, local ComfyUI…). Fix any ✗ items first.
-- **New project**: name it, then pick a starting blockout (empty stage, night street, two-hander interior, hero reveal).
+- **New project**: name it, then **Start empty** or pick a starter project (Breaking News, Wingspan, Final Lap, Posterized). Starters are full multi-shot scenes you can change freely; see `examples/starters/`.
 - **Open project**: your projects, newest first. **⋯** gives you Export, Duplicate and Archive. **Import project…** loads a `.previs.zip`, and **Archived** lets you restore archived projects.
 
 ## 2. Block out the scene
