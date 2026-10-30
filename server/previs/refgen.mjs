@@ -15,6 +15,8 @@ import { telemetryHooks } from './job-progress.mjs';
 import { slotsFor } from './concurrency.mjs';
 import { uploadCacheFor } from './upload-cache.mjs';
 import { validateGraph, workflowCost, validateApproval, hashValue, assertNoSecrets } from './workflows.mjs';
+import { followsGuide, describeFrame } from '../../shared/still-match.mjs';
+import { stillGuideMatch, gradeStillPaid } from './still-match.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const now = () => new Date().toISOString();
@@ -32,6 +34,8 @@ const save = (images, index) => ({ class_type: 'SaveImage', inputs: { images, fi
 // Shot key frames use the shot camera's blockout frame as a composition guide (uploaded at submit).
 const GUIDE = '100';
 const guideNode = () => ({ class_type: 'LoadImage', inputs: { image: 'previs-guide.png' } });
+// Flux Ultra's image-prompt blend for key frames (a guide means a key frame): high enough to keep the blockout's layout.
+const GUIDE_STRENGTH = 0.55;
 export const GUIDE_INPUT = { nodeId: GUIDE, input: 'image', kind: 'image', mime: 'image/png', filename: 'previs-guide.png' };
 // Extra reference images (object looks, the previous key frame) for models that take several images.
 const refNode = k => `${200 + k}`;
@@ -46,7 +50,7 @@ export const imagePresets = [
     pricing: { status: 'estimate', creditsPerImage: 12.66, usdPerImage: Math.round(12.66 * USD_PER_CREDIT * 1000) / 1000, source: PRICING, checkedAt: '2026-10-28' },
     build: ({ prompt, aspect, count, seed, guide }) => {
       const g = guide ? { [GUIDE]: guideNode() } : {};
-      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'FluxProUltraImageNode', inputs: { prompt, prompt_upsampling: false, seed: seed + i, aspect_ratio: aspect, raw: false, ...(guide ? { image_prompt: [GUIDE, 0], image_prompt_strength: 0.35 } : {}) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
+      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'FluxProUltraImageNode', inputs: { prompt, prompt_upsampling: false, seed: seed + i, aspect_ratio: aspect, raw: false, ...(guide ? { image_prompt: [GUIDE, 0], image_prompt_strength: GUIDE_STRENGTH } : {}) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
       return g;
     },
   },
@@ -130,7 +134,7 @@ export const imagePresets = [
     id: 'nano-banana-2-1', title: 'Nano Banana 2.1 (Gemini)', backend: 'cloud', node: 'GeminiNanoBanana2V2',
     note: 'Fast, inexpensive and good at following a guide and reference images. Token-billed: about 10 credits per 1K image (≈ $0.05).',
     pricing: { status: 'estimate', creditsPerImage: 10.6, usdPerImage: Math.round(10.6 * USD_PER_CREDIT * 1000) / 1000, derived: true, rate: '9.05 credits per 1K output image tokens', source: PRICING, checkedAt: '2026-10-29' },
-    maxRefs: 9,
+    maxRefs: 9, // the node takes 14 images; cast images add input tokens (a still with 4 references billed ≈ 17 credits)
     build: ({ prompt, aspect, count, seed, guide, refs = 0 }) => {
       const g = { ...(guide ? { [GUIDE]: guideNode() } : {}), ...refNodes(refs) };
       for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'GeminiNanoBanana2V2', inputs: { prompt, model: 'Gemini Nano Banana 2.1', 'model.aspect_ratio': aspect, 'model.resolution': '1K', 'model.thinking_level': 'MEDIUM', seed: seed + i, response_modalities: 'IMAGE', ...slots('model.images.image_', guide, refs) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
@@ -177,6 +181,8 @@ export const imagePresets = [
     },
   },
 ];
+// followsGuide: how well the model keeps a blockout guide's camera and layout ('strong' is recommended for key frames).
+for (const p of imagePresets) p.followsGuide = followsGuide(p.id);
 export const publicPresets = () => imagePresets.map(({ build, ...p }) => p);
 
 export function quoteFor(preset, count, cost) {
@@ -255,16 +261,38 @@ export async function openRefgen(root, director, options = {}) {
         const refs = job.target === 'shot' ? current.shots.find(s => s.id === job.shotId)?.references || [] : current.scene.references || [];
         const existing = refs.find(r => r.generated?.requestId === job.id && r.generated?.outputKey === output.key);
         const bytes = existing ? null : await adapter.view(output.location);
-        const r = existing ? { referenceId: existing.id, project: current } : await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, outputKey: output.key, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId } });
+        const guideMatch = bytes && job.target === 'shot' && job.guide ? await matchGuide(job, adapter, bytes, output.key) : null;
+        const r = existing ? { referenceId: existing.id, project: current } : await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, outputKey: output.key, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId, ...(guideMatch ? { guideMatch } : {}) } });
         if (!referenceIds.includes(r.referenceId)) referenceIds.push(r.referenceId);
         const ref = [...(r.project?.scene?.references || []), ...(r.project?.shots || []).flatMap(x => x.references || [])].find(x => x.id === r.referenceId);
-        results.push({ id: r.referenceId, key: output.key, kind: 'image', url: ref?.file ? `/director-refs/${job.projectId}/${ref.file}` : null });
+        const match = ref?.generated?.guideMatch; // graded scores only (the rough local one is not a match verdict)
+        results.push({ id: r.referenceId, key: output.key, kind: 'image', url: ref?.file ? `/director-refs/${job.projectId}/${ref.file}` : null, ...(match && !match.rough ? { guideMatch: match.score } : {}) });
         job = await persist({ ...job, referenceIds, results });
       }
       return persist({ ...job, status: 'completed', referenceIds, results, failure: null, tracking: { ...job.tracking, error: null }, message: `Attached ${referenceIds.length} ${job.target === 'shot' ? 'key frame' : 'look'}${referenceIds.length === 1 ? '' : 's'} to ${job.entityName}.`, finishedAt: now() });
     } catch (error) {
       return persist({ ...job, status: recoveryAttempts(job, 'collection') >= RECOVERY_ATTEMPTS ? 'recovery-required' : 'collecting', failure: { phase: 'collection', detail: errorDetail(error) }, tracking: { ...job.tracking, error: errorDetail(error) }, message: 'Existing output collection failed; no resubmission. Recovery is bounded across restarts.' });
     }
+  }
+
+  /**
+   * Key frames: how well the still kept its blockout guide. With PREVIS_MATCH_GRADER=gemini (and paid generation on)
+   * Gemini grades camera and blocking 0–10 on Comfy Cloud (token-billed, a few cents; adds ~20 s before the still
+   * attaches). Otherwise a free local edge/light score, stored with rough: true — it does not track camera match
+   * reliably (see docs/director.md), so the UI never shows it as a match score and batches never retry on it.
+   */
+  async function matchGuide(job, adapter, bytes, key) {
+    const guideBytes = await readFile(join(dirFor(job.projectId), job.guide.file)).catch(() => null);
+    if (!guideBytes) return null;
+    if ((options.grader ?? process.env.PREVIS_MATCH_GRADER) === 'gemini' && allowPaid() && job.backend.kind === 'cloud') {
+      const project = await director.get(job.projectId).catch(() => null), shot = project?.shots.find(s => s.id === job.shotId);
+      const t = !shot ? 0 : job.frameAt === 'end' ? shot.duration : typeof job.frameAt === 'number' ? job.frameAt : 0;
+      const plan = shot ? describeFrame(project, shot, t).text : '';
+      const graded = await gradeStillPaid({ adapter, upload: (b, o) => uploadCache.upload(adapter, b, o), guideBytes, stillBytes: bytes, requestId: `${job.id}-${hashValue(key).slice(0, 8)}`, projectId: job.projectId, plan });
+      if (graded) return graded;
+    }
+    const local = await stillGuideMatch(guideBytes, bytes);
+    return local ? { ...local, rough: true } : null;
   }
 
   async function resolve(input) {

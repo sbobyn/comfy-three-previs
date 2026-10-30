@@ -27,7 +27,8 @@ export function renderRoutes({ director, headless }) {
     if (path === '/api/director/frame') {
       const t = Number(input.t); if (input.t == null || !Number.isFinite(t)) fail('t (seconds into the shot) is required');
       const type = input.type ?? 'image/png'; if (!['image/png', 'image/jpeg'].includes(type)) fail('type must be image/png or image/jpeg');
-      return headless.run(opQuery('frame', { project: p.id, shot: s.id, t, width, height, type }));
+      // guide: the still-guide look (front markers, ground grid, light sky) used as image 1 for key-frame stills.
+      return headless.run(opQuery('frame', { project: p.id, shot: s.id, t, width, height, type, ...(input.guide === true ? { guide: 1 } : {}) }));
     }
     // render-blockout
     if (s.render && input.force !== true) return { skipped: true, previsShotId: s.render.previsShotId, asset: pickAsset((p.assets || []).find(a => a.id === s.render.assetId)) || { id: s.render.assetId, width: s.render.width, height: s.render.height, fps: 24, frameCount: s.render.frameCount, duration: s.render.duration } };

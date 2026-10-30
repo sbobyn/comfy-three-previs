@@ -9,7 +9,7 @@ export const CHROMIUM_ARGS = Object.freeze(['--use-angle=metal', '--enable-gpu',
 const SOFTWARE = /swiftshader|software|llvmpipe|basic render/i;
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const BUNDLES = ['Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing', 'Chromium.app/Contents/MacOS/Chromium'];
-const OPS = { blockout: ['project', 'shot', 'width', 'height'], frame: ['project', 'shot', 't', 'width', 'height', 'type'], sheet: ['project', 'entity', 'sheet', 'options'] };
+const OPS = { blockout: ['project', 'shot', 'width', 'height'], frame: ['project', 'shot', 't', 'width', 'height', 'type', 'guide'], sheet: ['project', 'entity', 'sheet', 'options'] };
 
 function fail(message, status = 400, apiCode) { const e = Error(message); e.status = status; if (apiCode) e.apiCode = apiCode; throw e; }
 export const unavailable = message => fail(message, 409, 'headless-unavailable');
