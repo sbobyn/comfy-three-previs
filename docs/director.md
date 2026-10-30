@@ -55,6 +55,16 @@ Make the grey blockout, then ask a video model to turn it into the shot.
 
 ![Generate: review inputs and estimate](../public/guide/generate.webp)
 
+### Camera comes from the blockout
+
+The blockout is the source of truth for camera motion. A video prompt never describes the move ("truck right", "low angle"); it carries one line that names the input to follow, plus lens and filter hints. Movement and cut tags are notes for you and stay out of the prompts.
+
+Each video model takes its camera from one of three sources, shown on the Video-model card, the batch plan and each version in Cut:
+
+- **Blockout** (Kling O1 edit, Seedance 2.5 edit, Wan VACE): the blockout clip itself is the video input, so your move is the camera. The start and end stills follow as the look, then the cast images. A blockout that is older than the shot is made again first. The final tier uses this.
+- **Start → end stills** (LTX start → end): the model moves between stills made from the blockout's first and last frames. It only approximates the move in between.
+- **One still** (LTX, the draft tier): the model animates a single still and guesses the camera. The card marks this as approximate.
+
 ## 5. Cut
 
 Choose the versions, order and timing of the film.
