@@ -14,7 +14,7 @@ const cache={};
 function load(relative){
   const file=resolve(root,relative);if(cache[file])return cache[file];const exports={};cache[file]=exports;
   const code=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
-  runInNewContext(code,{exports,require:id=>id.startsWith('.')?load(resolve(dirname(file),id+'.ts')):require(id),console,URL,Buffer,TextEncoder});return exports;
+  runInNewContext(code,{exports,require:id=>id.startsWith('.')?load(resolve(dirname(file),id+'.ts')):id==='three'?THREE:require(id),console,URL,Buffer,TextEncoder});return exports;
 }
 const core=load('src/director-phone-core.ts'),orientation=load('src/orientation.ts'),qr=load('src/qr.ts');
 const R=Math.PI/180;

@@ -96,7 +96,7 @@ async function fixture(t, { workflow = definition() } = {}) {
 }
 
 // Engine checks against a fake Cloud adapter (backendFactory): nothing leaves the process and nothing is paid.
-async function cloudFixture({ limit = '2', submitError = null } = {}) {
+async function cloudFixture({ limit = '2', submitError = null, history = async () => null, view } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'previs-generation-cloud-'));
   const project = await openProject(root), image = await project.image(png);
   await project.mutate(project.get().revision, p => {
@@ -111,7 +111,7 @@ async function cloudFixture({ limit = '2', submitError = null } = {}) {
     async queue() { return { queue_running: [], queue_pending: [] }; },
     async upload(bytes) { calls.uploads++; return { name: hashBytes(bytes) + '.png', subfolder: '', type: 'input', value: hashBytes(bytes) + '.png' }; },
     async submit({ graph, requestId }) { calls.submits++; calls.values.push(graph['1'].inputs.image); if (submitError) throw submitError(); return { promptId: 'cloud-' + requestId.slice(0, 8) }; },
-    async history() { return null; },
+    history, ...(view ? { view } : {}),
   });
   const generation = await openGeneration(root, project, { backendFactory, allowPaid: true, slots: createSlots({ env: { PREVIS_LIMIT_CLOUD_IMAGES: limit } }) });
   async function quoted() {
@@ -194,4 +194,21 @@ test('engine: the server tracker collects and attaches a queued job without a cl
   // The HTTP route keeps its { job, project } shape and does not attach twice.
   const again = await h.route('track', { jobId: input.requestId });
   assert.equal(again.job.status, 'completed'); assert.equal(again.project.assets.length, 2);
+});
+
+test('engine: a stalled Cloud /view for one job never delays another job\'s submit (per-request locks)', async () => {
+  let release, viewing;
+  const stalled = new Promise(r => { release = r; }), started = new Promise(r => { viewing = r; });
+  const history = async promptId => ({ promptId, requestId: first.input.requestId, graph: h.generation.get(first.input.requestId).submittedGraph, status: { completed: true }, outputs: { 2: { images: [{ filename: 'out.png', subfolder: '', type: 'output' }] } } });
+  const h = await cloudFixture({ limit: '4', history, view: async () => { viewing(); await stalled; return png; } });
+  const first = await h.quoted();
+  await h.generation.submit({ ...first.input, approval: h.consent(first.job) });
+  const tracking = h.generation.track(first.input.requestId);
+  await started; // first job is now downloading, held up by the fake /view
+  const second = await h.quoted(); // quoting is not blocked either
+  const t0 = Date.now(), sent = await h.generation.submit({ ...second.input, approval: h.consent(second.job) });
+  assert.equal(sent.status, 'queued'); assert.ok(Date.now() - t0 < 1000);
+  assert.equal(h.generation.get(first.input.requestId).status, 'collecting', 'collecting was persisted before the download');
+  release();
+  assert.equal((await tracking).status, 'completed'); assert.equal(h.calls.submits, 2);
 });

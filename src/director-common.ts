@@ -120,7 +120,7 @@ export function claudeDialog(connect: Connect, project?: DirectorProject) {
       connect ? h('details', {}, h('summary', {}, 'Claude Desktop configuration'), code(JSON.stringify({ mcpServers: { 'comfy-previs': { ...connect, env: { ...connect.env, PREVIS_URL: location.origin } } } }, null, 2))) : null,
       h('h3', {}, 'Try asking'),
       h('ul', {}, h('li', {}, `Open ${project?.title || 'my project'} and write a Cast Card for ${subject}.`), h('li', {}, `Make shot 1 a slow push-in on ${subject}.`), h('li', {}, names[1] ? `Add a reverse angle from ${names[1]} toward ${subject}.` : 'Add three shots that cover the key moment from different angles.')),
-      h('p', { class: 'note' }, 'Paid generation still requires your explicit approval.')));
+      h('p', { class: 'note' }, 'Claude can spend up to the maxCostUsd you allow in each tool call; the server must have PREVIS_ALLOW_PAID=1.')));
   dlg.addEventListener('keydown', ev => ev.stopPropagation());
   dlg.addEventListener('close', () => { dlg.remove(); if (opener?.isConnected) opener.focus(); });
   document.body.append(dlg); dlg.showModal();

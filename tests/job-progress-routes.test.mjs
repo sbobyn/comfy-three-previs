@@ -36,7 +36,7 @@ test('policy denial, malformed project, method, unrelated route', async () => {
 test('full snapshot first on every reconnect; filtered rows and increasing sequences', async () => {
   const f = fixture(), { res } = await f.request();
   assert.equal(res.headers['X-Accel-Buffering'], 'no');
-  const first = events(res)[0]; assert.equal(first.type, 'snapshot'); assert.equal(first.jobs.length, 1); assert.deepEqual(first.jobs[0], row());
+  const first = events(res)[0]; assert.equal(first.type, 'snapshot'); assert.equal(first.jobs.length, 1); const { results, ...streamed } = row(); assert.deepEqual(first.jobs[0], streamed, 'stream rows carry no result lists');
   assert.deepEqual(first.limits, { local: { active: 1, limit: 2 } });
   f.setJobs([{ ...row(), status: 'completed', results: [{ id: 'asset' }] }]); f.notify({ type: 'job', source: 'generation', id: 'j' });
   const next = events(res)[1]; assert.equal(next.job.status, 'completed'); assert.ok(next.seq > first.seq); assert.equal(next.job.label, 'Shot');
@@ -86,4 +86,18 @@ test('heartbeat comments and shutdown leave no active timer or subscriber', asyn
   const f = fixture(), { res } = await f.request();
   t.mock.timers.tick(15000); assert.equal(res.frames.at(-1), ': heartbeat\n\n');
   f.routes.stop(); const count = res.frames.length; t.mock.timers.tick(60000); assert.equal(res.frames.length, count); assert.equal(f.listeners.size, 0);
+});
+
+test('snapshot lists every active job and the newest 30 finished ones, without result lists; a large first frame still goes out', async () => {
+  const f = fixture(), big = 'x'.repeat(1500);
+  const finished = Array.from({ length: 90 }, (_, i) => ({ ...row(`done-${i}`), status: i % 3 ? 'completed' : 'failed', label: big, results: Array.from({ length: 4 }, (_, k) => ({ id: `r${k}`, url: `/renders/${'0'.repeat(36)}.png` })) }));
+  const active = Array.from({ length: 40 }, (_, i) => ({ ...row(`run-${i}`), label: big }));
+  f.setJobs([...active.slice(0, 20), ...finished, ...active.slice(20)]);
+  const { res } = await f.request(), [first] = events(res);
+  assert.equal(res.destroyed, false, 'the snapshot frame may exceed the 64 KB update cap');
+  assert.ok(Buffer.byteLength(res.frames.join('')) > 64 * 1024);
+  assert.equal(first.jobs.filter(j => j.status === 'running').length, 40);
+  assert.deepEqual(first.jobs.filter(j => j.status !== 'running').map(j => j.id), finished.slice(0, 30).map(j => j.id));
+  assert.ok(first.jobs.every(j => !('results' in j)));
+  f.routes.stop();
 });

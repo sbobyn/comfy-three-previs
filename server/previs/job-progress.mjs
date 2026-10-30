@@ -2,7 +2,7 @@ import { parseBinaryFrame, parseProgressMessage, promptId, PROGRESS_LIMITS } fro
 
 const keyOf = key => `${key.source}:${key.id}`;
 const validKey = key => key && ['generation', 'refgen'].includes(key.source) && promptId(key.id) && promptId(key.projectId);
-const terminal = new Set(['completed', 'failed', 'closed', 'cancelled']);
+const terminal = new Set(['completed', 'failed', 'closed', 'cancelled', 'orphaned']);
 const ignore = () => {};
 function safely(fn, fallback = false) {
   return (...args) => { try { const result = fn(...args); if (result?.then) return Promise.resolve(result).catch(() => fallback); return result; } catch { return fallback; } };
@@ -251,7 +251,7 @@ export function createJobProgress({ connect, trackNow = ignore, now = Date.now, 
       job.authority = row.status;
       if (terminal.has(row.status)) {
         job.terminalAt = now(); job.active = false; job.pending = null; job.buffer = [];
-        job.live.phase = row.status === 'completed' ? 'done' : row.status === 'closed' ? 'uncertain' : 'failed';
+        job.live.phase = row.status === 'completed' || row.status === 'orphaned' ? 'done' : row.status === 'closed' ? 'uncertain' : 'failed';
         job.live.connection = 'polling'; detach(job);
       } else if (['collecting', 'uploading', 'submitting'].includes(row.status)) job.live.phase = row.status;
       dirty(job);

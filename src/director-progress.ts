@@ -8,7 +8,7 @@ export type ProgressJob = { source: 'generation' | 'refgen'; id: string; project
 export type ProgressSnapshot = { jobs: ProgressJob[]; limits: Record<string, unknown>; tracker: Record<string, unknown> };
 type Options = { document?: Document; eventSource?: ((url: string) => EventSource) | null;
   poll?: (projectId: string, signal: AbortSignal) => Promise<ProgressSnapshot> };
-const terminal = new Set(['completed', 'failed', 'cancelled', 'closed', 'invalidated']);
+const terminal = new Set(['completed', 'failed', 'cancelled', 'closed', 'invalidated', 'orphaned']);
 const keyOf = (j: { source: string; id: string }) => `${j.source}:${j.id}`;
 const validJob = (j: any, projectId: string): j is ProgressJob => j && j.projectId === projectId &&
   ['generation', 'refgen'].includes(j.source) && typeof j.id === 'string' && typeof j.status === 'string';
