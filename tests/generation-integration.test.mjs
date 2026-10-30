@@ -162,6 +162,7 @@ test('engine: a rejected dispatch persists redacted failure.detail and never the
 
 test('engine: a quote survives unrelated project edits but not a changed source', async t => {
   const h = await fixture(t), input = await h.bind(), { job: quoted } = await h.route('quote', input);
+  assert.equal(quoted.cameraSource, 'still', 'every video job records where its camera comes from');
   await h.bind(); // another pipeline binds a shot: the global revision moves
   await h.project.mutate(h.project.get().revision, p => { p.shots.push({ id: 'other', title: 'Other shot', binding: requestBinding, renders: [] }); });
   assert.ok(h.project.get().revision > input.revision);

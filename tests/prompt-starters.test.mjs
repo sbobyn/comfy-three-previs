@@ -40,9 +40,11 @@ for (const slug of SLUGS) {
       assert.deepEqual(order, [...order].sort((a, b) => a - b), `${where}: parts out of order ${segs.map(g => g.key)}`);
       assert.ok(segs.some(g => g.key === 'action') && segs.some(g => g.key === 'camera'), `${where}: action and camera are always there`);
       if (kind === 'video' && text.length > VIDEO_PROMPT_CAP) {
-        // Only the parts that are never cut may push a video prompt past the cap.
-        assert.ok(segs.every(g => g.key === 'action' || g.key === 'camera' || g.key.startsWith('obj:')), `${where}: ${text.length} chars with optional parts`);
-        assert.ok(text.length <= VIDEO_PROMPT_CAP + 120, `${where}: ${text.length} chars`);
+        // Only the parts that are never cut may push a video prompt past the cap. The lens and filter hints are never
+        // cut either (the blockout is the camera, so they are all the prompt says about it); they get room beyond the slack.
+        const hints = segs.filter(g => g.key === 'cam-lens' || g.key === 'cam-filter');
+        assert.ok(segs.every(g => g.key === 'action' || g.key === 'camera' || g.key.startsWith('obj:') || hints.includes(g)), `${where}: ${text.length} chars with optional parts`);
+        assert.ok(text.length <= VIDEO_PROMPT_CAP + 120 + hints.reduce((a, g) => a + g.text.length + 1, 0), `${where}: ${text.length} chars`);
       }
     }
   });

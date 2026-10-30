@@ -100,7 +100,17 @@ List prices are Comfy Cloud estimates from each node's live price badge (checked
 | Nano Banana 2.1 / 2 | `GeminiNanoBanana2V2` | 9 | $0.05 / $0.08 |
 | Local checkpoint | `CheckpointLoaderSimple` | guide only | local GPU |
 
-Batch tiers: **draft** uses Flux.2 [pro] images and LTX 2.5 Fast video; **final** uses FLUX 3 looks and sheets, GPT Image 2.5 stills and MiniMax Hailuo H3 start → end video (set in `shared/tiers.mjs`). A batch sends every shot's stills before design sheets, so videos start as early as possible.
+Batch tiers: **draft** uses Flux.2 [pro] images and LTX 2.5 Fast video; **final** uses FLUX 3 looks and sheets, GPT Image 2.5 stills and Seedance 2.5 · edit video, which follows the blockout clip (set in `shared/tiers.mjs`). A batch sends every shot's stills before design sheets, so videos start as early as possible.
+
+### Camera comes from the blockout
+
+The blockout is the source of truth for camera motion. A video prompt never describes the move ("truck right", "low angle"); it carries one line that names the input to follow, plus lens and filter hints. Movement and cut tags are notes for you and stay out of the prompts.
+
+Each video model takes its camera from one of three sources, shown on the Video-model card, the batch plan and each version in Cut:
+
+- **Blockout** (Kling O1 edit, Seedance 2.5 edit, Wan VACE): the blockout clip itself is the video input, so your move is the camera. The start and end stills follow as the look, then the cast images. A blockout that is older than the shot is made again first. The final tier uses this.
+- **Start → end stills** (LTX 2.5 Pro, Seedance 2.5, Kling 4.0, Veo 3.1, MiniMax Hailuo H3 and Wan 2.7 start → end): the model moves between stills made from the blockout's first and last frames. It only approximates the move in between.
+- **One still** (the start-still models, including LTX 2.5 Fast in the draft tier): the model animates a single still and guesses the camera. The card marks this as approximate.
 
 ## 5. Cut
 

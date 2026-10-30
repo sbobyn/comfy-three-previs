@@ -8,7 +8,9 @@ import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
 import { assertNoSecrets } from './workflows.mjs';
 import { builtInPresets } from './presets.mjs';
-import { castRows, lookSource, objectLooks } from '../../shared/director.mjs';
+import { blockoutStale, castRows, lookSource, objectLooks } from '../../shared/director.mjs';
+import { cameraSourceOf, CAMERA_SOURCE_LABELS } from '../../shared/camera-source.mjs';
+import { maxReferences } from '../../shared/video-refs.mjs';
 import { planSlots } from '../../shared/sheet-presets.mjs';
 import { TIERS, modelsFor, estimateFor, VIDEO_PRICES, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 import { retryModelFor, WEAK_MATCH } from '../../shared/still-match.mjs';
@@ -35,7 +37,7 @@ function hasStill(shot, at) {
 }
 function videoNeeds(def) {
   if (!def) return null;
-  return { keyFrames: def.task === 'first-frame' ? ['start', ...(def.inputs?.lastFrame ? ['end'] : [])] : [], references: def.task !== 'first-frame', local: def.id.startsWith('wan-') || VIDEO_PRICES[def.id]?.local === true };
+  return { keyFrames: def.task === 'first-frame' ? ['start', ...(def.inputs?.lastFrame ? ['end'] : [])] : [], references: def.task !== 'first-frame', local: def.id.startsWith('wan-') || VIDEO_PRICES[def.id]?.local === true, camera: cameraSourceOf(def) };
 }
 const ids = (v, what) => {
   if (v == null) return null;
@@ -68,7 +70,9 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
   const def = want('videos') ? definitions.find(d => d.id === models.videos) : null;
   if (want('videos') && !def) fail(`Unknown video model ${models.videos}`);
   const needs = videoNeeds(def);
-  const stillsAt = input.stillsAt || ['start', ...(needs?.keyFrames.includes('end') ? ['end'] : [])];
+  // A model that follows the blockout clip takes the start and end stills as its look.
+  const lookStills = needs?.camera === 'blockout' && maxReferences(def) > 0;
+  const stillsAt = input.stillsAt || ['start', ...(needs?.keyFrames.includes('end') || lookStills ? ['end'] : [])];
   const nodes = [], byId = new Map();
   const add = n => { const node = { status: 'waiting', deps: [], estimateUsd: 0, ...n }; if (!node.optional?.length) delete node.optional; nodes.push(node); byId.set(node.id, node); return node; };
   const cast = s => castRows(project, s).filter(r => r.inCast).map(r => r.entity);
@@ -101,7 +105,8 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
   }
   for (const s of shots) {
     const name = shotName(project, s), castLooks = looksFor(cast(s));
-    const blockout = want('videos') ? add({ id: `blockout:${s.id}`, type: 'blockout', label: `${name} · blockout`, target: { shotId: s.id }, ...(s.render ? { status: 'skipped', assetId: s.render.assetId, note: 'Already rendered' } : {}) }) : null;
+    // A stale blockout is made again: it is the camera the video follows.
+    const blockout = want('videos') ? add({ id: `blockout:${s.id}`, type: 'blockout', label: `${name} · blockout`, target: { shotId: s.id }, ...(s.render && !blockoutStale(project, s) ? { status: 'skipped', assetId: s.render.assetId, note: 'Already rendered' } : s.render ? { note: 'Scene changed since; made again' } : {}) }) : null;
     const still = new Map();
     if (want('stills')) for (const at of stillsAt) {
       if (typeof at === 'number' && at > s.duration) continue;
@@ -109,8 +114,12 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
         ...(hasStill(s, at) ? { status: 'skipped', note: 'Key frame already exists' } : {}) }));
     }
     if (!want('videos')) continue;
-    const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, estimateUsd: estimateFor('video', models.videos, { duration: s.duration }), deps: [blockout.id] });
+    // Where the camera comes from: the blockout clip, start → end stills (approximate) or one still (approximate).
+    const cameraSource = needs.camera === 'keyframes' && !still.has('end') && !hasStill(s, 'end') && FIRST_FRAME_FALLBACK[def.id] ? 'still' : needs.camera;
+    const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, estimateUsd: estimateFor('video', models.videos, { duration: s.duration }), deps: [blockout.id], cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource] });
     if (needs.references && castLooks.length) { n.deps.push(...castLooks); n.optional = castLooks; }
+    // A model that follows the blockout clip also takes the start/end stills as its look, when this batch makes them.
+    if (lookStills) for (const x of ['start', 'end'].map(at => still.get(at)).filter(Boolean)) { n.deps.push(x.id); (n.optional ||= []).push(x.id); }
     // An end still is optional when the model has a start-only fallback (the driver animates the start still alone).
     const endOptional = Boolean(FIRST_FRAME_FALLBACK[def.id]);
     for (const at of needs.keyFrames) {

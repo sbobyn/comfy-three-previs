@@ -3,7 +3,8 @@
 // camera. It is assembled text (not a model's judgement), returned as tagged segments so the UI can
 // colour each part and show where it came from. Image and video prompts share everything except the
 // camera/motion part.
-import { shotObjects, castCard, describeCamera, MOVES } from './director.mjs';
+import { shotObjects, castCard, MOVES } from './director.mjs';
+import { cameraLine, withCameraLine } from './camera-source.mjs';
 
 // Camera vocabulary for style tags. Each term is the exact text added to the prompt.
 export const CAMERA_TERMS = {
@@ -54,12 +55,14 @@ const cap1 = x => x.charAt(0).toUpperCase() + x.slice(1);
  * Tagged segments for a shot. kind 'video' (motion, for LTX) or 'image' (a still, for FLUX).
  * Each segment: { key, label, source, color, text }.
  * Order: format → action → hero cast (most of the frame first) → one "Set:" sentence → look → camera → camera tags.
+ * A video prompt never describes the camera move: the blockout is the camera. Its camera part is one line naming
+ * the input to follow (`cameraSource`, see shared/camera-source.mjs); only lens and filter tags follow it.
  * Cast named in the action (@handle) leads (people and vehicles before props, then in the order named);
  * the rest follow by frame coverage. A video prompt always keeps the action, the camera, the lead cast and
- * a second named cast member (shortened to their first sentence when needed), then adds the rest by priority
- * while it fits `cap`: format, look, set, more named cast, movement, lens, other cast, cuts, filter, set pieces.
+ * a second named cast member (shortened to their first sentence when needed) and the lens and filter hints, then
+ * adds the rest by priority while it fits `cap`: format, look, set, more named cast, other cast, set pieces.
  */
-export function autoPromptSegments(project, shot, kind = 'video', { cap = kind === 'video' ? VIDEO_PROMPT_CAP : Infinity } = {}) {
+export function autoPromptSegments(project, shot, kind = 'video', { cap = kind === 'video' ? VIDEO_PROMPT_CAP : Infinity, cameraSource = 'blockout' } = {}) {
   const { entities, environment } = project.scene;
   const items = []; // { order, priority, seg } or set pieces { order: 3, priority, piece, ids }
   const seen = new Set();
@@ -96,11 +99,12 @@ export function autoPromptSegments(project, shot, kind = 'video', { cap = kind =
   for (const g of groups.filter(x => x.cards[0].kind === 'environment')) for (const x of fresh(pieces(g.text))) items.push({ order: 3, priority: 30, piece: x, ids: g.cards.map(c => c.id) });
   const look = fresh(pieces(environment?.style)).join('. ');
   if (look) items.push({ order: 4, priority: 4, seg: mk('style', 'Visual style', 'Project style', FIELD_COLORS.style, sentence(`Look: ${look}`)) });
-  if (kind === 'video') items.push({ order: 5, priority: 1, seg: mk('camera', 'Camera', 'Shot camera (blockout)', FIELD_COLORS.camera, `${sentence(`Camera: ${describeCamera(shot, entities)}`)} Follow the supplied camera motion exactly.`) });
+  if (kind === 'video') items.push({ order: 5, priority: 1, seg: mk('camera', 'Camera', CAMERA_FROM[cameraSource] || CAMERA_FROM.still, FIELD_COLORS.camera, cameraLine(cameraSource)) });
   else items.push({ order: 5, priority: 1, seg: mk('camera', 'Framing', 'Shot camera (blockout)', FIELD_COLORS.camera, `Framing: ${shot.camera.mm}mm lens, match the supplied blockout frame's composition.`) });
-  const st = shotStyle(shot), tagPriority = { movement: 6, lens: 7, cuts: 20, filter: 21 };
+  // Lens and filter hints are what the prompt still says about the camera, so a video prompt always keeps them.
+  const st = shotStyle(shot), tagPriority = kind === 'video' ? { lens: 1, filter: 1 } : { lens: 7, filter: 21 };
   Object.keys(CAMERA_TERMS).forEach((g, i) => {
-    if (kind === 'image' && (g === 'movement' || g === 'cuts')) return; // a still has no motion or cuts
+    if (g === 'movement' || g === 'cuts') return; // a still has no motion; a video takes its motion from the blockout
     if (st[g].length) items.push({ order: 6, sub: i, priority: tagPriority[g], seg: mk(`cam-${g}`, CAMERA_GROUPS[g], 'Camera style tags', FIELD_COLORS[g], sentence(`${CAMERA_GROUPS[g]}: ${st[g].join(', ')}`)) });
   });
 
@@ -129,6 +133,7 @@ export function autoPromptSegments(project, shot, kind = 'video', { cap = kind =
   }
   return render(chosen);
 }
+const CAMERA_FROM = { blockout: 'Blockout clip (the camera)', keyframes: 'Start → end stills', still: 'Start still' };
 /** Cast objects grouped by identical Cast Card text, each group with its colour (max 8 groups). */
 export function castGroups(project, shot) {
   const groups = [];
@@ -145,12 +150,16 @@ export function castGroups(project, shot) {
 export function objectColors(project, shot) {
   return new Map(project.scene.entities.map(e => [e.id, KIND_COLORS[e.kind] || OBJECT_COLORS[0]]));
 }
-export const autoPromptText = (project, shot, kind = 'video') => autoPromptSegments(project, shot, kind).map(s => s.text).join(' ');
+export const autoPromptText = (project, shot, kind = 'video', opts) => autoPromptSegments(project, shot, kind, opts).map(s => s.text).join(' ');
 
-/** The prompt actually used: the user's edit if there is one, else the auto-prompt. */
-export function shotPrompt(project, shot, kind = 'video') {
+/**
+ * The prompt actually used: the user's edit if there is one, else the auto-prompt. A video prompt always
+ * ends up with the camera line for `cameraSource` (an edited one has its camera line swapped or appended).
+ */
+export function shotPrompt(project, shot, kind = 'video', opts = {}) {
   const saved = shot.prompts?.[kind];
-  return saved?.edited && saved.text ? saved.text : autoPromptText(project, shot, kind);
+  if (!(saved?.edited && saved.text)) return autoPromptText(project, shot, kind, opts);
+  return kind === 'video' ? withCameraLine(saved.text, opts.cameraSource || 'blockout') : saved.text;
 }
 /** Character ranges of each segment found in a (possibly edited) text, for colouring. */
 export function highlightRanges(text, segments) {

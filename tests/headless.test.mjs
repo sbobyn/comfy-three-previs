@@ -122,6 +122,12 @@ test('render-blockout skips rendered shots unless forced, and needs the renderer
   await r.serve(req(), new URL('http://h/api/director/render-blockout'), (v, s = 200) => sent.push([s, v]), async () => ({ projectId: 'p1', shotId: 's1', force: true }));
   assert.deepEqual(sent.pop(), [409, { error: 'off', code: 'headless-unavailable' }]);
   await assert.rejects(r.serve(req(), new URL('http://h/api/director/render-blockout'), () => {}, async () => ({ projectId: 'p1', shotId: 'nope' })), e => e.status === 404);
+  // A blockout older than its shot is made again (it is the camera every video follows), so the renderer is needed.
+  const wing = JSON.parse(await readFile(new URL('./fixtures/wingspan-project.json', import.meta.url), 'utf8'));
+  const fresh = renderRoutes({ director: { get: async () => structuredClone(wing) }, headless: off });
+  assert.equal((await call(fresh, '/api/director/render-blockout', { projectId: wing.id, shotId: wing.shots[0].id })).skipped, true, 'an up-to-date blockout is kept');
+  wing.shots[0].duration += 1;
+  await assert.rejects(call(fresh, '/api/director/render-blockout', { projectId: wing.id, shotId: wing.shots[0].id }), e => e.apiCode === 'headless-unavailable');
   await assert.rejects(r.serve({ method: 'POST', headers: {} }, new URL('http://h/api/director/frame'), () => {}, async () => ({})), e => e.status === 415);
   await r.serve({ method: 'GET', headers: {} }, new URL('http://h/api/director/headless'), (v, s = 200) => sent.push([s, v]));
   assert.deepEqual(sent.pop(), [200, { enabled: false }]);
@@ -165,6 +171,9 @@ test('the headless capture uses the workspace’s exact shot signature and the w
   const capture = await readFile(new URL('../src/director-capture.ts', import.meta.url), 'utf8');
   const body = (src, head) => { const i = src.indexOf(head); assert.ok(i >= 0, head); return src.slice(i + head.length, src.indexOf('\n', i)); };
   assert.equal(body(capture, 'export const shotSignature = (p: DirectorProject, s: Shot) =>'), body(workspace, 'const signature = (p: DirectorProject, s: Shot) =>'));
+  // The server checks staleness with the shared copy (shared/director.mjs).
+  const shared = await readFile(new URL('../shared/director.mjs', import.meta.url), 'utf8');
+  assert.equal(body(shared, 'export const shotSignature = (p, s) =>'), body(workspace, 'const signature = (p: DirectorProject, s: Shot) =>'));
   assert.match(workspace, /async function captureShotVideo\(s: Shot, o: CaptureOptions\) \{\n  return captureVideo\(/);
 });
 

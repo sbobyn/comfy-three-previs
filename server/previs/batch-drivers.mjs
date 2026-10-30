@@ -1,9 +1,10 @@
 // Batch drivers. `fakeBackend()` simulates refgen/generation jobs and the job dashboard (tests, PREVIS_BATCH_FAKE=1);
 // it never touches real job stores and never sends anything. `loopbackDrivers()` drives the real routes over loopback HTTP.
 import { randomUUID } from 'node:crypto';
-import { castCard, compilePrompt, lookPrompt, lookSource, objectLooks, objectNotes, referenceLegend, videoReferences } from '../../shared/director.mjs';
+import { blockoutStale, castCard, compilePrompt, lookPrompt, lookSource, objectLooks, objectNotes, referenceLegend, videoReferences } from '../../shared/director.mjs';
 import { shotPrompt } from '../../shared/prompt.mjs';
 import { stillPrompt, stillReferences } from '../../shared/still-match.mjs';
+import { cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../../shared/camera-source.mjs';
 import { planSlots, setsFor, slotAspect, viewPrompt } from '../../shared/sheet-presets.mjs';
 import { withReferenceImages, maxReferences } from '../../shared/video-refs.mjs';
 import { clipSecondsFor, durationValue, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
@@ -172,25 +173,27 @@ export function loopbackDrivers(base) {
       def = await definitionFor(base, 0); parameters = parametersOf(def);
       if ('duration' in parameters) parameters.duration = durationValue(parameters.duration, clipSecondsFor(base, s.duration));
       assetBindings = { firstFrame: { renderId: start }, ...(wantsLast ? { lastFrame: { renderId: end } } : {}) };
-      prompt = (shotPrompt(p, s, 'video').trim() || compilePrompt(p, s)).replace('Preserve the supplied camera motion, framing and blocking.', 'Start from the supplied frame and keep its composition, characters and look.');
+      const cameraSource = wantsLast ? 'keyframes' : 'still';
+      prompt = withCameraLine(shotPrompt(p, s, 'video', { cameraSource }).trim() || compilePrompt(p, s, null, { cameraSource }), cameraSource);
     } else {
       const cap = maxReferences(base);
-      const registered = cap ? (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap }))).references : [];
+      // The blockout clip is the camera; the start (and end) still lead the reference images as the look, then the cast.
+      const registered = cap ? (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap, stills: cameraSourceOf(base) === 'blockout' }))).references : [];
       const all = [...(p.scene.references || []), ...p.shots.flatMap(x => x.references)];
       refs = registered.map(x => ({ ref: all.find(y => y.id === x.referenceId), entityId: x.entityId, role: x.role, label: x.label })).filter(x => x.ref);
       def = await definitionFor(base, registered.length); parameters = parametersOf(def);
-      assetBindings = { [def.inputs?.controlVideo ? 'controlVideo' : 'sourceVideo']: { assetId: r.assetId }, ...Object.fromEntries(registered.map((x, i) => [`referenceImage${i + 1}`, { renderId: x.renderId }])) };
-      const auto = compilePrompt(p, s), user = shotPrompt(p, s, 'video');
-      prompt = user?.trim() && user.trim() !== auto.trim() ? [user.trim(), referenceLegend(refs)].filter(Boolean).join('\n') : compilePrompt(p, s, refs);
+      assetBindings = { [motionInput(def) || 'sourceVideo']: { assetId: r.assetId }, ...Object.fromEntries(registered.map((x, i) => [`referenceImage${i + 1}`, { renderId: x.renderId }])) };
+      const cameraSource = cameraSourceOf(def), auto = compilePrompt(p, s, null, { cameraSource }), user = shotPrompt(p, s, 'video', { cameraSource });
+      prompt = user?.trim() && user.trim() !== auto.trim() ? [withCameraLine(user, cameraSource), referenceLegend(refs)].filter(Boolean).join('\n') : compilePrompt(p, s, refs, { cameraSource });
     }
-    const maxLen = def.constraints?.promptMaxLength; if (Number.isInteger(maxLen) && prompt.length > maxLen) prompt = prompt.slice(0, maxLen);
+    prompt = fitPrompt(prompt, def.constraints?.promptMaxLength, cameraSourceOf(def, assetBindings)); // keeps the camera line and the reference legend
     const local = def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-');
     // Bind and quote are both revision-checked; concurrent batches can move the revision in between, so retry them together.
     return withRevision(async revision => {
       const bind = await post('/api/generation/bind', { revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: true });
       const request = { requestId: randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: local ? 'local' : 'cloud' } };
       const job = (await post('/api/generation/quote', request)).job;
-      return { request, job, modelUsed: base.id };
+      return { request, job, modelUsed: base.id, cameraSource: job.cameraSource || cameraSourceOf(def, assetBindings) };
     });
   }
 
@@ -280,9 +283,10 @@ export function loopbackDrivers(base) {
         for (let fresh = !(ctx.node.jobId && ctx.node.submitRequest); ; fresh = true) {
           if (fresh) {
             if (!s.render) throw notSent('The shot’s blockout is not rendered; nothing was sent');
-            const { request, job, modelUsed } = await prepareVideo(ctx, p, s);
+            if (blockoutStale(p, s)) throw notSent('The shot changed since its blockout was made; make the blockout again (nothing was sent)');
+            const { request, job, modelUsed, cameraSource } = await prepareVideo(ctx, p, s);
             checkQuote(ctx, job.quote);
-            await ctx.record({ jobId: request.requestId, submitRequest: { ...request, fingerprint: job.fingerprint }, modelUsed });
+            await ctx.record({ jobId: request.requestId, submitRequest: { ...request, fingerprint: job.fingerprint }, modelUsed, cameraSource });
           }
           const { fingerprint, ...request } = ctx.node.submitRequest;
           try {
