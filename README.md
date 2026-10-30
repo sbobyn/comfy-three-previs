@@ -94,7 +94,7 @@ Your phone streams its orientation to the app over HTTPS on your local network.
 
 ## Starters
 
-Open one from the home page and make it yours: **Night street**, **Two-hander interior** and **Hero reveal**, or start from an empty stage.
+Open one from the home page and make it yours: **Breaking News** (a news anchor delivers the headline), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage.
 
 ## Development
 
