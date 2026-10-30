@@ -3,8 +3,10 @@
 // (tests/batch.test.mjs keeps them in sync). Estimates only; Comfy Cloud does not return a binding price.
 export const TIERS = {
   draft: { looks: 'flux-2-pro', sheets: 'flux-2-pro', stills: 'flux-2-pro', videos: 'ltx-25-i2v-fast-v1' },
-  final: { looks: 'flux-3', sheets: 'flux-3', stills: 'flux-3', videos: 'ltx-25-flf-v1' },
+  final: { looks: 'flux-3', sheets: 'flux-3', stills: 'flux-3', videos: 'seedance-25-edit-v1' },
 };
+// Draft animates the start still (cheap; its camera only approximates the blockout). Final follows the blockout clip itself,
+// with the start and end stills as its look (shared/camera-source.mjs).
 export const IMAGE_PRICES = { 'flux-2-pro': 0.028, 'flux-3': 0.066, 'flux-ultra': 0.06, 'nano-banana-2-1': 0.05, 'nano-banana-2': 0.081, 'local-checkpoint': 0 };
 // keyFrames: LTX bills the duration it is asked for, snapped to the combo values the agent and batch send.
 export const VIDEO_PRICES = {

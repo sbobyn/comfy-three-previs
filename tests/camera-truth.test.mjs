@@ -109,3 +109,21 @@ test('a stale blockout is planned again; the video waits on the stills it will u
   assert.ok(by(`video:${dive.id}`).deps.includes(`still:${dive.id}start`));
   assert.ok(by(`video:${dive.id}`).optional.includes(`still:${dive.id}start`), 'a failed still does not block the video');
 });
+
+test('tiers: draft animates a still (approximate camera), final follows the blockout; the plan says which per shot', async () => {
+  const { TIERS } = await import('../shared/tiers.mjs');
+  const preset = id => builtInPresets.find(x => x.id === id);
+  assert.equal(cameraSourceOf(preset(TIERS.draft.videos)), 'still');
+  assert.equal(cameraSourceOf(preset(TIERS.final.videos)), 'blockout');
+  const p = JSON.parse(await readFile(new URL('./fixtures/wingspan-project.json', import.meta.url), 'utf8'));
+  const video = (tier, extra = {}) => planBatch(p, { steps: ['stills', 'videos'], tier, maxCostUsd: 10, ...extra }).nodes.filter(n => n.type === 'video');
+  for (const n of video('draft')) assert.deepEqual([n.cameraSource, n.camera], ['still', 'Camera: from still (approximate)']);
+  for (const n of video('final')) {
+    assert.deepEqual([n.cameraSource, n.camera], ['blockout', 'Camera: from blockout']);
+    assert.ok(n.deps.some(d => d.endsWith('end')), 'final also makes the end still as the look');
+  }
+  for (const n of video('final', { models: { videos: 'ltx-25-flf-v1' } })) assert.equal(n.cameraSource, 'keyframes');
+  // Without the stills step and without an end still, a start → end model falls back to its start-only sibling.
+  const noEnd = planBatch(p, { steps: ['videos'], maxCostUsd: 10, shots: [p.shots[0].id], models: { videos: 'ltx-25-flf-v1' } }).nodes.find(n => n.type === 'video');
+  assert.equal(noEnd.cameraSource, 'still');
+});

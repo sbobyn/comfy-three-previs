@@ -8,6 +8,8 @@ import { api, h, toast } from './director-common';
 import { shotCast, objectLooks } from '../shared/director.mjs';
 import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } from './director-videogen';
 import type { Def, EngineRef } from './director-videogen';
+import { CAMERA_SOURCE_LABELS } from '../shared/camera-source.mjs';
+import type { CameraSource } from '../shared/camera-source.mjs';
 
 export type SequenceCtx = {
   project(): DirectorProject;
@@ -29,7 +31,7 @@ export type SequenceCtx = {
 export type RowParts = { s: Shot; i: number; count: number; on: boolean; inCut: boolean; thumb: HTMLCanvasElement; pick: HTMLInputElement; version: HTMLSelectElement; trimIn: HTMLInputElement; trimOut: HTMLInputElement; include: HTMLButtonElement; moveUp: HTMLButtonElement; moveDown: HTMLButtonElement; open: HTMLButtonElement; bState: string[]; gState: string[]; progress?: HTMLElement | null; select(): void; reorder(from: number, to: number): Promise<void> };
 
 type Job = { id: string; shotId: string; status: string; message?: string; definition?: { title?: string; task?: string } };
-type Quoted = { shot: Shot; est: number | null; ok: boolean; issue?: string; refs?: EngineRef[] };
+type Quoted = { shot: Shot; est: number | null; ok: boolean; issue?: string; refs?: EngineRef[]; cameraSource?: CameraSource };
 
 const DONE = ['completed', 'failed', 'uncertain', 'closed', 'invalidated', 'error'];
 const no = (p: DirectorProject, id: string) => String(p.shots.findIndex(s => s.id === id) + 1).padStart(2, '0');
@@ -345,8 +347,8 @@ export function createSequence(ctx: SequenceCtx) {
         if (!s.render || !fresh(s)) { quoted.push({ shot: s, est: null, ok: false, issue: s.render ? 'Blockout changed — make it again first' : 'Make the blockout first' }); continue; }
         if (activeJob(s)) { quoted.push({ shot: s, est: null, ok: false, issue: 'Already generating' }); continue; }
         try {
-          const { job, est, refs } = await bindAndQuote(s);
-          quoted.push({ shot: s, est, refs, ok: !!job.validation?.compatible, issue: job.validation?.compatible ? undefined : (job.validation?.issues || []).map((x: any) => x.message).slice(0, 2).join('; ') || 'Not compatible' });
+          const { job, est, refs, cameraSource } = await bindAndQuote(s);
+          quoted.push({ shot: s, est, refs, cameraSource, ok: !!job.validation?.compatible, issue: job.validation?.compatible ? undefined : (job.validation?.issues || []).map((x: any) => x.message).slice(0, 2).join('; ') || 'Not compatible' });
         } catch (e) {
           let msg = (e as Error).message; const lim = def.constraints?.sourceVideo?.duration;
           if (/duration/.test(msg) && lim) msg = `Needs a ${lim.min}–${Math.floor(lim.max)} s shot (this is ${s.duration} s)`;
@@ -378,6 +380,7 @@ export function createSequence(ctx: SequenceCtx) {
       h('table', { class: 'sq-quote' }, h('tbody', {}, ...quoted.map(q => h('tr', { class: q.ok ? '' : 'skip' },
         h('td', { class: 'mono' }, no(P(), q.shot.id)), h('td', {}, q.shot.title), h('td', { class: 'mono' }, `${q.shot.render?.duration != null ? Number(q.shot.render.duration).toFixed(2) : q.shot.duration}s`),
         h('td', {}, refStrip(q.refs || [])),
+        h('td', { class: 'sq-cam' + (q.cameraSource && q.cameraSource !== 'blockout' ? ' approx' : ''), title: 'Where this video’s camera motion comes from' }, q.cameraSource ? CAMERA_SOURCE_LABELS[q.cameraSource] : ''),
         h('td', { class: 'mono' }, q.ok ? (q.est != null ? `≈ $${q.est.toFixed(3)}` : 'unknown') : ''), h('td', { class: q.ok ? 'ok' : 'muted' }, q.ok ? 'Ready' : `Skipped · ${q.issue}`))))),
       ready.length ? h('div', { class: 'sq-approve' },
         h('span', {}, `Estimated total `, h('b', { class: 'mono' }, unknownCost ? `≥ $${total.toFixed(2)}` : `≈ $${total.toFixed(2)}`), ' · Cloud totals are estimates'),
