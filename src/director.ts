@@ -1612,7 +1612,7 @@ function renderHelp() {
 }
 // [director-phone] pair a phone and preview its aim in the shot camera (live only, not recorded). Lives in the Fly menu; its live chip sits in the transport.
 installPhoneDemo(flyPhoneSlot, scene, () => setView('camera'));
-{ const chip = flyPhoneSlot.querySelector('.phone-chip'); if (chip) flyGroup.before(chip); const [pair, look] = flyPhoneSlot.querySelectorAll<HTMLButtonElement>('.phone-group .btn'); if (pair) pair.textContent = 'Pair phone…'; if (look) look.textContent = 'Live look with phone'; }
+{ const chip = flyPhoneSlot.querySelector('.phone-chip'); if (chip) flyGroup.before(chip); const [pair, look] = Array.from(flyPhoneSlot.querySelectorAll<HTMLButtonElement>('.phone-group .btn')); if (pair) pair.textContent = 'Pair phone…'; if (look) look.textContent = 'Live look with phone'; }
 // ---------- Fly camera (hero): Operate with keyboard, gamepad or phone ----------
 const FLY_DEVICES: [FlyDevice, string][] = [['keyboard', 'Keyboard'], ['gamepad', 'Gamepad'], ['phone', 'Phone']];
 let flyPick = (localStorage.getItem('previs.fly.device') as FlyDevice | null) || null;
