@@ -24,6 +24,9 @@ const SIZES = { '1:1': [512, 512], '3:4': [512, 680], '4:3': [680, 512], '16:9':
 const PRICING = 'https://docs.comfy.org/tutorials/partner-nodes/pricing';
 
 const FLUX2_SIZE = { '1:1': [1024, 1024], '3:4': [768, 1024], '4:3': [1024, 768], '16:9': [1344, 768], '9:16': [768, 1344] };
+// Nearest preset sizes (no Custom): GPT Image has no 3:4/4:3 preset, so those use 2:3/3:2.
+const GPT_SIZE = { '1:1': '1024x1024', '3:4': '1024x1536', '4:3': '1536x1024', '16:9': '2048x1152' };
+const SEEDREAM_SIZE = { '1:1': '(1K) 1024x1024 (1:1)', '3:4': '(1K) 864x1152 (3:4)', '4:3': '(1K) 1152x864 (4:3)', '16:9': '(1K) 1312x736 (16:9)' };
 const save = (images, index) => ({ class_type: 'SaveImage', inputs: { images, filename_prefix: `previs/look-${index}` } });
 // Shot key frames use the shot camera's blockout frame as a composition guide (uploaded at submit).
 const GUIDE = '100';
@@ -70,22 +73,66 @@ export const imagePresets = [
     },
   },
   {
+    id: 'flux-2-max', title: 'Flux.2 [max] (BFL)', backend: 'cloud', node: 'Flux2ImageNode',
+    note: 'BFL’s top Flux.2 tier: more detail and better prompt and reference following than [pro]. $0.07 per 1 MP image plus $0.03–0.24 for reference images.',
+    pricing: { status: 'estimate', creditsPerImage: 15, usdPerImage: Math.round(15 * USD_PER_CREDIT * 1000) / 1000, source: 'Live Flux2ImageNode price_badge (Flux.2 [max]: $0.07 per output MP; reference surcharge $0.03–0.24 not included)', checkedAt: '2026-10-30' },
+    maxRefs: 7,
+    build: ({ prompt, aspect, count, seed, guide, refs = 0 }) => {
+      const [w, h] = FLUX2_SIZE[aspect] || FLUX2_SIZE['1:1'];
+      const g = { ...(guide ? { [GUIDE]: guideNode() } : {}), ...refNodes(refs) };
+      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'Flux2ImageNode', inputs: { prompt, model: 'Flux.2 [max]', 'model.width': w, 'model.height': h, seed: seed + i, ...slots('model.images.image_', guide, refs) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
+      return g;
+    },
+  },
+  {
+    id: 'gpt-image-25', title: 'GPT Image 2.5 (OpenAI)', backend: 'cloud', node: 'OpenAIGPTImageNodeV2',
+    note: 'OpenAI’s newest image model (2.5 Sunburst, high quality): strong text, logos and multi-reference edits. About $0.06–0.08 per image plus about $0.015 per reference image.',
+    pricing: { status: 'estimate', creditsPerImage: 16, usdPerImage: Math.round(16 * USD_PER_CREDIT * 1000) / 1000, source: 'Live OpenAIGPTImageNodeV2 price_badge (gpt-image-2.5 high: $0.0589–0.0753 by size; $0.0117–0.0176 per reference image not included)', checkedAt: '2026-10-30' },
+    maxRefs: 9,
+    build: ({ prompt, aspect, count, seed, guide, refs = 0 }) => {
+      const g = { ...(guide ? { [GUIDE]: guideNode() } : {}), ...refNodes(refs) };
+      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'OpenAIGPTImageNodeV2', inputs: { prompt, model: 'gpt-image-2.5-sunburst', 'model.size': GPT_SIZE[aspect] || GPT_SIZE['1:1'], 'model.custom_width': 1024, 'model.custom_height': 1024, 'model.background': 'opaque', 'model.quality': 'high', n: 1, seed: seed + i, ...slots('model.images.image_', guide, refs) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
+      return g;
+    },
+  },
+  {
+    id: 'seedream-5-pro', title: 'Seedream 5.0 Pro (ByteDance)', backend: 'cloud', node: 'ByteDanceSeedreamNodeV3',
+    note: 'ByteDance Seedream 5.0 Pro at 1K: photoreal, consistent multi-reference generation. $0.045 per image plus $0.003 per extra reference image.',
+    pricing: { status: 'estimate', creditsPerImage: 9.5, usdPerImage: Math.round(9.5 * USD_PER_CREDIT * 1000) / 1000, source: 'Live ByteDanceSeedreamNodeV3 price_badge (seedream 5.0 pro 1K: $0.045 per image; $0.003 per reference after the first not included)', checkedAt: '2026-10-30' },
+    maxRefs: 9,
+    build: ({ prompt, aspect, count, seed, guide, refs = 0 }) => {
+      const g = { ...(guide ? { [GUIDE]: guideNode() } : {}), ...refNodes(refs) };
+      // width/height only apply to the Custom size preset, but the schema requires them.
+      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'ByteDanceSeedreamNodeV3', inputs: { prompt, model: 'seedream 5.0 pro', 'model.size_preset': SEEDREAM_SIZE[aspect] || SEEDREAM_SIZE['1:1'], 'model.width': 2048, 'model.height': 2048, 'model.prompt_optimization': 'standard', 'model.seed': seed + i, 'model.watermark': false, 'model.thinking': true, ...slots('model.images.image_', guide, refs) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
+      return g;
+    },
+  },
+  {
     id: 'nano-banana-pro', title: 'Nano Banana Pro (Gemini 3 Pro Image)', backend: 'cloud', node: 'GeminiImage2Node',
-    note: 'Strong prompt following. Billed per output token, so there is no fixed per-image price.',
-    pricing: { status: 'token-based', creditsPerImage: null, usdPerImage: null, rate: '30.38 credits per 1K output tokens', source: PRICING, checkedAt: '2026-10-28' },
-    build: ({ prompt, aspect, count, seed, guide }) => {
-      const g = guide ? { [GUIDE]: guideNode() } : {};
-      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'GeminiImage2Node', inputs: { prompt, model: 'gemini-3-pro-image-preview', seed: seed + i, aspect_ratio: aspect, resolution: '1K', response_modalities: 'IMAGE', ...(guide ? { images: [GUIDE, 0] } : {}) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
+    note: 'Strong prompt following and reference consistency. About $0.16 per 1K image (token-billed estimate). Reference images are letterboxed onto one canvas size for the model.',
+    pricing: { status: 'estimate', creditsPerImage: 34, usdPerImage: Math.round(34 * USD_PER_CREDIT * 1000) / 1000, derived: true, rate: '30.38 credits per 1K output tokens', source: 'Live GeminiImage2Node price_badge (gemini-3-pro-image 1K: ≈ $0.1608 per image)', checkedAt: '2026-10-30' },
+    maxRefs: 9,
+    build: ({ prompt, aspect, count, seed, guide, refs = 0 }) => {
+      // This node takes one IMAGE input: with references, every image is padded to one size and batched (guide first).
+      const g = { ...(guide ? { [GUIDE]: guideNode() } : {}), ...refNodes(refs) };
+      let images = guide ? [GUIDE, 0] : null;
+      if (refs) {
+        const [w, h] = FLUX2_SIZE[aspect] || FLUX2_SIZE['1:1'], batch = {};
+        Object.entries(slots('', guide, refs)).forEach(([k, src]) => { g[`${300 + Number(k)}`] = { class_type: 'ResizeAndPadImage', inputs: { image: src, target_width: w, target_height: h, padding_color: 'white', interpolation: 'lanczos' } }; batch[`images.image${Number(k) - 1}`] = [`${300 + Number(k)}`, 0]; });
+        g['399'] = { class_type: 'BatchImagesNode', inputs: batch }; images = ['399', 0];
+      }
+      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'GeminiImage2Node', inputs: { prompt, model: 'gemini-3-pro-image-preview', seed: seed + i, aspect_ratio: aspect, resolution: '1K', response_modalities: 'IMAGE', ...(images ? { images } : {}) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
       return g;
     },
   },
   {
     id: 'nano-banana-2-1', title: 'Nano Banana 2.1 (Gemini)', backend: 'cloud', node: 'GeminiNanoBanana2V2',
-    note: 'Fast, inexpensive and good at following a guide image. Token-billed: about 10 credits per 1K image (≈ $0.05).',
+    note: 'Fast, inexpensive and good at following a guide and reference images. Token-billed: about 10 credits per 1K image (≈ $0.05).',
     pricing: { status: 'estimate', creditsPerImage: 10.6, usdPerImage: Math.round(10.6 * USD_PER_CREDIT * 1000) / 1000, derived: true, rate: '9.05 credits per 1K output image tokens', source: PRICING, checkedAt: '2026-10-29' },
-    build: ({ prompt, aspect, count, seed, guide }) => {
-      const g = guide ? { [GUIDE]: guideNode() } : {};
-      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'GeminiNanoBanana2V2', inputs: { prompt, model: 'Gemini Nano Banana 2.1', 'model.aspect_ratio': aspect, 'model.resolution': '1K', 'model.thinking_level': 'MEDIUM', seed: seed + i, response_modalities: 'IMAGE', ...(guide ? { 'model.images.image_1': [GUIDE, 0] } : {}) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
+    maxRefs: 9,
+    build: ({ prompt, aspect, count, seed, guide, refs = 0 }) => {
+      const g = { ...(guide ? { [GUIDE]: guideNode() } : {}), ...refNodes(refs) };
+      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'GeminiNanoBanana2V2', inputs: { prompt, model: 'Gemini Nano Banana 2.1', 'model.aspect_ratio': aspect, 'model.resolution': '1K', 'model.thinking_level': 'MEDIUM', seed: seed + i, response_modalities: 'IMAGE', ...slots('model.images.image_', guide, refs) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
       return g;
     },
   },
@@ -93,9 +140,10 @@ export const imagePresets = [
     id: 'nano-banana-2', title: 'Nano Banana 2 (Gemini 3.1 Flash Image)', backend: 'cloud', node: 'GeminiNanoBanana2V2',
     note: 'Gemini 3.1 Flash Image. Token-billed: about 17 credits per 1K image (≈ $0.08).',
     pricing: { status: 'estimate', creditsPerImage: 17.0, usdPerImage: Math.round(17.0 * USD_PER_CREDIT * 1000) / 1000, derived: true, rate: '15.19 credits per 1K output image tokens', source: PRICING, checkedAt: '2026-10-29' },
-    build: ({ prompt, aspect, count, seed, guide }) => {
-      const g = guide ? { [GUIDE]: guideNode() } : {};
-      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'GeminiNanoBanana2V2', inputs: { prompt, model: 'Nano Banana 2 (Gemini 3.1 Flash Image)', 'model.aspect_ratio': aspect, 'model.resolution': '1K', 'model.thinking_level': 'MINIMAL', seed: seed + i, response_modalities: 'IMAGE', ...(guide ? { 'model.images.image_1': [GUIDE, 0] } : {}) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
+    maxRefs: 9,
+    build: ({ prompt, aspect, count, seed, guide, refs = 0 }) => {
+      const g = { ...(guide ? { [GUIDE]: guideNode() } : {}), ...refNodes(refs) };
+      for (let i = 0; i < count; i++) { g[`${i * 2 + 1}`] = { class_type: 'GeminiNanoBanana2V2', inputs: { prompt, model: 'Nano Banana 2 (Gemini 3.1 Flash Image)', 'model.aspect_ratio': aspect, 'model.resolution': '1K', 'model.thinking_level': 'MINIMAL', seed: seed + i, response_modalities: 'IMAGE', ...slots('model.images.image_', guide, refs) } }; g[`${i * 2 + 2}`] = save([`${i * 2 + 1}`, 0], i); }
       return g;
     },
   },
@@ -226,7 +274,7 @@ export async function openRefgen(root, director, options = {}) {
     const entity = shot ? null : project.scene.entities.find(e => e.id === input.entityId); if (!shot && !entity) fail('Choose an object in this scene');
     const guide = shot && input.guideBytes ? input.guideBytes : null;
     const refBytes = Array.isArray(input.refBytes) ? input.refBytes : [];
-    if (refBytes.length > (preset.maxRefs ?? 0)) fail(preset.maxRefs ? `${preset.title} takes at most ${preset.maxRefs} reference images here` : `${preset.title} can’t take reference images; choose FLUX 3 or Flux.2`);
+    if (refBytes.length > (preset.maxRefs ?? 0)) fail(preset.maxRefs ? `${preset.title} takes at most ${preset.maxRefs} reference images here` : `${preset.title} can’t take reference images; choose a model that does (FLUX 3, Flux.2, GPT Image, Seedream or Nano Banana)`);
     if (guide && !guide.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) fail('The composition guide must be a PNG');
     const prompt = String(input.prompt || '').trim(); if (!prompt || prompt.length > 2500) fail('Prompt must be 1–2500 characters');
     const count = guide && preset.backend === 'local' ? 1 : Number(input.count ?? 1); if (!Number.isInteger(count) || count < 1 || count > 4) fail('Generate 1–4 images per request');

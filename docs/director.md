@@ -55,6 +55,41 @@ Make the grey blockout, then ask a video model to turn it into the shot.
 
 ![Generate: review inputs and estimate](../public/guide/generate.webp)
 
+### Models
+
+List prices are Comfy Cloud estimates from each node's live price badge (checked 2026-10-30). The app quotes every request before you approve it; reference-image surcharges and Cloud overhead are not included.
+
+**Video** (start-still models animate the shot's Start still; start → end models also pin its End still, and without one fall back to the start-only model at the same price):
+
+| Model | Comfy node | Takes | Clip lengths | ≈ List price |
+|---|---|---|---|---|
+| LTX 2.5 Fast (draft) | `LtxApi25ImageToVideo` | start still | 2–10 s | $0.13/s (720p) |
+| LTX 2.5 Pro | `LtxApi25ImageToVideo` | start, or start → end | 2–10 s | $0.17/s (720p) |
+| Seedance 2.5 | `ByteDance2ReferenceNodeV2` (start still as reference image 1; may reframe), `ByteDance2FirstLastFrameNode` | start (as reference), or start → end | 4–10 s | $0.33/s (720p, token-billed) |
+| Kling 4.0 | `Kling4ImageToVideoNode` | start, or start → end | 3–10 s | $0.22/s (720p) |
+| Veo 3.1 | `Veo3VideoGenerationNode`, `Veo3FirstLastFrameNode` | start, or start → end | 4, 6 or 8 s | $0.20/s (720p, no audio) |
+| MiniMax Hailuo H3 | `MinimaxHailuo03FirstLastFrameNode` | start, or start → end | 4–10 s | $0.13/s (768p) |
+| Wan 2.7 | `Wan2ImageToVideoApi` | start, or start → end | 2–10 s | $0.10/s (720p) |
+| Seedance 2.5 · edit | `ByteDance2ReferenceNodeV2` (edit) | blockout clip | clip length | $0.40/s (720p) |
+| Kling O1 · edit | `KlingOmniProEditVideoNode` | blockout clip | 3–10 s | $0.13/s (720p) |
+| Wan VACE 1.3B (local) | `WanVaceToVideo` | blockout edges | as set | local GPU |
+
+**Images** (looks, design sheets and stills; "refs" counts cast images besides a still's blockout guide):
+
+| Model | Comfy node | Refs | ≈ List price |
+|---|---|---|---|
+| Flux.2 [pro] (draft) | `Flux2ImageNode` | 7 | $0.03 |
+| Flux.2 [max] | `Flux2ImageNode` | 7 | $0.07 (+ $0.03–0.24 for refs) |
+| FLUX 3 | `Flux3ImageNode` | 9 | $0.07 |
+| Flux 1.1 [pro] Ultra | `FluxProUltraImageNode` | guide only | $0.06 |
+| GPT Image 2.5 (Sunburst, high) | `OpenAIGPTImageNodeV2` | 9 | $0.06–0.08 (+ ≈ $0.015 per ref) |
+| Seedream 5.0 Pro | `ByteDanceSeedreamNodeV3` | 9 | $0.045 |
+| Nano Banana Pro | `GeminiImage2Node` (refs padded and batched) | 9 | $0.16 |
+| Nano Banana 2.1 / 2 | `GeminiNanoBanana2V2` | 9 | $0.05 / $0.08 |
+| Local checkpoint | `CheckpointLoaderSimple` | guide only | local GPU |
+
+Batch tiers: **draft** uses Flux.2 [pro] images and LTX 2.5 Fast video; **final** uses FLUX 3 looks and sheets, GPT Image 2.5 stills and MiniMax Hailuo H3 start → end video (set in `shared/tiers.mjs`). A batch sends every shot's stills before design sheets, so videos start as early as possible.
+
 ## 5. Cut
 
 Choose the versions, order and timing of the film.

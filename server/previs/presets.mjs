@@ -1,26 +1,80 @@
 // Original small API graphs; models remain in the backend, never downloaded here.
 const saveVideo = video => ({class_type:'SaveVideo',inputs:{video,filename_prefix:'previs/video','format':'mp4','format.codec':'h264'}});
+// Start-still (and optional end-still) image-to-video presets for the partner models. `node` builds the model node from
+// the start (and end) LoadImage links; prompt/duration/resolution/seed map to its inputs. List prices: the node's live
+// object_info price_badge at these settings (211 credits = $1), cross-checked with Comfy Cloud estimate_credits; 2026-10-30.
+const credits = c => Math.round((c / 211) * 10000) / 10000;
+const frames = (last) => ({ '1': { class_type: 'LoadImage', inputs: { image: 'previs-first-frame.png' } }, ...(last ? { '4': { class_type: 'LoadImage', inputs: { image: 'previs-last-frame.png' } } } : {}) });
+function keyFramePreset({ id, title, description, last, node, map, durations, creditsPerSecond, resolution, source, conditioning, promptMaxLength = 2500 }) {
+  const n = node(['1', 0], last ? ['4', 0] : null);
+  return { version: 1, id, title, task: 'first-frame', description,
+    graph: { ...frames(last), '2': n, '3': saveVideo(['2', 0]) },
+    inputs: { firstFrame: { nodeId: '1', input: 'image' }, ...(last ? { lastFrame: { nodeId: '4', input: 'image' } } : {}), prompt: { nodeId: '2', input: map.prompt } },
+    parameters: Object.fromEntries(['duration', 'resolution', 'seed'].filter(k => map[k]).map(k => [k, { nodeId: '2', input: map[k] }])),
+    outputs: [{ nodeId: '3', mediaType: 'video/mp4' }],
+    constraints: { promptMaxLength, durations }, backendRequirements: {},
+    pricing: { status: 'estimate', currency: 'USD', ratePerSecond: credits(creditsPerSecond), creditsPerSecond, resolution, source, checkedAt: '2026-10-30', unknownCharges: ['Cloud workflow execution overhead', 'Account credit conversion/taxes'], allowanceIsNotProviderCap: true },
+    provenance: { source: `Original Previs API graph using the official ${n.class_type} schema (live object_info, 2026-10-30)`, conditioning }, verification: { status: 'imported' } };
+}
+const ESTIMATE = 'Live price_badge';
+const seedance = (first, last) => last
+  ? { class_type: 'ByteDance2FirstLastFrameNode', inputs: { model: 'Seedance 2.5', 'model.prompt': '', 'model.resolution': '720p', 'model.duration': 5, 'model.generate_audio': false, 'model.output_format': 'mp4', first_frame: first, last_frame: last, seed: 0, watermark: false } }
+  // Single image: the reference-to-video route with only reference image 1 set (never the real-human asset variants).
+  : { class_type: 'ByteDance2ReferenceNodeV2', inputs: { model: 'Seedance 2.5', 'model.prompt': '', 'model.resolution': '720p', 'model.ratio': '16:9', 'model.duration': 5, 'model.generate_audio': false, 'model.task_type': 'reference', 'model.output_format': 'mp4', 'model.reference_images.image_1': first, 'model.auto_downscale': true, 'model.auto_upscale': false, seed: 0, watermark: false } };
+const kling = (first, last) => ({ class_type: 'Kling4ImageToVideoNode', inputs: { model: 'kling-4.0', 'model.prompt': '', 'model.resolution': '720p', 'model.duration': 5, 'model.seed': 42, 'model.first_frame': first, ...(last ? { 'model.last_frame': last } : {}) } });
+const veo = (first, last) => last
+  ? { class_type: 'Veo3FirstLastFrameNode', inputs: { prompt: '', negative_prompt: '', resolution: '720p', aspect_ratio: '16:9', duration: 6, seed: 0, first_frame: first, last_frame: last, model: 'veo-3.1-generate', generate_audio: false } }
+  : { class_type: 'Veo3VideoGenerationNode', inputs: { prompt: '', aspect_ratio: '16:9', resolution: '720p', negative_prompt: '', duration_seconds: 6, person_generation: 'ALLOW', seed: 0, image: first, model: 'veo-3.1-generate', generate_audio: false } };
+const hailuo = (first, last) => ({ class_type: 'MinimaxHailuo03FirstLastFrameNode', inputs: { model: 'MiniMax H3', 'model.prompt': '', 'model.resolution': '768P', 'model.duration': 5, first_frame: first, ...(last ? { last_frame: last } : {}), seed: 42, watermark: false } });
+const wan = (first, last) => ({ class_type: 'Wan2ImageToVideoApi', inputs: { model: 'wan2.7-i2v', 'model.prompt': '', 'model.negative_prompt': '', 'model.resolution': '720P', 'model.duration': 5, first_frame: first, ...(last ? { last_frame: last } : {}), seed: 0, prompt_extend: false, watermark: false } });
+const DYN = { prompt: 'model.prompt', duration: 'model.duration', resolution: 'model.resolution', seed: 'seed' };
+const START = 'Animates the shot’s start still (or, without one, the first blockout frame) from the prompt; describe the camera move in the prompt.';
+const BOTH = 'Animates from the shot’s start still to its end still. Pinning both ends keeps objects and framing consistent with the blockout and between shots.';
+const partnerPresets = [
+  keyFramePreset({ id: 'seedance-25-i2v-v1', title: 'Seedance 2.5 · from the start still (reference)', last: false, node: seedance, map: DYN, durations: [4, 5, 6, 8, 10], creditsPerSecond: 70.47, resolution: '720p',
+    description: 'ByteDance Seedance 2.5 reference-to-video with the start still as its only reference image. It keeps the look and cast but does not start on the exact frame (it may reframe the shot); for a locked first frame use Seedance 2.5 · start → end stills. The most expensive per second; token-billed estimate.',
+    source: `${ESTIMATE} (Seedance 2.5 720p 16:9: 900 tokens/frame × (24·s+1) frames × $0.015301/1K ≈ $1.67 for 5 s; rate rounded up so 4 s is not under-quoted)`, conditioning: 'start image as reference image 1 + prompt' }),
+  keyFramePreset({ id: 'seedance-25-flf-v1', title: 'Seedance 2.5 · start → end stills', last: true, node: seedance, map: DYN, durations: [4, 5, 6, 8, 10], creditsPerSecond: 70.47, resolution: '720p',
+    description: `ByteDance Seedance 2.5 first/last-frame to video. ${BOTH} Token-billed estimate.`, source: `${ESTIMATE} (Seedance 2.5 720p 16:9: 900 tokens/frame × (24·s+1) frames × $0.015301/1K ≈ $1.67 for 5 s; rate rounded up so 4 s is not under-quoted)`, conditioning: 'first + last frame images + prompt' }),
+  keyFramePreset({ id: 'kling-40-i2v-v1', title: 'Kling 4.0 · animate the start still', last: false, node: kling, map: { ...DYN, seed: 'model.seed' }, durations: [3, 4, 5, 6, 8, 10], creditsPerSecond: 47.4, resolution: '720p',
+    description: `Kling 4.0 image-to-video (key frames, with sound). ${START}`, source: `${ESTIMATE} (kling-4.0 720p: $0.22451/s)`, conditioning: 'first frame image + prompt' }),
+  keyFramePreset({ id: 'kling-40-flf-v1', title: 'Kling 4.0 · start → end stills', last: true, node: kling, map: { ...DYN, seed: 'model.seed' }, durations: [3, 4, 5, 6, 8, 10], creditsPerSecond: 47.4, resolution: '720p',
+    description: `Kling 4.0 key-frame video (first and last frame, with sound). ${BOTH}`, source: `${ESTIMATE} (kling-4.0 720p: $0.22451/s)`, conditioning: 'first + last frame images + prompt' }),
+  keyFramePreset({ id: 'veo-31-i2v-v1', title: 'Veo 3.1 · animate the start still', last: false, node: veo, map: { prompt: 'prompt', duration: 'duration_seconds', resolution: 'resolution', seed: 'seed' }, durations: [4, 6, 8], creditsPerSecond: 42.2, resolution: '720p',
+    description: `Google Veo 3.1 image-to-video, no audio. ${START} Clips are 4, 6 or 8 seconds.`, source: `${ESTIMATE} (veo-3.1-generate 720p, audio off: $0.20/s)`, conditioning: 'first frame image + prompt' }),
+  keyFramePreset({ id: 'veo-31-flf-v1', title: 'Veo 3.1 · start → end stills', last: true, node: veo, map: { prompt: 'prompt', duration: 'duration', resolution: 'resolution', seed: 'seed' }, durations: [4, 6, 8], creditsPerSecond: 42.2, resolution: '720p',
+    description: `Google Veo 3.1 first/last-frame to video, no audio. ${BOTH} Clips are 4, 6 or 8 seconds.`, source: `${ESTIMATE} (veo-3.1-generate 720p, audio off: $0.20/s)`, conditioning: 'first + last frame images + prompt' }),
+  keyFramePreset({ id: 'hailuo-h3-i2v-v1', title: 'MiniMax Hailuo H3 · animate the start still', last: false, node: hailuo, map: DYN, durations: [4, 5, 6, 8, 10], creditsPerSecond: 27.16, resolution: '768P',
+    description: `MiniMax H3 (Hailuo) image-to-video at 768p; the aspect ratio follows the still. ${START}`, source: `${ESTIMATE} (MiniMax H3 768P: $0.1287/s)`, conditioning: 'first frame image + prompt' }),
+  keyFramePreset({ id: 'hailuo-h3-flf-v1', title: 'MiniMax Hailuo H3 · start → end stills', last: true, node: hailuo, map: DYN, durations: [4, 5, 6, 8, 10], creditsPerSecond: 27.16, resolution: '768P',
+    description: `MiniMax H3 (Hailuo) first/last-frame to video at 768p. ${BOTH}`, source: `${ESTIMATE} (MiniMax H3 768P: $0.1287/s)`, conditioning: 'first + last frame images + prompt' }),
+  keyFramePreset({ id: 'wan27-i2v-v1', title: 'Wan 2.7 · animate the start still', last: false, node: wan, map: DYN, durations: [2, 3, 4, 5, 6, 8, 10], creditsPerSecond: 21.1, resolution: '720P',
+    description: `Alibaba Wan 2.7 image-to-video (Cloud API, with generated sound). ${START} The cheapest partner model per second.`, source: `${ESTIMATE} (wan2.7 720P: $0.10/s)`, conditioning: 'first frame image + prompt' }),
+  keyFramePreset({ id: 'wan27-flf-v1', title: 'Wan 2.7 · start → end stills', last: true, node: wan, map: DYN, durations: [2, 3, 4, 5, 6, 8, 10], creditsPerSecond: 21.1, resolution: '720P',
+    description: `Alibaba Wan 2.7 first/last-frame to video (Cloud API, with generated sound). ${BOTH}`, source: `${ESTIMATE} (wan2.7 720P: $0.10/s)`, conditioning: 'first + last frame images + prompt' }),
+];
 export const builtInPresets = [
   // Seedance 2.5 reference-to-video in "edit" mode: transforms the supplied clip; output keeps its length and aspect ratio.
   // Billed per token: (input + output seconds) × 1280 × 720 × 24 / 1024 tokens × 1.931 credits per 1K at 720p with video input.
   {version:1,id:'ltx-25-flf-v1',title:'LTX 2.5 Pro · start → end key frames',task:'first-frame',description:'LTX 2.5 image-to-video between the shot’s start and end key frames (generated from the first and last blockout frames with every object’s look). Pinning both ends keeps objects, flips and rolls consistent with the blockout and between shots.',
     graph:{'1':{class_type:'LoadImage',inputs:{image:'previs-first-frame.png'}},'4':{class_type:'LoadImage',inputs:{image:'previs-last-frame.png'}},'2':{class_type:'LtxApi25ImageToVideo',inputs:{image:['1',0],last_frame:['4',0],model:'LTX-2.5 (Pro)','model.duration':'3','model.resolution':'1280x720','model.fps':'24','model.generate_audio':false,prompt:'',seed:42}},'3':saveVideo(['2',0])},
     inputs:{firstFrame:{nodeId:'1',input:'image'},lastFrame:{nodeId:'4',input:'image'},prompt:{nodeId:'2',input:'prompt'}},parameters:{duration:{nodeId:'2',input:'model.duration'},seed:{nodeId:'2',input:'seed'}},outputs:[{nodeId:'3',mediaType:'video/mp4'}],
-    constraints:{promptMaxLength:2500},backendRequirements:{},
+    constraints:{promptMaxLength:2500,durations:[2,3,4,5,6,8,10]},backendRequirements:{},
     pricing:{status:'estimate',currency:'USD',ratePerSecond:0.172,creditsPerSecond:36.3,resolution:'720p',source:'Comfy Cloud estimate_credits (109 credits for 3 s at 1280×720, Pro)',checkedAt:'2026-10-29',unknownCharges:['Cloud workflow execution overhead','Account credit conversion/taxes'],allowanceIsNotProviderCap:true},
     provenance:{source:'Original Previs API graph using official node schemas',conditioning:'first + last frame images + prompt'},verification:{status:'imported'}},
   {version:1,id:'ltx-25-i2v-v1',title:'LTX 2.5 Pro · animate the key frame',task:'first-frame',description:'LTX 2.5 image-to-video: animates the shot’s key frame (or, without one, the first blockout frame) from the prompt. It does not follow the blockout video’s motion; describe the camera move in the prompt. Generate a key frame in the Shot tab first for the best result.',
     graph:{'1':{class_type:'LoadImage',inputs:{image:'previs-first-frame.png'}},'2':{class_type:'LtxApi25ImageToVideo',inputs:{image:['1',0],model:'LTX-2.5 (Pro)','model.duration':'3','model.resolution':'1280x720','model.fps':'24','model.generate_audio':false,prompt:'',seed:42}},'3':saveVideo(['2',0])},
     inputs:{firstFrame:{nodeId:'1',input:'image'},prompt:{nodeId:'2',input:'prompt'}},parameters:{duration:{nodeId:'2',input:'model.duration'},seed:{nodeId:'2',input:'seed'}},outputs:[{nodeId:'3',mediaType:'video/mp4'}],
-    constraints:{promptMaxLength:2500},backendRequirements:{},
+    constraints:{promptMaxLength:2500,durations:[2,3,4,5,6,8,10]},backendRequirements:{},
     pricing:{status:'estimate',currency:'USD',ratePerSecond:0.172,creditsPerSecond:36.3,resolution:'720p',source:'Comfy Cloud estimate_credits (109 credits for 3 s at 1280×720, Pro)',checkedAt:'2026-10-29',unknownCharges:['Cloud workflow execution overhead','Account credit conversion/taxes'],allowanceIsNotProviderCap:true},
     provenance:{source:'Original Previs API graph using official node schemas',conditioning:'first frame image + prompt'},verification:{status:'imported'}},
   {version:1,id:'ltx-25-i2v-fast-v1',title:'LTX 2.5 Fast · animate the key frame (draft)',task:'first-frame',description:'LTX 2.5 Fast image-to-video, the cheaper draft tier (≈25% less than Pro at 720p): animates the shot’s key frame (or, without one, the first blockout frame) from the prompt. It does not follow the blockout video’s motion; describe the camera move in the prompt. Generate a key frame in the Shot tab first for the best result.',
     graph:{'1':{class_type:'LoadImage',inputs:{image:'previs-first-frame.png'}},'2':{class_type:'LtxApi25ImageToVideo',inputs:{image:['1',0],model:'LTX-2.5 (Fast)','model.duration':'3','model.resolution':'1280x720','model.fps':'24','model.generate_audio':false,prompt:'',seed:42}},'3':saveVideo(['2',0])},
     inputs:{firstFrame:{nodeId:'1',input:'image'},prompt:{nodeId:'2',input:'prompt'}},parameters:{duration:{nodeId:'2',input:'model.duration'},seed:{nodeId:'2',input:'seed'}},outputs:[{nodeId:'3',mediaType:'video/mp4'}],
-    constraints:{promptMaxLength:2500},backendRequirements:{},
+    constraints:{promptMaxLength:2500,durations:[2,3,4,5,6,8,10]},backendRequirements:{},
     pricing:{status:'estimate',currency:'USD',ratePerSecond:0.1287,creditsPerSecond:27.16,resolution:'720p',source:'Comfy Cloud LtxApi25ImageToVideo price badge (ltx-2.5 (fast) 1280x720 $0.1287/s); model option name checked against live object_info',checkedAt:'2026-10-30',unknownCharges:['Cloud workflow execution overhead','Account credit conversion/taxes'],allowanceIsNotProviderCap:true},
     provenance:{source:'Original Previs API graph using official node schemas',conditioning:'first frame image + prompt'},verification:{status:'imported'}},
+  ...partnerPresets,
   {version:1,id:'seedance-25-edit-v1',title:'Seedance 2.5 · edit the complete video',task:'transform-video',description:'ByteDance Seedance 2.5 video-to-video edit: restyles the whole blockout clip from the prompt while keeping its length, framing and motion. Billed per token (input + output video), roughly 3× Kling per second at 720p; minimum token limits apply.',
     graph:{'1':{class_type:'LoadVideo',inputs:{file:'previs-source.mp4'}},'2':{class_type:'ByteDance2ReferenceNodeV2',inputs:{model:'Seedance 2.5','model.prompt':'','model.resolution':'720p','model.ratio':'16:9','model.duration':5,'model.generate_audio':false,'model.task_type':'edit','model.output_format':'mp4','model.reference_videos.video_1':['1',0],'model.auto_downscale':true,'model.auto_upscale':false,seed:0,watermark:false}},'3':saveVideo(['2',0])},
     inputs:{sourceVideo:{nodeId:'1',input:'file'},prompt:{nodeId:'2',input:'model.prompt'}},parameters:{model:{nodeId:'2',input:'model'},resolution:{nodeId:'2',input:'model.resolution'},audio:{nodeId:'2',input:'model.generate_audio'},seed:{nodeId:'2',input:'seed'}},outputs:[{nodeId:'3',mediaType:'video/mp4'}],

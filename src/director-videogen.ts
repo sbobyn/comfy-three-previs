@@ -6,6 +6,7 @@ import type { DirectorProject, Shot, VideoRef } from '../shared/director.mjs';
 import { withReferenceImages, maxReferences } from '../shared/video-refs.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
 import { api } from './director-common';
+import { clipSecondsFor, durationValue, FIRST_FRAME_FALLBACK } from '../shared/tiers.mjs';
 
 export type Def = { id: string; title: string; task: string; description?: string; pricing?: { ratePerSecond?: number }; parameters?: Record<string, { nodeId: string; input: string }>; graph?: any; inputs?: any; provenance?: { presetId?: string; referenceImages?: number }; constraints?: any };
 export type GenState = { presets: Def[]; definitions: Def[]; jobs: any[]; paidExecutionEnabled?: boolean };
@@ -19,6 +20,20 @@ export function videoChoices(st: GenState): Def[] {
 function allVideoChoices(st: GenState): Def[] {
   return [...st.presets, ...st.definitions.filter(d => !d.provenance?.referenceImages && !st.presets.some(p => p.id === d.id || d.provenance?.presetId === p.id))].filter(d => VIDEO_TASKS.includes(d.task));
 }
+/** Seconds a shot generates (and is billed) with this model: start-still models snap to the clip lengths they accept. */
+export const clipSeconds = (d: Def | null | undefined, s: Shot) => (d?.task === 'first-frame' ? clipSecondsFor(d, s.duration) : s.render?.duration ?? s.duration);
+/** Clip lengths a start-still model accepts, e.g. "4/6/8 s" or "2–10 s"; '' for other models. */
+export function clipLengths(d: Def | null | undefined) {
+  const ds: number[] | undefined = d?.task === 'first-frame' ? d.constraints?.durations : undefined;
+  return ds?.length ? `${ds.length <= 3 ? ds.join('/') : `${ds[0]}–${ds[ds.length - 1]}`} s` : '';
+}
+/** Picker label: title · price per second · clip lengths. */
+export function modelLabel(d: Def) {
+  const rate = d.pricing?.ratePerSecond;
+  return [d.title, rate ? `≈ $${rate.toFixed(2)}/s` : null, clipLengths(d) || null].filter(Boolean).join(' · ');
+}
+/** The start-only sibling a start → end model uses when the shot has no end still (same as the batch). */
+export const startOnlyFallback = (d: Def | null | undefined) => (d ? (FIRST_FRAME_FALLBACK as Record<string, string>)[d.provenance?.presetId || d.id] || null : null);
 const baseOf = (st: GenState, id: string) => st.presets.find(p => p.id === id) || st.definitions.find(d => d.id === id) || null;
 export const referenceCapacity = (st: GenState, id: string) => { const b = baseOf(st, id); return b ? maxReferences(b) : 0; };
 
@@ -74,24 +89,26 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   return { def, job, request, est, refs: registered, prompt };
 }
 
-const LTX_DURATIONS = [2, 3, 4, 5, 6, 8, 10];
-/** Image-to-video (e.g. LTX): animate the shot's key frame, else its first blockout frame. */
+/** Image-to-video (LTX, Seedance, Kling, Veo, Hailuo, Wan): animate the shot's key frame, else its first blockout frame. */
 async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base: Def) {
   const { project, shot: s, st } = o, r = s.render!;
-  const wantsLast = !!base.inputs?.lastFrame;
+  let wantsLast = !!base.inputs?.lastFrame;
   const frame: EngineRef[] = (await api('director/video-refs', { projectId: project.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast })).references;
   let renderId = frame.find(x => x.label === 'start key frame')?.renderId;
   const lastId = frame.find(x => x.label === 'end key frame')?.renderId;
+  // No end still: a start → end model with a start-only sibling animates the start still alone (as the batch does).
+  const fallback = wantsLast && !lastId ? st.presets.find(p => p.id === startOnlyFallback(base)) : null;
+  if (fallback) { base = fallback; wantsLast = false; }
   if (wantsLast && (!renderId || !lastId)) throw Error('Generate this shot’s start and end key frames first');
   const main = (await api('project')).project;
   if (!renderId) renderId = main.renders?.find((x: any) => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
   if (!renderId) throw Error('No start image: generate a key frame for this shot, or make the blockout again');
-  const def = await definitionFor(st, o.definitionId, 0);
+  const def = await definitionFor(st, base.id, 0);
   const parameters: Record<string, unknown> = {};
   for (const [k, m] of Object.entries(def.parameters || {})) parameters[k] = def.graph?.[m.nodeId]?.inputs?.[m.input];
-  // Nearest supported clip length to the shot's duration.
-  const secs = LTX_DURATIONS.reduce((a, b) => (Math.abs(b - s.duration) < Math.abs(a - s.duration) ? b : a));
-  if ('duration' in parameters) parameters.duration = String(secs);
+  // Nearest clip length this model accepts, in the parameter's own type.
+  const secs = clipSecondsFor(def, s.duration);
+  if ('duration' in parameters) parameters.duration = durationValue(parameters.duration, secs);
   const auto = compilePrompt(project, s);
   const chosen = (o.userPrompt ?? shotPrompt(project, s, 'video')).trim();
   let prompt = chosen || auto;

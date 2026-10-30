@@ -54,7 +54,7 @@ export function normalizeInput(input = {}) {
 
 /**
  * Plan nodes and deps for one project. Blockouts are planned for shots that need a video (skipped when already rendered),
- * looks for cast objects without an image, sheets per object, stills per shot at `stillsAt` (skipped when that key frame exists),
+ * looks for cast objects without an image, sheets per object (after the batch's stills), stills per shot at `stillsAt` (skipped when that key frame exists),
  * videos per shot (deps: blockout + key-frame stills for first-frame models, or optional looks for reference models).
  */
 export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
@@ -116,6 +116,10 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
       else if (!hasStill(s, at) && !(at === 'end' && endOptional)) Object.assign(n, { status: 'failed', planError: true, error: `Needs a ${at} key frame; add the stills step` });
     }
   }
+  // Stills before design sheets: a sheet sends several images at once and would hold the cloud image slots the stills
+  // (and so the videos after them) wait for. Sheets wait on the batch's stills as optional deps (a failed still never blocks).
+  const stills = nodes.filter(n => n.type === 'still' && n.status === 'waiting').map(n => n.id);
+  if (stills.length) for (const n of nodes) if (n.type === 'sheet' && !n.planError) { n.deps.push(...stills); n.optional = [...(n.optional || []), ...stills]; }
   return { input, nodes };
 }
 

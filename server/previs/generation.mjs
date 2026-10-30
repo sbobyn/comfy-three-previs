@@ -26,7 +26,8 @@ export function expectedSeconds(job) {
   if (job.backend?.kind === 'local') return 600;
   if (generationKind(job) === 'image') return 90;
   const model = `${job.definition?.title || ''} ${Object.values(job.preparedGraph || {}).map(node => node?.class_type).join(' ')}`;
-  if (/kling|seedance/i.test(model)) return 420;
+  // Partner video models (Kling, Seedance/ByteDance, Veo, MiniMax Hailuo, Wan API) queue and render for minutes.
+  if (/kling|seedance|bytedance|veo|minimax|hailuo|wan\d?(?:ImageToVideo|TextToVideo)Api/i.test(model)) return 420;
   return Math.round(120 + 30 * clipSeconds(job));
 }
 /** What a request asks the backend to do, independent of its request id and binding id (duplicate detection). */
