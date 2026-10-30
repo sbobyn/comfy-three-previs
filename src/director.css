@@ -225,22 +225,24 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 
 /* ---------- Workspace frame + top bar ---------- */
 .ws { height: 100vh; display: grid; grid-template-rows: 48px 1fr; overflow: hidden; }
-.ws-top { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 0 12px; border-bottom: 1px solid var(--line); background: var(--paper); min-width: 0; }
-.ws-top .top-left { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.ws-top .crumbs { display: flex; align-items: center; gap: 6px; flex: 0 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; }
-.ws-top .crumbs input { background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 4px 6px; font-weight: 600; field-sizing: content; min-width: 60px; max-width: min(320px, 100%); text-overflow: ellipsis; }
-.ws-top .crumbs input:hover { border-color: var(--line-2); }
-.ws-top .crumbs input:focus { border-color: var(--accent); outline: none; background: var(--bg); }
-.ws-top .crumbs > span.muted { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.ws-top .sep { color: var(--faint); }
-.ws-top .undo-group { display: inline-flex; gap: 2px; padding-left: 6px; margin-left: 2px; border-left: 1px solid var(--line); flex: none; }
-.ws-top .undo-group .btn { width: 30px; height: 30px; color: var(--ink-2); }
-.ws-top .undo-group .btn svg, .ws-top .right .btn svg { width: 17px; height: 17px; }
-.ws-top .undo-group .btn:disabled { opacity: .3; }
-.ws-top .right { justify-self: end; display: flex; align-items: center; gap: 6px; min-width: 0; margin: 0; flex: none; flex-wrap: nowrap; white-space: nowrap; }
-.ws-top .right > * { flex: none; }
-.ws-top .right [data-tip]:hover::after, .ws-top .right [data-tip]:focus-visible::after { left: auto; right: 0; transform: none; }
-.ws-top > .panel-toggle[data-tip]:hover::after, .ws-top > .panel-toggle[data-tip]:focus-visible::after { left: 0; transform: none; }
+.ws-top {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 0 12px; border-bottom: 1px solid var(--line); background: var(--paper); min-width: 0;
+  & .top-left { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  & .crumbs { display: flex; align-items: center; gap: 6px; flex: 0 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; }
+  & .crumbs input { background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 4px 6px; font-weight: 600; field-sizing: content; min-width: 60px; max-width: min(320px, 100%); text-overflow: ellipsis; }
+  & .crumbs input:hover { border-color: var(--line-2); }
+  & .crumbs input:focus { border-color: var(--accent); outline: none; background: var(--bg); }
+  & .crumbs > span.muted { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  & .sep { color: var(--faint); }
+  & .undo-group { display: inline-flex; gap: 2px; padding-left: 6px; margin-left: 2px; border-left: 1px solid var(--line); flex: none; }
+  & .undo-group .btn { width: 30px; height: 30px; color: var(--ink-2); }
+  & .undo-group .btn svg, & .right .btn svg { width: 17px; height: 17px; }
+  & .undo-group .btn:disabled { opacity: .3; }
+  & .right { justify-self: end; display: flex; align-items: center; gap: 6px; min-width: 0; margin: 0; flex: none; flex-wrap: nowrap; white-space: nowrap; }
+  & .right > * { flex: none; }
+  & .right [data-tip]:hover::after, & .right [data-tip]:focus-visible::after { left: auto; right: 0; transform: none; }
+  & > .panel-toggle[data-tip]:hover::after, & > .panel-toggle[data-tip]:focus-visible::after { left: 0; transform: none; }
+}
 .claude-mark { color: var(--accent); margin-right: 5px; font-size: 13px; }
 .claude-btn .claude-mark { font-size: 14px; }
 .help-menu { right: 0; top: calc(100% + 8px); }
