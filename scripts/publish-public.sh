@@ -13,6 +13,7 @@
 #   SOURCE_DATA     server data dir to snapshot the demo from (default .evidence/dev-data; copied, never written)
 #   TRAILER_DIR     trailer folder with trailer-16x9/-1x1/-9x16/-30s-16x9.mp4 + BUILD-REPORT.md
 #                   (default: newest .evidence/launch-film/v*/ that has a BUILD-REPORT.md)
+#   DEMO_MEDIA_MB   demo media budget (default 400); the publish stops if the snapshot skips any media
 #   PAGES_URL       demo URL (default https://<owner>.github.io/<repo>/ from the remote)
 #   DEMO_PORT       port for the temporary server (default: first free port from 5320)
 #   COMMIT_TRAILER  optional line appended to both publish commit messages
@@ -52,7 +53,7 @@ say "preflight: $BRANCH @ $SHORT → $SLUG"
 git diff --quiet && git diff --cached --quiet || die "working tree has uncommitted changes"
 [ -z "$(git ls-files --others --exclude-standard)" ] || die "untracked files present: $(git ls-files --others --exclude-standard | head -5 | tr '\n' ' ')"
 git fetch -q "$SOURCE_REMOTE"
-if [ "${ALLOW_UNPUSHED:-0}" != 1 ] && [ -z "$(git branch -r --contains HEAD | grep " $SOURCE_REMOTE/" || true)" ]; then
+if [ "${ALLOW_UNPUSHED:-0}" != 1 ] && [ -z "$(git branch -r --contains "$SHA" | grep " $SOURCE_REMOTE/" || true)" ]; then
   die "HEAD $SHORT is not on any $SOURCE_REMOTE branch — push it first (or ALLOW_UNPUSHED=1)"
 fi
 
@@ -99,8 +100,8 @@ scan_dir() { # $1 = directory about to be published
 say "secret scan: tracked tree"
 tracked_env=$(git ls-files | grep -E '(^|/)\.env($|\.)' | grep -v -E '\.env\.example$' || true)
 [ -z "$tracked_env" ] || die ".env file(s) tracked: $tracked_env"
-hits=$(git grep -n -I -E -e "$SECRET_RE" -e "$PATH_RE" HEAD | cut -c1-200 || true)
-[ -s "$TMP/known" ] && hits+=$'\n'$(git grep -l -I -F -f "$TMP/known" HEAD | sed 's/$/: contains a configured credential value/' || true)
+hits=$(git grep -n -I -E -e "$SECRET_RE" -e "$PATH_RE" "$SHA" | cut -c1-200 || true)
+[ -s "$TMP/known" ] && hits+=$'\n'$(git grep -l -I -F -f "$TMP/known" "$SHA" | sed 's/$/: contains a configured credential value/' || true)
 [ -z "${hits//[[:space:]]/}" ] || { printf '%s\n' "$hits" >&2; die "secret/path scan hit in tracked files"; }
 echo "clean ($(git ls-files | wc -l | tr -d ' ') files)"
 
@@ -115,10 +116,10 @@ message() { printf '%s\n\n%s\n' "$1" "$2"; [ -z "$COMMIT_TRAILER" ] || printf '\
 say "code: $SHORT → $PUBLIC_REMOTE/$PUBLIC_BRANCH"
 git worktree add -q --detach "$TMP/main" "$PUBLIC_REMOTE/$PUBLIC_BRANCH"
 git -C "$TMP/main" rm -rq --ignore-unmatch .
-git archive HEAD | tar -x -C "$TMP/main"
+git archive "$SHA" | tar -x -C "$TMP/main"
 git -C "$TMP/main" add -A -f .
-if ! grep -qs export-ignore .gitattributes && [ "$(git -C "$TMP/main" write-tree)" != "$(git rev-parse 'HEAD^{tree}')" ]; then
-  die "exported tree differs from HEAD's tree"
+if ! grep -qs export-ignore .gitattributes && [ "$(git -C "$TMP/main" write-tree)" != "$(git rev-parse "$SHA^{tree}")" ]; then
+  die "exported tree differs from the source tree"
 fi
 if git -C "$TMP/main" diff --cached --quiet; then
   echo "public $PUBLIC_BRANCH already has this tree — nothing to commit"
@@ -144,10 +145,11 @@ env -i HOME="$HOME" PATH="$PATH" PORT="$port" PREVIS_DATA_DIR="$TMP/data" PREVIS
 SERVER_PID=$!
 for _ in $(seq 60); do curl -sf "http://127.0.0.1:$port/api/director/projects" >/dev/null && break; sleep 0.5; done
 curl -sf "http://127.0.0.1:$port/api/director/projects" >/dev/null || { cat "$TMP/server.log"; die "server did not start"; }
-PREVIS_URL="http://127.0.0.1:$port" PREVIS_DATA="$TMP/data" pnpm run demo:build >"$TMP/demo.log" 2>&1 || { tail -30 "$TMP/demo.log"; die "demo:build failed"; }
+DEMO_MEDIA_MB=${DEMO_MEDIA_MB:-400} PREVIS_URL="http://127.0.0.1:$port" PREVIS_DATA="$TMP/data" pnpm run demo:build >"$TMP/demo.log" 2>&1 || { tail -30 "$TMP/demo.log"; die "demo:build failed"; }
 kill "$SERVER_PID"; wait "$SERVER_PID" 2>/dev/null || true; SERVER_PID=
 grep 'demo snapshot:' "$TMP/demo.log" || die "no snapshot summary in demo:build output"
 ! grep -q '^warning:' "$TMP/demo.log" || { grep '^warning:' "$TMP/demo.log"; die "snapshot incomplete"; }
+! grep -q 'skipped over budget' "$TMP/demo.log" || die "demo media over budget (the demo would show missing images): raise DEMO_MEDIA_MB"
 scan_dir dist-demo
 
 say "demo: dist-demo + $(basename "$TRAILER_DIR") trailer → $PUBLIC_REMOTE/$PAGES_BRANCH"
@@ -196,23 +198,37 @@ const { chromium } = await import("playwright-core");
 const { resolveExecutable, CHROMIUM_ARGS } = await import("./server/previs/headless.mjs");
 const base = process.env.PAGES_URL, q = "v=" + process.env.BUST;
 const browser = await chromium.launch({ executablePath: resolveExecutable() || undefined, headless: true, args: [...CHROMIUM_ARGS] });
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-const errors = [];
-page.on("console", m => { if (m.type() === "error") errors.push(m.text()); });
-page.on("pageerror", e => errors.push(String(e)));
 const { projects } = await (await fetch(base + "demo-data/projects.json?" + q)).json();
-await page.goto(base + "?" + q, { waitUntil: "networkidle" });
-const home = await page.evaluate(names => names.filter(n => document.body.innerText.includes(n)).length, projects.map(p => p.name));
-const p = projects[0];
-await page.goto(base + "director.html?project=" + p.id + "&" + q, { waitUntil: "networkidle" });
-await page.waitForTimeout(2000);
-const director = await page.evaluate(n => ({ named: document.body.innerText.includes(n), canvas: !!document.querySelector("canvas") }), p.name);
+let failed = false;
+// Console errors (incl. failed loads) and page errors fail the check. The automatic browser
+// /favicon.ico request at the host root is outside the app and ignored. One retry for CDN blips.
+async function visit(url, check, attempt = 1) {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = [];
+  page.on("console", m => { if (m.type() === "error" && !/\/favicon\.ico$/.test(m.location().url || "")) errors.push(m.text() + " " + (m.location().url || "").replace(base, "")); });
+  page.on("pageerror", e => errors.push(String(e)));
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.waitForTimeout(1500);
+  const value = await page.evaluate(check);
+  await page.close();
+  return errors.length && attempt < 2 ? visit(url, check, attempt + 1) : { value, errors };
+}
+const report = (label, ok, r) => { console.log(`${ok && !r.errors.length ? "ok  " : "FAIL"} ${label}${r.errors.length ? ` — ${r.errors.length} console errors` : ""}`); for (const e of r.errors.slice(0, 8)) console.log("       " + e.slice(0, 200)); if (!ok || r.errors.length) failed = true; };
+const names = projects.map(p => p.title.replace(/^Starter · /, ""));
+const home = await visit(base + "?" + q, `(${JSON.stringify(names)}).filter(t => document.body.innerText.includes(t)).length`);
+report(`home lists ${home.value}/${names.length} starters`, home.value === names.length, home);
+for (const p of projects) {
+  const r = await visit(base + "director.html?project=" + p.id + "&" + q, `({ canvas: !!document.querySelector("canvas"), title: document.title })`);
+  const ok = r.value.canvas && r.value.title.includes(p.title);
+  report(`director.html loads ${p.title} (${r.value.canvas ? "3D viewport" : "no viewport"})`, ok, r);
+}
+const page = await browser.newPage();
+await page.goto(base + "?" + q);
 const film = await page.evaluate(src => new Promise(ok => { const v = document.createElement("video"); v.muted = true; v.preload = "metadata";
   v.onloadedmetadata = () => ok({ duration: v.duration, size: v.videoWidth + "x" + v.videoHeight }); v.onerror = () => ok(null); v.src = src; }), base + "launch-film.mp4?" + q);
 await browser.close();
-console.log(`home lists ${home}/${projects.length} starters; director "${p.name}": named=${director.named} canvas=${director.canvas}; launch-film.mp4 ${film ? film.size + ", " + film.duration.toFixed(1) + " s" : "did not load"}; console errors: ${errors.length}`);
-for (const e of errors) console.log("  console error: " + e.slice(0, 200));
-if (errors.length || !director.named || !director.canvas || !film || home !== projects.length) process.exit(1);
+console.log(`${film ? "ok  " : "FAIL"} launch-film.mp4 plays: ${film ? film.size + ", " + film.duration.toFixed(1) + " s" : "did not load"}`);
+if (failed || !film) process.exit(1);
 ' || die "browser check failed"
 
 say "published"
