@@ -59,11 +59,14 @@ Storyboard stills (key frames) get three things so the image keeps the blockout'
 
 - **A guide frame (image 1)** rendered in a guide look: vehicles get bright headlights, a pale nose and windscreen and red tail lights; people get a pale face and shoes; a light ground grid, a light sky (dim indoors) and shadows near the shot. Labels never appear. The workspace viewport and blockout videos look as before.
 - **The camera in words**, measured from the scene through the shot camera: move and moment, lens, shot size, camera height and angle, which side of the subject we see, the horizon, and each visible object's place, size, crop and heading ("nose pointing screen-right: a flat side profile… front end cut off by the right edge"). The composer shows it under the inputs.
-- **Fewer cast images**: looks of objects actually in frame, one environment image and the previous shot's last still, labelled as design-only so their pose doesn't override the guide.
+- **Fewer cast images**: looks of objects actually in frame, one environment image and the previous shot's last still, labelled as design-only so their pose doesn't override the guide. The shot's subject and the cast its description names (@handle) always send their look while in frame, even far away: a hero car 70 m down the track is still the hero.
+- **The moment**: a start still is told it shows the first instant (the action is only beginning), an end still the last. The shot text describes the whole action and on its own pulls a start still to the climax.
 
-**FLUX 3** follows the blockout best and is the storyboard default; **Nano Banana 2.1** also follows it well, phrased as an edit of image 1, but tends to turn side profiles into chase angles. See `.evidence/stillmatch-20261030/RESULTS.md` in the integration checkout for the comparison.
+A still remembers the blocking it was made from. When the shot changes (camera, timing or any object's position), a batch makes that key frame again rather than handing a video the old layout; the plan says "Blocking changed since its key frame; made again". Stills made before this was recorded count as changed when the shot's blockout clip is newer than them. Uploaded frames are always kept.
 
-**Match check.** With `PREVIS_MATCH_GRADER=gemini` (and paid generation on), each new key frame is graded 0–10 for camera and blocking by Gemini 3.5 Flash on Comfy Cloud (a few cents; about 20 s before the still attaches). The storyboard shows "matches blockout N/10", and a batch with `retryWeakMatch: true` redoes a still graded below 5 once with FLUX 3 (or Nano Banana 2.1 if it was FLUX 3), charged to the batch budget. Without the flag a free local edge-and-light score is stored with `rough: true`; it did not track camera match on hand-labelled stills, so it is never shown as a match score and never triggers a retry.
+**FLUX 3** follows the blockout best on side profiles and people and is the storyboard default; **Nano Banana 2.1** also follows it well, phrased as an edit of image 1, but tends to turn side profiles into chase angles. On head-on and going-away vehicles it is the other way round: FLUX 3 reversed a car or split the field with a wall (graded 5), and Nano Banana 2.1 matched (9); GPT Image 2.5, the final tier's still model, also matched (9). See `.evidence/stillmatch-20261030/RESULTS.md` and `.evidence/hero-20261030/HERO.md` in the integration checkout.
+
+**Match check.** With `PREVIS_MATCH_GRADER=gemini` (and paid generation on), each new key frame is graded 0–10 for camera and blocking by Gemini 3.5 Flash on Comfy Cloud (a few cents; about 20 s before the still attaches). The storyboard shows "matches blockout N/10", and a batch with `retryWeakMatch: true` redoes a still graded below 6 once with FLUX 3 (or Nano Banana 2.1 if it was FLUX 3), charged to the batch budget. Without the flag a free local edge-and-light score is stored with `rough: true`; it did not track camera match on hand-labelled stills, so it is never shown as a match score and never triggers a retry.
 
 ![Generate: review inputs and estimate](../public/guide/generate.webp)
 
@@ -82,7 +85,7 @@ List prices are Comfy Cloud estimates from each node's live price badge (checked
 | Veo 3.1 | `Veo3VideoGenerationNode`, `Veo3FirstLastFrameNode` | start, or start → end | 4, 6 or 8 s | $0.20/s (720p, no audio) |
 | MiniMax Hailuo H3 | `MinimaxHailuo03FirstLastFrameNode` | start, or start → end | 4–10 s | $0.13/s (768p) |
 | Wan 2.7 | `Wan2ImageToVideoApi` | start, or start → end | 2–10 s | $0.10/s (720p) |
-| Seedance 2.5 · edit | `ByteDance2ReferenceNodeV2` (edit) | blockout clip | clip length | $0.40/s (720p) |
+| Seedance 2.5 · edit | `ByteDance2ReferenceNodeV2` (edit) | blockout clip | clip length, 4–30 s | $0.40/s (720p) |
 | Kling O1 · edit | `KlingOmniProEditVideoNode` | blockout clip | 3–10 s | $0.13/s (720p) |
 | Wan VACE 1.3B (local) | `WanVaceToVideo` | blockout edges | as set | local GPU |
 
@@ -111,6 +114,14 @@ Each video model takes its camera from one of three sources, shown on the Video-
 - **Blockout** (Kling O1 edit, Seedance 2.5 edit, Wan VACE): the blockout clip itself is the video input, so your move is the camera. The start and end stills follow as the look, then the cast images. A blockout that is older than the shot is made again first. The final tier uses this.
 - **Start → end stills** (LTX 2.5 Pro, Seedance 2.5, Kling 4.0, Veo 3.1, MiniMax Hailuo H3 and Wan 2.7 start → end): the model moves between stills made from the blockout's first and last frames. It only approximates the move in between.
 - **One still** (the start-still models, including LTX 2.5 Fast in the draft tier): the model animates a single still and guesses the camera. The card marks this as approximate.
+
+Which blockout model, from the three launch hero shots (a head-on pass with a whip pan, a dunk with a push-in, a slow orbit; `.evidence/hero-20261030/HERO.md`):
+
+- **Seedance 2.5 · edit** held the blockout camera on all three, including a pass 3 m from the lens, and is the final-tier default. It needs a 4–30 s blockout clip (a shorter one is refused at plan time) and returns a clip about 0.3 s shorter than the input.
+- **Kling O1 · edit** is a third of the price but dropped the fast pass's camera (it became a side-on tracking shot) and started a dunk from its look still instead of the run-up. Use it for slower moves and drafts.
+- **LTX 2.5 Pro start → end** is the cheap control: it made a strong car-ad pass between two matched stills, but the eagle's wings flailed and the dunk jumped between its two stills.
+
+Write the description as action and look only ("@comfy-car dives to the inside and blows past to take the checkered flag by a full car length"); the blockout supplies the camera, and the stills the composition.
 
 ## 5. Cut
 

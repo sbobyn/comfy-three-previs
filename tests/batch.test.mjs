@@ -144,6 +144,36 @@ test('final plan adds end stills; reference models depend on looks instead; miss
   assert.throws(() => planBatch(project, { steps: ['looks'], maxCostUsd: 1, models: { looks: 'not-a-model' } }), /unpriced/);
 });
 
+test('a blockout-editing model refuses a clip length its provider rejects, at plan time', () => {
+  const short = structuredClone(project); short.shots[1].duration = 3.2;
+  const plan = model => byId(planBatch(short, { steps: ['videos'], models: { videos: model }, maxCostUsd: 5, shots: [short.shots[1].id] }).nodes, `video:${short.shots[1].id}`);
+  assert.equal(builtInPresets.find(d => d.id === 'seedance-25-edit-v1').constraints.sourceVideo.duration.min, 4, 'Seedance edit: 4–30 s input clips');
+  const sd = plan('seedance-25-edit-v1');
+  assert.equal(sd.status, 'failed'); assert.match(sd.error, /Seedance 2\.5 needs a 4–30 s blockout clip; this shot is 3\.2 s/);
+  assert.equal(plan('kling-o1-edit-v1').status, 'waiting', 'Kling O1 edit takes 3 s and up');
+});
+
+test('a key frame made for an earlier blocking is made again; uploads and current stills are kept', async () => {
+  const { shotSignature, stillStale } = await import('../shared/director.mjs');
+  const plan = p => byId(planBatch(p, { steps: ['stills', 'videos'], tier: 'final', maxCostUsd: 5, shots: [p.shots[0].id] }).nodes, `still:${p.shots[0].id}start`);
+  const fresh = structuredClone(project), shot = fresh.shots[0], still = shot.references.find(r => r.note === 'key frame start');
+  assert.equal(plan(fresh).status, 'skipped', 'a legacy still newer than the blockout clip is current');
+  // Legacy still (no signature) older than the shot's blockout clip: the blocking changed after it was made.
+  const legacy = structuredClone(fresh); legacy.shots[0].render.createdAt = '2026-10-30T16:00:00.000Z';
+  assert.ok(stillStale(legacy, legacy.shots[0], legacy.shots[0].references.find(r => r.note === 'key frame start')));
+  assert.deepEqual([plan(legacy).status, plan(legacy).note], ['waiting', 'Blocking changed since its key frame; made again']);
+  // Signed stills: stale exactly when the blocking differs.
+  const signed = structuredClone(fresh), ref = signed.shots[0].references.find(r => r.note === 'key frame start');
+  ref.generated.signature = shotSignature(signed, signed.shots[0]); signed.shots[0].render.createdAt = '2026-10-30T16:00:00.000Z';
+  assert.equal(plan(signed).status, 'skipped', 'signature matches: kept even though the clip was made again later');
+  signed.shots[0].start = (signed.shots[0].start || 0) + 1;
+  assert.equal(plan(signed).status, 'waiting', 'timing changed: made again');
+  // An uploaded frame (no generation record) is the director's choice and never stale.
+  const uploaded = structuredClone(legacy); delete uploaded.shots[0].references.find(r => r.note === 'key frame start').generated;
+  assert.equal(plan(uploaded).status, 'skipped');
+  assert.ok(still, 'fixture has a start still');
+});
+
 test('a shot’s video starts as soon as its still lands while other stills still run', async () => {
   const h = harness({ fake: { limits: { 'cloud:image': 1, 'cloud:video': 3 }, seconds: { still: 20, video: 60 } } });
   const batches = await h.open();

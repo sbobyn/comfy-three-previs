@@ -45,6 +45,7 @@ export function videoReferences(project: DirectorProject, shot: Shot, max?: numb
 export function keyStills(shot: Shot): { start: Reference | null; end: Reference | null };
 export function shotSignature(project: DirectorProject, shot: Shot): string;
 export function blockoutStale(project: DirectorProject, shot: Shot): boolean;
+export function stillStale(project: DirectorProject, shot: Shot, ref: Reference | null | undefined): boolean;
 export function referenceLegend(refs: VideoRef[]): string;
 export function clampDuration(value: unknown): number;
 export function lookSource(project: DirectorProject, entityId: string): Entity | null;
