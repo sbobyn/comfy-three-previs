@@ -53,8 +53,8 @@ export function shotPips(s: Shot, o: { stale: boolean; videos: number; stillRunn
   const video: PipTone = o.videoRunning ? 'run' : o.videos ? 'ok' : 'none';
   const label = [
     blockout === 'ok' ? 'Blockout ready' : blockout === 'changed' ? 'Scene changed since the blockout' : 'No blockout yet',
-    still === 'run' ? 'still generating' : stills ? `${stills} still${stills === 1 ? '' : 's'}` : 'no stills',
-    video === 'run' ? 'video generating' : o.videos ? `${o.videos} video${o.videos === 1 ? '' : 's'}` : 'no video',
+    `${stills ? `${stills} still${stills === 1 ? '' : 's'}` : 'no stills'}${still === 'run' ? ' (one generating)' : ''}`,
+    `${o.videos ? `${o.videos} video${o.videos === 1 ? '' : 's'}` : 'no video'}${video === 'run' ? ' (one generating)' : ''}`,
   ].join(' · ');
   return { blockout, still, video, label };
 }

@@ -324,6 +324,16 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .shot .info { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .shot .num { font-family: var(--mono); font-size: 10.5px; color: var(--ink-4); display: flex; gap: 6px; align-items: center; min-width: 0; overflow: hidden; white-space: nowrap; }
 .shot .title { font-weight: 600; letter-spacing: var(--track-tight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Per-shot status: blockout · still · video (present, changed, generating, none). */
+.shot-pips { display: inline-flex; align-items: center; gap: 2px; flex: none; }
+.sp { width: 15px; height: 15px; border-radius: 4px; display: inline-grid; place-items: center; color: var(--ink-4); flex: none; }
+.sp svg { width: 12px; height: 12px; }
+.sp.none { opacity: .45; }
+.sp.ok { color: var(--ok); background: var(--ok-soft); }
+.sp.changed { color: var(--warn); background: var(--warn-soft); }
+.sp.run { color: var(--accent); background: var(--accent-soft); animation: sp-run 1.4s var(--ease-in-out) infinite; }
+@keyframes sp-run { 50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .sp.run { animation: none; } }
 .shot .sub { color: var(--muted); font-size: var(--fs-2xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .outline { overflow: auto; padding: 0 8px 12px; flex: 1; min-height: 0; }

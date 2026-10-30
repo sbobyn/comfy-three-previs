@@ -22,10 +22,11 @@ import { openJourney } from './director-guide';
 import { initSheets, sheetSection } from './director-sheet'; // [designsheet]
 import { moveHelp } from './director-camhelp'; // [camhelp]
 import { mountJobsPip } from './director-jobs'; // [jobs]
-import { progressSlot } from './director-progress'; // [live-progress]
+import { progressSlot, acquireProgress } from './director-progress'; // [live-progress]
 import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
 import { initMobile } from './director-mobile'; // [mobile]
-import { stepAction, stepStatus, keyFrameSlots } from './director-desktop-core';
+import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill } from './director-desktop-core';
+import type { ShotPips } from './director-desktop-core';
 import { VIDEO_PRICES } from '../shared/tiers.mjs';
 
 const params = new URLSearchParams(location.search);
@@ -367,26 +368,51 @@ function apply(next: DirectorProject) {
 }
 
 const shotVideos = (id: string) => (project.assets || []).filter(a => a.kind === 'workflow-result' && a.shotId === id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-/** grey = blockout only, amber = scene changed since the blockout, green = a generated video exists. */
-function shotState(s: Shot): { pip: 'none' | 'changed' | 'video'; label: string } {
-  const stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
-  const vids = shotVideos(s.id).length;
-  if (stale) return { pip: 'changed', label: vids ? 'Scene changed since this shot’s video' : 'Scene changed since the blockout' };
-  if (vids) return { pip: 'video', label: `${vids} video${vids === 1 ? '' : 's'} generated` };
-  return { pip: 'none', label: s.render ? 'Blockout ready · no video yet' : 'Blockout only · no video yet' };
+// Rail pips: blockout · still · video per shot; "running" comes from the shared live-progress client.
+const PIP_ICON = {
+  blockout: '<rect x="2.5" y="3.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 6.5h11" stroke="currentColor" stroke-width="1.2"/>',
+  still: '<rect x="2.5" y="3.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="m4 11 3-3 2 2 1.5-1.5L12.5 11" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>',
+  video: '<path d="M5.5 4.2v7.6L12 8z" fill="currentColor"/>',
+};
+const progressLease = acquireProgress(projectId); // [live-progress]
+let liveJobs = new Set<string>();
+progressLease.client.subscribe(() => {
+  const next = new Set(progressLease.client.snapshot().jobs.filter(j => !['completed', 'failed', 'cancelled', 'closed', 'invalidated'].includes(j.status)).map(j => `${j.source}:${j.id}`));
+  if ([...next].join() !== [...liveJobs].join()) { liveJobs = next; if (project) renderShotPips(); }
+});
+function shotRunning(s: Shot) {
+  const still = refgen.jobs.some(j => j.target === 'shot' && j.shotId === s.id && (liveJobs.has(`refgen:${j.id}`) || ['uploading', 'submitting'].includes(j.status)));
+  const engine = new Set([s.render?.previsShotId, ...(project.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === s.id).map(a => a.source.engineShotId)].filter(Boolean));
+  const video = !!genCache?.jobs.some(j => engine.has(j.shotId) && liveJobs.has(`generation:${j.id}`));
+  return { still, video };
+}
+function pipsFor(s: Shot) {
+  const stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s)), run = shotRunning(s);
+  return shotPips(s, { stale, videos: shotVideos(s.id).length, stillRunning: run.still, videoRunning: run.video });
+}
+function pipEls(p: ShotPips) {
+  return (['blockout', 'still', 'video'] as const).map(k => { const el = h('i', { class: `sp sp-${k} ${p[k]}` }); el.append(svgIcon(PIP_ICON[k])); el.firstElementChild!.setAttribute('viewBox', '0 0 16 16'); return el; });
+}
+/** Refresh only the pips (live job changes) without redrawing the filmstrip. */
+function renderShotPips() {
+  for (const el of Array.from(shotList.querySelectorAll<HTMLElement>('.shot[data-shot]'))) {
+    const s = project.shots.find(x => x.id === el.dataset.shot); const box = el.querySelector('.shot-pips'); if (!s || !box) continue;
+    const p = pipsFor(s); box.setAttribute('aria-label', p.label); box.replaceChildren(...pipEls(p));
+  }
 }
 function renderShots() {
   shotList.replaceChildren(...project.shots.map((s, i) => {
-    const st = shotState(s), video = shotVideos(s.id)[0];
+    const pips = pipsFor(s), video = shotVideos(s.id)[0], still = midStill(s);
+    // Filmstrip frame: the still nearest mid-shot, else the blockout frame at mid-shot.
     const c = h('canvas', { width: 176, height: 99 });
-    const thumb = video ? (video.mime.startsWith('video/') ? h('video', { class: 'thumb', src: `${assetUrl(video)}#t=0.4`, muted: true, playsinline: true, preload: 'metadata', 'aria-hidden': 'true' }) : h('img', { class: 'thumb', src: assetUrl(video), alt: '' })) : c;
-    const b = h('button', { class: 'shot' + (s.id === shotId ? ' active' : ''), type: 'button', role: 'option', 'aria-selected': String(s.id === shotId), title: `${s.title} · ${st.label}`, onclick: () => selectShot(s.id) },
+    const thumb = still ? h('img', { class: 'thumb', src: refUrl(still), alt: '', loading: 'lazy', decoding: 'async' }) : c;
+    const b = h('button', { class: 'shot' + (s.id === shotId ? ' active' : ''), type: 'button', role: 'option', 'data-shot': s.id, 'aria-selected': String(s.id === shotId), title: `${s.title} · ${pips.label}`, onclick: () => selectShot(s.id) },
       h('span', { class: 'shot-frame' }, thumb, h('span', { class: 'shot-dur' }, `${s.duration}s`), video ? h('span', { class: 'shot-vid', 'aria-hidden': 'true' }, '▶') : null),
       h('span', { class: 'info' },
-        h('span', { class: 'num' }, h('i', { class: `pip ${st.pip}`, 'aria-label': st.label }), String(i + 1).padStart(2, '0')),
+        h('span', { class: 'num' }, String(i + 1).padStart(2, '0'), h('span', { class: 'shot-pips', role: 'img', 'aria-label': pips.label }, ...pipEls(pips))),
         h('span', { class: 'title' }, s.title),
         h('span', { class: 'sub' }, MOVES[s.camera.move])));
-    if (!video) requestAnimationFrame(() => { try { c.getContext('2d')!.drawImage(scene.thumbnail(s, 176, 99, signature(project, s)), 0, 0); } catch {} });
+    if (!still) requestAnimationFrame(() => { try { c.getContext('2d')!.drawImage(scene.thumbnail(s, 176, 99, signature(project, s)), 0, 0); } catch {} });
     return b;
   }));
 }
@@ -616,7 +642,7 @@ function semanticText(ta: HTMLTextAreaElement) {
 }
 // ---------- Video model: which model this shot uses, what it accepts, and what goes into each input ----------
 let genCache: GenState | null = null, genLoading = false;
-function loadGen() { if (genCache || genLoading) return; genLoading = true; api('generation').then(st => { genCache = st; shotPane.dataset.shot = ''; renderShotPane(); renderActionBar(); }).catch(() => {}).finally(() => { genLoading = false; }); }
+function loadGen() { if (genCache || genLoading) return; genLoading = true; api('generation').then(st => { genCache = st; shotPane.dataset.shot = ''; renderShotPane(); renderActionBar(); renderShotPips(); }).catch(() => {}).finally(() => { genLoading = false; }); }
 const modelKey = (s: Shot) => `previs.shot.model.${s.id}`;
 function shotModel(s: Shot) {
   const st = genCache!; const choices = videoChoices(st as any);
@@ -978,7 +1004,7 @@ async function loadRefgen() {
     refgen = await api(`director/refgen?projectId=${projectId}`);
     // BFL image models only for now (FLUX 3 first).
     refgen.presets = refgen.presets.filter(p => /^flux/.test(p.id)).sort((a, b) => (a.id === 'flux-3' ? -1 : b.id === 'flux-3' ? 1 : 0));
-    renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); } catch (e) { toast((e as Error).message, true); }
+    renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); renderShotPips(); } catch (e) { toast((e as Error).message, true); }
 }
 function lookCard(e: Entity, r: Reference) {
   const primary = e.look === r.id;

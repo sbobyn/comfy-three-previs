@@ -48,3 +48,15 @@ test('the status strip names the step’s state, with a short form for narrow wi
   assert.deepEqual(plain(core.keyFrameSlots({ id: 'x', task: 'transform-video' }, { x: { keyFrames: true } })), ['start'], 'the preset’s keyFrames flag counts');
   assert.deepEqual(plain(core.keyFrameSlots({ id: 'wan', task: 'transform-video' })), []);
 });
+
+test('rail pips show blockout, still and video, with running jobs, and the filmstrip uses the still nearest mid-shot', () => {
+  const s = shot([frame('a', 'key frame start'), frame('b', 'key frame @1.5s'), frame('c', 'key frame @1.5s'), frame('d', 'key frame end')], { render: { previsShotId: 'x' } });
+  assert.deepEqual(plain(core.shotPips(s, { stale: false, videos: 0, stillRunning: false, videoRunning: false })), { blockout: 'ok', still: 'ok', video: 'none', label: 'Blockout ready · 4 stills · no video' });
+  const run = core.shotPips(s, { stale: true, videos: 2, stillRunning: true, videoRunning: true });
+  assert.deepEqual([run.blockout, run.still, run.video], ['changed', 'run', 'run']);
+  assert.equal(run.label, 'Scene changed since the blockout · 4 stills (one generating) · 2 videos (one generating)');
+  assert.equal(core.shotPips(shot(), { stale: false, videos: 0, stillRunning: false, videoRunning: false }).blockout, 'none');
+  assert.equal(core.midStill(s).id, 'c', 'the newest take at the moment nearest mid-shot');
+  assert.equal(core.midStill(shot([frame('u', 'something else')])), null, 'unpinned stills are not placed on the strip');
+  assert.equal(core.midStill(shot()), null);
+});
