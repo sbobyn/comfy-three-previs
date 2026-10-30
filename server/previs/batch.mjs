@@ -10,7 +10,7 @@ import { assertNoSecrets } from './workflows.mjs';
 import { builtInPresets } from './presets.mjs';
 import { castRows, lookSource, objectLooks } from '../../shared/director.mjs';
 import { planSlots } from '../../shared/sheet-presets.mjs';
-import { TIERS, modelsFor, estimateFor, VIDEO_PRICES } from '../../shared/tiers.mjs';
+import { TIERS, modelsFor, estimateFor, VIDEO_PRICES, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 
 export const STEPS = ['looks', 'sheets', 'stills', 'videos'];
 const uuid = /^[a-f0-9-]{36}$/;
@@ -109,9 +109,11 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
     if (!want('videos')) continue;
     const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, estimateUsd: estimateFor('video', models.videos, { duration: s.duration }), deps: [blockout.id] });
     if (needs.references && castLooks.length) { n.deps.push(...castLooks); n.optional = castLooks; }
+    // An end still is optional when the model has a start-only fallback (the driver animates the start still alone).
+    const endOptional = Boolean(FIRST_FRAME_FALLBACK[def.id]);
     for (const at of needs.keyFrames) {
-      if (still.has(at)) n.deps.push(still.get(at).id);
-      else if (!hasStill(s, at)) Object.assign(n, { status: 'failed', planError: true, error: `Needs a ${at} key frame; add the stills step` });
+      if (still.has(at)) { n.deps.push(still.get(at).id); if (at === 'end' && endOptional) (n.optional ||= []).push(still.get(at).id); }
+      else if (!hasStill(s, at) && !(at === 'end' && endOptional)) Object.assign(n, { status: 'failed', planError: true, error: `Needs a ${at} key frame; add the stills step` });
     }
   }
   return { input, nodes };
@@ -121,12 +123,16 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
 const isBusy = e => e?.apiCode === 'busy' || e?.code === 'busy';
 const jobState = j => (j.status === 'completed' ? 'done' : ['failed', 'closed', 'invalidated'].includes(j.status) ? 'failed' : j.status === 'uncertain' ? 'uncertain' : 'running');
 const jobIdsOf = n => n.requestIds?.length ? n.requestIds : [n.jobId || n.requestId].filter(Boolean);
+// Everything a driver records about its saved requests; cleared only when nothing was dispatched or a failed node is redone.
+const NO_IDS = { jobId: undefined, requestId: undefined, requestIds: undefined, fingerprint: undefined, fingerprints: undefined, submitRequest: undefined, sheetId: undefined, unsent: undefined, modelUsed: undefined };
 
 /**
  * openBatches(root, { drivers, jobs, loadProject, definitions?, intervalMs?, missingTicks?, limits?, now?, log?, autoStart? })
  * drivers: { blockout|look|sheet|still|video: { submit(ctx), finish?(ctx, jobs) } }. ctx = { batch, node, project(), record(patch) }.
- *   A paid driver must call ctx.record({ requestId | jobId | requestIds }) before it dispatches, so a restart can find the job.
- *   submit resolves { jobId? | requestId? | requestIds?, done?, assetId?, referenceId?, ... }; it throws with apiCode 'busy' on 409.
+ *   A paid driver must call ctx.record({ requestId | jobId | requestIds }) before it dispatches, so a restart can find the job,
+ *   and must resubmit a recorded request idempotently (the stores return the saved job for anything already dispatched).
+ *   submit resolves { jobId? | requestId? | requestIds?, done?, assetId?, referenceId?, ... }; it throws with apiCode 'busy' on 409
+ *   (recorded ids are kept and resubmitted) and with notDispatched: true when the server refused before anything was sent.
  * jobs: { snapshot() } → the GET /api/jobs body (C1).
  */
 export async function openBatches(root, options = {}) {
@@ -141,10 +147,11 @@ export async function openBatches(root, options = {}) {
     if (!/^[a-f0-9-]{36}\.json$/.test(f)) continue;
     try { const b = JSON.parse(await readFile(join(dir, f), 'utf8')); batches.set(b.id, b); } catch (e) { log(`batch ${f} unreadable: ${e.message}`); }
   }
-  // A submit cut off by a restart: with a recorded id the dashboard decides; without one nothing was dispatched.
+  // A submit cut off by a restart goes back to ready: without an id nothing was dispatched; with one the driver resubmits the
+  // same saved request, which the store answers with the saved job when it was already sent (never a second dispatch).
   for (const b of batches.values()) for (const n of b.nodes) if (n.submitting) {
-    delete n.submitting;
-    if (!jobIdsOf(n).length) { n.status = 'ready'; if (n.reserved) { b.spentEstimateUsd = round(b.spentEstimateUsd - n.reserved); delete n.reserved; } }
+    delete n.submitting; n.status = 'ready'; if (jobIdsOf(n).length) n.resubmit = true;
+    if (n.reserved) { b.spentEstimateUsd = round(b.spentEstimateUsd - n.reserved); delete n.reserved; }
   }
 
   // One write at a time per batch (atomicJson shares one .tmp path); each write serializes the latest state.
@@ -209,7 +216,7 @@ export async function openBatches(root, options = {}) {
       try {
         const extra = drivers[n.type]?.finish ? await drivers[n.type].finish(context(b, n), list) : null;
         setNode(b, n, { ...patch, ...(extra || {}), status: 'done', finishedAt: iso(now()), ...(ok.length < list.length ? { error: `${list.length - ok.length} of ${list.length} images failed` } : {}) }, `${n.label}: done`);
-      } catch (e) { setNode(b, n, { status: 'failed', finishedAt: iso(now()), error: String(e.message).slice(0, 500) }, `${n.label}: finishing failed`); }
+      } catch (e) { setNode(b, n, { ...patch, status: 'done', finishedAt: iso(now()), error: `Generated, but finishing failed: ${String(e.message).slice(0, 400)}` }, `${n.label}: done; finishing step failed`); } // never redo paid work
     }
   }
 
@@ -222,7 +229,7 @@ export async function openBatches(root, options = {}) {
     if (b.spentEstimateUsd + n.estimateUsd > b.maxCostUsd + 1e-9) return setNode(b, n, { status: 'budget', error: `Over budget: ${usd(b.spentEstimateUsd)} committed + ${usd(n.estimateUsd)} > ${usd(b.maxCostUsd)}` }, `${n.label}: over budget, not submitted`), false;
     const driver = drivers[n.type];
     b.spentEstimateUsd = round(b.spentEstimateUsd + n.estimateUsd);
-    setNode(b, n, { status: 'running', submitting: true, reserved: n.estimateUsd || undefined, startedAt: iso(now()), error: undefined, retryAt: undefined }, `${n.label}: submitting${n.estimateUsd ? ` (≈ ${usd(n.estimateUsd)})` : ''}`);
+    setNode(b, n, { status: 'running', submitting: true, reserved: n.estimateUsd || undefined, startedAt: iso(now()), error: undefined, retryAt: undefined, resubmit: undefined }, `${n.label}: ${n.resubmit ? 'resubmitting its saved request' : 'submitting'}${n.estimateUsd ? ` (≈ ${usd(n.estimateUsd)})` : ''}`);
     const refund = () => { b.spentEstimateUsd = round(b.spentEstimateUsd - (n.reserved || 0)); };
     const work = (async () => {
       try {
@@ -231,7 +238,8 @@ export async function openBatches(root, options = {}) {
         const { done, ...rest } = r;
         setNode(b, n, { ...rest, submitting: undefined, reserved: undefined, ...(done ? { status: 'done', finishedAt: iso(now()) } : {}) }, done ? `${n.label}: done` : null);
       } catch (e) {
-        if (isBusy(e)) { refund(); setNode(b, n, { status: 'ready', submitting: undefined, reserved: undefined, jobId: undefined, requestId: undefined, requestIds: undefined, retryAt: iso(now() + (Number(e.retryAfterSeconds) || 15) * 1000) }, `${n.label}: backend busy, retrying in ${Number(e.retryAfterSeconds) || 15}s`); }
+        if (isBusy(e)) { refund(); setNode(b, n, { status: 'ready', submitting: undefined, reserved: undefined, retryAt: iso(now() + (Number(e.retryAfterSeconds) || 15) * 1000), ...(jobIdsOf(n).length ? { resubmit: true } : {}) }, `${n.label}: backend busy, retrying in ${Number(e.retryAfterSeconds) || 15}s`); }
+        else if (e.notDispatched) { refund(); setNode(b, n, { ...NO_IDS, status: 'failed', submitting: undefined, reserved: undefined, finishedAt: iso(now()), error: String(e.message).slice(0, 500) }, `${n.label}: refused, nothing was sent`); }
         else if (jobIdsOf(n).length) setNode(b, n, { submitting: undefined, reserved: undefined, error: String(e.message).slice(0, 500) }, `${n.label}: submit error after dispatch began; following the job`);
         else { refund(); setNode(b, n, { status: 'failed', submitting: undefined, reserved: undefined, finishedAt: iso(now()), error: String(e.message).slice(0, 500) }, `${n.label}: failed before dispatch`); }
       }
@@ -313,7 +321,7 @@ export async function openBatches(root, options = {}) {
       if (b.status === 'running') return structuredClone(b);
       if (maxCostUsd != null) { const cap = Number(maxCostUsd); if (!Number.isFinite(cap) || cap < b.spentEstimateUsd) fail(`maxCostUsd must be at least the ${usd(b.spentEstimateUsd)} already committed`); b.maxCostUsd = cap; }
       for (const n of b.nodes) if (n.cancelled || n.status === 'budget' || (n.status === 'failed' && !n.uncertain && !n.planError))
-        setNode(b, n, { status: 'waiting', cancelled: undefined, blockedBy: undefined, error: undefined, retryAt: undefined, stuck: undefined, startedAt: undefined, finishedAt: undefined, ...(n.status === 'failed' && !n.blockedBy ? { jobId: undefined, requestId: undefined, requestIds: undefined } : {}) });
+        setNode(b, n, { status: 'waiting', cancelled: undefined, blockedBy: undefined, error: undefined, retryAt: undefined, stuck: undefined, startedAt: undefined, finishedAt: undefined, ...(n.status === 'failed' && !n.blockedBy ? NO_IDS : {}) });
       setBatch(b, { status: 'running', dryRun: false }, `Resumed (cap ${usd(b.maxCostUsd)})`);
       resolve(b); await persist(b); schedule(b.id, 0);
       return structuredClone(b);
