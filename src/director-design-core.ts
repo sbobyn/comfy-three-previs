@@ -124,3 +124,24 @@ export function castFamilies(rows: FamilyRow[], sourceName: (id: string) => stri
   for (const r of rows) { const list = map.get(r.source); if (list) list.push(r); else map.set(r.source, [r]); }
   return [...map.entries()].map(([key, list]) => ({ key, ids: list.map(r => r.id), label: familyLabel(list.map(r => r.name), sourceName(key)) }));
 }
+
+// ---------- Claude dialog: examples from the hero cast ----------
+type ExampleProject = { title: string; shots: { camera: { target: string | null } }[]; scene: { entities: { id: string; name: string; kind: string; notes?: string; lookFrom?: string | null }[]; references?: { entityId: string | null }[] } };
+/** The project's hero cast: shot subjects first, then cast with an image or a description; never the set. */
+export function heroCast(p: ExampleProject, max = 3): string[] {
+  const subjects = new Map<string, number>();
+  for (const s of p.shots) if (s.camera.target) subjects.set(s.camera.target, (subjects.get(s.camera.target) || 0) + 1);
+  const hasLook = new Set((p.scene.references || []).map(r => r.entityId).filter(Boolean) as string[]);
+  const KIND = ['character', 'vehicle', 'prop'];
+  const score = (e: ExampleProject['scene']['entities'][number]) => (subjects.get(e.id) || 0) * 100 + (hasLook.has(e.id) ? 10 : 0) + (e.notes?.trim() ? 5 : 0) - KIND.indexOf(e.kind);
+  return p.scene.entities.filter(e => KIND.includes(e.kind) && !e.lookFrom && (subjects.has(e.id) || hasLook.has(e.id) || !!e.notes?.trim())).sort((a, b) => score(b) - score(a)).slice(0, max).map(e => e.name);
+}
+/** Three asks: a camera note, a new shot with the hero cast, and one end-to-end request with a budget. */
+export function claudeExamples(p: ExampleProject | null | undefined): string[] {
+  const [a = 'the main character', b] = p ? heroCast(p) : [];
+  return [
+    `Make shot 1 a slow push-in on ${a}, ending in a close-up.`,
+    b ? `Add a 3-second low-angle shot of ${b} and ${a} side by side.` : `Add three shots that cover ${a}’s key moment from different angles.`,
+    `Block out a new shot of ${a}, make its start still, then a draft video. Quote first and keep the total under $1.`,
+  ];
+}

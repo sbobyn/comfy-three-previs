@@ -145,3 +145,20 @@ test('transport at 1024: Fly camera stays whole on the first row, keys and scrub
     assert.ok(at1440.flyWhole); assert.equal(at1440.secondRow, false, 'a wide stage keeps one row');
   } finally { await browser.close(); }
 });
+
+test('Claude’s example asks use the hero cast and include one end-to-end ask with a budget', () => {
+  const p = { title: 'Starter · Final Lap', shots: [{ camera: { target: 'rival' } }, { camera: { target: 'comfy' } }, { camera: { target: 'comfy' } }],
+    scene: { entities: [{ id: 'flag', name: 'Flag stand', kind: 'prop' }, { id: 'tower', name: 'Light tower 1', kind: 'prop', lookFrom: 'flag' }, { id: 'track', name: 'Oval track', kind: 'environment', notes: 'banked' }, { id: 'rival', name: 'Rival car', kind: 'vehicle', notes: 'black' }, { id: 'comfy', name: 'Comfy car', kind: 'vehicle', notes: 'blue' }], references: [{ entityId: 'comfy' }, { entityId: 'flag' }] } };
+  assert.deepEqual(plain(core.heroCast(p)), ['Comfy car', 'Rival car', 'Flag stand']);
+  const asks = core.claudeExamples(p);
+  assert.equal(asks.length, 3);
+  assert.match(asks[0], /Comfy car/); assert.match(asks[1], /Rival car and Comfy car/);
+  assert.match(asks[2], /under \$1/); assert.match(asks[2], /Quote first/);
+  assert.ok(asks.every(a => !/Flag stand|Light tower|Oval track/.test(a)), 'never the dullest objects');
+  assert.match(core.claudeExamples(null)[0], /the main character/);
+  const common = readFileSync(new URL('../src/director-common.ts', import.meta.url), 'utf8');
+  const dlg = common.slice(common.indexOf('export function claudeDialog'));
+  assert.match(dlg, /code-head.*copy/s, 'Copy sits in the header row');
+  assert.match(dlg, /PREVIS_ALLOW_PAID=1/); assert.match(dlg, /not a hard cap/);
+  assert.doesNotMatch(dlg, /still requires your explicit approval/, 'no overclaim about approval');
+});
