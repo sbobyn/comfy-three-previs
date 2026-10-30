@@ -162,3 +162,17 @@ test('Claude’s example asks use the hero cast and include one end-to-end ask w
   assert.match(dlg, /PREVIS_ALLOW_PAID=1/); assert.match(dlg, /not a hard cap/);
   assert.doesNotMatch(dlg, /still requires your explicit approval/, 'no overclaim about approval');
 });
+
+test('demo mode: no Cloud status, the notice in the header (never over the transport), no camera.html', () => {
+  const read = f => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+  const shim = read('src/demo-shim.ts');
+  assert.doesNotMatch(shim, /camera\.html/, 'the retired camera studio is not linked');
+  assert.match(shim, /url === '\/index\.html'.*return BASE \+ url\.slice\(11\)/s);
+  assert.doesNotMatch(shim, /bottom:12px/, 'the floating notice no longer sits at the bottom, over the transport');
+  assert.match(shim, /querySelector<HTMLElement>\('\.demo-badge'\)/, 'it steps aside for the page’s own badge');
+  const snap = read('scripts/snapshot-demo.mjs');
+  assert.doesNotMatch(snap, /rename\(/); assert.match(snap, /rm\(join\(out, 'camera\.html'\)/);
+  assert.match(read('src/director-home.ts'), /setup && !DEMO \? setupStatus/, 'the home hides Cloud status in the demo');
+  assert.match(read('src/director.ts'), /DEMO \? demoBadge\(\) : null/);
+  assert.match(read('src/director-common.ts'), /export const DEMO = Boolean\(import\.meta\.env\.VITE_DEMO\)/);
+});

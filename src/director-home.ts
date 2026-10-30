@@ -5,7 +5,7 @@ import { TEMPLATES, makeEntity, makeShot } from '../shared/director.mjs';
 import type { DirectorProject, Shot } from '../shared/director.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
 import { renderStill } from './director-scene';
-import { api, h, ago, claudeDialog, toast } from './director-common';
+import { api, h, ago, claudeDialog, toast, DEMO, demoBadge } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
 import { openJourney } from './director-guide';
 import { checkList, openSetup } from './director-setup';
@@ -240,7 +240,7 @@ async function render() {
   app.replaceChildren(
     h('header', { class: 'home-top' },
       h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Three Previs'),
-      h('nav', {},
+      h('nav', {}, DEMO ? demoBadge() : null,
         h('button', { class: 'home-link', type: 'button', onclick: () => openJourney() }, 'Guide'),
         h('button', { class: 'home-link', type: 'button', onclick: () => openSetup() }, 'Setup'))),
     h('main', { class: 'home' },
@@ -252,7 +252,7 @@ async function render() {
           h('div', { class: 'home-actions' },
             newScene('New scene'),
             h('a', { class: 'home-btn', href: '#starters', onclick: (ev: Event) => { ev.preventDefault(); starterSection.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } }, 'Open a starter')),
-          h('div', { class: 'home-meta' }, claudeHint(), setup ? setupStatus(setup.checks, setup.dataDir) : null)),
+          h('div', { class: 'home-meta' }, claudeHint(), setup && !DEMO ? setupStatus(setup.checks, setup.dataDir) : null)),
         heroSeam(starters)),
       steps(),
       starterSection,

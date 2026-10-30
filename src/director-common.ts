@@ -2,6 +2,12 @@ import { SHAPES, entitySize } from '../shared/director.mjs';
 import type { Entity, DirectorProject } from '../shared/director.mjs';
 import { claudeExamples } from './director-design-core';
 
+/** The read-only GitHub Pages demo (built with VITE_DEMO=1): no Cloud status, no generation. */
+export const DEMO = Boolean(import.meta.env.VITE_DEMO);
+export const REPO_URL = 'https://github.com/sbobyn/comfy-three-previs';
+/** In-page demo notice, in the page's own header (the demo shim's floating banner steps aside for it). */
+export const demoBadge = () => h('a', { class: 'demo-badge', href: REPO_URL, target: '_blank', rel: 'noopener', title: 'This is a read-only demo. Run Comfy Three Previs locally to edit and generate.' }, 'Read-only demo · Run it locally ↗');
+
 export type RunnerStatus = { available: boolean; model: string; busy: string[]; runs: Record<string, { messageId: string; startedAt: string; text: string; steps: string[] } | null> }; // [agent]
 export type AgentStatus = { connected: boolean; waiting: boolean; lastSeen: string | null; name: string | null; runner?: RunnerStatus | null };
 export type Connect = { command: string; args: string[]; env: Record<string, string> } | null;
