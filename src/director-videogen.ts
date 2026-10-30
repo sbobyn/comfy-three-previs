@@ -12,9 +12,9 @@ export type GenState = { presets: Def[]; definitions: Def[]; jobs: any[]; paidEx
 export type EngineRef = { renderId: string; referenceId: string; entityId: string | null; role: string; label: string; name: string; file: string };
 
 export const VIDEO_TASKS = ['transform-video', 'control-video', 'first-frame'];
-/** Presets and imported definitions a user can pick (derived reference variants are hidden). LTX only for now. */
+/** Compatible task definitions, including imported graphs; derived reference variants are hidden. */
 export function videoChoices(st: GenState): Def[] {
-  return allVideoChoices(st).filter(d => (d.provenance?.presetId || d.id).startsWith('ltx-'));
+  return allVideoChoices(st);
 }
 function allVideoChoices(st: GenState): Def[] {
   return [...st.presets, ...st.definitions.filter(d => !d.provenance?.referenceImages && !st.presets.some(p => p.id === d.id || d.provenance?.presetId === p.id))].filter(d => VIDEO_TASKS.includes(d.task));

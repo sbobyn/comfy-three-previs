@@ -74,7 +74,7 @@ export function createSequence(ctx: SequenceCtx) {
   // ---------- Layout ----------
   const modelSel = h('select', { class: 'field', 'aria-label': 'Video model' });
   const renderAllBtn = h('button', { class: 'btn', type: 'button', title: 'Capture the camera video of every shot that has none, or whose blockout changed' }, 'Render missing blockouts');
-  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Generate selected');
+  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Quote selected');
   // Rough cost on the button: rate × seconds (LTX rounds to its clip lengths).
   const estShots = () => { const d = choice().find(x => x.id === modelSel.value); const rate = d?.pricing?.ratePerSecond; if (!rate) return ''; const secs = (s: Shot) => (d!.task === 'first-frame' ? [2, 3, 4, 5, 6, 8, 10].reduce((a, b) => (Math.abs(b - s.duration) < Math.abs(a - s.duration) ? b : a)) : s.render?.duration ?? s.duration); return ` · ≈ $${P().shots.filter(s => picked.has(s.id)).reduce((t, s) => t + rate * secs(s), 0).toFixed(2)}`; };
   const useRefs = h('input', { type: 'checkbox', checked: localStorage.getItem('previs.seq.refs') !== '0' });
@@ -208,7 +208,7 @@ export function createSequence(ctx: SequenceCtx) {
     const cut = p.edit?.clips?.length ? ids.flatMap(id => p.edit!.clips.filter(c => c.shotId === id)) : null;
     await ctx.runEntry({ label: 'Reorder shots', redo: [{ op: 'reorder_shots', ids }, ...(cut ? [{ op: 'set_edit', clips: cut }] : [])], undo: [{ op: 'reorder_shots', ids: before }, ...(cut ? [{ op: 'set_edit', clips: cutBefore }] : [])] });
   }
-  const syncPickAll = () => { const n = P().shots.length; pickAll.checked = picked.size === n; pickAll.indeterminate = picked.size > 0 && picked.size < n; quoteBtn.textContent = picked.size ? `Generate ${picked.size} shot${picked.size === 1 ? '' : 's'}${estShots()}` : 'Generate selected'; quoteBtn.disabled = busy || !picked.size; };
+  const syncPickAll = () => { const n = P().shots.length; pickAll.checked = picked.size === n; pickAll.indeterminate = picked.size > 0 && picked.size < n; quoteBtn.textContent = picked.size ? `Quote ${picked.size} shot${picked.size === 1 ? '' : 's'}${estShots()}` : 'Quote selected'; quoteBtn.disabled = busy || !picked.size; };
   pickAll.onchange = () => { picked = pickAll.checked ? new Set(P().shots.map(s => s.id)) : new Set(); draw(); };
 
   // ---------- Viewer ----------
@@ -338,22 +338,26 @@ export function createSequence(ctx: SequenceCtx) {
           quoted.push({ shot: s, est: null, ok: false, issue: msg });
         }
       }
-      // One click: everything that checks out is sent right away, one shot at a time.
-      const ready = quoted.filter(q => q.ok), skipped = quoted.filter(q => !q.ok);
-      if (skipped.length) toast(`Skipped ${skipped.map(q => `${no(P(), q.shot.id)} (${q.issue})`).join(', ')}`, true);
-      if (ready.length) { const total = ready.reduce((t, q) => t + (q.est ?? 0.6), 0); setTimeout(() => void runBatch(def, id, ready, Math.max(1, Math.ceil(total * 150) / 100)), 0); }
-      else batch.hidden = true;
+      drawQuote(def, id); // Quote only; submission requires the visible approval controls.
     } catch (e) { batch.replaceChildren(h('p', { class: 'status-line err' }, (e as Error).message)); }
     finally { busy = false; draw(); }
   }
   quoteBtn.onclick = () => void quote();
   function drawQuote(def: Def, id: string) {
     const ready = quoted.filter(q => q.ok), total = ready.reduce((t, q) => t + (q.est ?? 0), 0), unknownCost = ready.some(q => q.est == null);
-    const approve = h('input', { type: 'checkbox' });
+    const approve = h('input', { type: 'checkbox' }), unknown = h('input', { type: 'checkbox' });
+    const revision = P().revision, references = useRefs.checked;
+    let dispatched = false;
     const max = h('input', { class: 'field mono', type: 'number', min: 0, step: 0.01, value: (Math.ceil(total * 1.5 * 100) / 100 || 1).toFixed(2), style: 'width:84px', 'aria-label': 'Maximum USD for the batch' });
     const go = h('button', { class: 'btn camera', type: 'button', disabled: true }, `Approve & generate ${ready.length}`);
-    approve.onchange = () => { go.disabled = !approve.checked || !ready.length; };
-    go.onclick = () => void runBatch(def, id, ready, Number(max.value) || 0);
+    const sync = () => { go.disabled = dispatched || !approve.checked || !unknown.checked || !ready.length || !Number.isFinite(Number(max.value)) || Number(max.value) < 0; };
+    approve.onchange = unknown.onchange = max.oninput = sync;
+    go.onclick = () => {
+      sync(); if (go.disabled) return;
+      if (P().revision !== revision || modelSel.value !== id || useRefs.checked !== references) { batch.replaceChildren(h('p', { class: 'status-line err' }, 'Project, workflow or references changed. Quote again; nothing submitted.')); return; }
+      dispatched = true; go.disabled = true;
+      void runBatch(def, id, ready, Number(max.value));
+    };
     batch.replaceChildren(
       h('div', { class: 'sq-batch-head' }, h('strong', {}, `${def.title}`), h('span', { class: 'muted' }, 'Quote — nothing has been sent'), h('span', { style: 'flex:1' }), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close quote', onclick: () => { batch.hidden = true; quoted = []; } }, '✕')),
       h('table', { class: 'sq-quote' }, h('tbody', {}, ...quoted.map(q => h('tr', { class: q.ok ? '' : 'skip' },
@@ -362,7 +366,8 @@ export function createSequence(ctx: SequenceCtx) {
         h('td', { class: 'mono' }, q.ok ? (q.est != null ? `≈ $${q.est.toFixed(3)}` : 'unknown') : ''), h('td', { class: q.ok ? 'ok' : 'muted' }, q.ok ? 'Ready' : `Skipped · ${q.issue}`))))),
       ready.length ? h('div', { class: 'sq-approve' },
         h('span', {}, `Estimated total `, h('b', { class: 'mono' }, unknownCost ? `≥ $${total.toFixed(2)}` : `≈ $${total.toFixed(2)}`), ' · Cloud totals are estimates'),
-        h('label', {}, approve, 'I approve these requests, up to', max, 'USD in total'), go,
+        h('label', {}, approve, 'I approve these requests, with an allowance of ', max, ' USD in total'),
+        h('label', {}, unknown, 'I accept unresolved provider/runtime charges. The allowance is not a provider-enforced spending cap.'), go,
         h('p', { class: 'note', style: 'margin:0' }, 'Shots run one at a time (one job per backend). Each is re-checked just before it is sent; a failed or uncertain job stops the batch and is never retried.')) : h('p', { class: 'note' }, 'Nothing to generate.'));
   }
   async function runBatch(def: Def, id: string, list: Quoted[], cap: number) {

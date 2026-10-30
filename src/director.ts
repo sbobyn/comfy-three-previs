@@ -1329,7 +1329,7 @@ document.addEventListener('keydown', ev => {
 async function captureShotVideo(s: Shot, o: { width: number; height: number; prompt: string; onFrame?: (url: string, i: number, n: number) => void; onStatus?: (t: string) => void }) {
   if (shotId !== s.id) selectShot(s.id);
   const idx = project.shots.indexOf(s), { width, height } = o;
-  const n = Math.min(120, Math.max(2, Math.round(s.duration * 24))), at = (i: number) => (i / (n - 1)) * s.duration;
+  const n = Math.min(120, Math.max(2, Math.round(s.duration * 24))), at = (i: number) => i / 24;
   const motion = Array.from({ length: n }, (_, i) => { const p = scene.pose(at(i)); return { t: i / 24, p: p.p, q: scene.quaternionAt(at(i)), mm: Math.round(p.mm * 1000) / 1000 }; });
   o.onStatus?.('Saving camera motion…');
   const main = await api('project');
@@ -1422,6 +1422,8 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   try { st = await api('generation'); } catch (e) { box.replaceChildren(h('p', { class: 'status-line err' }, (e as Error).message)); return; }
   const choices = videoChoices(st as any);
   const wf = h('select', { class: 'field', 'aria-label': 'Workflow' }, ...choices.map(d => h('option', { value: d.id }, d.title)));
+  const previous = st.jobs.filter(j => j.shotId === previsShotId && (j.sources?.sourceVideo?.id === assetId || j.sources?.controlVideo?.id === assetId)).at(-1);
+  if (previous && choices.some(d => d.id === previous.definition?.id)) wf.value = previous.definition.id;
   const backendSel = h('select', { class: 'field', 'aria-label': 'Backend' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
   const note = h('p', { class: 'note', style: 'margin:0' });
   const showNote = () => { const d = choices.find(c => c.id === wf.value); note.textContent = d?.description || ''; backendSel.value = d?.id?.startsWith('wan-') ? 'local' : 'cloud'; };
@@ -1433,19 +1435,23 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
       ? h('div', { class: 'gen-refs-row' }, ...list.map((r, i) => h('span', { class: 'gen-ref', title: `${r.label} — ${r.ref.name}` }, h('img', { src: refUrl(r.ref), alt: '' }), h('small', {}, `${i + 1} · ${r.label}`))))
       : h('span', { class: 'note' }, useRefs.checked ? 'No looks yet for the objects in this shot. Make them in Looks.' : 'References off.'));
   };
-  useRefs.onchange = () => { localStorage.setItem('previs.seq.refs', useRefs.checked ? '1' : '0'); showRefs(); };
-  wf.onchange = () => { showNote(); showRefs(); }; showNote(); showRefs();
-  const timing = h('input', { type: 'checkbox', checked: true });
-  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Generate');
+  useRefs.onchange = () => { localStorage.setItem('previs.seq.refs', useRefs.checked ? '1' : '0'); showRefs(); out.replaceChildren(); };
+  wf.onchange = () => { showNote(); showRefs(); out.replaceChildren(); timing.checked = false; }; showNote(); showRefs();
+  backendSel.onchange = () => out.replaceChildren();
+  const timing = h('input', { type: 'checkbox' });
+  timing.onchange = () => out.replaceChildren();
+  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Review request & quote');
   const out = h('div', { class: 'gen-out' });
   const jobsBox = h('div', { class: 'gen-jobs' });
   quoteBtn.onclick = async () => {
-    quoteBtn.disabled = true; out.replaceChildren(h('p', { class: 'status-line' }, 'Preparing and sending…'));
+    const revision = project.revision, prompt = getPrompt();
+    for (const input of [quoteBtn, wf, backendSel, useRefs, timing]) input.disabled = true;
+    out.replaceChildren(h('p', { class: 'status-line' }, 'Preparing the request; nothing is being submitted…'));
     try {
-      const { def, job, request } = await prepareShotVideo({ project, shot: s, st: st as any, definitionId: wf.value, useReferences: useRefs.checked, userPrompt: getPrompt(), backend: backendSel.value === 'local' ? 'local' : 'cloud', acceptTimingChange: timing.checked });
+      const { def, job, request } = await prepareShotVideo({ project, shot: s, st: st as any, definitionId: wf.value, useReferences: useRefs.checked, userPrompt: prompt, backend: backendSel.value === 'local' ? 'local' : 'cloud', acceptTimingChange: timing.checked });
+      if (project.revision !== revision || getPrompt() !== prompt) throw Error('Shot or prompt changed while preparing. Review a fresh quote. Nothing submitted.');
       if (!job.validation?.compatible) throw Error((job.validation?.issues || []).map((i: any) => i.message).slice(0, 3).join('; ') || 'This workflow can’t run with these inputs');
       const card = genQuote(job, def, request, s); out.replaceChildren(card);
-      (card.querySelector('.gen-send') as HTMLButtonElement | null)?.click();
       out.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     } catch (e) {
       let msg = (e as Error).message;
@@ -1453,7 +1459,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
       if (/constraints: .*duration/.test(msg) && lim) msg = `${d.title.split(' ·')[0]} needs a ${lim.min}–${Math.floor(lim.max)} s source and this shot is ${s.duration} s. Set the shot's duration to at least ${lim.min} s, render again, then quote.`;
       out.replaceChildren(h('p', { class: 'status-line err' }, msg));
     }
-    finally { quoteBtn.disabled = false; }
+    finally { for (const input of [quoteBtn, wf, backendSel, useRefs, timing]) input.disabled = false; }
   };
   const drawJobs = () => {
     const mine = st.jobs.filter(j => j.shotId === previsShotId || (project.assets || []).some(a => a.kind === 'camera-render' && a.shotId === s.id && a.source.engineShotId === j.shotId)).slice(-4).reverse();
@@ -1462,7 +1468,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   drawJobs();
   box.replaceChildren(h('div', { class: 'grid2' }, h('label', {}, 'Workflow', wf), h('label', {}, 'Backend', backendSel)), note,
     h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, useRefs, 'Send the looks of the objects in this shot as reference images'), refsBox,
-    h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, timing, 'Accept output timing that differs from the source (e.g. 72 → 73 frames)'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, timing, 'I have reviewed that output timing/resolution may differ from the source; originals will not be fitted or replaced.'),
     h('div', {}, quoteBtn), out, jobsBox);
 }
 function genQuote(job: any, def: any, request: any, s: Shot) {
@@ -1471,13 +1477,15 @@ function genQuote(job: any, def: any, request: any, s: Shot) {
   const issues = job.validation?.issues || [];
   const approve = h('input', { type: 'checkbox' }), unknown = h('input', { type: 'checkbox' });
   const max = h('input', { class: 'field', type: 'number', min: 0, step: 0.01, value: est ? Math.ceil(est * 1.5 * 100) / 100 : 1, style: 'width:90px', 'aria-label': 'Maximum USD' });
-  // One-click generate: the Generate button is the approval (sent once, never retried).
-  const go = h('button', { class: 'btn camera gen-send', type: 'button', hidden: true }, 'Generate');
-  approve.checked = unknown.checked = true;
+  const go = h('button', { class: 'btn camera gen-send', type: 'button', disabled: true }, 'Approve & submit once');
+  let dispatched = false;
   const status = h('div', { class: 'status-line' });
-  const sync = () => { go.disabled = !job.validation?.compatible; };
+  const sync = () => { go.disabled = dispatched || !job.validation?.compatible || !approve.checked || (!free && !unknown.checked) || !Number.isFinite(Number(max.value)) || Number(max.value) < 0; };
   approve.onchange = unknown.onchange = sync;
+  max.oninput = sync;
   go.onclick = async () => {
+    sync(); if (go.disabled) return;
+    dispatched = true;
     go.disabled = true; status.className = 'status-line'; status.textContent = 'Submitting once…';
     try {
       const r = await api('generation/submit', { ...request, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: Number(max.value) || 0, allowUnknownCharges: !free } } });
@@ -1489,14 +1497,19 @@ function genQuote(job: any, def: any, request: any, s: Shot) {
         setTimeout(poll, 5000);
       };
       setTimeout(poll, 4000);
-    } catch (e) { status.className = 'status-line err'; status.textContent = (e as Error).message; sync(); }
+    } catch (e) { status.className = 'status-line err'; status.textContent = `${(e as Error).message} · No retry. Inspect request ${job.id} before preparing anything else.`; }
   };
   return h('div', { class: 'prompt-box', style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
     h('div', { class: 'facts' }, 'Workflow', h('b', {}, def.title), 'Backend', h('b', {}, request.backend.kind === 'cloud' ? 'Comfy Cloud' : 'Local ComfyUI'),
       'Ready', h('b', { style: `color:${job.validation?.compatible ? 'var(--ok)' : 'var(--bad)'}` }, job.validation?.compatible ? 'Schema compatible' : 'Missing requirements'),
       'Cost', h('b', { style: `color:${free ? 'var(--ok)' : 'var(--warn)'}` }, free ? 'No charge (local)' : est ? `≈ $${est.toFixed(3)} estimate; Cloud total unknown` : 'Unknown — needs approval'),
       'Quote', h('b', {}, String(job.fingerprint || '').slice(0, 12))),
+    h('p', { class: 'note' }, `Exact source: ${job.sources?.sourceVideo?.id || job.sources?.controlVideo?.id || job.sources?.firstFrame?.id || 'see request'} · ${job.sources?.sourceVideo?.frameCount ?? 'image'} frames · ${job.sources?.sourceVideo?.duration ?? '—'} s. Preparation does not upload inputs.`),
+    def.pricing?.partnerEstimate ? h('p', { class: 'note' }, `Published partner estimate: $${def.pricing.partnerEstimate.min.toFixed(4)}–$${def.pricing.partnerEstimate.max.toFixed(4)} USD. ${def.pricing.partnerEstimate.note}`) : null,
+    h('details', {}, h('summary', {}, 'Advanced · exact prompt and prepared graph'), h('pre', { style: 'max-height:240px;overflow:auto;white-space:pre-wrap' }, JSON.stringify({ prompt: job.binding?.prompt, sources: job.sources, graph: job.preparedGraph }, null, 2))),
     issues.length ? h('ul', { class: 'note', style: 'margin:0;padding-left:16px' }, ...issues.slice(0, 5).map((i: any) => h('li', {}, i.message))) : null,
+    h('label', {}, approve, ' I approve this exact request, with an allowance of ', max, ' USD.'),
+    !free ? h('label', {}, unknown, ' I accept unresolved provider/runtime charges. This allowance is not a provider-enforced spending cap.') : null,
     h('div', {}, go), status);
 }
 

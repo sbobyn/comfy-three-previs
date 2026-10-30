@@ -18,7 +18,8 @@ export function referenceTarget(definition) {
   }
   return null;
 }
-export const maxReferences = definition => referenceTarget(definition)?.spec.max ?? 0;
+// Imported graphs already declare their reference loaders. Keep their wiring intact.
+export const maxReferences = definition => referenceTarget(definition)?.spec.max ?? Object.keys(definition?.inputs || {}).filter(name => /^referenceImage[1-9]$/.test(name)).length;
 
 /**
  * A copy of `definition` with `count` reference-image inputs. Returns the original when count is 0
