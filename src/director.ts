@@ -576,6 +576,53 @@ function semanticText(ta: HTMLTextAreaElement) {
   requestAnimationFrame(paint); paint();
   return wrap;
 }
+// ---------- Video model: which model this shot uses, what it accepts, and what goes into each input ----------
+let genCache: GenState | null = null, genLoading = false;
+function loadGen() { if (genCache || genLoading) return; genLoading = true; api('generation').then(st => { genCache = st; shotPane.dataset.shot = ''; renderShotPane(); }).catch(() => {}).finally(() => { genLoading = false; }); }
+const modelKey = (s: Shot) => `previs.shot.model.${s.id}`;
+function shotModel(s: Shot) {
+  const st = genCache!; const choices = videoChoices(st as any);
+  const saved = localStorage.getItem(modelKey(s));
+  const last = s.render ? st.jobs.filter(j => j.shotId === s.render!.previsShotId).at(-1)?.definition?.id : null;
+  return choices.find(d => d.id === saved) || choices.find(d => d.id === last) || choices[0] || null;
+}
+function modelBlock(s: Shot) {
+  if (!genCache) { loadGen(); return h('div', { class: 'block vm' }, h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted' }, 'Loading…'))); }
+  const st = genCache, choices = videoChoices(st as any), def: any = shotModel(s);
+  if (!def) return h('div', { class: 'block vm' }, h('span', { class: 'eyebrow' }, 'Video model'), h('p', { class: 'note' }, 'No video models are set up.'));
+  const pick = h('select', { class: 'field vm-pick', 'aria-label': 'Video model for this shot' }, ...choices.map((d: any) => h('option', { value: d.id, selected: d.id === def.id }, d.title)));
+  pick.onchange = () => { localStorage.setItem(modelKey(s), pick.value); shotPane.dataset.shot = ''; renderShotPane(); };
+  const cap = referenceCapacity(st as any, def.id), refs = cap ? plannedReferences(project, s, st as any, def.id) : [];
+  const usesClip = def.task === 'transform-video' || def.task === 'control-video';
+  const usesFrames = def.task === 'first-frame', twoFrames = usesFrames && !!def.inputs?.lastFrame;
+  const frames = s.references.filter(r => r.role === 'frame');
+  const hasStart = frames.some(r => r.note !== 'key frame end'), hasEnd = frames.some(r => r.note === 'key frame end');
+  const maxLen = def.constraints?.promptMaxLength as number | undefined, promptLen = shotPrompt(project, s, 'video').length;
+  const stale = s.render && s.render.signature && s.render.signature !== signature(project, s);
+  const rate = def.pricing?.ratePerSecond as number | undefined;
+  const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
+  const sent = new Set(refs.map(r => r.entityId));
+  const slot = (ok: boolean | null, label: string, detail: Node | string, k?: string) => h('div', { class: 'vm-slot' + (ok === false ? ' warn' : ok ? ' ok' : ''), style: k ? `--k:${k}` : '' },
+    h('span', { class: 'vm-dot' }, ok === false ? '!' : ok ? '✓' : '–'), h('span', { class: 'vm-label' }, label), h('span', { class: 'vm-detail' }, detail));
+  return h('div', { class: 'block vm' },
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted', style: 'font-size:11.5px' }, rate ? `≈ $${(rate * s.duration).toFixed(2)} for ${s.duration}s` : 'Cost shown at quote')),
+    pick,
+    def.description ? h('p', { class: 'note vm-desc' }, def.description) : null,
+    h('div', { class: 'vm-inputs' },
+      h('div', { class: 'vm-head' }, 'What this model takes'),
+      slot(!maxLen || promptLen <= maxLen, 'Text prompt', maxLen ? h('span', {}, `${promptLen.toLocaleString()} / ${maxLen.toLocaleString()} characters`, promptLen > maxLen ? h('b', { class: 'vm-over' }, ' · will be cut') : '') : `${promptLen.toLocaleString()} characters`),
+      usesClip ? slot(s.render ? !stale : false, 'Blockout video', s.render ? (stale ? 'Rendered, but the scene changed since · re-render' : `Your camera move · ${s.render.duration}s, ${s.render.frameCount} frames`) : 'Not rendered yet · Render shot first') : slot(null, 'Blockout video', 'Not used · describe the motion in the prompt'),
+      usesFrames ? slot(hasStart, twoFrames ? 'Start frame' : 'First frame', hasStart ? 'Key frame ready' : 'Generate a key frame below') : null,
+      twoFrames ? slot(hasEnd, 'End frame', hasEnd ? 'Key frame ready' : 'Generate an end key frame below') : null,
+      slot(cap ? refs.length > 0 : null, 'Reference images', cap ? `${refs.length} of up to ${cap}` : 'Not accepted by this model')),
+    cap ? h('div', { class: 'vm-map' },
+      h('div', { class: 'vm-head' }, 'Shot objects → model inputs'),
+      ...refs.map((r, i) => h('div', { class: 'vm-ref', style: `--k:${KIND_COLORS[entity(r.entityId!)?.kind || 'prop']}`, onmouseenter: () => { if (r.entityId) { scene.setHover(r.entityId); highlightPrompt(r.entityId); } }, onmouseleave: () => { scene.setHover(null); highlightPrompt(selected); } },
+        h('span', { class: 'vm-n' }, `Image ${i + 1}`), h('img', { src: refUrl(r.ref), alt: '' }), h('span', { class: 'vm-name' }, r.label))),
+      ...cast.filter(r => !sent.has(r.entity.id)).map(r => h('div', { class: 'vm-ref missing', style: `--k:${KIND_COLORS[r.entity.kind]}` },
+        h('span', { class: 'vm-n' }, objectLooks(project, r.entity.id).length ? 'Over limit' : 'No image'), h('span', { class: 'vm-ph' }), h('span', { class: 'vm-name' }, r.entity.name)))) : null,
+    h('button', { class: 'btn camera vm-go', type: 'button', onclick: () => openRender() }, s.render && !stale ? 'Generate video…' : 'Render blockout, then generate…'));
+}
 function renderShotPane() {
   if (shotPane.contains(document.activeElement) && shotPane.dataset.shot === shotId) return;
   shotPane.dataset.shot = shotId;
@@ -610,6 +657,7 @@ function renderShotPane() {
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Shot ${String(idx + 1).padStart(2, '0')}`), h('button', { class: 'btn ghost sm', type: 'button', disabled: project.shots.length < 2, title: 'Delete this shot', onclick: () => { if (confirm(`Delete “${s.title}”? Its references stay on disk.`)) void edit([{ op: 'remove_shot', id: s.id }]); } }, 'Delete')),
       title, descBox),
     castBlock(s),
+    modelBlock(s),
     promptBlock(s, { project: () => project, runEntry: e => runEntry(e as any), select: id => { select(id); setTab('object'); } }),
     h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Camera'), h('span', { class: 'muted', style: 'font-size:11.5px' }, describeCamera(s, project.scene.entities))),
