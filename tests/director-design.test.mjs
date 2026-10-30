@@ -100,3 +100,17 @@ test('the Generate dialog leads with model · runs on · estimate · Generate, a
   const go = open.slice(open.indexOf('hGo.onclick'), open.indexOf('const dlg ='));
   assert.match(go, /\.gen-quote/); assert.doesNotMatch(go, /generation\/submit/);
 });
+
+test('cast rows sharing one image fold into a family named by what the names share', () => {
+  assert.equal(core.familyLabel(['Turns 3–4 · surface 1', 'Turns 3–4 · surface 2', 'Turns 3–4 · surface 12'], 'x'), 'Turns 3–4 · surface');
+  assert.equal(core.familyLabel(['Infield grass', 'Start-finish line', 'Front stretch 1'], 'Infield grass'), 'Infield grass', 'no shared start: the image owner’s name');
+  assert.equal(core.familyLabel(['Comfy car'], 'x'), 'Comfy car');
+  const rows = [{ id: 'a', name: 'Rival car', source: 'r.png' }, { id: 'b', name: 'Surface 1', source: 's.png' }, { id: 'c', name: 'Surface 2', source: 's.png' }, { id: 'd', name: 'Comfy car', source: 'd' }];
+  const fams = plain(core.castFamilies(rows, () => 'owner'));
+  assert.deepEqual(fams.map(f => [f.label, f.ids.length]), [['Rival car', 1], ['Surface', 2], ['Comfy car', 1]]);
+  const src = readFileSync(new URL('../src/director.ts', import.meta.url), 'utf8');
+  const block = src.slice(src.indexOf('function castBlock('), src.indexOf('/** Add any image already in the project'));
+  assert.match(block, /cast-set/, 'set pieces sit in one collapsed Set group');
+  assert.match(block, /In this shot · \$\{hero\.length\}/, 'the count is the hero cast');
+  assert.match(src, /`× \$\{names\.size\} objects`/, 'the Generate dialog lists each image once, × N objects');
+});

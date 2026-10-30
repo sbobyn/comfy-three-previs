@@ -106,3 +106,21 @@ export function dialogEstimate(def: { pricing?: { ratePerSecond?: number } } | n
   const rate = def?.pricing?.ratePerSecond;
   return rate ? `≈ $${(rate * seconds).toFixed(2)}` : 'Priced at quote';
 }
+
+// ---------- Cast list: look families ----------
+export type FamilyRow = { id: string; name: string; source: string };
+export type Family = { key: string; ids: string[]; label: string };
+/** The shared start of a family's names, trimmed at a word ("Turns 3–4 · surface 1", "… 12" → "Turns 3–4 · surface"). */
+export function familyLabel(names: string[], fallback: string): string {
+  if (names.length < 2) return names[0] || fallback;
+  let p = names[0]!;
+  for (const n of names) while (!n.startsWith(p)) p = p.slice(0, -1);
+  p = p.replace(/[\s·\-–—:,]*\d*$/, '').trim();
+  return p.length >= 3 ? p : fallback;
+}
+/** Rows grouped by the look they share (`source`: the object whose image they use), in first-seen order. */
+export function castFamilies(rows: FamilyRow[], sourceName: (id: string) => string): Family[] {
+  const map = new Map<string, FamilyRow[]>();
+  for (const r of rows) { const list = map.get(r.source); if (list) list.push(r); else map.set(r.source, [r]); }
+  return [...map.entries()].map(([key, list]) => ({ key, ids: list.map(r => r.id), label: familyLabel(list.map(r => r.name), sourceName(key)) }));
+}

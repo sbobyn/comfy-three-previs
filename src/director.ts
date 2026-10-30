@@ -25,7 +25,7 @@ import { mountJobsPip } from './director-jobs'; // [jobs]
 import { progressSlot, acquireProgress } from './director-progress'; // [live-progress]
 import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
 import { beforeAfter } from './director-media';
-import { dialogEstimate } from './director-design-core';
+import { dialogEstimate, castFamilies } from './director-design-core';
 import { initMobile } from './director-mobile'; // [mobile]
 import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY, moments, useTakeEntry, keyFrameCopy } from './director-desktop-core';
 import type { ShotPips } from './director-desktop-core';
@@ -1098,12 +1098,21 @@ function castBlock(s: Shot) {
     else if (!r.inCast && !r.auto) next.include.push(id); // camera doesn't see it, but put it in
     void runEntry({ label: r.inCast ? 'Remove from cast' : 'Add to cast', redo: [{ op: 'update_shot', id: s.id, patch: { cast: next } }], undo: [{ op: 'update_shot', id: s.id, patch: { cast: before } }] });
   };
+  // Tick or untick a whole look family in one step.
+  const toggleAll = (list: (typeof rows)[number][], on: boolean) => {
+    const before = normalizeCast(s.cast), next = normalizeCast(s.cast);
+    for (const r of list) {
+      const id = r.entity.id; next.include = next.include.filter(x => x !== id); next.exclude = next.exclude.filter(x => x !== id);
+      if (!on && r.auto) next.exclude.push(id); else if (on && !r.auto) next.include.push(id);
+    }
+    void runEntry({ label: on ? 'Add to cast' : 'Remove from cast', redo: [{ op: 'update_shot', id: s.id, patch: { cast: next } }], undo: [{ op: 'update_shot', id: s.id, patch: { cast: before } }] });
+  };
   const colors = objectColors(project, s);
-  // Lead with what the prompt is about: characters, vehicles, props, then described scenery. Bare set pieces fold away.
+  // Hero cast on top (the subject, then characters, vehicles, props by frame coverage); the set folds into one
+  // group; objects that share one image collapse into a single family row ("Turns 3–4 · surface ×12").
   const ORDER = ['character', 'vehicle', 'prop', 'environment'];
-  const described = (r: (typeof rows)[number]) => r.entity.kind !== 'environment' || !!castCard(project, r.entity.id)?.description || objectLooks(project, r.entity.id).length > 0;
-  const featured = inCast.filter(described).sort((a, b) => ORDER.indexOf(a.entity.kind) - ORDER.indexOf(b.entity.kind));
-  const pieces = inCast.filter(r => !described(r));
+  const hero = inCast.filter(r => r.entity.kind !== 'environment').sort((a, b) => (Number(b.lead) - Number(a.lead)) || (ORDER.indexOf(a.entity.kind) - ORDER.indexOf(b.entity.kind)) || (b.coverage - a.coverage));
+  const set = inCast.filter(r => r.entity.kind === 'environment').sort((a, b) => b.coverage - a.coverage);
   const row = (r: (typeof rows)[number]) => {
     const card = castCard(project, r.entity.id)!, looks = objectLooks(project, r.entity.id), look = looks[0];
     const open = selected === r.entity.id, c = colors.get(r.entity.id);
@@ -1126,11 +1135,36 @@ function castBlock(s: Shot) {
         h('span', { class: 'cast-chev', 'aria-hidden': 'true' }, '›')),
       h('div', { class: 'cast-slot', 'data-cast-slot': id }));
   };
+  // A family is every object whose primary image is the same file (shared looks, or one image linked to many).
+  const famKey = (r: (typeof rows)[number]) => objectLooks(project, r.entity.id)[0]?.file || r.entity.id;
+  const famName = (key: string) => { const owner = entity((project.scene.references || []).find(x => x.file === key)?.entityId || key); return owner ? owner.name.replace(/[\s·\-–—]*\d+$/, '') : 'Shared image'; };
+  /** Rows, with every look family of two or more collapsed into one expandable row. */
+  const rowsOf = (list: (typeof rows)[number][]) => {
+    const byId = new Map(list.map(r => [r.entity.id, r]));
+    const fams = castFamilies(list.map(r => ({ id: r.entity.id, name: r.entity.name, source: famKey(r) })), famName);
+    return fams.map(f => {
+      const members = f.ids.map(id => byId.get(id)!);
+      if (members.length === 1) return row(members[0]!);
+      const look = objectLooks(project, members[0]!.entity.id)[0], c = colors.get(members[0]!.entity.id), ins = members.filter(r => r.inCast).length;
+      const box = h('input', { type: 'checkbox', checked: ins === members.length, 'aria-label': `${f.label}: all ${members.length} in this shot`, title: `Tick or untick all ${members.length}` });
+      box.indeterminate = ins > 0 && ins < members.length;
+      box.onchange = () => toggleAll(members, box.checked); box.onclick = (ev: Event) => ev.stopPropagation();
+      const top = Math.max(...members.map(r => r.coverage));
+      return h('details', { class: 'cast-family' + (c ? ' colored' : ''), style: c ? `--c:${c}` : '', open: members.some(r => r.entity.id === selected) },
+        h('summary', { class: 'cast-head', title: members.map(r => r.entity.name).join(', ') }, box,
+          look ? h('img', { class: 'cast-thumb', src: refUrl(look), alt: '' }) : h('span', { class: 'cast-ph' }, shapeIcon(members[0]!.entity.shape)),
+          h('div', { class: 'cast-main' }, h('span', { class: 'cast-name' }, f.label, h('b', { class: 'cast-x' }, ` ×${members.length}`)),
+            h('span', { class: 'cast-why' }, `${members.length} objects · one ${look ? 'image' : 'look'}${top ? ` · up to ${Math.round(top * 100)}% of frame` : ''}`)),
+          h('span', { class: 'cast-chev', 'aria-hidden': 'true' }, '›')),
+        ...members.map(row));
+    });
+  };
+  const setCount = castFamilies(set.map(r => ({ id: r.entity.id, name: r.entity.name, source: famKey(r) })), () => '').length;
   return h('div', { class: 'block' },
-    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `In this shot · ${featured.length}`), h('button', { class: 'btn ghost sm', type: 'button', hidden: !rows.length, title: 'Every cast member’s image and the project style in one board', onclick: () => openLooks() }, 'Cast images')),
-    ...featured.map(row),
-    pieces.length ? h('details', { class: 'cast-out', open: pieces.some(r => r.entity.id === selected) }, h('summary', {}, `${pieces.length} set piece${pieces.length === 1 ? '' : 's'} in frame · no Cast Card`), ...pieces.map(row)) : null,
-    out.length ? h('details', { class: 'cast-out', open: out.some(r => r.entity.id === selected) }, h('summary', {}, `${out.length} not in this shot`), ...out.map(row)) : null);
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `In this shot · ${hero.length}`), h('button', { class: 'btn ghost sm', type: 'button', hidden: !rows.length, title: 'Every cast member’s image and the project style in one board', onclick: () => openLooks() }, 'Cast images')),
+    ...rowsOf(hero),
+    set.length ? h('details', { class: 'cast-out cast-set', open: set.some(r => r.entity.id === selected) }, h('summary', {}, `Set · ${set.length} piece${set.length === 1 ? '' : 's'} in frame${setCount < set.length ? ` · ${setCount} look${setCount === 1 ? '' : 's'}` : ''}`), ...rowsOf(set)) : null,
+    out.length ? h('details', { class: 'cast-out', open: out.some(r => r.entity.id === selected) }, h('summary', {}, `${out.length} not in this shot`), ...rowsOf(out)) : null);
 }
 /** Add any image already in the project as this object's reference. */
 function linkPicker(e: Entity) {
@@ -1707,11 +1741,13 @@ function openRender() {
   const step1 = h('div', { class: 'step active' }, h('span', { class: 'n' }, '1'), h('div', {}, h('h3', {}, 'Blockout'), h('p', {}, 'The grey camera clip: every frame through the shot camera at 24 fps, the exact motion the video model follows.'), res, h('div', { style: 'height:8px' }), facts, h('div', { style: 'height:10px' }), capture, h('div', { style: 'height:8px' }), progress, status));
   const refsByFile = new Map<string, { ref: Reference; names: Set<string> }>();
   const addRef = (ref: Reference, name?: string) => { const entry = refsByFile.get(ref.file) || { ref, names: new Set<string>() }; if (name) entry.names.add(name); refsByFile.set(ref.file, entry); };
-  for (const e of project.scene.entities) { const ref = objectLooks(project, e.id)[0]; if (ref) addRef(ref, e.name); }
+  // Unique images of this shot's cast (one line per image, however many objects share it), then the shot's own images.
+  const castNow = castRows(project, s).filter(r => r.inCast).sort((a, b) => (Number(a.entity.kind === 'environment') - Number(b.entity.kind === 'environment')) || (Number(b.lead) - Number(a.lead)) || (b.coverage - a.coverage));
+  for (const { entity: e } of castNow) { const ref = objectLooks(project, e.id)[0]; if (ref) addRef(ref, e.name); }
   for (const ref of s.references) addRef(ref, entity(ref.entityId)?.name);
   const refs = [...refsByFile.values()];
   const step2 = h('div', { class: 'step' }, h('span', { class: 'n' }, '2'), h('div', {}, h('h3', {}, 'Prompt & images'), h('p', {}, 'Composed from the story, cast and camera. Edit freely.'), prompt,
-    refs.length ? h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:8px' }, ...refs.map(({ ref: r, names }) => h('div', { style: 'display:flex;gap:8px;align-items:center;font-size:12px' }, h('img', { src: refUrl(r), alt: '', style: 'width:34px;height:34px;flex:none;object-fit:cover;border-radius:6px' }), h('div', { style: 'flex:1;min-width:0;overflow-wrap:anywhere' }, h('div', {}, r.name), h('small', { class: 'muted' }, names.size > 1 ? `Shared by ${[...names].join(', ')}` : [...names][0] || (r.role === 'style' ? 'Style' : 'Shot image')))))) : h('p', { class: 'note', style: 'margin-top:8px' }, 'No images for this shot.'),
+    refs.length ? h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:8px' }, ...refs.map(({ ref: r, names }) => h('div', { style: 'display:flex;gap:8px;align-items:center;font-size:12px' }, h('img', { src: refUrl(r), alt: '', style: 'width:34px;height:34px;flex:none;object-fit:cover;border-radius:6px' }), h('div', { style: 'flex:1;min-width:0;overflow-wrap:anywhere' }, h('div', {}, r.name), h('small', { class: 'muted', title: [...names].join(', ') }, names.size > 1 ? `× ${names.size} objects` : [...names][0] || (r.role === 'style' ? 'Style' : 'Shot image')))))) : h('p', { class: 'note', style: 'margin-top:8px' }, 'No images for this shot.'),
     h('p', { class: 'note', style: 'margin-top:8px' }, 'Cast images are named in the prompt and sent to models that take images.')));
   const gen = h('div', { class: 'gen-box' }, h('p', { class: 'note', style: 'margin:0' }, 'Make the blockout first.'));
   const step3 = h('div', { class: 'step' }, h('span', { class: 'n' }, '3'), h('div', {}, h('h3', {}, 'Generate the video'), h('p', { style: 'margin:0 0 8px' }, 'Run a Comfy video model on this exact blockout. You see the quote first; nothing runs until you approve it.'), gen));
