@@ -99,7 +99,7 @@ helpMenu.append(
   h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; localStorage.removeItem('previs.coach.viewport'); coach.hidden = false; } }, h('strong', {}, 'Show tips again'), h('span', {}, 'The first-run hints')));
 const top = h('header', { class: 'ws-top' },
   h('div', { class: 'top-left' },
-    h('a', { class: 'brand', href: '/', title: 'All projects' }, h('span', { class: 'brand-mark' })),
+    h('a', { class: 'brand', href: '/', title: 'Comfy Three Previs · all projects', 'aria-label': 'Comfy Three Previs · all projects' }, h('span', { class: 'brand-mark' })),
     h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput, h('span', { hidden: true }, sceneLabel)),
     h('div', { class: 'undo-group' }, undoBtn, redoBtn)),
   modeSwitch,
@@ -354,7 +354,7 @@ function apply(next: DirectorProject) {
   selection.retain(new Set(project.scene.entities.map(e => e.id)));
   if (document.activeElement !== titleInput) titleInput.value = project.title;
   sceneLabel.textContent = project.scene.name;
-  document.title = `${project.title} · Comfy Previs`;
+  document.title = `${project.title} · Comfy Three Previs`;
   scrub.max = String(shot().duration);
   if (playhead > shot().duration) playhead = shot().duration;
   scene.sync(project, shot());

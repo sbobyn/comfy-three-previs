@@ -1,6 +1,7 @@
 {
-  "name": "comfy-previs",
+  "name": "comfy-three-previs",
   "version": "0.0.0",
+  "description": "Open-source AI previs: 3D blockouts, consistent cast images, gamepad & phone camera, AI video.",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.18.0",
