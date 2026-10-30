@@ -42,7 +42,7 @@ export function openLooksBoard(ctx: LooksCtx) {
   const presetSel = h('select', { class: 'field', 'aria-label': 'Image model' });
   const fillPresets = () => {
     const list = ctx.refgen().presets, keep = [presetSel.value, localStorage.getItem('previs.looks.model'), 'flux-3'].find(id => id && list.some(p => p.id === id)) || list[0]?.id;
-    presetSel.replaceChildren(...list.map(p => h('option', { value: p.id, selected: p.id === keep }, `${p.title}${p.backend === 'cloud' ? ' · Cloud' : ''}`)));
+    presetSel.replaceChildren(...list.map((p: any) => h('option', { value: p.id, selected: p.id === keep }, `${p.title}${p.backend === 'cloud' ? ' · Cloud' : ''}${p.pricing?.usdPerImage != null ? (p.pricing.usdPerImage ? ` · ≈ $${p.pricing.usdPerImage.toFixed(2)}/image` : ' · free') : ''}${p.maxRefs ? ` · up to ${p.maxRefs} refs` : ''}`)));
   };
   presetSel.onchange = () => { localStorage.setItem('previs.looks.model', presetSel.value); syncToolbar(); };
   const countSel = h('select', { class: 'field', 'aria-label': 'Images per object' }, ...[1, 2, 3, 4].map(n => h('option', { value: n, selected: n === 2 }, `${n} per object`)));

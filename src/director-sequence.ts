@@ -6,7 +6,7 @@ import type { DirectorProject, Shot, Asset, EditClip } from '../shared/director.
 import { progressSlot } from './director-progress'; // [live-progress]
 import { api, h, toast } from './director-common';
 import { shotCast, objectLooks } from '../shared/director.mjs';
-import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences } from './director-videogen';
+import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences, clipSeconds, modelLabel } from './director-videogen';
 import type { Def, EngineRef } from './director-videogen';
 
 export type SequenceCtx = {
@@ -81,8 +81,8 @@ export function createSequence(ctx: SequenceCtx) {
   const renderAllBtn = h('button', { class: 'btn', type: 'button', title: 'Make the blockout of every shot that has none, or whose scene changed' }, 'Make missing blockouts');
   const allReady = h('span', { class: 'sq-allready muted', role: 'status', hidden: true }, '✓ All blockouts ready');
   const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Quote selected');
-  // Rough cost on the button: rate × seconds (LTX rounds to its clip lengths).
-  const estShots = () => { const d = choice().find(x => x.id === modelSel.value); const rate = d?.pricing?.ratePerSecond; if (!rate) return ''; const secs = (s: Shot) => (d!.task === 'first-frame' ? [2, 3, 4, 5, 6, 8, 10].reduce((a, b) => (Math.abs(b - s.duration) < Math.abs(a - s.duration) ? b : a)) : s.render?.duration ?? s.duration); return ` · ≈ $${P().shots.filter(s => picked.has(s.id)).reduce((t, s) => t + rate * secs(s), 0).toFixed(2)}`; };
+  // Rough cost on the button: rate × seconds (start-still models round to the clip lengths they accept).
+  const estShots = () => { const d = choice().find(x => x.id === modelSel.value); const rate = d?.pricing?.ratePerSecond; if (!rate) return ''; return ` · ≈ $${P().shots.filter(s => picked.has(s.id)).reduce((t, s) => t + rate * clipSeconds(d, s), 0).toFixed(2)}`; };
   const useRefs = h('input', { type: 'checkbox', checked: localStorage.getItem('previs.seq.refs') !== '0' });
   useRefs.onchange = () => { localStorage.setItem('previs.seq.refs', useRefs.checked ? '1' : '0'); drawBoard(); };
   const refUrl = (file: string) => `/director-refs/${P().id}/${file}`;
@@ -325,7 +325,7 @@ export function createSequence(ctx: SequenceCtx) {
     try { gen = await api('generation'); } catch { return; }
     const keep = modelSel.value;
     modelSel.onchange = () => syncPickAll();
-    modelSel.replaceChildren(...choice().map(d => h('option', { value: d.id }, `${d.title}${referenceCapacity(gen, d.id) ? ` · up to ${referenceCapacity(gen, d.id)} images` : ''}`)));
+    modelSel.replaceChildren(...choice().map(d => h('option', { value: d.id }, `${modelLabel(d)}${referenceCapacity(gen, d.id) ? ` · up to ${referenceCapacity(gen, d.id)} images` : ''}`)));
     if (keep && choice().some(d => d.id === keep)) modelSel.value = keep;
   }
   // Every submit needs a fresh binding against the engine's current revision.
