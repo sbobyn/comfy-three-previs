@@ -233,6 +233,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   // Transform gizmo (Move / Rotate / Resize), world space.
   const gizmo = new TransformControls(persp, canvas);
   gizmo.size = 0.82; gizmo.setSpace('world');
+  gizmo.setColors(0xD9603B, 0x5E9E6E, 0x5A7FC8, 0xF0B43C); // warm palette: X tally red, Y sage, Z slate blue, active amber
   const gizmoHelper = gizmo.getHelper(); scene.add(gizmoHelper);
 
   const marquee = document.createElement('div'); marquee.className = 'marquee'; marquee.hidden = true; overlay.append(marquee);
@@ -241,6 +242,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   const trails = new Map<string, THREE.Line>();
   let entities: Entity[] = [], shot: Shot | null = null, keys: CameraKey[] = [], playhead = 0, view: 'set' | 'camera' = 'set', dirty = true, env = 'stage';
   let selectedIds: string[] = [], primary: string | null = null;
+  let hiddenIds = new Set<string>(); // client-only: hidden in the editor views, never in captures
   let live: ScenePose | null = null; // [operate] pose flown by the camera operator, overrides the shot camera while set.
   let aimOverride: { q: [number, number, number, number]; mm: number | null } | null = null; // [director-phone]
   let mode: ModalMode = 'translate', snapPref = false, ctrlHeld = false, step = 1;
@@ -289,12 +291,13 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
         const group = buildShape(e.shape, e.color); group.userData.entityId = e.id;
         group.traverse(o => { o.userData.entityId = e.id; });
         scene.add(group);
-        const label = document.createElement('div'); label.className = 'label'; labelsEl.append(label);
+        const label = document.createElement('div'); label.className = 'label'; label.dataset.id = e.id; labelsEl.append(label);
         item = { group, entity: e, label, key }; groups.set(e.id, item);
       }
       item.entity = e;
       // Never fight a live gizmo drag or modal preview.
       if (!(gizmoDrag?.starts.has(e.id)) && !(modal?.starts.has(e.id))) placeGroup(item.group, e);
+      item.group.visible = !hiddenIds.has(e.id);
       const ref = events.onRefImage(e.id);
       item.label.replaceChildren();
       if (ref) { const img = document.createElement('img'); img.src = ref; img.alt = ''; item.label.append(img); } else { const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = e.color; item.label.append(sw); }
@@ -341,7 +344,14 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     markDirty();
   }
   /** Render without editor-only overlays (gizmo). */
-  function cleanRender(r: THREE.WebGLRenderer, cam: THREE.Camera) { const v = gizmoHelper.visible; gizmoHelper.visible = false; r.render(scene, cam); gizmoHelper.visible = v; }
+  function cleanRender(r: THREE.WebGLRenderer, cam: THREE.Camera, all = false) {
+    const v = gizmoHelper.visible; gizmoHelper.visible = false;
+    const shown = all ? [...hiddenIds].map(id => groups.get(id)?.group).filter(Boolean) as THREE.Group[] : [];
+    for (const g of shown) g.visible = true;
+    r.render(scene, cam);
+    for (const g of shown) g.visible = false;
+    gizmoHelper.visible = v;
+  }
 
   function size() { return renderer.getSize(new THREE.Vector2()); }
   function updateOrtho() {
@@ -426,7 +436,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
         let top = group.position.y + hgt * group.scale.y / Math.max(0.001, entity.scale[1]) + 0.25;
         if (entity.shape === 'group') { const b = new THREE.Box3(); for (const id of withDescendants(entities, [entity.id])) { const g2 = groups.get(id); if (g2 && g2.entity.shape !== 'group') b.expandByObject(g2.group); } if (!b.isEmpty()) top = b.max.y + 0.4; }
         const v = new THREE.Vector3(group.position.x, top, group.position.z).project(world);
-        const hidden = v.z > 1 || Math.abs(v.x) > 1.1 || Math.abs(v.y) > 1.1 || (!!entity.parent && !selectedIds.includes(entity.id));
+        const hidden = hiddenIds.has(entity.id) || v.z > 1 || Math.abs(v.x) > 1.1 || Math.abs(v.y) > 1.1 || (!!entity.parent && !selectedIds.includes(entity.id));
         label.style.display = hidden ? 'none' : '';
         if (!hidden) { label.style.left = `${offsetX + ((v.x + 1) / 2) * s.x}px`; label.style.top = `${offsetY + ((1 - v.y) / 2) * s.y}px`; }
       }
@@ -455,7 +465,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     return ray;
   }
   function pick(clientX: number, clientY: number): string | null {
-    const found = hit(clientX, clientY).intersectObjects([...groups.values()].map(g => g.group), true).find(i => i.object.userData.entityId && (i.object as THREE.Mesh).isMesh && i.object.visible);
+    const found = hit(clientX, clientY).intersectObjects([...groups.values()].map(g => g.group), true).find(i => i.object.userData.entityId && (i.object as THREE.Mesh).isMesh && i.object.visible && !hiddenIds.has(i.object.userData.entityId));
     return (found?.object.userData.entityId as string) ?? null;
   }
 
@@ -622,14 +632,14 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   function capture(t: number, width: number, height: number, type = 'image/png', quality?: number) {
     capturer.setPixelRatio(1); capturer.setSize(width, height, false);
     const cam = shotCam.clone(); cam.aspect = width / height; poseCamera(cam, pose(t));
-    applyTime(sceneTime(t)); cleanRender(capturer, cam); applyTime(sceneTime());
+    applyTime(sceneTime(t)); cleanRender(capturer, cam, true); applyTime(sceneTime());
     return captureCanvas.toDataURL(type, quality);
   }
   function thumbnail(other: Shot, width = 176, height = 99) {
     capturer.setPixelRatio(1); capturer.setSize(width, height, false);
     const cam = shotCam.clone(); cam.aspect = width / height;
     poseCamera(cam, shotCameraAt(other, entities, other.duration * 0.5));
-    applyTime((other.start || 0) + other.duration * 0.5); cleanRender(capturer, cam); applyTime(sceneTime());
+    applyTime((other.start || 0) + other.duration * 0.5); cleanRender(capturer, cam, true); applyTime(sceneTime());
     return captureCanvas;
   }
   function quaternionAt(t: number): [number, number, number, number] {
@@ -649,6 +659,8 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     setSnap(on: boolean) { snapPref = on; attachGizmo(); },
     setCtrl(on: boolean) { if (ctrlHeld !== on) { ctrlHeld = on; gizmo.setTranslationSnap(snapping() ? step : null); if (modal) previewModal(); } },
     setGridVisible(on: boolean) { grid.visible = on; markDirty(); },
+    /** Hide objects in the editor views only (captures, thumbnails and renders still include them). */
+    setHidden(ids: Iterable<string>) { hiddenIds = new Set(ids); for (const [id, item] of groups) item.group.visible = !hiddenIds.has(id); markDirty(); },
     gridStep: () => step,
     beginModal, modalKey, finishModal, modalActive: () => modal !== null,
     pointerInViewport: () => pointerInside, lastPointer: () => lastPointer,

@@ -148,7 +148,9 @@ function padText(): string {
   return `${p.id.replace(/\s*\(.*?Vendor.*?\)/i, '').slice(0, 48)} · ${p.mapping === 'standard' ? 'standard mapping' : 'unmapped — buttons may differ'}${pads.length > 1 ? ` · ${pads.length} pads` : ''}`;
 }
 
+const listeners = new Set<() => void>();
 function refresh() {
+  for (const f of listeners) f();
   const s = host.shot();
   if (takeShot !== s.id) { positionTake = aimTake = null; reviewing = null; takeShot = s.id; }
   const src = opts.pass === 'position' ? opts.source : opts.aim;
@@ -425,6 +427,29 @@ export function operateBlock(_shot: Shot): HTMLElement {
   if (phase === 'off') buildPanel(); else refresh();
   return panel;
 }
+
+export type FlyDevice = 'keyboard' | 'gamepad' | 'phone';
+/** The transport's hero "Fly camera" button drives the same Operate flow as the panel. */
+export const fly = {
+  /** Take the shot camera with a device: keyboard/gamepad fly a position pass, phone aims along the shot's path. */
+  start(device: FlyDevice) {
+    if (phase === 'live') { release(); return; }
+    if (device === 'phone') { opts.pass = 'aim'; save('pass', 'aim'); opts.aim = 'phone'; save('aim', 'phone'); }
+    else { opts.pass = 'position'; save('pass', 'position'); opts.source = device; save('source', device); }
+    buildPanel(); engage(); refresh();
+  },
+  /** Choose the device without taking control (a gamepad's A then arms from idle). */
+  setDevice(device: FlyDevice) {
+    if (phase === 'live') return;
+    if (device === 'phone') { opts.pass = 'aim'; save('pass', 'aim'); opts.aim = 'phone'; save('aim', 'phone'); }
+    else { opts.pass = 'position'; save('pass', 'position'); opts.source = device; save('source', device); }
+    buildPanel();
+  },
+  cycle() { cycle(); },
+  release() { release(); },
+  state: () => ({ phase, rec: phase === 'live' ? recorder.state : 'idle', device: (opts.pass === 'aim' ? opts.aim : opts.source) as string, pad: !!pickPad(), help: keyHelp() }),
+  onChange(f: () => void) { listeners.add(f); },
+};
 
 /** Test hook for browser checks: current operate state. */
 (window as any).__operate = { state: () => ({ phase, recorder: recorder.state, pass: opts.pass, positionTake: positionTake?.length ?? 0, aimTake: aimTake?.length ?? 0, reviewing }) };

@@ -78,6 +78,9 @@ class PhoneLink {
 let link: PhoneLink | null = null;
 const shared = () => (link ??= new PhoneLink());
 
+/** True while a paired phone is streaming its orientation. */
+export function phoneConnected() { return !!link && link.aim.connected(); }
+
 /** Tells the phone what the desktop is doing (camera position, lens, recording) for its buttons/readout. */
 export function setPhoneRig(rig: Partial<Rig>) { Object.assign(shared().rig, rig); }
 
