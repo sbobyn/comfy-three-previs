@@ -116,7 +116,7 @@ export function createJobTracker({ sources, intervalMs = 5000, maxIntervalMs = 3
     snapshot() {
       const at = now(), jobs = [];
       for (const source of sources) for (const job of source.list()) {
-        if (DRAFT.has(job.status) && !job.lastAttempt) continue;
+        if ((DRAFT.has(job.status) && !job.lastAttempt) || job.dismissedAt) continue;
         const active = source.isActive(job), entry = entries.get(keyOf(source.name, job.id));
         const start = startOf(job) ?? at, end = active ? at : endOf(job) ?? at;
         if (!active && at - end > recentMs) continue;

@@ -98,7 +98,14 @@ export async function openGeneration(root, project, options = {}) {
     if (job.status === 'submitting') { job.status = 'uncertain'; job.message = 'Stopped during dispatch. Backend execution may continue; never resubmit this request.'; }
     // Interrupted while uploading inputs: no prompt was sent, so the request returns to its quote and can be resubmitted as is.
     if (job.status === 'uploading') { job.status = 'quoted'; job.promptId = null; job.lastAttempt = { at: now(), error: 'Server stopped while uploading inputs; nothing was sent', httpStatus: null, code: 'interrupted' }; job.message = 'Interrupted before dispatch; nothing was sent. Submit again to resume.'; }
-    if (requiresAttachment && job.status === 'completed' && !job.attachment?.completedAt) job.status = 'attaching';
+    // Receipts written before attachment was recorded: re-attach only when the legacy library lacks a result
+    // (the director copies results lazily on its own sync, so an archived project never blocks this).
+    if (requiresAttachment && job.status === 'completed' && !job.attachment?.completedAt) {
+      if (options.attached?.(job)) job.attachment = { completedAt: job.completedAt || job.finishedAt || now(), migrated: true };
+      else job.status = 'attaching';
+    }
+    // Stopped earlier because its project was archived or deleted: retry once more, so it can become orphaned (terminal) or complete.
+    if (requiresAttachment && job.status === 'recovery-required' && job.failure?.phase === 'attachment' && /Unknown project/.test(job.failure.detail || '')) { job.status = 'attaching'; job.recovery = { ...job.recovery, attachment: 0 }; }
     await persist(job);
   }
   const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root);
@@ -339,6 +346,8 @@ export async function openGeneration(root, project, options = {}) {
       await attachResults(structuredClone(job));
       return persist({ ...job, status: 'completed', completedAt: now(), attachment: { completedAt: now() }, failure: null, tracking: { ...job.tracking, error: null }, message: 'Outputs collected and attached. Visual quality still requires review.' });
     } catch (error) {
+      // Its project was archived or deleted: terminal, not stuck. Outputs stay in the library; the user can dismiss the row.
+      if (error.orphaned) return persist({ ...job, status: 'orphaned', orphanedAt: now(), ...(job.completedAt ? {} : { finishedAt: now() }), failure: null, tracking: { ...job.tracking, error: null }, message: 'Its project was archived or deleted. Outputs are kept in the library; nothing was resubmitted.' });
       return persist({ ...job, status: recoveryAttempts(job, 'attachment') >= RECOVERY_ATTEMPTS ? 'recovery-required' : 'attaching', failure: { phase: 'attachment', detail: errorDetail(error) }, tracking: { ...job.tracking, error: errorDetail(error) }, message: 'Output attachment failed. Only attachment of existing results may be retried; no resubmission.' });
     }
   }
@@ -351,5 +360,11 @@ export async function openGeneration(root, project, options = {}) {
     if (queue.queue_running.length || queue.queue_pending.length) fail('Backend queue must be empty before closing an uncertain receipt', 409);
     return persist({ ...checked, status: 'closed', closedAt: now(), message: 'Operator reviewed backend history and confirmed idle. Outcome remains unknown; no cancellation or retry.' });
   }
-  return { setAttachment: fn => { attachResults = fn; }, prepare: serial(input => prepare(input)), quote: serial(input => prepare(input, true)), submit: serial(submit), track: serial(track), reconcile: serial(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect(), isActive: active, kindOf: generationKind, expectedSeconds, label: generationLabel, duplicateOf: job => duplicateOf(job) };
+  // Hides an orphaned receipt from the jobs list; the receipt and its outputs stay on disk.
+  async function dismiss(input) {
+    const job = get(input.jobId);
+    if (job.status !== 'orphaned') fail('Only a job whose project was archived or deleted can be dismissed', 409);
+    return job.dismissedAt ? job : persist({ ...job, dismissedAt: now() });
+  }
+  return { setAttachment: fn => { attachResults = fn; }, dismiss: serial(dismiss), prepare: serial(input => prepare(input)), quote: serial(input => prepare(input, true)), submit: serial(submit), track: serial(track), reconcile: serial(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect(), isActive: active, kindOf: generationKind, expectedSeconds, label: generationLabel, duplicateOf: job => duplicateOf(job) };
 }

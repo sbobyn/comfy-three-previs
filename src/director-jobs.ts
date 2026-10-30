@@ -21,7 +21,7 @@ type Api = <T = any>(path: string, body?: unknown) => Promise<T>;
 type Options = { projectId: string; api: Api; onOpenShot?: (shotId: string) => void; shots?: () => { id: string; title: string }[] };
 
 // ---- pure helpers (tests/director-jobs.test.mjs slices this block) ----
-const DONE = new Set(['completed', 'failed', 'closed', 'invalidated', 'cancelled']);
+const DONE = new Set(['completed', 'failed', 'closed', 'invalidated', 'cancelled', 'orphaned']);
 export const isActive = (j: JobRow) => !DONE.has(j.status);
 /** Red: stuck, uncertain, or running past twice the expected time. */
 export const needsAttention = (j: JobRow) => isActive(j) && (j.stuck || j.uncertain || j.status === 'uncertain' || (j.expectedSeconds > 0 && j.ageSeconds > 2 * j.expectedSeconds));
@@ -167,6 +167,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     ? api('director/refgen/track', { projectId: j.projectId, requestId: j.id })
     : api('generation/track', { jobId: j.id }));
   const reconcile = (j: JobRow) => act(`rec:${j.id}`, async () => { await api('generation/reconcile', { jobId: j.id, backendIdle: true, historyReviewed: true }); reconcileOpen.delete(j.id); recChecks.delete(j.id); }, 'Receipt closed: outcome unknown, nothing was cancelled or retried');
+  const dismiss = (j: JobRow) => act(`dis:${j.id}`, () => api('generation/dismiss', { jobId: j.id }));
   const batchCall = (b: BatchSummary, what: 'cancel' | 'resume') => act(`${what}:${b.id}`, () => api(`director/batch/${what}`, { id: b.id }), what === 'cancel' ? 'Batch cancelled' : 'Batch resumed');
 
   function shotOf(j: JobRow) {
@@ -187,7 +188,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
       active ? `${dur(j.ageSeconds)} of ~${dur(j.expectedSeconds)}` : j.createdAt ? since(j.createdAt, now) : '',
       active ? `checked ${since(j.lastTrackedAt, now)}${j.trackCount ? ` · ×${j.trackCount}` : ''}` : j.status === 'completed' && j.ageSeconds ? `took ${dur(j.ageSeconds)}` : '',
       j.costUsd != null ? `$${j.costUsd.toFixed(2)}` : '',
-      j.projectId && j.projectId !== projectId ? 'other project' : '',
+      j.status === 'orphaned' ? 'project archived or deleted · output kept' : j.projectId && j.projectId !== projectId ? 'other project' : '',
     ].filter(Boolean);
     const shot = onOpenShot ? shotOf(j) : null;
     const tracking = busy.has(`track:${j.id}`);
@@ -195,7 +196,8 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     const actions = h('div', { class: 'jr-act' },
       active ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `track:${j.id}`, disabled: tracking, onclick: () => void trackNow(j) }, tracking ? 'Checking…' : 'Track now') : null,
       canReconcile ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `rec:${j.id}`, 'aria-expanded': String(reconcileOpen.has(j.id)), onclick: () => { if (reconcileOpen.has(j.id)) reconcileOpen.delete(j.id); else reconcileOpen.add(j.id); renderSheet(); } }, 'Reconcile…') : null,
-      shot ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { sheet.close(); onOpenShot!(shot); } }, 'Open shot') : null);
+      shot ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { sheet.close(); onOpenShot!(shot); } }, 'Open shot') : null,
+      j.status === 'orphaned' ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `dis:${j.id}`, disabled: busy.has(`dis:${j.id}`), onclick: () => void dismiss(j) }, 'Dismiss') : null);
     // On a job that is still active, a failure is the last status check, not the job: show it quietly.
     const where = j.failure ? `${j.failure.phase || 'unknown step'}${j.failure.httpStatus ? ` · HTTP ${j.failure.httpStatus}` : ''}` : '';
     const detail = j.failure?.detail || (active ? j.trackingError : '') || '';
