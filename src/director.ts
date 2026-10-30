@@ -1,7 +1,7 @@
 import './director.css';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
-import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64 } from './director-common';
+import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge } from './director-common';
 import type { Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
 import { captureShotVideo as captureVideo } from './director-capture';
@@ -25,6 +25,8 @@ import { moveHelp } from './director-camhelp'; // [camhelp]
 import { mountJobsPip } from './director-jobs'; // [jobs]
 import { progressSlot, acquireProgress } from './director-progress'; // [live-progress]
 import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
+import { beforeAfter } from './director-media';
+import { dialogEstimate, castFamilies } from './director-design-core';
 import { initMobile } from './director-mobile'; // [mobile]
 import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY, moments, useTakeEntry, keyFrameCopy } from './director-desktop-core';
 import type { ShotPips } from './director-desktop-core';
@@ -126,7 +128,7 @@ const top = h('header', { class: 'ws-top' },
     h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput),
     h('div', { class: 'undo-group' }, undoBtn, redoBtn)),
   modeSwitch,
-  h('div', { class: 'right' }, h('div', { class: 'top-strip' }, topStatus, claudeChip), topGo, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu)));
+  h('div', { class: 'right' }, DEMO ? demoBadge() : null, h('div', { class: 'top-strip' }, topStatus, claudeChip), topGo, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu)));
 document.addEventListener('pointerdown', ev => { if (!helpMenu.hidden && !(ev.target as HTMLElement).closest?.('.menu-wrap')) helpMenu.hidden = true; });
 
 const shotList = h('div', { class: 'shots', role: 'listbox', 'aria-label': 'Shots' });
@@ -176,7 +178,7 @@ const snapBtn = h('button', { class: 'btn sm', type: 'button', 'aria-pressed': '
 const hud = h('div', { class: 'modal-hud', hidden: true, role: 'status' });
 const helpCard = h('div', { class: 'help-card', hidden: true, role: 'dialog', 'aria-label': 'Viewport controls' });
 const addPopup = h('div', { class: 'add-popup', hidden: true, role: 'menu', 'aria-label': 'Add object' });
-const dropHint = h('div', { class: 'drop-hint', hidden: true }, 'Drop an image on an object to add it as that object’s look');
+const dropHint = h('div', { class: 'drop-hint', hidden: true }, 'Drop an image on an object to add it as that object’s cast image');
 const monToggle = h('button', { class: 'mon-toggle', type: 'button', 'aria-pressed': 'true', title: 'Show or hide the shot monitor' });
 const coach = h('div', { class: 'coach', role: 'note', hidden: localStorage.getItem('previs.coach.viewport') === '1' },
   h('span', { class: 'coach-dot', 'aria-hidden': 'true' }),
@@ -216,6 +218,11 @@ const stage = h('section', { class: 'stage' }, viewport, h('div', { class: 'tran
 const shotPane = h('div', { class: 'pane shotpane' });
 const objectPane = h('div', { class: 'pane shotpane objectpane', hidden: true });
 const readiness = h('div', { class: 'ready', role: 'status', 'aria-label': 'Shot readiness' });
+// Fade only the edge with more pills beyond it; a vertical wheel scrolls the strip sideways.
+const readinessFade = () => { const max = readiness.scrollWidth - readiness.clientWidth; readiness.classList.toggle('at-start', readiness.scrollLeft <= 1); readiness.classList.toggle('at-end', readiness.scrollLeft >= max - 1); };
+readiness.addEventListener('scroll', readinessFade, { passive: true });
+readiness.addEventListener('wheel', ev => { if (readiness.scrollWidth <= readiness.clientWidth || Math.abs(ev.deltaX) > Math.abs(ev.deltaY)) return; ev.preventDefault(); readiness.scrollLeft += ev.deltaY; }, { passive: false });
+new ResizeObserver(readinessFade).observe(readiness);
 const actHint = h('div', { class: 'act-hint', 'aria-live': 'polite' });
 const actionBar = h('div', { class: 'side-act', role: 'toolbar', 'aria-label': 'Shot actions' }, actHint, h('div', { class: 'act-btns' }, previewBtn, renderBtn));
 const side = h('aside', { class: 'side' }, h('div', { class: 'side-head' }, readiness), h('div', { class: 'side-body', style: 'min-height:0;display:grid' }, shotPane, objectPane), actionBar);
@@ -224,6 +231,7 @@ const wsBody = h('div', { class: 'ws-body' }, rail, stage, side);
 const sequence = createSequence({
   project: () => project, apply: p => apply(p), runEntry: async e => { await runEntry(e); }, signature, assetUrl,
   thumbnail: (s, w, hh) => scene.thumbnail(s, w, hh),
+  boxes: (s, t) => scene.boxesAt(s, t),
   prompt: s => shotPrompt(project, s, 'video'),
   capture: (s, o) => captureShotVideo(s, { width: 1280, height: 720, prompt: shotPrompt(project, s, 'video'), ...o }),
   openShot: id => { selectShot(id); setStep('shoot'); },
@@ -775,6 +783,7 @@ function renderReadiness() {
     item('cast', need ? 'warn' : cast.length ? 'ok' : 'none', 'Cast', h('span', { class: 'rd-cast' }, ...cast.slice(0, 5).map(r => h('i', { style: `background:${KIND_COLORS[r.entity.kind]}`, title: r.entity.name })), `${cast.length}${need ? ` · ${need} need image${need === 1 ? '' : 's'}` : ''}`), need ? `${need} of ${cast.length} cast members have no image yet` : 'Every cast member has an image'),
     item('video', edited ? 'warn' : 'ok', 'Prompt', edited ? 'edited' : 'auto', edited ? 'You edited this shot’s prompt; your text is used' : 'The prompt is composed from the cast, camera and story'),
     item('video', vids ? 'ok' : 'none', 'Video', vids ? `✓${vids > 1 ? ` ${vids}` : ''}` : '–', vids ? `${vids} generated video${vids === 1 ? '' : 's'}` : 'No video yet: Generate video (bottom of this panel)'));
+  readinessFade();
   renderActionBar();
 }
 /** Action bar: shot number, blockout state and cost on the left; Preview and Generate on the right. */
@@ -1066,7 +1075,7 @@ async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' 
   };
   draw();
   const dlg = h('dialog', { class: 'assets', id: 'assets-dialog', 'aria-labelledby': 'assets-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Design every cast member’s look and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Every cast member’s image and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'assets-body' }, seg, h('p', { class: 'note', style: 'margin:0' }, 'Everything here lives in this project’s own folder, so exporting it carries videos, films, blockouts and images together.'), grid));
   document.body.append(dlg); dlg.showModal();
 }
@@ -1111,12 +1120,21 @@ function castBlock(s: Shot) {
     else if (!r.inCast && !r.auto) next.include.push(id); // camera doesn't see it, but put it in
     void runEntry({ label: r.inCast ? 'Remove from cast' : 'Add to cast', redo: [{ op: 'update_shot', id: s.id, patch: { cast: next } }], undo: [{ op: 'update_shot', id: s.id, patch: { cast: before } }] });
   };
+  // Tick or untick a whole look family in one step.
+  const toggleAll = (list: (typeof rows)[number][], on: boolean) => {
+    const before = normalizeCast(s.cast), next = normalizeCast(s.cast);
+    for (const r of list) {
+      const id = r.entity.id; next.include = next.include.filter(x => x !== id); next.exclude = next.exclude.filter(x => x !== id);
+      if (!on && r.auto) next.exclude.push(id); else if (on && !r.auto) next.include.push(id);
+    }
+    void runEntry({ label: on ? 'Add to cast' : 'Remove from cast', redo: [{ op: 'update_shot', id: s.id, patch: { cast: next } }], undo: [{ op: 'update_shot', id: s.id, patch: { cast: before } }] });
+  };
   const colors = objectColors(project, s);
-  // Lead with what the prompt is about: characters, vehicles, props, then described scenery. Bare set pieces fold away.
+  // Hero cast on top (the subject, then characters, vehicles, props by frame coverage); the set folds into one
+  // group; objects that share one image collapse into a single family row ("Turns 3–4 · surface ×12").
   const ORDER = ['character', 'vehicle', 'prop', 'environment'];
-  const described = (r: (typeof rows)[number]) => r.entity.kind !== 'environment' || !!castCard(project, r.entity.id)?.description || objectLooks(project, r.entity.id).length > 0;
-  const featured = inCast.filter(described).sort((a, b) => ORDER.indexOf(a.entity.kind) - ORDER.indexOf(b.entity.kind));
-  const pieces = inCast.filter(r => !described(r));
+  const hero = inCast.filter(r => r.entity.kind !== 'environment').sort((a, b) => (Number(b.lead) - Number(a.lead)) || (ORDER.indexOf(a.entity.kind) - ORDER.indexOf(b.entity.kind)) || (b.coverage - a.coverage));
+  const set = inCast.filter(r => r.entity.kind === 'environment').sort((a, b) => b.coverage - a.coverage);
   const row = (r: (typeof rows)[number]) => {
     const card = castCard(project, r.entity.id)!, looks = objectLooks(project, r.entity.id), look = looks[0];
     const open = selected === r.entity.id, c = colors.get(r.entity.id);
@@ -1127,7 +1145,7 @@ function castBlock(s: Shot) {
     const id = r.entity.id;
     return h('div', { class: 'cast-row' + (r.inCast ? ' in' : '') + (open ? ' open' : '') + (c ? ' colored' : ''), 'data-cast': id, style: c ? `--c:${c}` : '',
       onmouseenter: () => { scene.setHover(id); highlightPrompt(id); }, onmouseleave: () => { scene.setHover(null); highlightPrompt(selected); } },
-      h('div', { class: 'cast-head', role: 'button', tabindex: 0, 'aria-expanded': String(open), title: open ? 'Close' : 'Open: Cast Card, images and generation',
+      h('div', { class: 'cast-head', role: 'button', tabindex: 0, 'aria-expanded': String(open), title: open ? 'Close' : 'Open: description, cast images and generation',
         onkeydown: (ev: KeyboardEvent) => { if (ev.target === ev.currentTarget && ['Enter', ' '].includes(ev.key)) { ev.preventDefault(); ev.stopPropagation(); (ev.currentTarget as HTMLElement).click(); } },
         onclick: () => { if (selected === id) selection.clear(); else { selection.set([id], id); if (scene.view() === 'set') scene.pivotOn(id); openObject(); } } },
         box,
@@ -1139,11 +1157,36 @@ function castBlock(s: Shot) {
         h('span', { class: 'cast-chev', 'aria-hidden': 'true' }, '›')),
       h('div', { class: 'cast-slot', 'data-cast-slot': id }));
   };
+  // A family is every object whose primary image is the same file (shared looks, or one image linked to many).
+  const famKey = (r: (typeof rows)[number]) => objectLooks(project, r.entity.id)[0]?.file || r.entity.id;
+  const famName = (key: string) => { const owner = entity((project.scene.references || []).find(x => x.file === key)?.entityId || key); return owner ? owner.name.replace(/[\s·\-–—]*\d+$/, '') : 'Shared image'; };
+  /** Rows, with every look family of two or more collapsed into one expandable row. */
+  const rowsOf = (list: (typeof rows)[number][]) => {
+    const byId = new Map(list.map(r => [r.entity.id, r]));
+    const fams = castFamilies(list.map(r => ({ id: r.entity.id, name: r.entity.name, source: famKey(r) })), famName);
+    return fams.map(f => {
+      const members = f.ids.map(id => byId.get(id)!);
+      if (members.length === 1) return row(members[0]!);
+      const look = objectLooks(project, members[0]!.entity.id)[0], c = colors.get(members[0]!.entity.id), ins = members.filter(r => r.inCast).length;
+      const box = h('input', { type: 'checkbox', checked: ins === members.length, 'aria-label': `${f.label}: all ${members.length} in this shot`, title: `Tick or untick all ${members.length}` });
+      box.indeterminate = ins > 0 && ins < members.length;
+      box.onchange = () => toggleAll(members, box.checked); box.onclick = (ev: Event) => ev.stopPropagation();
+      const top = Math.max(...members.map(r => r.coverage));
+      return h('details', { class: 'cast-family' + (c ? ' colored' : ''), style: c ? `--c:${c}` : '', open: members.some(r => r.entity.id === selected) },
+        h('summary', { class: 'cast-head', title: members.map(r => r.entity.name).join(', ') }, box,
+          look ? h('img', { class: 'cast-thumb', src: refUrl(look), alt: '' }) : h('span', { class: 'cast-ph' }, shapeIcon(members[0]!.entity.shape)),
+          h('div', { class: 'cast-main' }, h('span', { class: 'cast-name' }, f.label, h('b', { class: 'cast-x' }, ` ×${members.length}`)),
+            h('span', { class: 'cast-why' }, `${members.length} objects · one ${look ? 'image' : 'look'}${top ? ` · up to ${Math.round(top * 100)}% of frame` : ''}`)),
+          h('span', { class: 'cast-chev', 'aria-hidden': 'true' }, '›')),
+        ...members.map(row));
+    });
+  };
+  const setCount = castFamilies(set.map(r => ({ id: r.entity.id, name: r.entity.name, source: famKey(r) })), () => '').length;
   return h('div', { class: 'block' },
-    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `In this shot · ${featured.length}`), h('button', { class: 'btn ghost sm', type: 'button', hidden: !rows.length, title: 'Every cast member’s image and the project style in one board', onclick: () => openLooks() }, 'Cast images')),
-    ...featured.map(row),
-    pieces.length ? h('details', { class: 'cast-out', open: pieces.some(r => r.entity.id === selected) }, h('summary', {}, `${pieces.length} set piece${pieces.length === 1 ? '' : 's'} in frame · no Cast Card`), ...pieces.map(row)) : null,
-    out.length ? h('details', { class: 'cast-out', open: out.some(r => r.entity.id === selected) }, h('summary', {}, `${out.length} not in this shot`), ...out.map(row)) : null);
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `In this shot · ${hero.length}`), h('button', { class: 'btn ghost sm', type: 'button', hidden: !rows.length, title: 'Every cast member’s image and the project style in one board', onclick: () => openLooks() }, 'Cast images')),
+    ...rowsOf(hero),
+    set.length ? h('details', { class: 'cast-out cast-set', open: set.some(r => r.entity.id === selected) }, h('summary', {}, `Set · ${set.length} piece${set.length === 1 ? '' : 's'} in frame${setCount < set.length ? ` · ${setCount} look${setCount === 1 ? '' : 's'}` : ''}`), ...rowsOf(set)) : null,
+    out.length ? h('details', { class: 'cast-out', open: out.some(r => r.entity.id === selected) }, h('summary', {}, `${out.length} not in this shot`), ...rowsOf(out)) : null);
 }
 /** Add any image already in the project as this object's reference. */
 function linkPicker(e: Entity) {
@@ -1152,7 +1195,7 @@ function linkPicker(e: Entity) {
   const seen = new Set<string>(), list = pool.filter(r => !seen.has(r.file) && seen.add(r.file));
   if (!list.length) return null;
   return h('details', { class: 'cc-link' }, h('summary', {}, 'Add from project images'),
-    h('div', { class: 'cc-grid' }, ...list.slice(0, 40).map(r => h('button', { type: 'button', title: `${r.name}${r.entityId ? ` · ${entity(r.entityId)?.name}` : ''}`, onclick: () => void edit([{ op: 'link_look', entityId: e.id, referenceId: r.id }]).then(() => toast(`Added to ${e.name}’s Cast Card`)).catch(() => {}) }, h('img', { src: refUrl(r), alt: r.name, loading: 'lazy' })))));
+    h('div', { class: 'cc-grid' }, ...list.slice(0, 40).map(r => h('button', { type: 'button', title: `${r.name}${r.entityId ? ` · ${entity(r.entityId)?.name}` : ''}`, onclick: () => void edit([{ op: 'link_look', entityId: e.id, referenceId: r.id }]).then(() => toast(`Added to ${e.name}’s cast images`)).catch(() => {}) }, h('img', { src: refUrl(r), alt: r.name, loading: 'lazy' })))));
 }
 function renderObjectPane() {
   if (objectPane.contains(document.activeElement) && objectPane.dataset.id === (selected || '')) return;
@@ -1235,7 +1278,7 @@ function renderObjectPane() {
       h('p', { class: 'note', style: 'margin:0' }, 'Sent with every shot that includes ', h('strong', {}, e.name), '; each video model takes a limited number of images.')),
     h('div', { class: 'block cast-card' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Appearance')),
-      h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s Cast Card: ${shared.notes || '—'}`) : null, notes),
+      h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s description: ${shared.notes || '—'}`) : null, notes),
       h('label', { class: 'cc-field' }, h('span', {}, 'Style notes'), styleNotes),
       h('div', { class: 'ob-style' }, h('span', { class: 'muted' }, 'Project style: '), styleText ? h('span', {}, styleText) : h('span', { class: 'muted' }, 'not set'), h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openLooks() }, styleText ? 'Edit' : 'Set style')),
       h('p', { class: 'note', style: 'margin:0' }, 'Description and style go into this object’s images and every shot it appears in. Its primary image is sent with those shots’ videos.')),
@@ -1245,7 +1288,7 @@ function renderObjectPane() {
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Image request'), editedTag, h('button', { class: 'btn ghost sm', type: 'button', disabled: !form.edited, onclick: () => { form.edited = false; rerender(); } }, 'Reset')),
       viewChips, prompt,
       h('div', { class: 'grid2' }, h('label', {}, 'Model', presetSel), h('label', {}, 'Images', count)),
-      preset ? h('p', { class: 'note', style: 'margin:0' }, preset.note, preset.backend === 'cloud' && !refgen.cloudCredential ? ' Cloud key not configured on this server — quoting will fail.' : '') : null,
+      preset ? h('p', { class: 'note', style: 'margin:0' }, preset.note, preset.backend === 'cloud' && !refgen.cloudCredential && !DEMO ? ' Cloud key not configured on this server — quoting will fail.' : '') : null,
       h('label', { style: 'display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted)' }, 'Aspect', aspect),
       h('details', { class: 'ob-more' }, h('summary', {}, 'Seed', preset?.backend === 'local' ? ' & checkpoint' : ''), h('div', { class: 'grid2' }, h('label', {}, 'Seed', seed), preset?.backend === 'local' ? h('label', {}, 'Checkpoint', ckpt) : h('span'))),
       h('div', { style: 'display:flex;gap:8px;align-items:center' }, quoteBtn),
@@ -1370,7 +1413,7 @@ async function uploadRefs(files: File[], entityId: string | null) {
     try {
       const r = await api('director/reference', { projectId, shotId, name: f.name, data: await readFileBase64(f), entityId, ...(entityId ? { scope: 'object' } : {}) });
       apply(r.project);
-      if (entityId) toast(`${f.name} added as a look for ${entity(entityId)?.name}`);
+      if (entityId) toast(`${f.name} added as a cast image for ${entity(entityId)?.name}`);
     } catch (e) { toast((e as Error).message, true); }
   }
 }
@@ -1383,7 +1426,7 @@ function dropTarget(el: HTMLElement, onFiles: (files: File[]) => void, onState?:
 }
 
 // Drop an image straight onto an object in the viewport to link it.
-viewport.addEventListener('dragover', ev => { if (ev.dataTransfer?.types.includes('Files')) { ev.preventDefault(); dropHint.hidden = false; const id = scene.pick(ev.clientX, ev.clientY); dropHint.textContent = id ? `Add as a look for ${entity(id)?.name}` : 'Drop on an object to link it — or anywhere to add a shot reference'; } });
+viewport.addEventListener('dragover', ev => { if (ev.dataTransfer?.types.includes('Files')) { ev.preventDefault(); dropHint.hidden = false; const id = scene.pick(ev.clientX, ev.clientY); dropHint.textContent = id ? `Add as a cast image for ${entity(id)?.name}` : 'Drop on an object to link it — or anywhere to add a shot reference'; } });
 viewport.addEventListener('dragleave', ev => { if (!viewport.contains(ev.relatedTarget as Node)) dropHint.hidden = true; });
 viewport.addEventListener('drop', ev => { ev.preventDefault(); dropHint.hidden = true; const id = scene.pick(ev.clientX, ev.clientY); void uploadRefs(Array.from(ev.dataTransfer?.files || []), id).then(() => { if (id) select(id); }); });
 
@@ -1680,8 +1723,34 @@ function openRender() {
   const s = shot(), idx = project.shots.indexOf(s);
   let width = 1280, height = 720;
   const frames = () => Math.min(120, Math.max(2, Math.round(s.duration * 24)));
-  const preview = h('img', { alt: 'Shot camera preview', src: scene.capture(s.duration / 2, 1280, 720, 'image/jpeg', 0.85) });
+  // The visual: blockout ↔ start still on one frame when the shot has a start still, else the blockout itself.
+  const start = [...s.references].reverse().find(r => r.role === 'frame' && (r.note === 'key frame start' || !r.note)) || null;
+  const seam = start ? beforeAfter({ before: scene.capture(0, 1280, 720, 'image/jpeg', 0.85), after: refUrl(start), kind: 'image', labels: ['Blockout', 'Start still'], sweep: 'once', alt: 'The blockout’s first frame on the left and the start still on the right. Drag the seam or use the arrow keys.' }) : null;
+  const preview = seam || h('img', { alt: 'Shot camera preview', src: scene.capture(s.duration / 2, 1280, 720, 'image/jpeg', 0.85) });
   const media = h('div', { class: 'render-media' }, preview);
+  const diagram = h('div', { class: 'rg-diagram' });
+  const visual = h('div', { class: 'render-visual' }, media, h('p', { class: 'rg-cam muted' }, describeCamera(s, project.scene.entities)), diagram);
+  // Header row: model · runs on · estimate · Generate. Generate makes the blockout if needed, then quotes; nothing runs before approval.
+  const hWf = h('select', { class: 'field', 'aria-label': 'Video model' }, h('option', {}, 'Loading models…'));
+  const hBackend = h('select', { class: 'field', 'aria-label': 'Runs on' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
+  const hEst = h('span', { class: 'rg-est mono', title: 'Rate × shot length. The quote shows the exact estimate before anything runs.' }, '');
+  const hGo = h('button', { class: 'btn cta', type: 'button', title: 'Make the blockout if needed, then quote. Nothing runs until you approve the quote.' }, 'Generate ▸');
+  const headModel = () => {
+    const st = genCache, def: any = st ? videoChoices(st as any).find(d => d.id === hWf.value) : null; if (!st || !def) return;
+    const refs = referenceCapacity(st as any, def.id) ? plannedReferences(project, s, st as any, def.id) : [];
+    hEst.textContent = dialogEstimate(def, s.duration, hBackend.value);
+    const fig = modelInputsDiagram(def.task, { twoFrames: def.task === 'first-frame' && !!def.inputs?.lastFrame, castImages: refs.length });
+    diagram.replaceChildren(fig, h('p', {}, h('b', {}, 'What this model takes. '), fig.querySelector('[aria-label]')?.getAttribute('aria-label') || ''));
+  };
+  hWf.addEventListener('change', () => { localStorage.setItem(modelKey(s), hWf.value); hBackend.value = hWf.value.startsWith('wan-') ? 'local' : 'cloud'; headModel(); });
+  hBackend.addEventListener('change', headModel);
+  const fillModels = () => {
+    if (!genCache) return;
+    hWf.replaceChildren(...videoChoices(genCache as any).map(d => h('option', { value: d.id }, modelLabel(d))));
+    const def = shotModel(s); if (def) hWf.value = def.id;
+    hBackend.value = hWf.value.startsWith('wan-') ? 'local' : 'cloud'; headModel();
+  };
+  if (genCache) fillModels(); else void api('generation').then(st => { genCache = st; fillModels(); }).catch(() => { hWf.replaceChildren(h('option', {}, 'Models unavailable')); });
   const facts = h('div', { class: 'facts' });
   const showFacts = () => facts.replaceChildren('Frames', h('b', {}, `${frames()} @ 24 fps`), 'Duration', h('b', {}, `${(frames() / 24).toFixed(3)}s (shot ${s.duration}s)`), 'Size', h('b', {}, `${width}×${height} · 16:9`));
   showFacts();
@@ -1689,25 +1758,27 @@ function openRender() {
     ...[[1280, 720], [640, 360]].map(([w, hh]) => { const input = h('input', { type: 'radio', name: 'res', checked: w === 1280 }); input.onchange = () => { width = w; height = hh; showFacts(); }; return h('label', {}, input, `${w}×${hh}`); }));
   const bar = h('i'); const progress = h('div', { class: 'progress', hidden: true }, bar);
   const status = h('div', { class: 'status-line' });
-  const capture = h('button', { class: 'btn camera', type: 'button' }, `Make blockout`);
+  const capture = h('button', { class: 'btn camera', type: 'button' }, s.render ? 'Remake blockout' : 'Make blockout');
   const prompt = h('textarea', { class: 'field', rows: 5, 'aria-label': 'Render prompt' }, shotPrompt(project, s, 'video'));
   const step1 = h('div', { class: 'step active' }, h('span', { class: 'n' }, '1'), h('div', {}, h('h3', {}, 'Blockout'), h('p', {}, 'The grey camera clip: every frame through the shot camera at 24 fps, the exact motion the video model follows.'), res, h('div', { style: 'height:8px' }), facts, h('div', { style: 'height:10px' }), capture, h('div', { style: 'height:8px' }), progress, status));
   const refsByFile = new Map<string, { ref: Reference; names: Set<string> }>();
   const addRef = (ref: Reference, name?: string) => { const entry = refsByFile.get(ref.file) || { ref, names: new Set<string>() }; if (name) entry.names.add(name); refsByFile.set(ref.file, entry); };
-  for (const e of project.scene.entities) { const ref = objectLooks(project, e.id)[0]; if (ref) addRef(ref, e.name); }
+  // Unique images of this shot's cast (one line per image, however many objects share it), then the shot's own images.
+  const castNow = castRows(project, s).filter(r => r.inCast).sort((a, b) => (Number(a.entity.kind === 'environment') - Number(b.entity.kind === 'environment')) || (Number(b.lead) - Number(a.lead)) || (b.coverage - a.coverage));
+  for (const { entity: e } of castNow) { const ref = objectLooks(project, e.id)[0]; if (ref) addRef(ref, e.name); }
   for (const ref of s.references) addRef(ref, entity(ref.entityId)?.name);
   const refs = [...refsByFile.values()];
   const step2 = h('div', { class: 'step' }, h('span', { class: 'n' }, '2'), h('div', {}, h('h3', {}, 'Prompt & images'), h('p', {}, 'Composed from the story, cast and camera. Edit freely.'), prompt,
-    refs.length ? h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:8px' }, ...refs.map(({ ref: r, names }) => h('div', { style: 'display:flex;gap:8px;align-items:center;font-size:12px' }, h('img', { src: refUrl(r), alt: '', style: 'width:34px;height:34px;flex:none;object-fit:cover;border-radius:6px' }), h('div', { style: 'flex:1;min-width:0;overflow-wrap:anywhere' }, h('div', {}, r.name), h('small', { class: 'muted' }, names.size > 1 ? `Shared by ${[...names].join(', ')}` : [...names][0] || (r.role === 'style' ? 'Style' : 'Shot image')))))) : h('p', { class: 'note', style: 'margin-top:8px' }, 'No images for this shot.'),
+    refs.length ? h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:8px' }, ...refs.map(({ ref: r, names }) => h('div', { style: 'display:flex;gap:8px;align-items:center;font-size:12px' }, h('img', { src: refUrl(r), alt: '', style: 'width:34px;height:34px;flex:none;object-fit:cover;border-radius:6px' }), h('div', { style: 'flex:1;min-width:0;overflow-wrap:anywhere' }, h('div', {}, r.name), h('small', { class: 'muted', title: [...names].join(', ') }, names.size > 1 ? `× ${names.size} objects` : [...names][0] || (r.role === 'style' ? 'Style' : 'Shot image')))))) : h('p', { class: 'note', style: 'margin-top:8px' }, 'No images for this shot.'),
     h('p', { class: 'note', style: 'margin-top:8px' }, 'Cast images are named in the prompt and sent to models that take images.')));
   const gen = h('div', { class: 'gen-box' }, h('p', { class: 'note', style: 'margin:0' }, 'Make the blockout first.'));
   const step3 = h('div', { class: 'step' }, h('span', { class: 'n' }, '3'), h('div', {}, h('h3', {}, 'Generate the video'), h('p', { style: 'margin:0 0 8px' }, 'Run a Comfy video model on this exact blockout. You see the quote first; nothing runs until you approve it.'), gen));
-  const setOpen = (previsShotId: string, assetId: string) => { renderGenerate(gen, s, previsShotId, assetId, () => prompt.value); };
+  const setOpen = (previsShotId: string, assetId: string) => renderGenerate(gen, s, previsShotId, assetId, () => prompt.value, { wf: hWf, backendSel: hBackend });
   prompt.oninput = () => { if (s.render && s.render.signature === signature(project, s)) setOpen(s.render.previsShotId, s.render.assetId); };
   const sig = signature(project, s);
   if (s.render && s.render.signature === sig) {
-    media.replaceChildren(h('video', { src: `/assets/${s.render.assetId}.mp4`, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
-    step1.className = 'step done'; status.textContent = `Up to date: ${s.render.frameCount} frames · ${Number(s.render.duration).toFixed(2)}s · ${s.render.width}×${s.render.height}. Make again to replace.`;
+    if (!seam) media.replaceChildren(h('video', { src: `/assets/${s.render.assetId}.mp4`, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
+    step1.className = 'step done'; status.textContent = `Up to date: ${s.render.frameCount} frames · ${Number(s.render.duration).toFixed(2)}s · ${s.render.width}×${s.render.height}. Remake blockout to replace it.`;
     step2.className = 'step active'; setOpen(s.render.previsShotId, s.render.assetId);
   }
   capture.onclick = async () => {
@@ -1718,33 +1789,45 @@ function openRender() {
       const { asset, previsShotId, project: saved } = await captureShotVideo(s, { width, height, prompt: prompt.value, onFrame: (url, i, n) => { if (i % 4 === 0) img.src = url; bar.style.width = `${((i + 1) / n) * 100}%`; status.textContent = `Blockout frame ${i + 1} / ${n}`; }, onStatus: t => { status.textContent = t; } });
       const previsShot = { id: previsShotId }; const r = { project: saved };
       apply(r.project);
-      media.replaceChildren(h('video', { src: asset.url, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
+      media.replaceChildren(seam || h('video', { src: asset.url, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
       status.textContent = `Saved: ${asset.frameCount} frames · ${Number(asset.duration).toFixed(2)}s · ${asset.width}×${asset.height} in ${((performance.now() - started) / 1000).toFixed(1)}s.`;
       step1.className = 'step done'; step2.className = 'step done'; step3.className = 'step active';
-      setOpen(previsShot.id, asset.id);
+      await setOpen(previsShot.id, asset.id);
     } catch (e) {
-      status.className = 'status-line err'; status.textContent = (e as Error).message;
+      status.className = 'status-line err'; status.textContent = (e as Error).message; if (seam) media.replaceChildren(seam);
     } finally {
-      capture.disabled = false; progress.hidden = true; capture.textContent = 'Make again';
+      capture.disabled = false; progress.hidden = true; capture.textContent = 'Remake blockout';
     }
   };
+  hGo.onclick = async () => {
+    hGo.disabled = true;
+    try {
+      if (!(s.render && s.render.signature === signature(project, s))) await (capture.onclick as () => Promise<void>)();
+      else if (!gen.querySelector('.gen-quote')) await setOpen(s.render.previsShotId, s.render.assetId);
+      const q = gen.querySelector<HTMLButtonElement>('.gen-quote');
+      if (q) { q.click(); step3.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+    } finally { hGo.disabled = false; }
+  };
   const dlg = h('dialog', { class: 'render', id: 'render-dialog', 'aria-labelledby': 'render-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'render-title' }, `Generate video · Shot ${String(idx + 1).padStart(2, '0')} · ${s.title}`), h('span', { class: 'muted', style: 'font-size:12px' }, describeCamera(s, project.scene.entities)), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
-    h('div', { class: 'render-body' }, media, h('div', { class: 'render-steps' }, step1, step2, step3)),
+    h('div', { class: 'dialog-head rg-head' }, h('h2', { id: 'render-title' }, `Generate video · Shot ${String(idx + 1).padStart(2, '0')} · ${s.title}`),
+      h('div', { class: 'rg-controls' }, h('label', { class: 'rg-f' }, h('span', {}, 'Model'), hWf), h('label', { class: 'rg-f' }, h('span', {}, 'Runs on'), hBackend), hEst, hGo),
+      h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'render-body' }, visual, h('div', { class: 'render-steps' }, step1, step2, step3)),
     h('div', { class: 'render-foot' }, h('p', { class: 'note' }, 'Nothing is uploaded or charged without a quote you approve.')));
   document.body.append(dlg); dlg.showModal();
 }
 
 // ---------- In-app video generation (uses the workflow engine: preset → bind → quote → approve → submit → track) ----------
 type GenState = { presets: any[]; definitions: any[]; jobs: any[]; paidExecutionEnabled: boolean };
-async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, assetId: string, getPrompt: () => string) {
+/** The quote and approval step of the Generate dialog. The model and runs-on selects live in the dialog's header row. */
+async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, assetId: string, getPrompt: () => string, head: { wf: HTMLSelectElement; backendSel: HTMLSelectElement }) {
   let st: GenState;
   try { st = await api('generation'); } catch (e) { box.replaceChildren(h('p', { class: 'status-line err' }, (e as Error).message)); return; }
   const choices = videoChoices(st as any);
-  const wf = h('select', { class: 'field', 'aria-label': 'Video model' }, ...choices.map(d => h('option', { value: d.id }, modelLabel(d))));
+  const { wf, backendSel } = head;
+  if (!choices.some(d => d.id === wf.value)) { wf.replaceChildren(...choices.map(d => h('option', { value: d.id }, modelLabel(d)))); const def = shotModel(s); if (def) wf.value = def.id; }
   const previous = st.jobs.filter(j => j.shotId === previsShotId && (j.sources?.sourceVideo?.id === assetId || j.sources?.controlVideo?.id === assetId)).at(-1);
   if (previous && choices.some(d => d.id === previous.definition?.id)) wf.value = previous.definition.id;
-  const backendSel = h('select', { class: 'field', 'aria-label': 'Runs on' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
   const note = h('p', { class: 'note', style: 'margin:0' });
   const showNote = () => { const d = choices.find(c => c.id === wf.value); note.textContent = d?.description || ''; backendSel.value = d?.id?.startsWith('wan-') ? 'local' : 'cloud'; };
   const useRefs = h('input', { type: 'checkbox', checked: localStorage.getItem('previs.seq.refs') !== '0' });
@@ -1760,7 +1843,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   backendSel.onchange = () => out.replaceChildren();
   const timing = h('input', { type: 'checkbox' });
   timing.onchange = () => out.replaceChildren();
-  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Review request & quote');
+  const quoteBtn = h('button', { class: 'btn camera gen-quote', type: 'button' }, 'Review request & quote');
   const out = h('div', { class: 'gen-out' });
   const jobsBox = h('div', { class: 'gen-jobs' });
   quoteBtn.onclick = async () => {
@@ -1786,7 +1869,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
     jobsBox.replaceChildren(...mine.map(j => h('div', { class: 'gen-job' }, h('b', { class: `st-${j.status}` }, j.status), h('span', {}, `${j.definition?.title?.split(' ·')[0] || 'Model'} · ${j.backend?.kind}`), h('small', { class: 'muted' }, j.message || ''))));
   };
   drawJobs();
-  box.replaceChildren(h('div', { class: 'grid2' }, h('label', {}, 'Video model', wf), h('label', {}, 'Runs on', backendSel)), note,
+  box.replaceChildren(note,
     h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, useRefs, 'Send the cast’s images with the request'), refsBox,
     h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, timing, 'I have reviewed that output timing/resolution may differ from the source; originals will not be fitted or replaced.'),
     h('div', {}, quoteBtn), out, jobsBox);

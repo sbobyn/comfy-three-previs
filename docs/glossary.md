@@ -1,0 +1,60 @@
+# Glossary
+
+One name per thing, used the same way in the app, the docs and the film. When a UI string and this page disagree, change the string.
+
+## The steps
+
+| Term | Meaning | Not |
+|---|---|---|
+| **Build** | Place objects in the 3D scene and give the cast their images. | Edit, Design |
+| **Shoot** | Frame each shot through the shot camera, or fly it live. | Direct, Camera tab |
+| **Cut** | Put the shots in order, pick each shot's version, trim, export the film. | Edit, Sequence, Timeline |
+
+## Scene and cast
+
+| Term | Meaning | Not |
+|---|---|---|
+| **Object** | Anything placed in the scene (a person, a car, a prop, a wall). | Entity (code only), Item |
+| **Cast** | The objects in a shot. The shot camera decides by default; ticks override it. | Cast list, Roster |
+| **Hero cast** | The cast that matters to the story: the shot's subject, then characters, vehicles and props. Listed first under "In this shot". | Main objects |
+| **Set** | The environment pieces in frame (track, stands, grass). Folded into one group. | Set pieces, Scenery |
+| **Cast image** | The picture of an object that is sent to image and video models. The first one is the **primary** cast image. | Look, Cast Card image, Reference (code only) |
+| **Shared image** | One cast image used by several objects. Shown once, as "× N objects", and folded into one row ("Turns 3–4 · surface ×12"). | Look family (code only), Shared look |
+| **Description** | What an object is, in words. It goes into the auto-prompt. | Notes, Cast Card |
+| **Project style** | The look of the whole film ("35 mm anamorphic, teal-and-orange grade"). | Style board |
+
+"Cast Card" is the old name for an object's description plus its cast images. It survives only in code and in the auto-prompt's source labels; do not use it in new UI.
+
+## Shots and media
+
+| Term | Meaning | Not |
+|---|---|---|
+| **Shot camera** | The camera that films the shot. "Director view" is the free camera for building. | Render camera |
+| **Fly camera** | Drive the shot camera live (keys, gamepad, phone) and record a take. | Live camera |
+| **Blockout** | The grey clip filmed through the shot camera at 24 fps: the motion every video model follows. **Make blockout** the first time, **Remake blockout** after a change. | Render, Capture, Previs clip, "Make again" |
+| **Still** | A generated image of one moment of a shot. A **start still** and an **end still** are the key frames some video models animate between. | Key frame image, Frame |
+| **Auto-prompt** | The prompt the app writes from the story, cast, world and camera. You can edit it. | Generated prompt |
+| **Video model** | The model that makes the shot's video (LTX, Seedance, Kling …). **Runs on** says where: Comfy Cloud or local ComfyUI. | Workflow (code only), Preset |
+| **Version** | One generated video of a shot. The cut uses one version per shot ("Newest" by default). Repeated runs of the same model are **takes** ("LTX 2.5 Fast · take 2"). | Result, Output |
+
+## Generating and spending
+
+| Term | Meaning |
+|---|---|
+| **Generate** | Make a still or a video. Always shows a **quote** first; nothing runs until you **approve** it. |
+| **Estimate** | Rate × length, shown before the quote ("≈ $0.69"). Cloud bills actual usage, so an estimate and an allowance are not a hard cap. |
+| **Allowance** | The most you approve for one request or batch. Claude sets one per request (`maxCostUsd`); paid runs need the server started with `PREVIS_ALLOW_PAID=1`. |
+
+## In the Cut viewer
+
+| Term | Meaning |
+|---|---|
+| **Compare** | One frame split into bands: blockout · start still · each version, labelled by model, with draggable seams. |
+| **Overlay** | Boxes around the hero cast as the shot camera sees them, each linked to its cast image and its words in the prompt; the generated frame fades in under the same boxes. |
+| **Export film** | One H.264 file of the cut, 1280×720 at 24 fps. |
+
+## Wording rules
+
+- Verbs on buttons: **Make** for free local work (Make blockout), **Generate** for model runs (Generate still, Generate video), **Remake** to redo either kind of local work.
+- One primary action per screen, in the CTA colour (`--cta`, ink on paper) on desktop and mobile. Coral (`--accent`) is kept for the live camera: Fly camera, record and the shutter.
+- Say what will happen and what it costs; never say "approval required" where the server would spend without asking.

@@ -11,7 +11,10 @@
   .home-section { margin-top: 32px; }
   .home-section[aria-labelledby="projects-title"] { order: 2; }
   #starters { order: 3; }
-  .home-head { flex-wrap: wrap; margin-bottom: 12px; }
+  .home.is-new #starters { order: 2; } .home.is-new .home-section[aria-labelledby="projects-title"] { order: 3; }
+  /* One header row: title, count, Import…, Archived (never wrapping under the heading). */
+  .home-head { flex-wrap: nowrap; margin-bottom: 12px; min-width: 0; }
+  .home-head .home-link { flex: none; padding: 0 8px; }
   .home-head h2 { font-size: 24px; }
   .home-head > span { font-size: 13px; }
   /* Starters: horizontal snap row */
@@ -33,6 +36,7 @@
 }
 @media (max-width: 699px) {
   .home { padding: 4px 16px 32px; }
+  .home-head { gap: 8px; } .home-head h2 { font-size: 21px; white-space: nowrap; } .home-head .home-link { padding: 0 6px; font-size: 14px; }
   .home-hero h1 { font-size: 34px; line-height: 1.05; }
   .home-lede { margin-top: 12px; font-size: 16px; }
   .home-actions { margin-top: 18px; }

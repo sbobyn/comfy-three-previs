@@ -270,7 +270,7 @@ function identityRow(e: Entity) {
   const id = objectLooks(P(), e.id)[0];
   return h('div', { class: 'ds-identity' + (id ? '' : ' missing') },
     id ? h('img', { src: refUrl(id), alt: '' }) : h('span', { class: 'ds-noid' }, '!'),
-    h('span', {}, id ? h('b', {}, 'Identity: primary image') : h('b', {}, 'No primary image yet'), h('br'), h('small', {}, id ? 'Sent as image 1 with the Cast Card description and style.' : 'Generate or upload an image above first — every view is drawn from it.')));
+    h('span', {}, id ? h('b', {}, 'Identity: primary image') : h('b', {}, 'No primary image yet'), h('br'), h('small', {}, id ? 'Sent as image 1 with the object’s description and style.' : 'Generate or upload an image above first — every view is drawn from it.')));
 }
 
 function modelPicker(u: Ui, onChange: () => void) {
