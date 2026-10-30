@@ -3,7 +3,6 @@
    Responsive rules sit at the end of the component they adjust. */
 :root {
   color-scheme: light;
-
   /* Surfaces (warm paper) */
   --paper:      #F6F3EE;   /* app background */
   --paper-2:    #EFEBE3;   /* rails, panels, secondary surfaces */
@@ -12,26 +11,22 @@
   --line:       #E2DCD1;   /* hairlines */
   --line-2:     #CFC7B9;   /* stronger borders (inputs, segmented) */
   --scrim:      rgba(21, 19, 15, .42);
-
   /* Ink (text) */
   --ink:        #15130F;
   --ink-2:      #3B3731;
   --ink-3:      #6E6961;   /* muted labels, captions — 5.0:1 on paper */
   --ink-4:      #7E786E;   /* faint (eyebrows, counts, hints) — 3.9:1 on paper; never body text */
   --on-ink:     #F6F3EE;
-
   /* The one accent: tally red (camera, record, primary attention) */
   --accent:     #C8401F;
   --accent-ink: var(--on-ink);
   --accent-soft:#F6E3DC;
   --accent-line:#E3A491;
-
   /* Semantic (always with a word or icon) */
   --ok:         #2F7A4E;  --ok-soft:   #DFEFE4;
   --warn:       #9A6A0C;  --warn-soft: #F5EBD2;
   --bad:        #B8321E;  --bad-soft:  #F6E3DC;
   --info:       #3B5BA9;  --info-soft: #E1E7F5;
-
   /* Stage (the dark 3D viewport inside the paper) */
   --stage:      #121110;
   --stage-2:    #1C1A17;
@@ -41,7 +36,6 @@
   --on-stage:   #EDE8DF;
   --on-stage-2: #A8A196;
   --stage-frame: 0 0 0 1px var(--ink), inset 0 0 0 1px rgba(255,250,240,.06), 0 18px 48px -24px rgba(21,19,15,.55);
-
   /* Prompt provenance (auto-prompt chips + spans), always paired with a text label */
   --pv-action:   #15130F;
   --pv-world:    #2E7D5B;
@@ -53,7 +47,6 @@
   --pv-filter:   #6D5BC2;
   --pv-cast-1:   #3B5BA9;  --pv-cast-2: #B33A5E;  --pv-cast-3: #1F7F8A;  --pv-cast-4: #9A6A0C;
   --pv-cast-5:   #4E8A2B;  --pv-cast-6: #C2611E;  --pv-cast-7: #7A4FC9;  --pv-cast-8: #2F7A4E;
-
   /* Type */
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', system-ui, sans-serif;
   --serif: ui-serif, 'New York', 'Iowan Old Style', 'Palatino', Georgia, serif;
@@ -62,7 +55,6 @@
   --fs-2xl: 22px;  --fs-3xl: 30px; --fs-4xl: 44px;
   --lh-tight: 1.15; --lh-snug: 1.3; --lh: 1.45; --lh-loose: 1.6;
   --track-caps: .08em; --track-tight: -.015em; --track-display: -.03em;
-
   /* Space, radii, shadows, motion, layout */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-12: 48px; --s-16: 64px;
   --r-xs: 5px; --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px; --r-full: 999px;
@@ -76,7 +68,6 @@
   --ease-in-out: cubic-bezier(.65, 0, .35, 1);
   --top-h: 52px; --rail-w: 264px; --side-w: 400px; --transport-h: 48px;
   --focus: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
-
   /* Legacy aliases still used by the side modules */
   --bg: var(--paper); --panel: var(--paper-2); --panel-2: var(--card); --raise: var(--paper-3);
   --text: var(--ink); --muted: var(--ink-3); --faint: var(--ink-4);
