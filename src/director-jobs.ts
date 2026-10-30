@@ -9,7 +9,7 @@ export type JobRow = {
   createdAt: string | null; submittedAt: string | null; lastTrackedAt: string | null; trackCount: number; nextTrackAt: string | null;
   ageSeconds: number; expectedSeconds: number; stuck: boolean; uncertain: boolean; costUsd: number | null;
   backend: { kind: string | null; id: string | null }; failure: { phase: string | null; httpStatus: number | null; detail: string | null } | null;
-  trackingError?: string; results: { id: string; kind: string; url: string }[]; shotId?: string;
+  trackingError?: string; results?: { id: string; kind: string; url: string }[]; shotId?: string; // results: not on live-stream rows
 };
 export type JobsSnapshot = { jobs: JobRow[]; limits: Record<string, { limit: number; active: number }>; tracker: { running: boolean; startedAt: string | null; resumed: number } };
 export type BatchSummary = {

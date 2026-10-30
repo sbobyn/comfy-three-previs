@@ -2,6 +2,10 @@ import { randomUUID } from 'node:crypto';
 
 const validId = value => typeof value === 'string' && /^[\w-]{1,128}$/.test(value);
 const validKey = row => row && ['generation', 'refgen'].includes(row.source) && validId(row.id);
+const TERMINAL = new Set(['completed', 'failed', 'closed', 'cancelled', 'invalidated', 'orphaned']);
+// Stream rows carry no result lists (the workspace reads results from the project), and a snapshot lists every
+// active job but only the newest `recentLimit` finished ones, so a busy day no longer pushes it past the frame cap.
+const lean = ({ results, ...row }) => row;
 
 /** resolveProject(req, projectId) applies EXISTING access policy and returns null or
  * { snapshot(), subscribe(notify), ownsJob(source,id) }. snapshot/subscribe/ownsJob
@@ -9,7 +13,7 @@ const validKey = row => row && ['generation', 'refgen'].includes(row.source) && 
  * are {type:'job'|'preview'|'remove',source,id}; never carry trusted browser rows.
  */
 export function createJobProgressRoutes({ resolveProject, observe, now = Date.now,
-  epoch = randomUUID(), maxBytes = 64 * 1024, stallMs = 15000, maxClients = 256 } = {}) {
+  epoch = randomUUID(), maxBytes = 64 * 1024, maxSnapshotBytes = 512 * 1024, recentLimit = 30, stallMs = 15000, maxClients = 256 } = {}) {
   if (typeof resolveProject !== 'function') throw new TypeError('Project resolver required');
   const clients = new Set();
   let seq = 0, stopped = false;
@@ -22,7 +26,8 @@ export function createJobProgressRoutes({ resolveProject, observe, now = Date.no
     const raw = scope.snapshot();
     if (!raw || typeof raw.then === 'function' || !Array.isArray(raw.jobs)) throw Error('Synchronous C1 snapshot required');
     // The resolver supplies public C1 data, never raw receipts/workflows/errors.
-    const filtered = { ...raw, jobs: raw.jobs.filter(row => validKey(row) && row.projectId === projectId) };
+    let finished = 0;
+    const filtered = { ...raw, jobs: raw.jobs.filter(row => validKey(row) && row.projectId === projectId && (!TERMINAL.has(row.status) || ++finished <= recentLimit)).map(lean) };
     const enriched = observe?.enrich?.(filtered) || filtered;
     return { jobs: enriched.jobs.map(row => row.live ? { ...row, live: { ...row.live,
       node: row.live.node ?? null, queue: row.live.queue ?? null, estimate: row.live.estimate ?? null,
@@ -60,10 +65,10 @@ export function createJobProgressRoutes({ resolveProject, observe, now = Date.no
       res.off('drain', drain); res.off('close', close); res.off('error', close); req.off('aborted', close);
       clients.delete(close); res.destroy();
     }
-    function write(frame) {
+    function write(frame, limit = maxBytes) {
       if (closed) return;
       const bytes = Buffer.byteLength(frame);
-      if (bytes + queuedBytes + (res.writableLength || 0) > maxBytes) return close();
+      if (bytes + queuedBytes + (res.writableLength || 0) > limit) return close();
       if (blocked) { queue.push(frame); queuedBytes += bytes; return; }
       if (!res.write(frame)) { blocked = true; stall = setTimeout(close, stallMs); stall.unref?.(); }
     }
@@ -73,7 +78,8 @@ export function createJobProgressRoutes({ resolveProject, observe, now = Date.no
     }
     function send(type, data) {
       const event = { ...envelope(projectId), ...data };
-      write(`id: ${epoch}:${event.seq}\nevent: ${type}\ndata: ${JSON.stringify(event)}\n\n`);
+      // The first frame (the snapshot) may be larger than later updates.
+      write(`id: ${epoch}:${event.seq}\nevent: ${type}\ndata: ${JSON.stringify(event)}\n\n`, type === 'snapshot' ? maxSnapshotBytes : maxBytes);
     }
     function notify(change) {
       if (closed || !validKey(change) || !['job', 'preview', 'remove'].includes(change.type)) return;
