@@ -90,3 +90,11 @@ export function moveStop(stops: number[], i: number, x: number): number[] {
   const lo = (i > 0 ? stops[i - 1]! : 0) + 2, hi = (i < stops.length - 1 ? stops[i + 1]! : 100) - 2;
   return stops.map((v, k) => (k === i ? Math.max(lo, Math.min(hi, x)) : v));
 }
+
+// ---------- Home hero: one sweep, then the seam is the user's ----------
+/** Seam position (% of blockout showing) for the hero's one-time sweep: all blockout → all generated → rest at 50. */
+export function heroSweepAt(u: number): number {
+  const e = (p: number) => (p < 0.5 ? 4 * p ** 3 : 1 - (-2 * p + 2) ** 3 / 2);
+  const t = Math.max(0, Math.min(1, u));
+  return t < 0.6 ? 100 - 100 * e(t / 0.6) : 50 * e((t - 0.6) / 0.4);
+}

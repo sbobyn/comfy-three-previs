@@ -71,3 +71,18 @@ test('the Cut view puts the viewer above the rows and offers Overlay and Compare
   assert.match(seq, /ctx\.boxes\?\.\(s/, 'boxes come from the live scene through the shot camera');
   assert.match(readFileSync(new URL('../src/director.ts', import.meta.url), 'utf8'), /boxes: \(s, t\) => scene\.boxesAt\(s, t\)/);
 });
+
+test('the home hero sweeps once — all blockout, all generated, then rests at the middle — and starters reveal on scrub', () => {
+  assert.equal(core.heroSweepAt(0), 100);
+  assert.equal(Math.round(core.heroSweepAt(0.6)), 0);
+  assert.equal(core.heroSweepAt(1), 50);
+  assert.equal(core.heroSweepAt(2), 50, 'clamped after the sweep');
+  const xs = Array.from({ length: 11 }, (_, i) => core.heroSweepAt(i / 10));
+  assert.ok(xs.every(x => x >= 0 && x <= 100));
+  const home = readFileSync(new URL('../src/director-home.ts', import.meta.url), 'utf8');
+  assert.match(home, /starterMedia\('final-lap'/, 'the hero is The draft');
+  assert.match(home, /sweep: 'once'/);
+  assert.match(home, /reveal: true/, 'starter cards play the generated loop and scrub the blockout in');
+  const media = readFileSync(new URL('../src/director-media.ts', import.meta.url), 'utf8');
+  assert.match(media, /set\(o\.reveal \? 0 :/, 'a reveal card starts on the generated frame');
+});

@@ -62,6 +62,17 @@
   background-repeat: no-repeat; opacity: .7; }
 .home-reel-tag { position: absolute; left: 28px; top: 26px; display: inline-flex; align-items: center; gap: 7px; font: 600 var(--fs-2xs)/1 var(--mono); letter-spacing: .08em; color: var(--on-stage); }
 .home-reel-tag i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: home-rec 1.6s var(--ease-in-out) infinite; }
+/* Hero seam: the generated draft over its blockout, one frame, one camera. */
+.home-hero-seam { display: flex; flex-direction: column; gap: 10px; min-width: 0; animation: home-rise var(--t-reveal) var(--ease-out) 100ms both; }
+.home-hero-seam .ba { border-radius: var(--r-xl); box-shadow: var(--stage-frame), 0 40px 80px -40px rgba(21,19,15,.5); }
+.home-hero-seam .ba-tag { top: 14px; font-size: 10.5px; padding: 5px 8px; } .home-hero-seam .ba-tag.l { left: 14px; } .home-hero-seam .ba-tag.r { right: 14px; }
+.home-hero-cap { margin: 0; display: flex; gap: 6px; align-items: baseline; font-size: var(--fs-sm); color: var(--ink-3); }
+.home-hero-cap strong { color: var(--ink); font-weight: 600; }
+.home-hero-cap span { margin-left: auto; font: 500 var(--fs-2xs)/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-4); }
+/* Starter cards: the seam shows only while scrubbing. */
+.home-seam-slot .ba.is-reveal { cursor: col-resize; }
+.home-seam-slot .ba.is-reveal .ba-seam { transition: opacity var(--t-fast, .15s) ease; }
+.home-seam-slot .ba.is-reveal:not(:hover):not(:focus-within) .ba-seam { opacity: 0; }
 .home-reel.is-empty { background: radial-gradient(120% 90% at 50% 100%, var(--stage-2), var(--stage)); }
 
 /* ---------- Three steps ---------- */

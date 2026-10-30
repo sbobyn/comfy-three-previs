@@ -4,6 +4,7 @@
 import './director-explain.css';
 import { h } from './director-common';
 import { seamKey } from './director-desktop-core';
+import { heroSweepAt } from './director-design-core';
 
 export type Callout = { label: string; x: number; y: number; w: number; h: number };
 export type GuideEntry = { id: string; file: string; kind: 'video' | 'image'; label?: string; project?: string; shot?: string; asset?: string; capturedAt?: string; callouts?: Callout[] };
@@ -29,32 +30,38 @@ function onVisible(el: Element, cb: (on: boolean) => void) {
 
 /**
  * Two aligned frames with a draggable seam: before on the left, after on the right (the Cut view's
- * compare convention). Sweeps gently until the first touch; reduced motion keeps a still 50/50 split.
+ * compare convention). Sweeps gently until the first touch (`sweep: 'once'`: one pass, all before → all after →
+ * rest at 50); reduced motion keeps a still 50/50 split. `reveal`: the after frame fills the card and the
+ * pointer scrubs the before frame in from the left, easing back out when it leaves.
  * Videos stay in sync, muted and looping, and play only while on screen.
  */
-export function beforeAfter(o: { before: string; after: string; kind: 'image' | 'video'; labels?: [string, string]; alt?: string; posters?: [string, string]; sweep?: boolean }) {
+export function beforeAfter(o: { before: string; after: string; kind: 'image' | 'video'; labels?: [string, string]; alt?: string; posters?: [string, string]; sweep?: boolean | 'once'; reveal?: boolean }) {
   const [la, lb] = o.labels || ['Blockout', 'Generated'];
   const media = (src: string, cls: string, poster?: string) => o.kind === 'video'
     ? h('video', { class: cls, muted: true, loop: true, playsinline: true, preload: 'none', poster, 'aria-hidden': 'true', 'data-src': src })
     : h('img', { class: cls, src, alt: '', loading: 'lazy', decoding: 'async', draggable: false });
   const a = media(o.before, 'ba-before', o.posters?.[0]), b = media(o.after, 'ba-after', o.posters?.[1]);
   const seam = h('div', { class: 'ba-seam', role: 'slider', tabindex: 0, 'aria-label': `Compare: ${la} left, ${lb} right`, 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': 50, 'aria-valuetext': `${la} 50%` });
-  const el = h('figure', { class: 'ba', 'aria-label': o.alt || `${la} and ${lb}, side by side` }, a, b, seam, h('span', { class: 'ba-tag l' }, la), h('span', { class: 'ba-tag r' }, lb));
-  let x = 50, touched = o.sweep === false, visible = false, raf = 0, playing = o.kind === 'video' && !reduced();
-  const set = (v: number) => { x = Math.max(0, Math.min(100, v)); el.style.setProperty('--x', `${x}%`); seam.setAttribute('aria-valuenow', String(Math.round(x))); seam.setAttribute('aria-valuetext', `${la} ${Math.round(x)}%`); };
+  const tagL = h('span', { class: 'ba-tag l' }, la), tagR = h('span', { class: 'ba-tag r' }, lb);
+  const el = h('figure', { class: 'ba' + (o.reveal ? ' is-reveal' : ''), 'aria-label': o.alt || `${la} and ${lb}, side by side` }, a, b, seam, tagL, tagR);
+  let x = 50, touched = o.sweep === false || !!o.reveal, visible = false, raf = 0, playing = o.kind === 'video' && !reduced();
+  const set = (v: number) => { x = Math.max(0, Math.min(100, v)); el.style.setProperty('--x', `${x}%`); seam.setAttribute('aria-valuenow', String(Math.round(x))); seam.setAttribute('aria-valuetext', `${la} ${Math.round(x)}%`); tagL.hidden = x < 6; tagR.hidden = x > 94; };
   const stop = () => { touched = true; cancelAnimationFrame(raf); raf = 0; };
   const sweep = (t0: number) => (now: number) => {
     raf = 0;
     if (touched || !visible || document.hidden || !el.isConnected) return;
-    set(50 + 30 * Math.sin(((now - t0) / 1000) * 0.9));
+    if (o.sweep === 'once') { const u = (now - t0) / 3400; set(heroSweepAt(u)); if (u >= 1) { touched = true; return; } } else set(50 + 30 * Math.sin(((now - t0) / 1000) * 0.9));
     raf = requestAnimationFrame(sweep(t0));
   };
+  // Reveal cards ease back to the full after frame when the pointer leaves.
+  const settle = () => { if (!o.reveal) return; cancelAnimationFrame(raf); const from = x, t0 = performance.now(); const go = (now: number) => { const u = Math.min(1, (now - t0) / 260); set(from * (1 - u) ** 2); raf = u < 1 ? requestAnimationFrame(go) : 0; }; raf = requestAnimationFrame(go); };
   const fromPointer = (ev: PointerEvent) => { const r = el.getBoundingClientRect(); set(((ev.clientX - r.left) / Math.max(1, r.width)) * 100); };
   let drag = false;
   el.addEventListener('pointerdown', ev => { if ((ev.target as HTMLElement).closest('.ba-toggle')) return; stop(); drag = true; el.setPointerCapture?.(ev.pointerId); fromPointer(ev); });
-  el.addEventListener('pointermove', ev => { if (drag) fromPointer(ev); });
-  el.addEventListener('pointerup', () => { drag = false; });
-  el.addEventListener('pointercancel', () => { drag = false; });
+  el.addEventListener('pointermove', ev => { if (drag || (o.reveal && ev.pointerType === 'mouse')) { if (!drag) { cancelAnimationFrame(raf); raf = 0; } fromPointer(ev); } });
+  el.addEventListener('pointerup', ev => { drag = false; if (ev.pointerType !== 'mouse') settle(); });
+  el.addEventListener('pointercancel', () => { drag = false; settle(); });
+  el.addEventListener('pointerleave', ev => { if (ev.pointerType === 'mouse' && !drag) settle(); });
   seam.addEventListener('keydown', ev => {
     const v = seamKey(x, ev.key, ev.shiftKey);
     if (v === null) return;
@@ -80,7 +87,7 @@ export function beforeAfter(o: { before: string; after: string; kind: 'image' | 
     el.append(toggle); paint();
     disconnect = onVisible(el, on => { visible = on; apply(); if (on && !touched && !reduced() && !raf) raf = requestAnimationFrame(sweep(performance.now())); });
   } else disconnect = onVisible(el, on => { visible = on; if (on && !touched && !reduced() && !raf) raf = requestAnimationFrame(sweep(performance.now())); });
-  set(50);
+  set(o.reveal ? 0 : o.sweep === 'once' && !reduced() ? 100 : 50);
   return Object.assign(el, { dispose });
 }
 
