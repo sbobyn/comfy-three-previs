@@ -361,7 +361,7 @@ export async function openDirector(root, options = {}) {
       await writeFile(join(dir, p.id, 'refs', file), bytes, { flag: 'wx', mode: 0o600 });
       const entity = input.entityId ? resolveEntity(p, input.entityId) : null;
       if (objectScope && !entity) fail('Choose an object for this look');
-      if (objectScope && (p.scene.references || []).filter(r => r.entityId === entity.id).length >= 24) fail('An object supports at most 24 looks');
+      if (objectScope && (p.scene.references || []).filter(r => r.entityId === entity.id).length >= 64) fail('An object supports at most 64 looks');
       const role = ROLES.includes(input.role) ? input.role : entity ? (entity.kind === 'character' ? 'character' : entity.kind === 'environment' ? 'environment' : 'prop') : 'style';
       const name = String(input.name || 'reference').replace(/\.[a-z0-9]+$/i, '').slice(0, 80) || 'reference';
       const ref = { id: refId, name, file, mime, role, entityId: entity?.id ?? null, note: String(input.note || '').slice(0, 200), createdAt: now(), ...(input.generated ? { generated: input.generated } : {}) };

@@ -1,8 +1,9 @@
 import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
 import { autoPromptSegments, autoPromptText, shotPrompt, shotStyle, normalizeStyle, CAMERA_TERMS } from '../../shared/prompt.mjs';
-import { lookPrompt, lookViews, castRows, castCard, objectLooks, handleOf } from '../../shared/director.mjs';
+import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, handleOf } from '../../shared/director.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
+import { setsFor, planSlots, slotAspect, viewPrompt, EXPRESSION_PACKS, INTENSITIES, MAX_SHEET_SLOTS } from '../../shared/sheet-presets.mjs';
 const base = process.env.PREVIS_URL || 'http://127.0.0.1:5190';
 if (!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(base)) throw Error('PREVIS_URL must be loopback');
 const tools = [
@@ -61,6 +62,16 @@ const tools = [
       if (r.status === 'completed' && r.referenceIds?.[0] && a.makePrimary !== false) await post('/api/director/edit', { projectId: p.id, ops: [{ op: 'set_look', entityId: e.id, referenceId: r.referenceIds[0] }] });
       return { object: e.name, status: r.status, message: r.message, requestId: job.id, referenceIds: r.referenceIds || [], estimateUsd: est, primary: r.status === 'completed' && a.makePrimary !== false ? r.referenceIds?.[0] : undefined };
     } },
+  { name: 'previs_director_sheet_presets', description: 'List the design-sheet sets for one object (or one kind): turnarounds, headshots, poses, expressions, details, establishing views, custom. Each set lists the views (slots) it would generate and its options. Also lists the object’s existing sheets with per-slot status. Free; nothing is sent.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, object: { type: 'string', description: 'Object name or id (or give kind)' }, kind: { type: 'string', enum: ['character', 'vehicle', 'prop', 'environment'] } }, additionalProperties: false },
+    run: async a => {
+      const p = a.object ? await project(a.projectId) : null, e = p ? entityOf(p, a.object) : null, kind = e?.kind || a.kind || 'character';
+      const options = { expressions: { pack: EXPRESSION_PACKS.map(x => x.id), intensities: Object.keys(INTENSITIES), angle: ['front', 'front-left', 'both'] }, 'obj-turn4': { top: 'boolean' }, 'obj-turn8': { top: 'boolean' }, custom: { label: 'string', direction: 'string', angle: 'front | front-left | left | back-left | back | back-right | right | front-right | top', framing: 'full | bust | head | whole | detail | wide' } };
+      return { kind, object: e ? { id: e.id, name: e.name, hasPrimaryImage: !!objectLooks(p, e.id)[0] } : null, sets: setsFor(kind).map(s => ({ id: s.id, label: s.label, hint: s.hint, defaults: s.options || {}, options: options[s.id] || null, slots: planSlots(s.id, kind, s.options || {}).map(x => ({ id: x.id, label: x.label, aspect: slotAspect(x.spec, kind) })) })),
+        sheets: (e?.sheets || []).map(sh => ({ id: sh.id, setId: sh.setId, label: sh.label, slots: sh.slots.map(x => ({ id: x.id, label: x.label, attempts: x.attempts.length, referenceId: (x.attempts.find(t => t.id === x.accepted) || x.attempts.find(t => t.id === x.selected) || {}).referenceId || null, accepted: !!x.accepted })) })),
+        note: 'Each view is its own image generated from the object’s primary image. Compose the sheet in the Previs object editor (Design sheet → Compose sheet…); composition needs the browser.' };
+    } },
+  { name: 'previs_director_generate_sheet', description: 'Generate a design-sheet set for one object on Comfy Cloud (paid: set maxCostUsd for the whole set). Every view is its own image request from the object’s primary image (reference image 1) plus its Cast Card description, style notes and the project style, sent one at a time. Views attach to the object’s images and fill the sheet in the Previs object editor live. Returns per-slot results. Uncertain dispatches stop the batch and are never resent. Takes about 30–60 s per view.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, object: { type: 'string', description: 'Object name or id' }, setId: { type: 'string', description: 'From previs_director_sheet_presets, e.g. turn3, obj-turn4, expressions, establishing' }, options: { type: 'object', description: 'Set options, e.g. { pack: "basic6", intensities: ["clear"], angle: "front" } for expressions' }, slots: { type: 'array', items: { type: 'string' }, description: 'Only these slot ids (default: all)' }, note: { type: 'string', description: 'Extra direction added to every view' }, presetId: { type: 'string', description: 'flux-2-pro (default, cheapest) or flux-3' }, maxCostUsd: { type: 'number', minimum: 0.01, maximum: 5 } }, required: ['projectId', 'object', 'setId', 'maxCostUsd'], additionalProperties: false },
+    run: async a => generateSheet(a) },
   { name: 'previs_director_set_primary_image', description: 'Choose which of an object’s images is primary: the one shown on its Cast Card and sent to video models as its reference.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, object: { type: 'string' }, referenceId: { type: 'string' } }, required: ['projectId', 'object', 'referenceId'], additionalProperties: false },
     run: async a => { const p = await project(a.projectId), e = entityOf(p, a.object); await post('/api/director/edit', { projectId: p.id, ops: [{ op: 'set_look', entityId: e.id, referenceId: a.referenceId }] }); return { ok: true, object: e.name, primary: a.referenceId }; } },
   { name: 'previs_director_shot_inputs', description: 'Show exactly what a video model would receive for a shot: the prompt text, the blockout video (if the model uses it and whether it is rendered and current), start/end key frames, and which object image fills each reference slot — plus objects that would be left out. Free; nothing is sent.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string' }, model: { type: 'string', description: 'Video model id from previs_director_models' } }, required: ['projectId', 'shot', 'model'], additionalProperties: false },
@@ -125,6 +136,49 @@ async function generateVideo(a) {
   if (est !== null && est > a.maxCostUsd) return { submitted: false, reason: `Estimated $${est.toFixed(2)} is above maxCostUsd $${a.maxCostUsd}` };
   const sub = (await post('/api/generation/submit', { ...request, approval: { approved: true, fingerprint: q.fingerprint, allowance: { currency: 'USD', maxAmount: a.maxCostUsd, allowUnknownCharges: true } } })).job;
   return { submitted: true, jobId: sub.id, status: sub.status, model: d.title, estimateUsd: est, references: refs.map((x, i) => `Image ${i + 1}: ${x.label}`), next: 'Call previs_director_video_status with jobId every minute or so; videos take 1–8 minutes.' };
+}
+// ---------- Design sheets ----------
+async function patchSheets(projectId, entityId, fn) {
+  const p = await project(projectId), e = p.scene.entities.find(x => x.id === entityId); if (!e) throw Error('That object was removed');
+  const sheets = structuredClone(e.sheets || []); fn(sheets);
+  await post('/api/director/edit', { projectId, ops: [{ op: 'update_entity', id: entityId, patch: { sheets } }] });
+}
+async function generateSheet(a) {
+  const p = await project(a.projectId), e = entityOf(p, a.object);
+  const identity = objectLooks(p, e.id)[0]; if (!identity) throw Error(`${e.name} has no primary image yet; generate one first (previs_director_generate_image)`);
+  if (!setsFor(e.kind).some(s => s.id === a.setId)) throw Error(`Set ${a.setId} is not offered for a ${e.kind}; see previs_director_sheet_presets`);
+  const all = planSlots(a.setId, e.kind, a.options || {}), planned = all.filter(x => !a.slots?.length || a.slots.includes(x.id));
+  if (!planned.length) throw Error('No views to generate');
+  if (planned.length > MAX_SHEET_SLOTS) throw Error(`At most ${MAX_SHEET_SLOTS} views per batch`);
+  if ((e.sheets || []).length >= 8) throw Error(`${e.name} already has 8 sheets; remove one in the editor first`);
+  const presetId = a.presetId || 'flux-2-pro';
+  const preset = ((await get(`/api/director/refgen?projectId=${p.id}`)).presets || []).find(x => x.id === presetId);
+  if (!preset || !(preset.maxRefs > 0)) throw Error('Choose an image model that takes reference images: flux-2-pro or flux-3');
+  const per = preset.pricing?.usdPerImage ?? null, total = per == null ? null : Math.round(per * planned.length * 1000) / 1000;
+  if (total === null || total > a.maxCostUsd) return { submitted: false, reason: total === null ? 'Cost unknown for this model' : `Estimated $${total} for ${planned.length} views is above maxCostUsd $${a.maxCostUsd}`, views: planned.map(x => x.label) };
+  const rid = () => Math.random().toString(36).slice(2, 10);
+  const sheetId = 's' + rid(), card = castCard(p, e.id);
+  const label = a.setId === 'expressions' ? `Expressions · ${EXPRESSION_PACKS.find(x => x.id === a.options?.pack)?.label || 'Basic 6'}` : a.setId === 'custom' ? planned[0].label : setsFor(e.kind).find(s => s.id === a.setId).label;
+  await patchSheets(p.id, e.id, sheets => sheets.push({ id: sheetId, setId: a.setId, label, options: a.options || {}, presetId, createdAt: new Date().toISOString(), slots: all.map(x => ({ ...x, attempts: [], selected: null, accepted: null })) }));
+  const results = [];
+  for (const [i, s] of planned.entries()) {
+    const seed = Math.floor(Math.random() * 1e9), attemptId = rid();
+    const prompt = viewPrompt({ kind: e.kind, spec: s.spec, description: objectNotes(p, e), styleNotes: card?.styleNotes, projectStyle: p.scene.environment.style, note: a.note || '' });
+    const setAttempt = patch => patchSheets(p.id, e.id, sheets => { const x = sheets.find(y => y.id === sheetId)?.slots.find(y => y.id === s.id); if (!x) return; const t = x.attempts.find(y => y.id === attemptId); if (t) Object.assign(t, patch); else { x.attempts.push({ id: attemptId, requestId: null, referenceId: null, mode: 'generate', note: a.note || '', from: null, presetId, seed, error: '', createdAt: new Date().toISOString(), ...patch }); x.selected = attemptId; } });
+    let job;
+    try { job = (await post('/api/director/refgen/prepare', { projectId: p.id, entityId: e.id, presetId, prompt, aspect: slotAspect(s.spec, e.kind), count: 1, seed, referenceIds: [identity.id], sheet: { sheetId, slotId: s.id, label: s.label } })).job; }
+    catch (err) { results.push({ slot: s.id, label: s.label, status: 'failed', message: err.message }); continue; }
+    await setAttempt({ requestId: job.id });
+    let r = null, error = null;
+    for (let w = 0; w < 180; w++) { try { r = (await post('/api/director/refgen/submit', { projectId: p.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: a.maxCostUsd, allowUnknownCharges: true } } })).job; break; } catch (err) { if (!/Another request/.test(err.message)) { error = err.message; break; } await sleep(5000); } }
+    if (!r) { await setAttempt({ error: error || 'Image backend stayed busy; nothing was sent' }); results.push({ slot: s.id, label: s.label, status: 'failed', message: error || 'Image backend stayed busy; nothing was sent' }); continue; }
+    if (r.status === 'uncertain') { await setAttempt({ error: r.message.slice(0, 300) }); results.push({ slot: s.id, label: s.label, status: 'uncertain', message: r.message }); return { sheetId, stopped: 'A dispatch outcome is unknown; the batch stopped and nothing is resent.', results, skipped: planned.slice(i + 1).map(x => x.id) }; }
+    const t0 = Date.now(); while (r.status === 'submitted' && Date.now() - t0 < 300000) { await sleep(4000); r = (await post('/api/director/refgen/track', { projectId: p.id, requestId: job.id })).job; }
+    if (r.status === 'completed' && r.referenceIds?.[0]) await setAttempt({ referenceId: r.referenceIds[0] });
+    else if (r.status !== 'submitted') await setAttempt({ error: String(r.message || r.status).slice(0, 300) });
+    results.push({ slot: s.id, label: s.label, status: r.status, requestId: job.id, referenceId: r.referenceIds?.[0] || null, message: r.message });
+  }
+  return { object: e.name, sheetId, label, model: preset.title, estimateUsd: total, results, next: 'Open the object in Previs → Design sheet to keep views, retry or edit them, and Compose sheet (browser, no charge).' };
 }
 async function handle(message) {
   if (message.method === 'initialize') return { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: 'comfy-previs', version: '0.1.0' }, instructions: 'Comfy Previs director. The user directs you here in chat while the Previs workspace (http://127.0.0.1:<port>/director.html?project=<id>) is open beside you; every edit appears there live and can be undone. Find the project with previs_director_projects (or create one with previs_director_create_project), read it with previs_director_get before every change, then build and direct with previs_director_edit (objects, Cast Card descriptions in notes/styleNotes, world and style, shots and cameras) and previs_director_animate (keyframed motion). Keep blockouts simple and readable: a few clear objects, named for what they are, each with a concrete appearance description. Reply with a short plain summary of what changed. Workflow: build the scene (objects with Cast Card descriptions, grouped where sensible), give each character/vehicle/prop an image (previs_director_generate_image, then set the best as primary), write shots and cameras, check and refine each shot prompt (previs_director_get_prompt / set_prompt / set_camera_style), choose a video model (previs_director_models, previs_director_shot_inputs), and once the user has rendered the blockout, generate video (previs_director_generate_video). Always state the estimated cost before paid generation and keep maxCostUsd tight. previs_director_wait_for_direction is only for messages typed inside the workspace and is not needed when the user talks to you directly.' };

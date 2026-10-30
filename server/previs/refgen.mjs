@@ -162,7 +162,7 @@ export async function openRefgen(root, director, options = {}) {
     if (input.target === 'shot' && !shot) fail('Choose a shot in this scene');
     const entity = shot ? null : project.scene.entities.find(e => e.id === input.entityId); if (!shot && !entity) fail('Choose an object in this scene');
     const guide = shot && input.guideBytes ? input.guideBytes : null;
-    const refBytes = shot && Array.isArray(input.refBytes) ? input.refBytes : [];
+    const refBytes = Array.isArray(input.refBytes) ? input.refBytes : [];
     if (refBytes.length > (preset.maxRefs ?? 0)) fail(preset.maxRefs ? `${preset.title} takes at most ${preset.maxRefs} reference images here` : `${preset.title} can’t take reference images; choose FLUX 3 or Flux.2`);
     if (guide && !guide.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) fail('The composition guide must be a PNG');
     const prompt = String(input.prompt || '').trim(); if (!prompt || prompt.length > 2500) fail('Prompt must be 1–2500 characters');
@@ -207,7 +207,7 @@ export async function openRefgen(root, director, options = {}) {
       const guideBytes = input.target === 'shot' && input.guide ? Buffer.from(String(input.guide), 'base64') : null;
       if (guideBytes && guideBytes.length > 12 * 1024 * 1024) fail('The composition guide is too large');
       // Reference images: director references (object looks, earlier key frames), normalised to PNG.
-      const refIds = input.target === 'shot' && Array.isArray(input.referenceIds) ? input.referenceIds.slice(0, 9) : [];
+      const refIds = Array.isArray(input.referenceIds) ? input.referenceIds.slice(0, 9) : [];
       const project0 = refIds.length ? await director.get(input.projectId) : null;
       const allRefs = project0 ? [...(project0.scene.references || []), ...project0.shots.flatMap(s => s.references)] : [];
       const refBytes = [];
@@ -221,7 +221,9 @@ export async function openRefgen(root, director, options = {}) {
       for (const [k, b] of refBytes.entries()) { const file = `${id}-ref${k + 1}.png`; await mkdir(dirFor(input.projectId), { recursive: true }); await writeFile(join(dirFor(input.projectId), file), b, { mode: 0o600 }); refs.push({ file, referenceId: refIds[k], sha256: createHash('sha256').update(b).digest('hex') }); }
       const frameAt = !r.shot ? null : ['start', 'end'].includes(input.frameAt) ? input.frameAt : Number.isFinite(Number(input.frameAt)) && input.frameAt !== null && input.frameAt !== '' ? Math.round(Math.max(0, Number(input.frameAt)) * 100) / 100 : null;
       const target = r.shot ? { target: 'shot', shotId: r.shot.id, ...(frameAt !== null ? { frameAt } : {}), shotNumber: r.project.shots.indexOf(r.shot) + 1, entityName: `Shot ${String(r.project.shots.indexOf(r.shot) + 1).padStart(2, '0')} ${r.shot.title}` } : { target: 'object', entityId: r.entity.id, entityName: r.entity.name };
-      return persist({ id, projectId: input.projectId, ...target, ...r.settings, guide, refs, backend: r.adapter.snapshot, graph: r.graph, graphHash: hashValue(r.graph), quote: r.quote, partnerNodes: r.partnerNodes, fingerprint: r.fingerprint, status: 'quoted', message: 'Quoted. Nothing was sent.', createdAt: now() });
+      // Design-sheet views name their image after the view and note which sheet slot it fills.
+      const sheet = !r.shot && input.sheet && typeof input.sheet === 'object' ? { sheetId: String(input.sheet.sheetId || '').slice(0, 48), slotId: String(input.sheet.slotId || '').slice(0, 48), label: String(input.sheet.label || '').slice(0, 60) } : null;
+      return persist({ id, projectId: input.projectId, ...target, ...(sheet ? { sheet } : {}), ...r.settings, guide, refs, backend: r.adapter.snapshot, graph: r.graph, graphHash: hashValue(r.graph), quote: r.quote, partnerNodes: r.partnerNodes, fingerprint: r.fingerprint, status: 'quoted', message: 'Quoted. Nothing was sent.', createdAt: now() });
     }),
     submit: input => serial(async () => {
       const saved = jobs.get(input.requestId); if (!saved || saved.projectId !== input.projectId) fail('Unknown request', 404);
@@ -264,7 +266,7 @@ export async function openRefgen(root, director, options = {}) {
       const expected = Object.entries(job.graph).filter(([, n]) => n.class_type === 'SaveImage').map(([id]) => id);
       for (const nodeId of expected) for (const image of history.outputs?.[nodeId]?.images || []) {
         const bytes = await adapter.view(image);
-        const r = await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId }), name: `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId } });
+        const r = await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId } });
         referenceIds.push(r.referenceId);
       }
       if (!referenceIds.length) return persist({ ...job, status: 'failed', message: 'Completed without a saved image output.', finishedAt: now() });

@@ -2,6 +2,7 @@
 // Director scene model shared by the browser workspace, the server and MCP tools.
 // Units are metres. The stage faces +z: "front" is toward the default camera,
 // "left" is -x as seen from the default camera.
+import { normalizeSheets } from './sheet-presets.mjs';
 
 export const SHAPES = {
   person: { size: [0.5, 1.8, 0.35], kind: 'character', color: '#e8b04b' },
@@ -69,8 +70,11 @@ export function makeEntity(input, id) {
     roll: tiltOf(input.roll),
     path: normalizePath(input.path),
     parent: typeof input.parent === 'string' && input.parent !== id ? input.parent : null,
+    ...sheetsOf(input.sheets),
   };
 }
+// Design sheets (views generated from the primary look); stored only when present.
+function sheetsOf(v) { const sheets = normalizeSheets(v); return sheets ? { sheets } : {}; }
 
 // ---------- Hierarchy ----------
 /** Every object below id (children, grandchildren…), parents before children. */
