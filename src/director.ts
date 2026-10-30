@@ -51,6 +51,21 @@ async function edit(ops: unknown[], quiet = false) {
 const titleInput = h('input', { 'aria-label': 'Project name', maxlength: 120 });
 const sceneLabel = h('span', { class: 'muted' });
 const pillSlot = h('span');
+const claudeBtn = h('button', { class: 'btn ghost sm', type: 'button', title: 'Direct this scene from Claude', onclick: () => claudeDialog() }, 'Direct with Claude');
+function claudeDialog() {
+  const d = h('dialog', { class: 'claude-help' },
+    h('h3', {}, 'Direct with Claude'),
+    h('p', {}, 'Previs is a connector in Claude Desktop and Claude Code. Ask Claude to build and direct this scene; edits appear here live, and every change can be undone.'),
+    h('p', { class: 'muted' }, 'Try:'),
+    h('ul', {},
+      h('li', {}, `“In Previs, open ${project?.title || 'my project'} and add a second creator watching from the bridge.”`),
+      h('li', {}, '“Write a Cast Card for every character, then make shot 1 a slow push-in on the car.”'),
+      h('li', {}, '“Add three shots that cover the lift-off from different angles.”')),
+    h('p', { class: 'muted' }, 'Setup: add the “comfy-previs” MCP server (node server/previs/agent.mjs, PREVIS_URL=http://127.0.0.1:<port>) to Claude.'),
+    h('div', { class: 'bar', style: 'display:flex;justify-content:flex-end;margin-top:12px' }, h('button', { class: 'btn sm', type: 'button', onclick: () => d.close() }, 'Done')));
+  d.addEventListener('close', () => d.remove());
+  document.body.append(d); (d as HTMLDialogElement).showModal();
+}
 const previewBtn = h('button', { class: 'btn', type: 'button', title: 'Play the shot through the camera (Space)' }, '▶ Preview');
 const looksBtn = h('button', { class: 'btn ghost', type: 'button', title: 'Design every object’s look and the project style; generate reference images in one batch' }, 'Looks');
 const assetsBtn = h('button', { class: 'btn ghost', type: 'button', title: 'Every render, result, look and reference in this project' }, 'Assets');
@@ -110,8 +125,8 @@ const prevKeyBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'ar
 const nextKeyBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Next keyframe', title: 'Next keyframe', onclick: () => jumpKey(1) }, '◆›');
 const stage = h('section', { class: 'stage' }, viewport, h('div', { class: 'transport' }, playBtn, timeOut, prevKeyBtn, keyBtn, nextKeyBtn, scrubWrap, moveChip));
 
-const directTab = h('button', { type: 'button', class: 'on', onclick: () => setTab('direct') }, 'Direct');
-const shotTab = h('button', { type: 'button', onclick: () => setTab('shot') }, 'Shot');
+const directTab = h('button', { type: 'button', hidden: true, onclick: () => setTab('direct') }, 'Direct');
+const shotTab = h('button', { type: 'button', class: 'on', onclick: () => setTab('shot') }, 'Shot');
 const objectTab = h('button', { type: 'button', onclick: () => setTab('object') }, 'Object');
 const shotChip = h('span', { class: 'shotchip' });
 const thread = h('div', { class: 'thread', 'aria-live': 'polite' });
@@ -159,7 +174,7 @@ function showJourney() {
   openJourney({
     context: `${project.title} · Browser-owned scene · ${project.scene.entities.length} objects · ${project.shots.length} shots · ${project.assets?.length || 0} saved video assets. Counts describe saved work, not quality acceptance.`,
     actions: {
-      scene: () => scenePanel('direct'),
+      scene: () => scenePanel('shot'),
       looks: () => openLooks(),
       shot: () => scenePanel('shot'),
       capture: () => { setMode('scene'); openRender(); },
@@ -362,7 +377,7 @@ function activityView(m: Message) {
 }
 
 function renderRoute() { // [agent]
-  pillSlot.replaceChildren(agentUi.pill(agent, () => connectDialog(agent, connect)));
+  pillSlot.replaceChildren(claudeBtn);
   routeNote.textContent = agentUi.routeNote(mode, agent);
 }
 
@@ -1533,7 +1548,7 @@ async function boot() {
     apply(p.project);
     // Open on the action: frame subjects, not the buildings around them.
     scene.frame(project.scene.entities.filter(e => e.kind !== 'environment').map(e => e.id), 3.5);
-    setTab(project.messages.some(m => m.role === 'user') ? 'direct' : 'direct');
+    setTab('shot');
     if (params.get('view') === 'sequence') setMode('sequence');
     agentUi.connect(); // [agent] live steps + streaming reply
     setTimeout(poll, 1200);

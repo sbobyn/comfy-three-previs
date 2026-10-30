@@ -897,3 +897,9 @@ dialog.journey-dialog { width: min(820px, 94vw); max-height: 90vh; }
 .journey-boundaries dt { font-size: 13px; font-weight: 600; margin-top: 16px; }
 .journey-boundaries dd { font-size: 13px; line-height: 1.6; margin: 5px 0 0; color: var(--ink-3); }
 .journey-boundaries nav { display: flex; flex-wrap: wrap; gap: 12px 18px; font-size: 13px; }
+
+/* Direct with Claude */
+dialog.claude-help { padding: 22px 24px; width: min(540px, 94vw); }
+dialog.claude-help h3 { margin: 0 0 8px; font-size: 18px; }
+dialog.claude-help ul { margin: 6px 0 10px 18px; padding: 0; display: grid; gap: 6px; }
+dialog.claude-help p { margin: 6px 0; line-height: 1.5; }
