@@ -68,3 +68,37 @@ test('the shot scrubber places shots in the Cut’s order, with shots left out o
   const f = core.filmSegments(p);
   assert.deepEqual(plain(f.segments.map(x => [x.shotId, x.start, x.inCut])), [['c', 0, true], ['a', 4, true], ['b', 6, false]]);
 });
+
+test('changes from Claude are described in plain words and undone exactly; the user’s own job results are not counted', () => {
+  const ent = (id, name, o = {}) => ({ id, name, kind: 'character', shape: 'person', position: [0, 0, 0], rotation: 0, scale: [1, 1, 1], color: '#fff', notes: '', ...o });
+  const base = () => ({ title: 'Wingspan', scene: { environment: { preset: 'stage', description: '' }, entities: [ent('e1', 'Eagle'), ent('e2', 'Elk')] }, shots: [shot([], { id: 's1', title: 'The valley' })] });
+  const a = base(), b = base();
+  b.shots.push(shot([], { id: 's2', title: 'The dive' }));
+  let x = core.externalChanges(a, b);
+  assert.equal(x.text, 'Claude added The dive');
+  assert.deepEqual(plain(x.undo), [{ op: 'remove_shot', id: 's2' }]);
+  assert.deepEqual(plain(core.externalChanges(b, a).undo)[0].op, 'add_shot', 'the reverse diff re-applies it (redo)');
+  const c = base(); c.scene.entities[0].position = [2, 0, 0];
+  x = core.externalChanges(a, c);
+  assert.equal(x.text, 'Claude moved Eagle'); assert.deepEqual(plain(x.ids), ['e1']);
+  assert.deepEqual(plain(x.undo), [{ op: 'update_entity', id: 'e1', patch: { position: [0, 0, 0] } }]);
+  const d = base(); d.scene.entities[1].notes = 'Bull elk'; d.scene.entities.push(ent('e3', 'Hawk')); d.shots[0].camera = { ...d.shots[0].camera, move: 'dolly-in' };
+  x = core.externalChanges(a, d);
+  assert.equal(x.text, 'Claude added Hawk and 2 more changes');
+  assert.deepEqual(plain(x.undo), [{ op: 'remove_entity', id: 'e3' }, { op: 'update_entity', id: 'e2', patch: { notes: '' } }, { op: 'update_shot', id: 's1', patch: { camera: a.shots[0].camera } }]);
+  const e = base(); e.shots[0].references.push(frame('f1', 'key frame start')); e.shots[0].render = { previsShotId: 'x' };
+  assert.equal(core.externalChanges(a, e), null, 'stills and blockouts are the user’s own jobs');
+  const gone = base(); gone.shots = []; a.shots[0].references.push(frame('f1', 'key frame start'));
+  assert.equal(core.externalChanges(a, gone).undo, null, 'a removed shot with stills cannot be brought back whole, so no Undo');
+});
+
+test('the first-run tour shows once, on a new project', () => {
+  const p = { revision: 2, createdAt: '2026-10-30T10:00:00Z', scene: { entities: [{}] } };
+  const now = Date.parse('2026-10-30T12:00:00Z');
+  assert.equal(core.shouldTour(p, null, now), true);
+  assert.equal(core.shouldTour(p, '1', now), false, 'never again once dismissed');
+  assert.equal(core.shouldTour({ ...p, revision: 40 }, null, now), false, 'an old, much-edited project is not new');
+  assert.equal(core.shouldTour({ ...p, revision: 40, createdAt: '2026-10-30T11:50:00Z' }, null, now), true, 'a starter opened minutes ago is');
+  assert.equal(core.shouldTour({ ...p, scene: { entities: [] } }, null, now), false, 'the empty stage has its own Start here card');
+  assert.deepEqual(plain(core.TOUR.map(t => t.id)), ['block', 'cast', 'shoot', 'generate']);
+});

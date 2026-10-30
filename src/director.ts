@@ -25,7 +25,7 @@ import { mountJobsPip } from './director-jobs'; // [jobs]
 import { progressSlot, acquireProgress } from './director-progress'; // [live-progress]
 import { mountExplainer, modelInputsDiagram, keyboardDiagram, gamepadDiagram, phoneDiagram } from './director-explain';
 import { initMobile } from './director-mobile'; // [mobile]
-import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments } from './director-desktop-core';
+import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY } from './director-desktop-core';
 import type { ShotPips } from './director-desktop-core';
 import { VIDEO_PRICES } from '../shared/tiers.mjs';
 
@@ -48,9 +48,12 @@ const allRefs = () => project.shots.flatMap(s => s.references);
 const fmt = (t: number) => `${t.toFixed(2)}s`;
 const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 
+let editsInFlight = 0; // while our own edit is on its way, a poll can't tell our change from someone else's
 async function edit(ops: unknown[], quiet = false) {
+  editsInFlight++;
   try { const r = await api('director/edit', { projectId, ops }); apply(r.project); return r; }
   catch (e) { if (!quiet) toast((e as Error).message, true); throw e; }
+  finally { editsInFlight--; }
 }
 
 // ---------- Layout ----------
@@ -237,7 +240,7 @@ function setStep(k: Step) {
   mobile?.onStep(k);
   for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); b.tabIndex = key === k ? 0 : -1; }
   wsBody.classList.toggle('shooting', k === 'shoot');
-  top.dataset.step = k; renderSteps(); renderCamHero();
+  top.dataset.step = k; renderSteps(); renderCamHero(); if (tourAt >= 0) requestAnimationFrame(placeTour);
   if (k === 'shoot') {
     setView('camera');
     if (collapsed.side) setCollapsed('side', false);
@@ -808,7 +811,7 @@ function openStill(at: 'start' | 'end') {
   goSection('video'); shotPane.dataset.shot = ''; renderShotPane();
   requestAnimationFrame(() => shotPane.querySelector('.sb-composer')?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }));
 }
-function showTipsAgain() { localStorage.removeItem('previs.coach.viewport'); localStorage.removeItem(HERO_KEY); coach.hidden = false; renderCamHero(); }
+function showTipsAgain() { localStorage.removeItem('previs.coach.viewport'); localStorage.removeItem(HERO_KEY); localStorage.removeItem(TOUR_KEY); coach.hidden = false; renderCamHero(); if (step !== 'cut') showTour(0); }
 let rigExplainer: { dispose(): void } | undefined;
 function renderShotPane() {
   const key = `${shotId}|${project.revision}`;
@@ -1807,36 +1810,37 @@ function genQuote(job: any, def: any, request: any, s: Shot) {
 }
 
 // ---------- Live sync ----------
+let agentLive = false;
 async function pollNow() {
   try {
     const r = await api(`director/project?id=${projectId}&since=${project.revision}`);
-    if (r.agent) claudeChip.hidden = !r.agent.connected;
-    if (r.project) { const before = project; apply(r.project); announceChanges(before, r.project); }
+    if (r.agent) { agentLive = !!(r.agent.connected || r.agent.runner?.busy?.length); claudeChip.hidden = !r.agent.connected; }
+    if (r.project && r.project.revision > project.revision) { const before = project, mine = editsInFlight > 0; apply(r.project); if (!mine) announceChanges(before, r.project); }
   } catch {}
 }
-/** Changes that arrive from outside (Claude over MCP): flash the objects in their kind colour and say what changed. */
+/** Changes the user did not make (Claude over MCP, or another window): flash the objects and say what changed, with Undo. */
 function announceChanges(before: DirectorProject, after: DirectorProject) {
-  const old = new Map(before.scene.entities.map(e => [e.id, JSON.stringify(e)]));
-  const objs = after.scene.entities.filter(e => old.get(e.id) !== JSON.stringify(e));
-  const removed = before.scene.entities.filter(e => !after.scene.entities.some(x => x.id === e.id)).length;
-  const oldShots = new Map(before.shots.map(x => [x.id, JSON.stringify(x)]));
-  const shots = after.shots.filter(x => oldShots.get(x.id) !== JSON.stringify(x)).length + before.shots.filter(x => !after.shots.some(y => y.id === x.id)).length;
-  if (!objs.length && !removed && !shots) return;
+  const ext = externalChanges(before, after); if (!ext) return;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  for (const e of objs) for (const el of [labels.querySelector<HTMLElement>(`[data-id="${e.id}"]`), outline.querySelector<HTMLElement>(`[data-id="${e.id}"]`)]) {
+  for (const id of ext.ids) for (const el of [labels.querySelector<HTMLElement>(`[data-id="${id}"]`), outline.querySelector<HTMLElement>(`[data-id="${id}"]`)]) {
     if (!el) continue;
-    el.style.setProperty('--flash', KIND_COLORS[e.kind] || 'var(--accent)');
+    el.style.setProperty('--flash', KIND_COLORS[entity(id)?.kind || ''] || 'var(--accent)');
     el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
     setTimeout(() => el.classList.remove('flash'), reduce ? 900 : 1600);
   }
-  const parts = [objs.length || removed ? `${objs.length + removed} object${objs.length + removed === 1 ? '' : 's'}` : '', shots ? `${shots} shot${shots === 1 ? '' : 's'}` : ''].filter(Boolean);
-  toast(`✳ Claude updated ${parts.join(' and ')}`);
+  const who = agentLive ? '✳ ' : '', text = agentLive ? ext.text : ext.text.replace(/^Claude /, 'Changed elsewhere: ');
+  if (!ext.undo) { toast(`${who}${text}`); return; }
+  // Undo works from the toast and from Ctrl/Cmd+Z (redo re-applies the same change).
+  const redo = externalChanges(after, before)?.undo;
+  const entry = { label: agentLive ? 'Claude’s change' : 'the change from elsewhere', redo: redo || [], undo: ext.undo };
+  if (redo) { undoStack.push(entry); renderUndo(); }
+  toast(`${who}${text}`, false, { label: 'Undo', run: () => { if (redo && undoStack.peekUndo() === entry) void undo(); else void edit(entry.undo).then(() => toast(`Undid ${entry.label}`)).catch(() => {}); } });
 }
 /** Empty project: three steps from nothing to a video. */
 function renderFirstRun() {
   const key = `previs.firstrun.${project.id}`;
   const objs = project.scene.entities.filter(e => e.shape !== 'group');
-  if (objs.length || localStorage.getItem(key) === '1') { firstRun.hidden = true; return; }
+  if (objs.length || localStorage.getItem(key) === '1') { firstRun.hidden = true; if (project.revision > 0 && tourAt < 0 && objs.length) setTimeout(maybeTour, 0); return; }
   const hasImages = objs.some(e => objectLooks(project, e.id).length), hasVideo = (project.assets || []).some(a => a.kind === 'workflow-result');
   const stepEl = (n: number, done: boolean, title: string, body: string, action: Node | null) => h('li', { class: done ? 'done' : '' }, h('span', { class: 'fr-n' }, done ? '✓' : String(n)), h('div', {}, h('strong', {}, title), h('p', {}, body), action));
   firstRun.hidden = false;
@@ -1848,6 +1852,37 @@ function renderFirstRun() {
       stepEl(2, hasImages, 'Give your cast an image', 'Open a cast member in the Cast panel and generate or drop an image.', null),
       stepEl(3, hasVideo, 'Frame a shot and generate video', 'Switch to Shoot, frame or fly the camera, then press Generate video in the bar at the bottom of the right panel.', null))));
 }
+// First-run tour: four coach marks (block, cast, shoot, generate) on a new project, once per browser.
+const tourEl = h('div', { class: 'tour', role: 'dialog', 'aria-modal': 'false', 'aria-labelledby': 'tour-title', hidden: true });
+document.body.append(tourEl);
+let tourAt = -1;
+const tourAnchor = (id: string): HTMLElement | null => id === 'block' ? viewport : id === 'cast' ? (step === 'build' ? topGo : stepBtns.build) : id === 'shoot' ? stepBtns.shoot : renderBtn.getClientRects().length ? renderBtn : topGo;
+function endTour() { tourAt = -1; tourEl.hidden = true; localStorage.setItem(TOUR_KEY, '1'); localStorage.setItem('previs.coach.viewport', '1'); window.removeEventListener('resize', placeTour); }
+function placeTour() {
+  const a = tourAnchor(TOUR[tourAt]?.id || ''); if (tourAt < 0 || !a) return;
+  const r = a.getBoundingClientRect(), w = tourEl.offsetWidth || 300, hh = tourEl.offsetHeight || 140, big = r.height > 240;
+  // Big anchors (the viewport): sit inside its top-left. Small ones: below, or above when there's no room.
+  const below = big ? r.top + 56 : r.bottom + 12 + hh < innerHeight ? r.bottom + 12 : r.top - 12 - hh;
+  const left = Math.max(8, Math.min(innerWidth - w - 8, big ? r.left + 16 : r.left + r.width / 2 - w / 2));
+  tourEl.style.left = `${left}px`; tourEl.style.top = `${below}px`;
+  tourEl.dataset.side = big ? 'inside' : below > r.top ? 'below' : 'above';
+  tourEl.style.setProperty('--arrow', `${Math.max(16, Math.min(w - 16, r.left + r.width / 2 - left))}px`);
+}
+function showTour(i: number) {
+  if (i >= TOUR.length) { endTour(); return; }
+  tourAt = i; const t = TOUR[i], last = i === TOUR.length - 1;
+  coach.hidden = true;
+  const next = h('button', { class: 'btn sm primary', type: 'button', onclick: () => showTour(i + 1) }, last ? 'Done' : 'Next');
+  tourEl.replaceChildren(
+    h('div', { class: 'tour-head' }, h('span', { class: 'eyebrow' }, `${i + 1} of ${TOUR.length}`), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Skip the tour', title: 'Skip the tour (Esc)', onclick: () => endTour() }, '✕')),
+    h('strong', { id: 'tour-title' }, t.title), h('p', {}, t.body),
+    h('div', { class: 'tour-foot' }, h('span', { class: 'tour-dots', 'aria-hidden': 'true' }, ...TOUR.map((_, k) => h('i', { class: k === i ? 'on' : '' }))), i ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => showTour(i - 1) }, 'Back') : null, next));
+  tourEl.hidden = false; placeTour(); requestAnimationFrame(placeTour);
+  window.removeEventListener('resize', placeTour); window.addEventListener('resize', placeTour);
+  next.focus({ preventScroll: true });
+}
+tourEl.addEventListener('keydown', ev => { if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); endTour(); } });
+function maybeTour() { if (tourAt < 0 && !mobile?.active() && firstRun.hidden && shouldTour(project, localStorage.getItem(TOUR_KEY))) showTour(0); }
 async function poll() { await pollNow(); setTimeout(poll, 1200); }
 
 async function boot() {
@@ -1862,6 +1897,7 @@ async function boot() {
 
     applyHidden();
     const v = params.get('view'); setStep(v === 'sequence' ? 'cut' : v === 'shoot' ? 'shoot' : 'build');
+    setTimeout(maybeTour, 900);
     setTimeout(poll, 1200);
   } catch (e) {
     app.replaceChildren(h('div', { class: 'empty-state', style: 'margin:80px auto;max-width:420px' }, (e as Error).message, h('br'), h('a', { href: '/', class: 'btn', style: 'margin-top:12px' }, 'Back to projects')));

@@ -445,6 +445,20 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .inspector input[type=color] { width: 100%; height: 26px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--bg); padding: 2px; }
 .inspector.collapsed > :not(.head) { display: none !important; }
 /* Controls & shortcuts card: paper card; key list scrolls, viewport settings stay pinned */
+/* First-run tour: one coach card at a time, pointing at the part of the workspace it explains. */
+.tour { position: fixed; z-index: 55; width: min(300px, calc(100vw - 16px)); display: flex; flex-direction: column; gap: 6px; padding: 12px 14px 12px; border-radius: var(--r-lg); background: var(--card); color: var(--ink-2); box-shadow: var(--sh-3); font-size: var(--fs-sm); animation: hero-in var(--t-reveal) var(--ease-out) both; }
+.tour::before { content: ''; position: absolute; left: var(--arrow, 24px); width: 12px; height: 12px; margin-left: -6px; background: var(--card); transform: rotate(45deg); box-shadow: -1px -1px 0 rgba(21,19,15,.06); }
+.tour[data-side=below]::before { top: -6px; }
+.tour[data-side=above]::before { bottom: -6px; box-shadow: 1px 1px 0 rgba(21,19,15,.06); }
+.tour[data-side=inside]::before { display: none; }
+.tour-head { display: flex; align-items: center; justify-content: space-between; margin: -4px -6px -2px 0; }
+.tour-head .eyebrow { color: var(--accent); }
+.tour strong { color: var(--ink); font-size: var(--fs-md); }
+.tour p { margin: 0; line-height: var(--lh); }
+.tour-foot { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.tour-dots { display: inline-flex; gap: 4px; margin-right: auto; }
+.tour-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line-2); }
+.tour-dots i.on { background: var(--accent); }
 /* Shoot: camera controls hero (bottom-left of the viewport); opens the camera guide in the Controls card. */
 .cam-hero { position: absolute; left: 12px; bottom: 12px; z-index: 5; display: flex; align-items: center; gap: 2px; max-width: calc(100% - 24px); padding: 4px 4px 4px 12px; border-radius: var(--r-full); background: rgba(255,253,249,.94); color: var(--ink-2); box-shadow: var(--sh-3); font-size: var(--fs-sm); backdrop-filter: blur(10px); animation: hero-in var(--t-reveal) var(--ease-out) both .3s; }
 @keyframes hero-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
