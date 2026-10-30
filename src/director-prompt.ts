@@ -17,7 +17,7 @@ function colouredText(text: string, segs: Segment[]) {
   let at = 0;
   for (const r of highlightRanges(text, segs)) {
     if (r.start > at) box.append(h('span', { class: 'ap-plain', title: 'Your text' }, text.slice(at, r.start)));
-    box.append(h('span', { class: 'ap-span', title: `${r.seg.label} · from ${r.seg.source}`, style: `--c:${r.seg.color}` }, text.slice(r.start, r.end)));
+    box.append(h('span', { class: 'ap-span', title: `${r.seg.label} · from ${r.seg.source}`, style: `--c:${r.seg.color}`, 'data-ids': (r.seg.ids || []).join(' ') }, text.slice(r.start, r.end)));
     at = r.end;
   }
   if (at < text.length) box.append(h('span', { class: 'ap-plain', title: 'Your text' }, text.slice(at)));
@@ -40,7 +40,7 @@ export function promptBlock(s: Shot, ctx: Ctx) {
   // Chips: one per contributing field/object, colour + label (+ source on hover).
   const chips = h('div', { class: 'ap-chips' }, ...segs.filter(g => g.key !== 'intro').map(g => {
     const objId = g.key.startsWith('obj:') ? g.key.slice(4) : null;
-    return h('button', { type: 'button', class: 'ap-chip', style: `--c:${g.color}`, title: `From ${g.source}${objId ? ' · click to open the Cast Card' : ''}`, onclick: objId ? () => ctx.select(objId) : undefined }, h('i'), g.label, objId ? h('small', {}, 'Cast Card') : null);
+    return h('button', { type: 'button', class: 'ap-chip', style: `--c:${g.color}`, 'data-ids': (g.ids || []).join(' '), title: `From ${g.source}${objId ? ' · click to open the Cast Card' : ''}`, onclick: objId ? () => ctx.select(objId) : undefined }, h('i'), g.label, objId ? h('small', {}, 'Cast Card') : null);
   }));
 
   const seg = h('div', { class: 'seg', role: 'tablist', 'aria-label': 'Prompt type' }, ...(['video', 'image'] as const).map(k => h('button', { type: 'button', role: 'tab', class: k === kind ? 'on' : '', 'aria-selected': String(k === kind), title: k === 'video' ? 'For the LTX video (includes camera motion)' : 'For the FLUX still (no motion)', onclick: () => { kind = k; editing = preview = false; rerender(); } }, k === 'video' ? 'Video · LTX' : 'Image · FLUX')));

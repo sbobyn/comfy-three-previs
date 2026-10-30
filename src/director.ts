@@ -8,6 +8,7 @@ import { initOperate, operateBlock } from './director-operate'; // [operate]
 import { installPhoneDemo } from './director-phone'; // [director-phone]
 import { createSequence } from './director-sequence';
 import { promptBlock } from './director-prompt';
+import { objectColors, KIND_COLORS } from '../shared/prompt.mjs';
 import { createAgentUi, agentText, ROUTES } from './director-agent'; // [agent]
 import type { Route } from './director-agent';
 import { shotPrompt } from '../shared/prompt.mjs';
@@ -127,7 +128,7 @@ const stage = h('section', { class: 'stage' }, viewport, h('div', { class: 'tran
 
 const directTab = h('button', { type: 'button', hidden: true, onclick: () => setTab('direct') }, 'Direct');
 const shotTab = h('button', { type: 'button', class: 'on', onclick: () => setTab('shot') }, 'Shot');
-const objectTab = h('button', { type: 'button', onclick: () => setTab('object') }, 'Object');
+const objectTab = h('button', { type: 'button', hidden: true, onclick: () => setTab('object') }, 'Object');
 const shotChip = h('span', { class: 'shotchip' });
 const thread = h('div', { class: 'thread', 'aria-live': 'polite' });
 const textarea = h('textarea', { placeholder: 'Ask or direct: “slow dolly in on @runner”, “write the prompt for shot 2”… @ mentions objects · Enter sends · Shift+Enter newline', rows: 3, 'aria-label': 'Direction' });
@@ -274,7 +275,7 @@ const selection = new Selection();
 const undoStack = new UndoStack();
 // [agent] Built-in agent UI: live stream, proposal cards, prompt actions. Undo entries land on the same stack.
 const agentUi = createAgentUi({ projectId, project: () => project, apply: p => apply(p), runEntry: e => runEntry(e), pushUndo: e => { undoStack.push(e); renderUndo(); }, refresh: () => pollNow(), resend: (text, sid) => { textarea.value = text; if (sid) shotId = sid; void send(); }, selectShot: id => { selectShot(id); setTab('shot'); } });
-selection.subscribe(sel => { selected = sel.primary; scene.setSelection(sel.ids, sel.primary); renderOutline(); renderInspector(); renderObjectPane(); renderKeyTrack(); });
+selection.subscribe(sel => { selected = sel.primary; scene.setSelection(sel.ids, sel.primary); scene.setOutlineColor(colorOf(sel.primary)); renderOutline(); renderInspector(); renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); renderKeyTrack(); });
 
 // ---------- Rendering ----------
 function apply(next: DirectorProject) {
@@ -322,7 +323,7 @@ function renderOutline() {
   const row = (e: Entity, depth: number): Node[] => {
     const children = kids(e.id), open = openGroups.has(e.id);
     const ref = objectLooks(project, e.id)[0] || allRefs().find(r => r.entityId === e.id && r.role !== 'style');
-    const btn = h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : '') + (children.length ? ' parent' : ''), type: 'button', style: `--depth:${depth}`, onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.frame([e.id], 1.2); } if (selection.ids.length) setTab('object'); }, ondblclick: () => scene.focusOn(e) },
+    const btn = h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : '') + (children.length ? ' parent' : ''), type: 'button', style: `--depth:${depth};--k:${KIND_COLORS[e.kind]}`, onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.frame([e.id], 1.2); } if (selection.ids.length) setTab('object'); }, ondblclick: () => scene.focusOn(e) },
       children.length ? h('span', { class: 'twisty' + (open ? ' open' : ''), role: 'button', 'aria-label': open ? 'Collapse' : 'Expand', onclick: (ev: MouseEvent) => { ev.stopPropagation(); toggleGroup(e.id); } }, '›') : h('span', { class: 'twisty none' }),
       e.shape === 'group' ? h('span', { class: 'sw grp' }) : h('span', { class: 'sw', style: `background:${e.color}` }),
       h('span', { class: 'name' }, e.name),
@@ -333,7 +334,7 @@ function renderOutline() {
   };
   for (const [kind, list] of Object.entries(groups)) {
     if (!list.length) continue;
-    outline.append(h('div', { class: 'group' }, kind === 'character' ? 'Characters' : kind === 'vehicle' ? 'Vehicles' : kind === 'prop' ? 'Props' : 'Environment'));
+    outline.append(h('div', { class: 'group', style: `--k:${KIND_COLORS[kind]}` }, kind === 'character' ? 'Characters' : kind === 'vehicle' ? 'Vehicles' : kind === 'prop' ? 'Props' : 'Environment'));
     for (const e of list) outline.append(...row(e, 0));
   }
 }
@@ -569,7 +570,7 @@ function renderShotPane() {
   shotPane.replaceChildren(
     h('div', { class: 'block' },
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Shot ${String(idx + 1).padStart(2, '0')}`), h('button', { class: 'btn ghost sm', type: 'button', disabled: project.shots.length < 2, title: 'Delete this shot', onclick: () => { if (confirm(`Delete “${s.title}”? Its references stay on disk.`)) void edit([{ op: 'remove_shot', id: s.id }]); } }, 'Delete')),
-      title, desc, handles),
+      title, desc),
     castBlock(s),
     promptBlock(s, { project: () => project, runEntry: e => runEntry(e as any), select: id => { select(id); setTab('object'); } }),
     h('div', { class: 'block' },
@@ -597,7 +598,8 @@ function renderShotPane() {
       h('video', { src: `/assets/${rendered.assetId}.mp4`, controls: true, muted: true, loop: true, playsinline: true, style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }),
       h('div', { class: 'facts' }, 'Frames', h('b', {}, `${rendered.frameCount} @ 24 fps`), 'Duration', h('b', {}, `${Number(rendered.duration).toFixed(2)}s`), 'Size', h('b', {}, `${rendered.width}×${rendered.height}`)),
       h('a', { class: 'btn sm', href: workflowUrl(rendered.previsShotId, rendered.assetId, rendered.prompt), target: '_blank' }, 'Open in Comfy workflow →'))] : []));
-  shotPane.addEventListener('focusout', () => setTimeout(() => { if (!shotPane.contains(document.activeElement)) renderShotPane(); }, 0), { once: true });
+  placeObjectPane();
+  shotPane.addEventListener('focusout', () => setTimeout(() => { if (!shotPane.contains(document.activeElement) && !objectPane.contains(document.activeElement)) renderShotPane(); }, 0), { once: true });
 }
 
 function refCard(s: Shot, r: Reference) {
@@ -866,26 +868,38 @@ function castBlock(s: Shot) {
     else if (!r.inCast && !r.auto) next.include.push(id); // camera doesn't see it, but put it in
     void runEntry({ label: r.inCast ? 'Remove from cast' : 'Add to cast', redo: [{ op: 'update_shot', id: s.id, patch: { cast: next } }], undo: [{ op: 'update_shot', id: s.id, patch: { cast: before } }] });
   };
+  const colors = objectColors(project, s);
+  // Lead with what the prompt is about: characters, vehicles, props, then described scenery. Bare set pieces fold away.
+  const ORDER = ['character', 'vehicle', 'prop', 'environment'];
+  const described = (r: (typeof rows)[number]) => r.entity.kind !== 'environment' || !!castCard(project, r.entity.id)?.description || objectLooks(project, r.entity.id).length > 0;
+  const featured = inCast.filter(described).sort((a, b) => ORDER.indexOf(a.entity.kind) - ORDER.indexOf(b.entity.kind));
+  const pieces = inCast.filter(r => !described(r));
   const row = (r: (typeof rows)[number]) => {
-    const card = castCard(project, r.entity.id)!, look = objectLooks(project, r.entity.id)[0];
-    const why = r.override === 'added' ? 'added by you' : r.override === 'removed' ? 'removed by you' : r.auto ? `camera sees it · ${Math.round(r.coverage * 100)}% of frame${r.lead ? ' · subject' : ''}` : 'not in frame';
-    const box = h('input', { type: 'checkbox', checked: r.inCast, 'aria-label': `${r.entity.name} in this shot` });
+    const card = castCard(project, r.entity.id)!, looks = objectLooks(project, r.entity.id), look = looks[0];
+    const open = selected === r.entity.id, c = colors.get(r.entity.id);
+    const why = r.override === 'added' ? 'Added by you' : r.override === 'removed' ? 'Left out by you' : r.auto ? `${Math.round(r.coverage * 100)}% of frame${r.lead ? ' · subject' : ''}` : 'Not in frame';
+    const box = h('input', { type: 'checkbox', checked: r.inCast, 'aria-label': `${r.entity.name} in this shot`, title: r.inCast ? 'In the video prompt · untick to leave it out' : 'Add to this shot' });
     box.onchange = () => toggle(r);
-    return h('div', { class: 'cast-row' + (r.inCast ? ' in' : '') + (r.override ? ' manual' : '') },
-      box,
-      look ? h('img', { src: refUrl(look), alt: '' }) : h('span', { class: 'cast-ph' }, shapeIcon(r.entity.shape)),
-      h('div', { class: 'cast-main' },
-        h('button', { type: 'button', class: 'cast-name', title: 'Open this Cast Card', onclick: () => { select(r.entity.id); setTab('object'); } }, r.entity.name),
-        h('span', { class: 'cast-why' + (r.override ? ' manual' : '') }, why),
-        r.inCast && card.description ? h('span', { class: 'cast-desc' }, card.description) : null,
-        r.inCast && card.styleNotes ? h('span', { class: 'cast-style' }, h('b', {}, 'Style '), card.styleNotes) : null,
-        r.inCast && card.imageRefs.length ? h('span', { class: 'cast-imgs' }, ...objectLooks(project, r.entity.id).slice(0, 6).map(ref => h('img', { src: refUrl(ref), alt: ref.name, title: ref.name, loading: 'lazy' }))) : null,
-        r.inCast ? h('span', { class: 'cast-facts' }, `${card.imageRefs.length} image${card.imageRefs.length === 1 ? '' : 's'}`, card.sharedFrom ? ` · shares ${entity(card.sharedFrom)?.name}’s Cast Card` : '', ` · #${card.blockoutId.slice(0, 6)}`) : null));
+    box.onclick = (ev: Event) => ev.stopPropagation();
+    const id = r.entity.id;
+    return h('div', { class: 'cast-row' + (r.inCast ? ' in' : '') + (open ? ' open' : '') + (c ? ' colored' : ''), 'data-cast': id, style: c ? `--c:${c}` : '',
+      onmouseenter: () => { scene.setHover(id); highlightPrompt(id); }, onmouseleave: () => { scene.setHover(null); highlightPrompt(selected); } },
+      h('div', { class: 'cast-head', role: 'button', tabindex: 0, 'aria-expanded': String(open), title: open ? 'Close' : 'Open: Cast Card, images and generation',
+        onclick: () => { if (open) selection.clear(); else { selection.set([id], id); if (scene.view() === 'set') scene.frame([id], 1.2); setTab('object'); } } },
+        box,
+        look ? h('img', { class: 'cast-thumb', src: refUrl(look), alt: '' }) : h('span', { class: 'cast-ph' }, shapeIcon(r.entity.shape)),
+        h('div', { class: 'cast-main' },
+          h('span', { class: 'cast-name' }, r.entity.name),
+          h('span', { class: 'cast-why' }, why, looks.length ? ` · ${looks.length} image${looks.length === 1 ? '' : 's'}` : '', card.sharedFrom ? ` · shares ${entity(card.sharedFrom)?.name}` : ''),
+          !open && r.inCast && card.description ? h('span', { class: 'cast-desc' }, card.description) : null),
+        h('span', { class: 'cast-chev', 'aria-hidden': 'true' }, '›')),
+      open ? h('div', { class: 'cast-slot', 'data-cast-slot': id }) : null);
   };
   return h('div', { class: 'block' },
-    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Cast · ${inCast.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, 'What this shot shows · ticks override the camera')),
-    ...inCast.map(row),
-    out.length ? h('details', { class: 'cast-out' }, h('summary', {}, `${out.length} not in this shot`), ...out.map(row)) : null);
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `In this shot · ${featured.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, 'Open an object to edit its Cast Card and images')),
+    ...featured.map(row),
+    pieces.length ? h('details', { class: 'cast-out', open: pieces.some(r => r.entity.id === selected) }, h('summary', {}, `${pieces.length} set piece${pieces.length === 1 ? '' : 's'} in frame · no Cast Card`), ...pieces.map(row)) : null,
+    out.length ? h('details', { class: 'cast-out', open: out.some(r => r.entity.id === selected) }, h('summary', {}, `${out.length} not in this shot`), ...out.map(row)) : null);
 }
 /** Add any image already in the project as this object's reference. */
 function linkPicker(e: Entity) {
@@ -1055,10 +1069,28 @@ function pollJobs() {
 // ---------- Actions ----------
 function selectShot(id: string) { shotId = id; playhead = 0; playing = false; apply(project); }
 function select(id: string | null) { if (id) selection.set([id], id); else selection.clear(); }
+// One panel: the shot, its cast, and the selected object opened in place inside its cast row.
 function setTab(t: 'direct' | 'shot' | 'object') {
-  tab = t; directTab.classList.toggle('on', t === 'direct'); shotTab.classList.toggle('on', t === 'shot'); objectTab.classList.toggle('on', t === 'object');
-  directPane.hidden = t !== 'direct'; shotPane.hidden = t !== 'shot'; objectPane.hidden = t !== 'object';
-  if (t === 'object') { if (collapsed.side) setCollapsed('side', false); renderObjectPane(); void loadRefgen(); }
+  tab = t; shotTab.classList.add('on');
+  directPane.hidden = true; shotPane.hidden = false;
+  if (t === 'object') { if (collapsed.side) setCollapsed('side', false); renderObjectPane(); void loadRefgen(); placeObjectPane(true); }
+}
+const colorOf = (id: string | null) => (id ? objectColors(project, shot()).get(id) ?? null : null);
+/** Put the selected object's editor inside its cast row (or at the top when it isn't in the cast). */
+function placeObjectPane(scroll = false) {
+  if (!selected) { objectPane.remove(); highlightPrompt(null); return; }
+  objectPane.hidden = false;
+  const slot = shotPane.querySelector(`[data-cast-slot="${selected}"]`);
+  if (slot) { if (objectPane.parentElement !== slot) slot.append(objectPane); }
+  else { objectPane.classList.add('loose'); const after = shotPane.firstElementChild; if (objectPane.previousElementSibling !== after) after ? after.after(objectPane) : shotPane.prepend(objectPane); }
+  if (slot) objectPane.classList.remove('loose');
+  highlightPrompt(selected);
+  if (scroll) requestAnimationFrame(() => (slot?.closest('.cast-row') || objectPane).scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+}
+/** Light up an object's words in the prompt (and its chip); everything else steps back. */
+function highlightPrompt(id: string | null) {
+  shotPane.classList.toggle('hl-on', !!id && !!shotPane.querySelector(`[data-ids~="${id}"]`));
+  shotPane.querySelectorAll<HTMLElement>('[data-ids]').forEach(el => el.classList.toggle('hl', !!id && el.dataset.ids!.split(' ').includes(id)));
 }
 function setView(v: 'set' | 'camera') {
   scene.setView(v); setBtn.classList.toggle('on', v === 'set'); camBtn.classList.toggle('on', v === 'camera');

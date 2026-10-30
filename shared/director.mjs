@@ -149,7 +149,7 @@ export function castCard(project, id) {
 export function castRows(project, shot) {
   const seen = new Map(shotCast(project, shot).map(c => [c.entity.id, c]));
   const cast = normalizeCast(shot.cast);
-  return project.scene.entities.map(e => {
+  return project.scene.entities.filter(e => e.shape !== 'group').map(e => {
     const c = seen.get(e.id), auto = !!c;
     const inCast = cast.include.includes(e.id) || (auto && !cast.exclude.includes(e.id));
     return { entity: e, coverage: c?.coverage ?? 0, lead: c?.lead ?? false, auto, inCast, override: cast.include.includes(e.id) ? 'added' : cast.exclude.includes(e.id) ? 'removed' : null };

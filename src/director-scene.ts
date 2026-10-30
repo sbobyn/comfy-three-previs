@@ -7,6 +7,7 @@ import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { computeModal, computeModalNumeric, modalKey as feedModalKey, modalHud, rigidApply, gridStep, unitsPerPixel, snapActive, snapDelta, framingDistance, isDrag, marqueeRect, inRect, RIGHT_CLICK_SLOP } from '../shared/editor-controls.mjs';
 import type { XForm, ModalMode, ModalState } from '../shared/editor-controls.mjs';
+import { KIND_COLORS } from '../shared/prompt.mjs';
 import { withDescendants, SHAPES, cameraKeys, cameraAt, focusPoint, entitySize, entityAt, entitiesAt, shotCameraAt } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, CameraKey, Vec3 } from '../shared/director.mjs';
 
@@ -264,8 +265,10 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   }
   /** What a transform moves: the selection plus everything inside it. */
   const moving = () => withDescendants(entities, selectedIds).filter(id => groups.has(id));
+  let hoverId: string | null = null;
   function refreshOutline() {
-    outline.selectedObjects = moving().map(id => groups.get(id)?.group).filter(Boolean) as THREE.Object3D[];
+    const ids = new Set(moving()); if (hoverId) for (const id of withDescendants(entities, [hoverId])) ids.add(id);
+    outline.selectedObjects = [...ids].map(id => groups.get(id)?.group).filter(Boolean) as THREE.Object3D[];
     for (const [id, { label }] of groups) label.classList.toggle('sel', selectedIds.includes(id));
     // Motion trails only for the selection; showing every path turns the road into noise.
     for (const [id, line] of trails) line.visible = selectedIds.includes(id);
@@ -297,6 +300,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       if (ref) { const img = document.createElement('img'); img.src = ref; img.alt = ''; item.label.append(img); } else { const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = e.color; item.label.append(sw); }
       item.label.append(e.name);
       item.label.classList.toggle('tgt', e.id === current.camera.target);
+      item.label.style.setProperty('--k', KIND_COLORS[e.kind] || '#9aa7b8');
     }
     for (const [id, item] of groups) if (!seen.has(id)) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); groups.delete(id); }
     // Motion trails for animated objects.
@@ -635,6 +639,10 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
 
   return {
     sync, pick, pose, capture, thumbnail, quaternionAt, markDirty,
+    /** Outline colour matches the object's colour in the prompt. */
+    setOutlineColor(c: string | null) { outline.visibleEdgeColor.set(c || 0xd6daff); outline.hiddenEdgeColor.set(c || 0xbac0ff); labelsEl.style.setProperty('--sel', c || ''); markDirty(); },
+    /** Temporarily outline an object (hovering its row in the panel). */
+    setHover(id: string | null) { if (hoverId !== id) { hoverId = id; refreshOutline(); } },
     setSelection(ids: string[], main: string | null) { selectedIds = ids.filter(id => groups.has(id)); primary = main && groups.has(main) ? main : selectedIds.at(-1) ?? null; refreshOutline(); attachGizmo(); },
     setTransformMode(next: ModalMode) { mode = next; attachGizmo(); },
     transformMode: () => mode,

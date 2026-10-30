@@ -579,7 +579,7 @@ dialog.editor { width: min(1240px, 97vw); max-height: 94vh; }
 /* Cast (Shot tab) and Cast Card (Object tab) */
 .cast-row { display: grid; grid-template-columns: 18px 36px minmax(0, 1fr); gap: 8px; align-items: center; padding: 5px 4px; border-radius: 8px; }
 .cast-row:hover { background: var(--raise); }
-.cast-row img, .cast-ph { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--line-2); display: grid; place-items: center; color: var(--faint); background: #0d0f13; }
+.cast-head > img, .cast-ph { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--line-2); display: grid; place-items: center; color: var(--faint); background: #0d0f13; }
 .cast-ph svg { width: 20px; height: 20px; }
 .cast-row:not(.in) { opacity: .6; }
 .cast-main { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
@@ -833,7 +833,7 @@ input[type=range].range::-webkit-slider-thumb { -webkit-appearance: none; width:
 .shotpane { padding: 16px; gap: 18px; }
 .block + .block { border-top: 1px solid var(--line); padding-top: 16px; }
 .cast-row { grid-template-columns: 18px 40px minmax(0,1fr); padding: 6px; border-radius: 9px; } .cast-row:hover { background: var(--paper-2); }
-.cast-row img, .cast-ph { width: 40px; height: 40px; border-radius: 7px; background: var(--stage-2); }
+.cast-head > img, .cast-ph { width: 40px; height: 40px; border-radius: 7px; background: var(--stage-2); }
 .cast-why { color: var(--ink-3); } .cast-why.manual { color: var(--accent); } .cast-facts { color: var(--ink-4); }
 dialog { background: var(--card); border-color: var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-3); }
 dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
@@ -952,3 +952,41 @@ dialog.claude-help p { margin: 6px 0; line-height: 1.5; }
 .transport > * { flex: none; }
 .transport .scrubwrap { flex: 1 1 80px; min-width: 60px; }
 .transport .movechip { flex: 1 1 0; min-width: 0; }
+
+/* ---------- Kind colours: characters, vehicles, props, environment read the same everywhere ---------- */
+.outline .group { display: flex; align-items: center; gap: 7px; color: var(--k, var(--ink-4)); }
+.outline .group::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--k); }
+.outline .obj { position: relative; }
+.outline .obj::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; border-radius: 2px; background: var(--k); opacity: 0; transition: opacity .15s ease; }
+.outline .obj:hover::before, .outline .obj.active::before { opacity: 1; }
+.outline .obj.active { background: color-mix(in srgb, var(--k) 10%, var(--paper, #fff)); }
+.outline .obj .sw.grp { border-color: var(--k); }
+.label { border-color: color-mix(in srgb, var(--k, #fff) 55%, transparent); }
+.label .sw { box-shadow: 0 0 0 1.5px var(--k, transparent); }
+.label.sel { border-color: var(--k, var(--accent)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--k, #fff) 45%, transparent); color: #fff; }
+
+/* ---------- One panel: cast rows open in place ---------- */
+.cast-row { display: block; padding: 0; border-radius: 12px; border: 1px solid transparent; background: transparent; transition: background .15s ease, border-color .15s ease, box-shadow .15s ease; --c: var(--ink-4, #999); }
+.cast-row.colored { --c: var(--c); }
+.cast-head { display: grid; grid-template-columns: 18px 42px minmax(0, 1fr) 14px; gap: 10px; align-items: center; padding: 8px 10px 8px 8px; cursor: pointer; border-radius: 12px; position: relative; outline: none; }
+.cast-head::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--c); }
+.cast-row:hover { background: color-mix(in srgb, var(--c) 6%, transparent); }
+.cast-row.open { background: var(--card, #fffdf9); border-color: color-mix(in srgb, var(--c) 35%, var(--line)); box-shadow: 0 1px 0 rgba(0,0,0,.02), 0 12px 32px -18px color-mix(in srgb, var(--c) 60%, transparent); }
+.cast-row .cast-thumb, .cast-row .cast-ph { width: 42px; height: 42px; border-radius: 9px; object-fit: cover; border: 0; box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--c) 45%, transparent); }
+.cast-row .cast-name { all: unset; font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink, var(--text)); }
+.cast-row .cast-why { font-size: 11px; color: var(--ink-3, var(--muted)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cast-row .cast-desc { font-size: 11.5px; color: var(--ink-3, var(--muted)); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; margin-top: 1px; }
+.cast-chev { color: var(--ink-4, var(--faint)); font-size: 16px; transition: transform .2s ease; justify-self: end; }
+.cast-row.open .cast-chev { transform: rotate(90deg); color: var(--c); }
+.cast-row input[type=checkbox] { accent-color: var(--c); }
+.cast-slot { padding: 2px 12px 14px; border-top: 1px solid color-mix(in srgb, var(--c) 18%, var(--line)); margin: 0 6px; }
+.cast-slot .objectpane, .shotpane > .objectpane { overflow: visible; padding: 10px 0 0; gap: 14px; display: flex; flex-direction: column; }
+.shotpane > .objectpane.loose { padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card, #fffdf9); }
+.cast-slot .objectpane > .inspector .head { display: none; }
+
+/* Prompt: the hovered/selected object's words light up, the rest steps back */
+.shotpane .ap-span, .shotpane .ap-chip { transition: opacity .18s ease, background .18s ease, box-shadow .18s ease; }
+.shotpane.hl-on .ap-span:not(.hl) { opacity: .38; }
+.shotpane.hl-on .ap-chip:not(.hl) { opacity: .45; }
+.shotpane .ap-span.hl { color: var(--ink, #15130F); background: color-mix(in srgb, var(--c) 22%, transparent); box-shadow: inset 0 -2px 0 var(--c), 0 0 0 2px color-mix(in srgb, var(--c) 18%, transparent); }
+.shotpane .ap-chip.hl { box-shadow: 0 0 0 2px var(--c); }
