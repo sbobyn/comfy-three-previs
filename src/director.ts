@@ -1583,6 +1583,16 @@ let inspectorCollapsed = localStorage.getItem('previs.inspectorCollapsed') !== '
 function setSnap(on: boolean) { snapPref = on; localStorage.setItem('previs.snap', on ? '1' : '0'); scene.setSnap(on); snapBtn.setAttribute('aria-pressed', String(on)); snapBtn.classList.toggle('on', on); renderHelp(); }
 snapBtn.onclick = () => setSnap(!snapPref);
 let gridVisible = localStorage.getItem('previs.grid.v2') === '1'; // hidden by default
+/** Subjects to frame on open: characters/vehicles, minus stragglers far from the rest (a bird high overhead). */
+function openingSubjects(entities: typeof project.scene.entities) {
+  const subs = entities.filter(e => e.kind !== 'environment' && e.shape !== 'group' && e.shape !== 'terrain');
+  if (subs.length < 3) return subs.map(e => e.id);
+  const med = (v: number[]) => { const a = [...v].sort((x, y) => x - y); return a[a.length >> 1]; };
+  const c = [0, 1, 2].map(i => med(subs.map(e => e.position[i])));
+  const d = subs.map(e => Math.hypot(e.position[0] - c[0], e.position[1] - c[1], e.position[2] - c[2]));
+  const lim = Math.max(3 * med(d), 6);
+  return subs.filter((_, i) => d[i] <= lim).map(e => e.id);
+}
 function frameSelected() { scene.frame(selection.ids); }
 async function duplicateSelection() {
   const src = selection.ids.map(id => entity(id)).filter(Boolean) as Entity[];
@@ -1972,7 +1982,7 @@ async function boot() {
     void loadRefgen().then(pollJobs);
     apply(p.project);
     // Open on the action: frame subjects, not the buildings around them.
-    scene.frame(project.scene.entities.filter(e => e.kind !== 'environment').map(e => e.id), 3.5);
+    scene.frame(openingSubjects(project.scene.entities), 10);
     setTab('shot');
     applyHidden();
     const v = params.get('view'); setStep(v === 'sequence' ? 'cut' : v === 'shoot' ? 'shoot' : 'build');

@@ -68,17 +68,26 @@ function buildShape(shape: string, color: string): THREE.Group {
       break;
     }
     case 'terrain': { // heightfield in local space (entity position/scale are applied by the group)
-      const N = 180, geo = new THREE.PlaneGeometry(w, d, N, N).rotateX(-Math.PI / 2);
+      const N = 192, geo = new THREE.PlaneGeometry(w, d, N, N).rotateX(-Math.PI / 2);
       const pos = geo.attributes.position as THREE.BufferAttribute, cols: number[] = [];
-      const base = { position: [0, 0, 0], scale: [1, 1, 1] }, grass = new THREE.Color('#6f8f4e'), rock = new THREE.Color('#7d7a74'), snow = new THREE.Color('#f2f2ee'), c = new THREE.Color();
+      const base = { position: [0, 0, 0], scale: [1, 1, 1] };
+      for (let i = 0; i < pos.count; i++) pos.setY(i, terrainHeight(base, pos.getX(i), pos.getZ(i)));
+      geo.computeVertexNormals();
+      const nrm = geo.attributes.normal as THREE.BufferAttribute;
+      const meadow = new THREE.Color('#7fa35a'), forest = new THREE.Color('#46663a'), rock = new THREE.Color('#8b857b'), snow = new THREE.Color('#f3f4f2'), c = new THREE.Color(), tmp = new THREE.Color();
+      const ramp = (v: number, a0: number, a1: number) => Math.min(1, Math.max(0, (v - a0) / (a1 - a0)));
       for (let i = 0; i < pos.count; i++) {
-        const y = terrainHeight(base, pos.getX(i), pos.getZ(i)); pos.setY(i, y);
-        const t = Math.min(1, Math.max(0, (y - 6) / 40)), s2 = Math.min(1, Math.max(0, (y - 105) / 25));
-        c.copy(grass).lerp(rock, t).lerp(snow, s2); cols.push(c.r, c.g, c.b);
+        const y = pos.getY(i), steep = 1 - nrm.getY(i), x = pos.getX(i), z = pos.getZ(i);
+        const jitter = (Math.sin(x * 0.37 + z * 0.21) * Math.sin(z * 0.29 - x * 0.13)) * 0.5; // soft patchiness
+        c.copy(meadow).lerp(forest, ramp(y + jitter * 4, 3, 22));
+        c.lerp(rock, Math.max(ramp(y + jitter * 10, 55, 110), ramp(steep, 0.28, 0.5) * ramp(y, 10, 40)));
+        c.lerp(snow, ramp(y + jitter * 12, 165, 195) * (1 - ramp(steep, 0.45, 0.65)));
+        c.lerp(tmp.setRGB(c.r * 1.06, c.g * 1.04, c.b * 0.98), jitter + 0.5); // slight hue variation
+        cols.push(c.r, c.g, c.b);
       }
-      geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); geo.computeVertexNormals();
-      const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true }));
-      mesh.receiveShadow = true; g.add(mesh); break;
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+      const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }));
+      mesh.receiveShadow = true; mesh.userData.terrain = true; g.add(mesh); break;
     }
     case 'tree': {
       g.add(part(new THREE.CylinderGeometry(0.14, 0.2, h * 0.35, 8), material('#6b4c33'), 0, h * 0.175, 0));
@@ -212,9 +221,12 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     const fwd = persp.getWorldDirection(new THREE.Vector3());
     const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(fwd, controls.target);
     // Prefer the real surface under the cursor (objects or ground); never zoom through it.
-    const hitObj = ray.intersectObjects([ground, ...[...groups.values()].map(g => g.group)], true).find(h => (h.object as THREE.Mesh).isMesh && h.object.visible);
-    const anchor = hitObj?.point.clone() ?? ray.ray.intersectPlane(plane, new THREE.Vector3()) ?? controls.target.clone();
+    // Big backdrops (terrain, the ground) only count when they're near the pivot: a far mountain under the cursor
+    // would drag the zoom (and the orbit pivot) off to the horizon and stall it there.
     const dist = persp.position.distanceTo(controls.target);
+    const hitObj = ray.intersectObjects([ground, ...[...groups.values()].map(g => g.group)], true).find(h => (h.object as THREE.Mesh).isMesh && h.object.visible
+      && (!(h.object === ground || h.object.userData.terrain) || h.distance < Math.max(3 * dist, 30)));
+    const anchor = hitObj?.point.clone() ?? ray.ray.intersectPlane(plane, new THREE.Vector3()) ?? controls.target.clone();
     let next = dist / factor;
     if (next > controls.maxDistance) next = controls.maxDistance;
     // Stop short of a surface: keep at least ZOOM_NEAR between the camera and the point under the cursor.
