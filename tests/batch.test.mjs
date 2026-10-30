@@ -129,7 +129,7 @@ test('draft plan: blockouts skipped, one look per family, start stills before vi
 test('final plan adds end stills; reference models depend on looks instead; missing key frames fail the plan node', () => {
   const final = planBatch(project, { steps: ['stills', 'videos'], tier: 'final', maxCostUsd: 5 }).nodes;
   assert.deepEqual(byId(final, `video:${dive.id}`).deps, [`blockout:${dive.id}`, `still:${dive.id}start`, `still:${dive.id}end`]);
-  assert.equal(byId(final, `still:${dive.id}end`).model, 'flux-3');
+  assert.equal(byId(final, `still:${dive.id}end`).model, TIERS.final.stills);
   const kling = planBatch(project, { steps: ['looks', 'videos'], models: { videos: 'kling-o1-edit-v1' }, maxCostUsd: 5 }).nodes;
   const v = byId(kling, `video:${dive.id}`);
   assert.equal(v.deps[0], `blockout:${dive.id}`);

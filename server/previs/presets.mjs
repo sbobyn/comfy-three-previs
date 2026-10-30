@@ -31,8 +31,8 @@ const DYN = { prompt: 'model.prompt', duration: 'model.duration', resolution: 'm
 const START = 'Animates the shot’s start still (or, without one, the first blockout frame) from the prompt; describe the camera move in the prompt.';
 const BOTH = 'Animates from the shot’s start still to its end still. Pinning both ends keeps objects and framing consistent with the blockout and between shots.';
 const partnerPresets = [
-  keyFramePreset({ id: 'seedance-25-i2v-v1', title: 'Seedance 2.5 · animate the start still', last: false, node: seedance, map: DYN, durations: [4, 5, 6, 8, 10], creditsPerSecond: 70.47, resolution: '720p',
-    description: `ByteDance Seedance 2.5 (reference-to-video with the start still as image 1). ${START} Strong motion and identity hold; the most expensive per second. Token-billed estimate.`,
+  keyFramePreset({ id: 'seedance-25-i2v-v1', title: 'Seedance 2.5 · from the start still (reference)', last: false, node: seedance, map: DYN, durations: [4, 5, 6, 8, 10], creditsPerSecond: 70.47, resolution: '720p',
+    description: 'ByteDance Seedance 2.5 reference-to-video with the start still as its only reference image. It keeps the look and cast but does not start on the exact frame (it may reframe the shot); for a locked first frame use Seedance 2.5 · start → end stills. The most expensive per second; token-billed estimate.',
     source: `${ESTIMATE} (Seedance 2.5 720p 16:9: 900 tokens/frame × (24·s+1) frames × $0.015301/1K ≈ $1.67 for 5 s; rate rounded up so 4 s is not under-quoted)`, conditioning: 'start image as reference image 1 + prompt' }),
   keyFramePreset({ id: 'seedance-25-flf-v1', title: 'Seedance 2.5 · start → end stills', last: true, node: seedance, map: DYN, durations: [4, 5, 6, 8, 10], creditsPerSecond: 70.47, resolution: '720p',
     description: `ByteDance Seedance 2.5 first/last-frame to video. ${BOTH} Token-billed estimate.`, source: `${ESTIMATE} (Seedance 2.5 720p 16:9: 900 tokens/frame × (24·s+1) frames × $0.015301/1K ≈ $1.67 for 5 s; rate rounded up so 4 s is not under-quoted)`, conditioning: 'first + last frame images + prompt' }),

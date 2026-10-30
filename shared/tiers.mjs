@@ -3,7 +3,10 @@
 // (tests/batch.test.mjs keeps them in sync). Estimates only; Comfy Cloud does not return a binding price.
 export const TIERS = {
   draft: { looks: 'flux-2-pro', sheets: 'flux-2-pro', stills: 'flux-2-pro', videos: 'ltx-25-i2v-fast-v1' },
-  final: { looks: 'flux-3', sheets: 'flux-3', stills: 'flux-3', videos: 'ltx-25-flf-v1' },
+  // Final: FLUX 3 looks/sheets (best livery and identity from cast images, 2026-10-30 comparison), GPT Image 2.5 stills (held
+  // the blockout guide's framing best) and MiniMax H3 start → end video (smoothest, most faithful key-frame clips; see
+  // .evidence/models-20261030 in the integration checkout).
+  final: { looks: 'flux-3', sheets: 'flux-3', stills: 'gpt-image-25', videos: 'hailuo-h3-flf-v1' },
 };
 export const IMAGE_PRICES = { 'flux-2-pro': 0.028, 'flux-2-max': 0.071, 'flux-3': 0.066, 'flux-ultra': 0.06, 'gpt-image-25': 0.076, 'seedream-5-pro': 0.045, 'nano-banana-pro': 0.161, 'nano-banana-2-1': 0.05, 'nano-banana-2': 0.081, 'local-checkpoint': 0 };
 export const KEY_FRAME_SECONDS = [2, 3, 4, 5, 6, 8, 10];
