@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { setsFor } from '../shared/sheet-presets.mjs';
 import { frameArgs, frameRoutes, imageSize } from '../server/previs/frames.mjs';
+import { builtInPresets } from '../server/previs/presets.mjs';
 
 // The stdio MCP agent (server/previs/agent.mjs) against a fake Previs HTTP server: the C4 tools, their schemas and
 // what they send. Contracts C1 (GET /api/jobs), C2 (render routes) and C3 (batch) are faked here.
@@ -42,6 +43,12 @@ function fakePrevis(p, { jobs = 'ok', headless = true } = {}) {
     'POST /api/director/refgen/track': () => ({ job: { status: 'completed', referenceIds: ['ref-' + calls.length] } }),
     'POST /api/director/edit': b => { for (const op of b.ops) if (op.op === 'update_entity' && op.patch.sheets) p.scene.entities.find(e => e.id === op.id).sheets = op.patch.sheets; return { project: p }; },
     'POST /api/director/sheet/compose': () => ({ referenceId: 'composed-1', project: p }),
+    'GET /api/generation': () => ({ presets: builtInPresets, definitions: [], jobs: [] }),
+    'GET /api/project': () => ({ project: { revision: 1, renders: [] } }),
+    'POST /api/director/video-refs': () => ({ references: [{ label: 'start still', role: 'frame', renderId: 'r-start' }] }),
+    'POST /api/generation/bind': () => ({ project: { revision: 2 }, workflowBindingId: 'wb1' }),
+    'POST /api/generation/quote': b => ({ job: { id: b.requestId, fingerprint: 'gfp', cameraSource: 'blockout' } }),
+    'POST /api/generation/submit': b => ({ job: { id: b.requestId, status: 'queued', cameraSource: 'blockout' } }),
     'POST /api/director/batch': b => ({ batch: { ...batch(b.dryRun ? 'planned' : 'running'), ...(b.dryRun ? { status: 'planned' } : {}) } }),
     'GET /api/director/batch': () => ({ batch: batch(++batchPolls >= 2 ? 'completed' : 'running') }),
     'GET /api/jobs': () => (jobs === 'missing' ? [404, { error: 'File not found; run pnpm build first.' }] : { jobs: [
@@ -237,4 +244,24 @@ test('asset-frame: one downscaled frame at t, still references and tiled contact
     await assert.rejects(call(`width=5`), /width must be/);
     assert.ok(frameArgs([{ file: 'a', t: 0 }], { width: 100, cols: 1, type: 'image/png' }).includes('png'));
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('generate_video takes its camera from the blockout by preference, reports cameraSource and refuses a mismatched model', async () => {
+  const p = await fixture();
+  const fake = fakePrevis(p);
+  await withAgent(fake, async ({ call }) => {
+    const r = await call('previs_director_generate_video', { projectId: p.id, shot: '1', cameraSource: 'blockout', maxCostUsd: 3 });
+    assert.equal(r.submitted, true); assert.equal(r.cameraSource, 'blockout'); assert.equal(r.camera, 'Camera: from blockout');
+    const bind = fake.calls.find(c => c.path === '/api/generation/bind').body;
+    assert.equal(bind.definitionId, 'kling-o1-edit-v1', 'cheapest cloud model that follows the blockout');
+    assert.deepEqual(bind.assetBindings, { sourceVideo: { assetId: p.shots[0].render.assetId }, referenceImage1: { renderId: 'r-start' } });
+    assert.match(bind.prompt, /blockout video exactly; it is the camera/);
+    assert.equal(fake.calls.find(c => c.path === '/api/director/video-refs').body.stills, true);
+    const binds = fake.calls.filter(c => c.path === '/api/generation/bind').length;
+    const no = await call('previs_director_generate_video', { projectId: p.id, shot: '1', model: 'ltx-25-i2v-fast-v1', cameraSource: 'blockout', maxCostUsd: 3 });
+    assert.equal(no.submitted, false); assert.equal(no.cameraSource, 'still'); assert.match(no.reason, /kling-o1-edit-v1/);
+    assert.equal(fake.calls.filter(c => c.path === '/api/generation/bind').length, binds, 'nothing bound for a refused model');
+    const inputs = await call('previs_director_shot_inputs', { projectId: p.id, shot: '1', model: 'seedance-25-edit-v1' });
+    assert.equal(inputs.cameraSource, 'blockout'); assert.equal(inputs.blockout.current, true);
+  });
 });

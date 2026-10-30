@@ -43,6 +43,14 @@
 .sq-st.ok { color: var(--ok); } .sq-st.stale { color: var(--warn); } .sq-st.missing, .sq-st.none { color: var(--ink-4); } .sq-st.run { color: var(--info); }
 .sq-cut select { height: 28px; font-size: 12px; }
 .sq-trim { display: flex; align-items: center; gap: 4px; }
+/* Camera source of the version in the cut: ▶ blockout clip · ⇥ start → end stills · ◻ one still (approximate). */
+.sq-ver { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.sq-ver select { flex: 1; min-width: 0; }
+.sq-camglyph { flex: none; width: 18px; height: 18px; display: inline-grid; place-items: center; border-radius: 5px; font-size: 10px; line-height: 1; background: var(--panel-2, #eee); color: var(--muted, #666); }
+.sq-camglyph.c-blockout { background: #e7f4ec; color: #1f7a45; }
+.sq-camglyph.c-still, .sq-camglyph.c-keyframes { background: #fdf1df; color: #9a5b06; }
+.sq-cam { font-size: 11.5px; white-space: nowrap; color: #1f7a45; }
+.sq-cam.approx { color: #9a5b06; }
 .sq-trim input { padding: 3px 6px; font-size: 11.5px; min-width: 0; }
 .sq-side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .sq-side .btn.on { background: var(--ok-soft); color: var(--ok); border-color: transparent; }

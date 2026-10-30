@@ -1,7 +1,7 @@
 import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
 import { autoPromptSegments, autoPromptText, shotPrompt, shotStyle, normalizeStyle, CAMERA_TERMS } from '../../shared/prompt.mjs';
-import { cameraSourceOf, motionInput } from '../../shared/camera-source.mjs';
+import { cameraSourceOf, motionInput, CAMERA_SOURCE_LABELS } from '../../shared/camera-source.mjs';
 import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, handleOf, videoReferences, blockoutStale } from '../../shared/director.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { setsFor, planSlots, slotAspect, viewPrompt, EXPRESSION_PACKS, INTENSITIES, MAX_SHEET_SLOTS } from '../../shared/sheet-presets.mjs';
@@ -77,10 +77,10 @@ const tools = [
     run: async a => { const p = await project(a.projectId), e = entityOf(p, a.object); await post('/api/director/edit', { projectId: p.id, ops: [{ op: 'set_look', entityId: e.id, referenceId: a.referenceId }] }); return { ok: true, object: e.name, primary: a.referenceId }; } },
   { name: 'previs_director_shot_inputs', description: 'Show exactly what a video model would receive for a shot: the prompt text, the blockout video (if the model uses it and whether it is rendered and current), start/end key frames, and which object image fills each reference slot — plus objects that would be left out. Free; nothing is sent.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string' }, model: { type: 'string', description: 'Video model id from previs_director_models' } }, required: ['projectId', 'shot', 'model'], additionalProperties: false },
     run: async a => { const p = await project(a.projectId), s = shotOf(p, a.shot), gen = await get('/api/generation'), def = videoDefs(gen).find(d => d.id === a.model); if (!def) throw Error(`Unknown video model ${a.model}`); return shotInputs(p, s, def); } },
-  { name: 'previs_director_generate_video', description: 'Generate a shot’s video on Comfy Cloud with the chosen model (paid: set maxCostUsd). Requires the shot’s blockout to be rendered (previs_director_render_blockout, or Render shot in the workspace); first-frame models also need key frames (previs_director_generate_still at start/end). Binds the blockout video / key frames, the shot prompt and the cast’s primary images, submits once and returns jobId; the result attaches to the shot when done (check with previs_director_video_status). Never retries.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string' }, model: { type: 'string' }, maxCostUsd: { type: 'number', minimum: 0.05, maximum: 10 }, useReferences: { type: 'boolean' } }, required: ['projectId', 'shot', 'model', 'maxCostUsd'], additionalProperties: false },
+  { name: 'previs_director_generate_video', description: 'Generate a shot’s video on Comfy Cloud with the chosen model (paid: set maxCostUsd). Requires the shot’s blockout to be rendered (previs_director_render_blockout, or Render shot in the workspace); first-frame models also need key frames (previs_director_generate_still at start/end). Binds the blockout video / key frames, the shot prompt and the cast’s primary images, submits once and returns jobId and cameraSource; the result attaches to the shot when done (check with previs_director_video_status). Never retries. The blockout is the camera: cameraSource "blockout" models take the blockout clip itself (the prompt never describes the move); "keyframes" models move between start and end stills (approximate); "still" models animate one still (approximate). Pass cameraSource to require one (default model: the cheapest cloud model with that source); a model that does not match is refused.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string' }, model: { type: 'string', description: 'Video model id; optional when cameraSource is given' }, cameraSource: { type: 'string', enum: ['blockout', 'keyframes', 'still'], description: 'Where the camera motion must come from' }, maxCostUsd: { type: 'number', minimum: 0.05, maximum: 10 }, useReferences: { type: 'boolean' } }, required: ['projectId', 'shot', 'maxCostUsd'], additionalProperties: false },
     run: async a => generateVideo(a) },
   { name: 'previs_director_video_status', description: 'Track a submitted video job; when complete the video attaches to its shot (Sequence view). Never resubmits.', inputSchema: { type: 'object', properties: { jobId: { type: 'string' } }, required: ['jobId'], additionalProperties: false },
-    run: async a => { const j = (await post('/api/generation/track', { jobId: a.jobId })).job; return { status: j.status, message: j.message, results: (j.results || []).map(r => ({ id: r.id, duration: r.duration, width: r.width, height: r.height })) }; } },
+    run: async a => { const j = (await post('/api/generation/track', { jobId: a.jobId })).job; return { status: j.status, message: j.message, cameraSource: j.cameraSource || cameraSourceOf(j.definition, j.binding?.assetBindings), results: (j.results || []).map(r => ({ id: r.id, duration: r.duration, width: r.width, height: r.height })) }; } },
 
   // ---------- Server-side rendering, stills, batches and the job dashboard ----------
   { name: 'previs_director_render_blockout', description: 'Render a shot’s grey 3D blockout video on the server (headless GPU renderer, no charge), exactly like Render shot in the workspace. Video models that follow the camera move need it. Skips a shot that is already rendered unless force is true (re-render after changing the camera, objects or animation). Takes about 10–60 s.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, shot: { type: 'string', description: 'Shot number, title or id' }, force: { type: 'boolean' } }, required: ['projectId', 'shot'], additionalProperties: false },
@@ -111,7 +111,7 @@ const VIDEO_TASKS = ['transform-video', 'control-video', 'first-frame'];
 function videoDefs(gen) { const seen = new Set(); return [...(gen.presets || []), ...(gen.definitions || [])].filter(d => VIDEO_TASKS.includes(d.task) && !seen.has(d.id) && seen.add(d.id)); }
 function describeVideoModel(d) {
   const clip = d.task === 'transform-video' || d.task === 'control-video';
-  return { id: d.id, title: d.title, description: d.description, task: d.task,
+  return { id: d.id, title: d.title, description: d.description, task: d.task, cameraSource: cameraSourceOf(d),
     inputs: { textPrompt: { maxLength: d.constraints?.promptMaxLength ?? null }, blockoutVideo: clip ? { used: true, duration: d.constraints?.sourceVideo?.duration ?? null } : { used: false }, startFrame: d.task === 'first-frame', endFrame: d.task === 'first-frame' && !!d.inputs?.lastFrame, referenceImages: maxReferences(d) },
     costPerSecondUsd: d.pricing?.ratePerSecond ?? null, local: d.id.startsWith('wan-') };
 }
@@ -120,15 +120,18 @@ function shotInputs(p, s, d) {
   const rows = castRows(p, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const withImg = rows.filter(r => objectLooks(p, r.entity.id).length);
   const frames = s.references.filter(r => r.role === 'frame');
-  return { model: m, prompt: shotPrompt(p, s, 'video', { cameraSource: cameraSourceOf(d) }), blockout: m.inputs.blockoutVideo.used ? (s.render ? { rendered: true, duration: s.render.duration, frames: s.render.frameCount } : { rendered: false, action: 'Render it with previs_director_render_blockout (or ask the user to click Render shot)' }) : 'not used',
+  return { model: m, cameraSource: m.cameraSource, camera: CAMERA_SOURCE_LABELS[m.cameraSource], prompt: shotPrompt(p, s, 'video', { cameraSource: m.cameraSource }), blockout: m.inputs.blockoutVideo.used ? (s.render ? { rendered: true, current: !blockoutStale(p, s), duration: s.render.duration, frames: s.render.frameCount } : { rendered: false, action: 'Render it with previs_director_render_blockout (or ask the user to click Render shot)' }) : 'not used',
     keyFrames: m.inputs.startFrame ? { start: frames.some(r => r.note !== 'key frame end'), end: frames.some(r => r.note === 'key frame end') } : 'not used',
     referenceSlots: withImg.slice(0, cap).map((r, i) => ({ slot: `Image ${i + 1}`, object: r.entity.name, kind: r.entity.kind, image: objectLooks(p, r.entity.id)[0]?.name })),
     leftOut: [...withImg.slice(cap).map(r => ({ object: r.entity.name, why: 'over the model’s image limit' })), ...rows.filter(r => !objectLooks(p, r.entity.id).length).map(r => ({ object: r.entity.name, why: 'no image yet' }))],
     estimateUsd: m.costPerSecondUsd ? +(m.costPerSecondUsd * s.duration).toFixed(2) : null };
 }
 async function generateVideo(a, rendered = false) {
-  const p = await project(a.projectId), s = shotOf(p, a.shot), gen = await get('/api/generation'), d = videoDefs(gen).find(x => x.id === a.model);
-  if (!d) throw Error(`Unknown video model ${a.model}`);
+  const p = await project(a.projectId), s = shotOf(p, a.shot), gen = await get('/api/generation'), defs = videoDefs(gen);
+  const want = a.cameraSource, local = x => x.id.startsWith('wan-');
+  const d = a.model ? defs.find(x => x.id === a.model) : defs.filter(x => cameraSourceOf(x) === (want || 'blockout') && !local(x) && x.pricing?.ratePerSecond).sort((x, y) => x.pricing.ratePerSecond - y.pricing.ratePerSecond)[0];
+  if (!d) throw Error(a.model ? `Unknown video model ${a.model}` : `No cloud video model takes its camera from ${want || 'blockout'}`);
+  if (want && cameraSourceOf(d) !== want) return { submitted: false, cameraSource: cameraSourceOf(d), reason: `${d.title} takes its camera from ${CAMERA_SOURCE_LABELS[cameraSourceOf(d)].replace('Camera: from ', '')}, not ${want}. Models with cameraSource “${want}”: ${defs.filter(x => cameraSourceOf(x) === want).map(x => x.id).join(', ') || 'none'}.` };
   const m = describeVideoModel(d);
   // The blockout clip is the camera: make it (again) when it is missing or the shot changed since.
   if (!rendered && (!s.render || blockoutStale(p, s))) {
@@ -163,7 +166,7 @@ async function generateVideo(a, rendered = false) {
   const est = m.costPerSecondUsd ? m.costPerSecondUsd * s.duration : null;
   if (est !== null && est > a.maxCostUsd) return { submitted: false, reason: `Estimated $${est.toFixed(2)} is above maxCostUsd $${a.maxCostUsd}` };
   const sub = (await post('/api/generation/submit', { ...request, approval: { approved: true, fingerprint: q.fingerprint, allowance: { currency: 'USD', maxAmount: a.maxCostUsd, allowUnknownCharges: true } } })).job;
-  return { submitted: true, jobId: sub.id, status: sub.status, model: d.title, estimateUsd: est, references: refs.map((x, i) => `Image ${i + 1}: ${x.label}`), next: 'Call previs_director_video_status with jobId every minute or so; videos take 1–8 minutes.' };
+  return { submitted: true, jobId: sub.id, status: sub.status, model: d.title, cameraSource: sub.cameraSource || cameraSource, camera: CAMERA_SOURCE_LABELS[sub.cameraSource || cameraSource], estimateUsd: est, references: refs.map((x, i) => `Image ${i + 1}: ${x.label}`), next: 'Call previs_director_video_status with jobId every minute or so; videos take 1–8 minutes.' };
 }
 // ---------- Design sheets ----------
 async function patchSheets(projectId, entityId, fn) {
