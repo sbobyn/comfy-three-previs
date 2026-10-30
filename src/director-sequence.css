@@ -96,3 +96,8 @@
 .sq-banner { background: var(--warn-soft); border-color: transparent; color: var(--warn); }
 .sq-batch, .lk-batch { background: var(--card); border-color: var(--line); box-shadow: var(--sh-1); }
 
+
+/* Saved-request comparison facts remain visible beside the media. */
+.sq-comparison-info { white-space: pre-line; font-size: 12px; line-height: 1.55; color: var(--ink-2); padding: 10px 12px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 8px; }
+.sq-comparison-position { font-size: 11.5px; color: var(--ink-3); }
+.sq-comparison-info[hidden], .sq-comparison-position[hidden] { display: none; }

@@ -21,13 +21,29 @@ export type SequenceCtx = {
   openEditor(): void;
 };
 
-type Job = { id: string; shotId: string; status: string; message?: string; definition?: { title?: string } };
+type Job = { id: string; shotId: string; status: string; message?: string; definition?: { title?: string; task?: string } };
 type Quoted = { shot: Shot; est: number | null; ok: boolean; issue?: string; refs?: EngineRef[] };
 
 const DONE = ['completed', 'failed', 'uncertain', 'closed', 'invalidated', 'error'];
 const no = (p: DirectorProject, id: string) => String(p.shots.findIndex(s => s.id === id) + 1).padStart(2, '0');
 const sec = (v: number | null | undefined) => (v == null ? '—' : `${Number(v).toFixed(2)}s`);
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+/** A result is compared only with the immutable camera render recorded in its receipt. */
+export function comparisonSource(assets: Asset[], result: Asset | null): Asset | null {
+  const id = result?.source?.sourceAssetId;
+  return id ? assets.find(a => a.id === id && a.kind === 'camera-render') || null : null;
+}
+
+export function comparisonFacts(source: Asset, result: Asset): string {
+  const describe = (label: string, a: Asset) => `${label} · ${a.width ?? '?'}×${a.height ?? '?'} · ${a.fps ?? '?'} fps · ${a.frameCount ?? '?'} frames · ${a.duration == null ? '?' : a.duration.toFixed(6)} s`;
+  const changed = (a: number | null | undefined, b: number | null | undefined) => a != null && b != null && Math.abs(a - b) > 0.000002;
+  const timing = changed(source.frameCount, result.frameCount) || changed(source.fps, result.fps) || changed(source.duration, result.duration);
+  const framing = changed(source.width, result.width) || changed(source.height, result.height);
+  return [describe('Saved source', source), describe('Result', result),
+    timing ? 'Timing differs. Comparison stops at the shorter clip; open Generated to inspect any extra result frames. Originals are unchanged.' : '',
+    framing ? 'Resolution differs. Each original keeps its own framing.' : ''].filter(Boolean).join('\n');
+}
 
 export function createSequence(ctx: SequenceCtx) {
   let gen: { presets: Def[]; definitions: Def[]; jobs: Job[] } = { presets: [], definitions: [], jobs: [] };
@@ -87,16 +103,23 @@ export function createSequence(ctx: SequenceCtx) {
   };
   seam.onkeydown = ev => { if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') { ev.preventDefault(); setSeam(seamAt + (ev.key === 'ArrowLeft' ? -5 : 5)); } };
   // Keep the overlay in step with the main player (which owns the controls).
-  const follow = () => { if (over.hidden) return; if (Math.abs(over.currentTime - video.currentTime) > 0.06) over.currentTime = Math.min(video.currentTime, (over.duration || Infinity) - 0.01); };
-  video.addEventListener('play', () => { if (!over.hidden) { follow(); void over.play().catch(() => {}); } });
+  const follow = () => { if (over.hidden) return; if (Math.abs(over.currentTime - video.currentTime) > 0.06) over.currentTime = Math.min(video.currentTime, over.duration > 0 ? over.duration : video.currentTime); };
+  video.addEventListener('play', () => { if (!over.hidden) { follow(); if (over.duration > 0 && video.currentTime >= over.duration) { video.pause(); return; } void over.play().catch(() => {}); } });
   video.addEventListener('pause', () => over.pause());
   video.addEventListener('seeked', follow);
   video.addEventListener('timeupdate', follow);
   video.addEventListener('ratechange', () => { over.playbackRate = video.playbackRate; });
-  const compareOff = () => { over.hidden = true; seam.hidden = true; over.pause(); };
+  video.addEventListener('ended', () => { if (!over.hidden) { over.pause(); if (over.duration > 0) over.currentTime = Math.min(video.currentTime, over.duration); } });
+  over.addEventListener('ended', () => { if (!over.hidden) { video.pause(); video.currentTime = Math.min(video.currentTime, over.duration); } });
+  const compareOff = () => { over.hidden = true; seam.hidden = true; over.pause(); comparisonInfo.hidden = true; comparisonPosition.hidden = true; };
   const empty = h('div', { class: 'sq-empty' });
   const abSeg = h('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Version' });
   const caption = h('div', { class: 'sq-caption' });
+  const comparisonInfo = h('div', { class: 'sq-comparison-info', hidden: true });
+  const comparisonPosition = h('div', { class: 'sq-comparison-position mono', hidden: true });
+  const position = (label: string, v: HTMLVideoElement) => `${label} ${v.currentTime.toFixed(3)} s${v.duration > 0 && v.currentTime >= v.duration - 0.0005 ? ' · ended' : ''}`;
+  const syncPosition = () => { if (!over.hidden) comparisonPosition.textContent = `${position('Source', video)} / ${position('Result', over)}`; };
+  for (const v of [video, over]) for (const name of ['timeupdate', 'seeked', 'pause', 'ended', 'loadedmetadata']) v.addEventListener(name, syncPosition);
   const playSeqBtn = h('button', { class: 'btn', type: 'button' }, '▶ Play sequence');
   const exportBtn = h('button', { class: 'btn camera', type: 'button' }, 'Export final video');
   const exportStatus = h('div', { class: 'status-line' });
@@ -113,7 +136,7 @@ export function createSequence(ctx: SequenceCtx) {
     h('aside', { class: 'sq-viewer' },
       h('div', { class: 'sq-screen' }, video, over, seam, empty),
       h('div', { class: 'sq-ctl' },
-        h('div', { class: 'sq-vbar' }, abSeg, caption),
+        h('div', { class: 'sq-vbar' }, abSeg, caption), comparisonInfo, comparisonPosition,
         h('div', { class: 'sq-vbar' }, playSeqBtn, totals),
         h('div', { class: 'sq-export' }, h('div', { class: 'sq-vbar' }, exportBtn, h('span', { class: 'note' }, '1280×720 · 24 fps · H.264, in shot order')), exportStatus, exportsList))));
 
@@ -208,18 +231,23 @@ export function createSequence(ctx: SequenceCtx) {
     if (seq || pinned) return;
     abSeg.hidden = !s;
     if (!s) { compareOff(); abSeg.replaceChildren(); caption.textContent = ''; show(null, 0, 'Pick a shot to watch it, or play the whole sequence.'); return; }
-    const gen = results(s)[0], b = blockout(s);
-    if (view !== 'blockout' && !gen && b) view = 'blockout';
-    abSeg.replaceChildren(...(['blockout', 'compare', 'generated'] as const).map(k => h('button', { type: 'button', role: 'radio', 'aria-checked': String(view === k), class: view === k ? 'on' : '', title: k === 'compare' ? 'Blockout and generated with a draggable seam' : '', disabled: k === 'blockout' ? !b : k === 'generated' ? !gen : !(gen && b), onclick: () => { view = k; drawViewer(); } }, k === 'blockout' ? 'Blockout' : k === 'compare' ? 'Compare' : 'Generated')));
+    const generated = results(s)[0], b = blockout(s);
+    if (view !== 'blockout' && !generated && b) view = 'blockout';
+    abSeg.replaceChildren(...(['blockout', 'compare', 'generated'] as const).map(k => h('button', { type: 'button', role: 'radio', 'aria-checked': String(view === k), class: view === k ? 'on' : '', title: k === 'compare' ? 'Blockout and generated with a draggable seam' : '', disabled: k === 'blockout' ? !b : !generated, onclick: () => { view = k; drawViewer(); } }, k === 'blockout' ? 'Blockout' : k === 'compare' ? 'Compare' : 'Generated')));
     const c = clipFor(s), chosen = c?.assetId ? videos(s).find(x => x.id === c.assetId) : null;
-    const genPick = chosen?.kind === 'workflow-result' ? chosen : gen, bPick = chosen?.kind === 'camera-render' ? chosen : b;
+    const genPick = chosen?.kind === 'workflow-result' ? chosen : generated;
+    const bPick = view === 'compare' ? comparisonSource(renders(s), genPick || null) : chosen?.kind === 'camera-render' ? chosen : b;
     const a = view === 'generated' ? genPick : bPick;
     if (view === 'compare' && genPick && bPick) {
       const url = ctx.assetUrl(genPick); if (!over.src.endsWith(url)) over.src = url;
       over.hidden = false; seam.hidden = false; setSeam(seamAt);
+      comparisonInfo.hidden = false; comparisonPosition.hidden = false;
+      const task = gen.jobs.find(j => j.id === genPick.source.jobId)?.definition?.task;
+      comparisonInfo.textContent = comparisonFacts(bPick, genPick) + (task === 'first-frame' ? '\nKey-frame animation: the full source camera-motion clip was not supplied to this workflow.' : '');
+      syncPosition();
     } else compareOff();
-    caption.textContent = `Shot ${no(p, s.id)} · ${s.title}${view === 'compare' && genPick ? ` · ${(genPick.source.workflow || 'generated').split(' ·')[0]} vs blockout v${bPick?.version ?? 1}` : a ? ` · ${a.kind === 'workflow-result' ? (a.source.workflow || 'generated').split(' ·')[0] : `blockout v${a.version ?? 1}`} · ${sec(a.duration)}` : ''}`;
-    if (show(a || null, 0, view === 'generated' ? 'No generated video yet.' : 'Not rendered yet. Use Render on the board.', false) && a) void video.play().catch(() => {});
+    caption.textContent = `Shot ${no(p, s.id)} · ${s.title}${view === 'compare' && genPick ? ` · ${(genPick.source.workflow || 'generated').split(' ·')[0]}${bPick ? ` vs original blockout v${bPick.version ?? 1}` : ' · original source unavailable'}` : a ? ` · ${a.kind === 'workflow-result' ? (a.source.workflow || 'generated').split(' ·')[0] : `blockout v${a.version ?? 1}`} · ${sec(a.duration)}` : ''}`;
+    if (show(a || null, 0, view === 'compare' ? 'The original camera render for this result is unavailable. A newer blockout will not be substituted.' : view === 'generated' ? 'No generated video yet.' : 'Not rendered yet. Use Render on the board.', false) && a) void video.play().catch(() => {});
   }
   function cutList() { return P().shots.map(s => ({ s, c: clipFor(s)!, a: media(s)! })).filter(x => x.c && x.a); }
   function stopSeq() { if (!seq) return; seq = null; playSeqBtn.textContent = '▶ Play sequence'; video.pause(); }
