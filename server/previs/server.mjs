@@ -19,6 +19,8 @@ import { openDirector, directorRoutes } from './director.mjs';
 import { openAgentRunner } from './agent-runner.mjs'; // [agent]
 import { openRefgen, refgenRoutes } from './refgen.mjs';
 import { setupChecks } from './setup-check.mjs';
+import { createJobTracker } from './job-tracker.mjs';
+import { slotsFor } from './concurrency.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -32,6 +34,8 @@ const generation = await generationRoutes(data,project);
 let refgen, agentRunner; // [agent]
 const director = await openDirector(data, { engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
 refgen = await openRefgen(data, director);
+const tracker = createJobTracker({ sources: [generation.trackerSource({ director }), refgen.trackerSource()], limits: () => slotsFor(data).snapshot(), log: line => console.log(`[jobs] ${line}`) });
+generation.useTracker(tracker); refgen.useTracker(tracker); tracker.start();
 const refgenRoute = refgenRoutes(refgen);
 const directorRoute = directorRoutes(director, project, () => ({ command: process.execPath, args: [join(root, 'server/previs/agent.mjs')], env: { PREVIS_URL: `http://127.0.0.1:${port}` } }), () => agentRunner);
 const videos = videoRoutes({data,project,blender,operations,refreshBlender});
@@ -84,6 +88,7 @@ const server = createServer(async (req, res) => {
     }
     if (req.method === 'GET' && url.pathname === '/api/phone') return send(phoneLan.readiness());
     if (req.method === 'GET' && url.pathname === '/api/generation') return send(generation.state());
+    if (req.method === 'GET' && url.pathname === '/api/jobs') return send(tracker.snapshot());
     if (req.method === 'GET' && url.pathname === '/api/project') return send({ project: project.get(), catalog, blender: blenderReadiness(), comfyJobs: comfy.list() });
     if (req.method === 'GET' && url.pathname === '/api/readiness') return send({ blender: blenderReadiness(), comfy: comfy.readiness(), browser: { available: true, scope: 'Editable camera-study set' } });
     if (req.method === 'GET' && url.pathname === '/api/comfy/jobs') return send({ jobs: comfy.list() });
@@ -208,10 +213,10 @@ const server = createServer(async (req, res) => {
     const start = range ? Number(range[1]) : 0, end = range ? Math.min(bytes.length-1, range[2] ? Number(range[2]) : bytes.length-1) : bytes.length-1;
     if (range && (start > end || start >= bytes.length)) { res.writeHead(416,{'Content-Range':`bytes */${bytes.length}`}); return res.end(); }
     res.writeHead(range ? 206 : 200, { ...(media ? {'Accept-Ranges':'bytes','Content-Length':end-start+1,...(range ? {'Content-Range':`bytes ${start}-${end}/${bytes.length}`} : {})} : {}), 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(range ? bytes.subarray(start,end+1) : bytes);
-  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
+  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});
 server.listen(port, '127.0.0.1', () => console.log(`Comfy Previs: http://127.0.0.1:${port}`));
-async function stop() { agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await releaseLock(); process.exit(0); }
+async function stop() { tracker.stop(); agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await releaseLock(); process.exit(0); }
 process.on('SIGTERM', stop); process.on('SIGINT', stop);

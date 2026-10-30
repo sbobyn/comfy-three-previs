@@ -8,7 +8,9 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
 import { imageToPng } from './edit.mjs';
-import { createBackend, backendTransportKey } from './backends.mjs';
+import { createBackend, errorDetail } from './backends.mjs';
+import { slotsFor } from './concurrency.mjs';
+import { uploadCacheFor } from './upload-cache.mjs';
 import { validateGraph, workflowCost, validateApproval, hashValue, assertNoSecrets } from './workflows.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
@@ -139,7 +141,7 @@ export async function openRefgen(root, director, options = {}) {
   const dirFor = pid => join(root, 'director', pid, 'refgen');
   const backendFor = options.backend || (input => createBackend(input, options.backendOptions));
   const allowPaid = () => (options.allowPaid ?? process.env.PREVIS_ALLOW_PAID === '1') === true;
-  async function persist(job) { assertNoSecrets(job); await mkdir(dirFor(job.projectId), { recursive: true }); await atomicJson(join(dirFor(job.projectId), job.id + '.json'), job); jobs.set(job.id, structuredClone(job)); return structuredClone(job); }
+  async function persist(job) { if (job.status === 'uncertain' && !job.uncertainAt) job = { ...job, uncertainAt: now() }; assertNoSecrets(job); await mkdir(dirFor(job.projectId), { recursive: true }); await atomicJson(join(dirFor(job.projectId), job.id + '.json'), job); jobs.set(job.id, structuredClone(job)); return structuredClone(job); }
   // Recover receipts: an interrupted dispatch is uncertain and is never resent.
   async function load(id) {
     let files = []; try { files = await readdir(dirFor(id)); } catch {}
@@ -154,6 +156,41 @@ export async function openRefgen(root, director, options = {}) {
   let chain = Promise.resolve();
   const serial = fn => { const next = chain.then(fn); chain = next.catch(() => {}); return next; };
   const active = j => ['submitting', 'submitted', 'uncertain'].includes(j.status);
+  const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root);
+  slots.register('refgen', () => [...jobs.values()].filter(active).map(j => ({ id: j.id, backend: j.backend, kind: 'image', status: j.status, uncertainAt: j.uncertainAt, dispatchStartedAt: j.dispatchStartedAt, createdAt: j.createdAt })));
+  let tracker = null;
+  const label = j => `${j.entityName || 'Image'}${j.sheet?.label ? ` · ${j.sheet.label}` : ''} · ${String(j.model || j.presetId || '').split(' (')[0]}`;
+  async function trackJob(id, tracking) {
+    let job = jobs.get(id); if (!job) fail('Unknown request', 404);
+    if (!['submitted', 'uncertain'].includes(job.status) || !job.promptId) return structuredClone(job);
+    if (tracking) job = { ...job, tracking: { lastTrackedAt: tracking.lastTrackedAt ?? null, trackCount: tracking.trackCount ?? 0, nextTrackAt: tracking.nextTrackAt ?? null } };
+    const unchanged = () => tracking ? persist(job) : structuredClone(job);
+    const adapter = backendFor(job.backend.kind === 'local' ? { kind: 'local', url: job.backend.url } : { kind: 'cloud' });
+    let history;
+    try { history = await adapter.history(job.promptId); }
+    catch (e) { if (tracking) await persist({ ...job, tracking: { ...job.tracking, error: errorDetail(e) } }); throw e; }
+    if (!history) return unchanged();
+    const status = history.status?.status_str;
+    if (status === 'error' || status === 'cancelled') {
+      // Surface the provider's own reason (e.g. a partner API "Server side error").
+      const legacy = (history.status?.messages || []).find(m => m?.[0] === 'execution_error')?.[1];
+      const err = history.error || (legacy ? { nodeId: legacy.node_id ?? null, nodeType: legacy.node_type || null, message: String(legacy.exception_message || '') } : null);
+      const why = err ? ` ${err.nodeType || 'Node'}: ${String(err.message || '').replace(/\s+/g, ' ').slice(0, 240)}` : '';
+      return persist({ ...job, status: 'failed', provider: { status, ...(err ? { error: err } : {}) }, failure: { phase: 'execution', httpStatus: null, detail: err ? errorDetail({ message: why.trim() }) : null }, message: `Backend reported ${status}.${why} Nothing is retried.`, finishedAt: now() });
+    }
+    if (!history.status?.completed) return unchanged();
+    const referenceIds = [], results = [];
+    const expected = Object.entries(job.graph).filter(([, n]) => n.class_type === 'SaveImage').map(([id]) => id);
+    for (const nodeId of expected) for (const image of history.outputs?.[nodeId]?.images || []) {
+      const bytes = await adapter.view(image);
+      const r = await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId } });
+      referenceIds.push(r.referenceId);
+      const ref = [...(r.project?.scene?.references || []), ...(r.project?.shots || []).flatMap(x => x.references || [])].find(x => x.id === r.referenceId);
+      results.push({ id: r.referenceId, kind: 'image', url: ref?.file ? `/director-refs/${job.projectId}/${ref.file}` : null });
+    }
+    if (!referenceIds.length) return persist({ ...job, status: 'failed', failure: { phase: 'declared-outputs', httpStatus: null, detail: 'Completed without a saved image output' }, message: 'Completed without a saved image output.', finishedAt: now() });
+    return persist({ ...job, status: 'completed', referenceIds, results, message: `Attached ${referenceIds.length} ${job.target === 'shot' ? 'key frame' : 'look'}${referenceIds.length === 1 ? '' : 's'} to ${job.entityName}.`, finishedAt: now() });
+  }
 
   async function resolve(input) {
     const preset = imagePresets.find(p => p.id === input.presetId); if (!preset) fail('Choose a generation preset');
@@ -193,9 +230,18 @@ export async function openRefgen(root, director, options = {}) {
     return { preset, adapter, graph, validation, quote: cost, partnerNodes, settings, fingerprint, entity, shot, guide, guideSha, project };
   }
 
-  return {
+  const api = {
     load,
     presets: publicPresets,
+    all: () => [...jobs.values()].map(j => structuredClone(j)),
+    useTracker(t) { tracker = t; },
+    // Job-tracker source (contract C1); images attach inside track, so onTerminal has nothing extra to do.
+    trackerSource: () => ({
+      name: 'refgen', list: () => [...jobs.values()].map(j => structuredClone(j)), get: id => { const j = jobs.get(id); if (!j) fail('Unknown request', 404); return structuredClone(j); },
+      isActive: active, track: (id, tracking) => serial(() => trackJob(id, tracking)), kindOf: () => 'image', label, projectIdOf: j => j.projectId,
+      expectedSeconds: j => j.backend?.kind === 'local' ? 600 : 90, costOf: j => j.quote?.amount ?? j.quote?.estimate ?? null,
+      resultsOf: j => j.results || (j.referenceIds || []).map(id => ({ id, kind: 'image', url: null })), onTerminal() {},
+    }),
     list(projectId) { return [...jobs.values()].filter(j => j.projectId === projectId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(j => structuredClone(j)); },
     paidEnabled: allowPaid,
     async checkpoints(localUrl) {
@@ -230,49 +276,40 @@ export async function openRefgen(root, director, options = {}) {
       if (saved.status !== 'quoted') return structuredClone(saved);
       const free = saved.quote.status === 'known' && saved.quote.amount === 0;
       if (!free && !allowPaid()) fail('Paid and unknown-cost generation is disabled on this server (PREVIS_ALLOW_PAID is not 1). Nothing was sent.', 403);
-      if ([...jobs.values()].some(j => j.id !== saved.id && active(j) && backendTransportKey(j.backend) === backendTransportKey(saved.backend))) fail('Another request on this backend is still running or uncertain. Resolve it first; nothing is retried.', 409);
-      const guideBytes = saved.guide ? await readFile(join(dirFor(saved.projectId), saved.guide.file)) : null;
-      const refBytes = await Promise.all((saved.refs || []).map(x => readFile(join(dirFor(saved.projectId), x.file))));
-      const current = await resolve({ ...saved, projectId: saved.projectId, entityId: saved.entityId, guideBytes, refBytes, localUrl: saved.backend.kind === 'local' ? saved.backend.url : undefined });
-      if (current.fingerprint !== saved.fingerprint) { await persist({ ...saved, status: 'invalidated', message: 'Backend schema, settings or price changed. Get a new quote.' }); fail('Quote changed; get a new quote and approve again', 409); }
-      validateApproval(input.approval, saved.fingerprint, saved.quote);
-      let job = await persist({ ...saved, approval: structuredClone(input.approval), status: 'submitting', message: 'Dispatch started. This request is never resent.', dispatchStartedAt: now() });
-      try {
-        const graph = structuredClone(saved.graph);
-        if (guideBytes) { const up = await current.adapter.upload(guideBytes, { filename: `${saved.id}-guide.png`, mime: 'image/png', subfolder: `previs/${saved.id}` }); graph[GUIDE].inputs.image = up.value; }
-        for (const [k, b] of refBytes.entries()) { const up = await current.adapter.upload(b, { filename: `${saved.id}-ref${k + 1}.png`, mime: 'image/png', subfolder: `previs/${saved.id}` }); graph[refNode(k + 1)].inputs.image = up.value; }
-        const { promptId } = await current.adapter.submit({ graph, requestId: saved.id, projectId: saved.projectId, partnerNodes: saved.partnerNodes });
-        job = await persist({ ...job, submittedGraph: graph, status: 'submitted', promptId, message: 'Accepted by the backend. Generating…', submittedAt: now() });
-      } catch (e) {
-        job = await persist({ ...job, status: 'uncertain', message: `Dispatch outcome unknown (${e.message}). Check the backend; this request is never resent.` });
-      }
-      return job;
+      const release = slots.acquire({ id: saved.id, backend: saved.backend, kind: 'image' });
+      try { return await dispatch(saved, input); } finally { release(); }
     }),
-    track: input => serial(async () => {
-      const job = jobs.get(input.requestId); if (!job || job.projectId !== input.projectId) fail('Unknown request', 404);
-      if (!['submitted', 'uncertain'].includes(job.status) || !job.promptId) return structuredClone(job);
-      const adapter = backendFor(job.backend.kind === 'local' ? { kind: 'local', url: job.backend.url } : { kind: 'cloud' });
-      const history = await adapter.history(job.promptId);
-      if (!history) return structuredClone(job);
-      const status = history.status?.status_str;
-      if (status === 'error' || status === 'cancelled') {
-        // Surface the provider's own reason (e.g. a partner API "Server side error").
-        const err = (history.status?.messages || []).find(m => m?.[0] === 'execution_error')?.[1];
-        const why = err ? ` ${err.node_type || 'Node'}: ${String(err.exception_message || '').replace(/\s+/g, ' ').slice(0, 240)}` : '';
-        return persist({ ...job, status: 'failed', message: `Backend reported ${status}.${why} Nothing is retried.`, finishedAt: now() });
-      }
-      if (!history.status?.completed) return structuredClone(job);
-      const referenceIds = [];
-      const expected = Object.entries(job.graph).filter(([, n]) => n.class_type === 'SaveImage').map(([id]) => id);
-      for (const nodeId of expected) for (const image of history.outputs?.[nodeId]?.images || []) {
-        const bytes = await adapter.view(image);
-        const r = await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId } });
-        referenceIds.push(r.referenceId);
-      }
-      if (!referenceIds.length) return persist({ ...job, status: 'failed', message: 'Completed without a saved image output.', finishedAt: now() });
-      return persist({ ...job, status: 'completed', referenceIds, message: `Attached ${referenceIds.length} ${job.target === 'shot' ? 'key frame' : 'look'}${referenceIds.length === 1 ? '' : 's'} to ${job.entityName}.`, finishedAt: now() });
-    }),
+    // Without a tracker (tests, tools) this tracks directly; with one, the tracker records the attempt.
+    track: (input, tracking) => {
+      const job = jobs.get(input.requestId); if (!job || job.projectId !== input.projectId) return Promise.reject(Object.assign(Error('Unknown request'), { status: 404 }));
+      return tracker && !tracking ? tracker.trackNow('refgen', job.id) : serial(() => trackJob(job.id, tracking));
+    },
   };
+  async function dispatch(saved, input) {
+    const guideBytes = saved.guide ? await readFile(join(dirFor(saved.projectId), saved.guide.file)) : null;
+    const refBytes = await Promise.all((saved.refs || []).map(x => readFile(join(dirFor(saved.projectId), x.file))));
+    const current = await resolve({ ...saved, projectId: saved.projectId, entityId: saved.entityId, guideBytes, refBytes, localUrl: saved.backend.kind === 'local' ? saved.backend.url : undefined });
+    if (current.fingerprint !== saved.fingerprint) { await persist({ ...saved, status: 'invalidated', message: 'Backend schema, settings or price changed. Get a new quote.' }); fail('Quote changed; get a new quote and approve again', 409); }
+    validateApproval(input.approval, saved.fingerprint, saved.quote);
+    let job = await persist({ ...saved, approval: structuredClone(input.approval), status: 'submitting', message: 'Dispatch started. This request is never resent.', dispatchStartedAt: now() });
+    let dispatchStarted = false;
+    try {
+      const graph = structuredClone(saved.graph);
+      if (guideBytes) { const up = await uploadCache.upload(current.adapter, guideBytes, { filename: `${saved.id}-guide.png`, mime: 'image/png', subfolder: `previs/${saved.id}` }); graph[GUIDE].inputs.image = up.value; }
+      for (const [k, b] of refBytes.entries()) { const up = await uploadCache.upload(current.adapter, b, { filename: `${saved.id}-ref${k + 1}.png`, mime: 'image/png', subfolder: `previs/${saved.id}` }); graph[refNode(k + 1)].inputs.image = up.value; }
+      dispatchStarted = true;
+      const { promptId } = await current.adapter.submit({ graph, requestId: saved.id, projectId: saved.projectId, partnerNodes: saved.partnerNodes });
+      job = await persist({ ...job, submittedGraph: graph, status: 'submitted', promptId, message: 'Accepted by the backend. Generating…', submittedAt: now() });
+    } catch (e) {
+      // Upload failures happen before any prompt is sent; a rejected prompt never ran. Both free the slot.
+      const failure = { phase: dispatchStarted ? 'dispatch' : 'preparation', httpStatus: e.httpStatus || null, detail: errorDetail(e) };
+      const rejected = !dispatchStarted || [400, 401, 402, 403, 422, 429].includes(e.httpStatus);
+      job = await persist({ ...job, status: rejected ? 'failed' : 'uncertain', failure, message: rejected ? `${dispatchStarted ? 'Backend rejected the request' : 'Upload failed before dispatch'} (${failure.detail.slice(0, 240)}). Nothing is retried.` : `Dispatch outcome unknown (${e.message}). Check the backend; this request is never resent.`, ...(rejected ? { finishedAt: now() } : {}) });
+    }
+    if (tracker && active(job)) tracker.watch('refgen', job.id);
+    return job;
+  }
+  return api;
 }
 
 export function refgenRoutes(refgen) {

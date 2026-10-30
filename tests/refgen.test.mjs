@@ -1,11 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp } from 'node:fs/promises';
+import { mkdtemp, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { openDirector } from '../server/previs/director.mjs';
 import { openRefgen, imagePresets } from '../server/previs/refgen.mjs';
 import { backendSnapshot } from '../server/previs/backends.mjs';
+import { createSlots } from '../server/previs/concurrency.mjs';
+import { createJobTracker } from '../server/previs/job-tracker.mjs';
 import { lookPrompt, compilePrompt, objectLooks } from '../shared/director.mjs';
 
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==', 'base64');
@@ -28,8 +30,8 @@ function mockBackend(log) {
     snapshot: backendSnapshot(input),
     async inspect() { log.push('inspect'); return { objectInfo: structuredClone(log.objectInfo || objectInfo) }; },
     async upload(bytes, o) { log.push('upload:' + bytes.length); return { value: `previs/${o.filename}` }; },
-    async submit(req) { log.push('submit'); log.graph = req.graph; if (log.failSubmit) throw Error('socket hang up'); return { promptId: 'p-' + req.requestId.slice(0, 8) }; },
-    async history() { log.push('history'); return log.done ? { status: { completed: true, status_str: 'success' }, outputs: { 7: { images: [{ filename: 'a.png', subfolder: '', type: 'output' }, { filename: 'b.png', subfolder: '', type: 'output' }] } } } : null; },
+    async submit(req) { log.push('submit'); log.graph = req.graph; if (log.submitError) throw log.submitError(); if (log.failSubmit) throw Error('socket hang up'); return { promptId: 'p-' + req.requestId.slice(0, 8) }; },
+    async history() { log.push('history'); if (log.historyError) return { status: { status_str: 'error', completed: false }, error: log.historyError }; return log.done ? { status: { completed: true, status_str: 'success' }, outputs: { 7: { images: [{ filename: 'a.png', subfolder: '', type: 'output' }, { filename: 'b.png', subfolder: '', type: 'output' }] } } } : null; },
     async view() { log.push('view'); return PNG; },
   });
 }
@@ -78,14 +80,14 @@ test('cloud generation stays quote-only unless paid execution is enabled', async
 });
 
 test('paid submission needs unknown-charge consent; uncertain dispatch is never resent; schema drift invalidates', async () => {
-  const { project, refgen, log, runner } = await setup({ allowPaid: true });
+  const { project, refgen, log, runner } = await setup({ allowPaid: true, slots: createSlots({ env: { PREVIS_LIMIT_CLOUD_IMAGES: '1' } }) });
   const job = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'a runner' });
   await assert.rejects(refgen.submit({ projectId: project.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 1 } } }), /allowUnknownCharges/);
   log.failSubmit = true;
   const uncertain = await refgen.submit({ projectId: project.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 1, allowUnknownCharges: true } } });
   assert.equal(uncertain.status, 'uncertain');
   const second = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'another' });
-  await assert.rejects(refgen.submit({ projectId: project.id, requestId: second.id, approval: { approved: true, fingerprint: second.fingerprint, allowance: { currency: 'USD', maxAmount: 1, allowUnknownCharges: true } } }), /still running or uncertain/);
+  await assert.rejects(refgen.submit({ projectId: project.id, requestId: second.id, approval: { approved: true, fingerprint: second.fingerprint, allowance: { currency: 'USD', maxAmount: 1, allowUnknownCharges: true } } }), e => e.status === 409 && e.apiCode === 'busy' && /1 of 1 cloud image slot in use/.test(e.message), 'an uncertain request holds its slot');
   assert.equal(log.filter(x => x === 'submit').length, 1);
 
   const fresh = await setup({ allowPaid: true });
@@ -123,4 +125,71 @@ test('shot key frames: blockout guide is quoted, uploaded at submit and attached
   assert.equal(frames.length, 2); assert.equal(frames[0].generated.presetId, 'local-checkpoint');
   const { compilePrompt } = await import('../shared/director.mjs');
   assert.match(compilePrompt(p, p.shots[0]), /Look: match key frame/);
+});
+
+const consent = job => ({ approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 1, allowUnknownCharges: true } });
+
+test('cloud image slots: two concurrent submits fit a limit of 2, the third is busy (409, retryable)', async () => {
+  const { project, refgen, log, runner } = await setup({ allowPaid: true, slots: createSlots({ env: { PREVIS_LIMIT_CLOUD_IMAGES: '2' } }) });
+  const jobs = [];
+  for (const prompt of ['one', 'two', 'three']) jobs.push(await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt }));
+  const sent = await Promise.all(jobs.slice(0, 2).map(job => refgen.submit({ projectId: project.id, requestId: job.id, approval: consent(job) })));
+  assert.deepEqual(sent.map(job => job.status), ['submitted', 'submitted']);
+  await assert.rejects(refgen.submit({ projectId: project.id, requestId: jobs[2].id, approval: consent(jobs[2]) }),
+    e => e.status === 409 && e.apiCode === 'busy' && e.retryAfterSeconds === 15 && e.message === 'Backend busy: 2 of 2 cloud image slots in use; retry when a job finishes');
+  assert.equal(log.filter(x => x === 'submit').length, 2);
+  assert.equal(refgen.list(project.id).find(j => j.id === jobs[2].id).status, 'quoted', 'a busy refusal leaves the quote untouched');
+});
+
+test('rejected dispatch persists redacted failure.detail and never the key; provider errors surface on track', async t => {
+  const secret = 'test-cloud-key-' + 'z'.repeat(20), previous = process.env.COMFY_CLOUD_API_KEY;
+  process.env.COMFY_CLOUD_API_KEY = secret;
+  t.after(() => { if (previous === undefined) delete process.env.COMFY_CLOUD_API_KEY; else process.env.COMFY_CLOUD_API_KEY = previous; });
+  const { root, project, refgen, log, runner } = await setup({ allowPaid: true });
+  log.submitError = () => Object.assign(Error('Backend /prompt returned HTTP 400'), { httpStatus: 400, detail: `{"error":"invalid prompt","extra_data":{"api_key_comfy_org":"${secret}"}}` });
+  const job = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'a runner' });
+  const failed = await refgen.submit({ projectId: project.id, requestId: job.id, approval: consent(job) });
+  assert.equal(failed.status, 'failed', 'a 400 rejection never ran, so it frees the slot');
+  assert.equal(failed.failure.phase, 'dispatch'); assert.equal(failed.failure.httpStatus, 400);
+  assert.match(failed.failure.detail, /invalid prompt/); assert.ok(failed.failure.detail.length <= 500);
+  const receipt = await readFile(join(root, 'director', project.id, 'refgen', job.id + '.json'), 'utf8');
+  assert.equal(receipt.includes(secret), false); assert.equal(JSON.stringify(failed).includes(secret), false);
+  log.submitError = null;
+  log.historyError = { nodeId: '1', nodeType: 'FluxProUltraImageNode', message: 'Server side error' };
+  const other = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'again' });
+  await refgen.submit({ projectId: project.id, requestId: other.id, approval: consent(other) });
+  const tracked = await refgen.track({ projectId: project.id, requestId: other.id });
+  assert.equal(tracked.status, 'failed'); assert.deepEqual(tracked.provider, { status: 'error', error: log.historyError });
+  assert.match(tracked.failure.detail, /FluxProUltraImageNode: Server side error/); assert.match(tracked.message, /Server side error/);
+});
+
+test('upload cache: identical guide bytes are uploaded once per Cloud backend', async () => {
+  const { project, refgen, log } = await setup({ allowPaid: true });
+  const ultra = objectInfo.FluxProUltraImageNode;
+  log.objectInfo = { ...objectInfo, FluxProUltraImageNode: { ...ultra, input: { ...ultra.input, optional: { image_prompt: ['IMAGE'], image_prompt_strength: ['FLOAT', {}] } } } };
+  const base = { projectId: project.id, target: 'shot', shotId: project.shots[0].id, presetId: 'flux-ultra', prompt: 'night street', aspect: '16:9', guide: PNG.toString('base64') };
+  const first = await refgen.prepare({ ...base, seed: 1 }), second = await refgen.prepare({ ...base, seed: 2 });
+  await refgen.submit({ projectId: project.id, requestId: first.id, approval: consent(first) });
+  const value = log.graph[100].inputs.image;
+  await refgen.submit({ projectId: project.id, requestId: second.id, approval: consent(second) });
+  assert.equal(log.filter(x => x.startsWith('upload')).length, 1);
+  assert.equal(log.graph[100].inputs.image, value, 'the second request reuses the stored Cloud input');
+});
+
+test('job tracker drives refgen to completion; the track route keeps its shape and records attempts', async () => {
+  const { project, refgen, log, runner } = await setup();
+  let t = Date.parse('2026-10-30T12:00:00Z');
+  const tracker = createJobTracker({ sources: [refgen.trackerSource()], now: () => t, tickMs: 0 });
+  refgen.useTracker(tracker); tracker.start();
+  const job = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'local-checkpoint', checkpoint: 'sd15.safetensors', prompt: 'a runner', seed: 3 });
+  await refgen.submit({ projectId: project.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 0 } } });
+  const viaRoute = await refgen.track({ projectId: project.id, requestId: job.id });
+  assert.equal(viaRoute.status, 'submitted'); assert.equal(viaRoute.tracking.trackCount, 1);
+  await assert.rejects(refgen.track({ projectId: 'other', requestId: job.id }), /Unknown request/);
+  log.done = true;
+  t += 8000; await tracker.tick();
+  const [row] = tracker.snapshot().jobs;
+  assert.equal(row.status, 'completed'); assert.equal(row.source, 'refgen'); assert.equal(row.kind, 'image'); assert.equal(row.trackCount, 2);
+  assert.equal(row.results.length, 2, 'the mock backend returns two images'); assert.match(row.results[0].url, new RegExp(`^/director-refs/${project.id}/[a-f0-9-]{36}\\.png$`));
+  assert.match(row.label, /Runner · Local ComfyUI/);
 });
