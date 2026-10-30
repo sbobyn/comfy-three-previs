@@ -114,3 +114,34 @@ test('cast rows sharing one image fold into a family named by what the names sha
   assert.match(block, /In this shot · \$\{hero\.length\}/, 'the count is the hero cast');
   assert.match(src, /`× \$\{names\.size\} objects`/, 'the Generate dialog lists each image once, × N objects');
 });
+
+// The transport at 1024 / 880 / 1440 window widths: the stage's transport is 461 / 396 / 776 px wide there
+// (measured in the workspace). Real stylesheet, the transport's real markup, headless Chrome.
+const { createRequire } = await import('node:module');
+const require = createRequire(import.meta.url);
+const chrome = await (async () => { try { require.resolve('playwright-core'); return (await import('../server/previs/headless.mjs')).resolveExecutable(); } catch { return null; } })();
+test('transport at 1024: Fly camera stays whole on the first row, keys and scrubber move to a second row', { skip: !chrome && 'no local Chromium/Chrome or playwright-core' }, async () => {
+  const { chromium } = require('playwright-core');
+  const browser = await chromium.launch({ executablePath: chrome, headless: true, args: ['--disable-background-networking'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1024, height: 760 } });
+    await page.route('**/*', route => route.abort());
+    const row = `<div class="transport-row"><button class="btn sm icon" type="button" aria-label="Play">▶</button><span class="time"><span>0.00s / 4.00s</span><span class="t-film"> · film 0.00s</span></span><div class="kf-nav"><button class="btn ghost sm icon" type="button">‹◆</button><button class="btn ghost sm icon" type="button">◆</button><button class="btn ghost sm icon" type="button">◆›</button></div><div class="scrubwrap"><input type="range" min="0" max="4" step="0.01" aria-label="Playhead"></div><span class="movechip">Crane down on Rival car, 40mm normal, high angle, 4s</span><div class="fly"><button class="fly-btn" type="button"><i class="fly-dot"></i><span>Fly camera</span></button><button class="fly-device" type="button"><span>Keyboard</span><span class="chev">▾</span></button></div></div>`;
+    await page.setContent(`<div id="w"><div class="transport"><div class="film-track"></div>${row}</div></div>`);
+    await page.addStyleTag({ content: readFileSync(new URL('../src/director.css', import.meta.url), 'utf8') });
+    const measure = width => page.evaluate(w => {
+      document.querySelector('#w').style.width = `${w}px`;
+      const r = s => document.querySelector(s).getBoundingClientRect();
+      const t = r('.transport'), fly = r('.fly'), dev = r('.fly-device'), play = r('.transport-row > .btn'), scrub = r('.scrubwrap'), keys = r('.kf-nav');
+      return { flyWhole: fly.left >= t.left && fly.right <= t.right + 0.5 && dev.width > 20, secondRow: scrub.top >= play.bottom - 1 && keys.top >= play.bottom - 1, scrubWide: scrub.width / t.width, sameRowAsFly: Math.abs(play.top - fly.top) < 8 };
+    }, width);
+    const at1024 = await measure(461);
+    assert.ok(at1024.flyWhole, 'Fly camera, with its device menu, is not clipped');
+    assert.ok(at1024.secondRow, 'keys and the scrubber are on the second row');
+    assert.ok(at1024.sameRowAsFly && at1024.scrubWide > 0.6);
+    const at880 = await measure(396);
+    assert.ok(at880.flyWhole && at880.secondRow);
+    const at1440 = await measure(776);
+    assert.ok(at1440.flyWhole); assert.equal(at1440.secondRow, false, 'a wide stage keeps one row');
+  } finally { await browser.close(); }
+});

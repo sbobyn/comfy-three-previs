@@ -565,7 +565,7 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
   .fly-device > span:first-child { display: none; }
   .fly-device { min-width: 34px; justify-content: center; padding: 0 12px 0 8px; }
 }
-@container transport (max-width: 460px) { .fly-device { display: none; } .fly-btn { border-radius: var(--r-full); } .transport-row { gap: 6px; } }
+@container transport (max-width: 460px) { .transport-row { gap: 6px; } }
 @media (max-width: 1000px) {
   .transport { padding-inline: 8px; }
   .transport-row { gap: 6px; }
@@ -573,6 +573,18 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
   .fly-btn { font-size: var(--fs-sm); }
 }
 @media (max-width: 980px) { .transport .kf-nav .btn:first-child, .transport .kf-nav .btn:last-child { display: none; } .fly-btn { padding: 0 12px; } }
+/* A narrow viewport (≈ 720 px and under): play · time · Fly camera on the first row, Fly kept whole;
+   the key-frame buttons and the scrubber move to a second row at full width. */
+@container transport (max-width: 720px) {
+  .transport-row { flex-wrap: wrap; row-gap: 6px; }
+  .transport-row::after { content: ''; order: 5; flex: 0 0 100%; height: 0; }
+  .transport-row > .kf-nav { order: 6; }
+  .transport-row > .scrubwrap { order: 7; flex: 1 1 0; }
+  .transport-row > .movechip { display: none; }
+  .transport-row > .fly { margin-left: auto; }
+  .transport .kf-nav .btn:first-child, .transport .kf-nav .btn:last-child { display: inline-flex; }
+}
+@container transport (max-width: 340px) { .fly-device { min-width: 30px; padding: 0 10px 0 6px; } .fly-btn kbd { display: none; } }
 
 /* ---------- Right panel: head, readiness, sections ---------- */
 .side { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); min-width: 0; min-height: 0; overflow: hidden; background: var(--panel); border-left: 1px solid var(--line); container-type: inline-size; container-name: side; }
@@ -583,7 +595,9 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .tabs button.on::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; background: var(--ink); border-radius: 2px 2px 0 0; }
 .side-head { height: auto; min-height: 44px; flex-wrap: nowrap; gap: 8px; padding: 8px 12px; }
 .side-head .shotchip { align-self: center; white-space: nowrap; margin-left: 0; padding: 0; color: var(--ink); font: 600 var(--fs-2xs)/1 var(--mono); letter-spacing: .06em; }
-.ready { display: flex; flex-wrap: nowrap; gap: 4px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 18px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 18px), transparent); }
+/* The readiness strip scrolls sideways (wheel or drag) with a fade on whichever edge has more. */
+.ready { --fl: 0px; --fr: 18px; display: flex; flex-wrap: nowrap; gap: 4px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fl), #000 calc(100% - var(--fr)), transparent); mask-image: linear-gradient(to right, transparent, #000 var(--fl), #000 calc(100% - var(--fr)), transparent); }
+.ready.at-start { --fl: 0px; } .ready:not(.at-start) { --fl: 18px; } .ready.at-end { --fr: 0px; }
 .ready::-webkit-scrollbar { display: none; }
 .side-head .rd { flex: none; display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px 0 7px; border: 1px solid var(--line); border-radius: var(--r-full); background: var(--card); font-size: var(--fs-2xs); color: var(--ink-3); cursor: pointer; white-space: nowrap; transition: border-color var(--t-fast), background var(--t-fast); }
 .side-head .rd:hover { border-color: var(--line-2); color: var(--ink); }

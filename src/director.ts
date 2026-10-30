@@ -215,6 +215,11 @@ const stage = h('section', { class: 'stage' }, viewport, h('div', { class: 'tran
 const shotPane = h('div', { class: 'pane shotpane' });
 const objectPane = h('div', { class: 'pane shotpane objectpane', hidden: true });
 const readiness = h('div', { class: 'ready', role: 'status', 'aria-label': 'Shot readiness' });
+// Fade only the edge with more pills beyond it; a vertical wheel scrolls the strip sideways.
+const readinessFade = () => { const max = readiness.scrollWidth - readiness.clientWidth; readiness.classList.toggle('at-start', readiness.scrollLeft <= 1); readiness.classList.toggle('at-end', readiness.scrollLeft >= max - 1); };
+readiness.addEventListener('scroll', readinessFade, { passive: true });
+readiness.addEventListener('wheel', ev => { if (readiness.scrollWidth <= readiness.clientWidth || Math.abs(ev.deltaX) > Math.abs(ev.deltaY)) return; ev.preventDefault(); readiness.scrollLeft += ev.deltaY; }, { passive: false });
+new ResizeObserver(readinessFade).observe(readiness);
 const actHint = h('div', { class: 'act-hint', 'aria-live': 'polite' });
 const actionBar = h('div', { class: 'side-act', role: 'toolbar', 'aria-label': 'Shot actions' }, actHint, h('div', { class: 'act-btns' }, previewBtn, renderBtn));
 const side = h('aside', { class: 'side' }, h('div', { class: 'side-head' }, readiness), h('div', { class: 'side-body', style: 'min-height:0;display:grid' }, shotPane, objectPane), actionBar);
@@ -772,6 +777,7 @@ function renderReadiness() {
     item('cast', need ? 'warn' : cast.length ? 'ok' : 'none', 'Cast', h('span', { class: 'rd-cast' }, ...cast.slice(0, 5).map(r => h('i', { style: `background:${KIND_COLORS[r.entity.kind]}`, title: r.entity.name })), `${cast.length}${need ? ` · ${need} need image${need === 1 ? '' : 's'}` : ''}`), need ? `${need} of ${cast.length} cast members have no image yet` : 'Every cast member has an image'),
     item('video', edited ? 'warn' : 'ok', 'Prompt', edited ? 'edited' : 'auto', edited ? 'You edited this shot’s prompt; your text is used' : 'The prompt is composed from the cast, camera and story'),
     item('video', vids ? 'ok' : 'none', 'Video', vids ? `✓${vids > 1 ? ` ${vids}` : ''}` : '–', vids ? `${vids} generated video${vids === 1 ? '' : 's'}` : 'No video yet: Generate video (bottom of this panel)'));
+  readinessFade();
   renderActionBar();
 }
 /** Action bar: shot number, blockout state and cost on the left; Preview and Generate on the right. */
