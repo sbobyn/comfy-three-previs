@@ -7,7 +7,7 @@ import { autoPromptSegments, autoPromptText, highlightRanges, shotStyle, suggest
 import type { Segment, StyleTags } from '../shared/prompt.mjs';
 import { h, toast } from './director-common';
 
-type Ctx = { project(): DirectorProject; runEntry(e: { label: string; redo: unknown[]; undo: unknown[] }): Promise<unknown>; select(id: string): void };
+type Ctx = { project(): DirectorProject; runEntry(e: { label: string; redo: unknown[]; undo: unknown[] }): Promise<unknown>; select(id: string): void; refresh?(): void };
 let kind: 'video' | 'image' = 'video';
 let editing = false, preview = false;
 
@@ -65,9 +65,21 @@ export function promptBlock(s: Shot, ctx: Ctx) {
     body = h('div', { class: 'ap-view', title: 'Click Edit to change the text' }, colouredText(text, segs));
   }
 
+  const block = h('div', { class: 'block ap-block' + (edited ? ' is-edited' : '') },
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Prompt'), marker, h('span', { style: 'flex:1' }), seg),
+    chips, body,
+    editing || preview ? null : h('div', { class: 'ap-actions' },
+      h('button', { class: 'btn sm', type: 'button', onclick: () => { editing = true; rerender(); } }, 'Edit'),
+      h('button', { class: 'btn sm ghost', type: 'button', title: edited ? 'Preview the new auto-prompt next to your edit before replacing it' : 'Rebuild from the Cast Cards and camera', onclick: () => { if (edited) { preview = true; rerender(); } else { toast('Auto-prompt is already up to date with the Cast Cards'); } } }, 'Regenerate'),
+      h('button', { class: 'btn sm ghost', type: 'button', onclick: () => void navigator.clipboard.writeText(text).then(() => toast('Prompt copied')) }, 'Copy'),
+      h('span', { class: 'note', style: 'margin-left:auto' }, edited ? 'Your edit is used for generation.' : 'Composed from the cast · edit to override')));
+  return block;
+}
+/** Camera style tags (Phase C): suggestions come from the shot's camera until you change them. Their terms go into the prompt. */
+export function cameraStyleBlock(s: Shot, ctx: Ctx) {
   // Camera style tags (Phase C): suggestions come from the shot's camera until you change them.
   const st = shotStyle(s), chosen = !!s.style;
-  const setStyle = (next: StyleTags | null, label: string) => ctx.runEntry({ label, redo: [{ op: 'update_shot', id: s.id, patch: { style: next } }], undo: [{ op: 'update_shot', id: s.id, patch: { style: s.style ?? null } }] }).then(rerender);
+  const setStyle = (next: StyleTags | null, label: string) => ctx.runEntry({ label, redo: [{ op: 'update_shot', id: s.id, patch: { style: next } }], undo: [{ op: 'update_shot', id: s.id, patch: { style: s.style ?? null } }] }).then(() => { (document.activeElement as HTMLElement | null)?.blur?.(); ctx.refresh?.(); });
   const styleRow = h('div', { class: 'ap-style' }, ...(Object.keys(CAMERA_TERMS) as (keyof StyleTags)[]).map(g => {
     const sel = h('select', { class: 'field', 'aria-label': `Add ${CAMERA_GROUPS[g]} term` }, h('option', { value: '' }, `+ ${CAMERA_GROUPS[g]}`), ...CAMERA_TERMS[g].filter(t => !st[g].includes(t)).map(t => h('option', { value: t }, t)));
     sel.onchange = () => { if (!sel.value) return; const next = { ...st, [g]: [...st[g], sel.value] }; void setStyle(next, `Add ${CAMERA_GROUPS[g]}`); };
@@ -75,16 +87,8 @@ export function promptBlock(s: Shot, ctx: Ctx) {
       ...st[g].map(t => h('button', { type: 'button', class: 'ap-tag', style: `--c:${FIELD_COLORS[g]}`, title: `Remove “${t}”`, onclick: () => void setStyle({ ...st, [g]: st[g].filter(x => x !== t) }, `Remove ${CAMERA_GROUPS[g]}`) }, t, ' ×')), sel);
   }));
 
-  const block = h('div', { class: 'block ap-block' + (edited ? ' is-edited' : '') },
-    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Auto-prompt'), marker, h('span', { style: 'flex:1' }), seg),
-    chips, body,
-    editing || preview ? null : h('div', { class: 'ap-actions' },
-      h('button', { class: 'btn sm', type: 'button', onclick: () => { editing = true; rerender(); } }, 'Edit'),
-      h('button', { class: 'btn sm ghost', type: 'button', title: edited ? 'Preview the new auto-prompt next to your edit before replacing it' : 'Rebuild from the Cast Cards and camera', onclick: () => { if (edited) { preview = true; rerender(); } else { toast('Auto-prompt is already up to date with the Cast Cards'); } } }, 'Regenerate'),
-      h('button', { class: 'btn sm ghost', type: 'button', onclick: () => void navigator.clipboard.writeText(text).then(() => toast('Prompt copied')) }, 'Copy'),
-      h('span', { class: 'note', style: 'margin-left:auto' }, edited ? 'Your edit is used for generation.' : 'Composed from the cast · edit to override')),
+  return h('div', { class: 'block ap-block ap-camstyle' },
     h('div', { class: 'ap-stylehead' }, h('span', { class: 'eyebrow' }, 'Camera style'), chosen ? h('button', { class: 'btn ghost sm', type: 'button', title: 'Back to suggestions from the shot camera', onclick: () => void setStyle(null, 'Reset camera style') }, 'Reset') : h('span', { class: 'note' }, 'Suggested from the shot camera')),
     styleRow);
-  return block;
 }
 export { suggestedStyle };
