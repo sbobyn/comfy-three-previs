@@ -1,5 +1,5 @@
 import './director.css';
-import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME } from '../shared/director.mjs';
+import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Message, Vec3, Asset, EditClip } from '../shared/director.mjs';
 import { api, h, toast, connectDialog, shapeIcon, readFileBase64 } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
@@ -40,7 +40,7 @@ const refUrl = (r: Reference) => `/director-refs/${project.id}/${r.file}`;
 const assetUrl = (a: Asset) => `/director-assets/${project.id}/${a.file.replace(/^assets\//, '')}`;
 const allRefs = () => project.shots.flatMap(s => s.references);
 const fmt = (t: number) => `${t.toFixed(2)}s`;
-const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.map(({ look, notes, name, styleNotes, lookFrom, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 
 async function edit(ops: unknown[], quiet = false) {
   try { const r = await api('director/edit', { projectId, ops }); apply(r.project); return r; }
@@ -51,7 +51,7 @@ async function edit(ops: unknown[], quiet = false) {
 const titleInput = h('input', { 'aria-label': 'Project name', maxlength: 120 });
 const sceneLabel = h('span', { class: 'muted' });
 const pillSlot = h('span');
-const claudeBtn = h('button', { class: 'btn ghost sm', type: 'button', title: 'Direct this scene from Claude', onclick: () => claudeDialog() }, 'Direct with Claude');
+const claudeBtn = h('button', { class: 'btn ghost sm', type: 'button', title: 'Direct this scene from Claude', onclick: () => claudeDialog() }, h('span', { class: 'claude-mark', 'aria-hidden': 'true' }, '✳'), h('span', { class: 'hide-md' }, 'Direct with '), 'Claude');
 function claudeDialog() {
   const d = h('dialog', { class: 'claude-help' },
     h('h3', {}, 'Direct with Claude'),
@@ -76,13 +76,13 @@ const seqModeBtn = h('button', { type: 'button', role: 'tab', 'aria-selected': '
 const modeSwitch = h('div', { class: 'seg ws-mode', role: 'tablist', 'aria-label': 'Workspace' }, sceneModeBtn, seqModeBtn);
 const top = h('header', { class: 'ws-top' },
   h('a', { class: 'brand', href: '/', title: 'All projects' }, h('span', { class: 'brand-mark' })),
-  h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep' }, '/'), titleInput, h('span', { class: 'sep' }, '·'), sceneLabel, modeSwitch),
-  h('div', { class: 'right' }, h('button', { class: 'btn ghost sm', type: 'button', title: 'End-to-end guide and feature map', onclick: () => showJourney() }, 'Guide'), pillSlot, looksBtn, assetsBtn, previewBtn, renderBtn));
+  h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput, h('span', { class: 'sep hide-lg' }, '·'), h('span', { class: 'hide-lg scene-name' }, sceneLabel)), modeSwitch,
+  h('div', { class: 'right' }, h('button', { class: 'btn ghost sm hide-md', type: 'button', title: 'End-to-end guide and feature map', onclick: () => showJourney() }, 'Guide'), pillSlot, looksBtn, assetsBtn, previewBtn, renderBtn));
 
 const shotList = h('div', { class: 'shots', role: 'listbox', 'aria-label': 'Shots' });
 const outline = h('div', { class: 'outline', 'aria-label': 'Scene objects' });
 const addMenu = h('div', { class: 'add-menu', hidden: true });
-for (const shape of Object.keys(SHAPES)) addMenu.append(h('button', { type: 'button', title: `Add ${shape}`, onclick: () => addObject(shape) }, shapeIcon(shape), shape));
+for (const shape of Object.keys(SHAPES).filter(x => x !== 'group')) addMenu.append(h('button', { type: 'button', title: `Add ${shape}`, onclick: () => addObject(shape) }, shapeIcon(shape), shape));
 const rail = h('aside', { class: 'rail' },
   h('section', { class: 'rail-section' },
     h('div', { class: 'rail-head' }, h('span', { class: 'eyebrow' }, 'Shots'), h('button', { class: 'btn ghost sm icon', type: 'button', title: 'Add shot', 'aria-label': 'Add shot', onclick: () => addShot() }, '+')),
@@ -253,7 +253,11 @@ document.addEventListener('keydown', ev => {
 const scene = createDirectorScene(canvas, labels, monitor, camFrame, {
   onClickSelect(id, mode) {
     if (!id) { if (mode === 'replace') selection.clear(); return; }
-    if (mode === 'add') selection.add(id); else if (mode === 'toggle') selection.toggle(id); else selection.click(id);
+    // Groups: the first click picks the outermost group; clicking again inside it steps one level in.
+    const chain: string[] = []; for (let e = entity(id); e && chain.length < 32; e = e.parent ? entity(e.parent) : null) chain.push(e.id);
+    const k = chain.findIndex(x => selection.has(x));
+    id = k > 0 ? chain[k - 1] : k === 0 ? id : chain.at(-1)!;
+    if (mode === 'add') selection.add(id); else if (mode === 'toggle') selection.toggle(id); else selection.set([id], id);
     // Focus the editor camera on what you clicked (the orbit then pivots around it).
     if (mode === 'replace' && selection.has(id) && scene.view() === 'set') scene.frame([id], 1.2);
     if (selection.ids.length) setTab('object');
@@ -303,23 +307,49 @@ function renderShots() {
   }));
 }
 
+const openGroups = new Set<string>(JSON.parse(localStorage.getItem(`previs.open.${projectId}`) || '[]'));
+function toggleGroup(id: string) { if (openGroups.has(id)) openGroups.delete(id); else openGroups.add(id); localStorage.setItem(`previs.open.${projectId}`, JSON.stringify([...openGroups])); renderOutline(); }
 function renderOutline() {
+  const all = project.scene.entities, ids = new Set(all.map(e => e.id));
+  const kids = (pid: string) => all.filter(e => e.parent === pid);
+  const roots = all.filter(e => !e.parent || !ids.has(e.parent));
+  // Selected objects inside a closed group open their path, so the selection is always visible.
+  for (const sid of selection.ids) for (let e = entity(sid); e?.parent; e = entity(e.parent)) openGroups.add(e.parent);
   const groups: Record<string, Entity[]> = { character: [], vehicle: [], prop: [], environment: [] };
-  for (const e of project.scene.entities) (groups[e.kind] ||= []).push(e);
+  for (const e of roots) (groups[e.kind] ||= []).push(e);
   outline.replaceChildren();
-  if (!project.scene.entities.length) outline.append(h('p', { class: 'note', style: 'padding:6px' }, 'Empty stage. Add objects with + or describe them in Direct.'));
+  if (!all.length) outline.append(h('p', { class: 'note', style: 'padding:6px' }, 'Empty stage. Add objects with +, or ask Claude to build the scene.'));
+  const row = (e: Entity, depth: number): Node[] => {
+    const children = kids(e.id), open = openGroups.has(e.id);
+    const ref = objectLooks(project, e.id)[0] || allRefs().find(r => r.entityId === e.id && r.role !== 'style');
+    const btn = h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : '') + (children.length ? ' parent' : ''), type: 'button', style: `--depth:${depth}`, onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.frame([e.id], 1.2); } if (selection.ids.length) setTab('object'); }, ondblclick: () => scene.focusOn(e) },
+      children.length ? h('span', { class: 'twisty' + (open ? ' open' : ''), role: 'button', 'aria-label': open ? 'Collapse' : 'Expand', onclick: (ev: MouseEvent) => { ev.stopPropagation(); toggleGroup(e.id); } }, '›') : h('span', { class: 'twisty none' }),
+      e.shape === 'group' ? h('span', { class: 'sw grp' }) : h('span', { class: 'sw', style: `background:${e.color}` }),
+      h('span', { class: 'name' }, e.name),
+      children.length ? h('span', { class: 'count' }, String(withDescendants(all, [e.id]).length - 1)) : null,
+      e.id === shot().camera.target ? h('span', { class: 'tgt', title: 'Camera target' }, '◎') : null,
+      ref ? h('img', { class: 'refdot', src: refUrl(ref), alt: '', title: `Reference: ${ref.name}` }) : null);
+    return [btn, ...(open ? children.flatMap(c => row(c, depth + 1)) : [])];
+  };
   for (const [kind, list] of Object.entries(groups)) {
     if (!list.length) continue;
     outline.append(h('div', { class: 'group' }, kind === 'character' ? 'Characters' : kind === 'vehicle' ? 'Vehicles' : kind === 'prop' ? 'Props' : 'Environment'));
-    for (const e of list) {
-      const ref = objectLooks(project, e.id)[0] || allRefs().find(r => r.entityId === e.id && r.role !== 'style');
-      outline.append(h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : ''), type: 'button', onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.frame([e.id], 1.2); } if (selection.ids.length) setTab('object'); }, ondblclick: () => scene.focusOn(e) },
-        h('span', { class: 'sw', style: `background:${e.color}` }),
-        h('span', { class: 'name' }, e.name),
-        e.id === shot().camera.target ? h('span', { class: 'tgt', title: 'Camera target' }, '◎') : null,
-        ref ? h('img', { class: 'refdot', src: refUrl(ref), alt: '', title: `Reference: ${ref.name}` }) : null));
-    }
+    for (const e of list) outline.append(...row(e, 0));
   }
+}
+/** Group the selection under a new empty (Ctrl/Cmd+G); ungroup a selected group (Shift+Ctrl/Cmd+G). */
+async function groupSelection() {
+  const list = selection.ids.map(id => entity(id)).filter(Boolean) as Entity[];
+  if (list.length < 1) return;
+  const id = crypto.randomUUID(), name = list.length === 1 ? `${list[0].name} group` : 'Group';
+  const ok = await runEntry({ label: `Group ${list.length} objects`, redo: [{ op: 'group', id, ids: list.map(e => e.id), name }], undo: [{ op: 'ungroup', id }] });
+  if (ok) { openGroups.delete(id); selection.set([id], id); toast('Grouped. Click the group name to rename it.'); }
+}
+async function ungroupSelection() {
+  const g = entity(selected); if (!g || g.shape !== 'group') return;
+  const members = project.scene.entities.filter(e => e.parent === g.id).map(e => e.id);
+  const ok = await runEntry({ label: `Ungroup ${g.name}`, redo: [{ op: 'ungroup', id: g.id }], undo: [{ op: 'group', id: g.id, ids: members, name: g.name }] });
+  if (ok) selection.set(members, members[0] ?? null);
 }
 
 function richText(text: string) {
@@ -871,7 +901,8 @@ function renderObjectPane() {
   objectPane.dataset.id = selected || '';
   const e = entity(selected);
   if (!e) { objectPane.replaceChildren(h('div', { class: 'empty-state', style: 'margin:8px' }, 'Select an object to design its look. ', h('button', { class: 'btn sm', type: 'button', onclick: () => openLooks() }, 'Open Looks board'))); return; }
-  if (selection.ids.length > 1) { objectPane.replaceChildren(inspector, h('p', { class: 'note' }, 'Select one object to design or generate its image.')); return; }
+  if (selection.ids.length > 1) { objectPane.replaceChildren(h('div', { class: 'group-bar' }, h('span', {}, `${selection.ids.length} objects selected`), h('button', { class: 'btn sm', type: 'button', onclick: () => void groupSelection() }, 'Group', h('kbd', {}, '⌘G'))), inspector, h('p', { class: 'note' }, 'Select one object to design or generate its image.')); return; }
+  if (e.shape === 'group') { const n = withDescendants(project.scene.entities, [e.id]).length - 1; objectPane.replaceChildren(h('div', { class: 'group-bar' }, h('span', {}, `Group · ${n} object${n === 1 ? '' : 's'} inside`), h('button', { class: 'btn sm ghost', type: 'button', onclick: () => void ungroupSelection() }, 'Ungroup', h('kbd', {}, '⇧⌘G'))), inspector, h('p', { class: 'note' }, 'Move, rotate or resize the group and everything inside follows. Click an object inside it in the viewport to edit just that part.')); return; }
   const looks = objectLooks(project, e.id), primary = looks[0];
   const source = lookSource(project, e.id), shared = source && source.id !== e.id ? source : null;
   const views = lookViews(e);
@@ -1253,7 +1284,7 @@ async function duplicateSelection() {
 const deleteDialog = h('dialog', { class: 'confirm', 'aria-labelledby': 'del-title' });
 document.body.append(deleteDialog);
 function requestDelete() {
-  const list = selection.ids.map(id => entity(id)).filter(Boolean) as Entity[];
+  const list = withDescendants(project.scene.entities, selection.ids).map(id => entity(id)).filter(Boolean) as Entity[];
   if (!list.length) return;
   const confirmBtn = h('button', { class: 'btn primary', type: 'button', onclick: () => { deleteDialog.close(); void deleteNow(list); } }, 'Delete');
   deleteDialog.replaceChildren(h('div', { class: 'dialog-body' },
@@ -1264,12 +1295,12 @@ function requestDelete() {
   deleteDialog.showModal(); confirmBtn.focus();
 }
 async function deleteNow(list: Entity[]) {
-  const ok = await runEntry({ label: list.length > 1 ? `Delete ${list.length} objects` : `Delete ${list[0].name}`, redo: list.map(e => ({ op: 'remove_entity', id: e.id })), undo: list.flatMap(e => recreateOps(e, project)) });
+  const ok = await runEntry({ label: list.length > 1 ? `Delete ${list.length} objects` : `Delete ${list[0].name}`, redo: [...list].reverse().map(e => ({ op: 'remove_entity', id: e.id })), undo: list.flatMap(e => recreateOps(e, project)) });
   if (ok) selection.clear();
 }
 function openAddPopup(x: number, y: number) {
   const r = viewport.getBoundingClientRect();
-  addPopup.replaceChildren(h('div', { class: 'eyebrow', style: 'padding:4px 8px' }, 'Add'), ...Object.keys(SHAPES).map(shape => h('button', { type: 'button', role: 'menuitem', onclick: () => void addObject(shape) }, shapeIcon(shape), shape)));
+  addPopup.replaceChildren(h('div', { class: 'eyebrow', style: 'padding:4px 8px' }, 'Add'), ...Object.keys(SHAPES).filter(x => x !== 'group').map(shape => h('button', { type: 'button', role: 'menuitem', onclick: () => void addObject(shape) }, shapeIcon(shape), shape)));
   addPopup.hidden = false;
   addPopup.style.left = `${Math.min(x - r.left, r.width - 190)}px`; addPopup.style.top = `${Math.min(y - r.top, r.height - 330)}px`;
   (addPopup.querySelector('button') as HTMLButtonElement | null)?.focus();
@@ -1280,7 +1311,7 @@ const HELP: [string, [string, string][]][] = [
   ['Select', [['Select', 'Click an object'], ['Add to selection', 'Shift + click'], ['Toggle in/out', 'Ctrl/Cmd + click'], ['Box add', 'Shift + drag'], ['Deselect all', 'Click empty space']]],
   ['Transform', [['Move / Rotate / Resize', 'G / R / S'], ['Constrain axis', 'X / Y / Z'], ['Exact amount', 'Type a number (− for negative)'], ['Edit amount', 'Backspace'], ['Confirm / Cancel', 'Click or Enter / Esc or right-click'], ['Snap movement', 'Hold Ctrl (inverts Snap)'], ['Scrub a field', 'Drag up/down · Shift fine · Ctrl snap']]],
   ['Animate', [['Insert keyframe', 'I'], ['Delete keyframe at playhead', 'Alt + I'], ['Previous / next keyframe', '‹◆ / ◆› on the timeline'], ['Move an animated object', 'Keys it at the playhead']]],
-  ['Edit', [['Add object', 'Right-click or Shift + A'], ['Duplicate in place', 'Shift + D or Ctrl/Cmd + D'], ['Delete', 'X, Delete or Backspace (asks first)'], ['Undo / Redo', 'Ctrl/Cmd + Z / Shift + Ctrl/Cmd + Z'], ['Play shot', 'Space']]],
+  ['Edit', [['Add object', 'Right-click or Shift + A'], ['Duplicate in place', 'Shift + D or Ctrl/Cmd + D'], ['Delete', 'X, Delete or Backspace (asks first)'], ['Group / Ungroup', 'Ctrl/Cmd + G / Shift + Ctrl/Cmd + G'], ['Undo / Redo', 'Ctrl/Cmd + Z / Shift + Ctrl/Cmd + Z'], ['Play shot', 'Space']]],
 ];
 function renderHelp() {
   const grid = h('input', { type: 'checkbox', checked: gridVisible }); grid.onchange = () => { gridVisible = grid.checked; localStorage.setItem('previs.grid.v2', gridVisible ? '1' : '0'); scene.setGridVisible(gridVisible); };
@@ -1335,6 +1366,7 @@ document.addEventListener('keydown', ev => {
   if (ev.key === ' ') { ev.preventDefault(); togglePlay(); return; }
   if (k === 'c') { setView(scene.view() === 'set' ? 'camera' : 'set'); return; }
   if (k === 'i') { ev.preventDefault(); insertKeys(); return; }
+  if ((ev.ctrlKey || ev.metaKey) && k === 'g') { ev.preventDefault(); if (ev.shiftKey) void ungroupSelection(); else void groupSelection(); return; }
   if (['g', 'r', 's'].includes(k)) { if (selection.size && scene.view() === 'set') { ev.preventDefault(); scene.beginModal(k === 'g' ? 'translate' : k === 'r' ? 'rotate' : 'scale'); } return; }
   if (k === 'x' || ev.key === 'Delete' || ev.key === 'Backspace') { if (selection.size) { ev.preventDefault(); requestDelete(); } return; }
 });

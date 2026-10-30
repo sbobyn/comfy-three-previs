@@ -1,7 +1,7 @@
 export type Vec3 = [number, number, number];
 export type Kind = 'character' | 'vehicle' | 'prop' | 'environment';
 export type Role = 'character' | 'prop' | 'environment' | 'style' | 'frame';
-export type Entity = { id: string; name: string; kind: Kind; shape: string; position: Vec3; rotation: number; scale: Vec3; color: string; notes: string; look?: string | null; lookFrom?: string | null; styleNotes?: string; path?: PathKey[] | null; pitch?: number; roll?: number };
+export type Entity = { id: string; name: string; kind: Kind; shape: string; position: Vec3; rotation: number; scale: Vec3; color: string; notes: string; look?: string | null; lookFrom?: string | null; styleNotes?: string; path?: PathKey[] | null; pitch?: number; roll?: number; parent?: string | null };
 export type PathKey = { t: number; p: Vec3; r?: number; s?: Vec3; pitch?: number; roll?: number };
 export type CameraKey = { t: number; p: Vec3; look: Vec3; mm: number };
 export type ShotCamera = { move: string; target: string | null; distance: number; height: number; angle: number; mm: number; keys: CameraKey[] | null; timing?: 'linear' | 'ease' };
@@ -27,6 +27,9 @@ export const MAX_DURATION: number;
 export const TEMPLATES: Record<string, { title: string; description: string; environment: { preset: string; description: string; style?: string }; entities: Partial<Entity>[] }>;
 export function handleOf(name: string): string;
 export function makeEntity(input: Partial<Entity>, id: string): Entity;
+export function descendantsOf(entities: Entity[], id: string): Entity[];
+export function rootOf(entities: Entity[], id: string): Entity | null;
+export function withDescendants(entities: Entity[], ids: string[]): string[];
 export function makeShot(input: Partial<Shot>, id: string, number: number, entities?: Entity[]): Shot;
 export function uniqueName(entities: Entity[], wanted: string): string;
 export function entitySize(entity: Entity): Vec3;

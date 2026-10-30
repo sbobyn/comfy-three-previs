@@ -11,7 +11,8 @@ import { atomicJson } from './atomic.mjs';
 import { interpret } from './director-parse.mjs';
 import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
 import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
-import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, normalizeCast } from '../../shared/director.mjs';
+import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
+import { rigidApply } from '../../shared/editor-controls.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
@@ -64,6 +65,7 @@ function resolveShot(p, ref) {
 export function applyOps(p, ops) {
   if (!Array.isArray(ops) || ops.length > 200) fail('ops must be an array of at most 200 edits');
   const results = [];
+  const batchIds = new Set(ops.filter(o => o?.op === 'update_entity').map(o => resolveEntity(p, o.id)?.id).filter(Boolean));
   for (const op of ops) {
     switch (op?.op) {
       case 'add_entity': {
@@ -82,8 +84,40 @@ export function applyOps(p, ops) {
           for (let x = src, i = 0; x?.lookFrom && i < 8; i++) { if (x.lookFrom === e.id) fail(`${src.name} already uses ${e.name}’s look`); x = p.scene.entities.find(y => y.id === x.lookFrom); }
           patch.lookFrom = src.id;
         }
+        if (patch.parent !== undefined && patch.parent !== null) {
+          const par = resolveEntity(p, patch.parent); if (!par) fail(`Unknown object ${patch.parent}`);
+          if (par.id === e.id || descendantsOf(p.scene.entities, e.id).some(d => d.id === par.id)) fail(`${par.name} is inside ${e.name}`);
+          patch.parent = par.id;
+        }
+        const before = { position: [...e.position], rotation: e.rotation, scale: [...e.scale] };
         const next = makeEntity({ ...e, ...patch, name: patch.name ? uniqueName(p.scene.entities.filter(x => x !== e), patch.name) : e.name }, e.id);
-        Object.assign(e, next); results.push({ op: op.op, id: e.id }); break;
+        Object.assign(e, next);
+        // Children follow their parent rigidly, unless this batch already places them (the editor sends every moved object).
+        if (['position', 'rotation', 'scale'].some(k => patch[k] !== undefined)) {
+          const kids = descendantsOf(p.scene.entities, e.id).filter(d => !batchIds.has(d.id));
+          rigidApply(before, { position: e.position, rotation: e.rotation, scale: e.scale }, kids.map(d => ({ position: d.position, rotation: d.rotation, scale: d.scale })))
+            .forEach((x, i) => { const d = kids[i]; const moved = makeEntity({ ...d, ...x }, d.id); if (d.path?.length) { const dx = moved.position.map((v, j) => v - d.position[j]); moved.path = d.path.map(k => ({ ...k, p: Array.isArray(k.p) ? k.p.map((v, j) => v + dx[j]) : k.p })); } Object.assign(d, moved); });
+        }
+        results.push({ op: op.op, id: e.id }); break;
+      }
+      case 'group': {
+        const members = (Array.isArray(op.ids) ? op.ids : []).map(x => resolveEntity(p, x)).filter(Boolean);
+        if (!members.length) fail('group needs ids of objects to group');
+        const top = members.filter(m => !members.some(o => o !== m && descendantsOf(p.scene.entities, o.id).includes(m)));
+        const all = withDescendants(p.scene.entities, top.map(m => m.id)).map(id => p.scene.entities.find(x => x.id === id));
+        const c = [0, 2].map(i => all.reduce((a, x) => a + x.position[i], 0) / all.length);
+        const id = uuid.test(op.id || '') && !p.scene.entities.some(e => e.id === op.id) ? op.id : randomUUID();
+        const parent = top.every(m => m.parent === top[0].parent) ? top[0].parent : null;
+        const kinds = [...new Set(top.map(m => m.kind))];
+        p.scene.entities.push(makeEntity({ name: uniqueName(p.scene.entities, op.name || 'Group'), shape: 'group', kind: kinds.length === 1 ? kinds[0] : 'environment', position: [c[0], 0, c[1]], parent }, id));
+        for (const m of top) m.parent = id;
+        results.push({ op: op.op, id }); break;
+      }
+      case 'ungroup': {
+        const g = resolveEntity(p, op.id); if (!g) fail(`Unknown object ${op.id}`);
+        for (const x of p.scene.entities) if (x.parent === g.id) x.parent = g.parent || null;
+        if (g.shape === 'group') p.scene.entities = p.scene.entities.filter(x => x !== g);
+        results.push({ op: op.op, id: g.id }); break;
       }
       case 'set_keyframes': {
         const e = resolveEntity(p, op.id); if (!e) fail(`Unknown object ${op.id}`);
@@ -102,6 +136,7 @@ export function applyOps(p, ops) {
       case 'remove_entity': {
         const e = resolveEntity(p, op.id); if (!e) fail(`Unknown object ${op.id}`);
         p.scene.entities = p.scene.entities.filter(x => x !== e);
+        for (const x of p.scene.entities) if (x.parent === e.id) x.parent = e.parent || null;
         // Object looks stay (unlisted) so undo can bring the object back with them; files are never removed.
         for (const s of p.shots) { if (s.camera.target === e.id) s.camera.target = null; for (const r of s.references) if (r.entityId === e.id) r.entityId = null; }
         results.push({ op: op.op, id: e.id }); break;

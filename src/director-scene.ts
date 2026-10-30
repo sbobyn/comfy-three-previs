@@ -7,7 +7,7 @@ import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { computeModal, computeModalNumeric, modalKey as feedModalKey, modalHud, rigidApply, gridStep, unitsPerPixel, snapActive, snapDelta, framingDistance, isDrag, marqueeRect, inRect, RIGHT_CLICK_SLOP } from '../shared/editor-controls.mjs';
 import type { XForm, ModalMode, ModalState } from '../shared/editor-controls.mjs';
-import { SHAPES, cameraKeys, cameraAt, focusPoint, entitySize, entityAt, entitiesAt, shotCameraAt } from '../shared/director.mjs';
+import { withDescendants, SHAPES, cameraKeys, cameraAt, focusPoint, entitySize, entityAt, entitiesAt, shotCameraAt } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, CameraKey, Vec3 } from '../shared/director.mjs';
 
 const HELPERS = 1; // Layer hidden from the shot camera.
@@ -71,6 +71,10 @@ function buildShape(shape: string, color: string): THREE.Group {
       break;
     }
     case 'rock': g.add(part(new THREE.DodecahedronGeometry(0.75, 0).scale(w / 1.5, h / 1.5, d / 1.5), m, 0, h * 0.45, 0)); break;
+    case 'group': { // an empty: a small editor-only marker at the pivot, never in the shot
+      const mk = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.OctahedronGeometry(0.28)), new THREE.LineBasicMaterial({ color: '#C8401F' }));
+      mk.position.y = 0.3; mk.layers.set(HELPERS); g.add(mk); break;
+    }
     default: g.add(part(new THREE.BoxGeometry(w, h, d), m, 0, h / 2, 0));
   }
   return g;
@@ -258,8 +262,10 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     gizmo.setTranslationSnap(snapping() ? step : null);
     markDirty();
   }
+  /** What a transform moves: the selection plus everything inside it. */
+  const moving = () => withDescendants(entities, selectedIds).filter(id => groups.has(id));
   function refreshOutline() {
-    outline.selectedObjects = selectedIds.map(id => groups.get(id)?.group).filter(Boolean) as THREE.Object3D[];
+    outline.selectedObjects = moving().map(id => groups.get(id)?.group).filter(Boolean) as THREE.Object3D[];
     for (const [id, { label }] of groups) label.classList.toggle('sel', selectedIds.includes(id));
     // Motion trails only for the selection; showing every path turns the road into noise.
     for (const [id, line] of trails) line.visible = selectedIds.includes(id);
@@ -285,7 +291,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       }
       item.entity = e;
       // Never fight a live gizmo drag or modal preview.
-      if (!(gizmoDrag && selectedIds.includes(e.id)) && !(modal && selectedIds.includes(e.id))) placeGroup(item.group, e);
+      if (!(gizmoDrag?.starts.has(e.id)) && !(modal?.starts.has(e.id))) placeGroup(item.group, e);
       const ref = events.onRefImage(e.id);
       item.label.replaceChildren();
       if (ref) { const img = document.createElement('img'); img.src = ref; img.alt = ''; item.label.append(img); } else { const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = e.color; item.label.append(sw); }
@@ -325,7 +331,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   /** Pose animated objects for scene time t (objects being edited keep their live pose). */
   function applyTime(t: number) {
     for (const [id, { group, entity }] of groups) {
-      if (!entity.path?.length || ((gizmoDrag || modal) && selectedIds.includes(id))) continue;
+      if (!entity.path?.length || gizmoDrag?.starts.has(id) || modal?.starts.has(id)) continue;
       const a = entityAt(entity, t); group.position.set(...a.position); group.rotation.set(rad(a.pitch), rad(a.rotation), rad(a.roll), 'YXZ'); group.scale.set(...a.scale);
     }
     markDirty();
@@ -413,8 +419,10 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       } else labelsEl.style.clipPath = '';
       for (const { group, label, entity } of groups.values()) {
         const [, hgt] = entitySize(entity);
-        const v = new THREE.Vector3(group.position.x, group.position.y + hgt * group.scale.y / Math.max(0.001, entity.scale[1]) + 0.25, group.position.z).project(world);
-        const hidden = v.z > 1 || Math.abs(v.x) > 1.1 || Math.abs(v.y) > 1.1;
+        let top = group.position.y + hgt * group.scale.y / Math.max(0.001, entity.scale[1]) + 0.25;
+        if (entity.shape === 'group') { const b = new THREE.Box3(); for (const id of withDescendants(entities, [entity.id])) { const g2 = groups.get(id); if (g2 && g2.entity.shape !== 'group') b.expandByObject(g2.group); } if (!b.isEmpty()) top = b.max.y + 0.4; }
+        const v = new THREE.Vector3(group.position.x, top, group.position.z).project(world);
+        const hidden = v.z > 1 || Math.abs(v.x) > 1.1 || Math.abs(v.y) > 1.1 || (!!entity.parent && !selectedIds.includes(entity.id));
         label.style.display = hidden ? 'none' : '';
         if (!hidden) { label.style.left = `${offsetX + ((v.x + 1) / 2) * s.x}px`; label.style.top = `${offsetY + ((1 - v.y) / 2) * s.y}px`; }
       }
@@ -452,13 +460,13 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   gizmo.addEventListener('dragging-changed', ev => { controls.enabled = !(ev as unknown as { value: boolean }).value; });
   gizmo.addEventListener('mouseDown', () => {
     if (!primary) return;
-    const starts = new Map(selectedIds.map(id => [id, xformOf(groups.get(id)!.group)] as const));
+    const starts = new Map(moving().map(id => [id, xformOf(groups.get(id)!.group)] as const));
     gizmoDrag = { primaryStart: starts.get(primary)!, starts };
   });
   gizmo.addEventListener('objectChange', () => {
     if (!gizmoDrag || !primary) return;
     const now = xformOf(groups.get(primary)!.group);
-    const others = selectedIds.filter(id => id !== primary);
+    const others = [...gizmoDrag.starts.keys()].filter(id => id !== primary);
     rigidApply(gizmoDrag.primaryStart, now, others.map(id => gizmoDrag!.starts.get(id)!)).forEach((x, i) => applyX(groups.get(others[i])!.group, x));
     markDirty();
   });
@@ -490,7 +498,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       now = { ...now, position: start.position.map((v, i) => v + d[i]) as Vec3 };
     }
     applyX(groups.get(primary)!.group, now);
-    const others = selectedIds.filter(id => id !== primary);
+    const others = [...modal.starts.keys()].filter(id => id !== primary);
     rigidApply(start, now, others.map(id => modal!.starts.get(id)!)).forEach((x, i) => applyX(groups.get(others[i])!.group, x));
     events.onModal(modalHud(modal)); markDirty();
   }
@@ -501,7 +509,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       Object.assign(modal, { mode: next, axis: null, numeric: '', startPointer: { ...modal.pointer } });
       previewModal(); return true;
     }
-    const starts = new Map(selectedIds.map(id => [id, xformOf(groups.get(id)!.group)] as const));
+    const starts = new Map(moving().map(id => [id, xformOf(groups.get(id)!.group)] as const));
     const r = canvas.getBoundingClientRect();
     const p = pointerInside ? lastPointer : { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     modal = { mode: next, axis: null, numeric: '', starts, primaryStart: starts.get(primary)!, startPointer: { ...p }, pointer: { ...p } };
@@ -594,7 +602,8 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   function toggleProjection() { if (world === persp) { updateOrtho(); ortho.zoom = 1; useCamera(ortho); } else useCamera(persp); return world === ortho ? 'orthographic' : 'perspective'; }
   function frame(ids: string[], minRadius = 0.3) {
     const box = new THREE.Box3();
-    for (const [id, { group }] of groups) if (!ids.length || ids.includes(id)) box.expandByObject(group);
+    const want = withDescendants(entities, ids);
+    for (const [id, { group, entity }] of groups) if ((!ids.length || want.includes(id)) && entity.shape !== 'group') box.expandByObject(group);
     if (box.isEmpty()) box.set(new THREE.Vector3(-3, 0, -3), new THREE.Vector3(3, 2, 3));
     const sphere = box.getBoundingSphere(new THREE.Sphere());
     const dir = world.position.clone().sub(controls.target).normalize();

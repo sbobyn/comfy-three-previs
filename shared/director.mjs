@@ -16,6 +16,8 @@ export const SHAPES = {
   wall: { size: [8, 3, 0.25], kind: 'environment', color: '#6b7280' },
   tree: { size: [2.5, 5, 2.5], kind: 'environment', color: '#4f8a5b' },
   rock: { size: [1.5, 1, 1.3], kind: 'environment', color: '#7d7468' },
+  // An empty that holds other objects; moving it moves its children. Never rendered or cast.
+  group: { size: [0.5, 0.5, 0.5], kind: 'environment', color: '#9aa7b8' },
 };
 export const KINDS = ['character', 'vehicle', 'prop', 'environment'];
 export const ROLES = ['character', 'prop', 'environment', 'style', 'frame'];
@@ -66,7 +68,31 @@ export function makeEntity(input, id) {
     pitch: tiltOf(input.pitch),
     roll: tiltOf(input.roll),
     path: normalizePath(input.path),
+    parent: typeof input.parent === 'string' && input.parent !== id ? input.parent : null,
   };
+}
+
+// ---------- Hierarchy ----------
+/** Every object below id (children, grandchildren…), parents before children. */
+export function descendantsOf(entities, id) {
+  const out = [], seen = new Set([id]);
+  for (let i = -1; i < out.length; i++) {
+    const pid = i < 0 ? id : out[i].id;
+    for (const e of entities) if (e.parent === pid && !seen.has(e.id)) { seen.add(e.id); out.push(e); }
+  }
+  return out;
+}
+/** The top-most ancestor (itself when it has no parent). */
+export function rootOf(entities, id) {
+  let e = entities.find(x => x.id === id);
+  for (let i = 0; e?.parent && i < 32; i++) { const p = entities.find(x => x.id === e.parent); if (!p) break; e = p; }
+  return e || null;
+}
+/** ids plus all their descendants, without duplicates. */
+export function withDescendants(entities, ids) {
+  const out = new Set(ids);
+  for (const id of ids) for (const d of descendantsOf(entities, id)) out.add(d.id);
+  return [...out];
 }
 
 export function entitySize(entity) {
@@ -246,6 +272,7 @@ export function shotCast(project, shot, { samples = 12, aspect = 16 / 9, minCove
     // three.js setFocalLength with a 35 mm film gauge: film height = 35 / aspect for landscape frames.
     const tanV = (35 / aspect) / 2 / Math.max(1, cam.mm), tanH = tanV * aspect;
     for (const e of entities) {
+      if (e.shape === 'group') continue;
       const at = e.path?.length ? { ...e, ...entityAt(e, start + t) } : e;
       const size = entitySize(at), radius = Math.hypot(...size) / 2;
       const d = sub([at.position[0], at.position[1] + size[1] / 2, at.position[2]], cam.p);
