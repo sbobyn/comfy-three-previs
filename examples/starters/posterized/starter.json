@@ -18,6 +18,7 @@
         "name": "Court floor",
         "kind": "environment",
         "shape": "box",
+        "model": "court",
         "position": [
           0,
           0,
@@ -44,6 +45,7 @@
         "name": "Center circle",
         "kind": "environment",
         "shape": "cylinder",
+        "model": "circle",
         "position": [
           0,
           0.03,
@@ -70,6 +72,7 @@
         "name": "East paint",
         "kind": "environment",
         "shape": "box",
+        "model": "paint",
         "position": [
           9.7,
           0.02,
@@ -95,6 +98,7 @@
         "name": "East hoop support",
         "kind": "environment",
         "shape": "box",
+        "model": "support",
         "position": [
           16.4,
           0,
@@ -120,6 +124,7 @@
         "name": "East backboard",
         "kind": "environment",
         "shape": "box",
+        "model": "backboard",
         "position": [
           12.7,
           2.85,
@@ -254,6 +259,7 @@
         "name": "East rim",
         "kind": "prop",
         "shape": "cylinder",
+        "model": "rim",
         "position": [
           12.25,
           3.05,
@@ -388,6 +394,7 @@
         "name": "West paint",
         "kind": "environment",
         "shape": "box",
+        "model": "paint",
         "position": [
           -9.7,
           0.02,
@@ -413,6 +420,7 @@
         "name": "West hoop support",
         "kind": "environment",
         "shape": "box",
+        "model": "support",
         "position": [
           -16.4,
           0,
@@ -438,6 +446,7 @@
         "name": "West backboard",
         "kind": "environment",
         "shape": "box",
+        "model": "backboard",
         "position": [
           -12.7,
           2.85,
@@ -463,6 +472,7 @@
         "name": "West rim",
         "kind": "prop",
         "shape": "cylinder",
+        "model": "rim",
         "position": [
           -12.25,
           3.05,
@@ -488,6 +498,7 @@
         "name": "Sideline stands · tier 1",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           0,
           0,
@@ -514,6 +525,7 @@
         "name": "Sideline stands · tier 2",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           0,
           0,
@@ -539,6 +551,7 @@
         "name": "Sideline stands · tier 3",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           0,
           0,
@@ -564,6 +577,7 @@
         "name": "Far sideline stands · tier 1",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           0,
           0,
@@ -589,6 +603,7 @@
         "name": "Far sideline stands · tier 2",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           0,
           0,
@@ -614,6 +629,7 @@
         "name": "Far sideline stands · tier 3",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           0,
           0,
@@ -639,6 +655,7 @@
         "name": "East end stands 1",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           16.926,
           0,
@@ -664,6 +681,7 @@
         "name": "East end stands 2",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           22.334,
           0,
@@ -689,6 +707,7 @@
         "name": "East end stands 3",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           26.472,
           0,
@@ -714,6 +733,7 @@
         "name": "East end stands 4",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           28.712,
           0,
@@ -739,6 +759,7 @@
         "name": "East end stands 5",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           28.712,
           0,
@@ -764,6 +785,7 @@
         "name": "East end stands 6",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           26.472,
           0,
@@ -789,6 +811,7 @@
         "name": "East end stands 7",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           22.334,
           0,
@@ -814,6 +837,7 @@
         "name": "East end stands 8",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           16.926,
           0,
@@ -839,6 +863,7 @@
         "name": "West end stands 1",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           -16.926,
           0,
@@ -864,6 +889,7 @@
         "name": "West end stands 2",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           -22.334,
           0,
@@ -889,6 +915,7 @@
         "name": "West end stands 3",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           -26.472,
           0,
@@ -914,6 +941,7 @@
         "name": "West end stands 4",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           -28.712,
           0,
@@ -939,6 +967,7 @@
         "name": "West end stands 5",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           -28.712,
           0,
@@ -964,6 +993,7 @@
         "name": "West end stands 6",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           -26.472,
           0,
@@ -989,6 +1019,7 @@
         "name": "West end stands 7",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           -22.334,
           0,
@@ -1014,6 +1045,7 @@
         "name": "West end stands 8",
         "kind": "environment",
         "shape": "box",
+        "model": "stands",
         "position": [
           -16.926,
           0,
@@ -1039,6 +1071,7 @@
         "name": "Jumbotron",
         "kind": "environment",
         "shape": "box",
+        "model": "screen",
         "position": [
           0,
           11,
@@ -1064,6 +1097,7 @@
         "name": "Comfy guard",
         "kind": "character",
         "shape": "person",
+        "model": "player",
         "position": [
           -2,
           0,
@@ -1413,6 +1447,7 @@
         "name": "Comfy wing",
         "kind": "character",
         "shape": "person",
+        "model": "player",
         "position": [
           4,
           0,
@@ -1438,6 +1473,7 @@
         "name": "Comfy center",
         "kind": "character",
         "shape": "person",
+        "model": "player",
         "position": [
           7,
           0,
@@ -1463,6 +1499,7 @@
         "name": "Rival defender",
         "kind": "character",
         "shape": "person",
+        "model": "player",
         "position": [
           9,
           0,
@@ -1670,6 +1707,7 @@
         "name": "Rival forward",
         "kind": "character",
         "shape": "person",
+        "model": "player",
         "position": [
           6,
           0,
@@ -1695,6 +1733,7 @@
         "name": "Rival guard",
         "kind": "character",
         "shape": "person",
+        "model": "player",
         "position": [
           3,
           0,
@@ -1720,6 +1759,7 @@
         "name": "Basketball",
         "kind": "prop",
         "shape": "sphere",
+        "model": "basketball",
         "position": [
           -1.6,
           1,

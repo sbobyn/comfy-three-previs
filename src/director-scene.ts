@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { buildBlockoutModel, loadBlockoutModels, modelReady } from './director-models';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -34,6 +35,15 @@ function outdoorSky() {
   return skyTexture;
 }
 export const isOutdoor = (entities: Pick<Entity, 'shape'>[]) => entities.some(e => e.shape === 'terrain');
+
+function disposeShape(group: THREE.Object3D) {
+  group.traverse(o => {
+    const mesh = o as THREE.Mesh;
+    mesh.geometry?.dispose();
+    const materials = Array.isArray(mesh.material) ? mesh.material : mesh.material ? [mesh.material] : [];
+    materials.forEach(m => m.dispose());
+  });
+}
 
 function material(color: string) { return new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0.02 }); }
 function part(geometry: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0) {
@@ -166,6 +176,7 @@ export function createStage() {
   const hemi = new THREE.HemisphereLight(...STUDIO.hemi);
   const sun = new THREE.DirectionalLight(...STUDIO.sun);
   sun.position.set(...STUDIO.sunAt); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02; // keep thin model panels from shadowing their own surface
   Object.assign(sun.shadow.camera, { left: -25, right: 25, top: 25, bottom: -25, near: 1, far: 70 });
   scene.add(hemi, sun, sun.target);
   // Flat ground layers all sit at y = 0. Depth can't separate coplanar surfaces (especially far away),
@@ -219,7 +230,7 @@ export function renderStill(project: Pick<DirectorProject, 'scene'>, shot: Shot,
   const stage = createStage(), outdoor = isOutdoor(project.scene.entities);
   applyEnv(stage, project.scene.environment.preset, outdoor); hideFlatGround(stage, outdoor);
   for (const e of entitiesAt(project.scene.entities, shot.start || 0)) {
-    const g = buildShape(e.shape, e.color);
+    const g = buildBlockoutModel(e) || buildShape(e.shape, e.color);
     g.position.set(...e.position); g.rotation.set(rad(e.pitch || 0), rad(e.rotation), rad(e.roll || 0), 'YXZ'); g.scale.set(...e.scale);
     stage.scene.add(g);
   }
@@ -403,16 +414,19 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
 
   function sync(project: DirectorProject, current: Shot) {
     entities = project.scene.entities; shot = current;
+    if (entities.some(e => !modelReady(e))) void loadBlockoutModels(entities).then(() => {
+      if (entities === project.scene.entities && shot) sync(project, shot);
+    }).catch(e => console.error(e));
     const preset = (ENV[project.scene.environment.preset] ? project.scene.environment.preset : 'stage') + (isOutdoor(entities) ? ':outdoor' : '');
     if (preset !== env || !scene.background) { env = preset; applyEnv({ scene, ground, road, hemi, sun }, preset.split(':')[0], preset.endsWith(':outdoor')); }
     const seen = new Set<string>();
     for (const e of entities) {
       seen.add(e.id);
-      const key = `${e.shape}|${e.color}`;
+      const key = `${e.shape}|${e.color}|${e.model || ''}|${modelReady(e)}`;
       let item = groups.get(e.id);
       if (!item || item.key !== key) {
-        if (item) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); dropGuideParts(item.group); }
-        const group = buildShape(e.shape, e.color); group.userData.entityId = e.id;
+        if (item) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); dropGuideParts(item.group); disposeShape(item.group); }
+        const group = buildBlockoutModel(e) || buildShape(e.shape, e.color); group.userData.entityId = e.id;
         group.traverse(o => { o.userData.entityId = e.id; if (o.userData.guide) guideParts.push(o); });
         scene.add(group);
         const label = document.createElement('div'); label.className = 'label'; label.dataset.id = e.id; label.style.display = 'none'; labelsEl.append(label);
@@ -434,7 +448,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       const tgt = e.id === current.camera.target;
       if (item.label.classList.contains('tgt') !== tgt) { item.label.classList.toggle('tgt', tgt); item.lw = 0; }
     }
-    for (const [id, item] of groups) if (!seen.has(id)) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); dropGuideParts(item.group); groups.delete(id); }
+    for (const [id, item] of groups) if (!seen.has(id)) { if (gizmo.object === item.group) gizmo.detach(); scene.remove(item.group); item.label.remove(); dropGuideParts(item.group); disposeShape(item.group); groups.delete(id); }
     // Motion trails for animated objects.
     for (const [id, line] of trails) if (!entities.some(e => e.id === id && e.path && e.path.length > 1)) { scene.remove(line); line.geometry.dispose(); trails.delete(id); }
     for (const e of entities) {
@@ -831,6 +845,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   }
   /** The shot camera frame at t. guide: the still-guide look (front markers, grid, light sky, local shadows; never in the viewport). */
   function capture(t: number, width: number, height: number, type = 'image/png', quality?: number, opts: { guide?: boolean } = {}) {
+    if (entities.some(e => !modelReady(e))) throw Error('Blockout models are still loading. Try again in a moment.');
     capturer.setPixelRatio(1); capturer.setSize(width, height, false);
     const cam = shotCam.clone(); cam.aspect = width / height; const at = pose(t); poseCamera(cam, at);
     applyTime(sceneTime(t));
@@ -841,7 +856,8 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   const thumbs = new Map<string, HTMLCanvasElement>();
   /** Shot card still at mid-shot. With a signature (e.g. director.ts `signature(project, shot)`) the result is cached and reused. */
   function thumbnail(other: Shot, width = 176, height = 99, signature?: string) {
-    const ck = signature ? `${signature}|${width}x${height}` : '', cached = ck ? thumbs.get(ck) : undefined;
+    const models = entities.map(e => e.model || '').join(',');
+    const ck = signature ? `${signature}|${models}|${entities.every(modelReady)}|${width}x${height}` : '', cached = ck ? thumbs.get(ck) : undefined;
     if (cached) return cached;
     capturer.setPixelRatio(1); capturer.setSize(width, height, false);
     const cam = shotCam.clone(); cam.aspect = width / height;
@@ -887,6 +903,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
 
   const api = {
     sync, pick, pose, capture, thumbnail, boxesAt, quaternionAt, markDirty,
+    async ready() { await loadBlockoutModels(entities); },
     /** Outline colour matches the object's colour in the prompt. */
     setOutlineColor(c: string | null) { outline.visibleEdgeColor.set(c || 0xd6daff); outline.hiddenEdgeColor.set(c || 0xbac0ff); labelsEl.style.setProperty('--sel', c || ''); markDirty(); },
     /** Temporarily outline an object (hovering its row in the panel). */

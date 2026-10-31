@@ -58,6 +58,16 @@ Wingspan uses a simple `bird` shape with a white head, spread wings and a +z-fac
 broader and lower, its trees and wildlife sit on the shore, and its cameras stay above the terrain.
 Final Lap has low surrounding terrain to activate the renderer's daylight sky and outdoor fill.
 
+## Blender display assets
+
+The 2026-10-31 asset pass adds a bundled `model` ID to every visible object: low-poly people,
+race cars, birds and wildlife, studio equipment, court fixtures, track sections and set pieces.
+The 32 GLBs total about 1.1 MB. Every original transform, path, camera, timing and media file is
+unchanged. Display models fit the original proxies and do not change blocking signatures; the
+bundled stills and videos still contain the earlier geometry. Capture a new blockout to see the
+new meshes in a video. Reproducible Blender scripts and capture instructions:
+[`scripts/blender/README.md`](../../scripts/blender/README.md).
+
 ## Format
 
 `starter.json` (`format: "comfy-previs-starter"`, `version: 2`):

@@ -2,6 +2,7 @@
 // Director scene model shared by the browser workspace, the server and MCP tools.
 // Units are metres. The stage faces +z: "front" is toward the default camera,
 // "left" is -x as seen from the default camera.
+import { blockoutModel } from './blockout-models.mjs';
 import { normalizeSheets } from './sheet-presets.mjs';
 import { cameraLine } from './camera-source.mjs';
 
@@ -62,6 +63,7 @@ export function makeEntity(input, id) {
     name: String(input.name || shape).slice(0, 60),
     kind: KINDS.includes(input.kind) ? input.kind : base.kind,
     shape,
+    ...(blockoutModel({ ...input, shape }) ? { model: input.model } : {}),
     position: vec(input.position, 3, [0, 0, 0]),
     rotation: Number.isFinite(input.rotation) ? ((input.rotation % 360) + 360) % 360 : 0,
     scale: vec(input.scale, 3, [1, 1, 1]).map(x => Math.max(0.05, Math.min(50, x))),
@@ -297,8 +299,10 @@ export function shotCast(project, shot, { samples = 12, aspect = 16 / 9, minCove
   return entities.filter(e => best.has(e.id)).map(e => ({ entity: e, coverage: Math.min(1, best.get(e.id)) , lead: e.id === shot.camera.target })).sort((a, b) => (b.lead - a.lead) || (b.coverage - a.coverage));
 }
 
-/** Hash of what a blockout clip depends on: same text as src/director-capture.ts shotSignature (tests/headless.test.mjs). */
-export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+/** Camera-truth hash: bundled display models, like looks, do not change proxy bounds or blocking.
+ * Existing clips keep their original pixels; changing display fidelity does not require paid regeneration.
+ * Same text as src/director-capture.ts shotSignature (tests/headless.test.mjs). */
+export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 /** The shot's blockout clip no longer matches its camera, timing or scene (it is made again before a video uses it). */
 export const blockoutStale = (project, shot) => !!(shot.render && shot.render.signature && shot.render.signature !== shotSignature(project, shot));
 

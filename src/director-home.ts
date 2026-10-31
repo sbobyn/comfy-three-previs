@@ -1,3 +1,4 @@
+import { loadBlockoutModels } from './director-models';
 // Home / launch page: what Comfy Three Previs does, how it works in three steps, starters, and your projects.
 import './director-home.css';
 import './director-home-mobile.css'; // [mobile]
@@ -225,6 +226,7 @@ async function render() {
     const [data, s, st] = await Promise.all([api('director/projects'), api('director/setup').catch(() => null), api('director/starters').catch(() => ({ starters: [] }))]);
     projects = data.projects; agent = data.agent; connect = data.connect; archivedCount = data.archived; setup = s;
     served = (st.starters || []).map((t: any) => ({ key: t.slug, title: String(t.title).replace(/^Starter · /, ''), description: t.description, shots: t.shots, scene: t.scene, shot: { ...t.shot, id: `starter-${t.slug}`, references: [], render: null } }));
+    await loadBlockoutModels(served.flatMap(s => s.scene.entities));
     if (showArchived) archived = (await api('director/archived')).projects;
   } catch (e) { toast((e as Error).message, true); }
   const starters = served.length ? served : templateStarters();
