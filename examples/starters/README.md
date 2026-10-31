@@ -16,17 +16,18 @@ examples/starters/
 Each starter opens with bundled media, with no generation and no network:
 
 - every cast member's primary image, and its design sheet (each view plus the composed board);
-- for each shot, the chosen start still (and end still, where there is one), the blockout clip and the
-  chosen video, plus a fresh local blockout of the revised blocking;
+- for each shot, the start and end stills, the blockout clip and the video made from them;
 - the cut, with the chosen video and trim for every shot.
 
-The 2026-10-31 blocking pass keeps every existing entity ID, cast look and design sheet. The 16 generated
-stills and 13 chosen videos are historical takes: they **do not match the revised blocking**. Old videos
-still point to the old blockout they actually used; each shot also has a newer, locally rendered 720p
-blockout. The old stills carry their original blocking signature, so a new batch remakes them. No paid
-media was made for this pass. Replacing the 16 stills and 13 videos costs about **$24.52** at the final-tier
-list prices; making start and end stills for every shot instead costs about **$25.28** including videos
-(estimates from `shared/tiers.mjs`, excluding overhead and retries).
+The 2026-10-31 blocking pass kept every entity ID, cast look and design sheet; the shot media was then
+made again for the revised blocking (2026-10-31, about $14.83 at list prices). The four shots the demo
+leads with use the final tier: GPT Image 2.5 stills and a Seedance 2.5 edit of the blockout clip, so the
+blockout is the camera (Final Lap · Checkered flag, Posterized · Posterized, Wingspan · The glide,
+Breaking News · The headline). The other nine use the draft tier: FLUX.2 Pro or FLUX 3 stills and an LTX
+Fast clip animated from the start still, whose camera only approximates the blockout; three of them are
+trimmed in the cut where the clip stops matching the shot (The valley, The draft, From the stands). Every
+still and blockout clip carries the signature of the current blocking, so a copy reports nothing as out
+of date and a new batch does not remake them.
 
 Set pieces render as blockout colours. The race's track surfaces, stands and towers no longer inherit
 an unrelated shared image; existing primary environment looks remain available. Cast identities remain
@@ -87,7 +88,7 @@ signature. `PREVIS_STARTERS_DIR` points the server at another starters folder (f
 
 ## Media size and why it is in git
 
-The four starters' media is about 40 MB (the export stops at 80 MB and then keeps only the hero shots'
+The four starters' media is about 32 MB (the export stops at 80 MB and then keeps only the hero shots'
 videos). It is committed with the code rather than downloaded from a release so that a fresh clone opens
 finished starters offline, with no publish step to keep in sync, and so `pnpm demo:build` can use the same
 files. Re-exporting only rewrites a file when its source changed, so history grows only when a starter's
@@ -105,5 +106,7 @@ pnpm starters:export --server http://127.0.0.1:5190 --only posterized
 ```
 
 Source project ids, hero shots and explicit still picks live in `SOURCES` in
-`scripts/export-starters.mjs`; override a project with `--<slug> <project-id>`. `--no-media` writes a
+`scripts/export-starters.mjs`; override a project with `--<slug> <project-id>`. The projects listed there predate the 2026-10-31
+blocking pass, so exporting them would bring the old blocking back; the regenerated media was made in fresh
+copies of these starters and placed into the snapshots under their existing ids. `--no-media` writes a
 version 1 snapshot without media. `--max-mb <n>` changes the size budget.
