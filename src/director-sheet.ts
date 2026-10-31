@@ -320,7 +320,7 @@ function planView(e: Entity, u: Ui) {
   const n = planned.length, identity = objectLooks(P(), e.id)[0];
   const st = ctx.refgen();
   const blocked = !identity ? 'Needs a primary image' : !st.paidExecutionEnabled ? 'Paid generation is off on this server' : !st.cloudCredential ? 'Cloud key not configured' : !imagePresets().length ? 'Loading models…' : n > MAX_SHEET_SLOTS ? `At most ${MAX_SHEET_SLOTS} views` : !n ? 'Pick at least one option' : '';
-  const go = h('button', { class: 'btn accent ds-go', type: 'button', disabled: !!blocked, title: blocked || `Generates ${n} images, one at a time` }, n ? `Generate ${n} view${n === 1 ? '' : 's'}` : 'Generate', h('span', { class: 'ds-cost' }, est(u.presetId, n)));
+  const go = h('button', { class: 'btn cta ds-go', type: 'button', disabled: !!blocked, title: blocked || `Generates ${n} images, one at a time` }, n ? `Generate ${n} view${n === 1 ? '' : 's'}` : 'Generate', h('span', { class: 'ds-cost' }, est(u.presetId, n)));
   go.onclick = () => { go.disabled = true; void createSheet(e, u).catch(err => { toast((err as Error).message, true); go.disabled = false; }); };
   return h('div', { class: 'ds-body' },
     h('div', { class: 'ds-sets', role: 'radiogroup', 'aria-label': 'Set' }, ...sets.map(s => {
@@ -437,7 +437,7 @@ function openCompose(e: Entity, sheetId: string) {
   const toggle = (k: 'name' | 'labels' | 'swatches' | 'sameScale', text: string) => h('label', { class: 'check-row' }, h('input', { type: 'checkbox', checked: o[k], onchange: (ev: Event) => { o[k] = (ev.target as HTMLInputElement).checked; void render(); } }), text);
   const fileName = `${e.name.replace(/[^\w.-]+/g, '-').replace(/-+/g, '-')}-sheet.png`;
   const download = h('button', { class: 'btn', type: 'button', onclick: async () => { if (!canvas) return; const url = URL.createObjectURL(await canvasBlob(canvas)); const a = h('a', { href: url, download: fileName }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000); } }, 'Download PNG');
-  const attach = h('button', { class: 'btn accent', type: 'button' }, 'Use sheet as this object’s image');
+  const attach = h('button', { class: 'btn cta', type: 'button' }, 'Use sheet as this object’s image');
   attach.onclick = async () => {
     if (!canvas) return; attach.disabled = true; status.className = 'status-line'; status.textContent = 'Attaching…';
     try {

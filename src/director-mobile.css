@@ -69,7 +69,7 @@ body.m-medium[data-mstep=shoot] .m-shootbody { grid-column: 2; grid-row: 1 / spa
 .m-fab { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--glass-line); background: var(--glass); backdrop-filter: blur(10px); color: var(--on-stage); display: grid; place-items: center; box-shadow: 0 10px 30px -10px rgba(0,0,0,.7); cursor: pointer; padding: 0; }
 .m-vpside .m-fab { display: grid; }
 .m-fab svg { width: 24px; height: 24px; }
-.m-fab.add { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.m-fab.add { background: var(--cta); border-color: var(--cta); color: var(--cta-ink); }
 .m-fab.frame { position: absolute; top: 12px; right: 12px; z-index: 3; width: 44px; height: 44px; place-items: center; justify-content: center; align-items: center; }
 body.m-has-sel[data-mstep=build]:is(.m-compact, .m-medium) .m-modebar { display: flex; }
 .m-modebar { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); z-index: 3; gap: 8px; align-items: center; }
@@ -95,16 +95,17 @@ body[data-mstep=build]:is(.m-compact, .m-medium) .viewport:not(.camview) .coach:
 .m-shotstrip { flex: none; background: var(--paper); border-top: 1px solid var(--line); }
 :is(body.m-compact, body.m-medium) .m-shotstrip .shots { display: flex; flex-direction: row; gap: 10px; overflow-x: auto; overflow-y: hidden; max-height: none; padding: 10px var(--m-gutter) 12px; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .m-shotstrip .shots::-webkit-scrollbar { display: none; }
-:is(body.m-compact, body.m-medium) .m-shotstrip .shot { flex: none; width: 118px; display: flex; flex-direction: column; gap: 5px; padding: 0; border: 0; background: none; border-radius: 0; scroll-snap-align: start; text-align: left; color: var(--ink); -webkit-touch-callout: none; user-select: none; }
+:is(body.m-compact, body.m-medium) .m-shotstrip .shot { flex: none; width: 118px; display: flex; flex-direction: column; gap: 5px; padding: 0; border: 0; background: none; border-radius: 0; scroll-snap-align: start; text-align: left; color: var(--ink); -webkit-touch-callout: none; user-select: none; align-items: stretch; }
 body.m-medium .m-shotstrip .shot { width: 144px; }
-:is(body.m-compact, body.m-medium) .m-shotstrip .shot-frame { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 9px; overflow: hidden; background: var(--stage-2); box-shadow: 0 0 0 1px rgba(21,19,15,.1); }
+:is(body.m-compact, body.m-medium) .m-shotstrip .shot-frame { position: relative; display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 9px; overflow: hidden; background: var(--stage-2); box-shadow: 0 0 0 1px rgba(21,19,15,.1); }
 :is(body.m-compact, body.m-medium) .m-shotstrip .shot.active .shot-frame { box-shadow: 0 0 0 2px var(--ink); }
 :is(body.m-compact, body.m-medium) .m-shotstrip .shot :is(canvas, .thumb) { width: 100%; height: 100%; object-fit: cover; border: 0; border-radius: 0; display: block; }
 :is(body.m-compact, body.m-medium) .m-shotstrip .shot-dur { position: absolute; right: 5px; bottom: 4px; font: 600 12px/1 var(--mono); color: var(--on-stage); background: rgba(0,0,0,.55); padding: 3px 5px; border-radius: 5px; }
 :is(body.m-compact, body.m-medium) .m-shotstrip .shot-vid { position: absolute; left: 5px; top: 5px; width: 18px; height: 18px; border-radius: 50%; background: var(--ok); color: #fff; font-size: 9px; display: grid; place-items: center; }
-:is(body.m-compact, body.m-medium) .m-shotstrip .info { display: flex; flex-direction: row; gap: 6px; align-items: baseline; font-size: var(--m-fs-xs); min-width: 0; }
+:is(body.m-compact, body.m-medium) .m-shotstrip .info { display: flex; flex-direction: column; gap: 2px; font-size: var(--m-fs-xs); min-width: 0; }
 :is(body.m-compact, body.m-medium) .m-shotstrip .num { font: 500 var(--m-fs-xs) var(--mono); color: var(--ink-3); display: flex; gap: 5px; align-items: center; }
-:is(body.m-compact, body.m-medium) .m-shotstrip .title { font-weight: 600; font-size: var(--m-fs-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:is(body.m-compact, body.m-medium) .m-shotstrip .title { font-weight: 600; font-size: var(--m-fs-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+:is(body.m-compact, body.m-medium) .m-shotstrip .num { flex: none; }
 :is(body.m-compact, body.m-medium) .m-shotstrip .sub { display: none; }
 :is(body.m-compact, body.m-medium) .m-shotstrip .shot.m-addshot .shot-frame { display: grid; place-items: center; background: var(--paper-2); color: var(--ink-3); font-size: 24px; box-shadow: 0 0 0 1px var(--line-2) inset; }
 
@@ -294,6 +295,13 @@ body.m-medium.m-docked[data-mstep=build] .ws-body .stage, body.m-medium.m-docked
 :is(body.m-compact, body.m-medium) dialog.m-task[open]:is(.confirm, .claude-help) { height: auto; }
 :is(body.m-compact, body.m-medium) dialog.m-task::before { content: ''; flex: none; align-self: center; width: 36px; height: 5px; margin-top: 8px; border-radius: 3px; background: var(--line-2); }
 :is(body.m-compact, body.m-medium) dialog.m-task :is(.dialog-head, .jobs-head, .assets-head, .looks-head) { position: sticky; top: 0; z-index: 2; background: var(--paper); padding: 8px 0; flex-wrap: wrap; gap: 8px; }
+/* Generate dialog head on a phone: title and close on one row, then the model, where it runs, the estimate and Generate. */
+:is(body.m-compact, body.m-medium) dialog.render .rg-head h2 { flex: 1 1 0; white-space: normal; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-head > .btn.icon { order: 2; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-controls { order: 3; flex: 1 1 100%; flex-wrap: wrap; gap: 8px; min-width: 0; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-f { flex: 1 1 140px; min-width: 0; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-f:first-child { flex-basis: 100%; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-f select { width: 100%; max-width: none; }
 :is(body.m-compact, body.m-medium) dialog.m-task h2 { font-size: var(--m-fs-lg); }
 :is(body.m-compact, body.m-medium) dialog.m-task .render-body { display: flex; flex-direction: column; gap: 14px; grid-template-columns: none; }
 :is(body.m-compact, body.m-medium) dialog.m-task .render-media { width: 100%; aspect-ratio: 16 / 9; }
@@ -370,7 +378,7 @@ body.m-medium .m-cr-main { grid-template-columns: 128px minmax(0, 1fr) 24px; }
 .m-st.ok::before { color: var(--ok); } .m-st.stale::before { color: #D9962B; } .m-st.missing::before { color: var(--bad); } .m-st.run::before { color: var(--accent); }
 :is(body.m-compact, body.m-medium) .sequence .sq-export { padding: 14px var(--m-gutter) 24px; display: flex; flex-direction: column; gap: 8px; }
 :is(body.m-compact, body.m-medium) .sequence .sq-export .sq-vbar { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
-:is(body.m-compact, body.m-medium) .sequence .sq-export .btn.camera { width: 100%; background: var(--ink); border-color: var(--ink); color: var(--on-ink); border-radius: 999px; font-weight: 600; }
+:is(body.m-compact, body.m-medium) .sequence .sq-export .btn.camera { width: 100%; background: var(--cta); border-color: var(--cta); color: var(--cta-ink); border-radius: 999px; font-weight: 600; }
 :is(body.m-compact, body.m-medium) .sequence .sq-export .note { text-align: center; font-size: var(--m-fs-xs); }
 :is(body.m-compact, body.m-medium) .sequence .sq-exp { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: var(--m-fs-sm); }
 body.m-medium .sequence .sq-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); }
