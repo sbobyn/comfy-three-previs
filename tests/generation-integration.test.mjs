@@ -16,6 +16,8 @@ import { backendSnapshot } from '../server/previs/backends.mjs';
 import { createSlots, createLimiter } from '../server/previs/concurrency.mjs';
 import { createJobTracker } from '../server/previs/job-tracker.mjs';
 import { assertNoSecrets } from '../server/previs/workflows.mjs';
+import { expandAsset } from '../server/previs/provenance.mjs';
+import { atomicJson } from '../server/previs/atomic.mjs';
 
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==', 'base64');
 const backend = { kind: 'local', url: 'http://127.0.0.1:8188' };
@@ -94,6 +96,58 @@ async function fixture(t, { workflow = definition() } = {}) {
   }
   return { root, project, image, workflow, state, routes, route, bind, complete };
 }
+
+// B23: provenance by reference in the legacy store.
+test('attached results keep provenance by reference to their receipt; reading it back is exact; project.json is compact', async t => {
+  const f = await fixture(t), job = await f.complete(), assets = f.project.get().assets;
+  assert.equal(assets.length, 2);
+  const receiptOf = id => f.routes.state().jobs.find(j => j.id === id);
+  for (const asset of assets) {
+    assert.deepEqual(asset.provenance.byReference, ['requestShot', 'sourceAssets']);
+    assert.equal('requestShot' in asset.provenance, false); assert.equal('sourceAssets' in asset.provenance, false);
+    assert.equal(asset.provenance.generationJobId, job.id); assert.equal(asset.provenance.prompt, 'New prompt');
+    const full = expandAsset(asset, receiptOf).provenance;
+    assert.deepEqual(full.requestShot, job.shot); assert.deepEqual(full.sourceAssets, job.sources); assert.equal('byReference' in full, false);
+  }
+  const text = await readFile(join(f.root, 'project.json'), 'utf8');
+  assert.equal(text.includes('\n'), false, 'written as compact JSON'); assert.deepEqual(JSON.parse(text), f.project.get());
+});
+
+test('an old store migrates on load without a revision bump, keeps copies that differ, and quotes made before it still submit', async t => {
+  const f = await fixture(t), job = await f.complete();
+  const receiptOf = id => f.routes.state().jobs.find(j => j.id === id);
+  // The pre-B23 store: every result carries inline copies; the second one's request shot was edited after the fact.
+  const old = f.project.get();
+  old.assets = old.assets.map(a => expandAsset(a, receiptOf));
+  old.assets[1].provenance.requestShot = { ...old.assets[1].provenance.requestShot, title: 'Edited after attach' };
+  await atomicJson(join(f.root, 'project.json'), old);
+  // A quote prepared on the old store, using a generated result as its first frame.
+  const before = await openProject(join(f.root)), engine = await openGeneration(f.root, before);
+  const bindingId = randomUUID();
+  await before.append(p => { p.workflowBindings.push({ id: bindingId, definitionId: f.workflow.id, shotId: 'shot', assetBindings: { firstFrame: { assetId: old.assets[0].id } }, prompt: 'From a result', parameters: {}, createdAt: new Date().toISOString() }); });
+  const input = { requestId: randomUUID(), revision: before.get().revision, workflowBindingId: bindingId, backend };
+  const quoted = await engine.quote(input);
+  assert.equal(quoted.sources.firstFrame.provenance.requestShot.title, job.shot.title, 'the quote saw the inline copy');
+  // Restart: the migration runs once.
+  const oldBytes = (await readFile(join(f.root, 'project.json'))).length;
+  const project = await openProject(f.root), revision = project.get().revision;
+  const routes = await generationRoutes(f.root, project);
+  const migrated = project.get();
+  assert.equal(migrated.revision, revision, 'no revision bump');
+  assert.deepEqual(migrated.assets.map(a => a.id), old.assets.map(a => a.id));
+  assert.deepEqual(migrated.assets[0].provenance.byReference, ['requestShot', 'sourceAssets']);
+  assert.deepEqual(migrated.assets[1].provenance.byReference, ['sourceAssets'], 'the edited request shot is kept inline');
+  assert.equal(migrated.assets[1].provenance.requestShot.title, 'Edited after attach');
+  const latestReceipt = id => routes.state().jobs.find(j => j.id === id);
+  assert.deepEqual(migrated.assets.map(a => expandAsset(a, latestReceipt)), old.assets, 'nothing is lost');
+  assert.ok((await readFile(join(f.root, 'project.json'))).length < oldBytes, 'the copies are gone from the file');
+  const sent = await routes.route('/api/generation/submit', { ...input, approval: approval(quoted) });
+  assert.equal(sent.job.status, 'queued', 'the old quote still matches (source provenance is read in full)');
+  // A second boot has nothing to migrate.
+  const again = await openProject(f.root), text = await readFile(join(f.root, 'project.json'), 'utf8');
+  await generationRoutes(f.root, again);
+  assert.equal(await readFile(join(f.root, 'project.json'), 'utf8'), text);
+});
 
 // Engine checks against a fake Cloud adapter (backendFactory): nothing leaves the process and nothing is paid.
 async function cloudFixture({ limit = '2', submitError = null, history = async () => null, view, downloads } = {}) {

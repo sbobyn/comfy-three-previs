@@ -9,6 +9,7 @@ import { telemetryHooks } from './job-progress.mjs';
 import { slotsFor, downloadsFor } from './concurrency.mjs';
 import { keyedLock } from './keyed-lock.mjs';
 import { uploadCacheFor } from './upload-cache.mjs';
+import { expandAsset } from './provenance.mjs';
 import { assertNoSecrets, hashBytes, hashValue, validateWorkflowDefinition, legacyWorkflowDefinition, validateGraph, workflowCost, validateApproval } from './workflows.mjs';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -171,7 +172,8 @@ export async function openGeneration(root, project, options = {}) {
       const source = assetBindings[name];
       if (!source || (!!source.assetId === !!source.renderId)) fail(`Explicitly bind ${name} to one project asset or saved render`);
       const render = source.renderId ? p.renders?.find(item => item.id === source.renderId) : null;
-      const original = render ? { ...render, kind: 'image', mime: 'image/png', filename: render.id + '.png' } : p.assets?.find(item => item.id === source.assetId);
+      // A generated source asset is read with its full provenance, as it was before references (B23), so quotes keep their fingerprint.
+      const original = render ? { ...render, kind: 'image', mime: 'image/png', filename: render.id + '.png' } : expandAsset(p.assets?.find(item => item.id === source.assetId), id => jobs.get(String(id).toLowerCase()));
       const asset = original ? { ...original, mime: original.mime || original.mimeType } : null;
       if (asset && !asset.filename && uuid.test(asset.id) && asset.url === `/assets/${asset.id}${extensions[asset.mime]}`) asset.filename = asset.id + extensions[asset.mime];
       if (!asset || !asset.binding || !extensions[asset.mime]) fail(`Source ${name} is missing or lacks media/provenance metadata`);
