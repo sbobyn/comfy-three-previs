@@ -17,6 +17,8 @@ import { releaseFrameStage } from './video.mjs';
 import { videoRoutes } from './video-routes.mjs';
 import { generationRoutes } from './generation-routes.mjs';
 import { openDirector, directorRoutes } from './director.mjs';
+import { zipEntryNames } from './zip.mjs';
+import { LIMITS } from './library.mjs';
 import { openAgentRunner } from './agent-runner.mjs'; // [agent]
 import { openRefgen, refgenRoutes } from './refgen.mjs';
 import { setupChecks } from './setup-check.mjs';
@@ -112,7 +114,22 @@ const server = createServer(async (req, res) => {
       if (!/^application\/(zip|octet-stream)/.test(req.headers['content-type'] || '')) fail('Upload a .previs.zip export', 415);
       const parts = []; let size = 0;
       for await (const chunk of req) { size += chunk.length; if (size > 1024 ** 3) fail('Export is larger than 1 GB', 413); parts.push(chunk); }
-      return send(await director.importZip(Buffer.concat(parts)));
+      const zip = Buffer.concat(parts);
+      // One drop target: an asset bundle (asset.json) goes to the library, a project export to a new project.
+      const names = zipEntryNames(zip);
+      if (names.includes('asset.json') && !names.includes('previs-export.json')) return send({ ...(await director.library.importZip(zip)), kind: 'asset' });
+      return send(await director.importZip(zip));
+    }
+    if (req.method === 'GET' && url.pathname === '/api/director/library/export') {
+      const { filename, data: zip } = await director.library.exportZip(url.searchParams.get('id'));
+      res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Length': zip.length, 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+      return res.end(zip);
+    }
+    if (req.method === 'POST' && url.pathname === '/api/director/library/import-zip') {
+      if (!/^application\/(zip|octet-stream)/.test(req.headers['content-type'] || '')) fail('Upload a .previs-asset.zip', 415);
+      const parts = []; let size = 0;
+      for await (const chunk of req) { size += chunk.length; if (size > LIMITS.zipBytes) fail(`Asset bundles are at most ${LIMITS.zipBytes / 1024 ** 2} MB`, 413); parts.push(chunk); }
+      return send(await director.library.importZip(Buffer.concat(parts)));
     }
     if (renderRoute.handles(url.pathname)) return await renderRoute.serve(req, url, send, body); // [headless]
     if (req.method === 'GET' && url.pathname === '/api/director/asset-frame') { try { return send(await frameRoute(url)); } catch (e) { if (e.apiCode) return send({ error: e.message, code: e.apiCode }, e.status); throw e; } } // [frames]

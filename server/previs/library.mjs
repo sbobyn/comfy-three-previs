@@ -8,11 +8,13 @@
 //
 // The functions here never take a lock: the director runs every library write on its own serial queue, so a save and
 // a place never interleave within one server. Several servers on one PREVIS_LIBRARY_DIR are not supported.
-import { mkdir, readFile, readdir, writeFile, stat, mkdtemp, rm } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile, stat, mkdtemp, rm, realpath, lstat, open } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import { createHash, randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, isAbsolute } from 'node:path';
+import { readZip, writeZip, zipEntryNames } from './zip.mjs';
 import { atomicJson } from './atomic.mjs';
 import { snapshotEntity } from './starters.mjs';
 import { imageSize } from './frames.mjs';
@@ -193,6 +195,21 @@ export function checkMedia(m, get, limits = LIMITS) {
   }
 }
 
+/**
+ * An asset bundle's files (Map name → bytes, from a zip or a folder) checked as a whole: only allowlisted names,
+ * a valid manifest, every listed file present and as declared, nothing undeclared. Returns the manifest.
+ */
+export function readAssetBundle(files, limits = LIMITS) {
+  for (const name of files.keys()) if (!ENTRY.test(name)) fail(`Unexpected file in asset bundle: ${name.slice(0, 80)}`);
+  const raw = files.get('asset.json');
+  if (!raw) fail('Not a Comfy Previs asset (no asset.json)');
+  let m; try { m = JSON.parse(raw.toString('utf8')); } catch { fail('asset.json is not valid JSON'); }
+  validateManifest(m, limits);
+  checkMedia(m, path => files.get(path), limits);
+  for (const name of files.keys()) if (name !== 'asset.json' && !m.media.some(x => x.path === name)) fail(`Undeclared file in asset bundle: ${name}`);
+  return m;
+}
+
 // ---------- Building an asset from a project ----------
 
 /**
@@ -355,6 +372,26 @@ async function shrinkToWebp(bytes, px, ffmpeg) {
   finally { await rm(tmp, { recursive: true, force: true }); }
 }
 
+/** Read a regular file (never through a symlink), refusing it as soon as it passes cap bytes. */
+async function readCapped(path, cap, what) {
+  let fh;
+  try { fh = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW); } catch (e) { fail(e.code === 'ELOOP' ? `${what} is a symlink; give the real file` : `Cannot read ${what}`); }
+  try {
+    if (!(await fh.stat()).isFile()) fail(`${what} is not a file`);
+    const chunks = [], buf = Buffer.alloc(1 << 20); let size = 0;
+    for (;;) {
+      const { bytesRead } = await fh.read(buf, 0, buf.length, null);
+      if (!bytesRead) break;
+      size += bytesRead; if (size > cap) fail(`${what} is over ${Math.round(cap / MiB)} MB`, 413);
+      chunks.push(Buffer.from(buf.subarray(0, bytesRead)));
+    }
+    return Buffer.concat(chunks);
+  } finally { await fh.close(); }
+}
+// A whole-project export (director.mjs EXPORT_FORMAT) can be large; one object is taken from it.
+const PROJECT_EXPORT = 'comfy-previs-project', MAX_PROJECT_EXPORT = 1024 ** 3;
+const sameOrigin = (a, project, entity) => a.origin?.projectId === project.id && a.origin?.entityId === entity.id;
+
 export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () => {} } = {}) {
   const assetsDir = join(dir, 'assets');
   const assetDir = id => { if (!UUID.test(id || '')) fail('Unknown asset', 404); return join(assetsDir, id); };
@@ -384,7 +421,33 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
     await atomicJson(join(at, 'asset.json'), m);
   }
 
-  return {
+  /** Add an imported asset: a known id with the same content is a no-op, a known id with new content the next version. */
+  async function install(m, files) {
+    const { assets } = await scan();
+    const existing = assets.find(a => a.id === m.id), clash = assets.find(a => a.handle === m.handle && a.id !== m.id);
+    if (clash) fail(`@${m.handle} is already in the library as a different asset; rename one of them, then import again`, 409);
+    if (existing && existing.contentHash === m.contentHash) return { asset: assetCard(existing), action: 'unchanged', text: `@${existing.handle} v${existing.version} is already in your library` };
+    const next = cleanManifest(existing ? { ...m, version: existing.version + 1, supersedes: existing.contentHash } : m);
+    await write(next, new Map(next.media.map(x => [x.path, files.get(x.path)])), existing);
+    return { asset: assetCard(next), action: existing ? 'updated' : 'added', text: existing ? `Updated @${next.handle} in your library to v${next.version}` : `Added @${next.handle} to your library` };
+  }
+
+  /** One object out of a whole-project export (.previs.zip), checked like a project import, saved as an asset. */
+  async function fromProjectExport(files, object, input) {
+    let manifest; try { manifest = JSON.parse(files.get('previs-export.json')?.toString('utf8')); } catch {}
+    if (manifest?.format !== PROJECT_EXPORT || manifest.version !== 1 || !Array.isArray(manifest.files)) fail('Not a Comfy Previs project export');
+    for (const f of manifest.files) { const data = files.get(f.name); if (!data || sha(data) !== f.sha256) fail(`Export is incomplete or changed: ${f.name}`); }
+    for (const name of files.keys()) if (name !== 'previs-export.json' && !manifest.files.some(f => f.name === name)) fail(`Unexpected file in export: ${name}`);
+    let p; try { p = JSON.parse(files.get('project.json').toString('utf8')); } catch { fail('Export project.json is invalid'); }
+    if (p?.version !== 1 || !Array.isArray(p.scene?.entities)) fail('Unsupported project version');
+    if (!object) fail(`This is a whole project export (“${String(p.title || '').slice(0, 60)}”); name the object to take from it`);
+    const ref = String(object).replace(/^@/, '');
+    const e = p.scene.entities.find(x => x.id === ref) || p.scene.entities.find(x => handleOf(x.name) === handleOf(ref));
+    if (!e) fail(`No object called “${object}” in that project; it has ${p.scene.entities.filter(x => x.shape !== 'group' || !x.parent).slice(0, 8).map(x => x.name).join(', ')}`, 404);
+    return api.save(p, e, input, file => { const b = files.get(`refs/${file}`); if (!b) throw Error('missing'); return b; }, { source: 'project-export' });
+  }
+
+  const api = {
     dir, limits,
     scan,
     async list(query = {}) {
@@ -403,9 +466,9 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
      * refs file. Saving the same object again, an object placed from this asset, or with replace:true over a taken
      * handle makes the next version; an unchanged save is a no-op.
      */
-    async save(project, entity, input = {}, readRef) {
+    async save(project, entity, input = {}, readRef, { source = 'project' } = {}) {
       const { assets } = await scan();
-      const { manifest: base, takes } = assetSnapshot(project, entity, { name: input.name, tags: input.tags, description: input.description, limits });
+      const { manifest: base, takes } = assetSnapshot(project, entity, { name: input.name, tags: input.tags, description: input.description, limits, source });
       const blobs = [];
       for (const t of takes) {
         let bytes; try { bytes = await readRef(t.file); } catch { fail(`The image file of “${t.ref.name}” is missing from the project`); }
@@ -426,8 +489,7 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
       }
       const media = blobs.map(b => ({ path: b.path, size: b.bytes.length, sha256: sha(b.bytes), ...imageDims(b.bytes) })).map(cleanMedia);
       const byHandle = assets.find(a => a.handle === base.handle);
-      const sameOrigin = a => a.origin?.projectId === project.id && a.origin?.entityId === entity.id;
-      const previous = byHandle && (input.replace === true || sameOrigin(byHandle) || byHandle.id === entity.from?.asset) ? byHandle : null;
+      const previous = byHandle && (input.replace === true || sameOrigin(byHandle, project, entity) || byHandle.id === entity.from?.asset) ? byHandle : null;
       if (byHandle && !previous) fail(`@${base.handle} is already in the library; choose another name or save over it with replace: true`, 409);
       const m = { ...base, id: previous?.id || randomUUID(), version: previous ? previous.version + 1 : 1, savedAt: new Date().toISOString(), contentHash: '', ...(previous ? { supersedes: previous.contentHash } : {}), media };
       const ordered = cleanManifest(m);
@@ -440,5 +502,50 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
       await write(ordered, files, previous);
       return { asset: assetCard(ordered), action: previous ? 'updated' : 'added', text: `Saved @${ordered.handle} v${ordered.version} with ${assetContents(ordered)}` };
     },
+    /** <handle>.previs-asset.zip: asset.json and refs/, checked exactly as an import would check it. */
+    async exportZip(ref) {
+      const m = await api.get(ref);
+      const files = new Map([['asset.json', Buffer.from(JSON.stringify(m, null, 2))]]);
+      for (const x of m.media) files.set(x.path, await readCapped(join(assetDir(m.id), x.path), limits.imageBytes, x.path));
+      readAssetBundle(files, limits);
+      const data = writeZip([...files].map(([name, bytes]) => ({ name, data: bytes })));
+      if (data.length > limits.zipBytes) fail(`@${m.handle} is ${(data.length / MiB).toFixed(1)} MB, over the ${limits.zipBytes / MiB} MB bundle limit`);
+      return { filename: `${m.handle}.previs-asset.zip`, data, asset: assetCard(m) };
+    },
+    /** Import a .previs-asset.zip from memory (browser upload or the home page drop). */
+    async importZip(buffer) {
+      if (buffer.length > limits.zipBytes) fail(`Asset bundles are at most ${limits.zipBytes / MiB} MB (this one is ${(buffer.length / MiB).toFixed(1)} MB)`, 413);
+      const files = readZip(buffer, { maxEntries: limits.zipEntries, maxTotal: limits.unzippedBytes });
+      return install(readAssetBundle(files, limits), files);
+    },
+    /**
+     * Import from an absolute path: a .previs-asset.zip, a folder holding asset.json, or a .previs.zip project export
+     * plus `object`. The path must be its own realpath; only allowlisted names are read; nothing is executed.
+     */
+    async importPath(path, { object, ...input } = {}) {
+      if (typeof path !== 'string' || !isAbsolute(path)) fail('path must be an absolute path');
+      let real; try { real = await realpath(path); } catch { fail(`Nothing at ${path}`, 404); }
+      if (real !== path) fail(`Give the real path (no symlinks, “..” or trailing slash): ${real}`);
+      const st = await lstat(path);
+      if (st.isDirectory()) {
+        const files = new Map();
+        let total = 0;
+        const take = async (name, cap) => { const b = await readCapped(join(path, name), cap, name); total += b.length; if (total > limits.unzippedBytes) fail('Asset folder content is too large', 413); files.set(name, b); };
+        if (!(await readdir(path)).includes('asset.json')) fail('That folder has no asset.json');
+        await take('asset.json', limits.unzippedBytes);
+        let m; try { m = JSON.parse(files.get('asset.json').toString('utf8')); } catch { fail('asset.json is not valid JSON'); }
+        validateManifest(m, limits);
+        try { if ((await lstat(join(path, 'refs'))).isSymbolicLink()) fail('refs is a symlink'); } catch (e) { if (e.status) throw e; }
+        for (const x of m.media) await take(x.path, limits.imageBytes);
+        return install(readAssetBundle(files, limits), files);
+      }
+      if (!st.isFile()) fail('path must be a file or a folder');
+      const buffer = await readCapped(path, path.endsWith('.previs.zip') ? MAX_PROJECT_EXPORT : limits.zipBytes, 'That file');
+      const names = zipEntryNames(buffer);
+      if (names.includes('asset.json')) return api.importZip(buffer);
+      if (names.includes('previs-export.json')) return fromProjectExport(readZip(buffer, { maxTotal: MAX_PROJECT_EXPORT }), object, input);
+      fail('Not a Comfy Previs asset bundle (.previs-asset.zip), asset folder or project export (.previs.zip)');
+    },
   };
+  return api;
 }

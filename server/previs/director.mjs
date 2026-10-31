@@ -406,6 +406,9 @@ export async function openDirector(root, options = {}) {
       list: query => library.list(query),
       get: ref => library.get(ref),
       refFile: (id, file) => library.refFile(id, file),
+      exportZip: ref => library.exportZip(ref),
+      importZip: buffer => serial(() => library.importZip(buffer)),
+      importPath: (input = {}) => serial(() => library.importPath(input.path, { object: input.object })),
       /** Save one object of a project (and everything grouped under it) to the library. */
       save: (projectId, input = {}) => serial(async () => {
         const p = await load(projectId);
@@ -747,6 +750,7 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
       }
       case '/api/director/agent/progress': return director.progress(input.projectId, input);
       case '/api/director/library/save': return director.library.save(input.projectId, input);
+      case '/api/director/library/import': return director.library.importPath(input);
       case '/api/director/library/place': {
         const r = await director.library.place(input.projectId, input);
         // The activity line names the placed asset once, not every object grouped under it.

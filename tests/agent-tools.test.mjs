@@ -15,7 +15,7 @@ import { builtInPresets } from '../server/previs/presets.mjs';
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==', 'base64');
 const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x2d, 0x00, 0x50, 0x03, 0x01, 0x22, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01, 0xff, 0xd9]); // SOF0 80×45
 const VIDEO = '7e0d0a11-0000-4000-8000-000000000001', STILL2 = '7e0d0a11-0000-4000-8000-000000000002';
-const LIBRARY_TOOLS = ['previs_library_list', 'previs_library_save', 'previs_library_place'];
+const LIBRARY_TOOLS = ['previs_library_list', 'previs_library_save', 'previs_library_place', 'previs_library_import', 'previs_library_export'];
 const NEW_TOOLS = ['previs_director_render_blockout', 'previs_director_generate_still', 'previs_director_batch_generate', 'previs_director_batch_status', 'previs_director_view_shot', 'previs_director_jobs_dashboard'];
 
 async function fixture() {

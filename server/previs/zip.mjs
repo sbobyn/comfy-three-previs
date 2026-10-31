@@ -72,3 +72,18 @@ export function readZip(buffer, { maxEntries = 10000, maxTotal = 2 * 1024 ** 3 }
   }
   return out;
 }
+
+/** Entry names from the central directory only (nothing is decompressed); [] when this is not a ZIP archive. */
+export function zipEntryNames(buffer) {
+  let eocd = -1;
+  for (let i = buffer.length - 22; i >= Math.max(0, buffer.length - 65557); i--) if (buffer.readUInt32LE(i) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) return [];
+  const count = buffer.readUInt16LE(eocd + 10), start = buffer.readUInt32LE(eocd + 16), names = [];
+  for (let i = 0, p = start; i < count && p + 46 <= buffer.length; i++) {
+    if (buffer.readUInt32LE(p) !== 0x02014b50) return names;
+    const nameLen = buffer.readUInt16LE(p + 28), extraLen = buffer.readUInt16LE(p + 30), commentLen = buffer.readUInt16LE(p + 32);
+    names.push(buffer.subarray(p + 46, p + 46 + nameLen).toString('utf8'));
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  return names;
+}
