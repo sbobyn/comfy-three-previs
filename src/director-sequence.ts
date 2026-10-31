@@ -489,7 +489,9 @@ export function createSequence(ctx: SequenceCtx) {
     if (keep && choice().some(d => d.id === keep)) modelSel.value = keep;
   }
   // Every submit needs a fresh binding against the engine's current revision.
-  const bindAndQuote = (s: Shot) => prepareShotVideo({ project: P(), shot: s, st: gen, definitionId: modelSel.value, useReferences: useRefs.checked });
+  // Like the server batch plan: a shot without a current End still animates its start still alone, and the quote table shows
+  // that shot's camera as "from still (approximate)" before anything is approved.
+  const bindAndQuote = (s: Shot) => prepareShotVideo({ project: P(), shot: s, st: gen, definitionId: modelSel.value, useReferences: useRefs.checked, startOnly: true });
   async function quote() {
     const p = P(), shots = p.shots.filter(s => picked.has(s.id));
     if (!shots.length) return;
