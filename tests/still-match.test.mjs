@@ -41,6 +41,15 @@ test('layout: headings and the seen side come from the object’s rotation throu
   assert.equal(Math.abs(at(0, 180).view), 180, 'camera behind it');
 });
 
+test('a bird keeps its spread-wing bounds and +z heading through the scene model and still prompt', () => {
+  const { project, shot } = scene({ move: 'static', angle: 0, distance: 8, height: 3, mm: 40 }, [{ name: 'Eagle', shape: 'bird', position: [0, 3, 0], rotation: 90 }]);
+  const item = frameLayout(project, shot).items[0];
+  assert.equal(project.scene.entities[0].shape, 'bird');
+  assert.equal(item.heading, 90);
+  assert.ok(item.size[0] > item.size[2] * 2, 'spread wings are wider than the body is long');
+  assert.match(describeFrame(project, shot).text, /Eagle:.*front facing screen-right/);
+});
+
 test('camera sentence: fixed cameras give the expected phrases', () => {
   const side = describeFrame(...Object.values(scene({ move: 'static', angle: 0, distance: 8, height: 1.5, mm: 35 }))).text;
   for (const p of ['Camera: First frame of a locked-off shot, 35mm normal lens', 'we see Hero car side-on, from its right side', 'Hero car: centre of frame', 'nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end', 'horizon'])

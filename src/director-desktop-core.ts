@@ -27,7 +27,7 @@ export function stepAction(step: Step, f: StepFacts): StepAction {
 }
 
 /** The top bar's status strip: `parts` joined by " · ", and `short` for narrow windows. */
-export function stepStatus(step: Step, p: DirectorProject, s: Shot, o: { stale: boolean; videos: number; castNeed: number; castTotal: number }): { parts: string[]; short: string } {
+export function stepStatus(step: Step, p: DirectorProject, s: Shot, o: { stale: boolean; videos: number; castNeed: number; castTotal: number; bundled?: boolean }): { parts: string[]; short: string } {
   const n = (k: number, w: string) => `${k} ${w}${k === 1 ? '' : 's'}`;
   if (step === 'build') {
     const objs = p.scene.entities.filter(e => e.shape !== 'group').length;
@@ -35,7 +35,7 @@ export function stepStatus(step: Step, p: DirectorProject, s: Shot, o: { stale: 
     return { parts: [n(objs, 'object'), cast], short: o.castNeed ? `${o.castNeed} need images` : cast };
   }
   if (step === 'shoot') {
-    const stills = s.references.filter(r => r.role === 'frame').length, blockout = s.render ? (o.stale ? 'blockout changed' : 'blockout ready') : 'no blockout';
+    const stills = s.references.filter(r => r.role === 'frame').length, blockout = s.render ? (o.stale ? 'blockout changed' : 'blockout ready') : o.bundled ? 'starter blockout' : 'no blockout';
     return { parts: [`Shot ${String(p.shots.indexOf(s) + 1).padStart(2, '0')}`, s.title, blockout, n(stills, 'still'), o.videos ? n(o.videos, 'video') : 'no video'], short: blockout };
   }
   const vids = new Set((p.assets || []).filter(a => a.kind === 'workflow-result').map(a => a.shotId)).size;

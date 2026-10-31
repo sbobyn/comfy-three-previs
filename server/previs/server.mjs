@@ -50,7 +50,7 @@ const observe = createJobProgress({ connect: createProgressSocketFactory({ WebSo
 progress = createProgressCoordinator({ observe, sources: jobSources, budget });
 const generation = await generationRoutes(data,project,{ telemetry: progress.telemetry('generation'), budget, log: console.log });
 let refgen, agentRunner; // [agent]
-const director = await openDirector(data, { engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
+const director = await openDirector(data, { startersDir: process.env.PREVIS_STARTERS_DIR || undefined, engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
 refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen'), budget, log: console.log });
 jobSources.generation = generation.trackerSource({ director }); jobSources.refgen = refgen.trackerSource();
 tracker = createJobTracker({ sources: [jobSources.generation, jobSources.refgen], limits: () => slotsFor(data).snapshot(), log: line => console.log(`[jobs] ${line}`) });

@@ -81,9 +81,11 @@ Element.prototype.setAttribute = function (name: string, value: string) {
 
 // Pages with their own header badge (home, workspace) get no floating banner. Elsewhere the banner sits at the
 // top right, out of the way of transports and tab bars, and can be dismissed.
-function banner() {
+function banner(tries = 0) {
   const own = document.querySelector<HTMLElement>('.demo-badge');
   if (own && own.offsetParent) return;
+  // Pages that fetch before drawing (the home page) add their own badge a little later: wait for it before doubling up.
+  if (tries < 8) { setTimeout(() => banner(tries + 1), 250); return; }
   const bar = document.createElement('div');
   bar.setAttribute('role', 'note'); bar.className = 'demo-banner';
   bar.style.cssText = 'position:fixed;right:12px;top:calc(56px + env(safe-area-inset-top, 0px));z-index:2147483647;display:flex;gap:8px;align-items:center;padding:6px 6px 6px 12px;border-radius:999px;background:rgba(17,17,20,.86);color:#f2f2f5;font:500 12px/1.3 system-ui,-apple-system,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);pointer-events:auto;white-space:nowrap';

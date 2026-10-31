@@ -13,15 +13,50 @@ examples/starters/
 
 ## What a starter opens with
 
-Each starter opens finished, with no generation and no network:
+Each starter opens with bundled media, with no generation and no network:
 
 - every cast member's primary image, and its design sheet (each view plus the composed board);
-- for each shot, the chosen start still (and end still, where there is one), the blockout clip and the
-  chosen video;
+- for each shot, the start and end stills, the blockout clip and the video made from them;
 - the cut, with the chosen video and trim for every shot.
 
-Set pieces (stands, track surfaces, light towers, hoop supports) have no image on purpose: they render
-as their blockout colour and are described once in the shot prompt's **Set:** sentence.
+The 2026-10-31 blocking pass kept every entity ID, cast look and design sheet; the shot media was then
+made again for the revised blocking (2026-10-31, about $14.83 at list prices). The four shots the demo
+leads with use the final tier: GPT Image 2.5 stills and a Seedance 2.5 edit of the blockout clip, so the
+blockout is the camera (Final Lap · Checkered flag, Posterized · Posterized, Wingspan · The glide,
+Breaking News · The headline). The other nine use the draft tier: FLUX.2 Pro or FLUX 3 stills and an LTX
+Fast clip animated from the start still, whose camera only approximates the blockout; three of them are
+trimmed in the cut where the clip stops matching the shot (The valley, The draft, From the stands). Every
+still and blockout clip carries the signature of the current blocking, so a copy reports nothing as out
+of date and a new batch does not remake them.
+
+Set pieces render as blockout colours. The race's track surfaces, stands and towers no longer inherit
+an unrelated shared image; existing primary environment looks remain available. Cast identities remain
+blue/yellow Comfy and green rival for the sports scenes.
+
+## Revised shots
+
+All camera motion is keyed in the blockout. Descriptions specify action; they do not instruct a second
+camera move. Every shot is 4–5 seconds, suitable for Seedance 2.5 edit's four-second minimum.
+
+| Starter | Shot | Seconds | Camera and action |
+|---|---|---:|---|
+| Breaking News | Breaking | 5 | Gentle descending push; anchor and desk read immediately. |
+| | The headline | 5 | Straight 55 mm dolly-in on the anchor delivering the headline. |
+| | On air | 5 | Restrained oblique push toward the desk for the sign-off. |
+| Final Lap | Final lap | 4 | Descending three-quarter track with both cars already alongside. |
+| | The draft | 4 | Low tracking two-shot; Comfy draws level in the inside lane. |
+| | From the stands | 4 | Elevated sideline track; Comfy pulls ahead. |
+| | Checkered flag | 4 | Front three-quarter track; Comfy crosses the line and wins by a car length. |
+| Posterized | Fast break | 4 | Elevated lateral track with the ball carrier advancing. |
+| | The drive | 4 | Lower tracking approach into the lane toward the defender. |
+| | Posterized | 5 | Slow baseline push and rise; guard leaps above the defender, scores and lands. |
+| Wingspan | The valley | 5 | Elevated following move with a visible eagle and open lake/ridge backdrop. |
+| | The dive | 5 | Smooth descending follow into the lake, without sudden banks. |
+| | The glide | 5 | Slow lateral arc around a spread-wing eagle low over water toward the ridge. |
+
+Wingspan uses a simple `bird` shape with a white head, spread wings and a +z-facing beak. Its terrain is
+broader and lower, its trees and wildlife sit on the shore, and its cameras stay above the terrain.
+Final Lap has low surrounding terrain to activate the renderer's daylight sky and outdoor fill.
 
 ## Format
 
@@ -43,11 +78,17 @@ to 2.5 Mbit/s with no audio. Version 1 snapshots (no media) still load.
 
 Creating a project from a starter (`POST /api/director/projects` with `template: "<slug>"`) deep-copies the
 snapshot with fresh ids and copies the media files into the new project's folder. Copying skips files that
-are already there, and a starter whose media folder is missing still opens, just without images and videos.
+are already there. A starter whose media files are missing still opens, without those images and videos; the
+project records how many were missing (`starterFiles`) and says so once when opened.
+
+Blocking signatures (on stills and blockout clips) hash entity ids, which the copy renews. A signature that matches
+the snapshot's blocking is rewritten to the copy's, so current media stays current; an older one stays out of date,
+and the app marks such stills and videos as made for an earlier blocking. The exporter keeps every blockout clip's
+signature. `PREVIS_STARTERS_DIR` points the server at another starters folder (for example one without `media/`).
 
 ## Media size and why it is in git
 
-The four starters' media is about 34 MB (the export stops at 80 MB and then keeps only the hero shots'
+The four starters' media is about 32 MB (the export stops at 80 MB and then keeps only the hero shots'
 videos). It is committed with the code rather than downloaded from a release so that a fresh clone opens
 finished starters offline, with no publish step to keep in sync, and so `pnpm demo:build` can use the same
 files. Re-exporting only rewrites a file when its source changed, so history grows only when a starter's
@@ -65,5 +106,7 @@ pnpm starters:export --server http://127.0.0.1:5190 --only posterized
 ```
 
 Source project ids, hero shots and explicit still picks live in `SOURCES` in
-`scripts/export-starters.mjs`; override a project with `--<slug> <project-id>`. `--no-media` writes a
+`scripts/export-starters.mjs`; override a project with `--<slug> <project-id>`. The projects listed there predate the 2026-10-31
+blocking pass, so exporting them would bring the old blocking back; the regenerated media was made in fresh
+copies of these starters and placed into the snapshots under their existing ids. `--no-media` writes a
 version 1 snapshot without media. `--max-mb <n>` changes the size budget.

@@ -1,6 +1,7 @@
 import './director.css';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf, keyStills } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
+import { starterBlockout, starterMediaStatus, videoStale } from '../shared/director.mjs';
 import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge } from './director-common';
 import type { Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
@@ -117,8 +118,8 @@ helpMenu.append(
   menuItem('Guide', 'The whole journey, scene to film', () => showJourney()),
   menuItem('Controls & shortcuts', 'Viewport, keys and grid · ?', () => { renderHelp(); helpCard.hidden = false; }),
   menuItem('Show tips again', 'The first-run hints and tour', () => showTipsAgain()),
-  h('div', { class: 'menu-sep' }),
-  menuItem('Export project (.zip)', 'Everything in this project, in one file', () => { location.href = `/api/director/export?id=${projectId}`; }));
+  // The read-only demo has no server to build the file.
+  ...(DEMO ? [] : [h('div', { class: 'menu-sep' }), menuItem('Export project (.zip)', 'Everything in this project, in one file', () => { location.href = `/api/director/export?id=${projectId}`; })]));
 // Status strip: what the current step is working on, Claude's presence and the jobs pip (mounted below).
 const topStatus = h('div', { class: 'top-status', role: 'status', 'aria-live': 'polite' });
 const claudeChip = h('button', { class: 'top-claude', type: 'button', hidden: true, title: 'Claude is connected · open the setup', onclick: () => claudeDialog() }, h('span', { class: 'claude-mark', 'aria-hidden': 'true' }, '✳'), 'Claude');
@@ -789,13 +790,14 @@ function renderReadiness() {
   const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const need = cast.filter(r => !objectLooks(project, r.entity.id).length).length;
   const edited = !!(s.prompts?.video?.edited && s.prompts.video.text);
-  const vids = shotVideos(s.id).length;
+  const vids = shotVideos(s.id).length, older = shotVideos(s.id).filter(a => videoStale(project, s, a)).length;
+  const bundled = starterBlockout(project, s);
   const item = (key: string, state: 'ok' | 'warn' | 'none', label: string, value: Node | string, tip: string) => h('button', { type: 'button', class: `rd ${state}`, title: tip, onclick: () => goSection(key) }, h('span', { class: 'rd-label' }, label), h('span', { class: 'rd-val' }, value));
   readiness.replaceChildren(
-    item('camera', s.render ? (stale ? 'warn' : 'ok') : 'none', 'Blockout', s.render ? (stale ? 'changed' : '✓') : '–', s.render ? (stale ? 'The scene or camera changed since the blockout' : 'Blockout is up to date') : 'No blockout yet: the grey camera clip is made when you generate'),
+    item('camera', s.render ? (stale ? 'warn' : 'ok') : 'none', 'Blockout', s.render ? (stale ? 'changed' : '✓') : bundled ? 'starter' : '–', s.render ? (stale ? 'The scene or camera changed since the blockout' : 'Blockout is up to date') : bundled ? `The starter’s blockout clip${bundled.fresh === false ? ' shows an earlier blocking' : ''}; watch it in Cut. Generating makes this shot’s own blockout first (free, in this browser).` : 'No blockout yet: the grey camera clip is made when you generate'),
     item('cast', need ? 'warn' : cast.length ? 'ok' : 'none', 'Cast', h('span', { class: 'rd-cast' }, ...cast.slice(0, 5).map(r => h('i', { style: `background:${KIND_COLORS[r.entity.kind]}`, title: r.entity.name })), `${cast.length}${need ? ` · ${need} need image${need === 1 ? '' : 's'}` : ''}`), need ? `${need} of ${cast.length} cast members have no image yet` : 'Every cast member has an image'),
     item('video', edited ? 'warn' : 'ok', 'Prompt', edited ? 'edited' : 'auto', edited ? 'You edited this shot’s prompt; your text is used' : 'The prompt is composed from the cast, camera and story'),
-    item('video', vids ? 'ok' : 'none', 'Video', vids ? `✓${vids > 1 ? ` ${vids}` : ''}` : '–', vids ? `${vids} generated video${vids === 1 ? '' : 's'}` : 'No video yet: Generate video (bottom of this panel)'));
+    item('video', vids ? (older === vids ? 'warn' : 'ok') : 'none', 'Video', vids ? (older === vids ? 'older' : `✓${vids > 1 ? ` ${vids}` : ''}`) : '–', vids ? `${vids} generated video${vids === 1 ? '' : 's'}${older ? `; ${older === vids ? (vids === 1 ? 'it was' : 'all were') : `${older} were`} made for an earlier blocking and do not match the blockout` : ''}` : 'No video yet: Generate video (bottom of this panel)'));
   readinessFade();
   renderActionBar();
 }
@@ -805,7 +807,7 @@ function renderActionBar() {
   const idx = project.shots.indexOf(s), stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
   if (!genCache) loadGen();
   const model: any = genCache ? shotModel(s) : null, rate = model?.pricing?.ratePerSecond as number | undefined, secs = clipSeconds(model, s);
-  const state = s.render ? (stale ? 'blockout changed' : 'blockout ready') : 'no blockout yet';
+  const state = s.render ? (stale ? 'blockout changed' : 'blockout ready') : starterBlockout(project, s) ? 'starter blockout' : 'no blockout yet';
   actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}` }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * secs).toFixed(2)}`)] : []));
   actHint.title = `${s.title} · ${s.duration}s · ${state}${rate ? ` · about $${(rate * secs).toFixed(2)} to generate (${secs}s clip)` : ''}`;
   const ready = !!s.render && !stale;
@@ -822,7 +824,7 @@ function renderSteps() {
   stepBtns.cut.querySelector('.st-count')!.textContent = `${vids} video${vids === 1 ? '' : 's'}`;
   const s = shot(), stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
   const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment'), castNeed = cast.filter(r => !objectLooks(project, r.entity.id).length).length;
-  const st = stepStatus(step, project, s, { stale, videos: shotVideos(s.id).length, castNeed, castTotal: cast.length }), text = st.parts.join(' · ');
+  const st = stepStatus(step, project, s, { stale, videos: shotVideos(s.id).length, castNeed, castTotal: cast.length, bundled: !!starterBlockout(project, s) }), text = st.parts.join(' · ');
   if (topStatus.title !== text) { topStatus.title = text; topStatus.replaceChildren(h('span', { class: 'ts-long' }, text), h('span', { class: 'ts-short', 'aria-hidden': 'true' }, st.short)); }
   const def = genCache ? shotModel(s) : null, slots = keyFrameSlots(def as any, VIDEO_PRICES), frames = s.references.filter(r => r.role === 'frame');
   const a = stepAction(step, { castNeed, keyFrames: slots.length ? (slots.includes('end') ? 'start+end' : 'start') : false, hasStart: frames.some(r => r.note === 'key frame start' || !r.note), hasEnd: frames.some(r => r.note === 'key frame end'), ...exportState });
@@ -1088,7 +1090,7 @@ async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' 
   };
   draw();
   const dlg = h('dialog', { class: 'assets', id: 'assets-dialog', 'aria-labelledby': 'assets-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Every cast member’s image and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Every cast member’s image and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), DEMO ? null : h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'assets-body' }, seg, h('p', { class: 'note', style: 'margin:0' }, 'Everything here lives in this project’s own folder, so exporting it carries videos, films, blockouts and images together.'), grid));
   document.body.append(dlg); dlg.showModal();
 }
@@ -2008,6 +2010,17 @@ tourEl.addEventListener('keydown', ev => { if (ev.key === 'Escape') { ev.prevent
 function maybeTour() { if (tourAt < 0 && !mobile?.active() && firstRun.hidden && shouldTour(project, localStorage.getItem(TOUR_KEY))) showTour(0); }
 async function poll() { await pollNow(); setTimeout(poll, 1200); }
 
+/** Once per project: say plainly when a starter's media is missing from this checkout or was made for an earlier blocking. */
+function starterNotice() {
+  const st = starterMediaStatus(project), key = `previs:starter-notice:${project.id}`;
+  if (!st || localStorage.getItem(key)) return;
+  const n = st.staleShots.length, total = project.shots.length;
+  const text = [
+    st.missing ? (st.missing >= st.listed ? 'This starter’s images and videos are not in this checkout, so it opens as a blockout only.' : `${st.missing} of ${st.listed} of this starter’s image and video files are not in this checkout, so some are missing.`) + ' Pull the latest version to get them; see examples/starters/README.md.' : '',
+    n ? `The stills and videos of ${n === total ? `all ${total}` : `${n} of ${total}`} shots were made for an earlier blocking, so they don’t match these blockouts. Generate makes matching ones, with a quote first.` : '',
+  ].filter(Boolean).join(' ');
+  toast(text, false, { label: 'Got it', run: () => localStorage.setItem(key, '1') });
+}
 async function boot() {
   if (!projectId) { location.href = '/'; return; }
   try {
@@ -2019,6 +2032,7 @@ async function boot() {
     scene.frame(openingSubjects(project.scene.entities), 10);
 
     applyHidden();
+    starterNotice();
     const v = params.get('view'); setStep(v === 'sequence' ? 'cut' : v === 'shoot' ? 'shoot' : 'build');
     setTimeout(maybeTour, 900);
     setTimeout(poll, 1200);

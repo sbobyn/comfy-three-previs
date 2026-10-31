@@ -24,15 +24,28 @@ Block out a scene in 3D in your browser, give every character and prop a consist
 You need **Node.js 22.12+** and **pnpm 10** (`corepack enable`). FFmpeg is needed to export camera videos.
 
 ```sh
-git clone https://github.com/sbobyn/comfy-three-previs.git
+git clone --depth 1 --single-branch https://github.com/sbobyn/comfy-three-previs.git
 cd comfy-three-previs
 pnpm install
 pnpm build
-cp .env.example .env      # then fill in COMFY_CLOUD_API_KEY
-pnpm start                # → http://127.0.0.1:5190
+cp .env.example .env      # optional: add COMFY_CLOUD_API_KEY for quotes and generation
+pnpm start                # → http://127.0.0.1:5190 (PORT=… to change)
 ```
 
-`pnpm run doctor` checks your machine and explains how to fix anything missing.
+The shallow clone downloads about 40 MB. A plain `git clone` also downloads the live demo's `gh-pages` history, about 900 MB.
+
+No key is needed to try it: open a starter, build, shoot, preview, watch the starter's videos and cut. A Comfy Cloud key adds quotes and generation; nothing paid runs unless `PREVIS_ALLOW_PAID=1`. `pnpm run doctor` checks your machine and explains how to fix anything missing.
+
+### Plan a batch without spending
+
+A dry run plans every still and video a batch would make, with its estimate, and sends nothing. It needs no key:
+
+```sh
+curl -s -X POST http://127.0.0.1:5190/api/director/batch -H 'content-type: application/json' \
+  -d '{"projectId":"<id from the project URL>","steps":["stills","videos"],"tier":"draft","maxCostUsd":0,"dryRun":true}'
+```
+
+Claude does the same with `previs_director_batch_generate` and `dryRun: true`.
 
 ### Configuration (`.env`)
 
@@ -102,7 +115,9 @@ Your phone streams its orientation to the app over HTTPS on your local network.
 
 ## Starters
 
-Open one from the home page and make it yours: **Breaking News** (a news anchor breaks the story of this launch), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage. Each opens finished: every cast member's image and design sheet, a still, the blockout clip and a generated video for each shot, and a cut. The media is in the repo (about 34 MB, see [examples/starters](examples/starters/README.md)), so nothing is downloaded or generated.
+Open one from the home page and make it yours: **Breaking News** (a news anchor breaks the story of this launch), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage. Each opens with every cast member's image and design sheet, stills, a blockout clip and a generated video for each shot, and a cut. The media is in the repo (about 32 MB, see [examples/starters](examples/starters/README.md)), so nothing is downloaded or generated.
+
+When a starter's blocking has changed since its stills and videos were made, it says so when you open it and marks those videos "older"; generating makes matching ones. If its media files are not in your checkout, it opens as a blockout and says that instead. A starter's blockout clip is for watching: generating first makes the shot's own blockout (free, in the browser).
 
 ## What models work today
 
@@ -141,7 +156,7 @@ These are the built-in presets; the table is generated from them (`pnpm docs:mod
 
 ## Guide
 
-[Build · Cast · Shoot · Generate · Cut](docs/director.md) — the user guide, with captured examples. The in-app **Guide** adds interactive viewport examples and before/after comparisons.
+[Build · Cast · Shoot · Generate · Cut](docs/director.md) — the user guide, with captured examples. The in-app **Guide** adds interactive viewport examples and before/after comparisons. Also: [phone and gamepad](docs/device-controls.md), [glossary](docs/glossary.md). The other files in `docs/` are dated engineering and review notes ([list](docs/history/README.md)); their links into `.evidence/` point at files that are not published.
 
 ## Development
 

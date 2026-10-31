@@ -4,7 +4,7 @@
   "slug": "breaking-news",
   "order": 0,
   "title": "Breaking News",
-  "description": "A news anchor breaks the story of this launch",
+  "description": "A composed news bulletin: the studio, a headline delivered by the anchor, and a confident sign-off.",
   "scene": {
     "name": "News studio",
     "environment": {
@@ -55,7 +55,7 @@
           1.4,
           1
         ],
-        "color": "#2459D8",
+        "color": "#183e69",
         "notes": "Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall.",
         "lookFrom": null,
         "styleNotes": "Clean broadcast motion graphics, crisp, no small type",
@@ -189,7 +189,7 @@
           1.4,
           1.1
         ],
-        "color": "#e9e4da",
+        "color": "#dce4e9",
         "notes": "Sleek white news desk with a glowing blue and yellow front panel strip.",
         "lookFrom": null,
         "styleNotes": "",
@@ -323,7 +323,7 @@
           1,
           1
         ],
-        "color": "#1d2a44",
+        "color": "#617f9d",
         "notes": "Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera.",
         "lookFrom": null,
         "styleNotes": "Same face in every shot: the man from the primary reference",
@@ -444,12 +444,12 @@
       {
         "id": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
         "name": "Studio camera 1",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "cylinder",
         "position": [
           -3.2,
           0,
-          6
+          7.5
         ],
         "rotation": 20,
         "scale": [
@@ -578,12 +578,12 @@
       {
         "id": "13ac6cbd-a7fe-4a15-b160-763e2680bc53",
         "name": "Studio camera 2",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "cylinder",
         "position": [
           0,
           0,
-          7
+          7.5
         ],
         "rotation": 0,
         "scale": [
@@ -603,12 +603,12 @@
       {
         "id": "df108bab-b049-4442-8151-3dfcec5cd4ea",
         "name": "Studio camera 3",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "cylinder",
         "position": [
           3.4,
           0,
-          6
+          7.5
         ],
         "rotation": 340,
         "scale": [
@@ -628,12 +628,12 @@
       {
         "id": "33a23d8a-2cc1-42e8-af89-dd7b5c644a98",
         "name": "Light rig 1",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "lamp",
         "position": [
           -7,
           0,
-          3.5
+          7
         ],
         "rotation": 0,
         "scale": [
@@ -643,7 +643,7 @@
         ],
         "color": "#c9c27a",
         "notes": "",
-        "lookFrom": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -653,12 +653,12 @@
       {
         "id": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
         "name": "Light rig 2",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "lamp",
         "position": [
           -3.5,
           0,
-          3.5
+          7
         ],
         "rotation": 0,
         "scale": [
@@ -679,12 +679,12 @@
       {
         "id": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
         "name": "Light rig 3",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "lamp",
         "position": [
           3.5,
           0,
-          3.5
+          7
         ],
         "rotation": 0,
         "scale": [
@@ -694,7 +694,7 @@
         ],
         "color": "#c9c27a",
         "notes": "",
-        "lookFrom": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -812,12 +812,12 @@
       {
         "id": "66052317-dbc0-4912-b281-cbdd00b7cfb5",
         "name": "Light rig 4",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "lamp",
         "position": [
           7,
           0,
-          3.5
+          7
         ],
         "rotation": 0,
         "scale": [
@@ -827,7 +827,7 @@
         ],
         "color": "#c9c27a",
         "notes": "",
-        "lookFrom": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -840,9 +840,9 @@
         "kind": "character",
         "shape": "person",
         "position": [
-          0.2,
+          -3.5,
           0,
-          7.8
+          8.5
         ],
         "rotation": 180,
         "scale": [
@@ -971,12 +971,12 @@
       {
         "id": "5e9a4e39-fece-4f22-bb65-ac6946f124f5",
         "name": "Studio cameras",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "group",
         "position": [
           0.06666666666666658,
           0,
-          6.333333333333333
+          7.5
         ],
         "rotation": 0,
         "scale": [
@@ -1017,6 +1017,32 @@
         "roll": 0,
         "path": null,
         "parent": null
+      },
+      {
+        "id": "13443489-30b8-4ea2-a2de-82a1639d5025",
+        "name": "Desk front panel",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          0.08,
+          -0.49
+        ],
+        "rotation": 0,
+        "scale": [
+          2.55,
+          0.9,
+          0.12
+        ],
+        "color": "#24729a",
+        "notes": "",
+        "look": null,
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "05487127-2ec2-4198-a1e5-5deb7b109044"
       }
     ],
     "references": [
@@ -1582,31 +1608,325 @@
     {
       "id": "a015ef8e-809e-4492-93ef-675772aba797",
       "title": "Breaking",
-      "description": "Crane down from above the lighting rigs, past the glowing @video-wall, to @news-anchor seated at the @anchor-desk looking up to camera.",
+      "description": "@news-anchor sits at the @anchor-desk beneath the blue @video-wall. The bulletin is about to begin.",
       "duration": 5,
       "start": 0,
       "camera": {
-        "move": "crane-down",
+        "move": "custom",
         "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
         "distance": 7,
         "height": 4.5,
         "angle": 10,
-        "mm": 24,
-        "keys": null
+        "mm": 40,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              1.2,
+              2.5,
+              6
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.05,
+            "p": [
+              1.14,
+              2.465,
+              5.925
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.1,
+            "p": [
+              1.08,
+              2.43,
+              5.85
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.15,
+            "p": [
+              1.02,
+              2.395,
+              5.775
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.2,
+            "p": [
+              0.96,
+              2.36,
+              5.7
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.25,
+            "p": [
+              0.9,
+              2.325,
+              5.625
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3,
+            "p": [
+              0.84,
+              2.29,
+              5.55
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.35,
+            "p": [
+              0.78,
+              2.255,
+              5.475
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4,
+            "p": [
+              0.72,
+              2.22,
+              5.4
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.45,
+            "p": [
+              0.66,
+              2.185,
+              5.325
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5,
+            "p": [
+              0.6,
+              2.15,
+              5.25
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.55,
+            "p": [
+              0.54,
+              2.115,
+              5.175
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6,
+            "p": [
+              0.48,
+              2.08,
+              5.1
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.65,
+            "p": [
+              0.42,
+              2.045,
+              5.025
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.7,
+            "p": [
+              0.36,
+              2.01,
+              4.95
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.75,
+            "p": [
+              0.3,
+              1.975,
+              4.875
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.8,
+            "p": [
+              0.24,
+              1.94,
+              4.8
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.85,
+            "p": [
+              0.18,
+              1.905,
+              4.725
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9,
+            "p": [
+              0.12,
+              1.87,
+              4.65
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.95,
+            "p": [
+              0.06,
+              1.835,
+              4.575
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 1,
+            "p": [
+              0,
+              1.8,
+              4.5
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          }
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
         "exclude": []
       },
       "style": {
-        "movement": [
-          "crane down"
-        ],
+        "movement": [],
         "cuts": [
           "continuous take, no cuts"
         ],
         "lens": [
-          "24mm wide"
+          "40mm"
         ],
         "filter": [
           "deep blue dusk"
@@ -1614,19 +1934,37 @@
       },
       "references": [
         {
-          "id": "58d80f67-97f1-4e13-8c9c-999975936390",
-          "name": "Shot 01 Breaking · Flux.2 [pro] · 964240",
-          "file": "58d80f67-97f1-4e13-8c9c-999975936390.webp",
+          "id": "fa122c1d-8574-596e-a61c-19a21a427900",
+          "name": "Shot 01 Breaking · Flux.2 [pro] · 758012",
+          "file": "fa122c1d-8574-596e-a61c-19a21a427900.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-31T06:27:01.281Z",
+          "generated": {
+            "presetId": "flux-2-pro",
+            "model": "Flux.2 [pro] (BFL)",
+            "seed": 758012,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 40mm normal lens; full shot, News anchor head to toe; camera 1.8 m high, at eye level and 6.4 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, the full frame width wide, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, over half the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, over half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor sits at the Anchor desk beneath the blue Video wall. The bulletin is about to begin. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "5315c9e7"
+          }
+        },
+        {
+          "id": "313f0315-5350-577b-a39a-6de324020e91",
+          "name": "Shot 01 Breaking · FLUX 3 Image · 943129",
+          "file": "313f0315-5350-577b-a39a-6de324020e91.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-30T17:46:21.603Z",
+          "createdAt": "2026-10-31T06:48:09.899Z",
           "generated": {
-            "presetId": "flux-2-pro",
-            "model": "Flux.2 [pro] (BFL)",
-            "seed": 964240,
-            "prompt": "Cinematic film still, single frame. Crane down from above the lighting rigs, past the glowing Video wall, to News anchor seated at the Anchor desk looking up to camera. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera., Same face in every shot: the man from the primary reference. Glossy dark blue studio floor with soft reflections. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall., Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Setting: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.. Framing: 24mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. Filter: deep blue dusk.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The News anchor looks exactly like image 2. The Video wall looks exactly like image 3. The Light rig 2 looks exactly like image 4. The Anchor desk looks exactly like image 5. The Studio floor looks exactly like image 6. No text, captions or labels."
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 943129,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; full shot, News anchor head to toe; camera 2.5 m high, just above News anchor's eye line and 8 m from News anchor, looking slightly down; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, the full frame width wide, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, about a third of the frame height tall, in front of News anchor. News anchor: centre of frame, about half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor sits at the Anchor desk beneath the blue Video wall. The bulletin is about to begin. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "5315c9e7"
           }
         }
       ]
@@ -1634,32 +1972,325 @@
     {
       "id": "3014d6d1-f093-4e8f-b791-aed102116cf3",
       "title": "The headline",
-      "description": "Medium close-up: @news-anchor looks up and delivers the headline, the @video-wall glowing behind.",
+      "description": "@news-anchor delivers the launch headline with composed authority; the @video-wall glows blue behind the desk.",
       "duration": 5,
       "start": 5,
       "camera": {
-        "move": "dolly-in",
+        "move": "custom",
         "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
         "distance": 3,
         "height": 1.4,
         "angle": 0,
-        "mm": 50,
-        "keys": null
+        "mm": 55,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              0,
+              1.6,
+              1.9
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.05,
+            "p": [
+              0,
+              1.6,
+              1.86
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.1,
+            "p": [
+              0,
+              1.6,
+              1.82
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.15,
+            "p": [
+              0,
+              1.6,
+              1.78
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.2,
+            "p": [
+              0,
+              1.6,
+              1.74
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.25,
+            "p": [
+              0,
+              1.6,
+              1.7
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.3,
+            "p": [
+              0,
+              1.6,
+              1.66
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.35,
+            "p": [
+              0,
+              1.6,
+              1.62
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.4,
+            "p": [
+              0,
+              1.6,
+              1.58
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.45,
+            "p": [
+              0,
+              1.6,
+              1.54
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.5,
+            "p": [
+              0,
+              1.6,
+              1.5
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.55,
+            "p": [
+              0,
+              1.6,
+              1.46
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.6,
+            "p": [
+              0,
+              1.6,
+              1.42
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.65,
+            "p": [
+              0,
+              1.6,
+              1.38
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.7,
+            "p": [
+              0,
+              1.6,
+              1.34
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.75,
+            "p": [
+              0,
+              1.6,
+              1.3
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.8,
+            "p": [
+              0,
+              1.6,
+              1.26
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.85,
+            "p": [
+              0,
+              1.6,
+              1.22
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.9,
+            "p": [
+              0,
+              1.6,
+              1.18
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.95,
+            "p": [
+              0,
+              1.6,
+              1.14
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 1,
+            "p": [
+              0,
+              1.6,
+              1.1
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          }
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
         "exclude": []
       },
       "style": {
-        "movement": [
-          "slow push-in"
-        ],
+        "movement": [],
         "cuts": [
           "continuous take, no cuts"
         ],
         "lens": [
-          "50mm normal",
-          "shallow depth of field"
+          "55mm"
         ],
         "filter": [
           "high contrast"
@@ -1667,19 +2298,37 @@
       },
       "references": [
         {
-          "id": "541259b3-11e0-4bd4-a459-4532c24a7447",
-          "name": "Shot 02 The headline · Flux.2 [pro] · 803981",
-          "file": "541259b3-11e0-4bd4-a459-4532c24a7447.webp",
+          "id": "ed40a467-dbf1-503d-a43c-bfedd21cff7a",
+          "name": "Shot 02 The headline · GPT Image 2.5 · 864957",
+          "file": "ed40a467-dbf1-503d-a43c-bfedd21cff7a.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-31T06:43:28.298Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 864957,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 55mm normal lens; medium shot, News anchor from the waist up; camera 1.6 m high, at eye level and 3 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: fills the whole background. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor delivers the launch headline with composed authority; the Video wall glows blue behind the desk. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Framing: 55mm lens, match the supplied blockout frame's…\nThe Video wall looks exactly like image 2. The News anchor looks exactly like image 3. The Studio floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "960aae67"
+          }
+        },
+        {
+          "id": "aefaf782-a221-50a3-aceb-6f8832c3b550",
+          "name": "Shot 02 The headline · GPT Image 2.5 · 153330",
+          "file": "aefaf782-a221-50a3-aceb-6f8832c3b550.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-30T17:18:30.727Z",
+          "createdAt": "2026-10-31T06:43:26.974Z",
           "generated": {
-            "presetId": "flux-2-pro",
-            "model": "Flux.2 [pro] (BFL)",
-            "seed": 803981,
-            "prompt": "Cinematic film still, single frame. Medium close-up: News anchor looks up and delivers the headline, the Video wall glowing behind. Confident news anchor in a tailored navy suit with a small yellow Comfy lapel pin, neat hair, warm expression, speaking to camera. Glossy dark blue studio floor with soft reflections. Huge curved LED video wall in electric blue showing the headline \"BREAKING: COMFYUI COMMUNITY RELEASES OPEN-SOURCE AI PREVIS\" with the yellow Comfy wordmark. Sleek white news desk with a glowing blue and yellow front panel strip. Setting: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.. Framing: 50mm lens, match the supplied blockout frame's composition. Lens: 50mm normal.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The News anchor looks exactly like image 2. The Video wall looks exactly like image 3. The Anchor desk looks exactly like image 4. The Studio floor looks exactly like image 5. No text, captions or labels."
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 153330,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 55mm normal lens; medium shot, News anchor from the waist up; camera 1.6 m high, at eye level and 3.8 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: fills the whole background. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor delivers the launch headline with composed authority; the Video wall glows blue behind the desk. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Framing: 55mm lens, match the…\nThe Video wall looks exactly like image 2. The News anchor looks exactly like image 3. The Studio floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "960aae67"
           }
         }
       ]
@@ -1687,7 +2336,7 @@
     {
       "id": "597912bb-6c6f-4f3b-9274-c203578c538e",
       "title": "On air",
-      "description": "Handheld over-the-shoulder from behind @camera-operator at the studio camera, pushing past the rig toward @news-anchor at the @anchor-desk as the floor manager counts him in.",
+      "description": "@news-anchor finishes the bulletin at the @anchor-desk and holds a confident expression. The studio remains calm and on air.",
       "duration": 5,
       "start": 10,
       "camera": {
@@ -1696,52 +2345,316 @@
         "distance": 6,
         "height": 1.6,
         "angle": 0,
-        "mm": 28,
+        "mm": 45,
         "keys": [
           {
             "t": 0,
             "p": [
-              1.6,
-              1.7,
-              9.6
+              -1,
+              1.9,
+              4.3
             ],
             "look": [
               0,
-              1.3,
+              1.35,
               -1.9
             ],
-            "mm": 28
+            "mm": 45
+          },
+          {
+            "t": 0.05,
+            "p": [
+              -0.975,
+              1.89,
+              4.235
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.1,
+            "p": [
+              -0.95,
+              1.88,
+              4.17
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.15,
+            "p": [
+              -0.925,
+              1.87,
+              4.105
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.2,
+            "p": [
+              -0.9,
+              1.86,
+              4.04
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -0.875,
+              1.85,
+              3.975
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.3,
+            "p": [
+              -0.85,
+              1.84,
+              3.91
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.35,
+            "p": [
+              -0.825,
+              1.83,
+              3.845
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.4,
+            "p": [
+              -0.8,
+              1.82,
+              3.78
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.45,
+            "p": [
+              -0.775,
+              1.81,
+              3.715
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -0.75,
+              1.8,
+              3.65
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.55,
+            "p": [
+              -0.725,
+              1.79,
+              3.585
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.6,
+            "p": [
+              -0.7,
+              1.78,
+              3.52
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.65,
+            "p": [
+              -0.675,
+              1.77,
+              3.455
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.7,
+            "p": [
+              -0.65,
+              1.76,
+              3.39
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -0.625,
+              1.75,
+              3.325
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.8,
+            "p": [
+              -0.6,
+              1.74,
+              3.26
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.85,
+            "p": [
+              -0.575,
+              1.73,
+              3.195
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.9,
+            "p": [
+              -0.55,
+              1.72,
+              3.13
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.95,
+            "p": [
+              -0.525,
+              1.71,
+              3.065
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
           },
           {
             "t": 1,
             "p": [
-              0.9,
-              1.6,
-              8.4
+              -0.5,
+              1.7,
+              3
             ],
             "look": [
               0,
-              1.3,
+              1.35,
               -1.9
             ],
-            "mm": 28
+            "mm": 45
           }
-        ]
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
         "exclude": []
       },
       "style": {
-        "movement": [
-          "handheld",
-          "steadicam follow"
-        ],
+        "movement": [],
         "cuts": [
           "continuous take, no cuts"
         ],
         "lens": [
-          "24mm wide"
+          "45mm"
         ],
         "filter": [
           "deep blue dusk"
@@ -1749,19 +2662,37 @@
       },
       "references": [
         {
-          "id": "8fffdd90-5fba-491d-b147-c682fa689f36",
-          "name": "Shot 03 On air · Flux.2 [pro] · 563435",
-          "file": "8fffdd90-5fba-491d-b147-c682fa689f36.webp",
+          "id": "ed80795a-4c4d-54f5-ab16-4ead2aa19f33",
+          "name": "Shot 03 On air · FLUX 3 Image · 368788",
+          "file": "ed80795a-4c4d-54f5-ab16-4ead2aa19f33.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-31T06:29:24.370Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 368788,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 45mm normal lens; medium long shot, News anchor from the knees up; camera 1.7 m high, at eye level and 4.9 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, about three-quarters of the frame height tall, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, about three-quarters of the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, partly hidden by Anchor desk, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor finishes the bulletin at the Anchor desk and holds a confident expression. The studio remains calm and on air. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Set: A modern broadcast news…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "db0d9f0f"
+          }
+        },
+        {
+          "id": "ac8ba3c7-da4c-5eb5-aecf-632d555bdd90",
+          "name": "Shot 03 On air · FLUX 3 Image · 33646",
+          "file": "ac8ba3c7-da4c-5eb5-aecf-632d555bdd90.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-30T17:46:24.847Z",
+          "createdAt": "2026-10-31T06:29:15.494Z",
           "generated": {
-            "presetId": "flux-2-pro",
-            "model": "Flux.2 [pro] (BFL)",
-            "seed": 563435,
-            "prompt": "Cinematic film still, single frame. Handheld over-the-shoulder from behind Camera operator at the studio camera, pushing past the rig toward News anchor at the Anchor desk as the floor manager counts him in. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera., Same face in every shot: the man from the primary reference. Glossy dark blue studio floor with soft reflections. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall., Clean broadcast motion graphics, crisp, no small type. Broadcast studio camera on a pedestal with a teleprompter hood. Studio camera operator in black, headset on, watching the viewfinder. Sleek white news desk with a glowing blue and yellow front panel strip. Setting: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.. Framing: 28mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. Filter: deep blue dusk.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The News anchor looks exactly like image 2. The Video wall looks exactly like image 3. The Studio camera 2 looks exactly like image 4. The Light rig 2 looks exactly like image 5. The Studio floor looks exactly like image 6. The Camera operator looks exactly like image 7. No text, captions or labels."
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 33646,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 45mm normal lens; full shot, News anchor head to toe; camera 1.9 m high, at eye level and 6.3 m from News anchor, looking slightly down; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, about three-quarters of the frame height tall, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, over half the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, over half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor finishes the bulletin at the Anchor desk and holds a confident expression. The studio remains calm and on air. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Set: A modern broadcast news studio at night: glossy dark floor,…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "db0d9f0f"
           }
         }
       ]
@@ -2102,20 +3033,29 @@
       "height": 817
     },
     {
-      "path": "media/refs/58d80f67-97f1-4e13-8c9c-999975936390.webp",
+      "path": "media/refs/fa122c1d-8574-596e-a61c-19a21a427900.webp",
       "kind": "image",
-      "bytes": 48138,
-      "sha256": "c8f1c23b18ff5d4041f15764495b8681eaf349e6e837244ba9aa17a53cb7fe3e",
-      "sourceSha256": "6e198da82b8ac465e7e127d4ee231f1ec2d28d3cceccaa031d4ac2f0824ec332",
+      "bytes": 81520,
+      "sha256": "e946a826aaf6972c6c4f56ff057f44d28b690f87e1fb8e4e5ad5a98f51bca20c",
+      "sourceSha256": "ba4b2cdde17fbc7d4f58731b62cfad698a4915ca4e737f5fdb66ed024c7192b0",
       "width": 1344,
       "height": 768
     },
     {
-      "path": "media/assets/65a5eb56-5700-4a69-9b4a-5fc4f08aa89a.mp4",
+      "path": "media/refs/313f0315-5350-577b-a39a-6de324020e91.webp",
+      "kind": "image",
+      "bytes": 67388,
+      "sha256": "a415a6a494afa8852c8d54bdec3b347c1508e8d64fed33439655f907c32c9c75",
+      "sourceSha256": "f632dd0e5c0d390dcbc6d1c9d59cc4a844173a5f8ee5d9e6ca58c1941b07d381",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/fb4ec8f6-d65d-4a5d-ad94-08d3785467ff.mp4",
       "kind": "video",
-      "bytes": 852411,
-      "sha256": "83b55846a6baf4af00028bb1f585d69358b0f4a9b6686899df8f88d3e676a52f",
-      "sourceSha256": "6a7983b2ce7169da66c2ad28d9ee55a87a74213ffba49a95757d639a6aa20a07",
+      "bytes": 671197,
+      "sha256": "cb8ee7cad8389e14fa214b68a56edc67b9e32efbe71ed5d2202e49aacc819419",
+      "sourceSha256": "2d5729a84c519b35a1c3f68a8c8f52ee4721a121a8be8b2603e4f4fbffdf4cdb",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -2123,11 +3063,11 @@
       "duration": 5
     },
     {
-      "path": "media/assets/cb215dbb-052e-43e4-b78d-63437452246f.mp4",
+      "path": "media/assets/d926219e-8388-5d92-a75a-5602d78f7058.mp4",
       "kind": "video",
-      "bytes": 1176227,
-      "sha256": "13cdf4eb57269e85de001337c99eebafa41081a07290078d6555e0504c79f4a0",
-      "sourceSha256": "4c1bfdbf65e8902ecb95c8cf90edef8193ff9620e9ef6d169388496e73c4c502",
+      "bytes": 1009809,
+      "sha256": "7fb7816098051bb6ab7e82344bcd3f10fcaf6b3d90b23206b4d7de413eb8c5c1",
+      "sourceSha256": "ca6bb90e29ea575867270f1894736d58343168fa384b4b3b8c06309956dad14d",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -2135,20 +3075,29 @@
       "duration": 5.042
     },
     {
-      "path": "media/refs/541259b3-11e0-4bd4-a459-4532c24a7447.webp",
+      "path": "media/refs/ed40a467-dbf1-503d-a43c-bfedd21cff7a.webp",
       "kind": "image",
-      "bytes": 64450,
-      "sha256": "e947e4ab6ed69ece4308ed853e88a69f23078f1588628c503aba7b81c22da3f8",
-      "sourceSha256": "6bfcecec3772b37dc92763bbe5c3ba26b9bdb1c4d01a74a0b311ca960532a811",
-      "width": 1344,
-      "height": 768
+      "bytes": 104416,
+      "sha256": "12ed6006a2718dbe757cc89d290763cd31b4a67709f651c2f777398b3729b662",
+      "sourceSha256": "66d9473fb3341e3a88bebae84ec6db91c3f754ae0fc71c1f2cb87c713688c0a1",
+      "width": 1600,
+      "height": 900
     },
     {
-      "path": "media/assets/c5dc1216-7dda-4c1e-8de6-ff38d7881451.mp4",
+      "path": "media/refs/aefaf782-a221-50a3-aceb-6f8832c3b550.webp",
+      "kind": "image",
+      "bytes": 114522,
+      "sha256": "ba18b7d03ccbde3e41f0cf0dbfcb862bb0f94634d437b31acdbd8990daf6740b",
+      "sourceSha256": "93eadb68764530fa7991f16c9ad4f08854965b6f8f0d2d363658e45a3354d32a",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/75f8d8f8-f1e3-4749-a132-e8c9f7b6394e.mp4",
       "kind": "video",
-      "bytes": 769729,
-      "sha256": "2a4fcb5410cd5e27b27ffd5651ed5ce24390774b049b861e32a76a00db9fe0a2",
-      "sourceSha256": "ca60807fa794a2e36bf831c48296779144b2d48d839fd169f975297cfe843c58",
+      "bytes": 357317,
+      "sha256": "4252aafe4179af54603a02e7c998a7ffddcbc39366a95f73db9ca98703e3f963",
+      "sourceSha256": "49ab7a9fd94ec04f725207251fa0c1682364204d104a44867f072c90839fe58c",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -2156,32 +3105,41 @@
       "duration": 5
     },
     {
-      "path": "media/assets/6b33169b-ba1a-4948-8ec8-e1787dd3542b.mp4",
+      "path": "media/assets/2f607883-0f3c-583c-acca-dd20535321c2.mp4",
       "kind": "video",
-      "bytes": 1079967,
-      "sha256": "7f8f5192e6e4732e491efab1894f4be7a0e9d4cb72371284ab91627d5a5f2ba9",
-      "sourceSha256": "e01b03bf4b12cd9f5c4350478313f5f03bc5e55060ea232cd560925bac31e0c4",
+      "bytes": 899405,
+      "sha256": "fb97722f41c1f561410376ff5ed71f9b61cda962ef300f5d56cf1a8f5652c41d",
+      "sourceSha256": "9092eb7e7eba10c22831742763431ee57dbe079521403faf5c7497c991f107da",
       "width": 1280,
       "height": 720,
       "fps": 24,
-      "frameCount": 121,
-      "duration": 5.042
+      "frameCount": 113,
+      "duration": 4.708
     },
     {
-      "path": "media/refs/8fffdd90-5fba-491d-b147-c682fa689f36.webp",
+      "path": "media/refs/ed80795a-4c4d-54f5-ab16-4ead2aa19f33.webp",
       "kind": "image",
-      "bytes": 60638,
-      "sha256": "eb7f3bf6f47c526debadcb1ac1b7ed10168ab9d38c353c20999a2dba811cb905",
-      "sourceSha256": "e4d4c2906a22201a5f35b9c07892c7f36ddfb68970a13a570818ab52a8d8d3e6",
-      "width": 1344,
+      "bytes": 52496,
+      "sha256": "cd1f12f316719982bc803c68ff7e6cc086758e8da51ff8b5dd3862b905b8d9ad",
+      "sourceSha256": "b2be92559820757367ab7fda13fad86292c62e5efbb2a25987bb0ed6c45c62d4",
+      "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/4d5fbe79-e940-437c-ab04-30cbf09dd81a.mp4",
+      "path": "media/refs/ac8ba3c7-da4c-5eb5-aecf-632d555bdd90.webp",
+      "kind": "image",
+      "bytes": 68278,
+      "sha256": "e8e0ba14058339569e0ee182897e0978c0338d2aa1ad807c33e1a629074ec7e4",
+      "sourceSha256": "ece49e485045f06edbeb1c680fd9975d00327da0d04a6edc26beb7afb79c0e8b",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/d7c03400-bb69-4171-ac64-c239335e6047.mp4",
       "kind": "video",
-      "bytes": 815660,
-      "sha256": "a11ca4233190969d8e4baa64154c02be4a1da355f52acc5e1f829d13b8b0e678",
-      "sourceSha256": "8972bc0c127a61b4ab3ad879a66c1cad7d9fea6a4ce42459ce7500e4b330bc17",
+      "bytes": 623322,
+      "sha256": "bd792b443f9d5d97246a6111c3670f26106ab22c31ae20d499a224f28d8f6d15",
+      "sourceSha256": "797d144b936733729bd271022f26f50dbbf1abdfbfee983696aa028d45f43ad5",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -2189,11 +3147,11 @@
       "duration": 5
     },
     {
-      "path": "media/assets/839a1561-3600-4554-b0e6-f5f8576bc2e7.mp4",
+      "path": "media/assets/940b5bf0-1a52-5b3a-a979-b655401dbe85.mp4",
       "kind": "video",
-      "bytes": 1204899,
-      "sha256": "78b8a0071911554dc81ae74ad695f6ee3e8310d6e7d72e401075ebe5e14397fe",
-      "sourceSha256": "f7e87d58721fe7f78d61269d0553c33460f80db035a0b7b2e3fed47ad41f87ae",
+      "bytes": 1025391,
+      "sha256": "4b307a595c453c15352747d0ee439c7f9219709cc226d6156efb06cb63d49ac7",
+      "sourceSha256": "98ee66dcb294169d633a62a543a104eeca35cf704f1e992c3629b19481d8bd00",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -2203,84 +3161,87 @@
   ],
   "assets": [
     {
-      "id": "65a5eb56-5700-4a69-9b4a-5fc4f08aa89a",
+      "id": "fb4ec8f6-d65d-4a5d-ad94-08d3785467ff",
       "kind": "camera-render",
       "shotId": "a015ef8e-809e-4492-93ef-675772aba797",
-      "file": "assets/65a5eb56-5700-4a69-9b4a-5fc4f08aa89a.mp4",
+      "file": "assets/fb4ec8f6-d65d-4a5d-ad94-08d3785467ff.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-30T15:10:37.235Z",
+      "createdAt": "2026-10-31T06:59:08.974Z",
       "source": {
-        "engineShotId": null
+        "engineShotId": null,
+        "signature": "5315c9e7"
       }
     },
     {
-      "id": "cb215dbb-052e-43e4-b78d-63437452246f",
+      "id": "d926219e-8388-5d92-a75a-5602d78f7058",
       "kind": "workflow-result",
       "shotId": "a015ef8e-809e-4492-93ef-675772aba797",
-      "file": "assets/cb215dbb-052e-43e4-b78d-63437452246f.mp4",
+      "file": "assets/d926219e-8388-5d92-a75a-5602d78f7058.mp4",
       "mime": "video/mp4",
       "duration": 5.041667,
-      "createdAt": "2026-10-30T17:50:19.669Z",
+      "createdAt": "2026-10-31T06:59:59.299Z",
       "source": {
         "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
         "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Crane down from above the lighting rigs, past the glowing Video wall, to News anchor seated at the Anchor desk looking up to camera. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera., Same face in every shot: the man from the primary reference. Glossy dark blue studio floor with soft reflections. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall., Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Setting: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.. Camera: Crane down on News anchor, 24mm wide, high angle, 5s. Follow the supplied camera motion exactly. Movement: crane down. Cuts: continuous take, no cuts. Lens: 24mm wide. Filter: deep blue dusk.",
-        "sourceAssetId": "65a5eb56-5700-4a69-9b4a-5fc4f08aa89a"
+        "prompt": "Cinematic live-action shot. News anchor sits at the Anchor desk beneath the blue Video wall. The bulletin is about to begin. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Set: Glossy dark blue studio floor with soft reflections. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 40mm. Filter: deep blue dusk.",
+        "sourceAssetId": "fb4ec8f6-d65d-4a5d-ad94-08d3785467ff"
       }
     },
     {
-      "id": "c5dc1216-7dda-4c1e-8de6-ff38d7881451",
+      "id": "75f8d8f8-f1e3-4749-a132-e8c9f7b6394e",
       "kind": "camera-render",
       "shotId": "3014d6d1-f093-4e8f-b791-aed102116cf3",
-      "file": "assets/c5dc1216-7dda-4c1e-8de6-ff38d7881451.mp4",
+      "file": "assets/75f8d8f8-f1e3-4749-a132-e8c9f7b6394e.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-30T15:10:38.551Z",
+      "createdAt": "2026-10-31T06:49:08.238Z",
       "source": {
-        "engineShotId": null
+        "engineShotId": null,
+        "signature": "960aae67"
       }
     },
     {
-      "id": "6b33169b-ba1a-4948-8ec8-e1787dd3542b",
+      "id": "2f607883-0f3c-583c-acca-dd20535321c2",
       "kind": "workflow-result",
       "shotId": "3014d6d1-f093-4e8f-b791-aed102116cf3",
-      "file": "assets/6b33169b-ba1a-4948-8ec8-e1787dd3542b.mp4",
+      "file": "assets/2f607883-0f3c-583c-acca-dd20535321c2.mp4",
       "mime": "video/mp4",
-      "duration": 5.041667,
-      "createdAt": "2026-10-30T17:19:39.030Z",
+      "duration": 4.708333,
+      "createdAt": "2026-10-31T06:56:24.473Z",
       "source": {
-        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "workflow": "Seedance 2.5 · edit the complete video · 6 reference images",
         "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Medium close-up: News anchor looks up and delivers the headline, the Video wall glowing behind. Confident news anchor in a tailored navy suit with a small yellow Comfy lapel pin, neat hair, warm expression, speaking to camera. Glossy dark blue studio floor with soft reflections. Huge curved LED video wall in electric blue showing the headline \"BREAKING: COMFYUI COMMUNITY RELEASES OPEN-SOURCE AI PREVIS\" with the yellow Comfy wordmark. Sleek white news desk with a glowing blue and yellow front panel strip. Setting: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.. Camera: Dolly in on News anchor, 50mm normal, eye level, 5s. Follow the supplied camera motion exactly. Movement: slow push-in. Lens: 50mm normal.",
-        "sourceAssetId": "c5dc1216-7dda-4c1e-8de6-ff38d7881451"
+        "prompt": "News anchor delivers the launch headline with composed authority; the Video wall glows blue behind the desk. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 55mm. Filter: high contrast.\nReference images: 1 = start still; 2 = end still; 3 = News anchor; 4 = Video wall; 5 = Anchor desk; 6 = Studio floor.",
+        "sourceAssetId": "75f8d8f8-f1e3-4749-a132-e8c9f7b6394e"
       }
     },
     {
-      "id": "4d5fbe79-e940-437c-ab04-30cbf09dd81a",
+      "id": "d7c03400-bb69-4171-ac64-c239335e6047",
       "kind": "camera-render",
       "shotId": "597912bb-6c6f-4f3b-9274-c203578c538e",
-      "file": "assets/4d5fbe79-e940-437c-ab04-30cbf09dd81a.mp4",
+      "file": "assets/d7c03400-bb69-4171-ac64-c239335e6047.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-30T15:10:39.933Z",
+      "createdAt": "2026-10-31T06:59:15.211Z",
       "source": {
-        "engineShotId": null
+        "engineShotId": null,
+        "signature": "db0d9f0f"
       }
     },
     {
-      "id": "839a1561-3600-4554-b0e6-f5f8576bc2e7",
+      "id": "940b5bf0-1a52-5b3a-a979-b655401dbe85",
       "kind": "workflow-result",
       "shotId": "597912bb-6c6f-4f3b-9274-c203578c538e",
-      "file": "assets/839a1561-3600-4554-b0e6-f5f8576bc2e7.mp4",
+      "file": "assets/940b5bf0-1a52-5b3a-a979-b655401dbe85.mp4",
       "mime": "video/mp4",
       "duration": 5.041667,
-      "createdAt": "2026-10-30T17:51:11.854Z",
+      "createdAt": "2026-10-31T07:00:10.617Z",
       "source": {
         "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
         "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Handheld over-the-shoulder from behind Camera operator at the studio camera, pushing past the rig toward News anchor at the Anchor desk as the floor manager counts him in. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera., Same face in every shot: the man from the primary reference. Glossy dark blue studio floor with soft reflections. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall., Clean broadcast motion graphics, crisp, no small type. Broadcast studio camera on a pedestal with a teleprompter hood. Studio camera operator in black, headset on, watching the viewfinder. Sleek white news desk with a glowing blue and yellow front panel strip. Setting: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.. Camera: Custom keys, 28mm normal, eye level, 5s. Follow the supplied camera motion exactly. Movement: handheld, steadicam follow. Cuts: continuous take, no cuts. Lens: 24mm wide. Filter: deep blue dusk.",
-        "sourceAssetId": "4d5fbe79-e940-437c-ab04-30cbf09dd81a"
+        "prompt": "Cinematic live-action shot. News anchor finishes the bulletin at the Anchor desk and holds a confident expression. The studio remains calm and on air. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 45mm. Filter: deep blue dusk.",
+        "sourceAssetId": "d7c03400-bb69-4171-ac64-c239335e6047"
       }
     }
   ],
@@ -2288,19 +3249,19 @@
     "clips": [
       {
         "shotId": "a015ef8e-809e-4492-93ef-675772aba797",
-        "assetId": "cb215dbb-052e-43e4-b78d-63437452246f",
+        "assetId": "d926219e-8388-5d92-a75a-5602d78f7058",
         "in": 0,
         "out": null
       },
       {
         "shotId": "3014d6d1-f093-4e8f-b791-aed102116cf3",
-        "assetId": "6b33169b-ba1a-4948-8ec8-e1787dd3542b",
+        "assetId": "2f607883-0f3c-583c-acca-dd20535321c2",
         "in": 0,
         "out": null
       },
       {
         "shotId": "597912bb-6c6f-4f3b-9274-c203578c538e",
-        "assetId": "839a1561-3600-4554-b0e6-f5f8576bc2e7",
+        "assetId": "940b5bf0-1a52-5b3a-a979-b655401dbe85",
         "in": 0,
         "out": null
       }

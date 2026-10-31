@@ -1,7 +1,7 @@
 // Mobile layer (compact phones, medium tablets): app bar, Build · Shoot · Cut tab bar, bottom sheets.
 // The same modules render everything; this file re-homes their elements and talks to director.ts through `host`.
 import './director-mobile.css';
-import { h, toast, shapeIcon } from './director-common';
+import { h, toast, shapeIcon, DEMO } from './director-common';
 import { SHAPES, MOVES, castRows, castCard, normalizeCast, objectLooks } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity } from '../shared/director.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
@@ -314,7 +314,7 @@ export function initMobile(host: MobileHost): MobileApi | null {
       ...(step === 'cut' && missing && !(missing as HTMLButtonElement).disabled ? [{ label: missing.textContent || 'Make missing blockouts', icon: 'cut', onPick: () => missing.click() }] : []),
       { label: 'Guide', icon: 'guide', onPick: () => openJourney() },
       { label: 'Rename project', icon: 'edit', onPick: () => { host.titleInput.focus(); host.titleInput.select(); } },
-      { label: 'Export project (.zip)', icon: 'download', onPick: () => { if (p) location.href = `/api/director/export?id=${p.id}`; } },
+      ...(DEMO ? [] : [{ label: 'Export project (.zip)', icon: 'download', onPick: () => { if (p) location.href = `/api/director/export?id=${p.id}`; } }]),
       { label: 'Show tips again', icon: 'tips', onPick: () => { localStorage.removeItem('previs.coach.viewport'); localStorage.removeItem('previs.m.gesturecoach'); host.coach.hidden = false; } },
     ]);
   }
