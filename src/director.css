@@ -1055,4 +1055,9 @@ dialog.confirm { width: min(380px, 92vw); }
 /* Read-only demo badge (VITE_DEMO builds): in the header, never over the stage or transport. */
 .demo-badge { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: var(--r-full); background: var(--ink); color: var(--on-ink); font-size: var(--fs-2xs); font-weight: 600; white-space: nowrap; text-decoration: none; flex: none; }
 .demo-badge:hover { background: var(--ink-2); }
+.coach.demo-note { width: max-content; max-width: min(640px, calc(100% - 28px)); border-radius: var(--r-lg); line-height: var(--lh-snug); }
+.coach.demo-note > span:nth-child(2), :is(body.m-compact, body.m-medium) .coach.demo-note { white-space: normal; }
+:is(body.m-compact, body.m-medium) .coach.demo-note { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; border-radius: var(--r-lg); padding: 10px 10px 10px 14px; }
+:is(body.m-compact, body.m-medium) .coach.demo-note > span:nth-child(2) { flex: 1 1 calc(100% - 24px); }
+body[data-mstep=build]:is(.m-compact, .m-medium) .viewport:not(.camview) .demo-note ~ .m-vpside { bottom: 132px; }
 @media (max-width: 1100px) { .ws-top .demo-badge { font-size: 0; padding: 0 8px; } .ws-top .demo-badge::before { content: 'Demo ↗'; font-size: var(--fs-2xs); } }

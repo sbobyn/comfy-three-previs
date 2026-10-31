@@ -123,6 +123,18 @@ export function slimProject(project, keep = demoKeep(project), media = new Map()
   return p;
 }
 
+/**
+ * The demo home's cards: the server's current starters (`GET director/starters`), each paired by title with the
+ * snapshotted project it opens. Starters with no project in the demo are left out; the demo cannot create one.
+ */
+export function demoStarters(starters = [], projects = []) {
+  const bare = t => String(t || '').replace(/^Starter · /, '').trim().toLowerCase();
+  return starters.flatMap(s => {
+    const p = projects.find(x => bare(x.title) === bare(s.title));
+    return p ? [{ slug: s.slug, title: s.title, description: s.description, shots: s.shots, entities: s.entities, scene: s.scene, shot: s.shot, projectId: p.id }] : [];
+  });
+}
+
 /** Follow input references and source clips, not unrelated output takes from the same job. */
 export function demoClosure(project, refgen, generation) {
   const keep = demoKeep(project), refJobs = new Map(), videoJobs = new Map(), engineAssets = new Set();
@@ -305,12 +317,14 @@ export async function snapshotDemo({ get, data, out, ids = DEFAULT_PROJECTS, bud
     projects.push({ ...summary, assets: slim.assets.length, references: slim.shots.reduce((n, s) => n + s.references.length, 0) });
   }
   await write('projects.json', { projects });
+  const starters = demoStarters((await get('director/starters').catch(() => ({}))).starters, projects);
+  await write('starters.json', { starters });
   await write('generation.json', { ...generation, jobs: [...jobs.values()], paidExecutionEnabled: false });
   await write('setup.json', { ready: true, checks: [] });
   const totalBytes = media.reduce((n, m) => n + m.bytes, 0);
   const manifest = { version: 1, projects: projects.map(p => p.id), skipped, media, totalBytes, budgetBytes: budget, complete: true, withinBudget: totalBytes <= budget };
   await write('snapshot-manifest.json', manifest);
-  console.log(`demo snapshot: ${projects.length} projects, ${jobs.size} generation jobs, ${media.length} media files (${(totalBytes / 1048576).toFixed(1)} MB), 0 skipped, 0 missing`);
+  console.log(`demo snapshot: ${projects.length} projects (${starters.length} as finished-scene cards), ${jobs.size} generation jobs, ${media.length} media files (${(totalBytes / 1048576).toFixed(1)} MB), 0 skipped, 0 missing`);
   if (totalBytes > budget) throw new Error(`Demo media over budget: ${totalBytes} > ${budget} bytes; all selected media retained, publication refused`);
   return manifest;
 }

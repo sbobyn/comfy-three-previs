@@ -3,7 +3,7 @@ import './director.css';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf, keyStills } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
 import { starterBlockout, starterMediaStatus, videoStale } from '../shared/director.mjs';
-import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge } from './director-common';
+import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge, REPO_URL } from './director-common';
 import type { Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
 import { captureShotVideo as captureVideo } from './director-capture';
@@ -288,6 +288,16 @@ function setStep(k: Step) {
   const q = new URLSearchParams(location.search); if (k === 'build') q.delete('view'); else q.set('view', k === 'cut' ? 'sequence' : 'shoot'); history.replaceState(null, '', `?${q}`);
 }
 app.replaceChildren(top, wsBody, sequence.el);
+// The read-only demo says so on arrival, before the first edit rather than in a toast after it: once per visit, in the
+// viewport hint's place (the orbit hint follows once it's dismissed).
+if (DEMO && sessionStorage.getItem('previs.demoNote') !== '1') {
+  const coachWas = coach.hidden; coach.hidden = true;
+  const note = h('div', { class: 'coach demo-note', role: 'note' }, h('span', { class: 'coach-dot', 'aria-hidden': 'true' }),
+    h('span', {}, h('b', {}, 'Read-only demo.'), ' Look around freely: camera, cast, stills, videos and the cut. Changes aren’t saved; generating runs on your own machine.'),
+    h('a', { class: 'btn sm', href: `${REPO_URL}#quick-start`, target: '_blank', rel: 'noopener' }, 'Run locally ↗'),
+    h('button', { class: 'btn sm', type: 'button', onclick: () => { note.remove(); sessionStorage.setItem('previs.demoNote', '1'); coach.hidden = coachWas; } }, 'OK'));
+  coach.after(note);
+}
 
 function showJourney() {
   if (!project) { toast('Wait for the project to finish loading.'); return; }
