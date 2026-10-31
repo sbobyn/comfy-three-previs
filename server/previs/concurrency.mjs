@@ -70,3 +70,28 @@ export function slotsFor(root) {
   if (!registries.has(key)) registries.set(key, createSlots());
   return registries.get(key);
 }
+
+/** Media downloads (/view) allowed at once per data dir: PREVIS_DOWNLOAD_CONCURRENCY, default 4. */
+export const downloadLimit = (env = process.env) => count(env.PREVIS_DOWNLOAD_CONCURRENCY, 4);
+
+// FIFO: at most `limit` calls run at once; the rest wait in arrival order. A stalled download holds one place,
+// never the whole queue (per-request journal locks stay in generation/refgen; this only bounds parallel transfers).
+export function createLimiter(limit) {
+  let running = 0;
+  const waiting = [];
+  const next = () => { while (running < limit && waiting.length) { running++; waiting.shift()(); } };
+  const run = async fn => {
+    await new Promise(resolve => { waiting.push(resolve); next(); });
+    try { return await fn(); } finally { running--; next(); }
+  };
+  run.stats = () => ({ limit, running, waiting: waiting.length });
+  return run;
+}
+
+// Generation and refgen share one download limit per data directory.
+const downloadRegistries = new Map();
+export function downloadsFor(root, env = process.env) {
+  const key = resolve(root);
+  if (!downloadRegistries.has(key)) downloadRegistries.set(key, createLimiter(downloadLimit(env)));
+  return downloadRegistries.get(key);
+}

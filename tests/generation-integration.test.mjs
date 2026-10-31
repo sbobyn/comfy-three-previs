@@ -13,7 +13,7 @@ import { generationRoutes } from '../server/previs/generation-routes.mjs';
 import { hashBytes } from '../server/previs/workflows.mjs';
 import { openGeneration } from '../server/previs/generation.mjs';
 import { backendSnapshot } from '../server/previs/backends.mjs';
-import { createSlots } from '../server/previs/concurrency.mjs';
+import { createSlots, createLimiter } from '../server/previs/concurrency.mjs';
 import { createJobTracker } from '../server/previs/job-tracker.mjs';
 import { assertNoSecrets } from '../server/previs/workflows.mjs';
 
@@ -96,7 +96,7 @@ async function fixture(t, { workflow = definition() } = {}) {
 }
 
 // Engine checks against a fake Cloud adapter (backendFactory): nothing leaves the process and nothing is paid.
-async function cloudFixture({ limit = '2', submitError = null, history = async () => null, view } = {}) {
+async function cloudFixture({ limit = '2', submitError = null, history = async () => null, view, downloads } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'previs-generation-cloud-'));
   const project = await openProject(root), image = await project.image(png);
   await project.mutate(project.get().revision, p => {
@@ -113,7 +113,7 @@ async function cloudFixture({ limit = '2', submitError = null, history = async (
     async submit({ graph, requestId }) { calls.submits++; calls.values.push(graph['1'].inputs.image); if (submitError) throw submitError(); return { promptId: 'cloud-' + requestId.slice(0, 8) }; },
     history, ...(view ? { view } : {}),
   });
-  const generation = await openGeneration(root, project, { backendFactory, allowPaid: true, slots: createSlots({ env: { PREVIS_LIMIT_CLOUD_IMAGES: limit } }) });
+  const generation = await openGeneration(root, project, { backendFactory, allowPaid: true, slots: createSlots({ env: { PREVIS_LIMIT_CLOUD_IMAGES: limit } }), ...(downloads ? { downloads } : {}) });
   async function quoted() {
     const id = randomUUID();
     await project.mutate(project.get().revision, p => { p.workflowBindings.push({ id, definitionId: 'definition', shotId: 'shot', assetBindings: { firstFrame: { renderId: image.id } }, prompt: 'cloud', parameters: {}, createdAt: new Date().toISOString() }); });
@@ -212,4 +212,27 @@ test('engine: a stalled Cloud /view for one job never delays another job\'s subm
   assert.equal(h.generation.get(first.input.requestId).status, 'collecting', 'collecting was persisted before the download');
   release();
   assert.equal((await tracking).status, 'completed'); assert.equal(h.calls.submits, 2);
+});
+
+test('engine: media downloads are bounded (FIFO); a full download queue still never delays a submit', async () => {
+  const gates = [], viewing = [];
+  const history = async promptId => { const job = h.generation.list().find(j => j.promptId === promptId); return { promptId, requestId: job.id, graph: job.submittedGraph, status: { completed: true }, outputs: { 2: { images: [{ filename: 'out.png', subfolder: '', type: 'output' }] } } }; };
+  const view = async () => { let release; const gate = new Promise(r => { release = r; }); gates.push(release); viewing.push(Date.now()); await gate; return png; };
+  const downloads = createLimiter(1);
+  const h = await cloudFixture({ limit: '4', history, view, downloads });
+  const a = await h.quoted(), b = await h.quoted();
+  for (const x of [a, b]) await h.generation.submit({ ...x.input, approval: h.consent(x.job) });
+  const trackA = h.generation.track(a.input.requestId), trackB = h.generation.track(b.input.requestId);
+  for (let i = 0; i < 50 && !gates.length; i++) await new Promise(r => setTimeout(r, 5));
+  await new Promise(r => setTimeout(r, 20));
+  assert.equal(gates.length, 1, 'only one download runs at a time');
+  assert.deepEqual(downloads.stats(), { limit: 1, running: 1, waiting: 1 });
+  assert.equal(h.generation.get(b.input.requestId).status, 'collecting', 'the waiting job has persisted collecting');
+  const c = await h.quoted(), t0 = Date.now();
+  assert.equal((await h.generation.submit({ ...c.input, approval: h.consent(c.job) })).status, 'queued'); assert.ok(Date.now() - t0 < 1000);
+  gates[0]();
+  for (let i = 0; i < 50 && gates.length < 2; i++) await new Promise(r => setTimeout(r, 5));
+  assert.equal(gates.length, 2, 'the next download starts when the first finishes'); gates[1]();
+  assert.deepEqual([(await trackA).status, (await trackB).status], ['completed', 'completed']);
+  assert.deepEqual(downloads.stats(), { limit: 1, running: 0, waiting: 0 });
 });

@@ -12,7 +12,7 @@ import { imageToPng } from './edit.mjs';
 import { createBackend, errorDetail, safeMediaLocation } from './backends.mjs';
 import { keyedLock } from './keyed-lock.mjs';
 import { telemetryHooks } from './job-progress.mjs';
-import { slotsFor } from './concurrency.mjs';
+import { slotsFor, downloadsFor } from './concurrency.mjs';
 import { uploadCacheFor } from './upload-cache.mjs';
 import { validateGraph, workflowCost, validateApproval, hashValue, assertNoSecrets } from './workflows.mjs';
 import { followsGuide, describeFrame } from '../../shared/still-match.mjs';
@@ -216,7 +216,7 @@ export async function openRefgen(root, director, options = {}) {
   // Per request id (and per identical request on submit), so one slow download never blocks another job.
   const lock = keyedLock();
   const active = j => ['uploading', 'submitting', 'submitted', 'uncertain', 'collecting'].includes(j.status);
-  const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root);
+  const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root), downloads = options.downloads || downloadsFor(root);
   slots.register('refgen', () => [...jobs.values()].filter(active).map(j => ({ id: j.id, backend: j.backend, kind: 'image', status: j.status, uncertainAt: j.uncertainAt, dispatchStartedAt: j.dispatchStartedAt, createdAt: j.createdAt })));
   let tracker = null;
   const label = j => `${j.entityName || 'Image'}${j.sheet?.label ? ` · ${j.sheet.label}` : ''} · ${String(j.model || j.presetId || '').split(' (')[0]}`;
@@ -261,7 +261,7 @@ export async function openRefgen(root, director, options = {}) {
         const current = await director.get(job.projectId);
         const refs = job.target === 'shot' ? current.shots.find(s => s.id === job.shotId)?.references || [] : current.scene.references || [];
         const existing = refs.find(r => r.generated?.requestId === job.id && r.generated?.outputKey === output.key);
-        const bytes = existing ? null : await adapter.view(output.location);
+        const bytes = existing ? null : await downloads(() => adapter.view(output.location));
         const guideMatch = bytes && job.target === 'shot' && job.guide ? await matchGuide(job, adapter, bytes, output.key) : null;
         const r = existing ? { referenceId: existing.id, project: current } : await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, outputKey: output.key, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId, ...(job.signature ? { signature: job.signature } : {}), ...(guideMatch ? { guideMatch } : {}) } });
         if (!referenceIds.includes(r.referenceId)) referenceIds.push(r.referenceId);

@@ -6,7 +6,7 @@ import { atomicJson } from './atomic.mjs';
 import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { createBackend, backendSnapshot, safeMediaLocation, errorDetail } from './backends.mjs';
 import { telemetryHooks } from './job-progress.mjs';
-import { slotsFor } from './concurrency.mjs';
+import { slotsFor, downloadsFor } from './concurrency.mjs';
 import { keyedLock } from './keyed-lock.mjs';
 import { uploadCacheFor } from './upload-cache.mjs';
 import { assertNoSecrets, hashBytes, hashValue, validateWorkflowDefinition, legacyWorkflowDefinition, validateGraph, workflowCost, validateApproval } from './workflows.mjs';
@@ -111,7 +111,7 @@ export async function openGeneration(root, project, options = {}) {
     if (requiresAttachment && job.status === 'recovery-required' && job.failure?.phase === 'attachment' && /Unknown project/.test(job.failure.detail || '')) { job.status = 'attaching'; job.recovery = { ...job.recovery, attachment: 0 }; }
     await persist(job);
   }
-  const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root);
+  const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root), downloads = options.downloads || downloadsFor(root);
   slots.register('generation', () => [...jobs.values()].filter(active).map(job => ({ id: job.id, backend: job.backend, kind: generationKind(job), status: job.status, uncertainAt: job.uncertainAt, dispatchStartedAt: job.dispatchStartedAt, createdAt: job.createdAt })));
   // Journal operations are serialized per request id (a slow download for one job never delays another job).
   // Submits of identical content also share a lock, so duplicate simultaneous submits are still refused.
@@ -318,7 +318,7 @@ export async function openGeneration(root, project, options = {}) {
       for (const output of job.collection) {
         if (job.results.some(result => result.key === output.key)) continue;
         phase = 'media-transfer';
-        const bytes = await adapter.view(output.location);
+        const bytes = await downloads(() => adapter.view(output.location));
         phase = 'media-probe';
         let media;
         if (output.mediaType === 'image/png') media = probePng(bytes);
