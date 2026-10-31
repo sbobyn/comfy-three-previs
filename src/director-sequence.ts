@@ -308,7 +308,7 @@ export function createSequence(ctx: SequenceCtx) {
       h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${bState[0]}` }, bState[1]),
         h('div', { class: 'sq-acts' },
           b ? h('button', { class: 'btn sm', type: 'button', 'aria-label': `Play the blockout of shot ${i + 1}`, title: 'Play the blockout', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'blockout'); } }, '▶') : null,
-          h('button', { class: 'btn sm', type: 'button', disabled: busy, 'aria-label': `${s.render ? 'Remake' : 'Make'} the blockout of shot ${i + 1}`, onclick: (ev: Event) => { ev.stopPropagation(); void renderShots([s]); } }, s.render ? 'Remake blockout' : 'Make blockout'))),
+          h('button', { class: 'btn sm', type: 'button', disabled: busy, 'aria-label': `${s.render ? 'Remake' : 'Make'} blockout · shot ${i + 1}`, onclick: (ev: Event) => { ev.stopPropagation(); void renderShots([s]); } }, s.render ? 'Remake blockout' : 'Make blockout'))),
       h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${gState[0]}` }, gState[1]), progress,
         h('div', { class: 'sq-acts' },
           res.length ? h('button', { class: 'btn sm', type: 'button', 'aria-label': `Play the generated video of shot ${i + 1}`, title: 'Play the generated video', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'generated'); } }, '▶') : null,

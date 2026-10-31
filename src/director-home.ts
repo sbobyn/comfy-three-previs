@@ -6,7 +6,7 @@ import { TEMPLATES, makeEntity, makeShot } from '../shared/director.mjs';
 import type { DirectorProject, Shot } from '../shared/director.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
 import { renderStill } from './director-scene';
-import { api, h, ago, claudeDialog, toast, DEMO, demoBadge } from './director-common';
+import { api, h, ago, claudeDialog, toast, DEMO, demoBadge, REPO_URL } from './director-common';
 import type { AgentStatus, Connect } from './director-common';
 import { openJourney } from './director-guide';
 import { checkList, openSetup } from './director-setup';
@@ -16,8 +16,15 @@ import { starterMedia } from './director-desktop-core';
 import { mountJobsPip } from './director-jobs'; // [jobs] the only place with a count across every project
 
 type Summary = { id: string; title: string; template: string; updatedAt: string; shots: number; entities: number; references: number; renders: number; assets: number; sceneName: string };
-/** One starter card: enough of the blockout to draw shot 1. `key` is what the server creates from. */
-export type Starter = { key: string; title: string; description: string; scene: DirectorProject['scene']; shot: Shot; shots?: number };
+/**
+ * One starter card: enough of the blockout to draw shot 1. `key` is what the server creates from. In the read-only
+ * demo `projectId` is the finished project the card opens (scripts/snapshot-demo.mjs pairs them).
+ */
+export type Starter = { key: string; title: string; description: string; scene: DirectorProject['scene']; shot: Shot; shots?: number; projectId?: string };
+/** The demo's "Explore a finished scene" opens this starter's project (the one the hero seam shows), else the first. */
+const FEATURED = 'final-lap';
+/** A workspace URL under the deploy base (the demo lives under /comfy-three-previs/). */
+const projectUrl = (id: string) => `${import.meta.env.BASE_URL}director.html?project=${encodeURIComponent(id)}`;
 
 const app = document.getElementById('app')!;
 let agent: AgentStatus | null = null, connect: Connect = null;
@@ -199,6 +206,23 @@ function ask(title: string, body: string, ok: string, field?: string): Promise<s
   });
 }
 
+/** The demo's secondary action: how to run the real thing. Mirrors the README's Quick start. */
+function runLocally() {
+  const commands = ['git clone --depth 1 --single-branch https://github.com/sbobyn/comfy-three-previs.git', 'cd comfy-three-previs', 'pnpm install && pnpm build', 'pnpm start   # → http://127.0.0.1:5190'].join('\n');
+  const copy = h('button', { class: 'btn', type: 'button', onclick: () => { void navigator.clipboard?.writeText(commands).then(() => { copy.textContent = 'Copied'; }, () => toast('Copy failed: select the commands instead.', true)); } }, 'Copy commands');
+  const done = h('button', { class: 'btn primary', type: 'submit' }, 'Done');
+  const dlg = h('dialog', { class: 'confirm home-run', 'aria-labelledby': 'run-title' },
+    h('form', { class: 'dialog-body', method: 'dialog' },
+      h('h2', { id: 'run-title', style: 'margin:0;font-size:15px' }, 'Run Comfy Three Previs locally'),
+      h('p', { class: 'muted', style: 'margin:0' }, 'Free and open source. You need Node.js 22.12+ and pnpm 10 (', h('code', {}, 'corepack enable'), '), and FFmpeg to export videos.'),
+      h('pre', { class: 'home-run-code', tabindex: 0, 'aria-label': 'Install commands' }, h('code', {}, commands)),
+      h('p', { class: 'muted', style: 'margin:0' }, 'Scenes, blockouts and the cut work without an account. To generate stills and video, add a Comfy Cloud API key to ', h('code', {}, '.env'), ' as the README explains.'),
+      h('div', { style: 'display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap' }, copy,
+        h('a', { class: 'btn', href: `${REPO_URL}#quick-start`, target: '_blank', rel: 'noopener' }, 'Full instructions ↗'), done)));
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.append(dlg); dlg.showModal(); done.focus();
+}
+
 function menu(p: Summary) {
   const close = () => { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
   const act = (label: string, fn: () => Promise<void>) => h('button', { role: 'menuitem', type: 'button', onclick: async () => { close(); try { await fn(); } catch (e) { toast((e as Error).message, true); } } }, label);
@@ -229,7 +253,7 @@ function projectCard(p: Summary) {
   void api(`director/project?id=${p.id}`).then(({ project }) => {
     el.firstElementChild!.replaceWith(frame(project.shots[0] ? still(project, project.shots[0], `${p.id}:${project.revision}`) : ''));
   }).catch(() => el.firstElementChild!.classList.remove('is-loading'));
-  return h('div', { class: 'home-project-wrap' }, el, ...menu(p));
+  return h('div', { class: 'home-project-wrap' }, el, ...(DEMO ? [] : menu(p)));
 }
 
 async function render() {
@@ -238,17 +262,31 @@ async function render() {
   try {
     const [data, s, st] = await Promise.all([api('director/projects'), api('director/setup').catch(() => null), api('director/starters').catch(() => ({ starters: [] }))]);
     projects = data.projects; agent = data.agent; connect = data.connect; archivedCount = data.archived; setup = s;
-    served = (st.starters || []).map((t: any) => ({ key: t.slug, title: String(t.title).replace(/^Starter · /, ''), description: t.description, shots: t.shots, scene: t.scene, shot: { ...t.shot, id: `starter-${t.slug}`, references: [], render: null } }));
+    served = (st.starters || []).map((t: any) => ({ key: t.slug, title: String(t.title).replace(/^Starter · /, ''), description: t.description, shots: t.shots, scene: t.scene, shot: { ...t.shot, id: `starter-${t.slug}`, references: [], render: null }, projectId: t.projectId }));
     await loadBlockoutModels(served.flatMap(s => s.scene.entities));
     if (showArchived) archived = (await api('director/archived')).projects;
   } catch (e) { toast((e as Error).message, true); }
   const starters = served.length ? served : templateStarters();
-  const starterSection = h('section', { class: 'home-section', id: 'starters', 'aria-labelledby': 'starters-title' },
-    h('div', { class: 'home-head' }, h('h2', { id: 'starters-title' }, 'Starters'), h('span', {}, 'Open one and make it yours.')),
-    starterCards(starters, key => void create(key)));
+  // The read-only demo can't create anything: its starters are finished projects that open as they are.
+  const scenes = DEMO ? served.filter(s => s.projectId) : [];
+  const featured = DEMO ? (scenes.find(s => s.key === FEATURED)?.projectId || scenes[0]?.projectId || projects[0]?.id) : undefined;
+  const starterSection = DEMO
+    ? h('section', { class: 'home-section', id: 'starters', 'aria-labelledby': 'starters-title' },
+      h('div', { class: 'home-head' }, h('h2', { id: 'starters-title' }, 'Finished scenes'), h('span', {}, 'Open one to look around: blockout, cast, stills and videos.')),
+      scenes.length ? starterCards(scenes, key => { const id = scenes.find(s => s.key === key)?.projectId; if (id) location.href = projectUrl(id); })
+        : h('div', { class: 'home-projects' }, ...projects.map(projectCard)))
+    : h('section', { class: 'home-section', id: 'starters', 'aria-labelledby': 'starters-title' },
+      h('div', { class: 'home-head' }, h('h2', { id: 'starters-title' }, 'Starters'), h('span', {}, 'Open one and make it yours.')),
+      starterCards(starters, key => void create(key)));
   const fileInput = h('input', { type: 'file', accept: '.zip,application/zip', hidden: true, onchange: (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (f) void importFile(f); } });
   const blenderInput = h('input', { type: 'file', accept: '.zip,application/zip', hidden: true, onchange: (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (f) void importBlender(f); } });
   const newScene = (label: string, cls = 'primary') => h('button', { class: `home-btn ${cls}`, type: 'button', onclick: () => void create('empty') }, label);
+  const openStarter = (cls = '') => h('a', { class: `home-btn ${cls}`, href: '#starters', onclick: (ev: Event) => { ev.preventDefault(); starterSection.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); starterSection.querySelector<HTMLElement>('.home-starter-open')?.focus({ preventScroll: true }); } }, 'Open a starter');
+  // First use leads with a finished starter (the quickest way to see what it does); New scene leads after that.
+  const isNew = projects.length < 3;
+  const actions = DEMO
+    ? [featured ? h('a', { class: 'home-btn primary', href: projectUrl(featured) }, 'Explore a finished scene') : null, h('button', { class: 'home-btn', type: 'button', onclick: () => runLocally() }, 'Run locally')]
+    : isNew ? [openStarter('primary'), newScene('New scene', '')] : [newScene('New scene'), openStarter()];
   const list = projects.length
     ? h('div', { class: 'home-projects' }, ...projects.map(projectCard))
     : h('div', { class: 'home-empty' }, h('strong', {}, 'No projects yet'), h('span', {}, 'Start a new scene or open a starter. Your work saves here automatically.'), newScene('New scene', 'ghost'));
@@ -268,14 +306,15 @@ async function render() {
           h('p', { class: 'home-eyebrow' }, 'Previsualization for AI video'),
           h('h1', {}, 'Block out the scene.', h('br'), h('span', {}, 'Generate the shot you meant.')),
           h('p', { class: 'home-lede' }, 'Arrange a scene in 3D, direct the camera, and Comfy turns it into video.'),
-          h('div', { class: 'home-actions' },
-            newScene('New scene'),
-            h('a', { class: 'home-btn', href: '#starters', onclick: (ev: Event) => { ev.preventDefault(); starterSection.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } }, 'Open a starter')),
+          h('div', { class: 'home-actions' }, ...actions),
+          // Said up front, before anyone tries to change something.
+          DEMO ? h('p', { class: 'home-demo-note', role: 'note' }, h('strong', {}, 'Read-only demo.'), ' Open any scene and look around: camera, cast, stills and videos. Editing and generating run on your own machine.') : null,
           h('div', { class: 'home-meta' }, claudeHint(), setup && !DEMO ? setupStatus(setup.checks, setup.dataDir) : null)),
         heroSeam(starters)),
       steps(),
       starterSection,
-      h('section', { class: 'home-section', 'aria-labelledby': 'projects-title' },
+      // The demo's projects are the finished scenes above; it has no "Your projects".
+      DEMO ? null : h('section', { class: 'home-section', 'aria-labelledby': 'projects-title' },
         h('div', { class: 'home-head' }, h('h2', { id: 'projects-title' }, 'Your projects'), projects.length ? h('span', {}, String(projects.length)) : null, h('i', { class: 'grow' }),
           fileInput, h('button', { class: 'home-link', type: 'button', title: 'A project (.previs.zip) or a shared asset (.previs-asset.zip)', onclick: () => fileInput.click() }, 'Import…'),
           DEMO ? null : blenderInput, DEMO ? null : h('button', { class: 'home-link', type: 'button', title: 'A zip of the folder scripts/blender/previs_export.py wrote: Blender’s camera, objects and frames become a new project', onclick: () => blenderInput.click() }, 'Import Blender shot…'),

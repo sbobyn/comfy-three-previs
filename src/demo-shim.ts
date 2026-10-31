@@ -32,6 +32,8 @@ async function apiGet(path: string, q: URLSearchParams): Promise<Response> {
       if (q.has('since')) return json({ agent: AGENT.agent });
       return file(`project-${q.get('id')}.json`);
     }
+    // The home's cards: the current starters, each paired with the finished project it opens (snapshot-demo.mjs).
+    case 'director/starters': return file('starters.json', { starters: [] });
     case 'director/refgen': return file(`refgen-${q.get('projectId')}.json`, { presets: [], jobs: [] });
     case 'director/assets': return file(`assets-${q.get('id')}.json`, { assets: [] });
     case 'director/setup': return file('setup.json', { ready: true, checks: [] });
