@@ -74,13 +74,18 @@ export function demoKeep(project) {
     const { start, end } = keyStills(s);
     if (start) refs.add(start.id);
     if (end) refs.add(end.id);
-    const clip = project.edit?.clips?.find(c => c.shotId === s.id);
-    const cut = clip && all.find(a => a.id === clip.assetId && a.shotId === s.id && a.mime?.startsWith('video/'));
-    if (clip?.assetId && !cut) throw new Error(`Unresolved Cut asset ${clip.assetId} for ${s.id}`);
-    const video = cut || picks[i].video;
-    if (video) assets.add(video.id);
+    const clips = project.edit?.clips?.filter(c => c.shotId === s.id) || [];
+    const videos = clips.length ? clips.map(clip => {
+      if (!clip.assetId) return picks[i].video;
+      const asset = all.find(a => a.id === clip.assetId && a.shotId === s.id && a.mime?.startsWith('video/'));
+      if (!asset) throw new Error(`Unresolved Cut asset ${clip.assetId} for ${s.id}`);
+      return asset;
+    }) : [picks[i].video];
+    for (const video of videos) {
+      if (video) assets.add(video.id);
+      if (video?.source?.sourceAssetId && all.some(a => a.id === video.source.sourceAssetId)) assets.add(video.source.sourceAssetId);
+    }
     if (s.render?.assetId && all.some(a => a.id === s.render.assetId)) assets.add(s.render.assetId);
-    if (video?.source?.sourceAssetId && all.some(a => a.id === video.source.sourceAssetId)) assets.add(video.source.sourceAssetId);
     const blockout = all.filter(a => a.shotId === s.id && a.kind === 'camera-render').sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))[0];
     if (blockout) assets.add(blockout.id);
     for (const r of s.references || []) if (r.role !== 'frame') refs.add(r.id);
@@ -120,11 +125,27 @@ export function slimProject(project, keep = demoKeep(project), media = new Map()
 
 /** Follow input references and source clips, not unrelated output takes from the same job. */
 export function demoClosure(project, refgen, generation) {
-  const keep = demoKeep(project), refJobs = new Map(), videoJobs = new Map();
+  const keep = demoKeep(project), refJobs = new Map(), videoJobs = new Map(), engineAssets = new Set();
   const refs = [...(project.scene.references || []), ...project.shots.flatMap(s => s.references || [])];
   const refById = new Map(refs.map(r => [r.id, r]));
   const assetById = new Map((project.assets || []).map(a => [a.id, a]));
   const visitRef = id => { if (refById.has(id)) keep.refs.add(id); };
+  const visitJob = id => {
+    if (!id || videoJobs.has(id)) return;
+    const job = (generation.jobs || []).find(j => j.id === id);
+    if (!job) throw new Error(`Missing video receipt ${id}`);
+    videoJobs.set(id, job);
+    for (const input of Object.values(job.sources || {})) visitInput(input);
+  };
+  const visitInput = input => {
+    if (!input || typeof input !== 'object') return;
+    visitRef(input.directorRef?.referenceId);
+    if (input.id) engineAssets.add(input.id);
+    if (assetById.has(input.id)) keep.assets.add(input.id);
+    visitJob(input.generationJobId);
+    visitJob(input.provenance?.generationJobId);
+    for (const ancestor of Object.values(input.provenance?.sourceAssets || {})) visitInput(ancestor);
+  };
   let previous;
   do {
     previous = keep.refs.size + keep.assets.size + refJobs.size + videoJobs.size;
@@ -140,17 +161,12 @@ export function demoClosure(project, refgen, generation) {
         if (!assetById.has(a.source.sourceAssetId)) throw new Error(`Unresolved source asset ${a.source.sourceAssetId}`);
         keep.assets.add(a.source.sourceAssetId);
       }
-      const job = (generation.jobs || []).find(j => j.id === a?.source?.jobId);
-      if (!job && a?.source?.jobId) throw new Error(`Missing video receipt ${a.source.jobId}`);
-      if (!job) continue;
-      videoJobs.set(job.id, job);
-      for (const input of Object.values(job.sources || {})) {
-        visitRef(input.directorRef?.referenceId);
-        if (assetById.has(input.id)) keep.assets.add(input.id);
-      }
+      visitJob(a?.source?.jobId);
+      visitJob(a?.generationJobId);
+      visitJob(a?.provenance?.generationJobId);
     }
   } while (previous !== keep.refs.size + keep.assets.size + refJobs.size + videoJobs.size);
-  return { ...keep, refJobs: [...refJobs.values()], videoJobs: [...videoJobs.values()] };
+  return { ...keep, engineAssets, refJobs: [...refJobs.values()], videoJobs: [...videoJobs.values()] };
 }
 
 /** Actual file metadata and original identity remain distinct; graphs and bindings stay historical. */
@@ -259,15 +275,28 @@ export async function snapshotDemo({ get, data, out, ids = DEFAULT_PROJECTS, bud
     for (const originalJob of keep.videoJobs) {
       if (jobs.has(originalJob.id)) continue;
       const job = structuredClone(originalJob);
-      for (const [key, input] of Object.entries(job.sources || {})) {
-        const source = `${input.sourceType === 'render' ? 'renders' : 'assets'}/${input.filename}`;
-        const image = (input.mime || input.mimeType || '').startsWith('image/');
+      const copyInput = async input => {
+        const mime = input.mime || input.mimeType || '';
+        const renderAsset = mime === 'image/png' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.id || '') && input.url === `/renders/${input.id}.png`;
+        const source = `${input.sourceType === 'render' || renderAsset ? 'renders' : 'assets'}/${input.filename}`;
+        const image = mime.startsWith('image/');
         const target = image ? `renders/${demoStillFile(input.filename)}` : `assets/${input.filename}`;
         const record = await save(source, target, image);
-        job.sources[key] = image ? { ...rewriteMedia(input, record, 'filename'), url: record.url } : { ...input, url: record.url };
-      }
+        const copied = image ? { ...rewriteMedia(input, record, 'filename'), url: record.url } : { ...input, url: record.url };
+        if (input.provenance?.sourceAssets) {
+          copied.provenance = { ...copied.provenance, sourceAssets: {} };
+          for (const [name, ancestor] of Object.entries(input.provenance.sourceAssets)) copied.provenance.sourceAssets[name] = await copyInput(ancestor);
+        }
+        return copied;
+      };
+      for (const [key, input] of Object.entries(job.sources || {})) job.sources[key] = await copyInput(input);
       job.demoOriginalResults = (job.results || []).map(r => ({ id: r.id, url: r.url, sha256: r.sha256 }));
-      job.results = (job.results || []).filter(r => keep.assets.has(r.id)).map(r => ({ ...r, url: assetURLs.get(r.id) || r.url }));
+      const results = [];
+      for (const result of job.results || []) if (keep.assets.has(result.id) || keep.engineAssets.has(result.id)) {
+        results.push(assetURLs.has(result.id) ? { ...result, url: assetURLs.get(result.id) } : await copyInput(result));
+      }
+      job.results = results;
+
       jobs.set(job.id, job);
     }
     await write(`project-${pid}.json`, { ...rest, project: slim, agent: { connected: false, waiting: false, lastSeen: null, name: null, runner: null } });

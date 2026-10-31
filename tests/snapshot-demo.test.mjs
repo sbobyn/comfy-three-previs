@@ -110,3 +110,47 @@ test('snapshot rewrites image files, MIME, hashes and receipt URLs together whil
   const hash = (await import('node:crypto')).createHash;
   for (const m of manifest.media) assert.equal(hash('sha256').update(await readFile(join(out, 'demo-media', m.path))).digest('hex'), m.sha256);
 });
+
+test('every repeated Cut clip retains its own take, automatic selection and trims', () => {
+  const p = fixture();
+  p.edit.clips.push({ shotId: 's', assetId: 'rejected-video', in: 0.5, out: 1.5 }, { shotId: 's', assetId: null, in: 0, out: 1 });
+  const before = structuredClone(p), slim = slimProject(p);
+  assert.deepEqual(slim.edit, before.edit);
+  for (const clip of slim.edit.clips.filter(c => c.assetId)) assert.ok(slim.assets.some(a => a.id === clip.assetId));
+  p.edit.clips.push({ shotId: 's', assetId: 'absent' });
+  assert.throws(() => demoKeep(p), /Unresolved Cut asset absent/);
+});
+
+test('engine-only generated PNG ancestors retain receipts, source media and nested provenance', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'demo-engine-chain-')), data = join(root, 'data'), out = join(root, 'out');
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNoaGgAAAMEAYFL09IQAAAAAElFTkSuQmCC', 'base64');
+  const id = '11111111-1111-4111-8111-111111111111';
+  const first = { id: 'first', filename: 'first.png', url: '/assets/first.png', mime: 'image/png', sourceType: 'asset' };
+  const image = { id, filename: `${id}.png`, url: `/renders/${id}.png`, mime: 'image/png', sourceType: 'asset', generationJobId: 'upstream', provenance: { generationJobId: 'upstream', sourceAssets: { firstFrame: first } } };
+  const p = { id: 'p', scene: { entities: [], references: [] }, shots: [{ id: 's', references: [] }], assets: [{ id: 'v', shotId: 's', file: 'assets/v.mp4', mime: 'video/mp4', kind: 'workflow-result', source: { jobId: 'downstream' } }], edit: { clips: [{ shotId: 's', assetId: 'v' }] } };
+  const gen = { jobs: [{ id: 'downstream', sources: { image }, results: [{ id: 'v' }] }, { id: 'upstream', graph: { seed: 21 }, sources: { firstFrame: first }, results: [image, { id: 'unrelated' }] }] };
+  const keep = demoClosure(p, { jobs: [] }, gen);
+  assert.deepEqual(keep.videoJobs.map(j => j.id), ['downstream', 'upstream']);
+  assert.ok(keep.engineAssets.has(id));
+  assert.throws(() => demoClosure(p, { jobs: [] }, { jobs: gen.jobs.slice(0, 1) }), /Missing video receipt upstream/);
+  const provenanceOnly = structuredClone(gen); delete provenanceOnly.jobs[0].sources.image.generationJobId;
+  assert.equal(demoClosure(p, { jobs: [] }, provenanceOnly).videoJobs.length, 2);
+  for (const [file, bytes] of [['director/p/assets/v.mp4', Buffer.from('video')], [`renders/${id}.png`, png], ['assets/first.png', png]]) {
+    await mkdir(join(data, file, '..'), { recursive: true }); await writeFile(join(data, file), bytes);
+  }
+  const get = async path => path === 'director/projects' ? { projects: [{ id: 'p' }] } : path === 'director/archived' ? { projects: [] } : path.startsWith('director/project?') ? { project: p } : path === 'generation' ? gen : { jobs: [] };
+  const before = structuredClone(gen);
+  const manifest = await snapshotDemo({ get, data, out, ids: ['p'] });
+  const saved = JSON.parse(await readFile(join(out, 'demo-data/generation.json')));
+  assert.equal(saved.jobs.length, 2);
+  assert.deepEqual(saved.jobs[1].graph, { seed: 21 });
+  assert.deepEqual(saved.jobs[1].results.map(r => r.id), [id]);
+  const published = new Set(manifest.media.map(m => '/' + m.path));
+  for (const j of saved.jobs) for (const input of Object.values(j.sources)) {
+    assert.ok(published.has(input.url));
+    for (const ancestor of Object.values(input.provenance?.sourceAssets || {})) assert.ok(published.has(ancestor.url));
+  }
+  assert.equal(saved.jobs[0].sources.image.demoMedia.original.file, `renders/${id}.png`);
+  assert.ok(published.has(saved.jobs[1].results[0].url));
+  assert.deepEqual(gen, before);
+});
