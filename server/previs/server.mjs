@@ -31,7 +31,7 @@ import { createJobProgress, createProgressSocketFactory } from './job-progress.m
 import { createJobProgressRoutes } from './job-progress-routes.mjs';
 import { createProgressCoordinator } from './job-progress-coordinator.mjs';
 import { keyedLock } from './keyed-lock.mjs';
-import { openBudget, budgetDir } from './budget.mjs';
+import { openBudget, budgetDir, refusalFields } from './budget.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -87,7 +87,7 @@ const port = Number(process.env.PORT || 5190);
 agentRunner = await openAgentRunner({ root, dataDir: data, port, director }); // [agent] built-in Claude Code runner
 const headless = openHeadless({ port }), renderRoute = renderRoutes({ director, headless }); // [headless] C2 render routes
 const frameRoute = frameRoutes({ director, headless }); // [frames] A6 video/still frames and contact sheets for agents
-const batches = await openBatches(data, { ...(process.env.PREVIS_BATCH_FAKE === '1' ? fakeBackend({ log: console.log }) : { drivers: loopbackDrivers(`http://127.0.0.1:${port}`), jobs: loopbackJobs(`http://127.0.0.1:${port}`) }), loadProject: id => director.get(id), log: console.log }), batchRoute = batchRoutes(batches); // [batch]
+const batches = await openBatches(data, { ...(process.env.PREVIS_BATCH_FAKE === '1' ? fakeBackend({ log: console.log }) : { drivers: loopbackDrivers(`http://127.0.0.1:${port}`), jobs: loopbackJobs(`http://127.0.0.1:${port}`) }), loadProject: id => director.get(id), costs: () => ({ marginPct: budget.marginPct(), graderOn: refgen.graderOn() }), log: console.log }), batchRoute = batchRoutes(batches); // [batch]
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
 async function body(req) {
   let text = ''; for await (const chunk of req) { text += chunk; if (text.length > 16 * 1024 * 1024) fail('Request too large', 413); }
@@ -278,7 +278,7 @@ const server = createServer(async (req, res) => {
     res.writeHead(range ? 206 : 200, { 'Accept-Ranges':'bytes','Content-Length':Math.max(0, end-start+1),...(range ? {'Content-Range':`bytes ${start}-${end}/${size}`} : {}), ...headers });
     if (!size) return res.end();
     const stream = createReadStream(file, { start, end }); stream.on('error', () => res.destroy()); res.on('close', () => stream.destroy()); stream.pipe(res);
-  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}), ...(e.budget ? { budget: e.budget } : {}) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
+  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}), ...refusalFields(e) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});

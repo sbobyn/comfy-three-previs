@@ -66,16 +66,17 @@ export function parseUsage(data) {
     const l = labels.get(r.group_key);
     return { key: r.group_key, name: l?.display_name || r.group_key, provider: l?.provider_display_name || l?.provider || null, usd: r.cost_micros / 1e6, share: finite(r.share) ? r.share : null, runs: finite(r.run_count) ? r.run_count : null };
   }).sort((x, y) => y.usd - x.usd);
-  const days = new Map();
+  const days = new Map(), buckets = [];
   for (const b of data.buckets || []) {
     if (!finite(b.cost_micros) || typeof b.period_start !== 'string') throw Error('Unexpected usage schema: a bucket has no period_start or cost_micros');
     days.set(b.period_start, (days.get(b.period_start) || 0) + b.cost_micros / 1e6);
+    buckets.push({ key: typeof b.group_key === 'string' ? b.group_key : null, start: b.period_start, end: typeof b.period_end === 'string' ? b.period_end : null, usd: b.cost_micros / 1e6 });
   }
   const bal = data.summary.balance;
   // Balance fields are cents: prefer the *_cents names, fall back to the misnamed *_micros ones (same values).
   const cents = name => finite(bal?.[`${name}_cents`]) ? bal[`${name}_cents`] : finite(bal?.[`${name}_micros`]) ? bal[`${name}_micros`] : null;
   const balance = bal ? { currency: bal.currency || null, totalUsd: cents('amount') === null ? null : cents('amount') / 100, cloudCreditUsd: cents('cloud_credit_balance') === null ? null : cents('cloud_credit_balance') / 100, prepaidUsd: cents('prepaid_balance') === null ? null : cents('prepaid_balance') / 100 } : null;
-  return { groupBy: data.group_by || null, asOf: data.as_of || null, servedFrom: data.served_from || null, billedUsd: data.summary.spend_micros / 1e6, balance, rows, days: [...days].sort(([a], [b]) => a.localeCompare(b)).map(([start, usd]) => ({ start, usd })) };
+  return { groupBy: data.group_by || null, granularity: data.granularity || null, asOf: data.as_of || null, servedFrom: data.served_from || null, billedUsd: data.summary.spend_micros / 1e6, balance, rows, buckets, days: [...days].sort(([a], [b]) => a.localeCompare(b)).map(([start, usd]) => ({ start, usd })) };
 }
 
 /** The local reservation ledger for reservations made in [start, end): read-only, never locked or written. */
@@ -103,9 +104,9 @@ export function summarizeLedger(ledger, start, end) {
   };
 }
 
-export async function fetchUsage({ start, end, groupBy, key, fetcher = fetch }) {
+export async function fetchUsage({ start, end, groupBy, key, granularity = 'day', fetcher = fetch }) {
   const url = new URL(ENDPOINT);
-  url.search = new URLSearchParams({ group_by: groupBy, granularity: 'day', starting_on: start.toISOString(), ending_before: end.toISOString() }).toString();
+  url.search = new URLSearchParams({ group_by: groupBy, granularity, starting_on: start.toISOString(), ending_before: end.toISOString() }).toString();
   const response = await fetcher(url, { headers: { 'X-API-Key': key, Accept: 'application/json' }, redirect: 'error', signal: AbortSignal.timeout(30000) });
   // Never echo the body of an error (it is not ours to print); the status says enough.
   if (!response.ok) throw Error(`Usage report HTTP ${response.status} for group_by=${groupBy}${response.status === 401 || response.status === 403 ? ' (check COMFY_CLOUD_API_KEY)' : ''}`);

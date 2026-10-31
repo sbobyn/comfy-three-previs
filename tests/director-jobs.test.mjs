@@ -77,10 +77,12 @@ test('budget line: what is left of the tighter cap, amber from 50%, red from 95%
   const scope = (o = {}) => ({ capUsd: null, spentUsd: 0, reservedUsd: 0, remainingUsd: null, alert: null, ...o });
   assert.equal(budgetLine(undefined), null);
   assert.equal(budgetLine({ account: scope({ period: 'month' }), project: scope(), remainingUsd: null, alert: null }), null);
-  assert.deepEqual({ ...budgetLine({ account: scope({ period: 'month', spentUsd: 1.2, reservedUsd: 0.3 }), project: scope(), remainingUsd: null, alert: null }) }, { tone: 'muted', text: 'Budget: no cap set · $1.50 committed this month' });
+  assert.deepEqual({ ...budgetLine({ account: scope({ period: 'month', spentUsd: 1.2, reservedUsd: 0.3 }), project: scope(), remainingUsd: null, alert: null }) }, { tone: 'muted', text: 'Budget: no cap set · $1.50 committed this month ($1.20 settled · $0.30 reserved)' });
   const account = scope({ period: 'month', capUsd: 15, spentUsd: 6, reservedUsd: 2, remainingUsd: 7, alert: 50 });
-  assert.deepEqual({ ...budgetLine({ account, project: scope(), remainingUsd: 7, alert: 50 }) }, { tone: 'warn', text: 'Budget: $7.00 left of $15.00 this month · $2.00 reserved' });
+  assert.deepEqual({ ...budgetLine({ account, project: scope(), remainingUsd: 7, alert: 50 }) }, { tone: 'warn', text: 'Budget: $7.00 left of $15.00 this month · $6.00 settled · $2.00 reserved' });
   const project = scope({ capUsd: 4, spentUsd: 3.9, remainingUsd: 0.1, alert: 95 });
-  assert.deepEqual({ ...budgetLine({ account, project, remainingUsd: 0.1, alert: 95 }) }, { tone: 'bad', text: 'Budget: $0.10 left of $4.00 for this project' });
+  assert.deepEqual({ ...budgetLine({ account, project, remainingUsd: 0.1, alert: 95 }) }, { tone: 'bad', text: 'Budget: $0.10 left of $4.00 for this project · $3.90 settled' });
+  // Nothing spent or held yet: just what is left.
+  assert.equal(budgetLine({ account: scope({ period: 'all', capUsd: 20, remainingUsd: 20 }), project: null, remainingUsd: 20, alert: null }).text, 'Budget: $20.00 left of $20.00');
   assert.equal(budgetLine({ account: scope({ period: 'all', capUsd: 20, remainingUsd: 20 }), project: null, remainingUsd: 20, alert: null }).tone, 'ok');
 });

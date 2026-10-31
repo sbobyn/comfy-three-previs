@@ -1,7 +1,9 @@
 // Batch generation (contract C3): plan a director project's blockouts, looks, sheets, stills and videos as a
 // dependency graph, then submit nodes as backend slots and the batch budget allow. Drivers do the work (loopback HTTP
 // on a real server, fakes in tests); job outcomes come from the job dashboard (contract C1, GET /api/jobs).
-// Estimates are list prices; a node with an unknown price is never submitted. Nothing is resent after an uncertain outcome.
+// A node's estimate is its expected charge: list price + reference images + the paid still grader (shared/tiers.mjs
+// estimateBreakdown). Its reserve adds the budget's safety margin, and the batch cap counts reserves, so a batch can no longer
+// plan under its cap and bill over it. A node with an unknown price is never submitted. Nothing is resent after an uncertain outcome.
 import { mkdir, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -12,7 +14,7 @@ import { blockoutStale, stillStale, castRows, lookSource, objectLooks } from '..
 import { cameraSourceOf, CAMERA_SOURCE_LABELS } from '../../shared/camera-source.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { planSlots } from '../../shared/sheet-presets.mjs';
-import { TIERS, modelsFor, estimateFor, VIDEO_PRICES, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
+import { TIERS, modelsFor, estimateFor, estimateBreakdown, sumBreakdowns, maxRefsFor, DEFAULT_MARGIN_PCT, VIDEO_PRICES, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 import { retryModelFor, WEAK_MATCH } from '../../shared/still-match.mjs';
 
 export const STEPS = ['looks', 'sheets', 'stills', 'videos'];
@@ -26,6 +28,15 @@ const MAX_EVENTS = 300;
 const iso = t => new Date(t).toISOString();
 const usd = x => `$${(Math.round((x || 0) * 100) / 100).toFixed(2)}`;
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
+const DEFAULT_COSTS = { marginPct: DEFAULT_MARGIN_PCT, graderOn: false };
+const money3 = x => `$${(Math.round((x || 0) * 1000) / 1000).toFixed(3).replace(/0$/, '')}`;
+/** "list $0.028 + references $0.017 + grader $0.05 + 10% margin $0.01" for messages. */
+export const describeBreakdown = b => (b ? `list ${money3(b.listUsd)}${b.refsUsd ? ` + references ${money3(b.refsUsd)}` : ''}${b.graderUsd ? ` + grader ${money3(b.graderUsd)}` : ''}${b.marginUsd ? ` + ${b.marginPct}% margin ${money3(b.marginUsd)}` : ''}` : '');
+/** The cost fields of one node: estimateUsd (expected), reserveUsd (with margin), breakdown; estimateUsd null when the price is unknown. */
+export function nodeCost(type, model, opts, costs = DEFAULT_COSTS) {
+  const b = estimateBreakdown(type, model, { ...opts, marginPct: costs.marginPct ?? DEFAULT_MARGIN_PCT });
+  return b ? { estimateUsd: b.expectedUsd, reserveUsd: b.reserveUsd, breakdown: b } : { estimateUsd: null };
+}
 
 // ---------- Planning (pure) ----------
 const shotName = (p, s) => `Shot ${String(p.shots.indexOf(s) + 1).padStart(2, '0')} ${s.title}`;
@@ -57,12 +68,20 @@ export function normalizeInput(input = {}) {
   return { steps: STEPS.filter(s => steps.includes(s)), tier, models: modelsFor(tier, input.models), maxCostUsd, shots: ids(input.shots, 'shots'), objects: ids(input.objects, 'objects'), stillsAt: stillsAt?.length ? [...new Set(stillsAt)] : null, dryRun: input.dryRun === true, retryWeakMatch: input.retryWeakMatch === true };
 }
 
+// Image inputs a key-frame still is sent: the blockout guide, the cast's looks in frame and the previous shot's last still, up to
+// the model's limit (src/director.ts picks the real ones at dispatch; the whole cast is the upper bound for "in frame").
+// grades: one paid grade per still when the grader is on.
+function stillInputs(project, shot, model, castCount, costs) {
+  const cap = maxRefsFor(model), prev = project.shots.indexOf(shot) > 0 ? 1 : 0;
+  return { refs: cap ? 1 + Math.min(cap - 1, castCount + prev) : 0, grades: costs.graderOn ? 1 : 0 };
+}
+
 /**
  * Plan nodes and deps for one project. Blockouts are planned for shots that need a video (skipped when already rendered),
  * looks for cast objects without an image, sheets per object (after the batch's stills), stills per shot at `stillsAt` (skipped when that key frame exists),
  * videos per shot (deps: blockout + key-frame stills for first-frame models, or optional looks for reference models).
  */
-export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
+export function planBatch(project, raw, { definitions = builtInPresets, costs = DEFAULT_COSTS } = {}) {
   const input = normalizeInput(raw), { steps, models } = input, want = s => steps.includes(s);
   for (const [step, type] of [['looks', 'look'], ['sheets', 'sheet'], ['stills', 'still']]) if (want(step) && estimateFor(type, models[step]) == null) fail(`Unknown or unpriced image model ${models[step]} for ${step}`);
   const shots = input.shots ? input.shots.map(id => project.shots.find(s => s.id === id) || fail(`Unknown shot ${id}`, 404)) : project.shots;
@@ -91,7 +110,7 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
     for (const e of pool) {
       const k = familyKey(e); if (lookNode.has(k) || imaged(k)) continue;
       const src = source(e), size = families.get(k).length;
-      lookNode.set(k, add({ id: `look:${src.id}`, type: 'look', label: `Look · ${src.name}${size > 1 && src.id === e.id && e.parent ? ` (shared by ${size})` : ''}`, target: { entityId: src.id, ...(size > 1 ? { family: families.get(k).map(x => x.id) } : {}) }, model: models.looks, estimateUsd: estimateFor('look', models.looks) }));
+      lookNode.set(k, add({ id: `look:${src.id}`, type: 'look', label: `Look · ${src.name}${size > 1 && src.id === e.id && e.parent ? ` (shared by ${size})` : ''}`, target: { entityId: src.id, ...(size > 1 ? { family: families.get(k).map(x => x.id) } : {}) }, model: models.looks, ...nodeCost('look', models.looks, {}, costs) }));
     }
   }
   const looksFor = es => [...new Set(es.map(e => lookNode.get(familyKey(e))?.id).filter(Boolean))];
@@ -100,7 +119,7 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
     const pool = objects || shots.flatMap(cast).filter(e => e.kind !== 'environment');
     for (const e of new Map(pool.map(x => [familyKey(x), source(x)])).values()) {
       const setId = SHEET_SET[e.kind] || 'obj-turn4', count = planSlots(setId, e.kind).length, look = lookNode.get(familyKey(e));
-      const n = add({ id: `sheet:${e.id}`, type: 'sheet', label: `Sheet · ${e.name}`, target: { entityId: e.id, setId }, model: models.sheets, count, estimateUsd: estimateFor('sheet', models.sheets, { count }), deps: look ? [look.id] : [] });
+      const n = add({ id: `sheet:${e.id}`, type: 'sheet', label: `Sheet · ${e.name}`, target: { entityId: e.id, setId }, model: models.sheets, count, ...nodeCost('sheet', models.sheets, { count, refs: 1 }, costs), deps: look ? [look.id] : [] });
       if (!look && !imaged(familyKey(e))) Object.assign(n, { status: 'failed', planError: true, error: `${e.name} needs a look first; add the looks step` });
     }
   }
@@ -111,13 +130,13 @@ export function planBatch(project, raw, { definitions = builtInPresets } = {}) {
     const still = new Map();
     if (want('stills')) for (const at of stillsAt) {
       if (typeof at === 'number' && at > s.duration) continue;
-      still.set(at, add({ id: `still:${s.id}${atKey(at)}`, type: 'still', label: `${name} · ${atLabel(at)} still`, target: { shotId: s.id, t: at }, model: models.stills, estimateUsd: estimateFor('still', models.stills), deps: castLooks, optional: castLooks,
+      still.set(at, add({ id: `still:${s.id}${atKey(at)}`, type: 'still', label: `${name} · ${atLabel(at)} still`, target: { shotId: s.id, t: at }, model: models.stills, ...nodeCost('still', models.stills, stillInputs(project, s, models.stills, cast(s).length, costs), costs), deps: castLooks, optional: castLooks,
         ...(hasStill(project, s, at) ? { status: 'skipped', note: 'Key frame already exists' } : hasStill(project, s, at, { stale: true }) ? { note: 'Blocking changed since its key frame; made again' } : {}) }));
     }
     if (!want('videos')) continue;
     // Where the camera comes from: the blockout clip, start → end stills (approximate) or one still (approximate).
     const cameraSource = needs.camera === 'keyframes' && !still.has('end') && !hasStill(project, s, 'end') && FIRST_FRAME_FALLBACK[def.id] ? 'still' : needs.camera;
-    const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, estimateUsd: estimateFor('video', models.videos, { duration: s.duration }), deps: [blockout.id], cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource] });
+    const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, ...nodeCost('video', models.videos, { duration: s.duration }, costs), deps: [blockout.id], cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource] });
     // A model that edits the blockout clip takes only clip lengths its provider accepts (Seedance edit: 4–30 s).
     const clip = needs.camera === 'blockout' ? def.constraints?.sourceVideo?.duration : null;
     if (clip && (s.duration < clip.min || s.duration > clip.max)) Object.assign(n, { status: 'failed', planError: true, error: `${def.title.split(' · ')[0]} needs a ${clip.min}–${clip.max} s blockout clip; this shot is ${s.duration} s. Change the shot length or the model` });
@@ -239,8 +258,8 @@ export async function openBatches(root, options = {}) {
       // retryWeakMatch: a still graded below WEAK_MATCH against its blockout is redone once with a strong-guide model
       // (a new paid request through the normal budget check; the weak still stays on the shot as an earlier take).
       const graded = results.find(r => Number.isFinite(r.guideMatch)), retry = retryModelFor(n.model);
-      if (n.type === 'still' && b.retryWeakMatch && !n.retriedFrom && graded && graded.guideMatch < WEAK_MATCH && estimateFor('still', retry) != null) {
-        setNode(b, n, { ...NO_IDS, status: 'ready', model: retry, estimateUsd: estimateFor('still', retry), retriedFrom: { model: n.model, referenceId: graded.id, guideMatch: graded.guideMatch } }, `${n.label}: matches the blockout ${graded.guideMatch}/10; retrying once with ${retry}`);
+      if (n.type === 'still' && b.retryWeakMatch && !n.retriedFrom && graded && graded.guideMatch < WEAK_MATCH && nodeCost('still', retry, { refs: n.breakdown?.refs, grades: n.breakdown?.grades }, b.costs).estimateUsd != null) {
+        setNode(b, n, { ...NO_IDS, status: 'ready', model: retry, ...nodeCost('still', retry, { refs: n.breakdown?.refs, grades: n.breakdown?.grades }, b.costs), retriedFrom: { model: n.model, referenceId: graded.id, guideMatch: graded.guideMatch } }, `${n.label}: matches the blockout ${graded.guideMatch}/10; retrying once with ${retry}`);
         continue;
       }
       try {
@@ -256,10 +275,11 @@ export async function openBatches(root, options = {}) {
 
   function submit(b, n) {
     if (n.estimateUsd == null) return setNode(b, n, { status: 'budget', error: 'Unknown cost; batches never submit unknown-cost work' }, `${n.label}: unknown cost, not submitted`), false;
-    if (b.spentEstimateUsd + n.estimateUsd > b.maxCostUsd + 1e-9) return setNode(b, n, { status: 'budget', error: `Over budget: ${usd(b.spentEstimateUsd)} committed + ${usd(n.estimateUsd)} > ${usd(b.maxCostUsd)}` }, `${n.label}: over budget, not submitted`), false;
+    const need = n.reserveUsd ?? n.estimateUsd; // what the server will reserve for it (the expected charge plus the margin)
+    if (b.spentEstimateUsd + need > b.maxCostUsd + 1e-9) return setNode(b, n, { status: 'budget', error: `Over budget: ${usd(b.spentEstimateUsd)} committed + ${usd(need)} for this request${n.breakdown && (n.breakdown.refsUsd || n.breakdown.graderUsd || n.breakdown.marginUsd) ? ` (${describeBreakdown(n.breakdown)})` : ''} > ${usd(b.maxCostUsd)}` }, `${n.label}: over budget, not submitted`), false;
     const driver = drivers[n.type];
-    b.spentEstimateUsd = round(b.spentEstimateUsd + n.estimateUsd);
-    setNode(b, n, { status: 'running', submitting: true, reserved: n.estimateUsd || undefined, startedAt: iso(now()), error: undefined, retryAt: undefined, resubmit: undefined }, `${n.label}: ${n.resubmit ? 'resubmitting its saved request' : 'submitting'}${n.estimateUsd ? ` (≈ ${usd(n.estimateUsd)})` : ''}`);
+    b.spentEstimateUsd = round(b.spentEstimateUsd + need);
+    setNode(b, n, { status: 'running', submitting: true, reserved: need || undefined, startedAt: iso(now()), error: undefined, retryAt: undefined, resubmit: undefined }, `${n.label}: ${n.resubmit ? 'resubmitting its saved request' : 'submitting'}${n.estimateUsd ? ` (≈ ${usd(n.estimateUsd)}, reserving ${usd(need)})` : ''}`);
     const refund = () => { b.spentEstimateUsd = round(b.spentEstimateUsd - (n.reserved || 0)); };
     const work = (async () => {
       try {
@@ -329,11 +349,13 @@ export async function openBatches(root, options = {}) {
     async create(raw) {
       if (!uuid.test(raw?.projectId || '')) fail('Unknown project', 404);
       const project = await loadProject(raw.projectId);
-      const { input, nodes } = planBatch(project, raw, { definitions: definitions(project) });
-      const estimateUsd = round(nodes.filter(n => !['skipped', 'failed'].includes(n.status)).reduce((s, n) => s + (n.estimateUsd || 0), 0));
+      const costs = { ...DEFAULT_COSTS, ...(typeof options.costs === 'function' ? options.costs() : options.costs) };
+      const { input, nodes } = planBatch(project, raw, { definitions: definitions(project), costs });
+      const planned = nodes.filter(n => !['skipped', 'failed'].includes(n.status)), breakdown = sumBreakdowns(planned.map(n => n.breakdown));
+      const estimateUsd = round(planned.reduce((s, n) => s + (n.estimateUsd || 0), 0)), reserveUsd = round(planned.reduce((s, n) => s + (n.reserveUsd ?? n.estimateUsd ?? 0), 0));
       const t = iso(now()), b = { id: randomUUID(), projectId: project.id, status: input.dryRun ? 'planned' : 'running', createdAt: t, updatedAt: t, steps: input.steps, tier: input.tier, models: input.models,
-        maxCostUsd: input.maxCostUsd, estimateUsd, spentEstimateUsd: 0, budgetSkipped: 0, dryRun: input.dryRun, ...(input.retryWeakMatch ? { retryWeakMatch: true } : {}), ...(input.shots ? { shots: input.shots } : {}), ...(input.objects ? { objects: input.objects } : {}), nodes, events: [] };
-      event(b, `Planned ${nodes.length} nodes for “${project.title}”: ≈ ${usd(estimateUsd)} (${input.tier}), cap ${usd(input.maxCostUsd)}${input.dryRun ? '; dry run, nothing submitted' : ''}`);
+        maxCostUsd: input.maxCostUsd, estimateUsd, reserveUsd, breakdown: { ...breakdown, marginPct: costs.marginPct, graderOn: costs.graderOn }, costs, spentEstimateUsd: 0, budgetSkipped: 0, dryRun: input.dryRun, ...(input.retryWeakMatch ? { retryWeakMatch: true } : {}), ...(input.shots ? { shots: input.shots } : {}), ...(input.objects ? { objects: input.objects } : {}), nodes, events: [] };
+      event(b, `Planned ${nodes.length} nodes for “${project.title}”: ≈ ${usd(estimateUsd)} expected (${describeBreakdown({ ...breakdown, marginUsd: 0 })}${breakdown.marginUsd ? `; reserves ${usd(reserveUsd)} with the ${costs.marginPct}% margin` : ''}) (${input.tier}), cap ${usd(input.maxCostUsd)}${input.dryRun ? '; dry run, nothing submitted' : ''}`);
       if (!input.dryRun) resolve(b);
       batches.set(b.id, b); if (!input.dryRun) await persist(b);
       if (!input.dryRun) schedule(b.id, 0);

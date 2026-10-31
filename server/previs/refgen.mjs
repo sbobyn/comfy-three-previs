@@ -18,6 +18,7 @@ import { validateGraph, workflowCost, validateApproval, hashValue, assertNoSecre
 import { followsGuide, describeFrame } from '../../shared/still-match.mjs';
 import { shotSignature } from '../../shared/director.mjs';
 import { stillGuideMatch, gradeStillPaid, GRADER_RESERVE_USD } from './still-match.mjs';
+import { GRADER_PRICES, BILLED_ON_MODERATION, DEFAULT_MARGIN_PCT, referenceUsd } from '../../shared/tiers.mjs';
 import { openBudget, budgetDir, followJob, quoteEstimate } from './budget.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
@@ -187,11 +188,21 @@ export const imagePresets = [
 for (const p of imagePresets) p.followsGuide = followsGuide(p.id);
 export const publicPresets = () => imagePresets.map(({ build, ...p }) => p);
 
-export function quoteFor(preset, count, cost) {
+/**
+ * A Cloud image quote. `estimate` is the expected charge: list price + reference images + the paid grader (`refs` image inputs
+ * per image, `grades` graded stills). The safety margin is not in it; `breakdown.reserveUsd` is what the budget will hold.
+ * `credits` stays the list price in credits (the displayed price).
+ */
+export function quoteFor(preset, count, cost, { refs = 0, grades = 0, marginPct = DEFAULT_MARGIN_PCT } = {}) {
   if (preset.backend === 'local') return { ...cost, label: cost.status === 'known' ? 'No charge (local hardware)' : 'Unknown — unqualified local nodes' };
-  const usd = preset.pricing.usdPerImage == null ? null : Math.round(preset.pricing.usdPerImage * count * 1000) / 1000;
+  const list = preset.pricing.usdPerImage == null ? null : Math.round(preset.pricing.usdPerImage * count * 1000) / 1000;
+  const r4 = x => Math.round(x * 10000) / 10000;
+  const refsUsd = list == null ? 0 : r4(referenceUsd(preset.id, refs) * count), graderUsd = list > 0 ? r4(GRADER_PRICES.gemini * grades) : 0;
+  const usd = list == null ? null : r4(list + refsUsd + graderUsd), marginUsd = usd == null ? 0 : r4(usd * marginPct / 100);
+  const extras = [refsUsd ? `${refs} reference image${refs === 1 ? '' : 's'} $${refsUsd.toFixed(3)}` : '', graderUsd ? `grader $${graderUsd.toFixed(3)}` : ''].filter(Boolean);
   return { status: 'unknown', amount: null, currency: 'USD', estimate: usd, credits: preset.pricing.creditsPerImage == null ? null : Math.round(preset.pricing.creditsPerImage * count * 100) / 100, nodes: cost.nodes,
-    label: usd == null ? `Unknown — ${preset.pricing.rate}` : `≈ $${usd.toFixed(3)} estimate (${Math.round(preset.pricing.creditsPerImage * count * 10) / 10} credits${preset.pricing.derived ? ', from the per-token rate' : ''}); Cloud total unknown`,
+    ...(usd == null ? {} : { breakdown: { listUsd: list, refsUsd, graderUsd, expectedUsd: usd, marginPct, marginUsd, reserveUsd: r4(usd + marginUsd), refs, grades: graderUsd ? grades : 0 } }),
+    label: usd == null ? `Unknown — ${preset.pricing.rate}` : `≈ $${usd.toFixed(3)} estimate (list $${list.toFixed(3)}${extras.length ? ` + ${extras.join(' + ')}` : ''}; ${Math.round(preset.pricing.creditsPerImage * count * 10) / 10} credits${preset.pricing.derived ? ', from the per-token rate' : ''}); Cloud total unknown`,
     reason: 'Comfy Cloud partner-node charges are estimates; the backend does not return a binding price.' };
 }
 
@@ -203,6 +214,8 @@ export async function openRefgen(root, director, options = {}) {
   const allowPaid = () => (options.allowPaid ?? process.env.PREVIS_ALLOW_PAID === '1') === true;
   // Every paid dispatch (and the paid grader) reserves its estimate here first (server.mjs passes the shared authority).
   const budget = options.budget || await openBudget(budgetDir(root));
+  // The paid still grader runs on Cloud key frames when PREVIS_MATCH_GRADER=gemini and paid generation is on; quotes and reservations count it.
+  const graderOn = () => (options.grader ?? process.env.PREVIS_MATCH_GRADER) === 'gemini' && allowPaid();
   async function persist(job) { if (job.status === 'uncertain' && !job.uncertainAt) job = { ...job, uncertainAt: now() }; assertNoSecrets(job); await mkdir(dirFor(job.projectId), { recursive: true }); await atomicJson(join(dirFor(job.projectId), job.id + '.json'), job); jobs.set(job.id, structuredClone(job)); await followJob(budget, job, options.log); return structuredClone(job); }
   // Recover receipts: an interrupted dispatch is uncertain and is never resent.
   async function load(id) {
@@ -223,6 +236,15 @@ export async function openRefgen(root, director, options = {}) {
   slots.register('refgen', () => [...jobs.values()].filter(active).map(j => ({ id: j.id, backend: j.backend, kind: 'image', status: j.status, uncertainAt: j.uncertainAt, dispatchStartedAt: j.dispatchStartedAt, createdAt: j.createdAt })));
   let tracker = null;
   const label = j => `${j.entityName || 'Image'}${j.sheet?.label ? ` · ${j.sheet.label}` : ''} · ${String(j.model || j.presetId || '').split(' (')[0]}`;
+  // A request the provider refuses (moderation) is still billed by some models (shared/tiers.mjs BILLED_ON_MODERATION): the
+  // reservation then settles at the output price plus reference images, not at $0 and not as a hold that expires.
+  const MODERATED = /Request Moderated|Moderation Reasons|Content Policy Violation/i;
+  function refusalBilling(job, text) {
+    if (!MODERATED.test(text)) return {};
+    const basis = BILLED_ON_MODERATION[job.presetId];
+    const q = job.quote?.breakdown;
+    return { moderated: true, ...(basis && q ? { billedUsd: Math.round((q.listUsd + q.refsUsd) * 10000) / 10000, billedNote: `Moderated; ${basis}` } : {}) };
+  }
   async function trackJob(id, tracking) {
     let job = jobs.get(id); if (!job) fail('Unknown request', 404);
     if (!['submitted', 'uncertain', 'collecting'].includes(job.status) || !job.promptId) return structuredClone(job);
@@ -240,7 +262,8 @@ export async function openRefgen(root, director, options = {}) {
         const legacy = (history.status?.messages || []).find(m => m?.[0] === 'execution_error')?.[1];
         const err = history.error || (legacy ? { nodeId: legacy.node_id ?? null, nodeType: legacy.node_type || null, message: String(legacy.exception_message || '') } : null);
         const why = err ? ` ${err.nodeType || 'Node'}: ${String(err.message || '').replace(/\s+/g, ' ').slice(0, 240)}` : '';
-        return persist({ ...job, status: 'failed', provider: { status, ...(err ? { error: err } : {}) }, failure: { phase: 'execution', httpStatus: null, detail: err ? errorDetail({ message: why.trim() }) : null }, message: `Backend reported ${status}.${why} Nothing is retried.`, finishedAt: now() });
+        const refusal = refusalBilling(job, `${err?.message || ''} ${legacy?.exception_message || ''}`);
+        return persist({ ...job, status: 'failed', provider: { status, ...(err ? { error: err } : {}) }, failure: { phase: 'execution', httpStatus: null, detail: err ? errorDetail({ message: why.trim() }) : null, ...refusal }, message: `Backend reported ${status}.${why} Nothing is retried.`, finishedAt: now() });
       }
       if (!history.status?.completed) return unchanged();
       const collection = [];
@@ -257,6 +280,7 @@ export async function openRefgen(root, director, options = {}) {
     }
     if (recoveryAttempts(job, 'collection') >= RECOVERY_ATTEMPTS) return persist({ ...job, status: 'recovery-required', message: 'Recovery limit reached. Recover existing output only; never resubmit.' });
     job = await persist(beginRecovery(job, 'collection'));
+    const tally = { calls: 0 }; // paid grades requested since the last save (billed even when the verdict is unusable)
     try {
       const referenceIds = [...(job.referenceIds || [])], results = [...(job.results || [])];
       for (const output of job.collection) {
@@ -265,17 +289,17 @@ export async function openRefgen(root, director, options = {}) {
         const refs = job.target === 'shot' ? current.shots.find(s => s.id === job.shotId)?.references || [] : current.scene.references || [];
         const existing = refs.find(r => r.generated?.requestId === job.id && r.generated?.outputKey === output.key);
         const bytes = existing ? null : await downloads(() => adapter.view(output.location));
-        const guideMatch = bytes && job.target === 'shot' && job.guide ? await matchGuide(job, adapter, bytes, output.key) : null;
+        const guideMatch = bytes && job.target === 'shot' && job.guide ? await matchGuide(job, adapter, bytes, output.key, tally) : null;
         const r = existing ? { referenceId: existing.id, project: current } : await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, outputKey: output.key, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId, ...(job.signature ? { signature: job.signature } : {}), ...(guideMatch ? { guideMatch } : {}) } });
         if (!referenceIds.includes(r.referenceId)) referenceIds.push(r.referenceId);
         const ref = [...(r.project?.scene?.references || []), ...(r.project?.shots || []).flatMap(x => x.references || [])].find(x => x.id === r.referenceId);
         const match = ref?.generated?.guideMatch; // graded scores only (the rough local one is not a match verdict)
         results.push({ id: r.referenceId, key: output.key, kind: 'image', url: ref?.file ? `/director-refs/${job.projectId}/${ref.file}` : null, ...(match && !match.rough ? { guideMatch: match.score } : {}) });
-        job = await persist({ ...job, referenceIds, results });
+        job = await persist({ ...job, referenceIds, results, ...(tally.calls ? { graderCalls: (job.graderCalls || 0) + tally.calls } : {}) }); tally.calls = 0;
       }
       return persist({ ...job, status: 'completed', referenceIds, results, failure: null, tracking: { ...job.tracking, error: null }, message: `Attached ${referenceIds.length} ${job.target === 'shot' ? 'key frame' : 'look'}${referenceIds.length === 1 ? '' : 's'} to ${job.entityName}.`, finishedAt: now() });
     } catch (error) {
-      return persist({ ...job, status: recoveryAttempts(job, 'collection') >= RECOVERY_ATTEMPTS ? 'recovery-required' : 'collecting', failure: { phase: 'collection', detail: errorDetail(error) }, tracking: { ...job.tracking, error: errorDetail(error) }, message: 'Existing output collection failed; no resubmission. Recovery is bounded across restarts.' });
+      return persist({ ...job, status: recoveryAttempts(job, 'collection') >= RECOVERY_ATTEMPTS ? 'recovery-required' : 'collecting', ...(tally.calls ? { graderCalls: (job.graderCalls || 0) + tally.calls } : {}), failure: { phase: 'collection', detail: errorDetail(error) }, tracking: { ...job.tracking, error: errorDetail(error) }, message: 'Existing output collection failed; no resubmission. Recovery is bounded across restarts.' });
     }
   }
 
@@ -285,19 +309,23 @@ export async function openRefgen(root, director, options = {}) {
    * attaches). Otherwise a free local edge/light score, stored with rough: true — it does not track camera match
    * reliably (see docs/director.md), so the UI never shows it as a match score and batches never retry on it.
    */
-  async function matchGuide(job, adapter, bytes, key) {
+  async function matchGuide(job, adapter, bytes, key, tally = { calls: 0 }) {
     const guideBytes = await readFile(join(dirFor(job.projectId), job.guide.file)).catch(() => null);
     if (!guideBytes) return null;
-    if ((options.grader ?? process.env.PREVIS_MATCH_GRADER) === 'gemini' && allowPaid() && job.backend.kind === 'cloud') {
+    if (graderOn() && job.backend.kind === 'cloud') {
       const project = await director.get(job.projectId).catch(() => null), shot = project?.shots.find(s => s.id === job.shotId);
       const t = !shot ? 0 : job.frameAt === 'end' ? shot.duration : typeof job.frameAt === 'number' ? job.frameAt : 0;
       const plan = shot ? describeFrame(project, shot, t).text : '';
       const requestId = `${job.id}-${hashValue(key).slice(0, 8)}`;
-      // The grade is optional: over budget, the free local score is used instead.
-      const admitted = await budget.reserve({ id: `${requestId}-grade`, source: 'grader', projectId: job.projectId, kind: 'image', model: 'Still grader', label: `${job.entityName || 'Still'} · match grade`, estimateUsd: GRADER_RESERVE_USD }).then(() => true, () => false);
+      // The still's own reservation already holds its grades (its quote counted them, see quoteFor), and the still settles
+      // for `tally.calls` of them. A job without that allowance (an older receipt) reserves the grade separately instead,
+      // and the grade is optional then: over budget, the free local score is used.
+      const prepaid = (budget.get(job.id)?.components?.graderUsd || 0) > 0;
+      const admitted = prepaid || await budget.reserve({ id: `${requestId}-grade`, source: 'grader', projectId: job.projectId, kind: 'image', model: 'Still grader', label: `${job.entityName || 'Still'} · match grade`, estimateUsd: GRADER_RESERVE_USD, components: { graderUsd: GRADER_RESERVE_USD } }).then(() => true, () => false);
       if (admitted) {
+        if (prepaid) tally.calls++; // a call that returns nothing may still be billed
         const graded = await gradeStillPaid({ adapter, upload: (b, o) => uploadCache.upload(adapter, b, o), guideBytes, stillBytes: bytes, requestId, projectId: job.projectId, plan });
-        await (graded ? budget.settle(`${requestId}-grade`) : budget.hold(`${requestId}-grade`, 'Grade not returned; a charge may still arrive')).catch(() => {});
+        if (!prepaid) await (graded ? budget.settle(`${requestId}-grade`) : budget.hold(`${requestId}-grade`, 'Grade not returned; a charge may still arrive')).catch(() => {});
         if (graded) return graded;
       }
     }
@@ -334,7 +362,8 @@ export async function openRefgen(root, director, options = {}) {
     const graph = preset.build({ prompt, aspect, count, seed, checkpoint, guide: Boolean(guide), refs: refBytes.length });
     const deferredInputs = [...(guide ? [GUIDE_INPUT] : []), ...refInputs(refBytes.length)];
     const validation = validateGraph(graph, objectInfo, deferredInputs.length ? { deferredInputs } : {});
-    const cost = quoteFor(preset, count, workflowCost(graph, objectInfo, adapter.snapshot));
+    // Inputs billed with the request: the blockout guide counts as an image input, and each key-frame image is graded when the paid grader is on.
+    const cost = quoteFor(preset, count, workflowCost(graph, objectInfo, adapter.snapshot), { refs: refBytes.length + (guide ? 1 : 0), grades: guide && shot && preset.backend === 'cloud' && graderOn() ? count : 0, marginPct: budget.marginPct?.() ?? DEFAULT_MARGIN_PCT });
     const partnerNodes = Object.values(graph).some(n => objectInfo[n.class_type]?.api_node === true);
     const settings = { presetId: preset.id, model: preset.title, prompt, aspect, count, seed, checkpoint };
     const guideSha = guide ? createHash('sha256').update(guide).digest('hex') : null;
@@ -357,6 +386,7 @@ export async function openRefgen(root, director, options = {}) {
     }),
     list(projectId) { return [...jobs.values()].filter(j => j.projectId === projectId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(j => structuredClone(j)); },
     paidEnabled: allowPaid,
+    graderOn,
     async checkpoints(localUrl) {
       const { objectInfo } = await backendFor({ kind: 'local', ...(localUrl ? { url: localUrl } : {}) }).inspect();
       const list = objectInfo.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0];
@@ -414,7 +444,7 @@ export async function openRefgen(root, director, options = {}) {
     validateApproval(input.approval, saved.fingerprint, saved.quote);
     // Durable reservation before any upload or dispatch; refused (402, code 'budget') over a cap or at an unknown price.
     const estimateUsd = quoteEstimate(saved.quote, saved.backend);
-    if (estimateUsd !== 0) await budget.reserve({ id: saved.id, source: 'refgen', projectId: saved.projectId, kind: 'image', model: saved.model || saved.presetId, label: label(saved), estimateUsd });
+    if (estimateUsd !== 0) await budget.reserve({ id: saved.id, source: 'refgen', projectId: saved.projectId, kind: 'image', model: saved.model || saved.presetId, label: label(saved), estimateUsd, components: saved.quote.breakdown });
     let job = await persist({ ...saved, approval: structuredClone(input.approval), status: 'uploading', message: 'Uploading inputs; nothing dispatched yet.',
       ...(saved.backend.kind === 'local' ? { progressClientId: saved.progressClientId || randomUUID() } : {}) });
     let dispatchStarted = false;
