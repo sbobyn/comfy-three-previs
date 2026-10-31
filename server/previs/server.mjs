@@ -278,7 +278,7 @@ const server = createServer(async (req, res) => {
     res.writeHead(range ? 206 : 200, { 'Accept-Ranges':'bytes','Content-Length':Math.max(0, end-start+1),...(range ? {'Content-Range':`bytes ${start}-${end}/${size}`} : {}), ...headers });
     if (!size) return res.end();
     const stream = createReadStream(file, { start, end }); stream.on('error', () => res.destroy()); res.on('close', () => stream.destroy()); stream.pipe(res);
-  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}), ...(e.budget ? { budget: e.budget } : {}) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
+  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}), ...(e.budget ? { budget: e.budget } : {}), ...(e.breakdown ? { breakdown: e.breakdown } : {}) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});

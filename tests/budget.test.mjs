@@ -6,7 +6,9 @@ import { join } from 'node:path';
 import { openBudget, followJob, quoteEstimate, periodKey, budgetSettings } from '../server/previs/budget.mjs';
 
 const dir = () => mkdtemp(join(tmpdir(), 'previs-budget-'));
-const open = async (env = {}, extra = {}) => { const d = await dir(); return { d, budget: await openBudget(d, { env, ...extra }) }; };
+// These tests pin exact amounts, so they run with no safety margin; tests/budget-margin.test.mjs covers the margin.
+const NO_MARGIN = { PREVIS_BUDGET_MARGIN: '0' };
+const open = async (env = {}, extra = {}) => { const d = await dir(); return { d, budget: await openBudget(d, { env: { ...NO_MARGIN, ...env }, ...extra }) }; };
 const refused = (promise, pattern) => assert.rejects(promise, e => e.status === 402 && e.apiCode === 'budget' && pattern.test(e.message) && Boolean(e.budget?.account));
 
 test('reserve persists before dispatch, settles to its estimate, and is idempotent per request id', async () => {
@@ -71,13 +73,13 @@ test('caps: account and per-project, from env and the data-dir config; the error
   const st = budget.status('p1');
   assert.equal(st.project.capUsd, 5); assert.equal(st.account.capUsd, 4.5); assert.equal(st.remainingUsd, 0.1);
   // A second authority on the same directory (another server) sees the same ledger and caps.
-  const other = await openBudget(d, { env: {} });
+  const other = await openBudget(d, { env: { ...NO_MARGIN } });
   await refused(other.reserve({ id: 'e', source: 'generation', estimateUsd: 0.5 }), /Account budget cap reached/);
   await assert.rejects(budget.setCaps({ accountCapUsd: -1 }), /non-negative/);
 });
 
 test('concurrent reserves from two servers on one ledger never overshoot the cap', async () => {
-  const d = await dir(), env = { PREVIS_BUDGET_CAP_USD: '1' };
+  const d = await dir(), env = { ...NO_MARGIN, PREVIS_BUDGET_CAP_USD: '1' };
   const [a, b] = [await openBudget(d, { env }), await openBudget(d, { env })];
   const results = await Promise.allSettled(Array.from({ length: 8 }, (_, i) => (i % 2 ? a : b).reserve({ id: `r${i}`, source: 'refgen', estimateUsd: 0.3 })));
   assert.equal(results.filter(r => r.status === 'fulfilled').length, 3);
@@ -147,7 +149,7 @@ test('quoteEstimate: known amounts, free local work, estimates and unknowns', ()
 
 test('a stale lock file from a crashed writer is broken; a live one times out with nothing sent', async () => {
   const d = await dir();
-  const budget = await openBudget(d, { env: {}, lockTimeoutMs: 200 });
+  const budget = await openBudget(d, { env: { ...NO_MARGIN }, lockTimeoutMs: 200 });
   await writeFile(join(d, 'ledger.lock'), '1');
   await assert.rejects(budget.reserve({ id: 'a', source: 'refgen', estimateUsd: 0.1 }), e => e.status === 503 && /locked/.test(e.message));
   const { utimes } = await import('node:fs/promises');
