@@ -94,19 +94,66 @@ finished starters offline, with no publish step to keep in sync, and so `pnpm de
 files. Re-exporting only rewrites a file when its source changed, so history grows only when a starter's
 content really changes.
 
-## Re-exporting
+## Source of truth and re-exporting
 
-Edit the source projects in the app (choose the cut's videos and the stills to show), then regenerate the
-snapshots from a running server or straight from a data directory. FFmpeg and ffprobe must be on `PATH`.
+**The bundles in this folder are the source of truth.** The exporter's source projects live in a data directory and are
+rebuilt from the bundles, not the other way round; a plain export of an old project must never overwrite a bundle.
 
 ```sh
-pnpm starters:export --server http://127.0.0.1:5190
-pnpm starters:export --data-dir "$PREVIS_DATA_DIR"
-pnpm starters:export --server http://127.0.0.1:5190 --only posterized
+# 1. Load the bundles into a data directory (a scratch copy, or any directory no server is using).
+pnpm starters:import --data-dir "$PREVIS_DATA_DIR"            # --only <slug>; --force replaces an existing source project
+
+# 2. Prove the round trip. Exports into a scratch copy and fails (exit 1) if any JSON or media file would change,
+#    appear or disappear. Nothing in examples/starters is written. No FFmpeg needed when nothing changed.
+pnpm starters:export --data-dir "$PREVIS_DATA_DIR" --check
+
+# 3. After changing a source project (new stills, videos, blocking), write the bundle.
+pnpm starters:export --data-dir "$PREVIS_DATA_DIR"            # FFmpeg and ffprobe on PATH; also --server <url>, --only <slug>
 ```
 
-Source project ids, hero shots and explicit still picks live in `SOURCES` in
-`scripts/export-starters.mjs`; override a project with `--<slug> <project-id>`. The projects listed there predate the 2026-10-31
-blocking pass, so exporting them would bring the old blocking back; the regenerated media was made in fresh
-copies of these starters and placed into the snapshots under their existing ids. `--no-media` writes a
-version 1 snapshot without media. `--max-mb <n>` changes the size budget.
+`starters:import` writes each bundle as the project `starterSourceId(slug)` (a fixed UUID per slug, listed as `id` in
+`SOURCES` in `scripts/export-starters.mjs`, so it never collides with a user's project or the old dev projects). Every
+entity, shot, image and clip id is kept, and the media files are copied unchanged. An existing source project is left
+alone unless `--force`. Stop any server that uses the directory first: a running server caches projects.
+
+`tests/starters-roundtrip.test.mjs` imports the bundles into a temporary directory and runs the same check, so
+`pnpm test` fails if a bundled JSON or media file is not exactly what its source project exports (a hand-edited
+snapshot, a changed file, a stale hash, a stray file, or an exporter change that alters the output).
+
+### How a media file stays byte-identical
+
+The exporter re-encodes a source file (WebP at most 1600 px, 720p H.264) only when it is not already the bundled
+file. A source whose SHA-256 equals the bundle's recorded `sha256` for that path, or whose `sourceSha256` matches the
+manifest, is copied or kept as it is; the manifest entry (including `sourceSha256`) is reused. Imported projects hold
+the bundled files themselves, so nothing is re-encoded and re-exporting is exact. A file you change in a source
+project is encoded once and then stays put.
+
+### How signatures survive
+
+A still's `generated.signature` and a blockout clip's `source.signature` hash the shot's blocking, which includes entity
+ids (`shotSignature`). Two different things happen to ids:
+
+- **Import and export keep ids**, so a signature in the bundle is still the signature of the blocking as imported.
+  The exporter keeps each still's `generated.signature` and each blockout clip's `source.signature`. A new video
+  keeps no signature of its own; it points at its blockout clip (`source.sourceAssetId`) and is current while that
+  clip is.
+- **Creating a project from a starter renews ids** (`instantiateStarter`). Any signature that equals the snapshot's
+  current blocking is rewritten to the copy's, so current media stays current. A signature that differs stays as it
+  was, so the app marks that still or video as made for an earlier blocking.
+
+When you change the blocking of a source project, its old stills and videos keep their old signatures (they are then
+reported as out of date) until you replace them.
+
+### Regenerating media
+
+Regenerate in the source project, never in the bundle:
+
+1. `pnpm starters:import` into a data directory and start a private server on it (paid work off unless you mean it).
+2. Dry-run, then run the batch against the source projects, which `scripts/pipeline/regenerate-starters.mjs` targets
+   by default: `node scripts/pipeline/regenerate-starters.mjs --dry-run --url <server>`. Review and accept stills and
+   videos in the app, and set the cut.
+3. `pnpm starters:export --data-dir <dir>` writes the bundle, then `--check` confirms it. Commit the bundle.
+
+Source project ids, hero shots (the videos kept if the media goes over budget) and titles live in `SOURCES` in
+`scripts/export-starters.mjs`; override a project with `--<slug> <project-id>`. `--no-media` writes a version 1
+snapshot without media. `--max-mb <n>` changes the size budget.
