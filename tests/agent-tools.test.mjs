@@ -29,7 +29,7 @@ async function fixture() {
 function fakePrevis(p, { jobs = 'ok', headless = true, unpriced = false } = {}) {
   const calls = [];
   let submits = 0, batchPolls = 0;
-  const batch = status => ({ id: 'b0000000-0000-4000-8000-000000000001', projectId: p.id, status, tier: 'draft', steps: ['stills'], estimateUsd: 0.09, spentEstimateUsd: status === 'completed' ? 0.09 : 0, maxCostUsd: 1, budgetSkipped: 0,
+  const batch = status => ({ id: 'b0000000-0000-4000-8000-000000000001', projectId: p.id, status, tier: 'draft', steps: ['stills'], estimateUsd: 0.09, reserveUsd: 0.099, breakdown: { listUsd: 0.056, refsUsd: 0.034, graderUsd: 0, expectedUsd: 0.09, marginUsd: 0.009, reserveUsd: 0.099, marginPct: 10 }, spentEstimateUsd: status === 'completed' ? 0.09 : 0, maxCostUsd: 1, budgetSkipped: 0,
     nodes: [{ id: 'still:a', type: 'still', label: 'Shot 1 · start still', status: status === 'completed' ? 'done' : 'running', deps: [], estimateUsd: 0.03 }, { id: 'still:b', type: 'still', label: 'Shot 2 · start still', status: status === 'completed' ? 'failed' : 'ready', error: 'Fake failure', deps: [], estimateUsd: 0.03 }, { id: 'still:c', type: 'still', label: 'Shot 3', status: 'budget', deps: [], estimateUsd: 0.03 }],
     events: Array.from({ length: 14 }, (_, i) => ({ at: '2026-10-30T10:00:00Z', text: `event ${i}` })) });
   const routes = {
@@ -189,6 +189,9 @@ test('batch_generate (dry run and wait) and batch_status summarise counts, spend
   await withAgent(fake, async ({ call }) => {
     const dry = await call('previs_director_batch_generate', { projectId: p.id, steps: ['stills'], tier: 'draft', maxCostUsd: 1, dryRun: true });
     assert.equal(dry.status, 'planned'); assert.equal(dry.plan.length, 3); assert.match(dry.next, /Nothing was sent/);
+    // The dry run itemizes what the estimate is made of and what the cap is checked against.
+    assert.equal(dry.reserveUsd, 0.099); assert.deepEqual([dry.breakdown.listUsd, dry.breakdown.refsUsd, dry.breakdown.marginUsd, dry.breakdown.marginPct], [0.056, 0.034, 0.009, 10]);
+    assert.match(dry.next, /\$0\.09: list \$0\.056 \+ reference images \$0\.034/); assert.match(dry.next, /reserve \(\$0\.099, 10% margin\)/);
     assert.deepEqual(fake.calls.find(c => c.path === '/api/director/batch').body, { projectId: p.id, steps: ['stills'], tier: 'draft', maxCostUsd: 1, dryRun: true });
     const run = await call('previs_director_batch_generate', { projectId: p.id, steps: ['stills'], maxCostUsd: 1, wait: true });
     assert.equal(run.status, 'completed'); assert.deepEqual(run.counts, { done: 1, failed: 1, budget: 1 }); assert.equal(run.failed[0].error, 'Fake failure');

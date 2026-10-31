@@ -4,7 +4,7 @@ import { mkdtemp, readFile, writeFile, readdir } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { openBatches, planBatch } from '../server/previs/batch.mjs';
+import { openBatches, planBatch, nodeCost } from '../server/previs/batch.mjs';
 import { batchRoutes } from '../server/previs/batch-routes.mjs';
 import { fakeBackend } from '../server/previs/batch-drivers.mjs';
 import { builtInPresets } from '../server/previs/presets.mjs';
@@ -20,7 +20,7 @@ function harness(options = {}) {
   let t = Date.parse('2026-10-30T12:00:00Z');
   const clock = { now: () => t, advance: s => { t += s * 1000; } };
   const fake = fakeBackend({ now: clock.now, ...options.fake });
-  return { clock, fake, open: async root => openBatches(root || await mkdtemp(join(tmpdir(), 'previs-batch-')), { drivers: fake.drivers, jobs: fake.jobs, loadProject: async () => structuredClone(project), now: clock.now, ...options.batches }) };
+  return { clock, fake, open: async root => openBatches(root || await mkdtemp(join(tmpdir(), 'previs-batch-')), { drivers: fake.drivers, jobs: fake.jobs, loadProject: async () => structuredClone(project), now: clock.now, costs: { marginPct: 0, graderOn: false }, ...options.batches }) }; // exact-amount tests run without the safety margin; the margin and grader have their own tests below
 }
 async function runUntil(batches, id, clock, done = b => ['completed', 'failed', 'cancelled', 'paused'].includes(b.status), step = 5, max = 400) {
   for (let i = 0; i < max; i++) {
@@ -138,7 +138,7 @@ test('final plan adds end stills; reference models depend on looks instead; miss
   assert.equal(byId(videosOnly, `video:${valley.id}`).status, 'waiting');
   assert.match(byId(videosOnly, `video:${dive.id}`).error, /start key frame/);
   const sheets = planBatch(project, { steps: ['sheets'], maxCostUsd: 5, objects: [project.scene.entities.find(e => e.name === 'Bald eagle').id] }).nodes;
-  assert.deepEqual([sheets.length, sheets[0].target.setId, sheets[0].count, sheets[0].estimateUsd], [1, 'turn4', 4, 0.112]);
+  assert.deepEqual([sheets.length, sheets[0].target.setId, sheets[0].count, sheets[0].estimateUsd], [1, 'turn4', 4, 0.18]); // 4 views × (FLUX.2 Pro $0.028 + the identity image each view is sent, $0.017)
   assert.throws(() => planBatch(project, { steps: ['videos'], maxCostUsd: 1, models: { videos: 'nope' } }), /Unknown video model/);
   assert.throws(() => planBatch(project, { steps: ['stills'] }), /maxCostUsd/);
   assert.throws(() => planBatch(project, { steps: ['looks'], maxCostUsd: 1, models: { looks: 'not-a-model' } }), /unpriced/);
@@ -186,7 +186,8 @@ test('a shot’s video starts as soon as its still lands while other stills stil
   assert.ok(Date.parse(diveVideo.startedAt) < Date.parse(swoopStill.finishedAt), 'dive video was running while the swoop still was still generating');
   assert.equal(done.status, 'completed');
   assert.ok(done.nodes.filter(n => n.type === 'video').every(n => n.status === 'done' && n.assetId));
-  assert.equal(done.spentEstimateUsd, 1.9865);
+  assert.equal(done.spentEstimateUsd, round4(done.nodes.filter(n => n.status === 'done').reduce((t, n) => t + n.reserveUsd, 0)), 'every submitted node counted its reserve once');
+  assert.ok(done.spentEstimateUsd > 1.9865, 'more than the old list-price total: stills now carry the blockout guide and cast images as references');
 });
 
 test('busy 409 puts the node back to ready and retries after retryAfterSeconds', async () => {
@@ -216,10 +217,13 @@ test('budget: maxCostUsd 0 submits nothing paid; a small cap stops at the line',
   assert.equal(zero.budgetSkipped, zero.nodes.filter(n => n.status === 'budget').length);
   assert.ok(zero.estimateUsd > 0);
 
-  const capped = await runUntil(batches, (await batches.create({ projectId: project.id, steps: ['stills', 'videos'], maxCostUsd: 0.7 })).id, h.clock);
+  // The line: exactly the three nodes that fit (valley's video and the two start stills), by their reserves.
+  const plan = planBatch(project, { steps: ['stills', 'videos'], maxCostUsd: 1 }, { costs: { marginPct: 0 } }).nodes;
+  const line = round4(plan.filter(n => [`video:${valley.id}`, `still:${dive.id}start`, `still:${swoop.id}start`].includes(n.id)).reduce((t, n) => t + n.reserveUsd, 0));
+  const capped = await runUntil(batches, (await batches.create({ projectId: project.id, steps: ['stills', 'videos'], maxCostUsd: line })).id, h.clock);
   const status = id => byId(capped.nodes, id).status;
   assert.deepEqual([status(`video:${valley.id}`), status(`still:${dive.id}start`), status(`still:${swoop.id}start`), status(`video:${dive.id}`), status(`video:${swoop.id}`)], ['done', 'done', 'done', 'budget', 'budget']);
-  assert.ok(capped.spentEstimateUsd <= 0.7);
+  assert.ok(capped.spentEstimateUsd <= line);
 });
 
 test('cancel stops new submits, keeps following running jobs; resume finishes the rest', async () => {
@@ -342,7 +346,7 @@ test('restart resubmits a recorded request (never a new one); a refusal refunds 
   const drivers = { ...h.fake.drivers,
     still: { async submit(ctx) { if (refuse) { await ctx.record({ requestId: 'draft-1', fingerprint: 'x' }); throw Object.assign(Error('Paid generation is disabled'), { status: 403, notDispatched: true }); } return h.fake.drivers.still.submit(ctx); } },
     look: { ...h.fake.drivers.look, async finish() { throw Error('link failed'); } } };
-  const third = await openBatches(await mkdtemp(join(tmpdir(), 'previs-batch-')), { drivers, jobs: h.fake.jobs, loadProject: async () => structuredClone(project), now: h.clock.now });
+  const third = await openBatches(await mkdtemp(join(tmpdir(), 'previs-batch-')), { drivers, jobs: h.fake.jobs, loadProject: async () => structuredClone(project), now: h.clock.now, costs: { marginPct: 0 } });
   const c = await third.create({ projectId: project.id, steps: ['looks', 'stills'], shots: [dive.id], maxCostUsd: 1 });
   const ended = await runUntil(third, c.id, h.clock);
   const still = byId(ended.nodes, `still:${dive.id}start`);
@@ -394,4 +398,52 @@ test('dry runs live in memory for an hour and are never persisted; old saved dry
   assert.deepEqual(reopened.list(project.id).map(b => b.id), [fresh.id]);
   assert.equal((await readdir(join(root, 'batches'))).length, 2);
   reopened.close();
+});
+
+// ---- Budget v2 (2026-10-31): the regeneration planned under its $15 cap on list prices and billed $16.84 ----
+test('budget v2: a plan itemizes list, references, grader and margin; the displayed list price is unchanged by them', () => {
+  const { nodes } = planBatch(project, { steps: ['stills'], shots: [dive.id], maxCostUsd: 5 }, { costs: { marginPct: 10, graderOn: true } });
+  const still = byId(nodes, `still:${dive.id}start`), bd = still.breakdown;
+  assert.equal(bd.listUsd, estimateFor('still', TIERS.draft.stills), 'list price is the table price');
+  assert.ok(bd.refs >= 1 && bd.refsUsd > 0, 'the blockout guide is an image input');
+  assert.equal(bd.graderUsd, 0.05); assert.equal(bd.grades, 1);
+  assert.equal(still.estimateUsd, round4(bd.listUsd + bd.refsUsd + bd.graderUsd));
+  assert.equal(still.reserveUsd, round4(still.estimateUsd * 1.1));
+  assert.equal(bd.marginUsd, round4(still.estimateUsd * 0.1));
+  // Same plan with the grader off, no margin: only the grade and the margin go away.
+  const plain = byId(planBatch(project, { steps: ['stills'], shots: [dive.id], maxCostUsd: 5 }, { costs: { marginPct: 0, graderOn: false } }).nodes, `still:${dive.id}start`);
+  assert.equal(plain.estimateUsd, round4(still.estimateUsd - 0.05)); assert.equal(plain.reserveUsd, plain.estimateUsd); assert.equal(plain.breakdown.graderUsd, 0);
+  // Videos and looks carry no grader and no reference charge.
+  const all = planBatch(project, { steps: ['looks', 'videos'], maxCostUsd: 5 }, { costs: { marginPct: 10, graderOn: true } }).nodes;
+  assert.ok(all.filter(n => ['look', 'video'].includes(n.type) && n.breakdown).every(n => n.breakdown.graderUsd === 0 && n.breakdown.refsUsd === 0));
+});
+
+test('budget v2: the batch estimate and its cap count the grader and the margin; dry runs show the breakdown', async () => {
+  const h = harness({ batches: { costs: () => ({ marginPct: 10, graderOn: true }) } });
+  const batches = await h.open();
+  const dry = await batches.create({ projectId: project.id, steps: ['stills'], maxCostUsd: 5, dryRun: true });
+  const stills = dry.nodes.filter(n => n.type === 'still' && n.status !== 'skipped');
+  assert.ok(stills.length >= 2);
+  assert.equal(dry.breakdown.graderUsd, round4(0.05 * stills.length)); assert.equal(dry.breakdown.marginPct, 10); assert.equal(dry.breakdown.graderOn, true);
+  assert.equal(dry.estimateUsd, round4(dry.breakdown.listUsd + dry.breakdown.refsUsd + dry.breakdown.graderUsd));
+  assert.equal(dry.reserveUsd, round4(stills.reduce((t, n) => t + n.reserveUsd, 0)));
+  assert.ok(dry.reserveUsd > dry.estimateUsd);
+  assert.match(dry.events[0].text, /list \$[\d.]+ \+ references \$[\d.]+ \+ grader \$[\d.]+.*reserves \$[\d.]+ with the 10% margin/);
+  // The incident: a cap that the list prices fit under, but the grader and margin do not. Nothing over the line is sent.
+  const listOnly = round4(stills.reduce((t, n) => t + n.breakdown.listUsd, 0));
+  const capped = await runUntil(batches, (await batches.create({ projectId: project.id, steps: ['stills'], maxCostUsd: listOnly })).id, h.clock);
+  assert.ok(capped.spentEstimateUsd <= listOnly + 1e-9, 'committed reserves never pass the cap');
+  const refused = capped.nodes.filter(n => n.status === 'budget');
+  assert.ok(refused.length >= 1 && /Over budget: .*\(list \$[\d.]+ \+ references \$[\d.]+ \+ grader \$0\.05 \+ 10% margin/.test(refused[0].error), refused[0]?.error);
+  assert.equal(capped.nodes.filter(n => n.status === 'done').length + refused.length, capped.nodes.filter(n => n.status !== 'skipped').length);
+});
+
+test('budget v2: a weak-match retry is re-estimated with the same grader, references and margin', async () => {
+  const model = TIERS.draft.stills;
+  const costs = { marginPct: 10, graderOn: true };
+  const { nodes } = planBatch(project, { steps: ['stills'], shots: [dive.id], maxCostUsd: 5 }, { costs });
+  const n = byId(nodes, `still:${dive.id}start`);
+  const retry = nodeCost('still', 'flux-3', { refs: n.breakdown.refs, grades: n.breakdown.grades }, costs);
+  assert.equal(retry.breakdown.graderUsd, 0.05); assert.equal(retry.breakdown.listUsd, estimateFor('still', 'flux-3'));
+  assert.notEqual(model, 'flux-3');
 });

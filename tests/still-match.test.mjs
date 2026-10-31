@@ -7,7 +7,7 @@ import { makeEntity, makeShot, shotCast } from '../shared/director.mjs';
 import { shotProjector, frameLayout, describeFrame, stillPrompt, momentLine, stillReferences, guideMatchScore, followsGuide, retryModelFor, STRONG_GUIDE_MODEL, editsGuide, WEAK_MATCH } from '../shared/still-match.mjs';
 import { parseGrade, graderGraph, GRADER_PROMPT } from '../server/previs/still-match.mjs';
 import { imagePresets, publicPresets } from '../server/previs/refgen.mjs';
-import { openBatches } from '../server/previs/batch.mjs';
+import { openBatches, planBatch, nodeCost } from '../server/previs/batch.mjs';
 import { fakeBackend } from '../server/previs/batch-drivers.mjs';
 
 // A stage with a car (and optional others) and one shot whose camera is given.
@@ -195,7 +195,7 @@ test('batch retryWeakMatch: a still graded below 5 is redone once with the stron
     const first = new Set();
     // Grade the first still of each node 3/10 (as refgen does with PREVIS_MATCH_GRADER=gemini); retries are not graded.
     const jobs = { async snapshot() { const s = await fake.jobs.snapshot(); for (const j of s.jobs) if (j.status === 'completed') { const sub = fake.submits.find(x => x.jobId === j.id); if (sub && (first.has(j.id) || !fake.submits.some(x => x.nodeId === sub.nodeId && x !== sub && fake.submits.indexOf(x) < fake.submits.indexOf(sub)))) { first.add(j.id); j.results = j.results.map(r => ({ ...r, guideMatch: 3 })); } } return s; } };
-    const batches = await openBatches(await mkdtemp(join(tmpdir(), 'previs-batch-')), { drivers: fake.drivers, jobs, loadProject: async () => structuredClone(project), now: () => t });
+    const batches = await openBatches(await mkdtemp(join(tmpdir(), 'previs-batch-')), { drivers: fake.drivers, jobs, loadProject: async () => structuredClone(project), now: () => t, costs: { marginPct: 0, graderOn: false } });
     const b = await batches.create({ projectId: project.id, steps: ['stills'], tier: 'draft', maxCostUsd: 5, shots: [project.shots[0].id], ...(retryWeakMatch ? { retryWeakMatch: true } : {}) });
     for (let i = 0; i < 100; i++) { await batches.tick(b.id); await batches.idle(); const x = batches.get(b.id); if (['completed', 'failed', 'paused'].includes(x.status)) return { batch: x, fake }; t += 5000; }
     throw Error('batch did not finish');
@@ -205,7 +205,9 @@ test('batch retryWeakMatch: a still graded below 5 is redone once with the stron
   assert.equal(on.fake.submits.filter(x => x.type === 'still').length, 2, 'one retry, never more');
   assert.equal(node.model, 'flux-3'); assert.equal(node.retriedFrom.model, 'flux-2-pro'); assert.equal(node.retriedFrom.guideMatch, 3);
   assert.ok(3 < WEAK_MATCH); assert.equal(WEAK_MATCH, 6, 'a 5/10 still is retried');
-  assert.equal(on.batch.spentEstimateUsd, 0.028 + 0.066, 'the retry is charged to the batch budget');
+  // The first take (FLUX.2 Pro + its image inputs) and the retry (FLUX 3, no documented reference price) are both charged to the batch budget.
+  const costs = { marginPct: 0, graderOn: false }, first = planBatch(project, { steps: ['stills'], shots: [project.shots[0].id], maxCostUsd: 5 }, { costs }).nodes.find(n => n.type === 'still');
+  assert.equal(on.batch.spentEstimateUsd, Math.round((first.reserveUsd + nodeCost('still', 'flux-3', { refs: first.breakdown.refs }, costs).reserveUsd) * 10000) / 10000, 'the retry is charged to the batch budget');
   const off = await run(false);
   assert.equal(off.fake.submits.filter(x => x.type === 'still').length, 1, 'off by default');
 });
