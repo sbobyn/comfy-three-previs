@@ -7,7 +7,7 @@ const source = await readFile(new URL('../src/director-jobs.ts', import.meta.url
 const a = source.indexOf('// ---- pure helpers'), b = source.indexOf('// ---- end pure helpers');
 const exports = {};
 runInNewContext(ts.transpileModule(source.slice(a, b), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText, { exports, Date, Set, Math, String, Object });
-const { pipState, groupJobs, settledState, batchCounts, needsAttention, dur, shownBatches } = exports;
+const { pipState, groupJobs, settledState, batchCounts, needsAttention, dur, shownBatches, budgetLine } = exports;
 const { jobs } = JSON.parse(await readFile(new URL('./fixtures/jobs.json', import.meta.url), 'utf8'));
 const { batches } = JSON.parse(await readFile(new URL('./fixtures/batches.json', import.meta.url), 'utf8'));
 const byStatus = s => jobs.find(j => j.status === s);
@@ -71,4 +71,16 @@ test('batches: a dry-run plan never lights the pip or lists in Jobs; failed and 
   assert.equal(pipState([], [b('plan', 'planned')]), null);
   const list = [b('plan', 'planned'), b('done1', 'completed'), b('run', 'running'), b('bad', 'failed', 30), b('done2', 'cancelled'), b('old', 'completed', 30), b('done3', 'completed'), b('done4', 'completed')];
   assert.deepEqual([...shownBatches(list, at).map(x => x.id)], ['run', 'bad', 'done1', 'done2', 'done3']);
+});
+
+test('budget line: what is left of the tighter cap, amber from 50%, red from 95%; quiet with no cap and no spend', () => {
+  const scope = (o = {}) => ({ capUsd: null, spentUsd: 0, reservedUsd: 0, remainingUsd: null, alert: null, ...o });
+  assert.equal(budgetLine(undefined), null);
+  assert.equal(budgetLine({ account: scope({ period: 'month' }), project: scope(), remainingUsd: null, alert: null }), null);
+  assert.deepEqual({ ...budgetLine({ account: scope({ period: 'month', spentUsd: 1.2, reservedUsd: 0.3 }), project: scope(), remainingUsd: null, alert: null }) }, { tone: 'muted', text: 'Budget: no cap set · $1.50 committed this month' });
+  const account = scope({ period: 'month', capUsd: 15, spentUsd: 6, reservedUsd: 2, remainingUsd: 7, alert: 50 });
+  assert.deepEqual({ ...budgetLine({ account, project: scope(), remainingUsd: 7, alert: 50 }) }, { tone: 'warn', text: 'Budget: $7.00 left of $15.00 this month · $2.00 reserved' });
+  const project = scope({ capUsd: 4, spentUsd: 3.9, remainingUsd: 0.1, alert: 95 });
+  assert.deepEqual({ ...budgetLine({ account, project, remainingUsd: 0.1, alert: 95 }) }, { tone: 'bad', text: 'Budget: $0.10 left of $4.00 for this project' });
+  assert.equal(budgetLine({ account: scope({ period: 'all', capUsd: 20, remainingUsd: 20 }), project: null, remainingUsd: 20, alert: null }).tone, 'ok');
 });

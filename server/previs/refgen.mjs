@@ -17,7 +17,8 @@ import { uploadCacheFor } from './upload-cache.mjs';
 import { validateGraph, workflowCost, validateApproval, hashValue, assertNoSecrets } from './workflows.mjs';
 import { followsGuide, describeFrame } from '../../shared/still-match.mjs';
 import { shotSignature } from '../../shared/director.mjs';
-import { stillGuideMatch, gradeStillPaid } from './still-match.mjs';
+import { stillGuideMatch, gradeStillPaid, GRADER_RESERVE_USD } from './still-match.mjs';
+import { openBudget, budgetDir, followJob, quoteEstimate } from './budget.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const now = () => new Date().toISOString();
@@ -200,7 +201,9 @@ export async function openRefgen(root, director, options = {}) {
   const backendFor = options.backend || (input => createBackend(input, options.backendOptions));
   const telemetry = telemetryHooks(options.telemetry); // optional live progress; never part of the outcome
   const allowPaid = () => (options.allowPaid ?? process.env.PREVIS_ALLOW_PAID === '1') === true;
-  async function persist(job) { if (job.status === 'uncertain' && !job.uncertainAt) job = { ...job, uncertainAt: now() }; assertNoSecrets(job); await mkdir(dirFor(job.projectId), { recursive: true }); await atomicJson(join(dirFor(job.projectId), job.id + '.json'), job); jobs.set(job.id, structuredClone(job)); return structuredClone(job); }
+  // Every paid dispatch (and the paid grader) reserves its estimate here first (server.mjs passes the shared authority).
+  const budget = options.budget || await openBudget(budgetDir(root));
+  async function persist(job) { if (job.status === 'uncertain' && !job.uncertainAt) job = { ...job, uncertainAt: now() }; assertNoSecrets(job); await mkdir(dirFor(job.projectId), { recursive: true }); await atomicJson(join(dirFor(job.projectId), job.id + '.json'), job); jobs.set(job.id, structuredClone(job)); await followJob(budget, job, options.log); return structuredClone(job); }
   // Recover receipts: an interrupted dispatch is uncertain and is never resent.
   async function load(id) {
     let files = []; try { files = await readdir(dirFor(id)); } catch {}
@@ -289,8 +292,14 @@ export async function openRefgen(root, director, options = {}) {
       const project = await director.get(job.projectId).catch(() => null), shot = project?.shots.find(s => s.id === job.shotId);
       const t = !shot ? 0 : job.frameAt === 'end' ? shot.duration : typeof job.frameAt === 'number' ? job.frameAt : 0;
       const plan = shot ? describeFrame(project, shot, t).text : '';
-      const graded = await gradeStillPaid({ adapter, upload: (b, o) => uploadCache.upload(adapter, b, o), guideBytes, stillBytes: bytes, requestId: `${job.id}-${hashValue(key).slice(0, 8)}`, projectId: job.projectId, plan });
-      if (graded) return graded;
+      const requestId = `${job.id}-${hashValue(key).slice(0, 8)}`;
+      // The grade is optional: over budget, the free local score is used instead.
+      const admitted = await budget.reserve({ id: `${requestId}-grade`, source: 'grader', projectId: job.projectId, kind: 'image', model: 'Still grader', label: `${job.entityName || 'Still'} · match grade`, estimateUsd: GRADER_RESERVE_USD }).then(() => true, () => false);
+      if (admitted) {
+        const graded = await gradeStillPaid({ adapter, upload: (b, o) => uploadCache.upload(adapter, b, o), guideBytes, stillBytes: bytes, requestId, projectId: job.projectId, plan });
+        await (graded ? budget.settle(`${requestId}-grade`) : budget.hold(`${requestId}-grade`, 'Grade not returned; a charge may still arrive')).catch(() => {});
+        if (graded) return graded;
+      }
     }
     const local = await stillGuideMatch(guideBytes, bytes);
     return local ? { ...local, rough: true } : null;
@@ -403,6 +412,9 @@ export async function openRefgen(root, director, options = {}) {
     const current = await resolve({ ...saved, projectId: saved.projectId, entityId: saved.entityId, guideBytes, refBytes, localUrl: saved.backend.kind === 'local' ? saved.backend.url : undefined });
     if (current.fingerprint !== saved.fingerprint) { await persist({ ...saved, status: 'invalidated', message: 'Backend schema, settings or price changed. Get a new quote.' }); fail('Quote changed; get a new quote and approve again', 409); }
     validateApproval(input.approval, saved.fingerprint, saved.quote);
+    // Durable reservation before any upload or dispatch; refused (402, code 'budget') over a cap or at an unknown price.
+    const estimateUsd = quoteEstimate(saved.quote, saved.backend);
+    if (estimateUsd !== 0) await budget.reserve({ id: saved.id, source: 'refgen', projectId: saved.projectId, kind: 'image', model: saved.model || saved.presetId, label: label(saved), estimateUsd });
     let job = await persist({ ...saved, approval: structuredClone(input.approval), status: 'uploading', message: 'Uploading inputs; nothing dispatched yet.',
       ...(saved.backend.kind === 'local' ? { progressClientId: saved.progressClientId || randomUUID() } : {}) });
     let dispatchStarted = false;

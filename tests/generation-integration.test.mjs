@@ -31,6 +31,8 @@ const definition = () => ({
   },
   inputs: { firstFrame: { nodeId: '1', input: 'image' } },
   outputs: [{ nodeId: '2', mediaType: 'image/png' }],
+  // A list price, so Cloud submits pass the budget authority (an unpriced Cloud request is refused there).
+  pricing: { status: 'estimate', currency: 'USD', ratePerSecond: 0.1 },
 });
 const schema = {
   LoadImage: { python_module: 'nodes', output: ['IMAGE', 'MASK'], input: { required: { image: [['author.png'], { image_upload: true }] } } },
