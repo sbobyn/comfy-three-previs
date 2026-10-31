@@ -13,7 +13,7 @@ const AGENT = { agent: { connected: false, waiting: false, lastSeen: null, name:
 /** Root-relative app URL → URL under the deploy base. Leaves everything else alone. */
 function rewrite(url: string): string {
   if (!url.startsWith('/') || url.startsWith('//') || url.startsWith(BASE)) return url;
-  if (/^\/(assets\/[\w-]+\.(mp4|webm|mov|png)|director-refs\/|director-assets\/|renders\/)/.test(url)) return MEDIA + url.slice(1);
+  if (/^\/(assets\/[\w-]+\.(mp4|webm|mov|png)|director-refs\/|director-refgen\/|director-assets\/|renders\/)/.test(url)) return MEDIA + url.slice(1);
   // The old camera studio (index.html) is gone; its links go to the home page.
   if (url === '/index.html' || url.startsWith('/index.html?')) return BASE + url.slice(11);
   if (url === '/' || /^\/[\w-]+\.html/.test(url)) return BASE + (url === '/' ? '' : url.slice(1));

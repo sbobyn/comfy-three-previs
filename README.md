@@ -171,6 +171,8 @@ The server is plain Node (`server/previs/`), the browser app is Vite + three.js 
 
 `scripts/publish-public.sh` publishes the committed tree to the public repo and redeploys the live demo with the latest launch film. It runs the gate and a secret scan first, adds one commit to public `main` (the tree, not the history) and one to `gh-pages` (`pnpm run demo:build` from a temporary read-only server, plus `launch-film*.mp4` from the newest `.evidence/launch-film/v*/`), then checks the Pages build and loads the demo in headless Chrome. It never force-pushes. Settings are environment variables listed at the top of the script (`TRAILER_DIR`, `SOURCE_DATA`, `DRY_RUN=1`, …).
 
+The demo snapshot keeps each shot's Cut selection, current key stills and blockouts, cast looks and sheets, and their input media and generation receipts. Archived projects and `Regen …` scratch projects are excluded. Images become WebP derivatives bounded to 1280 pixels on both axes; videos, source files and generation settings are unchanged. Derivative metadata records both original and published hashes, dimensions and paths. Snapshotting needs FFmpeg and ffprobe (`PREVIS_FFMPEG` / `PREVIS_FFPROBE`); missing media or a snapshot over `DEMO_MEDIA_MB` (default 400 MiB) fails the build instead of dropping files. `demo-data/snapshot-manifest.json` records every copied file and the measured media size. Build into a fresh output directory before snapshotting again. Publishing's `DRY_RUN=1` still fetches remote refs, although it does not push.
+
 ## License
 
 MIT — see [LICENSE](LICENSE). Third-party components and their licenses are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and `third-party-licenses/`.
