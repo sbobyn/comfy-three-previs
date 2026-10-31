@@ -9,7 +9,7 @@ import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { makeEntity, makeShot } from '../../shared/director.mjs';
+import { makeEntity, makeShot, shotSignature } from '../../shared/director.mjs';
 import { normalizePrompts, normalizeStyle } from '../../shared/prompt.mjs';
 
 export const STARTER_FORMAT = 'comfy-previs-starter';
@@ -84,7 +84,9 @@ export function starterSnapshot(project, { slug, title, description, order = 0, 
     files.push({ path: `media/assets/${a.id}.mp4`, from: a.file, kind: 'video' });
     // A video keeps the link to the blockout clip it was made from, so Compare and the seam can pair them.
     const from = a.source?.sourceAssetId && picks.some(pk => pk.blockout?.id === a.source.sourceAssetId) ? a.source.sourceAssetId : null;
-    const source = a.kind === 'workflow-result' ? { workflow: a.source?.workflow || 'Video', backend: a.source?.backend || null, prompt: a.source?.prompt || '', sourceAssetId: from } : { engineShotId: null };
+    // A blockout clip keeps the signature of the blocking it shows, so a copy can tell whether it still matches.
+    const sig = a.source?.signature || project.shots.find(s => s.render?.assetId === a.id)?.render.signature || null;
+    const source = a.kind === 'workflow-result' ? { workflow: a.source?.workflow || 'Video', backend: a.source?.backend || null, prompt: a.source?.prompt || '', sourceAssetId: from } : { engineShotId: null, ...(sig ? { signature: sig } : {}) };
     return { id: a.id, kind: a.kind, shotId: a.shotId, file: `assets/${a.id}.mp4`, mime: 'video/mp4', duration: a.duration ?? null, createdAt: a.createdAt, source };
   };
   const shots = project.shots.map((s, i) => {
@@ -141,7 +143,8 @@ export function starterCard(s) {
 /**
  * Scene, shots, assets and cut for a new project: a deep copy of the snapshot with fresh ids everywhere.
  * `has(path)` says whether a media file is present (a clone without media still opens, just without images);
- * images and videos whose file is missing are left out. `files` lists the copies to make: { from, to }.
+ * images and videos whose file is missing are left out. `files` lists the copies to make: { from, to }; `media` counts
+ * the listed files and the missing ones.
  */
 export function instantiateStarter(s, { has = () => true } = {}) {
   const map = new Map(s.scene.entities.map(e => [e.id, randomUUID()]));
@@ -182,8 +185,18 @@ export function instantiateStarter(s, { has = () => true } = {}) {
     return [{ ...structuredClone(a), id, shotId, file: `assets/${id}.mp4`, sha256: m?.sha256 ?? null, width: m?.width ?? null, height: m?.height ?? null, fps: m?.fps ?? null, frameCount: m?.frameCount ?? null, duration: m?.duration ?? a.duration ?? null, starter: s.slug, source: { ...(a.source || {}), ...(a.kind === 'camera-render' ? { engineShotId: null } : { resultId: null }) } }];
   });
   for (const a of assets) if (a.source.sourceAssetId) a.source.sourceAssetId = assetMap.get(a.source.sourceAssetId) || null;
+  // Blocking signatures hash entity ids, which the copy renews: a still or clip made for the snapshot's current
+  // blocking gets the copy's signature, so it stays current; one made for an earlier blocking stays out of date.
+  const copy = { scene: { entities, environment: s.scene.environment || {} } };
+  s.shots.forEach((x, i) => {
+    const was = shotSignature(s, x), now = shotSignature(copy, shots[i]);
+    for (const r of shots[i].references) if (r.generated?.signature === was) r.generated.signature = now;
+    for (const a of assets) if (a.shotId === shots[i].id && a.source.signature === was) a.source.signature = now;
+  });
   const clips = (s.edit?.clips || []).filter(c => shotMap.has(c.shotId) && assetMap.has(c.assetId)).map(c => ({ id: randomUUID(), shotId: shotMap.get(c.shotId), assetId: assetMap.get(c.assetId), in: c.in ?? 0, out: c.out ?? null }));
-  const out = { scene: { name: s.scene.name || s.title, environment: structuredClone(s.scene.environment || {}), entities }, shots, files };
+  // Listed media that is not in this checkout: the copy opens without those images and videos and says so.
+  const listed = (s.media || []).length, missing = (s.media || []).filter(m => !has(m.path)).length;
+  const out = { scene: { name: s.scene.name || s.title, environment: structuredClone(s.scene.environment || {}), entities }, shots, files, media: { listed, missing } };
   if (references.length) out.scene.references = references;
   if (assets.length) out.assets = assets;
   if (clips.length) out.edit = { clips, updatedAt: new Date().toISOString() };

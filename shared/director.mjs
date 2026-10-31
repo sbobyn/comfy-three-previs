@@ -314,6 +314,47 @@ export function stillStale(project, shot, ref) {
   return !!(shot.render?.createdAt && ref.createdAt && ref.createdAt < shot.render.createdAt);
 }
 
+/**
+ * A generated video made for an earlier blocking: the blockout clip it was made from recorded another shot
+ * signature, or (no signature recorded) the shot has a newer blockout clip. A video whose source clip is unknown
+ * is not judged.
+ */
+export function videoStale(project, shot, video) {
+  if (video?.kind !== 'workflow-result') return false;
+  const assets = project.assets || [];
+  const src = assets.find(a => a.id === video.source?.sourceAssetId && a.kind === 'camera-render');
+  if (!src) return false;
+  const made = src.source?.signature || (shot.render?.assetId === src.id ? shot.render.signature : null);
+  if (made) return made !== shotSignature(project, shot);
+  return assets.some(a => a.kind === 'camera-render' && a.shotId === shot.id && a.id !== src.id && String(a.createdAt) > String(src.createdAt));
+}
+
+/**
+ * The blockout clip a starter shipped for a shot that has no blockout of its own yet (its newest one), and whether it
+ * shows the shot as it is now (`fresh` is null when the clip recorded no signature). Starter clips can be watched,
+ * but generating still makes the shot's own blockout first.
+ */
+export function starterBlockout(project, shot) {
+  if (shot.render) return null;
+  const clip = (project.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id && a.starter).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))[0];
+  if (!clip) return null;
+  const made = clip.source?.signature;
+  return { asset: clip, fresh: made ? made === shotSignature(project, shot) : null };
+}
+
+/**
+ * What a project made from a starter is missing or has out of date: media files the snapshot lists that were not in
+ * the checkout (`starterFiles.missing`, recorded when the project was created) and shots whose generated stills or
+ * cut video were made for an earlier blocking. Null for other projects or when nothing is off.
+ */
+export function starterMediaStatus(project) {
+  if (!(project.assets || []).some(a => a.starter) && !project.starterFiles) return null;
+  const clipOf = s => { const c = project.edit?.clips?.find(x => x.shotId === s.id); return (project.assets || []).find(a => a.id === c?.assetId) || null; };
+  const staleShots = project.shots.filter(s => (s.references || []).some(r => r.role === 'frame' && stillStale(project, s, r)) || videoStale(project, s, clipOf(s))).map(s => s.id);
+  const missing = project.starterFiles?.missing || 0, listed = project.starterFiles?.listed || 0;
+  return missing || staleShots.length ? { missing, listed, staleShots } : null;
+}
+
 /** The shot's chosen start still and end still (its newest key frames), each null when missing. */
 export function keyStills(shot) {
   const frames = (shot.references || []).filter(r => r.role === 'frame');

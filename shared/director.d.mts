@@ -14,11 +14,12 @@ export type Message = { id: string; shotId: string | null; role: 'user' | 'agent
 // [agent] Edits the built-in agent proposed on a user message; applied/undone as one step.
 export type Proposal = { ops: unknown[]; undo: unknown[]; summary: { kind: string; text: string }[]; small: boolean; status: 'pending' | 'applied' | 'discarded' | 'undone'; decidedAt?: string };
 export type EditClip = { id: string; shotId: string; assetId: string | null; in: number; out: number | null };
-export type Asset = { id: string; kind: 'camera-render' | 'workflow-result' | 'edit'; shotId: string | null; file: string; mime: string; sha256: string; width: number; height: number; fps: number | null; frameCount: number | null; duration: number | null; version?: number; createdAt: string; imported?: boolean; source: { clips?: { assetId: string; in: number; out: number }[]; engineShotId?: string; engineAssetId?: string; sourceAssetId?: string; jobId?: string; resultId?: string; workflow?: string; backend?: string | null; prompt?: string; quote?: { status: string; amount: number | null; currency: string } | null } };
+export type Asset = { id: string; kind: 'camera-render' | 'workflow-result' | 'edit'; shotId: string | null; file: string; mime: string; sha256: string; width: number; height: number; fps: number | null; frameCount: number | null; duration: number | null; version?: number; createdAt: string; imported?: boolean; starter?: string; source: { clips?: { assetId: string; in: number; out: number }[]; engineShotId?: string; engineAssetId?: string; sourceAssetId?: string; jobId?: string; resultId?: string; workflow?: string; backend?: string | null; prompt?: string; signature?: string; quote?: { status: string; amount: number | null; currency: string } | null } };
 export type DirectorProject = {
   version: 1; id: string; title: string; template: string; createdAt: string; updatedAt: string; revision: number;
   scene: { name: string; environment: { preset: string; description: string; style?: string }; entities: Entity[]; references?: Reference[] };
   shots: Shot[]; messages: Message[]; assets?: Asset[]; edit?: { clips: EditClip[]; updatedAt: string };
+  starterFiles?: { listed: number; missing: number };
 };
 export const SHAPES: Record<string, { size: Vec3; kind: Kind; color: string }>;
 export const KINDS: Kind[];
@@ -46,6 +47,9 @@ export function keyStills(shot: Shot): { start: Reference | null; end: Reference
 export function shotSignature(project: DirectorProject, shot: Shot): string;
 export function blockoutStale(project: DirectorProject, shot: Shot): boolean;
 export function stillStale(project: DirectorProject, shot: Shot, ref: Reference | null | undefined): boolean;
+export function videoStale(project: DirectorProject, shot: Shot, video: Asset | null | undefined): boolean;
+export function starterBlockout(project: DirectorProject, shot: Shot): { asset: Asset; fresh: boolean | null } | null;
+export function starterMediaStatus(project: DirectorProject): { missing: number; listed: number; staleShots: string[] } | null;
 export function referenceLegend(refs: VideoRef[]): string;
 export function clampDuration(value: unknown): number;
 export function lookSource(project: DirectorProject, entityId: string): Entity | null;
