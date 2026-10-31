@@ -294,6 +294,13 @@ body.m-medium.m-docked[data-mstep=build] .ws-body .stage, body.m-medium.m-docked
 :is(body.m-compact, body.m-medium) dialog.m-task[open]:is(.confirm, .claude-help) { height: auto; }
 :is(body.m-compact, body.m-medium) dialog.m-task::before { content: ''; flex: none; align-self: center; width: 36px; height: 5px; margin-top: 8px; border-radius: 3px; background: var(--line-2); }
 :is(body.m-compact, body.m-medium) dialog.m-task :is(.dialog-head, .jobs-head, .assets-head, .looks-head) { position: sticky; top: 0; z-index: 2; background: var(--paper); padding: 8px 0; flex-wrap: wrap; gap: 8px; }
+/* Generate dialog head on a phone: title and close on one row, then the model, where it runs, the estimate and Generate. */
+:is(body.m-compact, body.m-medium) dialog.render .rg-head h2 { flex: 1 1 0; white-space: normal; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-head > .btn.icon { order: 2; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-controls { order: 3; flex: 1 1 100%; flex-wrap: wrap; gap: 8px; min-width: 0; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-f { flex: 1 1 140px; min-width: 0; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-f:first-child { flex-basis: 100%; }
+:is(body.m-compact, body.m-medium) dialog.render .rg-f select { width: 100%; max-width: none; }
 :is(body.m-compact, body.m-medium) dialog.m-task h2 { font-size: var(--m-fs-lg); }
 :is(body.m-compact, body.m-medium) dialog.m-task .render-body { display: flex; flex-direction: column; gap: 14px; grid-template-columns: none; }
 :is(body.m-compact, body.m-medium) dialog.m-task .render-media { width: 100%; aspect-ratio: 16 / 9; }
