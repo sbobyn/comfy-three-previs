@@ -29,7 +29,7 @@ export function shotProjector(shot, entities, t = 0, aspect = 16 / 9) {
 }
 
 // Shapes whose front means something (a car's nose, a person's face).
-const FRONTED = new Set(['person', 'car', 'chair']);
+const FRONTED = new Set(['person', 'car', 'chair', 'bird']);
 const hasFront = e => FRONTED.has(e.shape) || e.kind === 'character' || e.kind === 'vehicle';
 
 /**

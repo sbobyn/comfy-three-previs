@@ -8,6 +8,7 @@ import { cameraLine } from './camera-source.mjs';
 export const SHAPES = {
   person: { size: [0.5, 1.8, 0.35], kind: 'character', color: '#e8b04b' },
   car: { size: [1.9, 1.45, 4.5], kind: 'vehicle', color: '#d9534f' },
+  bird: { size: [2.4, 0.5, 1.1], kind: 'prop', color: '#3b2a1e' },
   box: { size: [1, 1, 1], kind: 'prop', color: '#9aa7b8' },
   table: { size: [1.6, 0.75, 0.9], kind: 'prop', color: '#a07a55' },
   chair: { size: [0.5, 0.9, 0.5], kind: 'prop', color: '#8a6a4a' },

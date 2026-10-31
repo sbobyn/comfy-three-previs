@@ -4,7 +4,7 @@
   "slug": "posterized",
   "order": 3,
   "title": "Posterized",
-  "description": "Comfy dunk in a packed arena",
+  "description": "A fast break, a drive into the lane, then the Comfy guard rising above the defender to finish at the rim.",
   "scene": {
     "name": "Arena",
     "environment": {
@@ -81,9 +81,9 @@
           0.05,
           4.9
         ],
-        "color": "#2459D8",
+        "color": "#326994",
         "notes": "",
-        "lookFrom": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -96,8 +96,8 @@
         "kind": "environment",
         "shape": "box",
         "position": [
-          14.2,
-          1.6,
+          16.4,
+          0,
           0
         ],
         "rotation": 0,
@@ -118,11 +118,11 @@
       {
         "id": "ff04a50c-5167-4501-acbf-aefe23e66f49",
         "name": "East backboard",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "box",
         "position": [
           12.7,
-          3.35,
+          2.85,
           0
         ],
         "rotation": 0,
@@ -131,7 +131,7 @@
           1.05,
           1.8
         ],
-        "color": "#e8f0f6",
+        "color": "#b8d5e5",
         "notes": "Clear glass backboard with a white border.",
         "lookFrom": null,
         "styleNotes": "",
@@ -261,11 +261,11 @@
         ],
         "rotation": 0,
         "scale": [
-          0.46,
-          0.05,
-          0.46
+          0.7,
+          0.06,
+          0.7
         ],
-        "color": "#E2591C",
+        "color": "#f18e36",
         "notes": "Orange breakaway rim with a white net.",
         "lookFrom": null,
         "styleNotes": "",
@@ -399,9 +399,9 @@
           0.05,
           4.9
         ],
-        "color": "#2459D8",
+        "color": "#326994",
         "notes": "",
-        "lookFrom": "d3df9ebf-bc8f-4834-af78-9b99e0b04981",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -414,8 +414,8 @@
         "kind": "environment",
         "shape": "box",
         "position": [
-          -14.2,
-          1.6,
+          -16.4,
+          0,
           0
         ],
         "rotation": 0,
@@ -436,11 +436,11 @@
       {
         "id": "c6f3fef1-e438-4dbb-970c-3360829c2bbd",
         "name": "West backboard",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "box",
         "position": [
           -12.7,
-          3.35,
+          2.85,
           0
         ],
         "rotation": 0,
@@ -449,7 +449,7 @@
           1.05,
           1.8
         ],
-        "color": "#e8f0f6",
+        "color": "#b8d5e5",
         "notes": "Clear glass backboard with a white border.",
         "lookFrom": "ff04a50c-5167-4501-acbf-aefe23e66f49",
         "styleNotes": "",
@@ -470,11 +470,11 @@
         ],
         "rotation": 0,
         "scale": [
-          0.46,
-          0.05,
-          0.46
+          0.7,
+          0.06,
+          0.7
         ],
-        "color": "#E2591C",
+        "color": "#f18e36",
         "notes": "Orange breakaway rim with a white net.",
         "lookFrom": "e18cadab-676b-4b43-be24-1e1ee60ba9bc",
         "styleNotes": "",
@@ -490,7 +490,7 @@
         "shape": "box",
         "position": [
           0,
-          1,
+          0,
           12
         ],
         "rotation": 0,
@@ -516,7 +516,7 @@
         "shape": "box",
         "position": [
           0,
-          2.6,
+          0,
           14.2
         ],
         "rotation": 0,
@@ -541,7 +541,7 @@
         "shape": "box",
         "position": [
           0,
-          4.2,
+          0,
           16.4
         ],
         "rotation": 0,
@@ -566,7 +566,7 @@
         "shape": "box",
         "position": [
           0,
-          1,
+          0,
           -12
         ],
         "rotation": 0,
@@ -591,7 +591,7 @@
         "shape": "box",
         "position": [
           0,
-          2.6,
+          0,
           -14.2
         ],
         "rotation": 0,
@@ -616,7 +616,7 @@
         "shape": "box",
         "position": [
           0,
-          4.2,
+          0,
           -16.4
         ],
         "rotation": 0,
@@ -641,7 +641,7 @@
         "shape": "box",
         "position": [
           16.926,
-          2.5,
+          0,
           -14.712
         ],
         "rotation": 348.75,
@@ -666,7 +666,7 @@
         "shape": "box",
         "position": [
           22.334,
-          2.5,
+          0,
           -12.472
         ],
         "rotation": 326.25,
@@ -691,7 +691,7 @@
         "shape": "box",
         "position": [
           26.472,
-          2.5,
+          0,
           -8.334
         ],
         "rotation": 303.75,
@@ -716,7 +716,7 @@
         "shape": "box",
         "position": [
           28.712,
-          2.5,
+          0,
           -2.926
         ],
         "rotation": 281.25,
@@ -741,7 +741,7 @@
         "shape": "box",
         "position": [
           28.712,
-          2.5,
+          0,
           2.926
         ],
         "rotation": 258.75,
@@ -766,7 +766,7 @@
         "shape": "box",
         "position": [
           26.472,
-          2.5,
+          0,
           8.334
         ],
         "rotation": 236.25,
@@ -791,7 +791,7 @@
         "shape": "box",
         "position": [
           22.334,
-          2.5,
+          0,
           12.472
         ],
         "rotation": 213.75,
@@ -816,7 +816,7 @@
         "shape": "box",
         "position": [
           16.926,
-          2.5,
+          0,
           14.712
         ],
         "rotation": 191.25,
@@ -841,7 +841,7 @@
         "shape": "box",
         "position": [
           -16.926,
-          2.5,
+          0,
           14.712
         ],
         "rotation": 168.75,
@@ -866,7 +866,7 @@
         "shape": "box",
         "position": [
           -22.334,
-          2.5,
+          0,
           12.472
         ],
         "rotation": 146.25,
@@ -891,7 +891,7 @@
         "shape": "box",
         "position": [
           -26.472,
-          2.5,
+          0,
           8.334
         ],
         "rotation": 123.75,
@@ -916,7 +916,7 @@
         "shape": "box",
         "position": [
           -28.712,
-          2.5,
+          0,
           2.926
         ],
         "rotation": 101.25,
@@ -941,7 +941,7 @@
         "shape": "box",
         "position": [
           -28.712,
-          2.5,
+          0,
           -2.926
         ],
         "rotation": 78.75,
@@ -966,7 +966,7 @@
         "shape": "box",
         "position": [
           -26.472,
-          2.5,
+          0,
           -8.334
         ],
         "rotation": 56.25,
@@ -991,7 +991,7 @@
         "shape": "box",
         "position": [
           -22.334,
-          2.5,
+          0,
           -12.472
         ],
         "rotation": 33.75,
@@ -1016,7 +1016,7 @@
         "shape": "box",
         "position": [
           -16.926,
-          2.5,
+          0,
           -14.712
         ],
         "rotation": 11.25,
@@ -1041,17 +1041,17 @@
         "shape": "box",
         "position": [
           0,
-          13,
+          11,
           0
         ],
         "rotation": 0,
         "scale": [
-          6,
-          3,
-          6
+          5,
+          1.4,
+          0.3
         ],
-        "color": "#1d1f22",
-        "notes": "Four-sided center-hung scoreboard with bright LED screens.",
+        "color": "#25445d",
+        "notes": "A slim overhead scoreboard, secondary to the play on the court.",
         "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
@@ -1075,7 +1075,7 @@
           1.12,
           1.1
         ],
-        "color": "#2459D8",
+        "color": "#238ce3",
         "notes": "Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.",
         "lookFrom": null,
         "styleNotes": "Blue and yellow only; never black, white or green on this player",
@@ -1085,74 +1085,110 @@
           {
             "t": 0,
             "p": [
-              -6,
+              -5,
               0,
-              2
-            ]
+              1.4
+            ],
+            "r": 90
           },
           {
-            "t": 3,
+            "t": 2,
             "p": [
-              -1,
+              -1.5,
               0,
-              2.5
-            ]
+              1.4
+            ],
+            "r": 90
+          },
+          {
+            "t": 4,
+            "p": [
+              2,
+              0,
+              1.3
+            ],
+            "r": 90
           },
           {
             "t": 6,
             "p": [
-              4,
+              5.2,
               0,
-              2.2
-            ]
+              1.1
+            ],
+            "r": 90
+          },
+          {
+            "t": 8,
+            "p": [
+              8,
+              0,
+              0.7
+            ],
+            "r": 90
           },
           {
             "t": 9,
             "p": [
-              8.6,
+              9.3,
               0,
-              1.2
-            ]
+              0.5
+            ],
+            "r": 90
+          },
+          {
+            "t": 9.8,
+            "p": [
+              10.2,
+              0.05,
+              0.25
+            ],
+            "r": 90
           },
           {
             "t": 10.6,
             "p": [
-              10.6,
-              0,
-              0.6
-            ]
+              11.5,
+              1.3,
+              0.05
+            ],
+            "r": 90
           },
           {
-            "t": 11.6,
-            "p": [
-              11.6,
-              1,
-              0.25
-            ]
-          },
-          {
-            "t": 12.2,
+            "t": 11.1,
             "p": [
               12,
-              1.15,
-              0.05
-            ]
+              1.4,
+              0
+            ],
+            "r": 90
           },
           {
-            "t": 13.2,
+            "t": 11.8,
             "p": [
-              12.1,
-              0,
-              0.4
-            ]
+              12.2,
+              0.8,
+              0.2
+            ],
+            "r": 90
           },
           {
-            "t": 15,
+            "t": 12.5,
             "p": [
-              11.4,
+              12.4,
               0,
-              1.6
-            ]
+              0.5
+            ],
+            "r": 90
+          },
+          {
+            "t": 13,
+            "p": [
+              12.5,
+              0,
+              0.7
+            ],
+            "r": 90
           }
         ],
         "parent": null,
@@ -1388,7 +1424,7 @@
           1.12,
           1.1
         ],
-        "color": "#2459D8",
+        "color": "#238ce3",
         "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
         "lookFrom": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
         "styleNotes": "",
@@ -1405,7 +1441,7 @@
         "position": [
           7,
           0,
-          5
+          -6
         ],
         "rotation": 120,
         "scale": [
@@ -1413,7 +1449,7 @@
           1.12,
           1.1
         ],
-        "color": "#2459D8",
+        "color": "#238ce3",
         "notes": "Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers.",
         "lookFrom": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
         "styleNotes": "",
@@ -1438,7 +1474,7 @@
           1.12,
           1.1
         ],
-        "color": "#16181A",
+        "color": "#82bf3d",
         "notes": "Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.",
         "lookFrom": null,
         "styleNotes": "Black and neon green only; never white, red or blue on this player",
@@ -1448,54 +1484,74 @@
           {
             "t": 0,
             "p": [
-              2,
+              1,
               0,
               0
-            ]
-          },
-          {
-            "t": 6,
-            "p": [
-              8,
-              0,
-              0.5
-            ]
-          },
-          {
-            "t": 10,
-            "p": [
-              10.8,
-              0,
-              0.2
             ],
             "r": 270
           },
           {
-            "t": 11.6,
+            "t": 4,
             "p": [
-              11.4,
-              0.6,
-              -0.3
+              6,
+              0,
+              0
             ],
             "r": 270
           },
           {
-            "t": 12.4,
+            "t": 8,
             "p": [
-              11.6,
+              10.7,
               0,
-              -0.5
+              -0.45
             ],
             "r": 270
           },
           {
-            "t": 15,
+            "t": 9.5,
             "p": [
-              11,
+              11.1,
               0,
-              -1.4
+              -0.45
             ],
-            "r": 240
+            "r": 270
+          },
+          {
+            "t": 10.1,
+            "p": [
+              11.2,
+              0.55,
+              -0.45
+            ],
+            "r": 270
+          },
+          {
+            "t": 10.7,
+            "p": [
+              11.3,
+              0.3,
+              -0.45
+            ],
+            "r": 270
+          },
+          {
+            "t": 11.3,
+            "p": [
+              11.3,
+              0,
+              -0.45
+            ],
+            "r": 270
+          },
+          {
+            "t": 13,
+            "p": [
+              11.2,
+              0,
+              -0.6
+            ],
+            "r": 270
           }
         ],
         "parent": null,
@@ -1625,7 +1681,7 @@
           1.12,
           1.1
         ],
-        "color": "#16181A",
+        "color": "#82bf3d",
         "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers.",
         "lookFrom": "e94b786d-72f3-4881-85b2-2c05357e8367",
         "styleNotes": "",
@@ -1642,7 +1698,7 @@
         "position": [
           3,
           0,
-          4
+          6.5
         ],
         "rotation": 240,
         "scale": [
@@ -1650,7 +1706,7 @@
           1.12,
           1.1
         ],
-        "color": "#16181A",
+        "color": "#82bf3d",
         "notes": "Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers.",
         "lookFrom": "e94b786d-72f3-4881-85b2-2c05357e8367",
         "styleNotes": "",
@@ -1675,7 +1731,7 @@
           0.24,
           0.24
         ],
-        "color": "#E2591C",
+        "color": "#eb762b",
         "notes": "Orange leather basketball with black seams.",
         "lookFrom": null,
         "styleNotes": "",
@@ -1685,82 +1741,110 @@
           {
             "t": 0,
             "p": [
-              -5.6,
-              1,
-              2.3
-            ]
+              -4.6,
+              0.7,
+              1.7
+            ],
+            "r": 0
           },
           {
-            "t": 3,
+            "t": 2,
             "p": [
-              -0.6,
-              0.6,
-              2.8
-            ]
+              -1.1,
+              0.4,
+              1.7
+            ],
+            "r": 0
+          },
+          {
+            "t": 4,
+            "p": [
+              2.4,
+              0.9,
+              1.6
+            ],
+            "r": 0
           },
           {
             "t": 6,
             "p": [
-              4.4,
-              1,
-              2.5
-            ]
+              5.6,
+              0.5,
+              1.4
+            ],
+            "r": 0
+          },
+          {
+            "t": 8,
+            "p": [
+              8.4,
+              0.8,
+              1
+            ],
+            "r": 0
           },
           {
             "t": 9,
             "p": [
-              9,
-              0.7,
-              1.5
-            ]
+              9.7,
+              1.2,
+              0.7
+            ],
+            "r": 0
+          },
+          {
+            "t": 9.8,
+            "p": [
+              10.6,
+              2,
+              0.3
+            ],
+            "r": 0
           },
           {
             "t": 10.6,
             "p": [
-              10.9,
-              1.6,
+              12,
+              3.35,
+              0.05
+            ],
+            "r": 0
+          },
+          {
+            "t": 11.1,
+            "p": [
+              12.25,
+              3.18,
+              0
+            ],
+            "r": 0
+          },
+          {
+            "t": 11.4,
+            "p": [
+              12.25,
+              2.5,
+              0
+            ],
+            "r": 0
+          },
+          {
+            "t": 12,
+            "p": [
+              12.25,
+              0.2,
+              0.1
+            ],
+            "r": 0
+          },
+          {
+            "t": 13,
+            "p": [
+              12.6,
+              0.15,
               0.6
-            ]
-          },
-          {
-            "t": 11.6,
-            "p": [
-              12,
-              3.2,
-              0.2
-            ]
-          },
-          {
-            "t": 12.2,
-            "p": [
-              12.25,
-              3.1,
-              0
-            ]
-          },
-          {
-            "t": 12.6,
-            "p": [
-              12.25,
-              1.6,
-              0
-            ]
-          },
-          {
-            "t": 13.4,
-            "p": [
-              12,
-              0.2,
-              0.3
-            ]
-          },
-          {
-            "t": 15,
-            "p": [
-              11.5,
-              0.2,
-              1.2
-            ]
+            ],
+            "r": 0
           }
         ],
         "parent": null,
@@ -2538,31 +2622,325 @@
     {
       "id": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
       "title": "Fast break",
-      "description": "Wide arena shot as @comfy-guard sprints the ball up the court on a fast break, @comfy-wing and @comfy-center filling the lanes, the rival defenders backpedalling, the crowd on its feet.",
-      "duration": 5,
-      "start": 1,
+      "description": "@comfy-guard in blue and yellow advances with @basketball while the green @rival-defender retreats toward the basket.",
+      "duration": 4,
+      "start": 0,
       "camera": {
-        "move": "crane-down",
+        "move": "custom",
         "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
         "distance": 18,
         "height": 10,
         "angle": 160,
-        "mm": 28,
-        "keys": null
+        "mm": 32,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              0,
+              4.8,
+              9
+            ],
+            "look": [
+              -4,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.05,
+            "p": [
+              0.208,
+              4.8,
+              9
+            ],
+            "look": [
+              -3.792,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.1,
+            "p": [
+              0.476,
+              4.8,
+              9
+            ],
+            "look": [
+              -3.524,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.15,
+            "p": [
+              0.793,
+              4.8,
+              9
+            ],
+            "look": [
+              -3.207,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.2,
+            "p": [
+              1.148,
+              4.8,
+              9
+            ],
+            "look": [
+              -2.852,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.25,
+            "p": [
+              1.531,
+              4.8,
+              9
+            ],
+            "look": [
+              -2.469,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.3,
+            "p": [
+              1.932,
+              4.8,
+              9
+            ],
+            "look": [
+              -2.068,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.35,
+            "p": [
+              2.34,
+              4.8,
+              9
+            ],
+            "look": [
+              -1.66,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.4,
+            "p": [
+              2.744,
+              4.8,
+              9
+            ],
+            "look": [
+              -1.256,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.45,
+            "p": [
+              3.134,
+              4.8,
+              9
+            ],
+            "look": [
+              -0.866,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.5,
+            "p": [
+              3.5,
+              4.8,
+              9
+            ],
+            "look": [
+              -0.5,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.55,
+            "p": [
+              3.851,
+              4.8,
+              9
+            ],
+            "look": [
+              -0.149,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.6,
+            "p": [
+              4.205,
+              4.8,
+              9
+            ],
+            "look": [
+              0.205,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.65,
+            "p": [
+              4.559,
+              4.8,
+              9
+            ],
+            "look": [
+              0.559,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.7,
+            "p": [
+              4.914,
+              4.8,
+              9
+            ],
+            "look": [
+              0.914,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.75,
+            "p": [
+              5.269,
+              4.8,
+              9
+            ],
+            "look": [
+              1.269,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.8,
+            "p": [
+              5.622,
+              4.8,
+              9
+            ],
+            "look": [
+              1.622,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.85,
+            "p": [
+              5.972,
+              4.8,
+              9
+            ],
+            "look": [
+              1.972,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.9,
+            "p": [
+              6.319,
+              4.8,
+              9
+            ],
+            "look": [
+              2.319,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.95,
+            "p": [
+              6.662,
+              4.8,
+              9
+            ],
+            "look": [
+              2.662,
+              1,
+              1
+            ],
+            "mm": 32
+          },
+          {
+            "t": 1,
+            "p": [
+              7,
+              4.8,
+              9
+            ],
+            "look": [
+              3,
+              1,
+              1
+            ],
+            "mm": 32
+          }
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
         "exclude": []
       },
       "style": {
-        "movement": [
-          "crane down"
-        ],
+        "movement": [],
         "cuts": [
           "continuous take, no cuts"
         ],
         "lens": [
-          "24mm wide"
+          "32mm"
         ],
         "filter": [
           "saturated primaries"
@@ -2582,7 +2960,8 @@
             "presetId": "flux-2-pro",
             "model": "Flux.2 [pro] (BFL)",
             "seed": 484291,
-            "prompt": "Cinematic film still, single frame. Wide arena shot as Comfy guard sprints the ball up the court on a fast break, Comfy wing and Comfy center filling the lanes, the rival defenders backpedalling, the crowd on its feet. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival t"
+            "prompt": "Cinematic film still, single frame. Wide arena shot as Comfy guard sprints the ball up the court on a fast break, Comfy wing and Comfy center filling the lanes, the rival defenders backpedalling, the crowd on its feet. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival t",
+            "signature": "bd8507ed"
           }
         }
       ]
@@ -2590,32 +2969,325 @@
     {
       "id": "4feea365-12b8-456f-878e-80be456c4c27",
       "title": "The drive",
-      "description": "Low tracking shot alongside as @comfy-guard drives hard along the baseline past @rival-defender, crossing the ball between his legs, sneakers squeaking.",
-      "duration": 5,
-      "start": 6,
+      "description": "@comfy-guard drives into the lane with @basketball. @rival-defender sets under the east rim, facing the approaching guard.",
+      "duration": 4,
+      "start": 4,
       "camera": {
-        "move": "truck-right",
+        "move": "custom",
         "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
         "distance": 5,
         "height": 1.4,
         "angle": -80,
-        "mm": 35,
-        "keys": null
+        "mm": 30,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              7,
+              2.3,
+              7
+            ],
+            "look": [
+              3,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.05,
+            "p": [
+              7.334,
+              2.3,
+              7
+            ],
+            "look": [
+              3.334,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.1,
+            "p": [
+              7.666,
+              2.3,
+              7
+            ],
+            "look": [
+              3.666,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.15,
+            "p": [
+              7.995,
+              2.3,
+              7
+            ],
+            "look": [
+              3.995,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.2,
+            "p": [
+              8.321,
+              2.3,
+              7
+            ],
+            "look": [
+              4.321,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.25,
+            "p": [
+              8.644,
+              2.3,
+              7
+            ],
+            "look": [
+              4.644,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.3,
+            "p": [
+              8.963,
+              2.3,
+              7
+            ],
+            "look": [
+              4.963,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.35,
+            "p": [
+              9.279,
+              2.3,
+              7
+            ],
+            "look": [
+              5.279,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.4,
+            "p": [
+              9.59,
+              2.3,
+              7
+            ],
+            "look": [
+              5.59,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.45,
+            "p": [
+              9.898,
+              2.3,
+              7
+            ],
+            "look": [
+              5.898,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.5,
+            "p": [
+              10.2,
+              2.3,
+              7
+            ],
+            "look": [
+              6.2,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.55,
+            "p": [
+              10.503,
+              2.3,
+              7
+            ],
+            "look": [
+              6.503,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.6,
+            "p": [
+              10.81,
+              2.3,
+              7
+            ],
+            "look": [
+              6.81,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.65,
+            "p": [
+              11.117,
+              2.3,
+              7
+            ],
+            "look": [
+              7.117,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.7,
+            "p": [
+              11.421,
+              2.3,
+              7
+            ],
+            "look": [
+              7.421,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.75,
+            "p": [
+              11.719,
+              2.3,
+              7
+            ],
+            "look": [
+              7.719,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.8,
+            "p": [
+              12.007,
+              2.3,
+              7
+            ],
+            "look": [
+              8.007,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.85,
+            "p": [
+              12.283,
+              2.3,
+              7
+            ],
+            "look": [
+              8.283,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.9,
+            "p": [
+              12.542,
+              2.3,
+              7
+            ],
+            "look": [
+              8.542,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 0.95,
+            "p": [
+              12.783,
+              2.3,
+              7
+            ],
+            "look": [
+              8.783,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          },
+          {
+            "t": 1,
+            "p": [
+              13,
+              2.3,
+              7
+            ],
+            "look": [
+              9,
+              1.3,
+              0.5
+            ],
+            "mm": 30
+          }
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
         "exclude": []
       },
       "style": {
-        "movement": [
-          "tracking shot",
-          "dolly alongside"
-        ],
+        "movement": [],
         "cuts": [
           "continuous take, no cuts"
         ],
         "lens": [
-          "35mm natural"
+          "30mm"
         ],
         "filter": [
           "high contrast"
@@ -2635,7 +3307,8 @@
             "presetId": "flux-2-pro",
             "model": "Flux.2 [pro] (BFL)",
             "seed": 366018,
-            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy guard drives hard along the baseline past Rival defender, crossing the ball between his legs, sneakers squeaking. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Clear glass backboard with a white border. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Photoreal live"
+            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy guard drives hard along the baseline past Rival defender, crossing the ball between his legs, sneakers squeaking. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Clear glass backboard with a white border. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Photoreal live",
+            "signature": "d4f02c40"
           }
         }
       ]
@@ -2643,31 +3316,325 @@
     {
       "id": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
       "title": "Posterized",
-      "description": "Low angle under the rim: @comfy-guard explodes upward and throws down a two-handed dunk over @rival-defender, the net snaps, the camera rises with him, the arena erupts.",
+      "description": "@comfy-guard takes two final strides, rises above @rival-defender and slams @basketball through the east rim. The defender lands beneath him; the guard comes down after the score.",
       "duration": 5,
-      "start": 10,
+      "start": 8,
       "camera": {
-        "move": "crane-up",
+        "move": "custom",
         "target": "6e7ff469-3932-4abf-a208-1d5b8f72573e",
         "distance": 5,
         "height": 0.8,
         "angle": -35,
-        "mm": 20,
-        "keys": null
+        "mm": 26,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              16.3,
+              1.9,
+              5.8
+            ],
+            "look": [
+              10.9,
+              1.8,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.05,
+            "p": [
+              16.265,
+              1.945,
+              5.77
+            ],
+            "look": [
+              10.935,
+              1.823,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.1,
+            "p": [
+              16.23,
+              1.99,
+              5.74
+            ],
+            "look": [
+              10.97,
+              1.846,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.15,
+            "p": [
+              16.195,
+              2.035,
+              5.71
+            ],
+            "look": [
+              11.005,
+              1.868,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.2,
+            "p": [
+              16.16,
+              2.08,
+              5.68
+            ],
+            "look": [
+              11.04,
+              1.888,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.25,
+            "p": [
+              16.125,
+              2.125,
+              5.65
+            ],
+            "look": [
+              11.075,
+              1.906,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.3,
+            "p": [
+              16.09,
+              2.17,
+              5.62
+            ],
+            "look": [
+              11.11,
+              1.921,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.35,
+            "p": [
+              16.055,
+              2.215,
+              5.59
+            ],
+            "look": [
+              11.145,
+              1.934,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.4,
+            "p": [
+              16.02,
+              2.26,
+              5.56
+            ],
+            "look": [
+              11.18,
+              1.943,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.45,
+            "p": [
+              15.985,
+              2.305,
+              5.53
+            ],
+            "look": [
+              11.215,
+              1.948,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.5,
+            "p": [
+              15.95,
+              2.35,
+              5.5
+            ],
+            "look": [
+              11.25,
+              1.95,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.55,
+            "p": [
+              15.915,
+              2.395,
+              5.47
+            ],
+            "look": [
+              11.285,
+              1.948,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.6,
+            "p": [
+              15.88,
+              2.44,
+              5.44
+            ],
+            "look": [
+              11.32,
+              1.943,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.65,
+            "p": [
+              15.845,
+              2.485,
+              5.41
+            ],
+            "look": [
+              11.355,
+              1.934,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.7,
+            "p": [
+              15.81,
+              2.53,
+              5.38
+            ],
+            "look": [
+              11.39,
+              1.921,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.75,
+            "p": [
+              15.775,
+              2.575,
+              5.35
+            ],
+            "look": [
+              11.425,
+              1.906,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.8,
+            "p": [
+              15.74,
+              2.62,
+              5.32
+            ],
+            "look": [
+              11.46,
+              1.888,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.85,
+            "p": [
+              15.705,
+              2.665,
+              5.29
+            ],
+            "look": [
+              11.495,
+              1.868,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.9,
+            "p": [
+              15.67,
+              2.71,
+              5.26
+            ],
+            "look": [
+              11.53,
+              1.846,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 0.95,
+            "p": [
+              15.635,
+              2.755,
+              5.23
+            ],
+            "look": [
+              11.565,
+              1.823,
+              0
+            ],
+            "mm": 26
+          },
+          {
+            "t": 1,
+            "p": [
+              15.6,
+              2.8,
+              5.2
+            ],
+            "look": [
+              11.6,
+              1.8,
+              0
+            ],
+            "mm": 26
+          }
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
         "exclude": []
       },
       "style": {
-        "movement": [
-          "crane up"
-        ],
+        "movement": [],
         "cuts": [
-          "speed ramp"
+          "continuous take, no cuts"
         ],
         "lens": [
-          "14mm ultra-wide"
+          "26mm"
         ],
         "filter": [
           "high contrast"
@@ -2688,7 +3655,8 @@
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
             "seed": 792113,
-            "prompt": "Cinematic film still, single frame. Low angle under the rim: Comfy guard explodes upward and throws down a two-handed dunk over Rival defender, the net snaps, the camera rises with him, the arena erupts. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Orange breakaway rim with a white net. Orange leather basketball with black seams. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action.. Framing: 20mm lens, match the supplied blockout frame's composition. Lens: 14mm ultra-wide. Filter: high contrast.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and e"
+            "prompt": "Cinematic film still, single frame. Low angle under the rim: Comfy guard explodes upward and throws down a two-handed dunk over Rival defender, the net snaps, the camera rises with him, the arena erupts. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Orange breakaway rim with a white net. Orange leather basketball with black seams. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action.. Framing: 20mm lens, match the supplied blockout frame's composition. Lens: 14mm ultra-wide. Filter: high contrast.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and e",
+            "signature": "ada048b4"
           }
         }
       ]
@@ -3126,6 +4094,42 @@
       "fps": 24,
       "frameCount": 121,
       "duration": 5.042
+    },
+    {
+      "path": "media/assets/7eb128d9-886e-472c-9a0d-c396267728d4.mp4",
+      "kind": "video",
+      "bytes": 300175,
+      "sha256": "6fea44114dee5a6778303040dec7f121dbf876a786d8abc7b86f098a67f60cfe",
+      "sourceSha256": "6fea44114dee5a6778303040dec7f121dbf876a786d8abc7b86f098a67f60cfe",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/c7802ae5-9c1e-4330-855b-44a6a4befd7e.mp4",
+      "kind": "video",
+      "bytes": 359542,
+      "sha256": "b17ce375350e55465698e54dbc07a90ce508f8755d9191163466491de70519cc",
+      "sourceSha256": "b17ce375350e55465698e54dbc07a90ce508f8755d9191163466491de70519cc",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/8b754c86-2181-44a7-a904-2c4590285b11.mp4",
+      "kind": "video",
+      "bytes": 686284,
+      "sha256": "1cc8680da26da056f3855dd81340a76b9df9ac65ea8ec19c0c8e2755bd100680",
+      "sourceSha256": "1cc8680da26da056f3855dd81340a76b9df9ac65ea8ec19c0c8e2755bd100680",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
     }
   ],
   "assets": [
@@ -3208,6 +4212,45 @@
         "backend": "cloud",
         "prompt": "Cinematic live-action shot. Low angle under the rim: the Comfy guard explodes upward and throws down a two-handed dunk over the rival defender, the net snaps, the camera cranes up with him, the arena erupts. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7. Orange leather basketball. Clear glass backboard, orange breakaway rim with a white net. Setting: a packed indoor basketball arena at night, only two teams on the court, blue-and-yellow versus black-and-neon-green. Look: photoreal live-action sports broadcast, crisp arena light, fast shutter. Camera: crane up from a low angle under the rim, 14mm ultra-wide, speed ramp into the dunk, 5s. Follow the supplied camera motion exactly.",
         "sourceAssetId": "10ff2446-6e1d-4ad6-a553-66cc8ed1e7b1"
+      }
+    },
+    {
+      "id": "7eb128d9-886e-472c-9a0d-c396267728d4",
+      "kind": "camera-render",
+      "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "file": "assets/7eb128d9-886e-472c-9a0d-c396267728d4.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-10-31T02:35:34.802Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "ae3879eb"
+      }
+    },
+    {
+      "id": "c7802ae5-9c1e-4330-855b-44a6a4befd7e",
+      "kind": "camera-render",
+      "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
+      "file": "assets/c7802ae5-9c1e-4330-855b-44a6a4befd7e.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-10-31T02:35:34.803Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "b40d8df2"
+      }
+    },
+    {
+      "id": "8b754c86-2181-44a7-a904-2c4590285b11",
+      "kind": "camera-render",
+      "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
+      "file": "assets/8b754c86-2181-44a7-a904-2c4590285b11.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-10-31T02:35:34.804Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "9e586736"
       }
     }
   ],
