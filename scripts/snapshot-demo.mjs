@@ -6,7 +6,7 @@
 //
 //   PREVIS_URL        server to read from (default http://127.0.0.1:5230)
 //   PREVIS_DATA       that server's data dir, for media files
-//                     (default ../comfy-previs-autoprompt-20261029/.evidence/dev-data)
+//                     (default .evidence/dev-data, the same default as scripts/publish-public.sh)
 //   DEMO_PROJECTS     comma-separated project ids (default: the four starters)
 //   DEMO_MEDIA_MB     media budget in MB (default 60)
 import { mkdir, writeFile, copyFile, readdir, stat, rm } from 'node:fs/promises';
@@ -16,7 +16,7 @@ import { join, resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
 const out = join(root, 'dist-demo');
 const server = process.env.PREVIS_URL || 'http://127.0.0.1:5230';
-const data = resolve(root, process.env.PREVIS_DATA || '../comfy-previs-autoprompt-20261029/.evidence/dev-data');
+const data = resolve(root, process.env.PREVIS_DATA || '.evidence/dev-data');
 const ids = (process.env.DEMO_PROJECTS || 'ff685e99-00bf-4f5f-979a-944f0caca7c9,f158baf1-2cac-4311-859a-e5c590d381d4,ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f,5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6').split(',');
 const budget = Number(process.env.DEMO_MEDIA_MB || 60) * 1024 * 1024;
 

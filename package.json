@@ -30,6 +30,11 @@
     "typescript": "^5.9.3",
     "vite": "^7.1.0"
   },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "esbuild"
+    ]
+  },
   "engines": {
     "node": ">=22.12.0"
   },

@@ -36,7 +36,8 @@ export async function setupChecks({ root, data, env = process.env, fetcher = fet
   let local = null;
   try { const r = await fetcher(comfyUrl + '/system_stats', { signal: AbortSignal.timeout(1500) }); local = r.ok; } catch { local = false; }
   add('local', 'Local ComfyUI', local ? 'ok' : 'optional', local ? `Reachable at ${comfyUrl}` : `Not reachable at ${comfyUrl}`, 'Optional: run ComfyUI locally (Desktop app or python main.py) and set PREVIS_COMFY_URL if not on port 8000.');
-  add('blender', 'Blender MCP', env.PREVIS_BLENDER_MCP_COMMAND ? 'ok' : 'optional', env.PREVIS_BLENDER_MCP_COMMAND ? 'Configured' : 'Not configured (optional)', 'See docs/standalone-previs.md to connect Blender.');
+  // Blender belongs to the retired workbench routes: only worth a line when someone runs them.
+  if (env.PREVIS_LEGACY_ROUTES === '1' || env.PREVIS_BLENDER_MCP_COMMAND) add('blender', 'Blender MCP', env.PREVIS_BLENDER_MCP_COMMAND ? 'ok' : 'optional', env.PREVIS_BLENDER_MCP_COMMAND ? 'Configured' : 'Not configured (optional)', 'See docs/standalone-previs.md to connect Blender.');
   const ready = checks.every(c => c.status !== 'required');
   return { ready, checks };
 }
