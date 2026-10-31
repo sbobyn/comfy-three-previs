@@ -118,8 +118,8 @@ helpMenu.append(
   menuItem('Guide', 'The whole journey, scene to film', () => showJourney()),
   menuItem('Controls & shortcuts', 'Viewport, keys and grid · ?', () => { renderHelp(); helpCard.hidden = false; }),
   menuItem('Show tips again', 'The first-run hints and tour', () => showTipsAgain()),
-  h('div', { class: 'menu-sep' }),
-  menuItem('Export project (.zip)', 'Everything in this project, in one file', () => { location.href = `/api/director/export?id=${projectId}`; }));
+  // The read-only demo has no server to build the file.
+  ...(DEMO ? [] : [h('div', { class: 'menu-sep' }), menuItem('Export project (.zip)', 'Everything in this project, in one file', () => { location.href = `/api/director/export?id=${projectId}`; })]));
 // Status strip: what the current step is working on, Claude's presence and the jobs pip (mounted below).
 const topStatus = h('div', { class: 'top-status', role: 'status', 'aria-live': 'polite' });
 const claudeChip = h('button', { class: 'top-claude', type: 'button', hidden: true, title: 'Claude is connected · open the setup', onclick: () => claudeDialog() }, h('span', { class: 'claude-mark', 'aria-hidden': 'true' }, '✳'), 'Claude');
@@ -1090,7 +1090,7 @@ async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' 
   };
   draw();
   const dlg = h('dialog', { class: 'assets', id: 'assets-dialog', 'aria-labelledby': 'assets-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Every cast member’s image and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Every cast member’s image and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), DEMO ? null : h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'assets-body' }, seg, h('p', { class: 'note', style: 'margin:0' }, 'Everything here lives in this project’s own folder, so exporting it carries videos, films, blockouts and images together.'), grid));
   document.body.append(dlg); dlg.showModal();
 }

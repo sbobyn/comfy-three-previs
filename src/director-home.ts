@@ -190,7 +190,7 @@ function menu(p: Summary) {
   const act = (label: string, fn: () => Promise<void>) => h('button', { role: 'menuitem', type: 'button', onclick: async () => { close(); try { await fn(); } catch (e) { toast((e as Error).message, true); } } }, label);
   const pop = h('div', { class: 'home-menu', hidden: true, role: 'menu' },
     act('Rename…', async () => { const name = await ask('Rename project', '', 'Rename', p.title); if (typeof name !== 'string' || name === p.title) return; await api('director/edit', { projectId: p.id, ops: [{ op: 'set_project', patch: { title: name } }] }); void render(); }),
-    h('a', { role: 'menuitem', href: `/api/director/export?id=${p.id}`, download: '' }, 'Export (.zip)'),
+    DEMO ? null : h('a', { role: 'menuitem', href: `/api/director/export?id=${p.id}`, download: '' }, 'Export (.zip)'),
     act('Duplicate', async () => { await api('director/duplicate', { projectId: p.id }); toast(`Duplicated “${p.title}”`); void render(); }),
     act('Archive…', async () => { if (!await ask(`Archive “${p.title}”?`, 'It moves to Archived and can be restored. Nothing is deleted.', 'Archive')) return; await api('director/archive', { projectId: p.id }); toast('Archived'); void render(); }));
   const items = () => Array.from(pop.querySelectorAll<HTMLElement>('[role="menuitem"]'));
