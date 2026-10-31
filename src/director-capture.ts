@@ -18,7 +18,7 @@ export type CaptureDeps = {
 export type CaptureOptions = { width: number; height: number; prompt: string; onFrame?: (url: string, i: number, n: number) => void; onStatus?: (t: string) => void };
 
 /** Same hash as director.ts `signature` (kept identical; tests/headless.test.mjs compares the two). */
-export const shotSignature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+export const shotSignature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, from, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 
 export async function captureShotVideo(deps: CaptureDeps, s: Shot, o: CaptureOptions) {
   const { api, scene } = deps;

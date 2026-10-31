@@ -1,0 +1,444 @@
+// Reusable blockout assets: one object (with everything grouped under it), its Cast Card, looks and design sheets,
+// saved as a small starter-shaped bundle in <PREVIS_DATA_DIR>/library/ and placed into any project as add_entity ops
+// plus a file copy. Design: .evidence/REUSABLE-ASSETS-DESIGN-20261031.md.
+//
+//   library/assets/<assetId>/asset.json         manifest (field allowlist below; no paths, job ids or secrets)
+//   library/assets/<assetId>/refs/<refId>.<ext>  looks, sheet views, composed boards
+//   library/assets/<assetId>/versions/<n>.json   earlier manifests; media files are never deleted
+//
+// The functions here never take a lock: the director runs every library write on its own serial queue, so a save and
+// a place never interleave within one server. Several servers on one PREVIS_LIBRARY_DIR are not supported.
+import { mkdir, readFile, readdir, writeFile, stat, mkdtemp, rm } from 'node:fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { atomicJson } from './atomic.mjs';
+import { snapshotEntity } from './starters.mjs';
+import { imageSize } from './frames.mjs';
+import { SHAPES, KINDS, ROLES, handleOf, descendantsOf, entitySize, lookSource, castCard } from '../../shared/director.mjs';
+import { normalizeSheets } from '../../shared/sheet-presets.mjs';
+import { rigidApply } from '../../shared/editor-controls.mjs';
+
+export const ASSET_FORMAT = 'comfy-previs-asset';
+export const ASSET_FORMAT_VERSION = 1;
+const MiB = 1024 ** 2;
+// Safety limits (design §8). Tests may pass smaller ones to openLibrary; the server always uses these.
+export const LIMITS = Object.freeze({ zipBytes: 64 * MiB, zipEntries: 32, unzippedBytes: 96 * MiB, imageBytes: 10 * MiB, entities: 50, assets: 500, tags: 12, tagLength: 24, description: 300, shrinkPx: 1600 });
+/** The only names a bundle may contain, in a zip or a directory. */
+export const ENTRY = /^asset\.json$|^refs\/[a-f0-9-]{36}\.(png|jpg|webp)$/;
+const REF_FILE = /^[a-f0-9-]{36}\.(png|jpg|webp)$/;
+const UUID = /^[a-f0-9-]{36}$/;
+const MIME = { png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp' };
+const EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+// A string that looks like a local path never goes into a bundle (and a bundle carrying one is refused).
+const LOCAL_PATH = /^\/|^[A-Za-z]:[\\/]|^~/;
+// references[].generated keeps what explains an image; request, prompt and job ids, outputs and signatures stay home.
+const GENERATED_KEEP = ['presetId', 'model', 'seed', 'prompt'];
+
+function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+const str = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
+const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
+const vec3 = (v, d) => (Array.isArray(v) && v.length === 3 && v.every(x => typeof x === 'number' && Number.isFinite(x)) ? [...v] : d);
+const uuidOr = v => (typeof v === 'string' && UUID.test(v) ? v : null);
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+export function sniffImage(bytes) {
+  if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) return 'image/png';
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg';
+  if (bytes.length >= 12 && bytes.subarray(0, 4).toString('latin1') === 'RIFF' && bytes.subarray(8, 12).toString('latin1') === 'WEBP') return 'image/webp';
+  return null;
+}
+/** Pixel size of a PNG, JPEG or WebP (VP8, VP8L, VP8X); nulls when the header is not understood. */
+export function imageDims(bytes) {
+  if (sniffImage(bytes) !== 'image/webp') return imageSize(bytes);
+  const chunk = bytes.subarray(12, 16).toString('latin1');
+  if (chunk === 'VP8X' && bytes.length >= 30) return { width: 1 + bytes.readUIntLE(24, 3), height: 1 + bytes.readUIntLE(27, 3) };
+  if (chunk === 'VP8 ' && bytes.length >= 30) return { width: bytes.readUInt16LE(26) & 0x3fff, height: bytes.readUInt16LE(28) & 0x3fff };
+  if (chunk === 'VP8L' && bytes.length >= 25) { const [b0, b1, b2, b3] = bytes.subarray(21, 25); return { width: 1 + (((b1 & 0x3f) << 8) | b0), height: 1 + (((b3 & 0x0f) << 10) | (b2 << 2) | ((b1 & 0xc0) >> 6)) }; }
+  return { width: null, height: null };
+}
+
+/** The library folder: PREVIS_LIBRARY_DIR when set (several data dirs can share one), else <data>/library. */
+export function libraryDir(dataDir, env = process.env) {
+  return env.PREVIS_LIBRARY_DIR ? resolve(env.PREVIS_LIBRARY_DIR) : join(dataDir, 'library');
+}
+
+// ---------- Manifest: field allowlist, canonical hash, path scan ----------
+
+const canonical = v => (Array.isArray(v) ? `[${v.map(canonical).join(',')}]` : v && typeof v === 'object' ? `{${Object.keys(v).sort().filter(k => v[k] !== undefined).map(k => `${JSON.stringify(k)}:${canonical(v[k])}`).join(',')}}` : JSON.stringify(v));
+/** What "unchanged" means: the canonical manifest without savedAt, version and supersedes, plus every media hash. */
+export function contentHash(m) {
+  const { savedAt, version, supersedes, contentHash: _, ...rest } = m;
+  return `sha256:${sha(`${canonical(rest)}\n${(m.media || []).map(x => x.sha256).join('\n')}`)}`;
+}
+
+function cleanEntity(e) {
+  const sheets = normalizeSheets(e.sheets);
+  return {
+    id: str(e.id, 36), name: str(e.name, 60), kind: KINDS.includes(e.kind) ? e.kind : 'prop', shape: SHAPES[e.shape] ? e.shape : 'box',
+    position: vec3(e.position, [0, 0, 0]), rotation: num(e.rotation), scale: vec3(e.scale, [1, 1, 1]), color: /^#[0-9a-f]{6}$/i.test(e.color || '') ? e.color : '#8a8f98',
+    notes: str(e.notes, 500), styleNotes: str(e.styleNotes, 300), pitch: num(e.pitch), roll: num(e.roll),
+    parent: uuidOr(e.parent), look: uuidOr(e.look), lookFrom: uuidOr(e.lookFrom), ...(sheets ? { sheets } : {}),
+  };
+}
+function cleanGenerated(g) {
+  if (!g || typeof g !== 'object') return undefined;
+  const out = {};
+  for (const k of GENERATED_KEEP) if (k === 'seed' ? Number.isInteger(g.seed) : typeof g[k] === 'string') out[k] = k === 'prompt' ? g[k].slice(0, 8000) : k === 'seed' ? g[k] : g[k].slice(0, 120);
+  return Object.keys(out).length ? out : undefined;
+}
+function cleanReference(r) {
+  const g = cleanGenerated(r.generated);
+  return { id: str(r.id, 36), name: str(r.name, 80), file: str(r.file, 60), mime: str(r.mime, 20), role: ROLES.includes(r.role) ? r.role : 'prop', entityId: str(r.entityId, 36), note: str(r.note, 500), createdAt: str(r.createdAt, 40), ...(g ? { generated: g } : {}) };
+}
+const cleanMedia = m => ({ path: str(m.path, 60), size: Number.isInteger(m.size) ? m.size : 0, sha256: str(m.sha256, 64), width: Number.isInteger(m.width) ? m.width : null, height: Number.isInteger(m.height) ? m.height : null });
+const cleanOrigin = o => ({ projectId: str(o?.projectId, 36), projectTitle: str(o?.projectTitle, 120), entityId: str(o?.entityId, 36), app: 'comfy-three-previs', source: ['project', 'project-export', 'blender'].includes(o?.source) ? o.source : 'project' });
+export function cleanTags(tags, limits = LIMITS) {
+  const list = Array.isArray(tags) ? tags : typeof tags === 'string' ? tags.split(',') : [];
+  return [...new Set(list.map(t => String(t).trim().toLowerCase().replace(/^#/, '').replace(/\s+/g, '-').slice(0, limits.tagLength)).filter(Boolean))].slice(0, limits.tags);
+}
+
+/** The manifest rebuilt from allowed fields only. A bundle is accepted only when this equals what it carries. */
+export function cleanManifest(m) {
+  return {
+    format: ASSET_FORMAT, formatVersion: Number.isInteger(m.formatVersion) ? m.formatVersion : ASSET_FORMAT_VERSION,
+    version: Number.isInteger(m.version) && m.version > 0 ? m.version : 1,
+    id: str(m.id, 36), handle: str(m.handle, 60), name: str(m.name, 60), kind: KINDS.includes(m.kind) ? m.kind : 'prop',
+    tags: cleanTags(m.tags), description: str(m.description, LIMITS.description),
+    savedAt: str(m.savedAt, 40), contentHash: str(m.contentHash, 71), ...(m.supersedes ? { supersedes: str(m.supersedes, 71) } : {}),
+    origin: cleanOrigin(m.origin),
+    entities: (Array.isArray(m.entities) ? m.entities : []).map(e => cleanEntity(e && typeof e === 'object' ? e : {})),
+    references: (Array.isArray(m.references) ? m.references : []).map(r => cleanReference(r && typeof r === 'object' ? r : {})),
+    media: (Array.isArray(m.media) ? m.media : []).map(x => cleanMedia(x && typeof x === 'object' ? x : {})),
+    footprint: vec3(m.footprint, [1, 1, 1]),
+  };
+}
+
+function firstDiff(a, b, path = '') {
+  if (a === b) return null;
+  if (typeof a !== typeof b || a === null || b === null || typeof a !== 'object' || Array.isArray(a) !== Array.isArray(b)) return path || '(manifest)';
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return path;
+    for (let i = 0; i < a.length; i++) { const d = firstDiff(a[i], b[i], `${path}[${i}]`); if (d) return d; }
+    return null;
+  }
+  for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) { const d = firstDiff(a[k], b[k], path ? `${path}.${k}` : k); if (d) return d; }
+  return null;
+}
+/** Every string in the manifest, with where it is. */
+function* strings(v, path = '') {
+  if (typeof v === 'string') yield [path, v];
+  else if (Array.isArray(v)) for (let i = 0; i < v.length; i++) yield* strings(v[i], `${path}[${i}]`);
+  else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) yield* strings(x, path ? `${path}.${k}` : k);
+}
+/** Refuse any string that looks like a local path (/…, C:\…, ~…): bundles never carry where something lived. */
+export function assertNoLocalPaths(m) {
+  for (const [path, s] of strings(m)) if (LOCAL_PATH.test(s)) fail(`asset.json must not contain local paths (${path}: “${s.slice(0, 40)}”)`);
+}
+
+/**
+ * Check a manifest completely: format, field allowlist, limits, internal links, no local paths. Media bytes are
+ * checked separately (checkMedia). Returns the manifest.
+ */
+export function validateManifest(m, limits = LIMITS) {
+  if (!m || typeof m !== 'object' || Array.isArray(m) || m.format !== ASSET_FORMAT) fail('Not a Comfy Previs asset (asset.json format)');
+  if (!Number.isInteger(m.formatVersion) || m.formatVersion < 1 || m.formatVersion > ASSET_FORMAT_VERSION) fail(`This asset needs a newer Comfy Previs (format version ${m.formatVersion})`);
+  const diff = firstDiff(m, cleanManifest(m));
+  if (diff) fail(`asset.json has a field outside the asset format, or an invalid value: ${diff}`);
+  assertNoLocalPaths(m);
+  if (!UUID.test(m.id)) fail('asset.json id must be a UUID');
+  if (!/^[a-z0-9-]{1,60}$/.test(m.handle) || handleOf(m.handle) !== m.handle) fail('asset.json handle is not a valid @handle');
+  if (!m.entities.length) fail('An asset needs at least one object');
+  if (m.entities.length > limits.entities) fail(`An asset holds at most ${limits.entities} objects (this one has ${m.entities.length})`);
+  const ids = new Set();
+  for (const [i, e] of m.entities.entries()) {
+    if (!UUID.test(e.id) || ids.has(e.id)) fail(`asset.json entities[${i}] needs a unique UUID id`);
+    if (i === 0 ? e.parent !== null : !ids.has(e.parent)) fail(`asset.json entities[${i}] must come after its parent, inside the asset`);
+    ids.add(e.id);
+  }
+  const refIds = new Set();
+  for (const [i, r] of m.references.entries()) {
+    const ext = r.file.split('.').pop();
+    if (!UUID.test(r.id) || refIds.has(r.id) || !REF_FILE.test(r.file) || r.file !== `${r.id}.${ext}` || MIME[ext] !== r.mime) fail(`asset.json references[${i}] has an invalid id, file or type`);
+    if (!ids.has(r.entityId)) fail(`asset.json references[${i}] belongs to no object in the asset`);
+    if (!m.media.some(x => x.path === `refs/${r.file}`)) fail(`asset.json references[${i}] has no media entry`);
+    refIds.add(r.id);
+  }
+  for (const e of m.entities) {
+    if (e.look && !refIds.has(e.look)) fail(`${e.name}: its look is not in the asset`);
+    if (e.lookFrom && (!ids.has(e.lookFrom) || e.lookFrom === e.id)) fail(`${e.name}: it shares a look from outside the asset`);
+    for (const sh of e.sheets || []) for (const s of sh.slots) for (const a of s.attempts) if (a.referenceId && !refIds.has(a.referenceId)) fail(`${e.name}: a sheet view is not in the asset`);
+  }
+  const paths = new Set();
+  for (const [i, x] of m.media.entries()) {
+    if (!ENTRY.test(x.path) || x.path === 'asset.json' || paths.has(x.path) || !/^[a-f0-9]{64}$/.test(x.sha256)) fail(`asset.json media[${i}] has an invalid path or hash`);
+    if (!m.references.some(r => `refs/${r.file}` === x.path)) fail(`asset.json media[${i}] is not used by any reference`);
+    if (x.size > limits.imageBytes) fail(`${x.path} is over ${limits.imageBytes / MiB} MB`);
+    paths.add(x.path);
+  }
+  if (m.contentHash !== contentHash(m)) fail('asset.json was changed after it was saved (content hash does not match)');
+  return m;
+}
+
+/** Each listed file: present, the declared size and hash, an image of the declared type under the image cap. */
+export function checkMedia(m, get, limits = LIMITS) {
+  for (const x of m.media) {
+    const bytes = get(x.path);
+    if (!bytes) fail(`Asset is incomplete: ${x.path} is missing`);
+    if (bytes.length > limits.imageBytes) fail(`${x.path} is over ${limits.imageBytes / MiB} MB`);
+    if (bytes.length !== x.size || sha(bytes) !== x.sha256) fail(`Asset file changed: ${x.path}`);
+    if (sniffImage(bytes) !== MIME[x.path.split('.').pop()]) fail(`${x.path} is not the PNG, JPEG or WebP image its name says`);
+  }
+}
+
+// ---------- Building an asset from a project ----------
+
+/**
+ * The asset for one object of a project: the object first, then everything grouped under it (parents before
+ * children), positions relative to the object, root at the origin with its own yaw kept. A look shared from outside
+ * the asset is copied in (look, description, style notes) so the asset never depends on another object.
+ * Returns { manifest (without id, version, savedAt, hash, media), takes: [{ path, file, ref }] } where `file` is the
+ * image file in the project's refs folder.
+ */
+export function assetSnapshot(project, root, { name, tags, description, limits = LIMITS, source = 'project' } = {}) {
+  const all = project.scene.entities;
+  const members = [root, ...descendantsOf(all, root.id)];
+  if (members.length > limits.entities) fail(`An asset holds at most ${limits.entities} objects; ${root.name} has ${members.length} with everything grouped under it`);
+  const inside = new Set(members.map(e => e.id));
+  const refById = new Map((project.scene.references || []).map(r => [r.id, r]));
+  const refs = new Map(), carrier = new Map();
+  const entities = members.map(e => {
+    let src = e, lookFrom = null;
+    if (e.lookFrom && inside.has(e.lookFrom)) lookFrom = e.lookFrom;
+    else if (e.lookFrom) {
+      // Shared from outside: the first member using that source carries a copy of its look; later ones share it.
+      const s = lookSource(project, e.id);
+      if (s && s.id !== e.id && carrier.has(s.id)) lookFrom = carrier.get(s.id);
+      else if (s && s.id !== e.id) { carrier.set(s.id, e.id); const card = castCard(project, e.id); src = { ...e, lookFrom: null, look: s.look, sheets: undefined, notes: card.description, styleNotes: card.styleNotes }; }
+      else src = { ...e, lookFrom: null };
+    }
+    const out = snapshotEntity(project, src, r => { if (!refs.has(r.id)) refs.set(r.id, { ref: r, entityId: e.id }); }, refById);
+    return cleanEntity({ ...out, lookFrom, parent: e.id === root.id ? null : e.parent });
+  });
+  const origin = entities[0].position;
+  for (const e of entities) e.position = e.position.map((v, i) => Math.round((v - origin[i]) * 1e6) / 1e6);
+  const takes = [], references = [];
+  for (const { ref: r, entityId } of refs.values()) {
+    const ext = String(r.file).split('.').pop();
+    if (!REF_FILE.test(r.file || '') || !UUID.test(r.id)) fail(`${r.name || 'An image'} has an unexpected file name`);
+    const g = cleanGenerated(r.generated);
+    references.push({ id: r.id, name: str(r.name, 80), file: `${r.id}.${ext}`, mime: MIME[ext], role: ROLES.includes(r.role) ? r.role : 'prop', entityId, note: str(r.note, 500), createdAt: str(r.createdAt, 40), ...(g ? { generated: g } : {}) });
+    takes.push({ path: `refs/${r.id}.${ext}`, file: r.file, ref: references.at(-1) });
+  }
+  const label = String(name || root.name).trim().slice(0, 60) || root.name;
+  const manifest = {
+    format: ASSET_FORMAT, formatVersion: ASSET_FORMAT_VERSION, handle: handleOf(label), name: label, kind: entities[0].kind,
+    tags: cleanTags(tags, limits), description: str(String(description ?? entities[0].notes ?? '').trim(), limits.description),
+    origin: cleanOrigin({ projectId: project.id, projectTitle: project.title, entityId: root.id, source }),
+    entities, references, footprint: entitySize(root).map(v => Math.round(v * 1000) / 1000),
+  };
+  return { manifest, takes };
+}
+
+/** Plain summary of what an asset holds, for replies: "1 look and a 9-view sheet". */
+export function assetContents(m) {
+  const looks = m.entities.filter(e => e.look).length;
+  const sheets = m.entities.flatMap(e => e.sheets || []);
+  const parts = [];
+  if (looks) parts.push(plural(looks, 'look'));
+  if (sheets.length === 1) parts.push(`a ${sheets[0].slots.length}-view sheet`); else if (sheets.length) parts.push(plural(sheets.length, 'design sheet'));
+  if (m.entities.length > 1) parts.push(`${plural(m.entities.length - 1, 'object')} grouped under it`);
+  return parts.length ? parts.join(parts.length > 2 ? ', ' : ' and ').replace(/, ([^,]+)$/, ' and $1') : 'no images yet (a sized proxy with a Cast Card)';
+}
+
+/** What the library dialog and previs_library_list show: the manifest without sheets and references. */
+export function assetCard(m) {
+  const { references, media, entities, ...rest } = m;
+  const root = entities[0], look = references.find(r => r.id === root.look);
+  return { ...rest, entities: entities.map(({ sheets, ...e }) => e), objects: entities.length, looks: entities.filter(e => e.look).length, sheetViews: entities.flatMap(e => e.sheets || []).reduce((n, s) => n + s.slots.length, 0), hasLook: !!look, hasSheet: entities.some(e => e.sheets?.length), thumb: look ? `/library-refs/${m.id}/${look.file}` : null, shape: root.shape, color: root.color };
+}
+
+// ---------- Finding an asset by name ----------
+
+const sharedPrefix = (a, b) => { let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++; return i; };
+/**
+ * One asset for a reference: exact id; then @handle; then handleOf(ref) (so "Red Racecar" and "@Red-Racecar" hit
+ * red-racecar); then the one handle that starts with it or contains it as a whole dash-separated word. Otherwise
+ * fails with the nearest handles so the agent can ask instead of guess.
+ */
+export function resolveAssetRef(assets, ref) {
+  const raw = String(ref ?? '').trim();
+  if (!raw) fail('Name a library asset (its @handle)');
+  const hit = assets.find(a => a.id === raw) || assets.find(a => a.handle === raw.replace(/^@/, ''));
+  if (hit) return hit;
+  const h = handleOf(raw);
+  const same = assets.find(a => a.handle === h);
+  if (same) return same;
+  const partial = assets.filter(a => a.handle.startsWith(h) || `-${a.handle}-`.includes(`-${h}-`));
+  if (partial.length === 1) return partial[0];
+  const words = h.split('-');
+  const nearest = [...partial, ...assets.filter(a => !partial.includes(a)).sort((a, b) => sharedPrefix(b.handle, h) - sharedPrefix(a.handle, h) || (b.tags || []).filter(t => words.includes(t)).length - (a.tags || []).filter(t => words.includes(t)).length)].slice(0, 5);
+  fail(`${partial.length > 1 ? `“${raw}” matches several library assets` : `No library asset is called “${raw}”`}. ${nearest.length ? `Nearest: ${nearest.map(a => `@${a.handle}`).join(', ')}` : 'The library is empty; save an object with previs_library_save first'}.`, 404);
+}
+
+/** Search: every word of q appears in the handle, name, kind, tags or description. */
+export function searchAssets(assets, { q, kind, tag } = {}) {
+  const words = String(q || '').toLowerCase().replace(/@/g, '').split(/\s+/).filter(Boolean);
+  return assets.filter(a => (!kind || a.kind === kind) && (!tag || (a.tags || []).includes(String(tag).toLowerCase()))
+    && words.every(w => [a.handle, a.name.toLowerCase(), a.kind, ...(a.tags || []), a.description.toLowerCase()].some(x => x.includes(w))));
+}
+
+// ---------- Placing an asset into a project ----------
+
+/**
+ * The edit that brings an asset into a project: one add_entity op per object (fresh ids, parents first), the
+ * references to append to project.scene.references (fresh ids, the copy's object ids) and the files to copy
+ * (asset-relative `from` → project refs file `to`). Sheets point at the new reference ids. The root carries
+ * `from: { asset, version, handle }`. `shot` adds the object to that shot's cast; `variantOf` makes the root share
+ * an existing object's look instead of copying the asset's root images.
+ */
+export function placeAsset(project, m, { position, rotation, name, shot, variantOf } = {}) {
+  const idMap = new Map(m.entities.map(e => [e.id, randomUUID()]));
+  const root = m.entities[0];
+  const find = ref => project.scene.entities.find(e => e.id === ref) || project.scene.entities.find(e => handleOf(e.name) === handleOf(String(ref)));
+  const variant = variantOf ? find(variantOf) : null;
+  if (variantOf && !variant) fail(`Unknown object ${variantOf} (variantOf)`);
+  const target = shot === undefined || shot === null || shot === '' ? null : project.shots.find(s => s.id === shot) || project.shots.find(s => handleOf(s.title) === handleOf(String(shot))) || (/^\d+$/.test(String(shot)) ? project.shots[Number(shot) - 1] : null);
+  if (shot !== undefined && shot !== null && shot !== '' && !target) fail(`Unknown shot ${shot}`);
+  // Images the root alone uses are not copied when it shares a variant's look.
+  const rootOnly = new Set(variant ? [root.look, ...(root.sheets || []).flatMap(sh => sh.slots.flatMap(s => s.attempts.map(a => a.referenceId)))].filter(Boolean) : []);
+  for (const e of m.entities.slice(1)) for (const id of [e.look, ...(e.sheets || []).flatMap(sh => sh.slots.flatMap(s => s.attempts.map(a => a.referenceId)))]) rootOnly.delete(id);
+  const refMap = new Map(), references = [], files = [];
+  for (const r of m.references) {
+    if (rootOnly.has(r.id) || (variant && r.entityId === root.id && r.note.startsWith('sheet:'))) continue;
+    const id = randomUUID(), ext = r.file.split('.').pop();
+    refMap.set(r.id, id);
+    files.push({ from: `refs/${r.file}`, to: `${id}.${ext}` });
+    references.push({ ...structuredClone(r), id, file: `${id}.${ext}`, entityId: idMap.get(r.entityId) });
+  }
+  const at = vec3(position, [0, 0, 0]);
+  const yaw = typeof rotation === 'number' && Number.isFinite(rotation) ? rotation : root.rotation;
+  const moved = rigidApply({ position: [0, 0, 0], rotation: root.rotation, scale: root.scale }, { position: at, rotation: yaw, scale: root.scale }, m.entities.slice(1));
+  const ops = m.entities.map((e, i) => {
+    const isRoot = i === 0, shares = isRoot && variant;
+    const sheets = shares ? undefined : (e.sheets || []).map(sh => ({ ...structuredClone(sh), slots: sh.slots.map(s => ({ ...structuredClone(s), attempts: s.attempts.map(a => ({ ...a, referenceId: refMap.get(a.referenceId) || null })) })) }));
+    const where = isRoot ? { position: at, rotation: yaw } : { position: moved[i - 1].position, rotation: moved[i - 1].rotation };
+    const entity = {
+      id: idMap.get(e.id), name: isRoot ? String(name || m.name).slice(0, 60) : e.name, kind: e.kind, shape: e.shape, ...where, scale: [...e.scale], color: e.color,
+      notes: e.notes, styleNotes: e.styleNotes, pitch: e.pitch, roll: e.roll, parent: isRoot ? null : idMap.get(e.parent),
+      look: shares ? null : refMap.get(e.look) || null, lookFrom: shares ? variant.id : e.lookFrom ? idMap.get(e.lookFrom) : null,
+      ...(sheets?.length ? { sheets } : {}), ...(isRoot ? { from: { asset: m.id, version: m.version, handle: m.handle } } : {}),
+    };
+    return { op: 'add_entity', entity };
+  });
+  if (target) {
+    const castIds = root.shape === 'group' ? m.entities.filter(e => e.shape !== 'group').map(e => idMap.get(e.id)) : [idMap.get(root.id)];
+    const cast = target.cast || { include: [], exclude: [] };
+    ops.push({ op: 'update_shot', id: target.id, patch: { cast: { include: [...new Set([...cast.include, ...castIds])], exclude: cast.exclude.filter(id => !castIds.includes(id)) } } });
+  }
+  return { ops, references, files, rootId: idMap.get(root.id), entityIds: m.entities.map(e => idMap.get(e.id)) };
+}
+
+// ---------- The library on disk ----------
+
+function run(cmd, args) { return new Promise((ok, no) => execFile(cmd, args, { maxBuffer: 16 * MiB }, (err, stdout) => (err ? no(err) : ok(stdout)))); }
+/** Re-encode an image as WebP no larger than px on its long side; null when ffmpeg is not available. */
+async function shrinkToWebp(bytes, px, ffmpeg) {
+  const tmp = await mkdtemp(join(tmpdir(), 'previs-asset-'));
+  try {
+    await writeFile(join(tmp, 'in'), bytes);
+    await run(ffmpeg, ['-v', 'error', '-y', '-i', join(tmp, 'in'), '-vf', `scale='min(${px},iw)':'min(${px},ih)':force_original_aspect_ratio=decrease`, '-c:v', 'libwebp', '-quality', '82', '-map_metadata', '-1', join(tmp, 'out.webp')]);
+    return await readFile(join(tmp, 'out.webp'));
+  } catch (e) { if (e.code === 'ENOENT') return null; throw e; }
+  finally { await rm(tmp, { recursive: true, force: true }); }
+}
+
+export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () => {} } = {}) {
+  const assetsDir = join(dir, 'assets');
+  const assetDir = id => { if (!UUID.test(id || '')) fail('Unknown asset', 404); return join(assetsDir, id); };
+
+  /** Every readable asset, newest first, plus the folder names whose manifest could not be read. */
+  async function scan() {
+    let names = []; try { names = await readdir(assetsDir, { withFileTypes: true }); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+    const assets = [], bad = [];
+    for (const d of names) {
+      if (!d.isDirectory() || !UUID.test(d.name)) continue;
+      try { const m = JSON.parse(await readFile(join(assetsDir, d.name, 'asset.json'), 'utf8')); if (m?.format !== ASSET_FORMAT || m.id !== d.name || !Array.isArray(m.entities) || !m.entities.length) throw Error('bad'); assets.push(m); }
+      catch { bad.push(d.name); }
+    }
+    return { assets: assets.sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt))), bad };
+  }
+
+  /** Write a manifest and its media; the manifest it replaces goes to versions/<n>.json. Existing same files are kept. */
+  async function write(m, blobs, previous) {
+    const at = assetDir(m.id);
+    await mkdir(join(at, 'refs'), { recursive: true });
+    for (const [path, bytes] of blobs) {
+      const to = join(at, path);
+      let same = false; try { same = (await stat(to)).size === bytes.length && sha(await readFile(to)) === sha(bytes); } catch {}
+      if (!same) await writeFile(to, bytes, { mode: 0o600 });
+    }
+    if (previous) { await mkdir(join(at, 'versions'), { recursive: true }); await atomicJson(join(at, 'versions', `${previous.version}.json`), previous); }
+    await atomicJson(join(at, 'asset.json'), m);
+  }
+
+  return {
+    dir, limits,
+    scan,
+    async list(query = {}) {
+      const { assets, bad } = await scan();
+      const found = searchAssets(assets, query).map(assetCard);
+      return { assets: found, total: assets.length, ...(bad.length ? { unreadable: bad.length } : {}), ...(assets.length > limits.assets ? { warning: `The library has ${assets.length} assets; more than ${limits.assets} makes listing slow. Export and remove ones you no longer use.` } : {}) };
+    },
+    async get(ref) { return resolveAssetRef((await scan()).assets, ref); },
+    refFile(id, file) {
+      if (!REF_FILE.test(file || '')) fail('Not found', 404);
+      return join(assetDir(id), 'refs', file);
+    },
+    assetDir,
+    /**
+     * Save one object of a project (and everything grouped under it). readRef(file) returns the bytes of a project
+     * refs file. Saving the same object again, an object placed from this asset, or with replace:true over a taken
+     * handle makes the next version; an unchanged save is a no-op.
+     */
+    async save(project, entity, input = {}, readRef) {
+      const { assets } = await scan();
+      const { manifest: base, takes } = assetSnapshot(project, entity, { name: input.name, tags: input.tags, description: input.description, limits });
+      const blobs = [];
+      for (const t of takes) {
+        let bytes; try { bytes = await readRef(t.file); } catch { fail(`The image file of “${t.ref.name}” is missing from the project`); }
+        if (bytes.length > limits.imageBytes) fail(`“${t.ref.name}” is over ${limits.imageBytes / MiB} MB`);
+        if (sniffImage(bytes) !== t.ref.mime) fail(`“${t.ref.name}” is not the PNG, JPEG or WebP image its name says`);
+        blobs.push({ ...t, bytes });
+      }
+      const total = () => blobs.reduce((n, b) => n + b.bytes.length, 0) + 64 * 1024;
+      if (total() > limits.zipBytes) {
+        // Over the bundle cap: shrink every image to WebP ≤ 1600 px when ffmpeg is here, else say what is big.
+        for (const b of blobs) {
+          const small = await shrinkToWebp(b.bytes, limits.shrinkPx, ffmpeg);
+          if (!small) fail(`This asset's images total ${(total() / MiB).toFixed(1)} MB, over the ${limits.zipBytes / MiB} MB limit, and ffmpeg is not available to shrink them: ${blobs.map(x => `${x.ref.name} ${(x.bytes.length / MiB).toFixed(1)} MB`).join(', ')}`);
+          b.bytes = small; b.ref.file = `${b.ref.id}.webp`; b.ref.mime = 'image/webp'; b.path = `refs/${b.ref.file}`;
+        }
+        if (total() > limits.zipBytes) fail(`This asset's images total ${(total() / MiB).toFixed(1)} MB even as WebP, over the ${limits.zipBytes / MiB} MB limit`);
+        log(`[library] shrank ${blobs.length} images of ${base.name} to WebP`);
+      }
+      const media = blobs.map(b => ({ path: b.path, size: b.bytes.length, sha256: sha(b.bytes), ...imageDims(b.bytes) })).map(cleanMedia);
+      const byHandle = assets.find(a => a.handle === base.handle);
+      const sameOrigin = a => a.origin?.projectId === project.id && a.origin?.entityId === entity.id;
+      const previous = byHandle && (input.replace === true || sameOrigin(byHandle) || byHandle.id === entity.from?.asset) ? byHandle : null;
+      if (byHandle && !previous) fail(`@${base.handle} is already in the library; choose another name or save over it with replace: true`, 409);
+      const m = { ...base, id: previous?.id || randomUUID(), version: previous ? previous.version + 1 : 1, savedAt: new Date().toISOString(), contentHash: '', ...(previous ? { supersedes: previous.contentHash } : {}), media };
+      const ordered = cleanManifest(m);
+      ordered.contentHash = contentHash(ordered);
+      if (previous && previous.contentHash === ordered.contentHash) return { asset: assetCard(previous), action: 'unchanged', text: `@${previous.handle} v${previous.version} is already in the library, unchanged (${assetContents(previous)})` };
+      // The exporter checks what the importer checks: allowlist, links, no local paths, every file as declared.
+      validateManifest(ordered, limits);
+      const files = new Map(blobs.map(b => [b.path, b.bytes]));
+      checkMedia(ordered, p => files.get(p), limits);
+      await write(ordered, files, previous);
+      return { asset: assetCard(ordered), action: previous ? 'updated' : 'added', text: `Saved @${ordered.handle} v${ordered.version} with ${assetContents(ordered)}` };
+    },
+  };
+}

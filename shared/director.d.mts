@@ -2,7 +2,7 @@ import type { Sheet } from './sheet-presets.mjs';
 export type Vec3 = [number, number, number];
 export type Kind = 'character' | 'vehicle' | 'prop' | 'environment';
 export type Role = 'character' | 'prop' | 'environment' | 'style' | 'frame';
-export type Entity = { id: string; name: string; kind: Kind; shape: string; position: Vec3; rotation: number; scale: Vec3; color: string; notes: string; look?: string | null; lookFrom?: string | null; styleNotes?: string; path?: PathKey[] | null; pitch?: number; roll?: number; parent?: string | null; sheets?: Sheet[] };
+export type Entity = { id: string; name: string; kind: Kind; shape: string; position: Vec3; rotation: number; scale: Vec3; color: string; notes: string; look?: string | null; lookFrom?: string | null; styleNotes?: string; path?: PathKey[] | null; pitch?: number; roll?: number; parent?: string | null; sheets?: Sheet[]; from?: { asset: string; version: number; handle: string } };
 export type PathKey = { t: number; p: Vec3; r?: number; s?: Vec3; pitch?: number; roll?: number };
 export type CameraKey = { t: number; p: Vec3; look: Vec3; mm: number };
 export type ShotCamera = { move: string; target: string | null; distance: number; height: number; angle: number; mm: number; keys: CameraKey[] | null; timing?: 'linear' | 'ease' };

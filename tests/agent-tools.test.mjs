@@ -15,6 +15,7 @@ import { builtInPresets } from '../server/previs/presets.mjs';
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==', 'base64');
 const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x2d, 0x00, 0x50, 0x03, 0x01, 0x22, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01, 0xff, 0xd9]); // SOF0 80×45
 const VIDEO = '7e0d0a11-0000-4000-8000-000000000001', STILL2 = '7e0d0a11-0000-4000-8000-000000000002';
+const LIBRARY_TOOLS = ['previs_library_list', 'previs_library_save', 'previs_library_place'];
 const NEW_TOOLS = ['previs_director_render_blockout', 'previs_director_generate_still', 'previs_director_batch_generate', 'previs_director_batch_status', 'previs_director_view_shot', 'previs_director_jobs_dashboard'];
 
 async function fixture() {
@@ -292,13 +293,15 @@ test('generate_image and generate_video refuse a model without a price estimate 
   });
 });
 
-test('tools/list: the director tools by default; legacy engine, Blender and passthrough tools only with PREVIS_MCP_LEGACY=1', async () => {
+test('tools/list: the director and library tools by default; legacy engine, Blender and passthrough tools only with PREVIS_MCP_LEGACY=1', async () => {
   const p = await fixture();
   let names;
   await withAgent(fakePrevis(p), async ({ rpc }) => {
     const tools = (await rpc('tools/list', {})).result.tools; names = tools.map(t => t.name);
-    assert.ok(names.length >= 20 && names.length <= 30, `${names.length} tools`);
-    assert.deepEqual(names.filter(n => !n.startsWith('previs_director_')), []);
+    const director = names.filter(n => n.startsWith('previs_director_')), library = names.filter(n => n.startsWith('previs_library_'));
+    assert.ok(director.length >= 20 && director.length <= 30, `${director.length} director tools`);
+    assert.deepEqual(library, LIBRARY_TOOLS, 'the asset library tools, as one group');
+    assert.deepEqual(names.filter(n => !director.includes(n) && !library.includes(n)), []);
     assert.match(tools.find(t => t.name === 'previs_director_edit').description, /\{op:"use_take",shotId,referenceId\}/);
     const refused = await rpc('tools/call', { name: 'previs_render_animation', arguments: {} });
     assert.match(refused.error.message, /Unknown tool/);

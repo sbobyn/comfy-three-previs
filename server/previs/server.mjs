@@ -261,6 +261,7 @@ const server = createServer(async (req, res) => {
     if (/^\/renders\/[a-f0-9-]{36}\.png$/.test(url.pathname)) file = join(data, url.pathname);
     else if (/^\/director-assets\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(mp4|webm|mov|png)$/.test(url.pathname)) { const [, , pid, name] = url.pathname.split('/'); file = await director.assetFile(pid, name); }
     else if (/^\/director-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp)$/.test(url.pathname)) { const [, , pid, name] = url.pathname.split('/'); file = await director.refFile(pid, name); }
+    else if (/^\/library-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp)$/.test(url.pathname)) { const [, , id, name] = url.pathname.split('/'); file = director.library.refFile(id, name); }
     else if (/^\/assets\/[a-f0-9-]{36}\.(mp4|webm|mov|mkv|png)$/.test(url.pathname)) file = join(data,url.pathname);
     else {
       const path = url.pathname === '/' ? '/start.html' : url.pathname;

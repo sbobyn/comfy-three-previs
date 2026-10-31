@@ -75,10 +75,16 @@ export function makeEntity(input, id) {
     path: normalizePath(input.path),
     parent: typeof input.parent === 'string' && input.parent !== id ? input.parent : null,
     ...sheetsOf(input.sheets),
+    ...fromOf(input.from),
   };
 }
 // Design sheets (views generated from the primary look); stored only when present.
 function sheetsOf(v) { const sheets = normalizeSheets(v); return sheets ? { sheets } : {}; }
+// Library provenance of a placed object (server/previs/library.mjs); stored only when present, never part of a shot signature.
+function fromOf(v) {
+  if (!v || typeof v !== 'object' || !/^[a-f0-9-]{36}$/.test(v.asset || '')) return {};
+  return { from: { asset: v.asset, version: Number.isInteger(v.version) && v.version > 0 ? v.version : 1, handle: handleOf(v.handle || 'asset').slice(0, 60) } };
+}
 
 // ---------- Hierarchy ----------
 /** Every object below id (children, grandchildren…), parents before children. */
@@ -298,7 +304,7 @@ export function shotCast(project, shot, { samples = 12, aspect = 16 / 9, minCove
 }
 
 /** Hash of what a blockout clip depends on: same text as src/director-capture.ts shotSignature (tests/headless.test.mjs). */
-export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, from, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 /** The shot's blockout clip no longer matches its camera, timing or scene (it is made again before a video uses it). */
 export const blockoutStale = (project, shot) => !!(shot.render && shot.render.signature && shot.render.signature !== shotSignature(project, shot));
 
