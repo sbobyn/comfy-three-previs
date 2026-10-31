@@ -23,6 +23,13 @@
 .home-btn.ghost { height: 36px; padding: 0 16px; font-size: var(--fs-md); }
 .home-btn.sm { height: 30px; padding: 0 12px; font-size: var(--fs-sm); align-self: flex-start; margin-top: 10px; }
 
+/* Read-only demo: the note under the actions, and the Run locally dialog's commands. */
+.home-demo-note { margin: 14px 0 0; max-width: 460px; font-size: var(--fs-sm); line-height: var(--lh); color: var(--ink-2); padding: 8px 12px; border-radius: var(--r-sm); background: var(--paper-2); border: 1px solid var(--line); }
+.home-demo-note strong { color: var(--ink); font-weight: 600; }
+dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
+/* Phones: the demo badge shortens so the header keeps Guide and Setup on screen. */
+@media (max-width: 600px) { .home-top .demo-badge { font-size: 0; padding: 0 10px; } .home-top .demo-badge::before { content: 'Demo ↗'; font-size: var(--fs-2xs); } }
+.home-run-code { margin: 0; padding: 12px 14px; border-radius: var(--r-sm); background: var(--paper-2); border: 1px solid var(--line); font: 12.5px/1.6 var(--mono); color: var(--ink); overflow-x: auto; white-space: pre; }
 .home-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; margin-top: 22px; font-size: var(--fs-sm); color: var(--ink-3); }
 .home-claude { display: inline-flex; align-items: center; gap: 7px; padding: 0; border: 0; background: none; color: var(--ink-3); font-size: inherit; cursor: pointer; transition: color var(--t-fast); }
 .home-claude:hover { color: var(--ink); }

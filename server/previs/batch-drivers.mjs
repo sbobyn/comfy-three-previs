@@ -1,10 +1,10 @@
 // Batch drivers. `fakeBackend()` simulates refgen/generation jobs and the job dashboard (tests, PREVIS_BATCH_FAKE=1);
 // it never touches real job stores and never sends anything. `loopbackDrivers()` drives the real routes over loopback HTTP.
 import { randomUUID } from 'node:crypto';
-import { blockoutStale, castCard, compilePrompt, lookPrompt, lookSource, objectLooks, objectNotes, referenceLegend, videoReferences } from '../../shared/director.mjs';
+import { blockoutStale, castCard, compilePrompt, keyStillState, lookPrompt, lookSource, objectLooks, objectNotes, referenceLegend, videoReferences } from '../../shared/director.mjs';
 import { shotPrompt } from '../../shared/prompt.mjs';
 import { stillPrompt, stillReferences } from '../../shared/still-match.mjs';
-import { cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../../shared/camera-source.mjs';
+import { cameraMotionWarning, cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../../shared/camera-source.mjs';
 import { planSlots, setsFor, slotAspect, viewPrompt } from '../../shared/sheet-presets.mjs';
 import { withReferenceImages, maxReferences } from '../../shared/video-refs.mjs';
 import { clipSecondsFor, durationValue, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
@@ -76,6 +76,98 @@ function fail(message) { throw notSent(message); }
 const lookAspect = e => (e.kind === 'character' ? '3:4' : e.kind === 'environment' ? '16:9' : '4:3'); // src/director-looks.ts aspectFor, default view
 
 /**
+ * A shot's video prompt before fitting, as the browser builds it (src/director-videogen.ts shotVideoPrompt / prepareFirstFrame):
+ * a start-frame model gets the shot prompt with its camera line; a clip model gets the auto prompt with numbered references,
+ * or the user's edited prompt plus the reference legend. `refs` are planner rows ({ ref, entityId, role, label }).
+ */
+export function videoPrompt(p, s, cameraSource, refs = []) {
+  if (cameraSource !== 'blockout') return withCameraLine(shotPrompt(p, s, 'video', { cameraSource }).trim() || compilePrompt(p, s, null, { cameraSource }), cameraSource);
+  const auto = compilePrompt(p, s, null, { cameraSource }), user = shotPrompt(p, s, 'video', { cameraSource });
+  return user?.trim() && user.trim() !== auto.trim() ? [withCameraLine(user, cameraSource), referenceLegend(refs)].filter(Boolean).join('\n') : compilePrompt(p, s, refs, { cameraSource });
+}
+
+/**
+ * Server-side video preparation shared by the batch and the MCP agent (server/previs/agent.mjs): registers the preset's
+ * saved definition, registers the shot's references in the planner's order and builds the prompt exactly like the browser
+ * (src/director-videogen.ts), then binds and quotes. Nothing is submitted. `get`/`post` call the loopback routes.
+ * A start → end model whose shot has no end still is refused unless `startOnly` chooses its start-only sibling.
+ */
+export function videoPreparer({ get, post }) {
+  // Engine-project writes are revision-checked; concurrent callers retry with a fresh revision.
+  async function withRevision(fn) {
+    for (let i = 0; ; i++) {
+      try { return await fn((await get('/api/project')).project.revision); } catch (e) { if (e.status !== 409 || e.apiCode || !/Project changed/i.test(e.message) || i >= 9) throw e; await new Promise(r => setTimeout(r, 150 + Math.random() * 600)); }
+    }
+  }
+  // Engine writes inside a route (video-refs registering renders) can lose a race with the job tracker attaching
+  // results; the route is idempotent, so retry it on "Project changed".
+  async function retryChanged(fn) {
+    for (let i = 0; ; i++) {
+      try { return await fn(); } catch (e) { if (!/Project changed/i.test(e.message) || i >= 9) throw e; await new Promise(r => setTimeout(r, 200 + Math.random() * 800)); }
+    }
+  }
+  // Saved engine definition for a preset + reference count (src/director-videogen.ts definitionFor); one at a time so
+  // concurrent shots share one saved copy. A built-in preset is saved (registered) here before its first bind.
+  let defining = Promise.resolve();
+  function definitionFor(base, refCount) {
+    const run = defining.then(async () => {
+      const presetId = base.provenance?.presetId || base.id;
+      const wanted = withReferenceImages({ ...base, provenance: { ...(base.provenance || {}), presetId } }, refCount), n = wanted.provenance?.referenceImages || 0;
+      const same = d => (d.provenance?.presetId === presetId || d.id === presetId) && (d.provenance?.referenceImages || 0) === n && JSON.stringify(d.graph) === JSON.stringify(wanted.graph);
+      const saved = ((await get('/api/generation')).definitions || []).find(same);
+      return saved || (await withRevision(revision => post('/api/generation/preset', { revision, definition: wanted }))).definition;
+    });
+    defining = run.catch(() => {});
+    return run;
+  }
+  // Bind + quote one shot exactly like the browser (src/director-videogen.ts prepareShotVideo / prepareFirstFrame).
+  async function prepare(p, s, { model, useReferences = true, startOnly = false }) {
+    const gen = await get('/api/generation'), r = s.render;
+    const pick = id => (gen.presets || []).find(d => d.id === id) || (gen.definitions || []).find(d => d.id === id);
+    let base = pick(model); if (!base) throw notSent(`Unknown video model ${model}`);
+    let assetBindings, prompt, refs = [];
+    const parametersOf = def => Object.fromEntries(Object.entries(def.parameters || {}).map(([k, m]) => [k, def.graph?.[m.nodeId]?.inputs?.[m.input]]));
+    let def, parameters, registered = [], seconds = r.duration ?? s.duration;
+    if (base.task === 'first-frame') {
+      let wantsLast = !!base.inputs?.lastFrame;
+      // No current end still: only an explicit choice (startOnly) animates the start still alone with the start-only sibling.
+      const sibling = wantsLast && FIRST_FRAME_FALLBACK[base.id] && keyStillState(p, s).endState !== 'ready' ? pick(FIRST_FRAME_FALLBACK[base.id]) : null;
+      if (sibling && startOnly) { base = sibling; wantsLast = false; }
+      const frames = (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast }))).references;
+      let start = frames.find(x => x.label === 'start key frame')?.renderId; const end = frames.find(x => x.label === 'end key frame')?.renderId;
+      if (wantsLast && (!start || !end)) throw Object.assign(notSent(`This model animates start → end: the shot needs ${!start && !end ? 'start and end key frames' : !start ? 'a start key frame' : 'an end key frame'}${sibling && start ? `, or choose to animate the start still alone with ${sibling.title.split(' · ')[0]} (camera from one still, approximate)` : ''}`), { startOnly: sibling && start ? sibling.id : null });
+      if (!start) start = (await get('/api/project')).project.renders?.find(x => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
+      if (!start) throw notSent('No start image: generate a key frame for this shot, or render the blockout again');
+      def = await definitionFor(base, 0); parameters = parametersOf(def);
+      seconds = clipSecondsFor(base, s.duration);
+      if ('duration' in parameters) parameters.duration = durationValue(parameters.duration, seconds);
+      assetBindings = { firstFrame: { renderId: start }, ...(wantsLast ? { lastFrame: { renderId: end } } : {}) };
+      prompt = videoPrompt(p, s, wantsLast ? 'keyframes' : 'still', []);
+    } else {
+      const cap = useReferences === false ? 0 : maxReferences(base);
+      // The blockout clip is the camera; the start (and end) still lead the reference images as the look, then the cast.
+      registered = cap ? (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap, stills: cameraSourceOf(base) === 'blockout' }))).references : [];
+      const all = [...(p.scene.references || []), ...p.shots.flatMap(x => x.references)];
+      refs = registered.map(x => ({ ref: all.find(y => y.id === x.referenceId), entityId: x.entityId, role: x.role, label: x.label })).filter(x => x.ref);
+      def = await definitionFor(base, registered.length); parameters = parametersOf(def);
+      assetBindings = { [motionInput(def) || 'sourceVideo']: { assetId: r.assetId }, ...Object.fromEntries(registered.map((x, i) => [`referenceImage${i + 1}`, { renderId: x.renderId }])) };
+      prompt = videoPrompt(p, s, cameraSourceOf(def), refs);
+    }
+    prompt = fitPrompt(prompt, def.constraints?.promptMaxLength, cameraSourceOf(def, assetBindings)); // keeps the camera line and the reference legend
+    const local = def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-');
+    // Bind and quote are both revision-checked; concurrent batches can move the revision in between, so retry them together.
+    return withRevision(async revision => {
+      const bind = await post('/api/generation/bind', { revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: true });
+      const request = { requestId: randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: local ? 'local' : 'cloud' } };
+      const job = (await post('/api/generation/quote', request)).job;
+      const cameraSource = job.cameraSource || cameraSourceOf(def, assetBindings);
+      return { request, job, def, modelUsed: base.id, cameraSource, prompt, refs: registered, seconds, promptWarning: cameraMotionWarning(prompt, cameraSource) };
+    });
+  }
+  return { definitionFor, prepare };
+}
+
+/**
  * Real drivers over loopback HTTP (the routes the browser and agent use). Paid drivers record { requestId | jobId | requestIds }
  * and the approved fingerprint before the submit call that dispatches, so a restart resubmits the same saved request; both
  * stores answer a resubmit of a non-draft request with the saved job, so nothing is ever sent twice. Completion comes from the
@@ -105,19 +197,6 @@ export function loopbackDrivers(base) {
       throw e;
     }
   }
-  // Engine-project writes are revision-checked; concurrent nodes retry with a fresh revision.
-  async function withRevision(fn) {
-    for (let i = 0; ; i++) {
-      try { return await fn((await get('/api/project')).project.revision); } catch (e) { if (e.status !== 409 || e.apiCode || !/Project changed/i.test(e.message) || i >= 9) throw e; await new Promise(r => setTimeout(r, 150 + Math.random() * 600)); }
-    }
-  }
-  // Engine writes inside a route (video-refs registering renders) can lose a race with the job tracker attaching
-  // results; the route is idempotent, so retry it on "Project changed".
-  async function retryChanged(fn) {
-    for (let i = 0; ; i++) {
-      try { return await fn(); } catch (e) { if (!/Project changed/i.test(e.message) || i >= 9) throw e; await new Promise(r => setTimeout(r, 200 + Math.random() * 800)); }
-    }
-  }
   async function patchSheets(projectId, entityId, fn) {
     const p = (await get(`/api/director/project?id=${projectId}`)).project, e = entityOf(p, entityId), sheets = structuredClone(e.sheets || []);
     fn(sheets);
@@ -140,62 +219,8 @@ export function loopbackDrivers(base) {
   }
   const presets = async projectId => (await get(`/api/director/refgen?projectId=${projectId}`)).presets || [];
 
-  // Saved engine definition for a preset + reference count (src/director-videogen.ts definitionFor); one at a time so
-  // concurrent shots share one saved copy.
-  let defining = Promise.resolve();
-  function definitionFor(base, refCount) {
-    const run = defining.then(async () => {
-      const presetId = base.provenance?.presetId || base.id;
-      const wanted = withReferenceImages({ ...base, provenance: { ...(base.provenance || {}), presetId } }, refCount), n = wanted.provenance?.referenceImages || 0;
-      const same = d => (d.provenance?.presetId === presetId || d.id === presetId) && (d.provenance?.referenceImages || 0) === n && JSON.stringify(d.graph) === JSON.stringify(wanted.graph);
-      const saved = ((await get('/api/generation')).definitions || []).find(same);
-      return saved || (await withRevision(revision => post('/api/generation/preset', { revision, definition: wanted }))).definition;
-    });
-    defining = run.catch(() => {});
-    return run;
-  }
-  // Bind + quote one shot exactly like the browser (src/director-videogen.ts prepareShotVideo / prepareFirstFrame).
-  async function prepareVideo(ctx, p, s) {
-    const gen = await get('/api/generation'), r = s.render;
-    const pick = id => (gen.presets || []).find(d => d.id === id) || (gen.definitions || []).find(d => d.id === id);
-    let base = pick(ctx.node.model); if (!base) throw notSent(`Unknown video model ${ctx.node.model}`);
-    let assetBindings, prompt, refs = [];
-    const parametersOf = def => Object.fromEntries(Object.entries(def.parameters || {}).map(([k, m]) => [k, def.graph?.[m.nodeId]?.inputs?.[m.input]]));
-    let def, parameters;
-    if (base.task === 'first-frame') {
-      let wantsLast = !!base.inputs?.lastFrame;
-      const frames = (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast }))).references;
-      let start = frames.find(x => x.label === 'start key frame')?.renderId; const end = frames.find(x => x.label === 'end key frame')?.renderId;
-      if (wantsLast && !end && FIRST_FRAME_FALLBACK[base.id] && pick(FIRST_FRAME_FALLBACK[base.id])) { base = pick(FIRST_FRAME_FALLBACK[base.id]); wantsLast = false; }
-      if (wantsLast && (!start || !end)) throw notSent('This model animates start → end: the shot needs both key frames');
-      if (!start) start = (await get('/api/project')).project.renders?.find(x => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
-      if (!start) throw notSent('No start image: generate a key frame for this shot, or render the blockout again');
-      def = await definitionFor(base, 0); parameters = parametersOf(def);
-      if ('duration' in parameters) parameters.duration = durationValue(parameters.duration, clipSecondsFor(base, s.duration));
-      assetBindings = { firstFrame: { renderId: start }, ...(wantsLast ? { lastFrame: { renderId: end } } : {}) };
-      const cameraSource = wantsLast ? 'keyframes' : 'still';
-      prompt = withCameraLine(shotPrompt(p, s, 'video', { cameraSource }).trim() || compilePrompt(p, s, null, { cameraSource }), cameraSource);
-    } else {
-      const cap = maxReferences(base);
-      // The blockout clip is the camera; the start (and end) still lead the reference images as the look, then the cast.
-      const registered = cap ? (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: cap, stills: cameraSourceOf(base) === 'blockout' }))).references : [];
-      const all = [...(p.scene.references || []), ...p.shots.flatMap(x => x.references)];
-      refs = registered.map(x => ({ ref: all.find(y => y.id === x.referenceId), entityId: x.entityId, role: x.role, label: x.label })).filter(x => x.ref);
-      def = await definitionFor(base, registered.length); parameters = parametersOf(def);
-      assetBindings = { [motionInput(def) || 'sourceVideo']: { assetId: r.assetId }, ...Object.fromEntries(registered.map((x, i) => [`referenceImage${i + 1}`, { renderId: x.renderId }])) };
-      const cameraSource = cameraSourceOf(def), auto = compilePrompt(p, s, null, { cameraSource }), user = shotPrompt(p, s, 'video', { cameraSource });
-      prompt = user?.trim() && user.trim() !== auto.trim() ? [withCameraLine(user, cameraSource), referenceLegend(refs)].filter(Boolean).join('\n') : compilePrompt(p, s, refs, { cameraSource });
-    }
-    prompt = fitPrompt(prompt, def.constraints?.promptMaxLength, cameraSourceOf(def, assetBindings)); // keeps the camera line and the reference legend
-    const local = def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-');
-    // Bind and quote are both revision-checked; concurrent batches can move the revision in between, so retry them together.
-    return withRevision(async revision => {
-      const bind = await post('/api/generation/bind', { revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: true });
-      const request = { requestId: randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: local ? 'local' : 'cloud' } };
-      const job = (await post('/api/generation/quote', request)).job;
-      return { request, job, modelUsed: base.id, cameraSource: job.cameraSource || cameraSourceOf(def, assetBindings) };
-    });
-  }
+  const videos = videoPreparer({ get, post });
+  const prepareVideo = (ctx, p, s) => videos.prepare(p, s, { model: ctx.node.model, startOnly: true });
 
   return {
     blockout: {

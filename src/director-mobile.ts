@@ -97,7 +97,8 @@ export function initMobile(host: MobileHost): MobileApi | null {
   host.viewport.after(transport);
   const swThumb = h('canvas', { width: 96, height: 54, 'aria-hidden': 'true' });
   const swNum = h('span', { class: 'm-sw-n mono' }), swTitle = h('span', { class: 'm-sw-t' });
-  const switcher = h('button', { class: 'm-switch', type: 'button', 'aria-haspopup': 'dialog', 'aria-label': 'Choose shot', onclick: () => openShotList() }, swThumb, swNum, swTitle, icon('down'));
+  // Named by what it shows (shot number and title); the title attribute describes what it does.
+  const switcher = h('button', { class: 'm-switch', type: 'button', 'aria-haspopup': 'dialog', title: 'Choose shot', onclick: () => openShotList() }, swThumb, swNum, swTitle, icon('down'));
   const stepShot = (d: number) => { const list = P().shots, i = list.findIndex(s => s.id === S().id) + d; if (list[i]) host.selectShot(list[i].id); };
   const prev = h('button', { class: 'm-ib', type: 'button', 'aria-label': 'Previous shot', onclick: () => stepShot(-1) }, '‹');
   const next = h('button', { class: 'm-ib', type: 'button', 'aria-label': 'Next shot', onclick: () => stepShot(1) }, '›');
@@ -177,7 +178,7 @@ export function initMobile(host: MobileHost): MobileApi | null {
     const dot = (st: string[]) => h('span', { class: `m-st ${st[0]}` }, st[1]);
     const f = h('span', { class: 'm-cr-f' }, x.thumb, h('span', { class: 'm-cr-d mono' }, `${x.s.duration}s`));
     const grip = h('span', { class: 'm-cr-grip', role: 'button', 'aria-label': `Reorder shot ${x.i + 1}: press and hold, then drag` }, icon('grip'));
-    const main = h('button', { class: 'm-cr-main', type: 'button', 'aria-label': `Shot ${x.i + 1} ${x.s.title}`, onclick: () => openShotSheet(x.s.id) },
+    const main = h('button', { class: 'm-cr-main', type: 'button', onclick: () => openShotSheet(x.s.id) },
       f, h('span', { class: 'm-cr-i' }, h('b', {}, `${pad(x.i + 1)} · ${x.s.title}`), h('span', { class: 'm-cr-st' }, dot(x.bState), x.inCut ? dot(x.gState) : h('span', { class: 'm-st none' }, 'Left out of the cut')), h('span', { class: 'm-chip' }, x.inCut ? res : 'Excluded', ' ⌄')), icon('chev'));
     const el = h('div', { class: 'm-cutrow' + (x.on ? ' on' : '') + (x.inCut ? '' : ' out'), role: 'listitem' }, x.pick, grip, main);
     dragReorder(el, grip, x);

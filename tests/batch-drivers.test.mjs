@@ -173,7 +173,10 @@ test('video: LTX start→end falls back to start-only without an end still; pres
     assert.equal(sub.backend.kind, 'cloud');
 
     // A second shot reuses the saved definition; with both stills the start→end model is used as planned.
-    const both = await mockServer({ on: { endFrame: true } });
+    // (The driver reads the stills from the project, the same state the batch plan used, so the project has the end still.)
+    const withEnd = structuredClone(fixture), v = withEnd.shots[0];
+    v.references.push({ ...v.references.find(r => r.note === 'key frame start'), id: randomUUID(), note: 'key frame end' });
+    const both = await mockServer({ on: { endFrame: true }, project: withEnd });
     try {
       const c2 = ctxFor(both, { id: `video:${valley.id}`, type: 'video', model: 'ltx-25-flf-v1', estimateUsd: 0.86, target: { shotId: valley.id } });
       await loopbackDrivers(both.base).video.submit(c2);

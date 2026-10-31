@@ -44,6 +44,8 @@ export function compilePrompt(project: DirectorProject, shot: Shot, refs?: Video
 export function shotCast(project: DirectorProject, shot: Shot, opts?: { samples?: number; aspect?: number; minCoverage?: number }): { entity: Entity; coverage: number; lead: boolean }[];
 export function videoReferences(project: DirectorProject, shot: Shot, max?: number, opts?: { stills?: boolean }): VideoRef[];
 export function keyStills(shot: Shot): { start: Reference | null; end: Reference | null };
+export type StillState = 'missing' | 'stale' | 'ready';
+export function keyStillState(project: DirectorProject, shot: Shot): { start: Reference | null; end: Reference | null; startState: StillState; endState: StillState };
 export function shotSignature(project: DirectorProject, shot: Shot): string;
 export function blockoutStale(project: DirectorProject, shot: Shot): boolean;
 export function blenderBlockout(project: DirectorProject, shot: Shot): boolean;
