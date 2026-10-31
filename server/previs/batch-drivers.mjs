@@ -228,9 +228,10 @@ export function loopbackDrivers(base) {
           const looks = stillReferences(p, s, t, cap).looks; // objects in frame, one environment image
           const prev = p.shots[p.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);
           const refIds = [...looks.map(r => r.ref.id), ...(prev ? [prev.id] : [])].slice(0, Math.max(0, cap - 1));
-          const prompt = stillPrompt({ project: p, shot: s, t, text: shotPrompt(p, s, 'image'), presetId: ctx.node.model, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null });
-          const guide = (await post('/api/director/frame', { projectId: p.id, shotId: s.id, t, guide: true })).data;
-          return { projectId: p.id, target: 'shot', shotId: s.id, frameAt: at, presetId: ctx.node.model, prompt, aspect: '16:9', count: 1, seed: randomSeed(), referenceIds: refIds, guide };
+          const frame = await post('/api/director/frame', { projectId: p.id, shotId: s.id, t, guide: true });
+          // A Blender guide (blender-import) has no proxy markers, so the prompt does not explain them.
+          const prompt = stillPrompt({ project: p, shot: s, t, text: shotPrompt(p, s, 'image'), presetId: ctx.node.model, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null, markers: frame.source !== 'blender' });
+          return { projectId: p.id, target: 'shot', shotId: s.id, frameAt: at, presetId: ctx.node.model, prompt, aspect: '16:9', count: 1, seed: randomSeed(), referenceIds: refIds, guide: frame.data };
         });
       },
     },

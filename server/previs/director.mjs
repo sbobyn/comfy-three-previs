@@ -613,6 +613,7 @@ export async function openDirector(root, options = {}) {
     recordRender: (id, input, previs) => serial(async () => {
       const p = structuredClone(await load(id));
       const shot = resolveShot(p, input.shotId); if (!shot) fail('Unknown shot');
+      const origin = input.origin === 'blender' ? { origin: 'blender' } : {}; // a clip imported from Blender (blender-import.mjs), not the Previs proxies
       const main = previs.get();
       const asset = main.assets?.find(a => a.id === input.assetId && a.shotId === input.previsShotId && a.kind === 'video');
       if (!asset) fail('Exported video not found in the project');
@@ -622,8 +623,8 @@ export async function openDirector(root, options = {}) {
       await mkdir(join(dir, p.id, 'assets'), { recursive: true });
       const file = `assets/${asset.id}.mp4`;
       try { await writeFile(join(dir, p.id, file), bytes, { flag: 'wx', mode: 0o600 }); } catch (e) { if (e.code !== 'EEXIST') throw e; }
-      (p.assets ||= []).push({ id: asset.id, kind: 'camera-render', shotId: shot.id, file, mime: 'video/mp4', sha256: asset.sha256, width: asset.width, height: asset.height, fps: asset.fps, frameCount: asset.frameCount, duration: asset.duration, version: (p.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id).length + 1, createdAt: now(), source: { engineShotId: input.previsShotId, engineAssetId: asset.id, prompt: String(input.prompt || '').slice(0, 8000), signature: String(input.signature || '').slice(0, 64) } });
-      shot.render = { previsShotId: input.previsShotId, assetId: asset.id, prompt: String(input.prompt || compilePrompt(p, shot)).slice(0, 8000), frameCount: asset.frameCount, duration: asset.duration, width: asset.width, height: asset.height, signature: String(input.signature || '').slice(0, 64), createdAt: now() };
+      (p.assets ||= []).push({ id: asset.id, kind: 'camera-render', shotId: shot.id, file, mime: 'video/mp4', sha256: asset.sha256, width: asset.width, height: asset.height, fps: asset.fps, frameCount: asset.frameCount, duration: asset.duration, version: (p.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id).length + 1, createdAt: now(), source: { engineShotId: input.previsShotId, engineAssetId: asset.id, prompt: String(input.prompt || '').slice(0, 8000), signature: String(input.signature || '').slice(0, 64), ...origin } });
+      shot.render = { previsShotId: input.previsShotId, assetId: asset.id, prompt: String(input.prompt || compilePrompt(p, shot)).slice(0, 8000), frameCount: asset.frameCount, duration: asset.duration, width: asset.width, height: asset.height, signature: String(input.signature || '').slice(0, 64), createdAt: now(), ...origin };
       return { project: await save(p) };
     }),
   };
