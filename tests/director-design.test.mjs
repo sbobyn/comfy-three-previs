@@ -91,7 +91,7 @@ test('the Generate dialog leads with model · runs on · estimate · Generate, a
   assert.equal(core.dialogEstimate({ pricing: { ratePerSecond: 0.16 } }, 4, 'cloud'), '≈ $0.64 for 4s');
   assert.equal(core.dialogEstimate({ pricing: {} }, 4, 'cloud'), 'Priced at quote');
   // Review L1: a paid partner graph run through Local ComfyUI is never labelled free.
-  assert.equal(core.dialogEstimate({ pricing: { ratePerSecond: 0.16 } }, 4, 'local'), '≈ $0.64 for 4s · partner model, billed on Local too');
+  assert.equal(core.dialogEstimate({ pricing: { ratePerSecond: 0.16 } }, 4, 'local'), '≈ $0.64 for 4s · not free on Local');
   assert.equal(core.dialogEstimate({ pricing: { ratePerSecond: 0 } }, 4, 'local'), 'Free · local');
   assert.equal(core.dialogEstimate({ pricing: {} }, 4, 'local'), 'Priced at quote', 'an unpriced graph is priced at the quote, not assumed free');
   assert.equal(core.dialogEstimate({ id: 'wan-vace-13b-edge-v1', pricing: {} }, 4, 'local'), 'Free · local', 'native local graph');

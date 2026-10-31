@@ -107,7 +107,7 @@ export function heroSweepAt(u: number): number {
  */
 export function dialogEstimate(def: { id?: string; pricing?: { ratePerSecond?: number } } | null, seconds: number, backend: string): string {
   const rate = def?.pricing?.ratePerSecond;
-  if (rate) return `≈ $${(rate * seconds).toFixed(2)} for ${seconds}s${backend === 'local' ? ' · partner model, billed on Local too' : ''}`;
+  if (rate) return `≈ $${(rate * seconds).toFixed(2)} for ${seconds}s${backend === 'local' ? ' · not free on Local' : ''}`;
   // `wan-` presets are native local graphs (no partner nodes), as elsewhere in the app.
   if (backend === 'local' && (rate === 0 || def?.id?.startsWith('wan-'))) return 'Free · local';
   return 'Priced at quote';

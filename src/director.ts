@@ -1372,7 +1372,7 @@ function quoteCard(job: any, done: (sent: boolean) => void) {
     h('label', { style: 'display:flex;gap:8px;align-items:center' }, approve, 'I approve this exact request'),
     free ? null : est === null ? h('p', { class: 'note', style: 'margin:0' }, 'No cost estimate for this model, so it is not sent from here. Choose a priced model.')
       : h('label', { style: 'display:flex;gap:8px;align-items:center' }, unknown, 'I accept the Cloud total is unknown, up to', max, 'USD'),
-    h('div', { style: 'display:flex;gap:8px;align-items:center' }, go, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => done(false) }, 'Cancel'), blocked ? h('span', { class: 'note' }, 'Paid generation is off on this server (PREVIS_ALLOW_PAID≠1). Nothing will be sent.') : null),
+    h('div', { style: 'display:flex;gap:8px;align-items:center;flex-wrap:wrap' }, go, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => done(false) }, 'Cancel'), blocked ? h('span', { class: 'note' }, 'Paid generation is off on this server (PREVIS_ALLOW_PAID≠1). Nothing will be sent.') : null),
     status);
 }
 function jobRow(job: any) {
@@ -1776,7 +1776,7 @@ function openRender() {
   // Header row: model · runs on · estimate · Generate. Generate makes the blockout if needed, then quotes; nothing runs before approval.
   const hWf = h('select', { class: 'field', 'aria-label': 'Video model' }, h('option', {}, 'Loading models…'));
   const hBackend = h('select', { class: 'field', 'aria-label': 'Runs on' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
-  const hEst = h('span', { class: 'rg-est mono', title: 'Rate × the seconds the model makes. The quote shows the exact estimate before anything runs.' }, '');
+  const hEst = h('span', { class: 'rg-est mono', title: 'Rate × the seconds the model makes. A partner (paid) model bills even when it runs through Local ComfyUI. The quote shows the exact estimate before anything runs.' }, '');
   // What the blockout clip is to the chosen model: the camera itself, or only the source of the stills that stand in for it.
   const blockoutNote = h('p', {}, 'The grey camera clip: every frame through the shot camera at 24 fps.');
   const hGo = h('button', { class: 'btn cta', type: 'button', title: 'Make the blockout if needed, then quote. Nothing runs until you approve the quote.' }, 'Generate ▸');
@@ -1819,7 +1819,7 @@ function openRender() {
     refs.length ? h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:8px' }, ...refs.map(({ ref: r, names }) => h('div', { style: 'display:flex;gap:8px;align-items:center;font-size:12px' }, h('img', { src: refUrl(r), alt: '', style: 'width:34px;height:34px;flex:none;object-fit:cover;border-radius:6px' }), h('div', { style: 'flex:1;min-width:0;overflow-wrap:anywhere' }, h('div', {}, r.name), h('small', { class: 'muted', title: [...names].join(', ') }, names.size > 1 ? `× ${names.size} objects` : [...names][0] || (r.role === 'style' ? 'Style' : 'Shot image')))))) : h('p', { class: 'note', style: 'margin-top:8px' }, 'No images for this shot.'),
     h('p', { class: 'note', style: 'margin-top:8px' }, 'Cast images are named in the prompt and sent to models that take images.')));
   const gen = h('div', { class: 'gen-box' }, h('p', { class: 'note', style: 'margin:0' }, 'Make the blockout first.'));
-  const step3 = h('div', { class: 'step' }, h('span', { class: 'n' }, '3'), h('div', {}, h('h3', {}, 'Generate the video'), h('p', { style: 'margin:0 0 8px' }, 'Run a Comfy video model on this exact blockout. You see the quote first; nothing runs until you approve it.'), gen));
+  const step3 = h('div', { class: 'step' }, h('span', { class: 'n' }, '3'), h('div', {}, h('h3', {}, 'Generate the video'), h('p', { style: 'margin:0 0 8px' }, 'Run the chosen video model on this shot. You see the quote, camera source and final prompt first; nothing runs until you approve it.'), gen));
   const setOpen = (previsShotId: string, assetId: string) => renderGenerate(gen, s, previsShotId, assetId, () => prompt.value, { wf: hWf, backendSel: hBackend });
   prompt.oninput = () => { if (s.render && s.render.signature === signature(project, s)) setOpen(s.render.previsShotId, s.render.assetId); };
   const sig = signature(project, s);
