@@ -412,7 +412,7 @@ function shotRunning(s: Shot) {
 }
 function pipsFor(s: Shot) {
   const stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s)), run = shotRunning(s);
-  return shotPips(s, { stale, videos: shotVideos(s.id).length, stillRunning: run.still, videoRunning: run.video });
+  return shotPips(s, { stale, videos: shotVideos(s.id).length, stillRunning: run.still, videoRunning: run.video, bundled: !!starterBlockout(project, s) });
 }
 function pipEls(p: ShotPips) {
   return (['blockout', 'still', 'video'] as const).map(k => { const el = h('i', { class: `sp sp-${k} ${p[k]}` }); el.append(svgIcon(PIP_ICON[k])); el.firstElementChild!.setAttribute('viewBox', '0 0 16 16'); return el; });

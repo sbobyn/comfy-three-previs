@@ -45,14 +45,17 @@ export function stepStatus(step: Step, p: DirectorProject, s: Shot, o: { stale: 
 // ---------- Rail: per-shot status pips and the filmstrip still ----------
 export type PipTone = 'ok' | 'changed' | 'none' | 'run';
 export type ShotPips = { blockout: PipTone; still: PipTone; video: PipTone; label: string };
-/** Blockout (current / changed / none), still (any / generating / none), video (any / generating / none). */
-export function shotPips(s: Shot, o: { stale: boolean; videos: number; stillRunning: boolean; videoRunning: boolean }): ShotPips {
+/**
+ * Blockout (current / changed / none), still (any / generating / none), video (any / generating / none).
+ * `bundled`: the shot has no blockout of its own but a starter shipped one, so the label says so, not "No blockout yet".
+ */
+export function shotPips(s: Shot, o: { stale: boolean; videos: number; stillRunning: boolean; videoRunning: boolean; bundled?: boolean }): ShotPips {
   const stills = s.references.filter(r => r.role === 'frame').length;
   const blockout: PipTone = s.render ? (o.stale ? 'changed' : 'ok') : 'none';
   const still: PipTone = o.stillRunning ? 'run' : stills ? 'ok' : 'none';
   const video: PipTone = o.videoRunning ? 'run' : o.videos ? 'ok' : 'none';
   const label = [
-    blockout === 'ok' ? 'Blockout ready' : blockout === 'changed' ? 'Scene changed since the blockout' : 'No blockout yet',
+    blockout === 'ok' ? 'Blockout ready' : blockout === 'changed' ? 'Scene changed since the blockout' : o.bundled ? 'Starter blockout' : 'No blockout yet',
     `${stills ? `${stills} still${stills === 1 ? '' : 's'}` : 'no stills'}${still === 'run' ? ' (one generating)' : ''}`,
     `${o.videos ? `${o.videos} video${o.videos === 1 ? '' : 's'}` : 'no video'}${video === 'run' ? ' (one generating)' : ''}`,
   ].join(' · ');
