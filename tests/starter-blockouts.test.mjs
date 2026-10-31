@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadStarters, instantiateStarter } from '../server/previs/starters.mjs';
-import { entityAt, focusPoint, shotCameraAt, stillStale } from '../shared/director.mjs';
+import { entityAt, focusPoint, shotCameraAt, stillStale, videoStale } from '../shared/director.mjs';
 import { frameLayout, shotProjector } from '../shared/still-match.mjs';
 import { terrainHeight } from '../shared/terrain.mjs';
 import { planBatch } from '../server/previs/batch.mjs';
@@ -70,23 +70,26 @@ test('Posterized rises above the defender and sends the ball through the rim; Wi
   }
 });
 
-test('fresh starter copies keep old generated media stale and preserve each old video’s actual blockout source', () => {
+// The 2026-10-31 media regeneration replaced every still and video with takes made for the revised blocking.
+test('fresh starter copies open with start and end stills and a video made from the current blocking', () => {
   for (const s of starters) {
     const p = instantiateStarter(s);
     for (const sh of p.shots) {
-      assert.ok(sh.references.filter(r => r.generated).every(r => stillStale(p, sh, r)), `${s.slug}: legacy still cannot be reused as current blocking`);
+      const stills = sh.references.filter(r => r.generated);
+      assert.deepEqual(stills.map(r => r.note).sort(), ['key frame end', 'key frame start'], `${s.slug} ${sh.title}: one start and one end still`);
+      assert.ok(stills.every(r => !stillStale(p, sh, r)), `${s.slug} ${sh.title}: still made for the current blocking`);
       const renders = p.assets.filter(a => a.shotId === sh.id && a.kind === 'camera-render');
-      assert.ok(renders.length >= 2, 'keep the historical source and the new free blockout');
-      const latest = renders.sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-      assert.equal(latest.duration, sh.duration);
-      assert.equal(latest.frameCount, sh.duration * 24);
+      assert.equal(renders.length, 1, `${s.slug} ${sh.title}: one blockout clip, the one the video was made from`);
+      assert.equal(renders[0].duration, sh.duration);
+      assert.equal(renders[0].frameCount, sh.duration * 24);
       const video = p.assets.find(a => a.shotId === sh.id && a.kind === 'workflow-result');
-      assert.notEqual(video.source.sourceAssetId, latest.id, 'old video must not pretend it came from new blocking');
-      assert.ok(renders.some(a => a.id === video.source.sourceAssetId));
+      assert.equal(video.source.sourceAssetId, renders[0].id, `${s.slug} ${sh.title}: video keeps its actual blockout source`);
+      assert.ok(!videoStale(p, sh, video), `${s.slug} ${sh.title}: video made for the current blocking`);
     }
+    // Nothing a final-tier batch would pay for is remade: every key frame already exists for this blocking.
     const plan = planBatch(p, { steps: ['stills', 'videos'], tier: 'final', dryRun: true, maxCostUsd: 50 });
     const stills = plan.nodes.filter(n => n.type === 'still');
     assert.equal(stills.length, p.shots.length * 2);
-    assert.ok(stills.every(n => n.status === 'waiting'), 'final-tier plan remakes stale starts and makes missing ends');
+    assert.ok(stills.every(n => n.status === 'skipped'), `${s.slug}: final-tier plan keeps the bundled stills`);
   }
 });
