@@ -12,7 +12,7 @@
 import { mkdir, open, readFile, stat, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { atomicJson } from './atomic.mjs';
-import { parseMarginPct } from '../../shared/tiers.mjs';
+import { parseMarginPct, GRADER_PRICES } from '../../shared/tiers.mjs';
 
 /** Ledger directory: PREVIS_BUDGET_DIR (share it between servers for one account budget), else <data dir>/budget. */
 export const budgetDir = (dataDir, env = process.env) => env.PREVIS_BUDGET_DIR || join(dataDir, 'budget');
@@ -259,6 +259,15 @@ export const noBudget = () => {
   return { reserve: async () => ({ reservation: null, alerts: [] }), settle: ok, release: ok, hold: ok, setCaps: async () => null, refresh: ok, status: () => null, marginPct: () => 0, list: () => [], get: () => null, subscribe: () => () => {} };
 };
 
+/** What a finished job cost, when its receipt says more than the reservation does: { costUsd?, costStatus?, note? } or {}. */
+export function settlementOf(job) {
+  const q = job?.quote?.breakdown;
+  if (!q) return {}; // generation receipts and older refgen receipts settle at the reservation's expected charge
+  // Paid grades the job actually requested (its quote allowed for them); each one is billed whether or not the verdict was usable.
+  const grades = Math.min(Number(job.graderCalls) || 0, Number(q.grades) || 0);
+  return { costUsd: Math.round((q.listUsd + q.refsUsd + grades * GRADER_PRICES.gemini) * 10000) / 10000, costStatus: 'estimated' };
+}
+
 // Job receipt → ledger. Generation and refgen share these status names closely enough for one mapping.
 const RAN = new Set(['completed', 'orphaned', 'recovery-required', 'attaching']);
 const DRAFT = new Set(['prepared', 'quoted', 'invalidated']);
@@ -269,8 +278,10 @@ export async function followJob(budget, job, log = () => {}) {
   // Only real transitions take the ledger lock (a tracked uncertain job is persisted on every check).
   const live = HELD.has(state);
   try {
-    if (RAN.has(job.status)) { if (state !== 'settled') await budget.settle(job.id); }
+    if (RAN.has(job.status)) { if (state !== 'settled') await budget.settle(job.id, settlementOf(job)); }
     else if (DRAFT.has(job.status)) { if (live) await budget.release(job.id, 'Back to its quote; nothing was sent'); }
+    // Refused by the provider but still billed (moderation on some models): the charge is known, so settle it; do not hold or release.
+    else if (job.status === 'failed' && Number.isFinite(job.failure?.billedUsd)) { if (state !== 'settled') await budget.settle(job.id, { costUsd: job.failure.billedUsd, costStatus: 'billed-on-refusal', note: job.failure.billedNote || 'Refused, but the provider still bills it' }); }
     else if (job.status === 'failed') {
       if (job.failure?.phase === 'preparation' || job.failure?.notSent) { if (live) await budget.release(job.id, 'Refused before it ran; nothing was charged'); }
       else if (state === 'reserved') await budget.hold(job.id, `Failed after dispatch (${job.failure?.phase || 'execution'}); a charge may still arrive`);
