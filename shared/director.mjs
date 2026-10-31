@@ -301,6 +301,8 @@ export function shotCast(project, shot, { samples = 12, aspect = 16 / 9, minCove
 export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 /** The shot's blockout clip no longer matches its camera, timing or scene (it is made again before a video uses it). */
 export const blockoutStale = (project, shot) => !!(shot.render && shot.render.signature && shot.render.signature !== shotSignature(project, shot));
+/** The shot's blockout clip is a Blender render (server/previs/blender-import.mjs) that still matches the shot, so its frames are the still guide. */
+export const blenderBlockout = (project, shot) => shot.render?.origin === 'blender' && !blockoutStale(project, shot);
 
 /**
  * A generated key-frame still made for an earlier blocking (camera, timing or scene). New stills record the shot

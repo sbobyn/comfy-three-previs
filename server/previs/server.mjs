@@ -7,7 +7,7 @@ import { resolve, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BlenderMcp } from './mcp-client.mjs';
 import { inspectCode, renderCode, catalogToken } from './blender.mjs';
-import { openProject, validateBinding, validateBrowser, sameBinding } from './store.mjs';
+import { openProject, validateBinding, validateBrowser, sameBinding, addBrowserShot } from './store.mjs';
 import { randomUUID } from 'node:crypto';
 import { openOperations } from './operations.mjs';
 import { lockProject } from './lock.mjs';
@@ -17,6 +17,7 @@ import { releaseFrameStage } from './video.mjs';
 import { videoRoutes } from './video-routes.mjs';
 import { generationRoutes } from './generation-routes.mjs';
 import { openDirector, directorRoutes } from './director.mjs';
+import { openBlenderImport } from './blender-import.mjs';
 import { openAgentRunner } from './agent-runner.mjs'; // [agent]
 import { openRefgen, refgenRoutes } from './refgen.mjs';
 import { setupChecks } from './setup-check.mjs';
@@ -51,6 +52,7 @@ progress = createProgressCoordinator({ observe, sources: jobSources, budget });
 const generation = await generationRoutes(data,project,{ telemetry: progress.telemetry('generation'), budget, log: console.log });
 let refgen, agentRunner; // [agent]
 const director = await openDirector(data, { startersDir: process.env.PREVIS_STARTERS_DIR || undefined, engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
+const blenderImport = openBlenderImport({ data, director, previs: project });
 refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen'), budget, log: console.log });
 jobSources.generation = generation.trackerSource({ director }); jobSources.refgen = refgen.trackerSource();
 tracker = createJobTracker({ sources: [jobSources.generation, jobSources.refgen], limits: () => slotsFor(data).snapshot(), log: line => console.log(`[jobs] ${line}`) });
@@ -113,6 +115,19 @@ const server = createServer(async (req, res) => {
       const parts = []; let size = 0;
       for await (const chunk of req) { size += chunk.length; if (size > 1024 ** 3) fail('Export is larger than 1 GB', 413); parts.push(chunk); }
       return send(await director.importZip(Buffer.concat(parts)));
+    }
+    // Blender thin import (docs/blender-import.md): an export folder by path (MCP tool, curl), or the same folder zipped
+    // (home screen). The zip is raw binary, so it is read here, before the 16 MiB JSON body limit applies.
+    if (req.method === 'POST' && url.pathname === '/api/director/import-blender-zip') {
+      if (!/^application\/(zip|octet-stream)/.test(req.headers['content-type'] || '')) fail('Upload a zip of the folder previs_export.py wrote', 415);
+      const parts = []; let size = 0;
+      for await (const chunk of req) { size += chunk.length; if (size > 1024 ** 3) fail('Blender export is larger than 1 GB', 413); parts.push(chunk); }
+      const q = url.searchParams;
+      return send(await blenderImport.fromZip(Buffer.concat(parts), { projectId: q.get('projectId'), shotId: q.get('shotId'), title: q.get('title') }));
+    }
+    if (req.method === 'POST' && url.pathname === '/api/director/import-blender') {
+      if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
+      return send(await blenderImport.fromPath(await body(req)));
     }
     if (renderRoute.handles(url.pathname)) return await renderRoute.serve(req, url, send, body); // [headless]
     if (req.method === 'GET' && url.pathname === '/api/director/asset-frame') { try { return send(await frameRoute(url)); } catch (e) { if (e.apiCode) return send({ error: e.message, code: e.apiCode }, e.status); throw e; } } // [frames]
@@ -224,11 +239,7 @@ const server = createServer(async (req, res) => {
         if (url.pathname === '/api/browser-shot') return { project: await project.mutate(input.revision, async p => {
           const browser = validateBrowser(input);
           const image = await project.image(Buffer.from(String(input.png), 'base64'));
-          const id = randomUUID();
-          const binding = { source: 'three', scene: browser.director ? String(browser.director.sceneName || 'Director scene').slice(0, 120) : 'Camera study', camera: browser.director ? 'Director camera' : 'Operated camera', fps: 24, start: 0, end: Math.max(0, Math.floor((browser.frames.at(-1)?.t || 0) * 24 + 1e-8)), frame: 0 };
-          p.shots.push({ id, title: String(input.title || 'Camera study').slice(0, 160), createdRevision: p.revision + 1, binding, browser, renders: [image.id] });
-          p.renders.push({ id: image.id, shotId: id, source: 'three', pass: 'beauty', width: image.width, height: image.height, binding, createdAt: new Date().toISOString() });
-          if (!browser.director && !p.scenes.some(s => s.owner === 'three')) p.scenes.push({ id: randomUUID(), owner: 'three', name: 'Camera study', version: 1 });
+          addBrowserShot(p, { id: randomUUID(), title: input.title, browser, image });
         }) };
         if (url.pathname === '/api/render') {
           let operationId = null, renderId = null;

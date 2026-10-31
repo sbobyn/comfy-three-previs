@@ -239,7 +239,8 @@ export function momentLine(shot, t) {
  * in words, the moment (momentLine), the shot text, then which image each cast member looks like. Only the shot text is shortened to fit `max`.
  * looks: [{ label }] in image order from image 2; prevImage: image number of the previous shot's still, if sent.
  */
-export function stillPrompt({ project, shot, t = 0, text = '', presetId = '', looks = [], prevImage = null, frame = null, max = 2500 }) {
+// markers: false when image 1 is a Blender frame (blenderBlockout), which has no headlight, face or ground-wedge markers.
+export function stillPrompt({ project, shot, t = 0, text = '', presetId = '', looks = [], prevImage = null, frame = null, max = 2500, markers = true }) {
   const f = frame || describeFrame(project, shot, t);
   const head = editsGuide(presetId)
     ? "Edit image 1: repaint this grey 3D blockout as one photoreal film frame. Keep image 1's camera position, lens, framing, horizon and every object's position, size, heading and pose exactly; only replace the grey shapes, ground and sky with the real things described below."
@@ -247,7 +248,7 @@ export function stillPrompt({ project, shot, t = 0, text = '', presetId = '', lo
   const last = looks.length + 1 + (prevImage ? 1 : 0);
   const ids = [...looks.map((l, i) => `The ${l.label} looks exactly like image ${i + 2}.`), prevImage ? `Image ${prevImage} is the previous shot: keep lighting, colour grade and designs continuous.` : '',
     last > 1 ? `Image${last > 2 ? `s 2–${last}` : ' 2'} show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.` : ''].filter(Boolean).join(' ');
-  const tail = "Reading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.";
+  const tail = (markers ? "Reading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. " : "Do not copy image 1's flat untextured colours or plain sky. ") + "One single photographic frame; no text, captions, labels, split panels or watermarks.";
   const moment = momentLine(shot, t);
   const fixed = [head, f.text, moment, ids, tail].filter(Boolean);
   const room = max - fixed.join('\n').length - 2;

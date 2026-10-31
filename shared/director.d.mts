@@ -8,13 +8,13 @@ export type CameraKey = { t: number; p: Vec3; look: Vec3; mm: number };
 export type ShotCamera = { move: string; target: string | null; distance: number; height: number; angle: number; mm: number; keys: CameraKey[] | null; timing?: 'linear' | 'ease' };
 export type Generated = { requestId: string; presetId: string; model: string; prompt: string; seed: number; backend: string; promptId: string; guideMatch?: import("./still-match.mjs").GuideMatch };
 export type Reference = { id: string; name: string; file: string; mime: string; role: Role; entityId: string | null; note: string; createdAt: string; generated?: Generated };
-export type ShotRender = { previsShotId: string; assetId: string; prompt: string; frameCount: number; duration: number; width: number; height: number; createdAt: string; signature?: string };
+export type ShotRender = { previsShotId: string; assetId: string; prompt: string; frameCount: number; duration: number; width: number; height: number; createdAt: string; signature?: string; origin?: 'blender' };
 export type Shot = { id: string; title: string; description: string; duration: number; start?: number; camera: ShotCamera; references: Reference[]; render: ShotRender | null; cast?: { include: string[]; exclude: string[] }; prompts?: Partial<Record<'video' | 'image', { text: string; edited: true; basedOn: string; editedAt: string }>>; style?: { movement: string[]; cuts: string[]; lens: string[]; filter: string[] } };
 export type Message = { id: string; shotId: string | null; role: 'user' | 'agent' | 'builtin' | 'system'; text: string; attachments: string[]; status: 'pending' | 'claimed' | 'handled'; createdAt: string; handledBy?: string; activity?: { at: string; text: string; auto?: boolean }[]; workStartedAt?: string; workEndedAt?: string; replyTo?: string; via?: 'runner'; error?: boolean; proposal?: Proposal; suggestion?: { shotId: string; kind: 'video' | 'image'; text: string } };
 // [agent] Edits the built-in agent proposed on a user message; applied/undone as one step.
 export type Proposal = { ops: unknown[]; undo: unknown[]; summary: { kind: string; text: string }[]; small: boolean; status: 'pending' | 'applied' | 'discarded' | 'undone'; decidedAt?: string };
 export type EditClip = { id: string; shotId: string; assetId: string | null; in: number; out: number | null };
-export type Asset = { id: string; kind: 'camera-render' | 'workflow-result' | 'edit'; shotId: string | null; file: string; mime: string; sha256: string; width: number; height: number; fps: number | null; frameCount: number | null; duration: number | null; version?: number; createdAt: string; imported?: boolean; starter?: string; source: { clips?: { assetId: string; in: number; out: number }[]; engineShotId?: string; engineAssetId?: string; sourceAssetId?: string; jobId?: string; resultId?: string; workflow?: string; backend?: string | null; prompt?: string; signature?: string; quote?: { status: string; amount: number | null; currency: string } | null } };
+export type Asset = { id: string; kind: 'camera-render' | 'workflow-result' | 'edit'; shotId: string | null; file: string; mime: string; sha256: string; width: number; height: number; fps: number | null; frameCount: number | null; duration: number | null; version?: number; createdAt: string; imported?: boolean; starter?: string; source: { clips?: { assetId: string; in: number; out: number }[]; engineShotId?: string; engineAssetId?: string; sourceAssetId?: string; jobId?: string; resultId?: string; workflow?: string; backend?: string | null; prompt?: string; signature?: string; origin?: 'blender'; quote?: { status: string; amount: number | null; currency: string } | null } };
 export type DirectorProject = {
   version: 1; id: string; title: string; template: string; createdAt: string; updatedAt: string; revision: number;
   scene: { name: string; environment: { preset: string; description: string; style?: string }; entities: Entity[]; references?: Reference[] };
@@ -46,6 +46,7 @@ export function videoReferences(project: DirectorProject, shot: Shot, max?: numb
 export function keyStills(shot: Shot): { start: Reference | null; end: Reference | null };
 export function shotSignature(project: DirectorProject, shot: Shot): string;
 export function blockoutStale(project: DirectorProject, shot: Shot): boolean;
+export function blenderBlockout(project: DirectorProject, shot: Shot): boolean;
 export function stillStale(project: DirectorProject, shot: Shot, ref: Reference | null | undefined): boolean;
 export function videoStale(project: DirectorProject, shot: Shot, video: Asset | null | undefined): boolean;
 export function starterBlockout(project: DirectorProject, shot: Shot): { asset: Asset; fresh: boolean | null } | null;
