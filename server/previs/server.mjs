@@ -18,6 +18,8 @@ import { videoRoutes } from './video-routes.mjs';
 import { generationRoutes } from './generation-routes.mjs';
 import { openDirector, directorRoutes } from './director.mjs';
 import { openBlenderImport } from './blender-import.mjs';
+import { zipEntryNames } from './zip.mjs';
+import { LIMITS } from './library.mjs';
 import { openAgentRunner } from './agent-runner.mjs'; // [agent]
 import { openRefgen, refgenRoutes } from './refgen.mjs';
 import { setupChecks } from './setup-check.mjs';
@@ -114,7 +116,22 @@ const server = createServer(async (req, res) => {
       if (!/^application\/(zip|octet-stream)/.test(req.headers['content-type'] || '')) fail('Upload a .previs.zip export', 415);
       const parts = []; let size = 0;
       for await (const chunk of req) { size += chunk.length; if (size > 1024 ** 3) fail('Export is larger than 1 GB', 413); parts.push(chunk); }
-      return send(await director.importZip(Buffer.concat(parts)));
+      const zip = Buffer.concat(parts);
+      // One drop target: an asset bundle (asset.json) goes to the library, a project export to a new project.
+      const names = zipEntryNames(zip);
+      if (names.includes('asset.json') && !names.includes('previs-export.json')) return send({ ...(await director.library.importZip(zip)), kind: 'asset' });
+      return send(await director.importZip(zip));
+    }
+    if (req.method === 'GET' && url.pathname === '/api/director/library/export') {
+      const { filename, data: zip } = await director.library.exportZip(url.searchParams.get('id'));
+      res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Length': zip.length, 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+      return res.end(zip);
+    }
+    if (req.method === 'POST' && url.pathname === '/api/director/library/import-zip') {
+      if (!/^application\/(zip|octet-stream)/.test(req.headers['content-type'] || '')) fail('Upload a .previs-asset.zip', 415);
+      const parts = []; let size = 0;
+      for await (const chunk of req) { size += chunk.length; if (size > LIMITS.zipBytes) fail(`Asset bundles are at most ${LIMITS.zipBytes / 1024 ** 2} MB`, 413); parts.push(chunk); }
+      return send(await director.library.importZip(Buffer.concat(parts)));
     }
     // Blender thin import (docs/blender-import.md): an export folder by path (MCP tool, curl), or the same folder zipped
     // (home screen). The zip is raw binary, so it is read here, before the 16 MiB JSON body limit applies.
@@ -272,6 +289,7 @@ const server = createServer(async (req, res) => {
     if (/^\/renders\/[a-f0-9-]{36}\.png$/.test(url.pathname)) file = join(data, url.pathname);
     else if (/^\/director-assets\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(mp4|webm|mov|png)$/.test(url.pathname)) { const [, , pid, name] = url.pathname.split('/'); file = await director.assetFile(pid, name); }
     else if (/^\/director-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp)$/.test(url.pathname)) { const [, , pid, name] = url.pathname.split('/'); file = await director.refFile(pid, name); }
+    else if (/^\/library-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp)$/.test(url.pathname)) { const [, , id, name] = url.pathname.split('/'); file = director.library.refFile(id, name); }
     else if (/^\/assets\/[a-f0-9-]{36}\.(mp4|webm|mov|mkv|png)$/.test(url.pathname)) file = join(data,url.pathname);
     else {
       const path = url.pathname === '/' ? '/start.html' : url.pathname;

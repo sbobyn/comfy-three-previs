@@ -22,6 +22,8 @@ One name per thing, used the same way in the app, the docs and the film. When a 
 | **Shared image** | One cast image used by several objects. Shown once, as "× N objects", and folded into one row ("Turns 3–4 · surface ×12"). | Look family (code only), Shared look |
 | **Description** | What an object is, in words. It goes into the auto-prompt. | Notes, Cast Card |
 | **Project style** | The look of the whole film ("35 mm anamorphic, teal-and-orange grade"). | Style board |
+| **Shared asset** | An object saved to this computer's library with its description, cast images and design sheets, ready to **Place** in any project. **Save to library** makes one; **Export** writes it as one `.previs-asset.zip`. | Library asset (code: asset), Prefab, Template |
+| **@handle** | The short name an object or shared asset answers to (`@red-racecar`), made from its name. In the scene first, then the library. | Tag, Slug |
 
 "Cast Card" is the old name for an object's description plus its cast images. It survives only in code and in the auto-prompt's source labels; do not use it in new UI.
 

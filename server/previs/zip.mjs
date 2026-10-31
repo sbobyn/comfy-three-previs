@@ -11,11 +11,11 @@ export function safeEntryName(name) {
   return name;
 }
 
-// entries: [{ name, data: Buffer }]
-export function writeZip(entries) {
+// entries: [{ name, data: Buffer }]; date stamps every entry (now by default; a fixed date makes the bytes repeatable).
+export function writeZip(entries, { date = new Date() } = {}) {
   const locals = [], centrals = [];
   let offset = 0;
-  const date = new Date(), dosTime = (date.getHours() << 11) | (date.getMinutes() << 5) | (date.getSeconds() >> 1), dosDate = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  const dosTime = (date.getHours() << 11) | (date.getMinutes() << 5) | (date.getSeconds() >> 1), dosDate = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
   for (const { name, data } of entries) {
     safeEntryName(name);
     if (data.length >= MAX || offset >= MAX) fail('Project is too large to export (4 GB limit)');
@@ -71,4 +71,19 @@ export function readZip(buffer, { maxEntries = 10000, maxTotal = 2 * 1024 ** 3 }
     out.set(name, data);
   }
   return out;
+}
+
+/** Entry names from the central directory only (nothing is decompressed); [] when this is not a ZIP archive. */
+export function zipEntryNames(buffer) {
+  let eocd = -1;
+  for (let i = buffer.length - 22; i >= Math.max(0, buffer.length - 65557); i--) if (buffer.readUInt32LE(i) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) return [];
+  const count = buffer.readUInt16LE(eocd + 10), start = buffer.readUInt32LE(eocd + 16), names = [];
+  for (let i = 0, p = start; i < count && p + 46 <= buffer.length; i++) {
+    if (buffer.readUInt32LE(p) !== 0x02014b50) return names;
+    const nameLen = buffer.readUInt16LE(p + 28), extraLen = buffer.readUInt16LE(p + 30), commentLen = buffer.readUInt16LE(p + 32);
+    names.push(buffer.subarray(p + 46, p + 46 + nameLen).toString('utf8'));
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  return names;
 }
