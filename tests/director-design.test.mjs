@@ -187,8 +187,13 @@ test('one vocabulary and one CTA colour: the glossary’s terms are the UI’s t
   const quoted = ui.match(/'[^'\n]*'|`[^`\n]*`/g).join('\n');
   for (const old of ['Cast looks', 'Make again', 'Cast Card', 'Looks board', 'as a look for', 'object’s look']) assert.doesNotMatch(quoted, new RegExp(old), old);
   assert.match(ui, /s\.render \? 'Remake blockout' : 'Make blockout'/, 'Make the first time, Remake after');
+  assert.match(ui, /s\.render \? 'Remake blockout…' : 'Make blockout…'/, 'the action bar says Remake after a change too');
+  assert.doesNotMatch(ui, /\$\{setCount\} look|'image' : 'look'/, 'the set and families say shared image, not look');
   // The primary action shares one token on desktop and mobile; coral stays on the camera.
   assert.match(read('src/director.css'), /\.btn\.cta \{ background: var\(--cta\)/);
+  assert.match(read('src/director.css'), /\.btn\.primary, \.btn\.camera \{ background: var\(--cta\)/);
+  assert.doesNotMatch(read('src/director.css'), /\.act-go:hover \{ background: var\(--accent\)/, 'the primary action never turns coral');
+  assert.doesNotMatch(read('src/director-sheet.ts'), /btn accent/, 'sheet actions use the CTA token');
   assert.match(read('src/director-mobile.css'), /\.side-act \.act-go \{ background: var\(--cta\)/);
   assert.match(read('src/director-mobile.css'), /\.m-btn\.m-cta \{ background: var\(--cta\)/);
   assert.match(read('src/director-home.css'), /\.home-btn\.primary \{ background: var\(--cta\)/);

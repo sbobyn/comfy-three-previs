@@ -809,8 +809,8 @@ function renderActionBar() {
   actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}` }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * secs).toFixed(2)}`)] : []));
   actHint.title = `${s.title} · ${s.duration}s · ${state}${rate ? ` · about $${(rate * secs).toFixed(2)} to generate (${secs}s clip)` : ''}`;
   const ready = !!s.render && !stale;
-  renderBtn.textContent = ready ? 'Generate video ▸' : 'Make blockout…';
-  renderBtn.title = ready ? 'Generate this shot’s video from its blockout' : 'Make the camera blockout, then generate this shot’s video';
+  renderBtn.textContent = ready ? 'Generate video ▸' : s.render ? 'Remake blockout…' : 'Make blockout…';
+  renderBtn.title = ready ? 'Generate this shot’s video from its blockout' : `${s.render ? 'Remake' : 'Make'} the camera blockout, then generate this shot’s video`;
   renderSteps();
 }
 /** Top bar: step counts, the status strip and the one primary action for the current step. */
@@ -1189,7 +1189,7 @@ function castBlock(s: Shot) {
         h('summary', { class: 'cast-head', title: members.map(r => r.entity.name).join(', ') }, box,
           look ? h('img', { class: 'cast-thumb', src: refUrl(look), alt: '' }) : h('span', { class: 'cast-ph' }, shapeIcon(members[0]!.entity.shape)),
           h('div', { class: 'cast-main' }, h('span', { class: 'cast-name' }, f.label, h('b', { class: 'cast-x' }, ` ×${members.length}`)),
-            h('span', { class: 'cast-why' }, `${members.length} objects · one ${look ? 'image' : 'look'}${top ? ` · up to ${Math.round(top * 100)}% of frame` : ''}`)),
+            h('span', { class: 'cast-why' }, `${members.length} objects · ${look ? 'one shared image' : 'no image yet'}${top ? ` · up to ${Math.round(top * 100)}% of frame` : ''}`)),
           h('span', { class: 'cast-chev', 'aria-hidden': 'true' }, '›')),
         ...members.map(row));
     });
@@ -1198,7 +1198,7 @@ function castBlock(s: Shot) {
   return h('div', { class: 'block' },
     h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `In this shot · ${hero.length}`), h('button', { class: 'btn ghost sm', type: 'button', hidden: !rows.length, title: 'Every cast member’s image and the project style in one board', onclick: () => openLooks() }, 'Cast images')),
     ...rowsOf(hero),
-    set.length ? h('details', { class: 'cast-out cast-set', open: set.some(r => r.entity.id === selected) }, h('summary', {}, `Set · ${set.length} piece${set.length === 1 ? '' : 's'} in frame${setCount < set.length ? ` · ${setCount} look${setCount === 1 ? '' : 's'}` : ''}`), ...rowsOf(set)) : null,
+    set.length ? h('details', { class: 'cast-out cast-set', open: set.some(r => r.entity.id === selected) }, h('summary', {}, `Set · ${set.length} piece${set.length === 1 ? '' : 's'} in frame${setCount < set.length ? ` · ${setCount} shared image${setCount === 1 ? '' : 's'}` : ''}`), ...rowsOf(set)) : null,
     out.length ? h('details', { class: 'cast-out', open: out.some(r => r.entity.id === selected) }, h('summary', {}, `${out.length} not in this shot`), ...rowsOf(out)) : null);
 }
 /** Add any image already in the project as this object's reference. */
