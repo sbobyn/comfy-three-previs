@@ -238,6 +238,30 @@ test('server round trip: import, downstream consumers, refresh, stale hand-over 
   } finally { await srv.stop(); }
 });
 
+test('MCP: previs_director_blender_helper and previs_director_import_blender against a live server', { skip: !mediaAvailable && 'needs ffmpeg and ffprobe', timeout: 120000 }, async () => {
+  const srv = await startServer(15297);
+  const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_MCP_LEGACY: '', PREVIS_URL: 'http://127.0.0.1:15297' }, stdio: ['pipe', 'pipe', 'inherit'] });
+  const pending = new Map(); let n = 0, buffer = '';
+  agent.stdout.on('data', d => { buffer += d; let i; while ((i = buffer.indexOf('\n')) >= 0) { const m = JSON.parse(buffer.slice(0, i)); buffer = buffer.slice(i + 1); pending.get(m.id)?.(m); } });
+  const rpc = (method, params) => new Promise(r => { const id = ++n; pending.set(id, r); agent.stdin.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n'); });
+  const tool = async (name, args) => { const m = await rpc('tools/call', { name, arguments: args }); assert.equal(m.result.isError, false, m.result.content[0].text); return JSON.parse(m.result.content[0].text); };
+  try {
+    const listed = (await rpc('tools/list', {})).result.tools.map(t => t.name);
+    for (const t of ['previs_director_import_blender', 'previs_director_blender_helper']) assert.ok(listed.includes(t), t);
+    const helper = await tool('previs_director_blender_helper', {});
+    assert.equal(helper.script, fileURLToPath(new URL('../scripts/blender/previs_export.py', import.meta.url)));
+    assert.match(helper.headless, /-P .*previs_export\.py -- --out/); assert.match(helper.blenderMcp, /PREVIS_EXPORT = /);
+    const first = await tool('previs_director_import_blender', { path: FIXTURE, title: 'From Claude' });
+    assert.equal(first.shot.number, 1); assert.equal(first.frames, 12); assert.equal(first.objects.length, 4);
+    assert.ok(first.landmarks.checked === 9 && first.landmarks.worstErrorPctOfWidth < 0.1);
+    assert.match(first.open, /director\.html\?project=/);
+    const again = await tool('previs_director_import_blender', { projectId: first.projectId, shot: '1', path: FIXTURE });
+    assert.equal(again.shot.id, first.shot.id); assert.ok(again.objects.every(o => o.action === 'updated'));
+    const refused = await rpc('tools/call', { name: 'previs_director_import_blender', arguments: { path: 'relative/folder' } });
+    assert.equal(refused.result.isError, true); assert.match(refused.result.content[0].text, /absolute path/);
+  } finally { agent.kill(); await srv.stop(); }
+});
+
 // The helper itself needs Blender, so this runs only when PREVIS_BLENDER names the binary
 // (e.g. /Applications/Blender.app/Contents/MacOS/Blender); it was run with Blender 5.3.0 Alpha.
 test('helper: Blender re-exports the fixture scene to the same sidecar and refuses bad scenes and folders', { skip: !process.env.PREVIS_BLENDER && 'set PREVIS_BLENDER to a Blender binary to run scripts/blender/previs_export.py', timeout: 180000 }, async () => {
