@@ -1146,6 +1146,8 @@ async function loadRefgen() {
     stillPresets = refgen.presets.filter(p => p.backend === 'cloud' && (p.maxRefs ?? 0) > 0).sort((a, b) => (a.id === STRONG_GUIDE_MODEL ? -1 : b.id === STRONG_GUIDE_MODEL ? 1 : 0) || (a.followsGuide === 'strong' ? 0 : 1) - (b.followsGuide === 'strong' ? 0 : 1));
     // Cloud image models (FLUX 3 first); local checkpoints stay in the Looks board's own flow.
     refgen.presets = refgen.presets.filter(p => p.backend === 'cloud').sort((a, b) => (a.id === 'flux-3' ? -1 : b.id === 'flux-3' ? 1 : 0));
+    // The image list can arrive before the project: the project's first render draws the panes with it.
+    if (!project) return;
     renderObjectPane(); shotPane.dataset.shot = ''; renderShotPane(); renderShotPips(); } catch (e) { toast((e as Error).message, true); }
 }
 function lookCard(e: Entity, r: Reference) {
