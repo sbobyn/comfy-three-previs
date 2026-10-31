@@ -105,11 +105,23 @@ test('migration: restarting on existing data leaves no stuck job from archived o
   if (process.env.PREVIS_MIGRATION_DATA) {
     const copy = join(await mkdtemp(join(tmpdir(), 'previs-devdata-')), 'data');
     execFileSync('cp', ['-c', '-R', process.env.PREVIS_MIGRATION_DATA, copy]); await rm(join(copy, '.server-lock'), { force: true }); // the source may be in use
+    // Put receipts a fixed server already migrated back into their pre-fix state (completed, no attachment record),
+    // so the clone reproduces the audit's boot: legacy receipts, some for archived projects.
+    const legacyIds = [];
+    for (const file of await readdir(join(copy, 'generation-jobs'))) {
+      if (!file.endsWith('.json')) continue;
+      const job = JSON.parse(await readFile(join(copy, 'generation-jobs', file), 'utf8'));
+      if (job.status === 'completed' && job.attachment?.migrated) { delete job.attachment; await atomicJson(join(copy, 'generation-jobs', file), job); legacyIds.push(job.id); }
+    }
     for (let round = 0; round < 2; round++) {
       s = await bootServer(copy, port);
-      try { const snap = await settled(s); assert.deepEqual(snap.jobs.filter(j => j.stuck).map(j => `${j.id.slice(0, 8)} ${j.status}`), []); }
-      finally { await s.stop(); }
+      try {
+        const snap = await settled(s);
+        assert.deepEqual(snap.jobs.filter(j => j.stuck || j.status === 'recovery-required').map(j => `${j.id.slice(0, 8)} ${j.status}`), []);
+      } finally { await s.stop(); }
     }
+    for (const id of legacyIds) assert.equal(JSON.parse(await readFile(join(copy, 'generation-jobs', id + '.json'), 'utf8')).status, 'completed', `legacy receipt ${id.slice(0, 8)} stays completed`);
+    console.log(`# migration clone: ${legacyIds.length} legacy receipts restored to their pre-fix state; none stuck after two boots`);
     assert.ok((await readdir(join(copy, 'generation-jobs'))).length > 0);
   }
 });
