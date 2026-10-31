@@ -10,6 +10,9 @@ import { setsFor, setDef, planSlots, slotAspect, slotLayout, viewPrompt, editVie
 import type { Sheet, SheetSlot, SheetAttempt, PlannedSlot } from '../shared/sheet-presets.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
 import { api, h, toast } from './director-common';
+import { estimateBreakdown } from '../shared/tiers.mjs';
+import { submitImage, suggestedCap } from './director-spend';
+import type { SpendBound } from './director-spend';
 import { progressSlot } from './director-progress'; // [live-progress]
 import { composeSheet, canvasBlob } from './director-sheet-compose';
 import type { ComposeOptions } from './director-sheet-compose';
@@ -35,6 +38,11 @@ const live = new Map<string, Live>(); // `${sheetId}:${slotId}`
 type Task = { entityId: string; sheetId: string; slotId: string; mode: 'generate' | 'retry' | 'edit'; note: string; from: string | null; presetId: string };
 const queue: Task[] = [];
 let running = false, stopAfterCurrent = false, presetsRequested = false;
+// The total the artist approved for the views being sent (one runner, so one bound); null when nothing is approved.
+let bound: SpendBound | null = null;
+// Views waiting for that approval, by object: nothing is prepared or sent until the artist approves a total.
+type Ask = { n: number; presetId: string; refs: number; start: () => void };
+const asks = new Map<string, Ask>();
 
 const P = () => ctx.project();
 const ent = (id: string) => P().scene.entities.find(e => e.id === id) || null;
@@ -46,7 +54,7 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 const imagePresets = () => ctx.refgen().presets.filter(p => p.backend === 'cloud' && (p.maxRefs ?? 0) > 0);
 const usdPer = (presetId: string) => ctx.refgen().presets.find(p => p.id === presetId)?.pricing?.usdPerImage ?? null;
 const money = (n: number) => `$${n < 0.1 ? n.toFixed(3) : n.toFixed(2)}`;
-const est = (presetId: string, n: number) => { const u = usdPer(presetId); return u == null ? '' : `≈ ${money(u * n)}`; };
+const est = (presetId: string, n: number) => { const u = usdPer(presetId); return u == null ? '' : `list ≈ ${money(u * n)}`; };
 const jobOf = (requestId: string | null) => (requestId ? ctx.refgen().jobs.find(j => j.id === requestId) : null);
 
 function uiFor(e: Entity): Ui {
@@ -113,7 +121,7 @@ async function run() {
     }
   } finally {
     for (const t of queue.splice(0)) live.delete(keyOf(t.sheetId, t.slotId));
-    running = false; stopAfterCurrent = false;
+    running = false; stopAfterCurrent = false; bound = null; // the next action asks again
     await ctx.loadRefgen().catch(() => {}); redraw();
   }
 }
@@ -141,14 +149,14 @@ async function runTask(t: Task): Promise<boolean> {
   const attempt: SheetAttempt = { id: rid(), requestId: job.id, referenceId: null, mode: t.mode, note: t.note.slice(0, 300), from: t.from, presetId: t.presetId, seed, error: '', createdAt: new Date().toISOString() };
   await mutate(e.id, sheets => { const x = findSlot(sheets, sheet.id, s.id); if (x) { x.attempts.push(attempt); x.selected = attempt.id; x.attempts = x.attempts.slice(-12); } });
   const fail = async (message: string) => { await mutate(e.id, sheets => { const a = findSlot(sheets, sheet.id, s.id)?.attempts.find(y => y.id === attempt.id); if (a) a.error = message.slice(0, 300); }); live.delete(keyOf(t.sheetId, t.slotId)); };
-  // Submit. The click on Generate is the approval for this request at its quoted estimate.
-  const max = Math.max(0.25, Math.ceil(((job.quote?.estimate ?? 0.2) * 2) * 100) / 100);
+  // Submit under the total the artist approved for these views; a view whose estimate would pass it is not sent, and the run stops.
   let sent: any = null;
   for (let waited = 0; ; waited += 5) {
     if (stopAfterCurrent && waited) { await fail('Stopped before sending. Nothing was charged.'); return true; }
-    try { sent = (await api('director/refgen/submit', { projectId: ctx.projectId, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: max, allowUnknownCharges: true } } })).job; break; }
+    try { sent = (await submitImage(api, ctx.projectId, job, bound)).job; break; }
     catch (err) {
       const msg = (err as Error).message;
+      if ((err as any).refused) { await fail(msg); stopAfterCurrent = true; return true; }
       if (!/Another request on this backend/.test(msg) || waited > 900) { await fail(msg); return true; }
       setLive(t, 'waiting', 'Waiting for the image model…'); await sleep(5000);
     }
@@ -179,6 +187,32 @@ async function reconcile(e: Entity) {
       if (job.status === 'completed' && job.referenceIds?.[0]) await mutate(e.id, sheets => { const x = findSlot(sheets, sheet.id, s.id)?.attempts.find(y => y.id === a.id); if (x) x.referenceId = job.referenceIds[0]; });
     } catch {} finally { reconciling.delete(a.id); }
   }
+}
+
+// ---------- Spending approval: a visible total before any view is prepared or sent ----------
+function askApproval(e: Entity, n: number, presetId: string, refs: number, start: () => void) { asks.set(e.id, { n, presetId, refs, start }); draw(e.id); }
+function approvalPanel(e: Entity) {
+  const a = asks.get(e.id); if (!a) return null;
+  const cancel = h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { asks.delete(e.id); draw(e.id); } }, 'Cancel');
+  // Expected = list price + reference images, per view (the same prices the server quotes from).
+  const b = estimateBreakdown('sheet', a.presetId, { count: a.n, refs: a.refs });
+  if (!b) return h('div', { class: 'ds-approve', role: 'group', 'aria-label': 'Approve spending' }, h('p', { class: 'note' }, 'This model has no cost estimate, so nothing is sent from here. Choose a priced model.'), cancel);
+  const approve = h('input', { type: 'checkbox' });
+  const cap = h('input', { class: 'field mono', type: 'number', min: 0, step: 0.01, value: suggestedCap(b.expectedUsd).toFixed(2), style: 'width:84px', 'aria-label': 'Maximum USD for these views' });
+  const go = h('button', { class: 'btn cta', type: 'button', disabled: true }, `Approve & generate ${a.n} view${a.n === 1 ? '' : 's'}`);
+  const sync = () => { go.disabled = !approve.checked || !(Number(cap.value) >= b.expectedUsd); };
+  approve.onchange = sync; cap.oninput = sync;
+  go.onclick = () => {
+    sync(); if (go.disabled) return;
+    asks.delete(e.id);
+    const capUsd = Number(cap.value);
+    bound = bound && running ? { capUsd: bound.capUsd + capUsd, spentUsd: bound.spentUsd } : { capUsd, spentUsd: 0 };
+    a.start(); draw(e.id);
+  };
+  return h('div', { class: 'ds-approve', role: 'group', 'aria-label': 'Approve spending' },
+    h('p', { style: 'margin:0' }, `${a.n} image request${a.n === 1 ? '' : 's'} · ≈ ${money(b.expectedUsd)} expected (list ${money(b.listUsd)}${b.refsUsd ? ` + reference images ${money(b.refsUsd)}` : ''}). Cloud bills actual usage; each view is quoted before it is sent.`),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;flex-wrap:wrap' }, approve, 'I approve up to', cap, 'USD for these views. A view whose quote would pass it is not sent.'),
+    h('div', { style: 'display:flex;gap:8px;align-items:center' }, go, cancel));
 }
 
 // ---------- Actions ----------
@@ -256,6 +290,7 @@ function draw(entityId: string) {
   el.replaceChildren(
     h('div', { class: 'block-head ds-head' }, h('span', { class: 'eyebrow' }, 'Design sheet'), h('span', { class: 'ds-sub' }, 'Every view from the primary image')),
     tabs,
+    ...[approvalPanel(e)].filter(x => x !== null),
     sheet ? sheetView(e, u, sheet) : planView(e, u));
   if (activeKey) { const again = el.querySelector<HTMLElement>(`[data-key="${activeKey}"]`); if (again) { again.focus({ preventScroll: true }); if (sel && (again instanceof HTMLTextAreaElement || again instanceof HTMLInputElement)) try { again.setSelectionRange(sel[0], sel[1]); } catch {} } }
 }
@@ -321,7 +356,7 @@ function planView(e: Entity, u: Ui) {
   const st = ctx.refgen();
   const blocked = !identity ? 'Needs a primary image' : !st.paidExecutionEnabled ? 'Paid generation is off on this server' : !st.cloudCredential ? 'Cloud key not configured' : !imagePresets().length ? 'Loading models…' : n > MAX_SHEET_SLOTS ? `At most ${MAX_SHEET_SLOTS} views` : !n ? 'Pick at least one option' : '';
   const go = h('button', { class: 'btn cta ds-go', type: 'button', disabled: !!blocked, title: blocked || `Generates ${n} images, one at a time` }, n ? `Generate ${n} view${n === 1 ? '' : 's'}` : 'Generate', h('span', { class: 'ds-cost' }, est(u.presetId, n)));
-  go.onclick = () => { go.disabled = true; void createSheet(e, u).catch(err => { toast((err as Error).message, true); go.disabled = false; }); };
+  go.onclick = () => askApproval(e, n, u.presetId, 1, () => void createSheet(e, u).catch(err => toast((err as Error).message, true)));
   return h('div', { class: 'ds-body' },
     h('div', { class: 'ds-sets', role: 'radiogroup', 'aria-label': 'Set' }, ...sets.map(s => {
       const count = planSlots(s.id, e.kind, s.id === u.setId ? u.options : s.options || {}).length;
@@ -359,7 +394,7 @@ function sheetView(e: Entity, u: Ui, sheet: Sheet) {
       h('div', { class: 'ds-label' }, s.label));
   }));
   const focus = sheet.slots.find(s => s.id === u.focus) || null;
-  const genMissing = h('button', { class: 'btn sm', type: 'button', disabled: !canPay || !missing.length, onclick: () => enqueue(missing.map(s => ({ entityId: e.id, sheetId: sheet.id, slotId: s.id, mode: 'generate', note: '', from: null, presetId: u.presetId }))) }, `Generate missing (${missing.length})`, missing.length ? h('span', { class: 'ds-cost' }, est(u.presetId, missing.length)) : null);
+  const genMissing = h('button', { class: 'btn sm', type: 'button', disabled: !canPay || !missing.length, onclick: () => askApproval(e, missing.length, u.presetId, 1, () => enqueue(missing.map(s => ({ entityId: e.id, sheetId: sheet.id, slotId: s.id, mode: 'generate', note: '', from: null, presetId: u.presetId })))) }, `Generate missing (${missing.length})`, missing.length ? h('span', { class: 'ds-cost' }, est(u.presetId, missing.length)) : null);
   return h('div', { class: 'ds-body' },
     h('div', { class: 'ds-bar' },
       h('span', { class: 'ds-progress' }, h('b', {}, `${done}/${sheet.slots.length}`), ' views', kept ? ` · ${kept} kept` : ''),
@@ -384,8 +419,8 @@ function slotDetail(e: Entity, u: Ui, sheet: Sheet, s: SheetSlot) {
   const editNote = h('textarea', { class: 'field', rows: 2, maxlength: 300, placeholder: 'What to change: “close the jacket”, “make the logo larger”…', 'aria-label': 'What to change in this image', 'data-key': `edit-${s.id}` }, u.edit);
   editNote.oninput = () => { u.edit = editNote.value; editBtn.disabled = busy || !canPay || !ref || !editNote.value.trim(); };
   const task = (mode: Task['mode'], note: string, from: string | null): Task => ({ entityId: e.id, sheetId: sheet.id, slotId: s.id, mode, note, from, presetId: u.presetId });
-  const retryBtn = h('button', { class: 'btn sm', type: 'button', disabled: busy || !canPay || !objectLooks(P(), e.id)[0], onclick: () => { const note = u.retry.trim(); u.retry = ''; enqueue([task('retry', note, null)]); } }, 'Retry from the primary image', h('span', { class: 'ds-cost' }, est(u.presetId, 1)));
-  const editBtn = h('button', { class: 'btn sm', type: 'button', disabled: busy || !canPay || !ref || !u.edit.trim(), onclick: () => { const note = u.edit.trim(); u.edit = ''; enqueue([task('edit', note, shown!.id)]); } }, 'Edit this image', h('span', { class: 'ds-cost' }, est(u.presetId, 1)));
+  const retryBtn = h('button', { class: 'btn sm', type: 'button', disabled: busy || !canPay || !objectLooks(P(), e.id)[0], onclick: () => { const note = u.retry.trim(); u.retry = ''; askApproval(e, 1, u.presetId, 1, () => enqueue([task('retry', note, null)])); } }, 'Retry from the primary image', h('span', { class: 'ds-cost' }, est(u.presetId, 1)));
+  const editBtn = h('button', { class: 'btn sm', type: 'button', disabled: busy || !canPay || !ref || !u.edit.trim(), onclick: () => { const note = u.edit.trim(), from = shown!.id; u.edit = ''; askApproval(e, 1, u.presetId, 2, () => enqueue([task('edit', note, from)])); } }, 'Edit this image', h('span', { class: 'ds-cost' }, est(u.presetId, 1)));
   const accepted = !!shown && s.accepted === shown.id;
   return h('div', { class: 'ds-detail' },
     h('div', { class: 'ds-detail-head' }, h('b', {}, s.label), h('span', { class: 'muted' }, shown ? `attempt ${idx} of ${s.attempts.length}${shown.mode !== 'generate' ? ` · ${shown.mode}` : ''}` : 'not generated yet'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => { u.focus = null; draw(e.id); } }, '✕')),

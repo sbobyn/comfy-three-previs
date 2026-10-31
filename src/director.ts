@@ -4,6 +4,7 @@ import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt
 import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
 import { starterBlockout, starterMediaStatus, videoStale, keyStillState, blenderBlockout } from '../shared/director.mjs';
 import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge } from './director-common';
+import { expectedUsd, isFree, submitImage, suggestedCap } from './director-spend';
 import type { Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
 import { captureShotVideo as captureVideo } from './director-capture';
@@ -1016,17 +1017,22 @@ function keyFrameBlock(s: Shot) {
   const count = h('select', { class: 'field', 'aria-label': 'Takes' }, ...[1, 2, 3, 4].map(n => h('option', { value: n, selected: n === f.count }, `${n} take${n > 1 ? 's' : ''}`)));
   count.onchange = () => { f.count = Number(count.value); go.textContent = `Generate${estLabel(f.presetId, f.count)}`; };
   const status = h('div', { class: 'status-line' });
-  const go = h('button', { class: 'btn camera', type: 'button' }, `Generate${estLabel(f.presetId, f.count)}`);
+  const go = h('button', { class: 'btn camera', type: 'button' }, `Review quote${estLabel(f.presetId, f.count)}`);
+  // Preparing quotes the exact request; nothing is sent until the artist approves it on the card.
+  const review = (job: any) => status.replaceChildren(quoteCard(job, sent => {
+    reviewing.delete(`still:${s.id}`);
+    if (sent) { f.open = false; f.seed = Math.floor(Math.random() * 1e6); toast(`Generating ${job.count > 1 ? `${job.count} takes` : 'a still'} at ${label(t)} · it pins to the storyboard when ready`); }
+    shotPane.dataset.shot = ''; renderShotPane();
+  }));
+  if (reviewing.has(`still:${s.id}`)) review(reviewing.get(`still:${s.id}`));
   go.onclick = async () => {
-    go.disabled = true; status.className = 'status-line'; status.textContent = 'Sending…';
+    go.disabled = true; status.className = 'status-line'; status.textContent = 'Preparing the quote; nothing is sent…';
     try {
       const text = [prompt.value.trim(), moment.value.trim() ? `At this moment: ${moment.value.trim()}.` : ''].filter(Boolean).join(' ');
       const frameAt = t === 0 ? 'start' : Math.abs(t - s.duration) < 0.01 ? 'end' : t;
       const full = stillPrompt({ project, shot: s, t, text, presetId: f.presetId, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null, frame: words, markers: !blender });
       const { job } = await api('director/refgen/prepare', { projectId, target: 'shot', shotId: s.id, frameAt, presetId: f.presetId, prompt: full, aspect: '16:9', count: f.count, seed: f.seed, referenceIds: refIds, guide: (await guide.data).split(',')[1] });
-      await generateNow(job); f.open = false; f.seed = Math.floor(Math.random() * 1e6);
-      toast(`Generating ${f.count > 1 ? `${f.count} takes` : 'a still'} at ${label(t)} · it pins to the storyboard when ready`);
-      shotPane.dataset.shot = ''; renderShotPane();
+      reviewing.set(`still:${s.id}`, job); status.className = 'status-line'; review(job);
     } catch (e) { status.className = 'status-line err'; status.textContent = (e as Error).message; }
     finally { go.disabled = false; }
   };
@@ -1265,26 +1271,28 @@ function renderObjectPane() {
   presetSel.onchange = () => { form.presetId = presetSel.value; localStorage.setItem('previs.looks.model', presetSel.value); rerender(); };
   const aspect = h('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Aspect' }, ...['1:1', '3:4', '4:3', '16:9'].map(a => h('button', { type: 'button', class: a === form.aspect ? 'on' : '', onclick: () => { form.aspect = a; form.edited = true; rerender(); } }, a)));
   const count = h('select', { class: 'field', 'aria-label': 'Images' }, ...[1, 2, 3, 4].map(n => h('option', { value: n, selected: n === form.count }, `${n} image${n > 1 ? 's' : ''}`)));
-  count.onchange = () => { form.count = Number(count.value); quoteBtn.textContent = `Generate image${form.count > 1 ? 's' : ''}${estLabel(form.presetId, form.count)}`; };
+  count.onchange = () => { form.count = Number(count.value); quoteBtn.textContent = `Review quote${estLabel(form.presetId, form.count)}`; };
   const seed = h('input', { class: 'field', type: 'number', min: 0, value: form.seed, 'aria-label': 'Seed' });
   seed.onchange = () => { form.seed = Math.max(0, Math.floor(Number(seed.value) || 0)); };
   const ckpt = h('select', { class: 'field', 'aria-label': 'Checkpoint' }, ...(checkpoints === null ? [h('option', { value: '' }, 'Loading installed checkpoints…')] : checkpoints.length ? checkpoints.map(c => h('option', { value: c, selected: c === form.checkpoint }, c)) : [h('option', { value: '' }, checkpointError || 'No checkpoints installed')]));
   if (preset?.backend === 'local' && checkpoints === null) void loadCheckpoints();
   if (checkpoints?.length && !checkpoints.includes(form.checkpoint)) form.checkpoint = checkpoints.find(c => /v1-5|sd|xl/i.test(c)) || checkpoints[0];
   ckpt.onchange = () => { form.checkpoint = ckpt.value; };
-  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, `Generate image${form.count > 1 ? 's' : ''}${estLabel(form.presetId, form.count)}`);
+  const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, `Review quote${estLabel(form.presetId, form.count)}`);
   const quoteStatus = h('div', { class: 'status-line' });
+  // Preparing quotes the exact request; nothing is sent until the artist approves it on the card.
+  const review = (job: any) => quoteStatus.replaceChildren(quoteCard(job, () => { reviewing.delete(`entity:${e.id}`); objectPane.dataset.id = ''; renderObjectPane(); }));
+  if (reviewing.has(`entity:${e.id}`)) review(reviewing.get(`entity:${e.id}`));
   quoteBtn.onclick = async () => {
-    quoteBtn.disabled = true; quoteStatus.className = 'status-line'; quoteStatus.textContent = 'Sending…';
+    quoteBtn.disabled = true; quoteStatus.className = 'status-line'; quoteStatus.textContent = 'Preparing the quote; nothing is sent…';
     try {
       const { job } = await api('director/refgen/prepare', { projectId, entityId: e.id, presetId: form.presetId, prompt: form.prompt, aspect: form.aspect, count: form.count, seed: form.seed, ...(form.checkpoint ? { checkpoint: form.checkpoint } : {}) });
-      await generateNow(job); objectPane.dataset.id = ''; renderObjectPane();
+      reviewing.set(`entity:${e.id}`, job); quoteStatus.className = 'status-line'; review(job);
     }
     catch (err) { quoteStatus.className = 'status-line err'; quoteStatus.textContent = (err as Error).message; }
     finally { quoteBtn.disabled = false; }
   };
   const jobs = refgen.jobs.filter(j => j.entityId === e.id);
-  const quoted = jobs.find(j => j.status === 'quoted');
   const upload = h('label', { class: 'ob-add', title: `Upload images for ${e.name}` }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => void uploadRefs(Array.from((ev.target as HTMLInputElement).files || []), e.id) }), '＋', h('small', {}, 'Upload'));
   dropTarget(upload, files => uploadRefs(files, e.id));
   const hero = h('div', { class: 'ob-hero' + (primary ? '' : ' empty') },
@@ -1330,41 +1338,41 @@ function renderObjectPane() {
       quoteStatus),
     jobs.filter(j => j.status !== 'quoted').length ? h('div', { class: 'block' }, h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Requests')), ...jobs.filter(j => j.status !== 'quoted').slice(0, 6).map(jobRow)) : null].filter(Boolean) as Node[]));
 }
-/** Estimated cost shown on Generate buttons. */
+/** List price shown on the quote buttons (the quote adds reference images and the paid grader). */
 function estLabel(presetId: string, count: number) {
   const p: any = refgen.presets.find(x => x.id === presetId);
   if (p?.backend === 'local') return ' · free (local)';
-  const usd = p?.pricing?.usdPerImage; return usd != null ? ` · ≈ $${(usd * count).toFixed(2)}` : '';
+  const usd = p?.pricing?.usdPerImage; return usd != null ? ` · list ≈ $${(usd * count).toFixed(2)}` : '';
 }
-/** One click: the prepared request is sent once (the click is the approval). Never retried. */
-async function generateNow(job: any) {
-  const free = job.quote?.status === 'known' && job.quote.amount === 0;
-  const est = job.quote?.estimate ?? 0.5;
-  await api('director/refgen/submit', { projectId, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: free ? 0 : Math.max(0.5, Math.ceil(est * 200) / 100), ...(free ? {} : { allowUnknownCharges: true }) } } });
-  await loadRefgen(); pollJobs();
-}
-function quoteCard(job: any) {
-  const free = job.quote.status === 'known' && job.quote.amount === 0;
+// Prepared image requests waiting for the artist's approval, by where they were asked for ("entity:<id>", "still:<shotId>").
+const reviewing = new Map<string, any>();
+/**
+ * The review step for one prepared image request: the exact quote, an allowance the artist sets, and explicit approval.
+ * Sent once through submitImage (never above the allowance); `done(sent)` closes it.
+ */
+function quoteCard(job: any, done: (sent: boolean) => void) {
+  const free = isFree(job), est = expectedUsd(job);
   const blocked = !free && !refgen.paidExecutionEnabled;
   const approve = h('input', { type: 'checkbox' });
   const unknown = h('input', { type: 'checkbox' });
-  const max = h('input', { class: 'field', type: 'number', min: 0, step: 0.01, value: free ? 0 : Math.max(0.5, Math.ceil(((job.quote.estimate ?? 0.5) * 1.5) * 100) / 100), 'aria-label': 'Maximum USD', style: 'width:96px' });
+  const max = h('input', { class: 'field', type: 'number', min: 0, step: 0.01, value: free ? 0 : est === null ? '' : suggestedCap(est), 'aria-label': 'Maximum USD', style: 'width:96px' });
   const go = h('button', { class: 'btn camera', type: 'button', disabled: true }, free ? 'Generate' : 'Approve & generate');
-  const sync = () => { go.disabled = blocked || !approve.checked || (!free && !unknown.checked); };
+  const sync = () => { go.disabled = blocked || (!free && est === null) || !approve.checked || (!free && !unknown.checked); };
   approve.onchange = unknown.onchange = sync;
   const status = h('div', { class: 'status-line' });
   go.onclick = async () => {
     go.disabled = true;
     try {
-      await api('director/refgen/submit', { projectId, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: Number(max.value) || 0, ...(free ? {} : { allowUnknownCharges: true }) } } });
-      objectPane.dataset.id = ''; shotPane.dataset.shot = ''; await loadRefgen(); pollJobs();
+      await submitImage(api, projectId, job, { capUsd: Number(max.value) || 0, spentUsd: 0 });
+      done(true); await loadRefgen(); pollJobs();
     } catch (err) { status.className = 'status-line err'; status.textContent = (err as Error).message; sync(); }
   };
-  return h('div', { class: 'prompt-box', style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
+  return h('div', { class: 'prompt-box quote-card', style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
     h('div', { class: 'facts' }, 'Model', h('b', {}, job.model), 'Runs on', h('b', {}, job.backend.kind === 'cloud' ? 'Comfy Cloud' : job.backend.url), 'Images', h('b', {}, `${job.count} · ${job.aspect} · seed ${job.seed}`), 'Estimated cost', h('b', { style: `color:${free ? 'var(--ok)' : 'var(--warn)'}` }, job.quote.label), 'Quote', h('b', {}, job.fingerprint.slice(0, 12))),
     h('label', { style: 'display:flex;gap:8px;align-items:center' }, approve, 'I approve this exact request'),
-    free ? null : h('label', { style: 'display:flex;gap:8px;align-items:center' }, unknown, 'I accept the Cloud total is unknown, up to', max, 'USD'),
-    h('div', { style: 'display:flex;gap:8px;align-items:center' }, go, blocked ? h('span', { class: 'note' }, 'Paid generation is off on this server (PREVIS_ALLOW_PAID≠1). Nothing will be sent.') : null),
+    free ? null : est === null ? h('p', { class: 'note', style: 'margin:0' }, 'No cost estimate for this model, so it is not sent from here. Choose a priced model.')
+      : h('label', { style: 'display:flex;gap:8px;align-items:center' }, unknown, 'I accept the Cloud total is unknown, up to', max, 'USD'),
+    h('div', { style: 'display:flex;gap:8px;align-items:center' }, go, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => done(false) }, 'Cancel'), blocked ? h('span', { class: 'note' }, 'Paid generation is off on this server (PREVIS_ALLOW_PAID≠1). Nothing will be sent.') : null),
     status);
 }
 function jobRow(job: any) {
@@ -1768,14 +1776,14 @@ function openRender() {
   // Header row: model · runs on · estimate · Generate. Generate makes the blockout if needed, then quotes; nothing runs before approval.
   const hWf = h('select', { class: 'field', 'aria-label': 'Video model' }, h('option', {}, 'Loading models…'));
   const hBackend = h('select', { class: 'field', 'aria-label': 'Runs on' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
-  const hEst = h('span', { class: 'rg-est mono', title: 'Rate × shot length. The quote shows the exact estimate before anything runs.' }, '');
+  const hEst = h('span', { class: 'rg-est mono', title: 'Rate × the seconds the model makes. The quote shows the exact estimate before anything runs.' }, '');
   // What the blockout clip is to the chosen model: the camera itself, or only the source of the stills that stand in for it.
   const blockoutNote = h('p', {}, 'The grey camera clip: every frame through the shot camera at 24 fps.');
   const hGo = h('button', { class: 'btn cta', type: 'button', title: 'Make the blockout if needed, then quote. Nothing runs until you approve the quote.' }, 'Generate ▸');
   const headModel = () => {
     const st = genCache, def: any = st ? videoChoices(st as any).find(d => d.id === hWf.value) : null; if (!st || !def) return;
     const refs = referenceCapacity(st as any, def.id) ? plannedReferences(project, s, st as any, def.id) : [];
-    hEst.textContent = dialogEstimate(def, s.duration, hBackend.value);
+    hEst.textContent = dialogEstimate(def, clipSeconds(def, s), hBackend.value);
     const cam = cameraSourceOf(def);
     blockoutNote.textContent = `The grey camera clip: every frame through the shot camera at 24 fps. ${cam === 'blockout' ? 'This model takes the clip itself: it is the camera.' : cam === 'keyframes' ? 'This model does not take the clip: it moves between the start and end stills made from it, so the move in between is approximate.' : 'This model does not take the clip: it animates one still, so the camera move is approximate.'}`;
     const fig = modelInputsDiagram(def.task, { twoFrames: def.task === 'first-frame' && !!def.inputs?.lastFrame, castImages: refs.length });
