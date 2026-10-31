@@ -18,7 +18,7 @@ import { readZip, writeZip, zipEntryNames } from './zip.mjs';
 import { atomicJson } from './atomic.mjs';
 import { snapshotEntity } from './starters.mjs';
 import { imageSize } from './frames.mjs';
-import { SHAPES, KINDS, ROLES, handleOf, descendantsOf, entitySize, lookSource, castCard } from '../../shared/director.mjs';
+import { SHAPES, KINDS, ROLES, handleOf, descendantsOf, entitySize, lookSource, castCard, makeEntity } from '../../shared/director.mjs';
 import { normalizeSheets } from '../../shared/sheet-presets.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
 
@@ -267,7 +267,7 @@ export function assetContents(m) {
   if (looks) parts.push(plural(looks, 'look'));
   if (sheets.length === 1) parts.push(`a ${sheets[0].slots.length}-view sheet`); else if (sheets.length) parts.push(plural(sheets.length, 'design sheet'));
   if (m.entities.length > 1) parts.push(`${plural(m.entities.length - 1, 'object')} grouped under it`);
-  return parts.length ? parts.join(parts.length > 2 ? ', ' : ' and ').replace(/, ([^,]+)$/, ' and $1') : 'no images yet (a sized proxy with a Cast Card)';
+  return parts.length ? parts.join(parts.length > 2 ? ', ' : ' and ').replace(/, ([^,]+)$/, ' and $1') : 'no images yet (a sized proxy: add its description and images)';
 }
 
 /** What the library dialog and previs_library_list show: the manifest without sheets and references. */
@@ -392,7 +392,46 @@ async function readCapped(path, cap, what) {
 const PROJECT_EXPORT = 'comfy-previs-project', MAX_PROJECT_EXPORT = 1024 ** 3;
 const sameOrigin = (a, project, entity) => a.origin?.projectId === project.id && a.origin?.entityId === entity.id;
 
-export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () => {} } = {}) {
+// ---------- Blender handoff source (the seam) ----------
+// The Blender thin import (server/previs/blender-import.mjs, built on feat/previs-blender-import-20261031) owns
+// reading and validating an export: blender-previs.json plus frames/. The library only needs one object's first frame
+// record from it, so it loads that reader when this build has it and says so plainly when it does not.
+export const BLENDER_SIDECAR = 'blender-previs.json';
+/** { readDir(path), readZip(buffer), validate(manifest) } from blender-import.mjs, or null when this build lacks it. */
+export async function blenderHandoffReader() {
+  let m;
+  try { m = await import('./blender-import.mjs'); }
+  catch (e) { if (e.code === 'ERR_MODULE_NOT_FOUND' && String(e.message).includes('blender-import.mjs')) return null; throw e; }
+  return typeof m.readHandoffDir === 'function' && typeof m.readHandoffZip === 'function' && typeof m.validateHandoff === 'function'
+    ? { readDir: m.readHandoffDir, readZip: m.readHandoffZip, validate: m.validateHandoff } : null;
+}
+/** A stable UUID-shaped id from text, so importing the same Blender object again is the same asset's next version. */
+function stableId(text) {
+  const h = sha(`comfy-previs-library:${text}`);
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
+/**
+ * One object of a validated Blender handoff as a one-object project: its first frame record gives shape, kind
+ * (cast objects keep theirs, the rest are environment), colour and size (scale = size / the shape's size); the name
+ * is the one Previs uses (the cast: prefix already dropped). No images and no sheet: a sized proxy to fill in.
+ */
+export function blenderObject(manifest, object) {
+  const objects = Array.isArray(manifest?.objects) ? manifest.objects : [];
+  const ref = String(object || '').replace(/^@/, '');
+  if (!ref) fail(`This is a Blender export; name the object to take from it: ${objects.slice(0, 8).map(o => o.name).join(', ')}`);
+  const o = objects.find(x => x.name === ref || x.blenderName === ref) || objects.find(x => handleOf(x.name) === handleOf(ref));
+  if (!o) fail(`No object called “${object}” in that Blender export; it has ${objects.slice(0, 8).map(x => x.name).join(', ')}`, 404);
+  const shape = SHAPES[o.shape] && !['group', 'terrain'].includes(o.shape) ? o.shape : 'box';
+  const own = KINDS.includes(o.kind) ? o.kind : SHAPES[shape].kind;
+  const kind = !o.cast ? 'environment' : own === 'environment' ? 'prop' : own;
+  const f = o.frames[0], base = SHAPES[shape].size;
+  const scale = f.size.map((v, i) => Math.round(Math.max(0.05, Math.min(50, v / base[i])) * 1e6) / 1e6);
+  const id = stableId(`blender:${manifest.source?.scene || ''}:${o.blenderName || o.name}`);
+  const entity = makeEntity({ name: o.name, shape, kind, color: o.color, rotation: f.yaw, scale }, id);
+  return { project: { id: '', title: String(manifest.source?.scene || 'Blender export').slice(0, 120), scene: { entities: [entity], references: [], environment: { preset: 'stage', description: '' } }, shots: [] }, entity };
+}
+
+export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () => {}, blender = blenderHandoffReader } = {}) {
   const assetsDir = join(dir, 'assets');
   const assetDir = id => { if (!UUID.test(id || '')) fail('Unknown asset', 404); return join(assetsDir, id); };
 
@@ -445,6 +484,16 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
     const e = p.scene.entities.find(x => x.id === ref) || p.scene.entities.find(x => handleOf(x.name) === handleOf(ref));
     if (!e) fail(`No object called “${object}” in that project; it has ${p.scene.entities.filter(x => x.shape !== 'group' || !x.parent).slice(0, 8).map(x => x.name).join(', ')}`, 404);
     return api.save(p, e, input, file => { const b = files.get(`refs/${file}`); if (!b) throw Error('missing'); return b; }, { source: 'project-export' });
+  }
+
+  /** One object out of a Blender handoff (folder or zip), read and validated by the Blender importer. */
+  async function fromBlender(read, object, input) {
+    const reader = await blender();
+    if (!reader) fail('This Previs build cannot read Blender exports yet: the Blender importer (server/previs/blender-import.mjs) is not installed. Update Comfy Previs, or import the object from a .previs.zip instead.', 501);
+    const { manifest } = await read(reader);
+    reader.validate(manifest);
+    const { project, entity } = blenderObject(manifest, object);
+    return api.save(project, entity, input, () => { throw Error('no images'); }, { source: 'blender' });
   }
 
   const api = {
@@ -531,7 +580,9 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
         const files = new Map();
         let total = 0;
         const take = async (name, cap) => { const b = await readCapped(join(path, name), cap, name); total += b.length; if (total > limits.unzippedBytes) fail('Asset folder content is too large', 413); files.set(name, b); };
-        if (!(await readdir(path)).includes('asset.json')) fail('That folder has no asset.json');
+        const listing = await readdir(path);
+        if (!listing.includes('asset.json') && listing.includes(BLENDER_SIDECAR)) return fromBlender(r => r.readDir(path), object, input);
+        if (!listing.includes('asset.json')) fail('That folder has no asset.json');
         await take('asset.json', limits.unzippedBytes);
         let m; try { m = JSON.parse(files.get('asset.json').toString('utf8')); } catch { fail('asset.json is not valid JSON'); }
         validateManifest(m, limits);
@@ -540,11 +591,13 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
         return install(readAssetBundle(files, limits), files);
       }
       if (!st.isFile()) fail('path must be a file or a folder');
-      const buffer = await readCapped(path, path.endsWith('.previs.zip') ? MAX_PROJECT_EXPORT : limits.zipBytes, 'That file');
+      // Asset bundles are capped at 64 MB (importZip checks again); project and Blender exports can be larger.
+      const buffer = await readCapped(path, path.endsWith('.previs-asset.zip') ? limits.zipBytes : MAX_PROJECT_EXPORT, 'That file');
       const names = zipEntryNames(buffer);
       if (names.includes('asset.json')) return api.importZip(buffer);
       if (names.includes('previs-export.json')) return fromProjectExport(readZip(buffer, { maxTotal: MAX_PROJECT_EXPORT }), object, input);
-      fail('Not a Comfy Previs asset bundle (.previs-asset.zip), asset folder or project export (.previs.zip)');
+      if (names.some(n => n.split('/').pop() === BLENDER_SIDECAR)) return fromBlender(r => r.readZip(buffer), object, input);
+      fail('Not a Comfy Previs asset bundle (.previs-asset.zip), asset folder, project export (.previs.zip) or Blender export');
     },
   };
   return api;
