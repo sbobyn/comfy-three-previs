@@ -1898,20 +1898,37 @@
       },
       "references": [
         {
-          "id": "fc1ce5da-1edc-48c0-a95c-329f1f60fed6",
-          "name": "Shot 01 The valley · FLUX 3 Image · 4242",
-          "file": "fc1ce5da-1edc-48c0-a95c-329f1f60fed6.webp",
+          "id": "edadfba7-1289-51dc-a5cf-63ef743bbf29",
+          "name": "Shot 01 The valley · FLUX 3 Image · 300027",
+          "file": "edadfba7-1289-51dc-a5cf-63ef743bbf29.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-31T06:47:23.378Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 300027,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 35mm normal lens; wide shot, Bald eagle small in frame; camera 15.5 m high, above Bald eagle and 17.1 m from Bald eagle, looking slightly down; we see Bald eagle from directly behind; horizon in the upper third.\nIn frame: Bald eagle: centre of frame, about a quarter of the frame width wide, front facing away from the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Bald eagle glides with broad wings spread above the alpine valley. A turquoise lake and layered ridges open beyond the green shoreline. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in natural light, no studio props. Set: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds; Clear turquoise glacial lake reflecting the peaks; Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Look: Photoreal nature documentary. Low golden sun, crisp air, layered atmospheric haze, natural colour.…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Images 2–3 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "92babc84"
+          }
+        },
+        {
+          "id": "69c72866-655d-58c3-ad98-1b9309731be7",
+          "name": "Shot 01 The valley · FLUX 3 Image · 145198",
+          "file": "69c72866-655d-58c3-ad98-1b9309731be7.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-30T15:47:44.017Z",
+          "createdAt": "2026-10-31T06:37:21.422Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 4242,
-            "prompt": "Cinematic film still, single frame. Sweeping aerial over the lake and peaks as a tiny Bald eagle glides down from the ridge. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Framing: 24mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. This is the first frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Bald eagle looks exactly like image 2. One single photographic frame, no split panels, no captions or watermarks.",
-            "signature": "71e0f5e9"
+            "seed": 145198,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 35mm normal lens; wide shot, Bald eagle small in frame; camera 24.5 m high, above Bald eagle and 17.9 m from Bald eagle, looking slightly down; we see Bald eagle from directly behind; horizon in the upper third.\nIn frame: Bald eagle: centre of frame, about a quarter of the frame width wide, front facing away from the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Bald eagle glides with broad wings spread above the alpine valley. A turquoise lake and layered ridges open beyond the green shoreline. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in natural light, no studio props. Set: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds; Clear turquoise glacial lake reflecting the peaks; Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Look: Photoreal nature documentary. Low golden sun, crisp air, layered atmospheric haze,…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Images 2–3 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "92babc84"
           }
         }
       ]
@@ -2245,20 +2262,37 @@
       },
       "references": [
         {
-          "id": "46987310-01b1-49b3-a0dc-e09d669bd56a",
-          "name": "Shot 02 The dive · FLUX 3 Image · 4242",
-          "file": "46987310-01b1-49b3-a0dc-e09d669bd56a.webp",
+          "id": "352cc1bb-7ac0-5933-a5ef-1e6e9b77e078",
+          "name": "Shot 02 The dive · FLUX 3 Image · 392496",
+          "file": "352cc1bb-7ac0-5933-a5ef-1e6e9b77e078.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-31T06:40:02.091Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 392496,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 32mm normal lens; medium shot of Bald eagle; camera 5.6 m high, above Bald eagle and 10.4 m from Bald eagle, looking slightly down; we see Bald eagle from directly behind; horizon in the upper third.\nIn frame: Bald eagle: centre of frame, about a third of the frame width wide, front facing away from the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Bald eagle descends smoothly from the valley toward the lake, banking gently with its wings spread. Trees give way to open water. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in natural light, no studio props. Set: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds; Clear turquoise glacial lake reflecting the peaks; Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Look: Photoreal nature documentary. Low golden…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "355ef9d3"
+          }
+        },
+        {
+          "id": "e34905c1-ceb4-5e4d-acee-0a4e22c4499f",
+          "name": "Shot 02 The dive · FLUX 3 Image · 323351",
+          "file": "e34905c1-ceb4-5e4d-acee-0a4e22c4499f.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-30T17:02:49.974Z",
+          "createdAt": "2026-10-31T06:47:42.848Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 4242,
-            "prompt": "Cinematic film still, single frame. FPV chase right behind Bald eagle as it folds its wings and dives down the river canyon. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Clear turquoise glacial lake reflecting the peaks. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Tall subalpine fir and pine trees, dark green, dense. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Framing: 20mm lens, match the supplied blockout frame's composition. Lens: 14mm ultra-wide. Filter: golden hour light. This is the first frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Bald eagle looks exactly like image 2. The Elk 1 looks exactly like image 3. The Pine tree looks exactly like image 4. One single photographic frame, no split panels, no captions or watermarks.",
-            "signature": "1819a5eb"
+            "seed": 323351,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 32mm normal lens; medium shot of Bald eagle; camera 14.6 m high, above Bald eagle and 11.2 m from Bald eagle, looking slightly down; we see Bald eagle from directly behind; horizon in the upper third.\nIn frame: Bald eagle: centre of frame, about a third of the frame width wide, front facing away from the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Bald eagle descends smoothly from the valley toward the lake, banking gently with its wings spread. Trees give way to open water. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in natural light, no studio props. Set: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds; Clear turquoise glacial lake reflecting the peaks; Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Look: Photoreal nature…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "355ef9d3"
           }
         }
       ]
@@ -2592,20 +2626,37 @@
       },
       "references": [
         {
-          "id": "039d2d7a-9b7d-40f4-b6ad-5cfae27517b2",
-          "name": "Shot 03 The swoop · Flux.2 [pro] · 67341",
-          "file": "039d2d7a-9b7d-40f4-b6ad-5cfae27517b2.webp",
+          "id": "26c1e565-ad03-5cad-a61d-b5f8d52f00b0",
+          "name": "Shot 03 The glide · GPT Image 2.5 · 191456",
+          "file": "26c1e565-ad03-5cad-a61d-b5f8d52f00b0.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-31T06:43:36.553Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 191456,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 40mm normal lens; wide shot, Bald eagle small in frame; camera 4.7 m high, about level with Bald eagle's top and 10 m from Bald eagle, level; we see Bald eagle side-on, from its right side (a side profile, not a three-quarter or chase view); horizon across the middle.\nIn frame: Bald eagle: centre of frame, about a quarter of the frame width wide, front facing screen-right: a flat side profile, back at the left end, front at the right end. Elk 2: left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing toward the camera and screen-left (three-quarter front view). Elk 3: left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing screen-left (profile). Elk 1: far left of frame, a small part of the frame height tall, behind Bald eagle to the left.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Bald eagle holds a majestic low glide over turquoise water toward the sunlit ridge. Its white head leads, broad wings remain spread and the tips bank gently above the lake. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "d5a31a6c"
+          }
+        },
+        {
+          "id": "ca14a077-41e4-57f5-a0f1-d825e8627684",
+          "name": "Shot 03 The glide · GPT Image 2.5 · 350096",
+          "file": "ca14a077-41e4-57f5-a0f1-d825e8627684.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-30T17:18:43.512Z",
+          "createdAt": "2026-10-31T06:44:02.783Z",
           "generated": {
-            "presetId": "flux-2-pro",
-            "model": "Flux.2 [pro] (BFL)",
-            "seed": 67341,
-            "prompt": "Cinematic film still, single frame. Low tracking shot at the lakeshore as Bald eagle skims the water past the grazing Elk herd and climbs away. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Clear turquoise glacial lake reflecting the peaks. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The Bald eagle looks exactly like image 2. The Elk 2 looks exactly like image 3. The Alpine lake looks exactly like image 4. The River 5 looks exactly like image 5. The Alpine terrain looks exactly like image 6. Image 7 is the previous shot: keep lighting and style continuous. No text, captions or labels.",
-            "signature": "3c81a00b"
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 350096,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; medium shot of Bald eagle; camera 4.7 m high, about level with Bald eagle's top and 10 m from Bald eagle, level; we see Bald eagle from the rear three-quarter, its right side; horizon across the middle.\nIn frame: Bald eagle: centre of frame, about a third of the frame width wide, front facing away from the camera and screen-right (three-quarter rear view). Elk 3: far left of frame, a small part of the frame height tall, behind Bald eagle to the left, partly hidden by Elk 2, facing toward the camera and screen-left (three-quarter front view). Elk 1: far left of frame, a small part of the frame height tall, cut off by the left edge, behind Bald eagle to the left. Elk 2: far left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Bald eagle holds a majestic low glide over turquoise water toward the sunlit ridge. Its white head leads, broad wings remain spread and the tips bank gently above the lake. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "d5a31a6c"
           }
         }
       ]
@@ -2667,109 +2718,28 @@
       "height": 768
     },
     {
-      "path": "media/refs/fc1ce5da-1edc-48c0-a95c-329f1f60fed6.webp",
+      "path": "media/refs/edadfba7-1289-51dc-a5cf-63ef743bbf29.webp",
       "kind": "image",
-      "bytes": 215318,
-      "sha256": "de5b7a074dfed6da7d0ec6f020fb171d752c3c57015d499516c2c2050924da2c",
-      "sourceSha256": "42e7abed104c73772543ef0a52a5aaa2deb98e968ae9bc6791d20d4ca0643b33",
+      "bytes": 179904,
+      "sha256": "996cd54d1b85d671d385a3b99c86a597aba3e67faded067c52efdf9368d608dd",
+      "sourceSha256": "8d9daf0280c261b1116c1783334f8fa915c6105dcca6ff5cc10d70fa32d9ea36",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/98a7eb6e-3d99-4e1f-a9c6-6806207303be.mp4",
-      "kind": "video",
-      "bytes": 1145005,
-      "sha256": "27877f94b8a4d551fe412bd2d3aa7cfe19b8060f65331a9aeeb0dd55475ad867",
-      "sourceSha256": "93d1b5b4394ff2ee90b277425f940bc1034e5d59bbddbf681323387be1f9c388",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 120,
-      "duration": 5
-    },
-    {
-      "path": "media/assets/f564d4dd-7c10-434e-b783-47d877962579.mp4",
-      "kind": "video",
-      "bytes": 1290439,
-      "sha256": "5770b8c260d76cad0d0eb1ee5a10fb588f09b43a05d125e6befa7748729c9c3b",
-      "sourceSha256": "2304ffb328887873e356fbeb0189f3f85fdad3549f0b0157357de3f473de9947",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 121,
-      "duration": 5.042
-    },
-    {
-      "path": "media/refs/46987310-01b1-49b3-a0dc-e09d669bd56a.webp",
+      "path": "media/refs/69c72866-655d-58c3-ad98-1b9309731be7.webp",
       "kind": "image",
-      "bytes": 313706,
-      "sha256": "69a488ce0d68fee15964727e1c37a9e369fab2ce4e10df974e4ab0b418209f6b",
-      "sourceSha256": "d052e44382cc316d01f78ec93dafb9cfc6c14eae431aa3d82461d13e180a954e",
+      "bytes": 193582,
+      "sha256": "2e4ef117bcf25bb43a51ed3e6a47f1518039797f1b8defc75e4a7ddd508708a2",
+      "sourceSha256": "92e9ac1bafd5a4c8056041e7dcf56d4c673c054c307a5d39ec109a4f1f1044aa",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/be4f46fd-1308-4908-bb26-02c8151f8eb5.mp4",
+      "path": "media/assets/73cf1033-e2a6-44c1-b39a-373cd0dfd0ad.mp4",
       "kind": "video",
-      "bytes": 1076024,
-      "sha256": "d12f06c2975acce255b04605441fab1d43787c60bfaf4d34148c325027ba91c9",
-      "sourceSha256": "42729307283fc0ffa6b5d41a19dd4d58c74a7606693b6b157be4abcef7d84b74",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 120,
-      "duration": 5
-    },
-    {
-      "path": "media/assets/b0a9b5e8-32e4-4355-9c78-76e4d7f21869.mp4",
-      "kind": "video",
-      "bytes": 1303830,
-      "sha256": "1e5d95fb4137aa9a4bf4e5808c09adf2753811e9a486c2eac97527359b085d86",
-      "sourceSha256": "3b19cd57034fc4880d6b7c5cbbe2177bb710d596932d4e33d9e21452d59d37b8",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 121,
-      "duration": 5.042
-    },
-    {
-      "path": "media/refs/039d2d7a-9b7d-40f4-b6ad-5cfae27517b2.webp",
-      "kind": "image",
-      "bytes": 228174,
-      "sha256": "e782c11ce4023b79ef0e95cec2d56ad314488ad048e7430f36e2b13c71fb4829",
-      "sourceSha256": "6600e272ac68612f449a6cbdef3bac2b7e14e50330f5f29497b5c42b25075bca",
-      "width": 1344,
-      "height": 768
-    },
-    {
-      "path": "media/assets/12dbfb03-c4e0-4811-9a62-e0c605c5c3f5.mp4",
-      "kind": "video",
-      "bytes": 1040276,
-      "sha256": "14a48fc917cb213d8098d1d770bddf7cd0bdd9cd5ec7bbdcfba282bca18a99a2",
-      "sourceSha256": "5233679747cf2b1497a4a39e2726f82709b31ed93d05b32b966980d9808c94b7",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 120,
-      "duration": 5
-    },
-    {
-      "path": "media/assets/394f58fa-6432-4330-8716-f61697dcd1fd.mp4",
-      "kind": "video",
-      "bytes": 1094184,
-      "sha256": "91a5fe2b73f200a95838b62ed2c1e8b5d0b4e9ec6253fcd6cdc443d0dfef7233",
-      "sourceSha256": "c0ccb536389c89476a9f0457374565894e430f4bcb785d08e463cefd8e3195de",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 121,
-      "duration": 5.042
-    },
-    {
-      "path": "media/assets/e51fbe9e-589a-4655-88ab-4148b41ee2f8.mp4",
-      "kind": "video",
-      "bytes": 918877,
-      "sha256": "8f7ae0e8910ad41a00bdcd6f7f50b86aff1d02c9591588f9c3442db1e641b776",
+      "bytes": 1097910,
+      "sha256": "1c65cabdb9a10e3fcdb348a8cf65a81fd23f4650fbfe98109ff11888d566ea4e",
       "sourceSha256": "8f7ae0e8910ad41a00bdcd6f7f50b86aff1d02c9591588f9c3442db1e641b776",
       "width": 1280,
       "height": 720,
@@ -2778,10 +2748,40 @@
       "duration": 5
     },
     {
-      "path": "media/assets/8aa85c42-63f5-4951-8c5c-b04ca089b2b6.mp4",
+      "path": "media/assets/2475d511-96bc-59b3-a89f-67c1ae5287f0.mp4",
       "kind": "video",
-      "bytes": 638124,
-      "sha256": "7955f20f5dada4179371a5ab3aa8a3f1151f7d6fb9c6d265a3df986574a7c544",
+      "bytes": 1252834,
+      "sha256": "a8c127fcf36194dc5f436c0201ce39acdffecbbc795b2181be1ef3968c5a2b43",
+      "sourceSha256": "2eed084da418447eaca0bef19bf4a2c8fb452eba84b667fcd7c69d7fee376b95",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 121,
+      "duration": 5.042
+    },
+    {
+      "path": "media/refs/352cc1bb-7ac0-5933-a5ef-1e6e9b77e078.webp",
+      "kind": "image",
+      "bytes": 199142,
+      "sha256": "38b2f46669142ec0e0ea204b3a199340717badc40fa4c605615b16be7fa4189b",
+      "sourceSha256": "f1f3d76267c1027eac854e24f55613b13ab13913b6fa4cc6bd69dc9bfd912b30",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/refs/e34905c1-ceb4-5e4d-acee-0a4e22c4499f.webp",
+      "kind": "image",
+      "bytes": 235214,
+      "sha256": "d7d00ed4f51b8d8ef2d43c663569e4c3702c2f19723a4def69bbaf86f466015f",
+      "sourceSha256": "68b80b29e4e7a9e36c7359c1a7c943281dcc3818c10be80128a0b49763f6be55",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/84dd3139-e4ce-493b-af9a-9e93827ac6cb.mp4",
+      "kind": "video",
+      "bytes": 884509,
+      "sha256": "41f10a211608ffde6eea55f2289f1214288af4b395c5ac29b7d7d3169ce22f1b",
       "sourceSha256": "7955f20f5dada4179371a5ab3aa8a3f1151f7d6fb9c6d265a3df986574a7c544",
       "width": 1280,
       "height": 720,
@@ -2790,137 +2790,143 @@
       "duration": 5
     },
     {
-      "path": "media/assets/02c4f4a7-6b26-46e8-84d4-4ed031bf2916.mp4",
+      "path": "media/assets/d066daf5-e152-57d7-a1cc-412c21e2ed37.mp4",
       "kind": "video",
-      "bytes": 760279,
-      "sha256": "f4f15faa48d02d3caf241a35d77f46f6bf4bc270d947d05fdccbed1ab9106078",
+      "bytes": 1060487,
+      "sha256": "78ce4f19c6a10ee9378faa6fb9b2aceff279b90684616c62f54100b1f755cfd4",
+      "sourceSha256": "d7a26bc93c680d8707898a694ffaa1c2b935cf7c80c26a69fbdcae400be2cf51",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 121,
+      "duration": 5.042
+    },
+    {
+      "path": "media/refs/26c1e565-ad03-5cad-a61d-b5f8d52f00b0.webp",
+      "kind": "image",
+      "bytes": 255552,
+      "sha256": "714007302d0bd58b7914437a9c2d10d73749955bd1fb5b1e4be756e11a118fb9",
+      "sourceSha256": "19fd9c4321ac69b75cb80afc7b1b32b2b9cc0c15e1c84864e74fbe82987de227",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/ca14a077-41e4-57f5-a0f1-d825e8627684.webp",
+      "kind": "image",
+      "bytes": 212164,
+      "sha256": "c0175eced9e4ea837a514462f2a0703dbc9939c5078b2a4f26a500174bc5b24c",
+      "sourceSha256": "6bce6d5182e9152de93c3a1648f348478fbff5e26da50b756b5328ce59636290",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/04ced9b8-dde0-45ad-8653-c47e4cf643de.mp4",
+      "kind": "video",
+      "bytes": 1068521,
+      "sha256": "3f8986f387c25c52a12c87f0cc4beebda5924438aafb2d56b583e1fff3246be6",
       "sourceSha256": "f4f15faa48d02d3caf241a35d77f46f6bf4bc270d947d05fdccbed1ab9106078",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 120,
       "duration": 5
+    },
+    {
+      "path": "media/assets/e81ba725-5ad4-5edd-a017-e252e4352a56.mp4",
+      "kind": "video",
+      "bytes": 1068214,
+      "sha256": "73b429d717724d7ef9570691c99ec686f46100d8aa1ffbb5e5a63dd941e727f9",
+      "sourceSha256": "2cda765c2ca7c2347beaa049f9293394c68417f44d848b168c5b160b67eba98f",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708
     }
   ],
   "assets": [
     {
-      "id": "98a7eb6e-3d99-4e1f-a9c6-6806207303be",
+      "id": "73cf1033-e2a6-44c1-b39a-373cd0dfd0ad",
       "kind": "camera-render",
       "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
-      "file": "assets/98a7eb6e-3d99-4e1f-a9c6-6806207303be.mp4",
+      "file": "assets/73cf1033-e2a6-44c1-b39a-373cd0dfd0ad.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-30T17:03:23.913Z",
-      "source": {
-        "engineShotId": null
-      }
-    },
-    {
-      "id": "f564d4dd-7c10-434e-b783-47d877962579",
-      "kind": "workflow-result",
-      "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
-      "file": "assets/f564d4dd-7c10-434e-b783-47d877962579.mp4",
-      "mime": "video/mp4",
-      "duration": 5.041667,
-      "createdAt": "2026-10-30T17:33:23.080Z",
-      "source": {
-        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
-        "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Sweeping aerial over the lake and peaks as a tiny Bald eagle glides down from the ridge. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Custom keys, 24mm wide, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 24mm wide.",
-        "sourceAssetId": "98a7eb6e-3d99-4e1f-a9c6-6806207303be"
-      }
-    },
-    {
-      "id": "be4f46fd-1308-4908-bb26-02c8151f8eb5",
-      "kind": "camera-render",
-      "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
-      "file": "assets/be4f46fd-1308-4908-bb26-02c8151f8eb5.mp4",
-      "mime": "video/mp4",
-      "duration": 5,
-      "createdAt": "2026-10-30T17:03:26.690Z",
-      "source": {
-        "engineShotId": null
-      }
-    },
-    {
-      "id": "b0a9b5e8-32e4-4355-9c78-76e4d7f21869",
-      "kind": "workflow-result",
-      "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
-      "file": "assets/b0a9b5e8-32e4-4355-9c78-76e4d7f21869.mp4",
-      "mime": "video/mp4",
-      "duration": 5.041667,
-      "createdAt": "2026-10-30T17:33:05.649Z",
-      "source": {
-        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
-        "backend": "cloud",
-        "prompt": "Cinematic live-action shot. FPV chase right behind Bald eagle as it folds its wings and dives down the river canyon. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Clear turquoise glacial lake reflecting the peaks. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Tall subalpine fir and pine trees, dark green, dense. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Custom keys, 20mm wide, eye level, 5s. Follow the supplied camera motion exactly. Movement: FPV drone chase. Cuts: continuous take, no cuts. Lens: 14mm ultra-wide. Filter: golden hour light.",
-        "sourceAssetId": "be4f46fd-1308-4908-bb26-02c8151f8eb5"
-      }
-    },
-    {
-      "id": "12dbfb03-c4e0-4811-9a62-e0c605c5c3f5",
-      "kind": "camera-render",
-      "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
-      "file": "assets/12dbfb03-c4e0-4811-9a62-e0c605c5c3f5.mp4",
-      "mime": "video/mp4",
-      "duration": 5,
-      "createdAt": "2026-10-30T17:03:29.381Z",
-      "source": {
-        "engineShotId": null
-      }
-    },
-    {
-      "id": "394f58fa-6432-4330-8716-f61697dcd1fd",
-      "kind": "workflow-result",
-      "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
-      "file": "assets/394f58fa-6432-4330-8716-f61697dcd1fd.mp4",
-      "mime": "video/mp4",
-      "duration": 5.041667,
-      "createdAt": "2026-10-30T17:32:45.254Z",
-      "source": {
-        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
-        "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Low tracking shot at the lakeshore as Bald eagle skims the water past the grazing Elk herd and climbs away. A bald eagle in flight: dark brown body and broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Clear turquoise glacial lake reflecting the peaks. Elk grazing at the lakeshore, tan body, dark brown neck, antlers on the bull. Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Setting: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Look: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.. Camera: Truck left on Bald eagle, 35mm normal, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 35mm natural.",
-        "sourceAssetId": "12dbfb03-c4e0-4811-9a62-e0c605c5c3f5"
-      }
-    },
-    {
-      "id": "e51fbe9e-589a-4655-88ab-4148b41ee2f8",
-      "kind": "camera-render",
-      "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
-      "file": "assets/e51fbe9e-589a-4655-88ab-4148b41ee2f8.mp4",
-      "mime": "video/mp4",
-      "duration": 5,
-      "createdAt": "2026-10-31T02:35:34.806Z",
+      "createdAt": "2026-10-31T06:59:30.452Z",
       "source": {
         "engineShotId": null,
         "signature": "92babc84"
       }
     },
     {
-      "id": "8aa85c42-63f5-4951-8c5c-b04ca089b2b6",
+      "id": "2475d511-96bc-59b3-a89f-67c1ae5287f0",
+      "kind": "workflow-result",
+      "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
+      "file": "assets/2475d511-96bc-59b3-a89f-67c1ae5287f0.mp4",
+      "mime": "video/mp4",
+      "duration": 5.041667,
+      "createdAt": "2026-10-31T07:00:17.528Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Bald eagle glides with broad wings spread above the alpine valley. A turquoise lake and layered ridges open beyond the green shoreline. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 35mm. Filter: golden hour light, deep focus.",
+        "sourceAssetId": "73cf1033-e2a6-44c1-b39a-373cd0dfd0ad"
+      }
+    },
+    {
+      "id": "84dd3139-e4ce-493b-af9a-9e93827ac6cb",
       "kind": "camera-render",
       "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
-      "file": "assets/8aa85c42-63f5-4951-8c5c-b04ca089b2b6.mp4",
+      "file": "assets/84dd3139-e4ce-493b-af9a-9e93827ac6cb.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-31T02:35:34.807Z",
+      "createdAt": "2026-10-31T06:59:35.436Z",
       "source": {
         "engineShotId": null,
         "signature": "355ef9d3"
       }
     },
     {
-      "id": "02c4f4a7-6b26-46e8-84d4-4ed031bf2916",
+      "id": "d066daf5-e152-57d7-a1cc-412c21e2ed37",
+      "kind": "workflow-result",
+      "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "file": "assets/d066daf5-e152-57d7-a1cc-412c21e2ed37.mp4",
+      "mime": "video/mp4",
+      "duration": 5.041667,
+      "createdAt": "2026-10-31T07:01:38.190Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Bald eagle descends smoothly from the valley toward the lake, banking gently with its wings spread. Trees give way to open water. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 32mm. Filter: golden hour light.",
+        "sourceAssetId": "84dd3139-e4ce-493b-af9a-9e93827ac6cb"
+      }
+    },
+    {
+      "id": "04ced9b8-dde0-45ad-8653-c47e4cf643de",
       "kind": "camera-render",
       "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
-      "file": "assets/02c4f4a7-6b26-46e8-84d4-4ed031bf2916.mp4",
+      "file": "assets/04ced9b8-dde0-45ad-8653-c47e4cf643de.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-31T02:35:34.808Z",
+      "createdAt": "2026-10-31T06:49:58.759Z",
       "source": {
         "engineShotId": null,
         "signature": "d5a31a6c"
+      }
+    },
+    {
+      "id": "e81ba725-5ad4-5edd-a017-e252e4352a56",
+      "kind": "workflow-result",
+      "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+      "file": "assets/e81ba725-5ad4-5edd-a017-e252e4352a56.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-10-31T06:55:23.524Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 6 reference images",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Bald eagle holds a majestic low glide over turquoise water toward the sunlit ridge. Its white head leads, broad wings remain spread and the tips bank gently above the lake. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 40mm. Filter: golden hour light.\nReference images: 1 = start still; 2 = end still; 3 = Bald eagle; 4 = Elk 3; 5 = Alpine lake; 6 = Alpine terrain.",
+        "sourceAssetId": "04ced9b8-dde0-45ad-8653-c47e4cf643de"
       }
     }
   ],
@@ -2928,19 +2934,19 @@
     "clips": [
       {
         "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
-        "assetId": "f564d4dd-7c10-434e-b783-47d877962579",
+        "assetId": "2475d511-96bc-59b3-a89f-67c1ae5287f0",
         "in": 0,
-        "out": null
+        "out": 2.75
       },
       {
         "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
-        "assetId": "b0a9b5e8-32e4-4355-9c78-76e4d7f21869",
+        "assetId": "d066daf5-e152-57d7-a1cc-412c21e2ed37",
         "in": 0,
         "out": null
       },
       {
         "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
-        "assetId": "394f58fa-6432-4330-8716-f61697dcd1fd",
+        "assetId": "e81ba725-5ad4-5edd-a017-e252e4352a56",
         "in": 0,
         "out": null
       }
