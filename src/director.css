@@ -982,6 +982,8 @@ dialog.assets { width: min(1180px, 96vw); max-height: 92vh; }
 .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
 .asset { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
 .asset video, .asset img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--stage-2); display: block; }
+.asset .asset-shape { width: 100%; aspect-ratio: 16 / 9; background: var(--stage-2); display: grid; place-items: center; }
+.asset .asset-shape svg { width: 56px; height: 56px; }
 .asset .a-body { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
 .asset .a-title { font-weight: 600; display: flex; gap: 6px; align-items: center; }
 .asset .badge { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--paper-2); color: var(--muted); font-size: 10.5px; font-weight: 500; letter-spacing: .02em; white-space: nowrap; }

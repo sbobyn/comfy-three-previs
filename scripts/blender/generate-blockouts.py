@@ -1,0 +1,366 @@
+"""Rebuild bundled, texture-free GLBs: blender -b --python scripts/blender/generate-blockouts.py.
+Geometry helpers use Previs metres (Y up, +Z forward, bottom-centre pivot).
+Blender stores (x,-z,y); glTF's standard Y-up export restores the Previs axes.
+Run from the repository root with Node 22+ on PATH (terrain samples share the app's heightfield).
+"""
+import bpy
+import json
+import math
+import subprocess
+import struct
+from pathlib import Path
+from mathutils import Vector
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / 'public/models/blockouts'
+OUT.mkdir(parents=True, exist_ok=True)
+materials = {}
+
+def mat(name, color):
+    if name not in materials:
+        m = bpy.data.materials.new(name)
+        rgb = tuple(int(color[i:i+2], 16) / 255 for i in (1, 3, 5))
+        # Blender node colours are linear; the palette is sRGB like Three.Color(hex).
+        rgb = tuple(c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4 for c in rgb)
+        m.diffuse_color = (*rgb, 1)
+        m.use_nodes = True
+        p = m.node_tree.nodes.get('Principled BSDF')
+        p.inputs['Base Color'].default_value = (*rgb, 1)
+        p.inputs['Roughness'].default_value = .85
+        materials[name] = m
+    return materials[name]
+
+BODY = mat('entity-color', '#ffffff')  # tinted to the scene entity colour by the loader
+DARK = mat('charcoal', '#202932')
+WHITE = mat('ivory', '#e9e8dc')
+GLASS = mat('glass-blue', '#52788e')
+SKIN = mat('skin', '#b87851')
+GOLD = mat('gold', '#f6c544')
+WOOD = mat('bark', '#594334')
+LEAF = mat('pine-shadow', '#244532')
+ORANGE = mat('rim-orange', '#e57b2a')
+
+def xyz(p): return (p[0], -p[2], p[1])
+def finish(o, material):
+    o.data.materials.append(material)
+    return o
+
+def box(p, s, material=BODY, bevel=0):
+    bpy.ops.mesh.primitive_cube_add(size=1, location=xyz(p))
+    o = bpy.context.object
+    o.scale = (s[0], s[2], s[1])
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    if bevel:
+        m = o.modifiers.new('corner cuts', 'BEVEL'); m.width = bevel; m.segments = 1
+        bpy.ops.object.modifier_apply(modifier=m.name)
+    return finish(o, material)
+
+def ellipsoid(p, s, material=BODY, segments=12, rings=6):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=segments, ring_count=rings, radius=1, location=xyz(p))
+    o = bpy.context.object; o.scale = (s[0], s[2], s[1])
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    return finish(o, material)
+
+def rod(a, b, r, material=BODY, r2=None, sides=8):
+    av, bv = Vector(xyz(a)), Vector(xyz(b)); v = bv-av
+    bpy.ops.mesh.primitive_cone_add(vertices=sides, radius1=r, radius2=r if r2 is None else r2, depth=v.length, location=(av+bv)/2)
+    o = bpy.context.object; o.rotation_euler = v.to_track_quat('Z','Y').to_euler()
+    return finish(o, material)
+
+def mesh(verts, faces, material=BODY):
+    data = bpy.data.meshes.new('faceted'); data.from_pydata([xyz(v) for v in verts], [], faces); data.update()
+    o = bpy.data.objects.new('faceted', data); bpy.context.collection.objects.link(o)
+    return finish(o, material)
+
+def ring(p, radius, tube, material=WHITE, axis='y', segments=24):
+    bpy.ops.mesh.primitive_torus_add(major_segments=segments, minor_segments=4, location=xyz(p), major_radius=radius, minor_radius=tube)
+    o = bpy.context.object
+    if axis == 'x': o.rotation_euler[1] = math.pi/2
+    if axis == 'z': o.rotation_euler[0] = math.pi/2
+    return finish(o, material)
+
+def human(role):
+    # Separate limbs, shoes, neck, face, hair; all within the original 0.5 x 1.8 x 0.35 proxy.
+    sports = role == 'player'
+    for side in (-1,1):
+        x = side*.105
+        box((x,.065,.035),(.14,.13,.28),DARK,.025)
+        rod((x,.15,0),(x,.59,-.025),.064,SKIN if sports else BODY,r2=.07)
+        rod((x,.59,-.025),(x,.94,0),.07,BODY,r2=.085)
+    box((0,.93,0),(.33,.23,.23),BODY,.045)
+    mesh([(-.16,1, -.11),(.16,1,-.11),(.20,1.43,-.09),(-.20,1.43,-.09),(-.16,1,.12),(.16,1,.12),(.20,1.43,.10),(-.20,1.43,.10)],[(0,3,2,1),(4,5,6,7),(0,1,5,4),(3,7,6,2),(0,4,7,3),(1,2,6,5)])
+    rod((0,1.40,0),(0,1.53,0),.065,SKIN)
+    ellipsoid((0,1.64,.005),(.12,.16,.125),SKIN)
+    ellipsoid((0,1.735,-.015),(.12,.065,.105),DARK)
+    box((0,1.63,.128),(.045,.055,.045),SKIN,.008)
+    for side in (-1,1):
+        shoulder=(side*.19,1.38,0); elbow=(side*.205,1.14,.02)
+        hand=(side*.19,1.0,.10)
+        if role == 'fan': elbow=(side*.20,1.32,.08); hand=(side*.16,1.50,.12)
+        if role == 'operator': hand=(side*.17,1.18,.13)
+        rod(shoulder,elbow,.048,SKIN if sports else BODY)
+        rod(elbow,hand,.041,SKIN if sports else BODY)
+        ellipsoid(hand,(.044,.055,.04),SKIN,8,4)
+    if sports:
+        box((0,1.12,.123),(.29,.045,.008),GOLD)
+        box((0,1.31,.117),(.065,.13,.008),WHITE)
+        for side in (-1,1): box((side*.105,.24,.065),(.105,.16,.03),WHITE)
+    if role == 'anchor':
+        mesh([(-.10,1.43,.105),(.10,1.43,.105),(0,1.17,.13)],[(0,2,1)],WHITE)
+        box((0,1.31,.137),(.035,.18,.012),GOLD)
+    if role == 'fan': box((0,1.51,.14),(.18,.10,.035),DARK,.01)
+
+def car():
+    box((0,.56,0),(1.77,.56,4.42),BODY,.14)
+    box((0,.85,1.25),(1.65,.20,1.6),BODY,.07)
+    # Sloping windscreen and roof, plus inset dark windows.
+    mesh([(-.82,.77,-1.3),(.82,.77,-1.3),(.64,1.39,-.8),(-.64,1.39,-.8),(-.82,.77,1.0),(.82,.77,1.0),(.64,1.39,.45),(-.64,1.39,.45)],[(0,3,2,1),(4,5,6,7),(3,7,6,2),(0,4,7,3),(1,2,6,5)],GLASS)
+    box((0,1.41,-.17),(1.32,.08,1.30),BODY,.04)
+    for side in (-1,1):
+        box((side*.79,1.07,-.22),(.06,.58,.10),BODY)
+        for z in (-1.38,1.40):
+            rod((side*.72,.36,z),(side*.95,.36,z),.36,DARK,sides=16)
+            rod((side*.951,.36,z),(side*.955,.36,z),.19,WHITE,sides=10)
+        box((side*.55,.67,2.17),(.43,.15,.05),WHITE,.02)
+        box((side*.55,.66,-2.19),(.44,.12,.04),ORANGE)
+    box((0,.42,2.23),(1.62,.11,.04),DARK)
+    box((0,.65,2.205),(.54,.12,.02),DARK)
+    box((0,.94,1.33),(.24,.025,1.53),GOLD)
+    box((0,1.456,-.18),(.24,.012,1.18),GOLD)
+    for x in (-.55,.55): box((x,.97,-1.94),(.07,.27,.10),DARK)
+    box((0,1.12,-1.96),(1.8,.08,.36),DARK,.015)
+
+def eagle():
+    ellipsoid((0,.25,0),(.16,.18,.36))
+    ellipsoid((0,.35,.34),(.125,.14,.14),WHITE)
+    rod((0,.34,.43),(0,.29,.55),.065,GOLD,r2=.015,sides=6)
+    for side in (-1,1):
+        mesh([(side*.08,.28,.20),(side*.65,.34,.16),(side*1.12,.28,.02),(side*1.17,.25,-.25),(side*.58,.26,-.22),(side*.10,.23,-.20)],[(0,1,4),(1,2,3,4),(0,4,5)])
+        for i in range(6):
+            x=.65+i*.09
+            mesh([(side*x,.275,-.06),(side*(x+.10),.27,-.07),(side*(x+.06),.22,-(.29+(i%3)*.045)),(side*(x-.015),.23,-.27)],[(0,1,2,3)],DARK)
+        ellipsoid((side*.09,.39,.418),(.015,.018,.012),DARK,8,4)
+        rod((side*.07,.16,-.02),(side*.07,.10,.06),.025,GOLD)
+    mesh([(-.10,.23,-.24),(.10,.23,-.24),(.20,.18,-.55),(-.20,.18,-.55)],[(0,1,2,3)],WHITE)
+
+def elk():
+    ellipsoid((0,.51,-.08),(.26,.24,.35))
+    for x in (-.18,.18):
+        for z in (-.30,.19):
+            rod((x,.40,z),(x,.06,z+.035),.042,WOOD,r2=.026)
+            box((x,.035,z+.05),(.075,.07,.10),DARK)
+    rod((0,.55,.20),(0,.79,.31),.13,BODY,r2=.085)
+    ellipsoid((0,.81,.35),(.10,.11,.15))
+    ellipsoid((0,.78,.46),(.075,.06,.055),DARK)
+    for s in (-1,1):
+        ellipsoid((s*.12,.89,.31),(.10,.035,.055))
+        rod((s*.045,.88,.30),(s*.18,1,.20),.018,WHITE,r2=.008)
+        for j in range(3): rod((s*(.07+j*.04),.91+j*.025,.28-j*.025),(s*(.13+j*.04),.99,.29-j*.03),.01,WHITE,r2=.003)
+
+def pine():
+    rod((0,0,0),(0,4.6,0),.16,WOOD,r2=.055)
+    for i in range(5):
+        y=1.0+i*.74; r=1.25-i*.21
+        rod((0,y,0),(0,min(5,y+1.8),0),r,BODY if i%2 else LEAF,r2=0,sides=9)
+
+def equipment(kind):
+    if kind == 'camera':
+        for x,z in [(-.34,.25),(.34,.25),(0,-.35)]: rod((x,.03,z),(0,.79,0),.025,DARK)
+        rod((0,.1,0),(0,.85,0),.055,DARK)
+        box((0,.97,-.06),(.42,.36,.38),BODY,.025)
+        rod((0,1.0,.10),(0,1.0,.38),.12,DARK)
+        rod((0,1.0,.38),(0,1.0,.4),.095,GLASS)
+        box((0,1.17,-.10),(.20,.06,.2),DARK)
+    else:
+        rod((0,0,0),(0,3.65,0),.07,DARK,r2=.045)
+        for x,z in [(-.14,.13),(.14,.13),(0,-.15)]: rod((x,0,z),(0,.5,0),.025,DARK)
+        box((0,3.82,0),(.30,.36,.30),BODY,.025)
+        box((0,3.82,.151),(.25,.27,.01),WHITE)
+
+def surface(kind):
+    box((0,.46,0),(1,.92,1),BODY)
+    if kind == 'court':
+        # Markings on top: world dimensions 28 x 15 through the entity scale.
+        for x in (-.48,.48): box((x,.98,0),(.003,.03,.95),WHITE)
+        for z in (-.47,.47): box((0,.98,z),(.96,.03,.005),WHITE)
+        box((0,.98,0),(.003,.03,.94),WHITE)
+        for i in range(15): box((-.46+i*.065,.94,0),(.001,.01,.94),WOOD)
+        for side in (-1,1):
+            # Open three-point arc, sampled in the existing floor's normalised space.
+            for i in range(24):
+                a=-math.pi/2+i*math.pi/24; b=a+math.pi/24
+                rod((side*(.43-.22*math.cos(a)),.99,.40*math.sin(a)),(side*(.43-.22*math.cos(b)),.99,.40*math.sin(b)),.002,WHITE,sides=4)
+    elif kind == 'paint':
+        for z in (-.47,.47): box((0,.98,z),(.96,.03,.015),WHITE)
+        for x in (-.48,.48): box((x,.98,0),(.015,.03,.96),WHITE)
+    elif kind == 'track':
+        for z in (-.46,.46): box((0,.98,z),(1,.025,.012),WHITE)
+        for x in (-.375,-.125,.125,.375): box((x,.98,0),(.10,.025,.008),GOLD)
+    elif kind == 'finish':
+        for x in range(2):
+            for z in range(20):
+                if (x+z)%2: box((-.25+x*.5,.98,-.475+z*.05),(.5,.03,.05),DARK)
+    elif kind == 'studio-floor':
+        for z in (-.42,.42): box((0,.98,z),(.9,.025,.004),GLASS)
+        for x in (-.42,.42): box((x,.98,0),(.004,.025,.84),GLASS)
+    elif kind == 'grass':
+        for i in range(8): box((-.4375+i*.125,.95,0),(.0625,.02,1),LEAF)
+    elif kind == 'river':
+        for x in (-.27,.12): box((x,.98,0),(.012,.02,.85),GLASS)
+
+def stands():
+    for i in range(6):
+        z=-.5+(i+.5)/6; h=(i+1)/6
+        box((0,h/2,z),(1,h,1/6),BODY)
+        box((0,h+.007,z-.015),(.96,.015,.065),DARK)
+        for x in range(12): box((-.46+x*.083,h+.035,z+.04),(.052,.065,.015),GLASS)
+    for x in (-.49,.49):
+        rod((x,.14,-.48),(x,.99,.45),.008,WHITE)
+
+def panels(kind):
+    box((0,.5,0),(1,1,1),BODY,.025)
+    if kind == 'barrier':
+        box((0,.93,0),(1,.12,1),DARK)
+        for x in (-.375,-.125,.125,.375): box((x,.50,.505),(.006,.80,.01),GLASS)
+    elif kind == 'press-box':
+        for x in range(10): box((-.45+x*.1,.6,.505),(.085,.56,.01),GLASS)
+        box((0,.96,0),(1,.08,1),DARK)
+    else:
+        box((0,.53,.505),(.92,.83,.015),DARK)
+        for x in range(4): box((-.345+x*.23,.57,.52),(.22,.62,.008),GLASS)
+        box((0,.16,.53),(.86,.04,.01),GOLD)
+        if kind == 'video-wall':
+            # Stylised world map made from broad facets, no text or textures.
+            for x,y,w,h in [(-.25,.65,.17,.20),(-.17,.4,.06,.17),(.05,.64,.10,.12),(.08,.43,.07,.19),(.25,.64,.21,.16),(.32,.34,.08,.07)]:
+                box((x,y,.537),(w,h,.01),WHITE,.01)
+
+def desk():
+    box((0,.70,0),(1.6,.10,.9),BODY,.025)
+    for x in (-.6,.6): box((x,.32,0),(.14,.64,.65),DARK,.03)
+    box((0,.39,.24),(1.35,.50,.11),GLASS,.02)
+    box((0,.15,0),(1.45,.09,.7),DARK,.03)
+    box((-.35,.745,.08),(.33,.008,.25),WHITE)
+    box((.45,.74,.03),(.25,.02,.20),DARK)
+
+def basketball():
+    ellipsoid((0,.5,0),(.49,.49,.49),BODY,20,12)
+    for axis in ('x','y','z'): ring((0,.5,0),.49,.009,DARK,axis,32)
+
+def rim():
+    ring((0,.64,0),.36,.035,ORANGE,segments=32)
+    # Net stays within the same short cylinder proxy; the rim is genuinely open.
+    ring((0,.12,0),.27,.012,WHITE,segments=24)
+    for i in range(12):
+        a=i*math.tau/12; b=a+.22
+        rod((.35*math.cos(a),.62,.35*math.sin(a)),(.27*math.cos(b),.08,.27*math.sin(b)),.009,WHITE,sides=4)
+
+def circle():
+    rod((0,0,0),(0,1,0),.4,BODY,sides=48)
+    ring((0,1,0),.385,.008,WHITE,segments=48)
+
+def lake():
+    rod((0,0,0),(0,1.2,0),.4,BODY,sides=64)
+    ring((0,1.195,0),.397,.002,GLASS,segments=64)
+    for x,z,s in [(-.2,-.1,.12),(.1,.12,.18),(-.05,-.25,.10)]: box((x,1.205,z),(s,.005,.002),GLASS)
+
+def support():
+    box((0,.09,0),(1,.18,1),DARK,.04)
+    box((0,.54,0),(.42,.92,.42),BODY,.04)
+    box((0,.93,0),(.90,.14,.90),DARK,.04)
+
+def backboard():
+    box((0,.5,0),(1,1,1),DARK)
+    # The existing board is thin in X. Decoration must be on both X faces.
+    for side in (-1,1):
+        box((side*.51,.52,0),(.015,.90,.92),GLASS)
+        for z in (-.19,.19): box((side*.53,.42,z),(.015,.30,.025),WHITE)
+        for y in (.27,.57): box((side*.53,y,0),(.015,.025,.40),WHITE)
+
+def tower():
+    for x in (-.38,.38):
+        for z in (-.38,.38): rod((x,0,z),(x,.8,z),.035,DARK,sides=6)
+    for y in (.2,.4,.6):
+        for z in (-.38,.38): rod((-.38,y-.18,z),(.38,y,z),.02,DARK,sides=6)
+    box((0,.77,0),(1,.08,1),BODY)
+    for x in (-.46,.46): rod((x,.8,-.46),(x,1,-.46),.018,WHITE)
+    box((0,.96,-.44),(.94,.06,.04),WHITE)
+
+# Shared height function is sampled without rewriting its deterministic noise in Python.
+def terrain():
+    code = "import {terrainHeight} from './shared/terrain.mjs'; const a=[]; for(let z=0;z<=48;z++)for(let x=0;x<=48;x++)a.push([x*10-240,terrainHeight({position:[0,0,0],scale:[1,1,1]},x*10-240,z*10-240),z*10-240]); console.log(JSON.stringify(a));"
+    verts=json.loads(subprocess.check_output(['node','--input-type=module','-e',code],cwd=ROOT))
+    faces=[]
+    for z in range(48):
+        for x in range(48):
+            a=z*49+x; faces.extend([(a,a+49,a+1),(a+1,a+49,a+50)])
+    o=mesh(verts,faces,mat('meadow','#7fa35a'))
+    palette=[mat('forest','#476b3c'),mat('rock','#a39a8c'),mat('snow','#e4e9e6')]
+    for m in palette:o.data.materials.append(m)
+    for poly in o.data.polygons:
+        h=sum(verts[i][1] for i in poly.vertices)/3
+        poly.material_index=3 if h>160 else 2 if h>95 else 1 if h>18 else 0
+
+BUILDERS = {
+    'player': ('person',lambda:human('player')), 'anchor':('person',lambda:human('anchor')),
+    'operator':('person',lambda:human('operator')), 'fan':('person',lambda:human('fan')),
+    'race-car':('car',car), 'eagle':('bird',eagle), 'elk':('box',elk), 'pine':('tree',pine),
+    'studio-camera':('cylinder',lambda:equipment('camera')), 'light':('lamp',lambda:equipment('light')),
+    'court':('box',lambda:surface('court')), 'paint':('box',lambda:surface('paint')),
+    'track':('box',lambda:surface('track')), 'finish':('box',lambda:surface('finish')),
+    'studio-floor':('box',lambda:surface('studio-floor')), 'grass':('box',lambda:surface('grass')),
+    'river':('box',lambda:surface('river')), 'stands':('box',stands),
+    'barrier':('box',lambda:panels('barrier')), 'press-box':('box',lambda:panels('press-box')),
+    'screen':('box',lambda:panels('screen')), 'video-wall':('wall',lambda:panels('video-wall')),
+    'desk-panel':('box',lambda:panels('screen')), 'desk':('table',desk),
+    'basketball':('sphere',basketball), 'rim':('cylinder',rim), 'circle':('cylinder',circle),
+    'lake':('cylinder',lake), 'support':('box',support), 'backboard':('box',backboard),
+    'flag-stand':('box',tower), 'terrain':('terrain',terrain),
+}
+SIZES={'person':(.5,1.8,.35),'car':(1.9,1.45,4.5),'bird':(2.4,.5,1.1),'box':(1,1,1),'tree':(2.5,5,2.5),'cylinder':(.8,1.2,.8),'lamp':(.3,4,.3),'wall':(8,3,.25),'table':(1.6,.75,.9),'sphere':(1,1,1)}
+def canonical_indices(file):
+    # Blender's parallel exporter can reorder triangles without changing geometry.
+    # Rotate each triangle cyclically (preserve winding) and sort the index records.
+    data = bytearray(file.read_bytes())
+    json_size = struct.unpack_from('<I', data, 12)[0]
+    doc = json.loads(data[20:20+json_size])
+    binary = 28 + json_size
+    for mesh_data in doc['meshes']:
+        for primitive in mesh_data['primitives']:
+            assert primitive.get('mode', 4) == 4
+            acc = doc['accessors'][primitive['indices']]
+            view = doc['bufferViews'][acc['bufferView']]
+            offset = binary + view.get('byteOffset', 0) + acc.get('byteOffset', 0)
+            fmt = '<' + {5123: 'H', 5125: 'I'}[acc['componentType']] * acc['count']
+            values = struct.unpack_from(fmt, data, offset)
+            triangles = []
+            for i in range(0, len(values), 3):
+                tri = values[i:i+3]
+                triangles.append(min(tri[n:]+tri[:n] for n in range(3)))
+            struct.pack_into(fmt, data, offset, *(i for tri in sorted(triangles) for i in tri))
+    file.write_bytes(data)
+
+manifest={}
+for name,(shape,build) in BUILDERS.items():
+    bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
+    build()
+    objects=list(bpy.context.scene.objects)
+    # Bake transforms, join by material on export, and fit the immutable proxy bounds.
+    bpy.ops.object.select_all(action='SELECT'); bpy.context.view_layer.objects.active=objects[0]
+    bpy.ops.object.convert(target='MESH'); bpy.ops.object.join()
+    o=bpy.context.object; o.name=name
+    bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
+    if shape != 'terrain':
+        coords=[v.co.copy() for v in o.data.vertices]
+        lo=[min(v[i] for v in coords) for i in range(3)]; hi=[max(v[i] for v in coords) for i in range(3)]
+        w,h,d=SIZES[shape]; target=(w,d,h)
+        for v in o.data.vertices:
+            for i in range(3): v.co[i]=((v.co[i]-lo[i])/(hi[i]-lo[i])-(0 if i==2 else .5))*target[i]
+    o.data.update(); o.data.calc_loop_triangles()
+    triangles=len(o.data.loop_triangles)
+    assert triangles <= 5000,(name,triangles)
+    file=OUT/(name+'.glb')
+    bpy.ops.export_scene.gltf(filepath=str(file),export_format='GLB',use_selection=True,export_yup=True,export_animations=False,export_cameras=False,export_lights=False,export_texcoords=False,export_normals=True,export_materials='EXPORT')
+    canonical_indices(file)
+    manifest[name]={'shape':shape,'triangles':triangles,'bytes':file.stat().st_size}
+(OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+print('BLOCKOUTS',len(manifest),'assets',sum(x['bytes'] for x in manifest.values()),'bytes')

@@ -17,6 +17,7 @@ import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
 import { loadStarters, starterCard, instantiateStarter, attachStarterMedia } from './starters.mjs';
 import { existsSync } from 'node:fs';
+import { openLibrary, libraryDir, placeAsset } from './library.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
@@ -104,6 +105,7 @@ export function applyOps(p, ops) {
         const before = { position: [...e.position], rotation: e.rotation, scale: [...e.scale] };
         const next = makeEntity({ ...e, ...patch, name: patch.name ? uniqueName(p.scene.entities.filter(x => x !== e), patch.name) : e.name }, e.id);
         Object.assign(e, next);
+        if (!next.model) delete e.model; // changing proxy shape clears an incompatible display mesh
         if (!next.sheets) delete e.sheets; // `sheets: []` clears them (makeEntity omits an empty list)
         // Children follow their parent rigidly, unless this batch already places them (the editor sends every moved object).
         if (['position', 'rotation', 'scale'].some(k => patch[k] !== undefined)) {
@@ -274,6 +276,8 @@ export async function openDirector(root, options = {}) {
   const agent = { lastSeen: 0, name: null };
   let chain = Promise.resolve();
   const serial = fn => { const next = chain.then(fn); chain = next.catch(() => {}); return next; };
+  // Reusable assets shared by every project of this install; library writes run on this same queue.
+  const library = openLibrary(options.libraryDir || libraryDir(root), { log: options.log });
 
   async function load(id) {
     if (!uuid.test(id || '')) fail('Unknown project', 404);
@@ -399,6 +403,38 @@ export async function openDirector(root, options = {}) {
       else shot.references.push(ref);
       return { project: await save(p), referenceId: refId };
     }),
+    library: {
+      list: query => library.list(query),
+      get: ref => library.get(ref),
+      refFile: (id, file) => library.refFile(id, file),
+      exportZip: ref => library.exportZip(ref),
+      importZip: buffer => serial(() => library.importZip(buffer)),
+      importPath: (input = {}) => serial(() => library.importPath(input.path, { object: input.object })),
+      /** Save one object of a project (and everything grouped under it) to the library. */
+      save: (projectId, input = {}) => serial(async () => {
+        const p = await load(projectId);
+        const e = resolveEntity(p, String(input.object || '').replace(/^@/, '')); if (!e) fail(`Unknown object ${input.object}`);
+        return library.save(p, e, input, file => readFile(join(dir, p.id, 'refs', file)));
+      }),
+      /** Put a library asset into a project: add_entity ops through applyOps, plus its images copied into refs/. */
+      place: (projectId, input = {}) => serial(async () => {
+        const p = structuredClone(await load(projectId));
+        const m = await library.get(input.asset);
+        const plan = placeAsset(p, m, input);
+        (p.scene.references ||= []).push(...plan.references);
+        applyOps(p, plan.ops);
+        await mkdir(join(dir, p.id, 'refs'), { recursive: true });
+        for (const f of plan.files) {
+          const bytes = await readFile(join(library.assetDir(m.id), f.from));
+          if (createHash('sha256').update(bytes).digest('hex') !== m.media.find(x => x.path === f.from)?.sha256) fail(`Library file changed on disk: ${f.from}; save or import the asset again`);
+          await writeFile(join(dir, p.id, 'refs', f.to), bytes, { flag: 'wx', mode: 0o600 });
+        }
+        const root = p.scene.entities.find(e => e.id === plan.rootId), handle = handleOf(root.name);
+        const where = root.position.map(v => Math.round(v * 100) / 100).join(', ');
+        const text = `Placed @${handle}${handle === m.handle ? '' : ` (the library's @${m.handle}; @${m.handle} was taken in this project)`} v${m.version} at [${where}]`;
+        return { project: await save(p), entityIds: plan.entityIds, root: plan.rootId, name: root.name, handle, asset: { id: m.id, handle: m.handle, version: m.version }, text, ops: plan.ops };
+      }),
+    },
     async refFile(projectId, file) {
       if (!uuid.test(projectId) || !/^[a-f0-9-]{36}\.(png|jpg|webp)$/.test(file)) fail('Not found', 404);
       return join(dir, projectId, 'refs', file);
@@ -612,6 +648,7 @@ export async function openDirector(root, options = {}) {
     recordRender: (id, input, previs) => serial(async () => {
       const p = structuredClone(await load(id));
       const shot = resolveShot(p, input.shotId); if (!shot) fail('Unknown shot');
+      const origin = input.origin === 'blender' ? { origin: 'blender' } : {}; // a clip imported from Blender (blender-import.mjs), not the Previs proxies
       const main = previs.get();
       const asset = main.assets?.find(a => a.id === input.assetId && a.shotId === input.previsShotId && a.kind === 'video');
       if (!asset) fail('Exported video not found in the project');
@@ -621,8 +658,8 @@ export async function openDirector(root, options = {}) {
       await mkdir(join(dir, p.id, 'assets'), { recursive: true });
       const file = `assets/${asset.id}.mp4`;
       try { await writeFile(join(dir, p.id, file), bytes, { flag: 'wx', mode: 0o600 }); } catch (e) { if (e.code !== 'EEXIST') throw e; }
-      (p.assets ||= []).push({ id: asset.id, kind: 'camera-render', shotId: shot.id, file, mime: 'video/mp4', sha256: asset.sha256, width: asset.width, height: asset.height, fps: asset.fps, frameCount: asset.frameCount, duration: asset.duration, version: (p.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id).length + 1, createdAt: now(), source: { engineShotId: input.previsShotId, engineAssetId: asset.id, prompt: String(input.prompt || '').slice(0, 8000), signature: String(input.signature || '').slice(0, 64) } });
-      shot.render = { previsShotId: input.previsShotId, assetId: asset.id, prompt: String(input.prompt || compilePrompt(p, shot)).slice(0, 8000), frameCount: asset.frameCount, duration: asset.duration, width: asset.width, height: asset.height, signature: String(input.signature || '').slice(0, 64), createdAt: now() };
+      (p.assets ||= []).push({ id: asset.id, kind: 'camera-render', shotId: shot.id, file, mime: 'video/mp4', sha256: asset.sha256, width: asset.width, height: asset.height, fps: asset.fps, frameCount: asset.frameCount, duration: asset.duration, version: (p.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id).length + 1, createdAt: now(), source: { engineShotId: input.previsShotId, engineAssetId: asset.id, prompt: String(input.prompt || '').slice(0, 8000), signature: String(input.signature || '').slice(0, 64), ...origin } });
+      shot.render = { previsShotId: input.previsShotId, assetId: asset.id, prompt: String(input.prompt || compilePrompt(p, shot)).slice(0, 8000), frameCount: asset.frameCount, duration: asset.duration, width: asset.width, height: asset.height, signature: String(input.signature || '').slice(0, 64), createdAt: now(), ...origin };
       return { project: await save(p) };
     }),
   };
@@ -635,7 +672,8 @@ export function summarizeOps(ops, project) {
   const shot = id => { const s = project.shots.find(x => x.id === id) || (/^\d+$/.test(String(id)) ? project.shots[Number(id) - 1] : null); return s ? `“${s.title}”` : 'a shot'; };
   const out = [];
   for (const o of ops || []) {
-    if (o.op === 'add_entity') out.push(`Added ${o.entity?.name || o.entity?.shape || 'an object'}`);
+    if (o.op === 'add_entity' && o.entity?.from?.handle) out.push(`Placed @${o.entity.from.handle} from the library`);
+    else if (o.op === 'add_entity') out.push(`Added ${o.entity?.name || o.entity?.shape || 'an object'}`);
     else if (o.op === 'update_entity') out.push(`Updated ${name(o.id)}${o.patch?.path !== undefined ? ' (animation)' : ''}`);
     else if (o.op === 'remove_entity') out.push(`Removed ${name(o.id)}`);
     else if (o.op === 'add_shot') out.push(`Added shot “${o.shot?.title || 'new shot'}”`);
@@ -662,6 +700,7 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
       if (path === '/api/director/starters') return { starters: await director.starters() };
       if (path === '/api/director/assets') { const { project: p } = await director.syncResults(url.searchParams.get('id')); return { assets: p.assets || [], shots: p.shots.map((s, i) => ({ id: s.id, number: i + 1, title: s.title })) }; }
       if (path === '/api/director/agent') return { agent: director.agentStatus(), connect: connect() };
+      if (path === '/api/director/library') return director.library.list({ q: url.searchParams.get('q'), kind: url.searchParams.get('kind'), tag: url.searchParams.get('tag') });
       if (path === '/api/director/project') {
         await director.syncResults(url.searchParams.get('id'));
         const p = await director.get(url.searchParams.get('id'));
@@ -712,6 +751,14 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
         return r;
       }
       case '/api/director/agent/progress': return director.progress(input.projectId, input);
+      case '/api/director/library/save': return director.library.save(input.projectId, input);
+      case '/api/director/library/import': return director.library.importPath(input);
+      case '/api/director/library/place': {
+        const r = await director.library.place(input.projectId, input);
+        // The activity line names the placed asset once, not every object grouped under it.
+        if (meta.agent) { const text = summarizeOps(r.ops.filter(o => o.op !== 'add_entity' || o.entity.from), r.project); if (text) { const pr = await director.progress(input.projectId, { text, auto: true }); if (pr.logged) r.project = pr.project; } }
+        return r; // ops (add_entity with their ids) let the browser redo a Place after undoing it
+      }
       // [agent] Built-in runner tools (scoped to one message) and the browser's proposal decisions.
       case '/api/director/agent/scene': { const { project: p, pending, shotId } = await director.preview(input.projectId, input.messageId); return sceneView(p, shotId, pending); }
       case '/api/director/agent/prompt': {

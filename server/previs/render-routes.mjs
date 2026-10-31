@@ -1,6 +1,7 @@
 // Contract C2: server-side blockout, frame and sheet rendering through the headless page pool (headless.mjs).
 import { opQuery, unavailable } from './headless.mjs';
-import { blockoutStale } from '../../shared/director.mjs';
+import { blockoutStale, blenderBlockout } from '../../shared/director.mjs';
+import { videoFrame } from './frames.mjs';
 
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
 const ROUTES = new Set(['/api/director/render-blockout', '/api/director/frame', '/api/director/sheet/compose', '/api/director/headless']);
@@ -28,6 +29,14 @@ export function renderRoutes({ director, headless }) {
     if (path === '/api/director/frame') {
       const t = Number(input.t); if (input.t == null || !Number.isFinite(t)) fail('t (seconds into the shot) is required');
       const type = input.type ?? 'image/png'; if (!['image/png', 'image/jpeg'].includes(type)) fail('type must be image/png or image/jpeg');
+      // A current Blender import is the guide itself: its frame at t comes from the clip, not the proxies (no renderer needed).
+      const clip = blenderBlockout(p, s) && (p.assets || []).find(a => a.id === s.render.assetId);
+      if (clip) {
+        const i = Math.min((clip.frameCount || 1) - 1, Math.max(0, Math.round(t * 24)));
+        // Seek a quarter frame early so the decoder's first frame at or after the seek is frame i.
+        const f = await videoFrame(await director.assetFile(p.id, clip.file.replace(/^assets\//, '')), i ? (i - 0.25) / 24 : 0, { width, type });
+        return { data: f.bytes.toString('base64'), mime: type, width: f.width, height: f.height, source: 'blender', frame: i };
+      }
       // guide: the still-guide look (front markers, ground grid, light sky) used as image 1 for key-frame stills.
       return headless.run(opQuery('frame', { project: p.id, shot: s.id, t, width, height, type, ...(input.guide === true ? { guide: 1 } : {}) }));
     }

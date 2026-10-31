@@ -43,6 +43,35 @@ export function starterPicks(project, hero = {}) {
 }
 
 /**
+ * One object as a portable record: the entity without its looks and sheets, then its primary look and every design
+ * sheet whose slots all have a shown take (each slot collapsed to that take, requestId cleared), plus the composed
+ * board. `take(ref)` is called for each image kept, in order. Starter snapshots and library assets both use it.
+ */
+export function snapshotEntity(project, e, take, refById = new Map((project.scene.references || []).map(r => [r.id, r]))) {
+  const objectRefs = project.scene.references || [];
+  const out = structuredClone(e);
+  delete out.look; delete out.sheets;
+  const look = !e.lookFrom && refById.get(e.look);
+  if (look) { take(look); out.look = look.id; }
+  // Design sheets: the shown take of every slot, plus the composed board. A sheet with no images is dropped.
+  const sheets = [];
+  for (const sh of e.sheets || []) {
+    const slots = sh.slots.map(s => {
+      const shown = s.attempts.find(a => a.id === s.accepted) || s.attempts.find(a => a.id === s.selected) || s.attempts.at(-1);
+      const ref = shown && refById.get(shown.referenceId);
+      return ref ? { ...structuredClone(s), attempts: [{ ...structuredClone(shown), requestId: null }], selected: shown.id, accepted: s.accepted === shown.id ? shown.id : null, ref } : null;
+    });
+    if (!slots.some(Boolean) || slots.some(x => !x)) continue;
+    for (const s of slots) { if (s.ref.id !== out.look) take(s.ref); delete s.ref; }
+    const composed = objectRefs.find(r => r.entityId === e.id && r.note === `sheet:${sh.id}:composed`);
+    if (composed) take(composed);
+    sheets.push({ ...structuredClone(sh), slots });
+  }
+  if (sheets.length) out.sheets = sheets;
+  return out;
+}
+
+/**
  * Turn a full project document into a portable starter snapshot.
  * With `media: false` (the version 1 shape) no looks, sheets, stills or videos are kept.
  * Otherwise the snapshot lists media files as { path, from, kind } where `from` is the file inside the
@@ -52,30 +81,12 @@ export function starterSnapshot(project, { slug, title, description, order = 0, 
   const files = [];
   const refPath = r => `media/refs/${r.id}.webp`;
   const takeRef = r => { files.push({ path: refPath(r), from: `refs/${r.file}`, kind: 'image' }); return { id: r.id, name: r.name, file: `${r.id}.webp`, mime: 'image/webp', role: r.role, entityId: r.entityId ?? null, note: r.note || '', createdAt: r.createdAt, ...(r.generated ? { generated: keepGenerated(r.generated) } : {}) }; };
-  const objectRefs = project.scene.references || [];
-  const refById = new Map(objectRefs.map(r => [r.id, r]));
+  const refById = new Map((project.scene.references || []).map(r => [r.id, r]));
   const sceneRefs = [];
   const entities = project.scene.entities.map(e => {
+    if (media) return snapshotEntity(project, e, r => sceneRefs.push(takeRef(r)), refById);
     const out = structuredClone(e);
     delete out.look; delete out.sheets;
-    if (!media) return out;
-    const look = !e.lookFrom && refById.get(e.look);
-    if (look) { sceneRefs.push(takeRef(look)); out.look = look.id; }
-    // Design sheets: the shown take of every slot, plus the composed board. A sheet with no images is dropped.
-    const sheets = [];
-    for (const sh of e.sheets || []) {
-      const slots = sh.slots.map(s => {
-        const shown = s.attempts.find(a => a.id === s.accepted) || s.attempts.find(a => a.id === s.selected) || s.attempts.at(-1);
-        const ref = shown && refById.get(shown.referenceId);
-        return ref ? { ...structuredClone(s), attempts: [{ ...structuredClone(shown), requestId: null }], selected: shown.id, accepted: s.accepted === shown.id ? shown.id : null, ref } : null;
-      });
-      if (!slots.some(Boolean) || slots.some(x => !x)) continue;
-      for (const s of slots) { if (s.ref.id !== out.look) sceneRefs.push(takeRef(s.ref)); delete s.ref; }
-      const composed = objectRefs.find(r => r.entityId === e.id && r.note === `sheet:${sh.id}:composed`);
-      if (composed) sceneRefs.push(takeRef(composed));
-      sheets.push({ ...structuredClone(sh), slots });
-    }
-    if (sheets.length) out.sheets = sheets;
     return out;
   });
   const ids = new Set(entities.map(e => e.id));

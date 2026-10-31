@@ -1,3 +1,4 @@
+import { loadBlockoutModels } from './director-models';
 // Home / launch page: what Comfy Three Previs does, how it works in three steps, starters, and your projects.
 import './director-home.css';
 import './director-home-mobile.css'; // [mobile]
@@ -163,8 +164,21 @@ async function importFile(file: File) {
     const r = await fetch('/api/director/import', { method: 'POST', headers: { 'Content-Type': 'application/zip' }, body: file });
     const data = await r.json();
     if (!r.ok) throw Error(data.error);
+    // The same drop target takes a shared asset (.previs-asset.zip): it goes to the library, not to a project.
+    if (data.kind === 'asset') { toast(data.text); return; }
     toast(`Imported “${data.project.title}”`);
     void render();
+  } catch (e) { toast((e as Error).message, true); }
+}
+
+// A Blender shot: the folder scripts/blender/previs_export.py wrote, zipped. It becomes a new project (docs/blender-import.md).
+async function importBlender(file: File) {
+  try {
+    toast('Importing the Blender shot…');
+    const r = await fetch(`/api/director/import-blender-zip?title=${encodeURIComponent(file.name.replace(/(\.previs-blender)?\.zip$/i, ''))}`, { method: 'POST', headers: { 'Content-Type': 'application/zip' }, body: file });
+    const data = await r.json();
+    if (!r.ok) throw Error(data.error);
+    location.href = `/director.html?project=${data.projectId}`;
   } catch (e) { toast((e as Error).message, true); }
 }
 
@@ -225,6 +239,7 @@ async function render() {
     const [data, s, st] = await Promise.all([api('director/projects'), api('director/setup').catch(() => null), api('director/starters').catch(() => ({ starters: [] }))]);
     projects = data.projects; agent = data.agent; connect = data.connect; archivedCount = data.archived; setup = s;
     served = (st.starters || []).map((t: any) => ({ key: t.slug, title: String(t.title).replace(/^Starter · /, ''), description: t.description, shots: t.shots, scene: t.scene, shot: { ...t.shot, id: `starter-${t.slug}`, references: [], render: null } }));
+    await loadBlockoutModels(served.flatMap(s => s.scene.entities));
     if (showArchived) archived = (await api('director/archived')).projects;
   } catch (e) { toast((e as Error).message, true); }
   const starters = served.length ? served : templateStarters();
@@ -232,6 +247,7 @@ async function render() {
     h('div', { class: 'home-head' }, h('h2', { id: 'starters-title' }, 'Starters'), h('span', {}, 'Open one and make it yours.')),
     starterCards(starters, key => void create(key)));
   const fileInput = h('input', { type: 'file', accept: '.zip,application/zip', hidden: true, onchange: (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (f) void importFile(f); } });
+  const blenderInput = h('input', { type: 'file', accept: '.zip,application/zip', hidden: true, onchange: (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (f) void importBlender(f); } });
   const newScene = (label: string, cls = 'primary') => h('button', { class: `home-btn ${cls}`, type: 'button', onclick: () => void create('empty') }, label);
   const list = projects.length
     ? h('div', { class: 'home-projects' }, ...projects.map(projectCard))
@@ -261,7 +277,8 @@ async function render() {
       starterSection,
       h('section', { class: 'home-section', 'aria-labelledby': 'projects-title' },
         h('div', { class: 'home-head' }, h('h2', { id: 'projects-title' }, 'Your projects'), projects.length ? h('span', {}, String(projects.length)) : null, h('i', { class: 'grow' }),
-          fileInput, h('button', { class: 'home-link', type: 'button', onclick: () => fileInput.click() }, 'Import…'),
+          fileInput, h('button', { class: 'home-link', type: 'button', title: 'A project (.previs.zip) or a shared asset (.previs-asset.zip)', onclick: () => fileInput.click() }, 'Import…'),
+          DEMO ? null : blenderInput, DEMO ? null : h('button', { class: 'home-link', type: 'button', title: 'A zip of the folder scripts/blender/previs_export.py wrote: Blender’s camera, objects and frames become a new project', onclick: () => blenderInput.click() }, 'Import Blender shot…'),
           archivedCount ? h('button', { class: 'home-link home-archived', type: 'button', 'aria-pressed': String(showArchived), onclick: () => { showArchived = !showArchived; void render(); } }, showArchived ? 'Hide archived' : `Archived · ${archivedCount}`) : null),
         list, archivedList)));
 }

@@ -18,6 +18,7 @@
         "name": "Alpine lake",
         "kind": "environment",
         "shape": "cylinder",
+        "model": "lake",
         "position": [
           0,
           0.45,
@@ -44,6 +45,7 @@
         "name": "River 1",
         "kind": "environment",
         "shape": "box",
+        "model": "river",
         "position": [
           18,
           0.3,
@@ -70,6 +72,7 @@
         "name": "River 2",
         "kind": "environment",
         "shape": "box",
+        "model": "river",
         "position": [
           15.4,
           0.3,
@@ -95,6 +98,7 @@
         "name": "River 3",
         "kind": "environment",
         "shape": "box",
+        "model": "river",
         "position": [
           12.8,
           0.3,
@@ -120,6 +124,7 @@
         "name": "River 4",
         "kind": "environment",
         "shape": "box",
+        "model": "river",
         "position": [
           10.2,
           0.3,
@@ -145,6 +150,7 @@
         "name": "River 5",
         "kind": "environment",
         "shape": "box",
+        "model": "river",
         "position": [
           7.6,
           0.3,
@@ -170,6 +176,7 @@
         "name": "River 6",
         "kind": "environment",
         "shape": "box",
+        "model": "river",
         "position": [
           5,
           0.3,
@@ -195,6 +202,7 @@
         "name": "Pine 30,40 · 1",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           39.8,
           0.085,
@@ -220,6 +228,7 @@
         "name": "Pine 30,40 · 2",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           28,
           0.076,
@@ -245,6 +254,7 @@
         "name": "Pine 30,40 · 3",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           19.4,
           0.09,
@@ -270,6 +280,7 @@
         "name": "Pine 30,40 · 4",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           33.1,
           0.129,
@@ -295,6 +306,7 @@
         "name": "Pine 30,40 · 5",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           32.1,
           0.049,
@@ -320,6 +332,7 @@
         "name": "Pine 30,40 · 6",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           31.4,
           0.063,
@@ -345,6 +358,7 @@
         "name": "Pine 30,40 · 7",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           31,
           0.123,
@@ -370,6 +384,7 @@
         "name": "Pine -25,-10 · 1",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -20.6,
           -0.039,
@@ -395,6 +410,7 @@
         "name": "Pine -25,-10 · 2",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -32.5,
           -0.026,
@@ -420,6 +436,7 @@
         "name": "Pine -25,-10 · 3",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -23.5,
           -0.009,
@@ -445,6 +462,7 @@
         "name": "Pine -25,-10 · 4",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -24.2,
           -0.006,
@@ -470,6 +488,7 @@
         "name": "Pine -25,-10 · 5",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -14.8,
           -0.022,
@@ -495,6 +514,7 @@
         "name": "Pine -25,-10 · 6",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -32.7,
           -0.013,
@@ -520,6 +540,7 @@
         "name": "Pine -25,-10 · 7",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -29.8,
           -0.016,
@@ -545,6 +566,7 @@
         "name": "Pine -25,-10 · 8",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -26.2,
           -0.011,
@@ -570,6 +592,7 @@
         "name": "Pine 20,-20 · 1",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           27,
           -0.044,
@@ -595,6 +618,7 @@
         "name": "Pine 20,-20 · 2",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           30.4,
           -0.055,
@@ -620,6 +644,7 @@
         "name": "Pine 20,-20 · 3",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           27,
           -0.064,
@@ -645,6 +670,7 @@
         "name": "Pine 20,-20 · 4",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           27.6,
           -0.052,
@@ -670,6 +696,7 @@
         "name": "Pine 20,-20 · 5",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           19.9,
           -0.054,
@@ -695,6 +722,7 @@
         "name": "Pine 20,-20 · 6",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           27,
           -0.049,
@@ -720,6 +748,7 @@
         "name": "Pine -45,-60 · 1",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -55.4,
           -0.012,
@@ -745,6 +774,7 @@
         "name": "Pine -45,-60 · 2",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -43.1,
           -0.018,
@@ -770,6 +800,7 @@
         "name": "Pine -45,-60 · 3",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -39.8,
           -0.024,
@@ -795,6 +826,7 @@
         "name": "Pine -45,-60 · 4",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -34.4,
           -0.052,
@@ -820,6 +852,7 @@
         "name": "Pine -45,-60 · 5",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -45.2,
           -0.037,
@@ -845,6 +878,7 @@
         "name": "Pine -45,-60 · 6",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -39.3,
           -0.037,
@@ -870,6 +904,7 @@
         "name": "Pine -45,-60 · 7",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -45.1,
           -0.04,
@@ -895,6 +930,7 @@
         "name": "Pine 45,-65 · 1",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           39.7,
           0.037,
@@ -920,6 +956,7 @@
         "name": "Pine 45,-65 · 2",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           46.2,
           0.094,
@@ -945,6 +982,7 @@
         "name": "Pine 45,-65 · 3",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           49.4,
           0.074,
@@ -970,6 +1008,7 @@
         "name": "Pine 45,-65 · 4",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           35,
           0.023,
@@ -995,6 +1034,7 @@
         "name": "Pine 45,-65 · 5",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           33.3,
           0.035,
@@ -1020,6 +1060,7 @@
         "name": "Pine 45,-65 · 6",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           39.8,
           0.038,
@@ -1045,6 +1086,7 @@
         "name": "Pine 60,80 · 1",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           48.9,
           0.177,
@@ -1070,6 +1112,7 @@
         "name": "Pine 60,80 · 2",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           46.49,
           0.175,
@@ -1095,6 +1138,7 @@
         "name": "Pine 60,80 · 3",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           49.19,
           0.177,
@@ -1120,6 +1164,7 @@
         "name": "Pine 60,80 · 4",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           50.02,
           0.178,
@@ -1145,6 +1190,7 @@
         "name": "Pine 60,80 · 5",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           44.88,
           0.173,
@@ -1170,6 +1216,7 @@
         "name": "Pine tree",
         "kind": "environment",
         "shape": "tree",
+        "model": "pine",
         "position": [
           -30,
           0.013,
@@ -1196,6 +1243,7 @@
         "name": "Elk 1",
         "kind": "prop",
         "shape": "box",
+        "model": "elk",
         "position": [
           -27,
           -0.033,
@@ -1222,6 +1270,7 @@
         "name": "Elk 2",
         "kind": "character",
         "shape": "box",
+        "model": "elk",
         "position": [
           -27,
           -0.042,
@@ -1247,6 +1296,7 @@
         "name": "Elk 3",
         "kind": "character",
         "shape": "box",
+        "model": "elk",
         "position": [
           -27,
           -0.044,
@@ -1272,6 +1322,7 @@
         "name": "Bald eagle",
         "kind": "prop",
         "shape": "bird",
+        "model": "eagle",
         "position": [
           20,
           22,
@@ -1446,6 +1497,7 @@
         "name": "Alpine terrain",
         "kind": "environment",
         "shape": "terrain",
+        "model": "terrain",
         "position": [
           0,
           0,

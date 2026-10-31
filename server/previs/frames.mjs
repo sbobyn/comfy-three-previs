@@ -56,6 +56,12 @@ function ffmpeg(args) {
   });
 }
 
+/** One frame of a local video at t seconds as PNG or JPEG bytes, no wider than width (the clip's own size at most). */
+export async function videoFrame(file, t, { width = 1280, type = 'image/png' } = {}) {
+  const bytes = await ffmpeg(frameArgs([{ file, t }], { width, cols: 1, type }));
+  return { bytes, ...imageSize(bytes) };
+}
+
 /** GET /api/director/asset-frame?projectId&(assetId&t…|referenceId…|shotId&t…)&width&cols&type → { data, mime, width, height, frames }. */
 export function frameRoutes({ director, headless }) {
   return async function route(url) {

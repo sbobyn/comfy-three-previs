@@ -78,6 +78,17 @@ export function validateBrowser(input) {
   return { subject: input.subject, camera: input.camera, frames: input.frames, sceneVersion: director ? 2 : 1, ...(input.delivery ? { delivery: browserDelivery(input.delivery) } : {}), ...(director ? { director } : {}) };
 }
 
+/**
+ * Add a saved browser camera shot (and its first-frame render) to the engine project `p`, as POST /api/browser-shot
+ * does. `browser` comes from validateBrowser, `image` from project.image. Shared with the Blender import.
+ */
+export function addBrowserShot(p, { id, title, browser, image }) {
+  const binding = { source: 'three', scene: browser.director ? String(browser.director.sceneName || 'Director scene').slice(0, 120) : 'Camera study', camera: browser.director ? 'Director camera' : 'Operated camera', fps: 24, start: 0, end: Math.max(0, Math.floor((browser.frames.at(-1)?.t || 0) * 24 + 1e-8)), frame: 0 };
+  p.shots.push({ id, title: String(title || 'Camera study').slice(0, 160), createdRevision: p.revision + 1, binding, browser, renders: [image.id] });
+  p.renders.push({ id: image.id, shotId: id, source: 'three', pass: 'beauty', width: image.width, height: image.height, binding, createdAt: new Date().toISOString() });
+  if (!browser.director && !p.scenes.some(s => s.owner === 'three')) p.scenes.push({ id: randomUUID(), owner: 'three', name: 'Camera study', version: 1 });
+}
+
 // Snapshot of the director blockout a browser recording was rendered from.
 function validateDirectorSnapshot(d) {
   const id = /^[a-f0-9-]{36}$/;
