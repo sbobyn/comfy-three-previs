@@ -10,8 +10,10 @@ export const TIERS = {
   final: { looks: 'flux-3', sheets: 'flux-3', stills: 'gpt-image-25', videos: 'seedance-25-edit-v1' },
 };
 export const IMAGE_PRICES = { 'flux-2-pro': 0.028, 'flux-2-max': 0.071, 'flux-3': 0.066, 'flux-ultra': 0.06, 'gpt-image-25': 0.076, 'seedream-5-pro': 0.045, 'nano-banana-pro': 0.161, 'nano-banana-2-1': 0.05, 'nano-banana-2': 0.081, 'local-checkpoint': 0 };
-// Paid still grader (PREVIS_MATCH_GRADER=gemini): token-billed, about $0.05 per graded still (two small images in, one short
-// verdict out). 2026-10-31: 39 grades booked $1.95 that no batch estimate counted; the regeneration overran its cap by $1.84.
+// Paid still grader (PREVIS_MATCH_GRADER=gemini): token-billed (two small images in, one short verdict out). $0.05 per grade is the
+// reservation: the server ledger booked it for 39 grades on 2026-10-31 ($1.95 that no batch estimate counted, so the regeneration
+// overran its cap by $1.84). It is an upper bound: billing for that hour shows gemini-3.5-flash at $0.2529 for the ~40 grades
+// (about $0.006 each; `pnpm usage:settle`). Lower this once a second day confirms it; until then the cap stays safe.
 export const GRADER_PRICES = { gemini: 0.05 };
 // Reference-image surcharges per image the model receives (a still's blockout guide counts as one). usdPerRef is an upper-bound
 // assumption from the saved live price badges (docs: .evidence/CREDITS-AND-COMPUTE-2026-10-30.md, "Reference costs"); `free` images
