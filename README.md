@@ -55,6 +55,7 @@ Claude does the same with `previs_director_batch_generate` and `dryRun: true`.
 | `PREVIS_ALLOW_PAID` | Set to `1` to allow paid generation. Default `0`; each run still shows a cost estimate first. |
 | `PORT` | Server port. Default `5190`. |
 | `PREVIS_DATA_DIR` | Where projects are stored. Default `.previs/` in the checkout. |
+| `PREVIS_LIBRARY_DIR` | Where shared assets are stored. Default `PREVIS_DATA_DIR/library/`. Point several data dirs at one library to share it (one server at a time). |
 | `PREVIS_COMFY_URL` | A local ComfyUI server, e.g. `http://127.0.0.1:8000`. |
 | `PREVIS_FFMPEG`, `PREVIS_FFPROBE` | Full paths if FFmpeg is not on your `PATH`. |
 | `PREVIS_PHONE_*` | Phone camera over HTTPS (see below). |
@@ -90,7 +91,7 @@ claude mcp add comfy-previs -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to
 
 Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, quote generations and run them. Paid tools do not ask you again: each call carries a `maxCostUsd` that Claude sets and the run is skipped when the estimate is higher, and nothing paid runs unless the server has `PREVIS_ALLOW_PAID=1`. Models without a price estimate are refused unless the call passes `allowUnknownCost` and the server runs with `PREVIS_ALLOW_UNKNOWN_COST=1`. Every run also counts against the server's budget caps (see Configuration). Tell Claude your budget, or leave `PREVIS_ALLOW_PAID` at `0` to keep it to free work and quotes.
 
-Claude sees the director tools (`previs_director_*`). The older engine, Blender and raw-workflow tools (`previs_render_animation`, `previs_submit_passthrough` and the like) are listed only when the MCP server runs with `PREVIS_MCP_LEGACY=1`; their Blender, transfer, raw Comfy and handoff routes also need the app started with `PREVIS_LEGACY_ROUTES=1`.
+Claude sees the director tools (`previs_director_*`) and the asset library tools (`previs_library_list`, `_save`, `_place`, `_import`, `_export`), so "put @red-racecar at the start line" places a saved car in the current project. The older engine, Blender and raw-workflow tools (`previs_render_animation`, `previs_submit_passthrough` and the like) are listed only when the MCP server runs with `PREVIS_MCP_LEGACY=1`; their Blender, transfer, raw Comfy and handoff routes also need the app started with `PREVIS_LEGACY_ROUTES=1`.
 
 ## Phone camera
 
@@ -119,6 +120,12 @@ Your phone streams its orientation to the app over HTTPS on your local network.
 Open one from the home page and make it yours: **Breaking News** (a news anchor breaks the story of this launch), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage. Each opens with every cast member's image and design sheet, stills, a blockout clip and a generated video for each shot, and a cut. The media is in the repo (about 32 MB, see [examples/starters](examples/starters/README.md)), so nothing is downloaded or generated.
 
 When a starter's blocking has changed since its stills and videos were made, it says so when you open it and marks those videos "older"; generating makes matching ones. If its media files are not in your checkout, it opens as a blockout and says that instead. A starter's blockout clip is for watching: generating first makes the shot's own blockout (free, in the browser).
+
+## Asset library
+
+Save any object to reuse it in other projects: select it and choose **Save to library** under Appearance (or ask Claude, `previs_library_save`). The object comes with everything grouped under it, its description, style notes, primary cast image and design sheets. The library lives in `PREVIS_DATA_DIR/library/`, outside any project, so archiving a project keeps it. In another project, open **Library → Shared assets** and choose **Place**, or tell Claude "put @red-racecar at the start line". A placed object answers to its @handle; a second copy becomes `@red-racecar-2`. Saving an object again makes a new version.
+
+To share an asset, **Export** writes one `<handle>.previs-asset.zip`. Drop it on the home page's **Import…** (it goes to the library, not a new project), use **Import asset…** in the Library dialog, or have Claude run `previs_library_import` with its path. Claude can also take one object out of a colleague's `.previs.zip` project export. Bundles hold only `asset.json` and `refs/` images (PNG, JPEG, WebP up to 10 MB each, 64 MB per bundle, 50 objects per asset). They contain no local paths, job ids or keys, and imports refuse anything else.
 
 ## What models work today
 

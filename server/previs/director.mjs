@@ -755,7 +755,7 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
         const r = await director.library.place(input.projectId, input);
         // The activity line names the placed asset once, not every object grouped under it.
         if (meta.agent) { const text = summarizeOps(r.ops.filter(o => o.op !== 'add_entity' || o.entity.from), r.project); if (text) { const pr = await director.progress(input.projectId, { text, auto: true }); if (pr.logged) r.project = pr.project; } }
-        delete r.ops; return r;
+        return r; // ops (add_entity with their ids) let the browser redo a Place after undoing it
       }
       // [agent] Built-in runner tools (scoped to one message) and the browser's proposal decisions.
       case '/api/director/agent/scene': { const { project: p, pending, shotId } = await director.preview(input.projectId, input.messageId); return sceneView(p, shotId, pending); }

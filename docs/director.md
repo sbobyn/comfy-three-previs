@@ -135,6 +135,16 @@ Choose the versions, order and timing of the film.
 
 ![Cut board: order, version, trims and export](../public/guide/cut.webp)
 
+## Library: reuse objects across projects
+
+Save a cast member or a set piece once and place it in any project on this computer.
+
+- Select the object and choose **Save to library** under Appearance. Give it a name (its @handle) and a few tags. A group saves with everything inside it.
+- The asset keeps the description, style notes, primary cast image and each finished design sheet. If the object shares another object's image, that image and description are copied into the asset. Animation and shot images are left behind.
+- In another project, open **Library → Shared assets** and choose **Place**. The object lands 2 m in front of the shot's subject, selected, and Undo removes it. Through Claude: "put @red-racecar at the start line". An @handle names an object in the scene when one has it; otherwise Claude looks in the library.
+- Saving the same object again, or a placed copy of it, makes the next version; older versions stay in `library/assets/<id>/versions/`. Nothing in the library is deleted by the app.
+- **Export** writes one `<handle>.previs-asset.zip` to share. **Import asset…** in the Library dialog, or **Import…** on the home page, adds one to your library. An asset you already have with the same content is left unchanged; new content becomes its next version.
+
 ## Other ways to work
 
 You can direct the same project through Claude using the MCP connector; see the [README setup](../README.md#direct-scenes-from-claude-mcp). Phone aiming requires local HTTPS and a trusted certificate. The public demo is read-only; generation needs a local installation.

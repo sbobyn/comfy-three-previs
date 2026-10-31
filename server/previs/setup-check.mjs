@@ -3,6 +3,7 @@
 import { spawn } from 'node:child_process';
 import { access, mkdir, constants } from 'node:fs/promises';
 import { join } from 'node:path';
+import { openLibrary, libraryDir, LIMITS } from './library.mjs';
 
 function version(cmd, args = ['-version']) {
   return new Promise(resolve => {
@@ -28,6 +29,14 @@ export async function setupChecks({ root, data, env = process.env, fetcher = fet
   if (data) {
     let writable = false; try { await mkdir(data, { recursive: true }); await access(data, constants.W_OK); writable = true; } catch {}
     add('data', 'Project folder writable', writable ? 'ok' : 'required', data, 'Set PREVIS_DATA_DIR to a folder you can write to.');
+    // Shared assets: the app skips a manifest it cannot read; say which ones here. Only shown once a library exists.
+    const lib = libraryDir(data, env);
+    if (await exists(join(lib, 'assets'))) {
+      const { assets, bad } = await openLibrary(lib).scan();
+      const many = assets.length > LIMITS.assets;
+      add('library', 'Asset library', bad.length || many ? 'warn' : 'ok', `${assets.length} shared asset${assets.length === 1 ? '' : 's'} in ${lib}${bad.length ? `; ${bad.length} unreadable: ${bad.slice(0, 3).join(', ')}${bad.length > 3 ? '…' : ''}` : ''}`,
+        bad.length ? 'Those folders under library/assets/ have a missing or broken asset.json; move them aside or import the asset again.' : many ? `More than ${LIMITS.assets} assets makes listing slow; export and remove ones you no longer use.` : '');
+    }
   }
   add('env', '.env file', await exists(join(root, '.env')) ? 'ok' : 'optional', await exists(join(root, '.env')) ? '.env present' : 'No .env (optional)', 'cp .env.example .env, then add keys you need.');
   add('cloud', 'Comfy Cloud key', env.COMFY_CLOUD_API_KEY ? 'ok' : 'optional', env.COMFY_CLOUD_API_KEY ? 'COMFY_CLOUD_API_KEY is set' : 'Not set — Cloud quotes and generation unavailable', 'Create a key at comfy.org and put it in .env as COMFY_CLOUD_API_KEY=… (never commit it).');

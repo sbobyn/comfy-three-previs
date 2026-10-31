@@ -282,6 +282,11 @@ test('HTTP routes, /library-refs and the previs_library_* MCP tools: "put @red-r
       const placed = await call('previs_library_place', { projectId: night.id, asset: '@comfy-car', position: [0, 0, 6], rotation: 180, shot: '1' });
       assert.equal(placed.error, false, placed.out);
       assert.equal(placed.out.handle, 'comfy-car'); assert.match(placed.out.text, /^Placed @comfy-car v1 at \[0, 0, 6\]$/);
+      const viaHttp = await post('/api/director/library/place', { projectId: night.id, asset: 'comfy-car', position: [4, 0, 6] });
+      assert.deepEqual(viaHttp.data.ops.filter(o => o.op === 'add_entity').map(o => o.entity.id), viaHttp.data.entityIds, 'the browser gets the ops to redo a Place');
+      await post('/api/director/edit', { projectId: night.id, ops: [...viaHttp.data.entityIds].reverse().map(id => ({ op: 'remove_entity', id })) });
+      const redone = await post('/api/director/edit', { projectId: night.id, ops: viaHttp.data.ops.filter(o => o.op === 'add_entity') });
+      assert.equal(redone.status, 200); assert.ok(redone.data.project.scene.entities.find(e => e.id === viaHttp.data.root).look, 'undo then redo keeps its image');
       const { data: got } = await post('/api/director/get', { projectId: night.id });
       const car = got.project.scene.entities.find(e => e.id === placed.out.root);
       assert.equal(car.notes, source.notes); assert.equal(car.sheets.length, source.sheets.length); assert.ok(car.look);
@@ -292,7 +297,7 @@ test('HTTP routes, /library-refs and the previs_library_* MCP tools: "put @red-r
 
       const missing = await call('previs_library_place', { projectId: night.id, asset: '@comfy' });
       assert.equal(missing.error, false, 'a unique prefix still resolves');
-      assert.equal(missing.out.handle, 'comfy-car-2');
+      assert.equal(missing.out.handle, 'comfy-car-3');
       const none = await call('previs_library_place', { projectId: night.id, asset: '@red-racecar' });
       assert.equal(none.error, true); assert.match(none.out, /No library asset is called “@red-racecar”\. Nearest: @comfy-car/);
       assert.equal((await post('/api/director/library/save', { projectId: night.id, object: car.id })).status, 200);

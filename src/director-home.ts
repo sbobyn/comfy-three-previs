@@ -163,6 +163,8 @@ async function importFile(file: File) {
     const r = await fetch('/api/director/import', { method: 'POST', headers: { 'Content-Type': 'application/zip' }, body: file });
     const data = await r.json();
     if (!r.ok) throw Error(data.error);
+    // The same drop target takes a shared asset (.previs-asset.zip): it goes to the library, not to a project.
+    if (data.kind === 'asset') { toast(data.text); return; }
     toast(`Imported “${data.project.title}”`);
     void render();
   } catch (e) { toast((e as Error).message, true); }
@@ -261,7 +263,7 @@ async function render() {
       starterSection,
       h('section', { class: 'home-section', 'aria-labelledby': 'projects-title' },
         h('div', { class: 'home-head' }, h('h2', { id: 'projects-title' }, 'Your projects'), projects.length ? h('span', {}, String(projects.length)) : null, h('i', { class: 'grow' }),
-          fileInput, h('button', { class: 'home-link', type: 'button', onclick: () => fileInput.click() }, 'Import…'),
+          fileInput, h('button', { class: 'home-link', type: 'button', title: 'A project (.previs.zip) or a shared asset (.previs-asset.zip)', onclick: () => fileInput.click() }, 'Import…'),
           archivedCount ? h('button', { class: 'home-link home-archived', type: 'button', 'aria-pressed': String(showArchived), onclick: () => { showArchived = !showArchived; void render(); } }, showArchived ? 'Hide archived' : `Archived · ${archivedCount}`) : null),
         list, archivedList)));
 }

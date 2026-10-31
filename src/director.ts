@@ -1055,12 +1055,13 @@ function resultsBlock(s: Shot): Node[] {
       h('div', { class: 'vid-meta' }, h('span', {}, (a.source.workflow || 'Video').split(' ·')[0]), h('span', { class: 'muted' }, `${a.duration != null ? Number(a.duration).toFixed(1) : '—'}s · ${a.width}×${a.height} · ${new Date(a.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`),
         h('button', { class: 'linklike', type: 'button', title: 'Compare the video with its blockout', onclick: () => { setStep('cut'); sequence.open(s.id, 'compare'); } }, 'Compare')))))];
 }
-async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' | 'ref' = 'all') {
+async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' | 'ref' | 'shared' = 'all') {
   document.getElementById('assets-dialog')?.remove();
-  let assets: Asset[] = [];
+  let assets: Asset[] = [], library: LibraryCard[] = [];
   try { assets = (await api(`director/assets?id=${projectId}`)).assets; } catch (e) { toast((e as Error).message, true); }
+  if (!DEMO) try { library = (await api('director/library')).assets; } catch (e) { toast((e as Error).message, true); }
   const shotLabel = (id: string) => { const i = project.shots.findIndex(x => x.id === id); return i < 0 ? 'Removed shot' : `Shot ${String(i + 1).padStart(2, '0')} · ${project.shots[i].title}`; };
-  type Item = { kind: 'cut' | 'render' | 'result' | 'look' | 'ref'; title: string; sub: string; url: string; video: boolean; created: string; meta: string; actions: Node[] };
+  type Item = { kind: 'cut' | 'render' | 'result' | 'look' | 'ref' | 'shared'; title: string; sub: string; url: string; video: boolean; created: string; meta: string; actions: Node[]; badge?: string; thumb?: Node };
   const items: Item[] = [
     ...assets.map(a => ({
       kind: a.kind === 'camera-render' ? 'render' as const : a.kind === 'edit' ? 'cut' as const : 'result' as const,
@@ -1072,28 +1073,83 @@ async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' 
     })),
     ...(project.scene.references || []).filter(r => entity(r.entityId)).map(r => ({ kind: 'look' as const, title: r.name, sub: `Cast image · ${entity(r.entityId)?.name || 'object'}${entity(r.entityId)?.look === r.id ? ' · primary' : ''}`, url: refUrl(r), video: false, created: r.createdAt, meta: r.generated ? `✦ ${r.generated.model.split(' (')[0]} · seed ${r.generated.seed}` : 'uploaded', actions: [h('a', { class: 'btn sm', href: refUrl(r), download: r.file }, 'Download')] })),
     ...project.shots.flatMap(s => s.references.map(r => ({ kind: 'ref' as const, title: r.name, sub: `${shotLabel(s.id)} · ${r.role}`, url: refUrl(r), video: false, created: r.createdAt, meta: entity(r.entityId) ? `→ ${entity(r.entityId)!.name}` : 'not linked', actions: [h('a', { class: 'btn sm', href: refUrl(r), download: r.file }, 'Download')] }))),
+    // Shared assets live in this computer's library, outside any project; Place copies one in.
+    ...library.map(a => ({ kind: 'shared' as const, title: a.name, sub: `@${a.handle} · ${a.kind}${a.objects > 1 ? ` · ${a.objects} objects` : ''}`, url: a.thumb || '', video: false, created: a.savedAt, badge: `v${a.version}`,
+      thumb: a.thumb ? undefined : h('div', { class: 'asset-shape', style: `color:${a.color}` }, shapeIcon(a.shape)),
+      meta: `${a.footprint.map(v => v.toFixed(1)).join(' × ')} m${a.looks ? ` · ${a.looks} image${a.looks === 1 ? '' : 's'}` : ''}${a.sheetViews ? ` · ${a.sheetViews}-view sheet` : ''}${a.tags.length ? ` · ${a.tags.join(', ')}` : ''}`,
+      actions: [h('button', { class: 'btn sm', type: 'button', title: 'Put it 2 m in front of this shot’s subject, selected', onclick: () => void placeFromLibrary(a) }, 'Place'), h('a', { class: 'btn sm', href: `/api/director/library/export?id=${a.id}`, download: '' }, 'Export')] })),
   ].sort((a, b) => b.created.localeCompare(a.created));
-  const labels = { all: 'All', result: 'Videos', cut: 'Films', look: 'Cast images', render: 'Blockouts', ref: 'Shot images' } as const;
-  let filter: keyof typeof labels = initial;
+  const labels = { all: 'All', result: 'Videos', cut: 'Films', look: 'Cast images', render: 'Blockouts', ref: 'Shot images', ...(DEMO ? {} : { shared: 'Shared assets' }) } as Record<Item['kind'] | 'all', string>;
+  let filter = (labels[initial] ? initial : 'all') as keyof typeof labels;
   const grid = h('div', { class: 'asset-grid' });
   const seg = h('div', { class: 'seg' });
+  const own = items.filter(i => i.kind !== 'shared');
+  const note = h('p', { class: 'note', style: 'margin:0' });
   const draw = () => {
-    seg.replaceChildren(...(Object.keys(labels) as (keyof typeof labels)[]).map(k => h('button', { type: 'button', class: k === filter ? 'on' : '', onclick: () => { filter = k; draw(); } }, `${labels[k]} · ${k === 'all' ? items.length : items.filter(i => i.kind === k).length}`)));
-    const shown = items.filter(i => filter === 'all' || i.kind === filter);
+    seg.replaceChildren(...(Object.keys(labels) as (keyof typeof labels)[]).map(k => h('button', { type: 'button', class: k === filter ? 'on' : '', onclick: () => { filter = k; draw(); } }, `${labels[k]} · ${k === 'all' ? own.length : items.filter(i => i.kind === k).length}`)));
+    note.textContent = filter === 'shared' ? 'Shared assets live in this computer’s library, outside any project: save an object with Save to library, then place it in any project. Export makes one .zip to share; Import asset… takes one in.' : 'Everything here lives in this project’s own folder, so exporting it carries videos, films, blockouts and images together.';
+    const shown = filter === 'all' ? own : items.filter(i => i.kind === filter);
     grid.replaceChildren(...(shown.length ? shown.map(i => h('div', { class: 'asset' },
-      i.video ? h('video', { src: i.url, muted: true, loop: true, playsinline: true, preload: 'metadata', controls: true }) : h('img', { src: i.url, alt: i.title, loading: 'lazy' }),
+      i.thumb ?? (i.video ? h('video', { src: i.url, muted: true, loop: true, playsinline: true, preload: 'metadata', controls: true }) : h('img', { src: i.url, alt: i.title, loading: 'lazy' })),
       h('div', { class: 'a-body' },
-        h('div', { class: 'a-title' }, h('span', { class: `badge ${i.kind === 'render' || i.kind === 'cut' ? 'render' : i.kind === 'result' ? 'result' : 'look'}` }, labels[i.kind].replace(/s$/, '')), h('span', { style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap' }, i.title)),
+        h('div', { class: 'a-title' }, h('span', { class: `badge ${i.kind === 'render' || i.kind === 'cut' ? 'render' : i.kind === 'result' ? 'result' : 'look'}` }, i.badge ?? labels[i.kind].replace(/s$/, '')), h('span', { style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap' }, i.title)),
         h('span', { class: 'muted' }, i.sub),
         h('span', { class: 'a-meta' }, `${i.meta} · ${new Date(i.created).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`),
-        h('div', { class: 'a-actions' }, ...i.actions)))) : [h('div', { class: 'empty-state', style: 'grid-column:1/-1' }, 'Nothing here yet.')]));
+        h('div', { class: 'a-actions' }, ...i.actions)))) : [h('div', { class: 'empty-state', style: 'grid-column:1/-1' }, filter === 'shared' ? 'No shared assets yet. Select an object and use Save to library under Appearance.' : 'Nothing here yet.')]));
   };
   draw();
+  // A .previs-asset.zip someone shared: into this computer's library, then shown under Shared assets.
+  const assetFile = h('input', { type: 'file', accept: '.zip,application/zip', hidden: true, onchange: async (ev: Event) => {
+    const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return;
+    try { const r = await fetch('/api/director/library/import-zip', { method: 'POST', headers: { 'Content-Type': 'application/zip' }, body: f }); const data = await r.json(); if (!r.ok) throw Error(data.error); toast(data.text); void openAssets('shared'); }
+    catch (e) { toast((e as Error).message, true); }
+  } });
+  const importAsset = h('span', {}, assetFile, h('button', { class: 'btn sm', type: 'button', title: 'Add a shared .previs-asset.zip to this computer’s library', onclick: () => assetFile.click() }, 'Import asset…'));
   const dlg = h('dialog', { class: 'assets', id: 'assets-dialog', 'aria-labelledby': 'assets-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Every cast member’s image and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), DEMO ? null : h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
-    h('div', { class: 'assets-body' }, seg, h('p', { class: 'note', style: 'margin:0' }, 'Everything here lives in this project’s own folder, so exporting it carries videos, films, blockouts and images together.'), grid));
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'assets-title' }, `Library · ${project.title}`), h('button', { class: 'btn sm', type: 'button', title: 'Every cast member’s image and the project style in one board', onclick: () => { dlg.close(); openLooks(); } }, 'Cast images'), DEMO ? null : h('a', { class: 'btn sm', href: `/api/director/export?id=${project.id}`, download: '' }, 'Export project (.zip)'), DEMO ? null : importAsset, h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'assets-body' }, seg, note, grid));
   document.body.append(dlg); dlg.showModal();
 }
+
+// ---------- Shared assets (server/previs/library.mjs) ----------
+type LibraryCard = { id: string; handle: string; name: string; kind: string; version: number; savedAt: string; tags: string[]; description: string; footprint: Vec3; objects: number; looks: number; sheetViews: number; thumb: string | null; shape: string; color: string };
+/** Place a library asset 2 m in front of this shot's subject (toward the camera), selected and undoable. */
+async function placeFromLibrary(a: LibraryCard) {
+  const s = shot(), target = entity(s.camera.target);
+  const centre: Vec3 = target ? [target.position[0], 0, target.position[2]] : [0, 0, 0];
+  const cam = cameraKeys(s, project.scene.entities)[0]?.p || [0, 0, 10];
+  const dx = cam[0] - centre[0], dz = cam[2] - centre[2], len = Math.hypot(dx, dz) || 1;
+  const position: Vec3 = [snap(centre[0] + (2 * dx) / len, 0.1), 0, snap(centre[2] + (2 * dz) / len, 0.1)];
+  try {
+    const r = await api('director/library/place', { projectId, asset: a.id, position });
+    apply(r.project);
+    undoStack.push({ label: `Place @${r.handle}`, redo: r.ops.filter((o: { op: string }) => o.op === 'add_entity'), undo: [...r.entityIds].reverse().map((id: string) => ({ op: 'remove_entity', id })) });
+    renderUndo();
+    document.getElementById('assets-dialog')?.remove();
+    if (step === 'cut') setStep('build');
+    select(r.root); toast(r.text);
+  } catch (e) { toast((e as Error).message, true); }
+}
+/** Save to library: name and tags, then the object (and everything grouped under it) goes to the shared library. */
+function saveToLibrary(e: Entity) {
+  const name = h('input', { class: 'field', type: 'text', value: e.name, maxlength: 60, 'aria-label': 'Asset name' });
+  const tags = h('input', { class: 'field', type: 'text', maxlength: 200, placeholder: 'car, hero, race', 'aria-label': 'Tags, separated by commas' });
+  const inside = withDescendants(project.scene.entities, [e.id]).length - 1;
+  const send = async (replace: boolean): Promise<void> => {
+    try { const r = await api('director/library/save', { projectId, object: e.id, name: name.value.trim() || e.name, tags: tags.value.split(',').map(t => t.trim()).filter(Boolean), replace }); toast(r.text); }
+    catch (err) { const msg = (err as Error).message; toast(msg, true, /already in the library/.test(msg) ? { label: 'Save over it', run: () => void send(true) } : undefined); }
+  };
+  const dlg = h('dialog', { class: 'confirm', 'aria-labelledby': 'save-asset-title' },
+    h('form', { class: 'dialog-body', method: 'dialog', onsubmit: () => void send(false) },
+      h('h2', { id: 'save-asset-title', style: 'margin:0;font-size:15px' }, 'Save to library'),
+      h('p', { class: 'muted', style: 'margin:0' }, `Keeps ${e.name}${inside ? ` and the ${inside} object${inside === 1 ? '' : 's'} grouped under it` : ''} with its description, cast images and design sheets, so any project on this computer can place it. Saving it again makes a new version.`),
+      h('label', { class: 'cc-field' }, h('span', {}, 'Name · its @handle'), name),
+      h('label', { class: 'cc-field' }, h('span', {}, 'Tags'), tags),
+      h('div', { style: 'display:flex;gap:8px;justify-content:flex-end' }, h('button', { class: 'btn', type: 'button', onclick: () => dlg.close() }, 'Cancel'), h('button', { class: 'btn primary', type: 'submit' }, 'Save'))));
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.append(dlg); dlg.showModal(); name.select();
+}
+const saveToLibraryBtn = (e: Entity) => DEMO ? null : h('button', { class: 'btn sm', type: 'button', style: 'margin-left:auto', title: 'Keep this object, its description, cast images and design sheets for any project', onclick: () => saveToLibrary(e) }, 'Save to library');
 
 // ---------- Object looks & generation ----------
 let looksBoard: { refresh(): void } | null = null;
@@ -1218,7 +1274,7 @@ function renderObjectPane() {
   const e = entity(selected);
   if (!e) { objectPane.replaceChildren(h('div', { class: 'empty-state', style: 'margin:8px' }, 'Select an object to design its image. ', h('button', { class: 'btn sm', type: 'button', onclick: () => openLooks() }, 'Open cast images'))); return; }
   if (selection.ids.length > 1) { objectPane.replaceChildren(h('div', { class: 'group-bar' }, h('span', {}, `${selection.ids.length} objects selected`), h('button', { class: 'btn sm', type: 'button', onclick: () => void groupSelection() }, 'Group', h('kbd', {}, '⌘G'))), inspector, h('p', { class: 'note' }, 'Select one object to design or generate its image.')); return; }
-  if (e.shape === 'group') { const n = withDescendants(project.scene.entities, [e.id]).length - 1; objectPane.replaceChildren(h('div', { class: 'group-bar' }, h('span', {}, `Group · ${n} object${n === 1 ? '' : 's'} inside`), h('button', { class: 'btn sm ghost', type: 'button', onclick: () => void ungroupSelection() }, 'Ungroup', h('kbd', {}, '⇧⌘G'))), inspector, h('p', { class: 'note' }, 'Move, rotate or resize the group and everything inside follows. Click an object inside it in the viewport to edit just that part.')); return; }
+  if (e.shape === 'group') { const n = withDescendants(project.scene.entities, [e.id]).length - 1; objectPane.replaceChildren(h('div', { class: 'group-bar' }, h('span', {}, `Group · ${n} object${n === 1 ? '' : 's'} inside`), h('button', { class: 'btn sm ghost', type: 'button', onclick: () => void ungroupSelection() }, 'Ungroup', h('kbd', {}, '⇧⌘G')), saveToLibraryBtn(e)), inspector, h('p', { class: 'note' }, 'Move, rotate or resize the group and everything inside follows. Click an object inside it in the viewport to edit just that part.')); return; }
   const looks = objectLooks(project, e.id), primary = looks[0];
   const source = lookSource(project, e.id), shared = source && source.id !== e.id ? source : null;
   const views = lookViews(e);
@@ -1292,7 +1348,7 @@ function renderObjectPane() {
       usedBy.length ? h('p', { class: 'note', style: 'margin:0' }, `Shared with ${usedBy.map(x => x.name).join(', ')}.`) : null,
       h('p', { class: 'note', style: 'margin:0' }, 'Sent with every shot that includes ', h('strong', {}, e.name), '; each video model takes a limited number of images.')),
     h('div', { class: 'block cast-card' },
-      h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Appearance')),
+      h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Appearance'), saveToLibraryBtn(e)),
       h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s description: ${shared.notes || '—'}`) : null, notes),
       h('label', { class: 'cc-field' }, h('span', {}, 'Style notes'), styleNotes),
       h('div', { class: 'ob-style' }, h('span', { class: 'muted' }, 'Project style: '), styleText ? h('span', {}, styleText) : h('span', { class: 'muted' }, 'not set'), h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openLooks() }, styleText ? 'Edit' : 'Set style')),
