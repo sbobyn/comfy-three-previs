@@ -36,7 +36,7 @@ function mockBackend(log) {
     async inspect() { log.push('inspect'); return { objectInfo: structuredClone(log.objectInfo || objectInfo) }; },
     async upload(bytes, o) { log.push('upload:' + bytes.length); return { value: `previs/${o.filename}` }; },
     async submit(req) { log.push('submit'); log.graph = req.graph; if (log.submitError) throw log.submitError(); if (log.failSubmit) throw Error('socket hang up'); return { promptId: 'p-' + req.requestId.slice(0, 8) }; },
-    async history() { log.push('history'); if (log.historyError) return { status: { status_str: 'error', completed: false }, error: log.historyError }; return log.done ? { status: { completed: true, status_str: 'success' }, outputs: { 7: { images: [{ filename: 'a.png', subfolder: '', type: 'output' }, { filename: 'b.png', subfolder: '', type: 'output' }] } } } : null; },
+    async history() { log.push('history'); if (log.historyError) return { status: { status_str: 'error', completed: false }, error: log.historyError }; return log.done ? { status: { completed: true, status_str: 'success' }, outputs: log.outputs || { 7: { images: [{ filename: 'a.png', subfolder: '', type: 'output' }, { filename: 'b.png', subfolder: '', type: 'output' }] } } } : null; },
     async view() { log.push('view'); return log.view ? log.view() : PNG; },
   });
 }
@@ -372,4 +372,42 @@ test('refgen: a stalled /view for one job never delays another job\'s submit; co
   assert.deepEqual(results.map(r => r.status).sort(), ['fulfilled', 'rejected']);
   assert.equal(results.find(r => r.status === 'rejected').reason.apiCode, 'duplicate');
   assert.equal(log.filter(x => x === 'submit').length, 3);
+});
+
+test('budget: a paid image reserves before dispatch, settles on completion, and is refused over the cap with nothing sent', async () => {
+  const { openBudget } = await import('../server/previs/budget.mjs');
+  const root = await mkdtemp(join(tmpdir(), 'previs-refgen-budget-'));
+  const budget = await openBudget(join(root, 'budget'), { env: { PREVIS_BUDGET_PROJECT_CAP_USD: '0.1' } });
+  const { project, refgen, log, runner } = await setup({ allowPaid: true, budget });
+  const approve = job => ({ approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 1, allowUnknownCharges: true } });
+  const job = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'a runner' });
+  const sent = await refgen.submit({ projectId: project.id, requestId: job.id, approval: approve(job) });
+  assert.equal(sent.status, 'submitted');
+  assert.equal(budget.get(job.id).state, 'reserved'); assert.equal(budget.get(job.id).estimateUsd, job.quote.estimate);
+  // A second image would cross the $0.10 project cap: refused before upload or dispatch, the draft stays quoted.
+  const second = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'another runner' });
+  const uploads = log.filter(x => x.startsWith('upload')).length;
+  await assert.rejects(refgen.submit({ projectId: project.id, requestId: second.id, approval: approve(second) }), e => e.status === 402 && e.apiCode === 'budget' && /Project budget cap reached/.test(e.message));
+  assert.equal(log.filter(x => x === 'submit').length, 1); assert.equal(log.filter(x => x.startsWith('upload')).length, uploads);
+  assert.equal(refgen.list(project.id).find(j => j.id === second.id).status, 'quoted');
+  log.done = true; log.outputs = { 2: { images: [{ filename: 'a.png', subfolder: '', type: 'output' }] } }; // FLUX Ultra saves at node 2
+  assert.equal((await refgen.track({ projectId: project.id, requestId: job.id })).status, 'completed');
+  assert.equal(budget.get(job.id).state, 'settled'); assert.equal(budget.status(project.id).project.spentUsd, job.quote.estimate);
+});
+
+test('budget: a backend rejection before it ran releases the reservation; an execution failure keeps it held', async () => {
+  const { openBudget } = await import('../server/previs/budget.mjs');
+  const root = await mkdtemp(join(tmpdir(), 'previs-refgen-budget-'));
+  const budget = await openBudget(join(root, 'budget'), { env: {} });
+  const { project, refgen, log, runner } = await setup({ allowPaid: true, budget });
+  const approve = job => ({ approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 1, allowUnknownCharges: true } });
+  log.submitError = () => Object.assign(Error('Payment required'), { httpStatus: 402 });
+  const rejected = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'a runner' });
+  assert.equal((await refgen.submit({ projectId: project.id, requestId: rejected.id, approval: approve(rejected) })).status, 'failed');
+  assert.equal(budget.get(rejected.id).state, 'released');
+  log.submitError = null; log.historyError = { nodeType: 'FluxProUltraImageNode', message: 'Server side error' };
+  const ran = await refgen.prepare({ projectId: project.id, entityId: runner.id, presetId: 'flux-ultra', prompt: 'another' });
+  await refgen.submit({ projectId: project.id, requestId: ran.id, approval: approve(ran) });
+  assert.equal((await refgen.track({ projectId: project.id, requestId: ran.id })).status, 'failed');
+  assert.equal(budget.get(ran.id).state, 'held');
 });

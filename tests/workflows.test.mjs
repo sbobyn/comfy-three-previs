@@ -18,7 +18,8 @@ const schema = {
   LoadImage: { python_module: 'nodes', output: ['IMAGE', 'MASK'], input: { required: { image: [['author.png'], { image_upload: true }] } } },
   SaveImage: { python_module: 'nodes', output_node: true, output: [], input: { required: { images: ['IMAGE'], filename_prefix: ['STRING', { default: 'ComfyUI' }] } } },
 };
-const definition = () => ({ version: 1, id: 'definition', task: 'passthrough', graph: structuredClone(graph), inputs: { image: { nodeId: '1', input: 'image' } }, outputs: [{ nodeId: '2', mediaType: 'image/png' }] });
+// Priced (a list rate), so Cloud submits pass the budget authority; local ones are free either way.
+const definition = () => ({ version: 1, id: 'definition', task: 'passthrough', graph: structuredClone(graph), inputs: { image: { nodeId: '1', input: 'image' } }, outputs: [{ nodeId: '2', mediaType: 'image/png' }], pricing: { status: 'estimate', currency: 'USD', ratePerSecond: 0.1 } });
 const approve = job => ({ approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 0 } });
 const deferred = [{ nodeId: '1', input: 'image', kind: 'image', mime: 'image/png', filename: 'new.png' }];
 
@@ -364,4 +365,31 @@ test('auto-grow input groups expand to named slots and are optional', async () =
   assert.equal(linked.compatible, true, JSON.stringify(linked.issues));
   const bad = validateGraph({ 1: { class_type: 'Gen', inputs: { prompt: 'p', model: 'm1', 'model.images.image_9': 'x' } } }, objectInfo);
   assert.equal(bad.compatible, false, 'unknown slots are still rejected');
+});
+
+test('budget: an unpriced Cloud request is refused before any upload; a priced one reserves its rate × seconds and settles', async () => {
+  const { openBudget } = await import('../server/previs/budget.mjs');
+  const { generationEstimate } = await import('../server/previs/generation.mjs');
+  const f = await fixture(), budget = await openBudget(join(f.root, 'budget'), { env: {} });
+  const generation = await openGeneration(f.root, f.project, { backendFactory: f.backendFactory, allowPaid: true, budget });
+  const cloud = () => ({ ...f.input(), backend: { kind: 'cloud' } });
+  const consent = job => ({ ...approve(job), allowance: { currency: 'USD', maxAmount: 5, allowUnknownCharges: true } });
+  await f.project.mutate(f.project.get().revision, p => { p.workflowDefinitions[0].pricing = { status: 'unknown' }; });
+  const unpriced = cloud(), q1 = await generation.quote(unpriced);
+  assert.equal(generationEstimate(q1), null);
+  await assert.rejects(generation.submit({ ...unpriced, approval: consent(q1) }), e => e.status === 402 && e.apiCode === 'budget' && /no price estimate/.test(e.message));
+  assert.equal(f.state.uploads, 0); assert.equal(f.state.submits, 0);
+  assert.equal(generation.get(unpriced.requestId).status, 'quoted'); assert.equal(generation.get(unpriced.requestId).lastAttempt.code, 'budget');
+  await f.project.mutate(f.project.get().revision, p => { p.workflowDefinitions[0].pricing = { status: 'estimate', currency: 'USD', ratePerSecond: 0.2 }; p.workflowBindings[0].parameters = {}; });
+  const priced = cloud(), q2 = await generation.quote(priced);
+  assert.equal(generationEstimate(q2), 1, '0.2/s × the 5 s default');
+  await generation.submit({ ...priced, approval: consent(q2) });
+  assert.equal(budget.get(priced.requestId).state, 'reserved'); assert.equal(budget.get(priced.requestId).estimateUsd, 1);
+  f.state.visible = true;
+  assert.equal((await generation.track(priced.requestId)).status, 'completed');
+  assert.equal(budget.get(priced.requestId).state, 'settled');
+  // Local work without partner API nodes never touches the ledger.
+  const local = f.input(), q3 = await generation.quote(local);
+  await generation.submit({ ...local, approval: approve(q3) });
+  assert.equal(budget.get(local.requestId), null);
 });

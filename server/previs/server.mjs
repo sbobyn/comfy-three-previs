@@ -31,6 +31,7 @@ import { createJobProgress, createProgressSocketFactory } from './job-progress.m
 import { createJobProgressRoutes } from './job-progress-routes.mjs';
 import { createProgressCoordinator } from './job-progress-coordinator.mjs';
 import { keyedLock } from './keyed-lock.mjs';
+import { openBudget, budgetDir } from './budget.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -40,14 +41,17 @@ const project = await openProject(data);
 const blender = new BlenderMcp();
 const operations = await openOperations(data);
 const comfy = await openComfy(data, project);
+// One budget authority for every paid dispatch in this server (and any other server sharing PREVIS_BUDGET_DIR).
+let progress;
+const budget = await openBudget(budgetDir(data), { onChange: ({ alerts }) => { for (const a of alerts) console.log(`[budget] ${a.message}`); progress?.publishBudget(); } });
 // [live-progress] Ephemeral observer; stores get nonthrowing hooks, the tracker stays the only authority.
 let tracker; const jobSources = {};
 const observe = createJobProgress({ connect: createProgressSocketFactory({ WebSocket }), trackNow: (source, id) => tracker?.trackNow(source, id) });
-const progress = createProgressCoordinator({ observe, sources: jobSources });
-const generation = await generationRoutes(data,project,{ telemetry: progress.telemetry('generation') });
+progress = createProgressCoordinator({ observe, sources: jobSources, budget });
+const generation = await generationRoutes(data,project,{ telemetry: progress.telemetry('generation'), budget, log: console.log });
 let refgen, agentRunner; // [agent]
 const director = await openDirector(data, { engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
-refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen') });
+refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen'), budget, log: console.log });
 jobSources.generation = generation.trackerSource({ director }); jobSources.refgen = refgen.trackerSource();
 tracker = createJobTracker({ sources: [jobSources.generation, jobSources.refgen], limits: () => slotsFor(data).snapshot(), log: line => console.log(`[jobs] ${line}`) });
 generation.useTracker(tracker); refgen.useTracker(tracker); tracker.start();
@@ -124,9 +128,24 @@ const server = createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/api/phone') return send(phoneLan.readiness());
     if (req.method === 'GET' && url.pathname === '/api/generation') return send(generation.state());
     if (req.method === 'GET' && url.pathname === '/api/jobs') {
-      const id = url.searchParams.get('projectId'), snap = tracker.snapshot(); if (id === null) return send(snap);
+      await budget.refresh().catch(() => {}); // another server may share the ledger
+      const id = url.searchParams.get('projectId'), snap = tracker.snapshot(); if (id === null) return send({ ...snap, budget: budget.status(null) });
       if (!(await projectExists(id))) fail('Unknown project', 404);
-      return send({ ...snap, jobs: snap.jobs.filter(job => job.projectId === id) });
+      return send({ ...snap, jobs: snap.jobs.filter(job => job.projectId === id), budget: budget.status(id) });
+    }
+    // Budget: status (account + optional project), reservations, caps, and releasing a hold after checking the bill.
+    if (req.method === 'GET' && url.pathname === '/api/budget') {
+      await budget.refresh();
+      const id = url.searchParams.get('projectId') || null;
+      return send({ ...budget.status(id), reservations: budget.list().filter(r => !id || r.projectId === id).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 200) });
+    }
+    if (req.method === 'POST' && (url.pathname === '/api/budget/caps' || url.pathname === '/api/budget/release')) {
+      if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
+      const input = await body(req);
+      if (url.pathname === '/api/budget/caps') return send(await budget.setCaps(input));
+      const r = budget.get(String(input.id || '')); if (!r) fail('Unknown reservation', 404);
+      await budget.release(r.id, String(input.note || 'Released by the operator after checking the bill').slice(0, 200));
+      return send(budget.status(r.projectId));
     }
     if (req.method === 'GET' && url.pathname === '/api/project') return send({ project: project.get(), catalog, blender: blenderReadiness(), comfyJobs: comfy.list() });
     if (req.method === 'GET' && url.pathname === '/api/readiness') return send({ blender: blenderReadiness(), comfy: comfy.readiness(), browser: { available: true, scope: 'Editable camera-study set' } });
@@ -259,7 +278,7 @@ const server = createServer(async (req, res) => {
     res.writeHead(range ? 206 : 200, { 'Accept-Ranges':'bytes','Content-Length':Math.max(0, end-start+1),...(range ? {'Content-Range':`bytes ${start}-${end}/${size}`} : {}), ...headers });
     if (!size) return res.end();
     const stream = createReadStream(file, { start, end }); stream.on('error', () => res.destroy()); res.on('close', () => stream.destroy()); stream.pipe(res);
-  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
+  } catch (e) { send({ error: e.code === 'ENOENT' ? 'File not found; run pnpm build first.' : e.message, ...(e.apiCode ? { code: e.apiCode, retryAfterSeconds: e.retryAfterSeconds } : {}), ...(e.budget ? { budget: e.budget } : {}) }, e.status || (e.code === 'ENOENT' ? 404 : 400)); }
 });
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});
