@@ -4,7 +4,7 @@
   "slug": "final-lap",
   "order": 2,
   "title": "Final Lap",
-  "description": "Comfy car wins on the last lap",
+  "description": "Two cars side by side: the Comfy car draws level, makes the pass and wins across the finish line.",
   "scene": {
     "name": "Oval speedway",
     "environment": {
@@ -83,7 +83,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -108,7 +108,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -133,7 +133,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -158,7 +158,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -183,7 +183,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -208,7 +208,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -233,7 +233,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -258,7 +258,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -283,7 +283,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -308,7 +308,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -333,7 +333,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "dcbcd81f-7482-4997-8d81-ab776564be69",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -384,7 +384,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -409,7 +409,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -434,7 +434,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -459,7 +459,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -484,7 +484,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -509,7 +509,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -534,7 +534,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -559,7 +559,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -584,7 +584,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -609,7 +609,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -634,7 +634,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "f1f02d58-470c-4bd6-81b8-c52f4313b866",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -648,7 +648,7 @@
         "shape": "box",
         "position": [
           20,
-          0.06,
+          0.09,
           40
         ],
         "rotation": 0,
@@ -657,9 +657,9 @@
           0.05,
           14
         ],
-        "color": "#f4f1ea",
+        "color": "#f4f3df",
         "notes": "Checkered start-finish line painted across the track.",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -669,18 +669,18 @@
       {
         "id": "018da5ee-d2fa-4179-bea0-f0760f89f390",
         "name": "Flag stand",
-        "kind": "prop",
+        "kind": "environment",
         "shape": "box",
         "position": [
           20,
-          4,
+          0,
           49
         ],
         "rotation": 0,
         "scale": [
-          2,
-          8,
-          2
+          1.5,
+          4,
+          1.5
         ],
         "color": "#d8d4cc",
         "notes": "Starter flag stand above the start-finish line; official waving a checkered flag.",
@@ -807,7 +807,7 @@
         "shape": "box",
         "position": [
           71.315,
-          4.5,
+          0,
           -56.886
         ],
         "rotation": 348.75,
@@ -818,7 +818,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -832,7 +832,7 @@
         "shape": "box",
         "position": [
           92.223,
-          4.5,
+          0,
           -48.225
         ],
         "rotation": 326.25,
@@ -843,7 +843,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -857,7 +857,7 @@
         "shape": "box",
         "position": [
           108.225,
-          4.5,
+          0,
           -32.223
         ],
         "rotation": 303.75,
@@ -868,7 +868,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -882,7 +882,7 @@
         "shape": "box",
         "position": [
           116.886,
-          4.5,
+          0,
           -11.315
         ],
         "rotation": 281.25,
@@ -893,7 +893,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -907,7 +907,7 @@
         "shape": "box",
         "position": [
           116.886,
-          4.5,
+          0,
           11.315
         ],
         "rotation": 258.75,
@@ -918,7 +918,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -932,7 +932,7 @@
         "shape": "box",
         "position": [
           108.225,
-          4.5,
+          0,
           32.223
         ],
         "rotation": 236.25,
@@ -943,7 +943,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -957,7 +957,7 @@
         "shape": "box",
         "position": [
           92.223,
-          4.5,
+          0,
           48.225
         ],
         "rotation": 213.75,
@@ -968,7 +968,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -982,7 +982,7 @@
         "shape": "box",
         "position": [
           71.315,
-          4.5,
+          0,
           56.886
         ],
         "rotation": 191.25,
@@ -993,7 +993,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1007,7 +1007,7 @@
         "shape": "box",
         "position": [
           -71.315,
-          4.5,
+          0,
           56.886
         ],
         "rotation": 168.75,
@@ -1033,7 +1033,7 @@
         "shape": "box",
         "position": [
           -92.223,
-          4.5,
+          0,
           48.225
         ],
         "rotation": 146.25,
@@ -1044,7 +1044,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1058,7 +1058,7 @@
         "shape": "box",
         "position": [
           -108.225,
-          4.5,
+          0,
           32.223
         ],
         "rotation": 123.75,
@@ -1069,7 +1069,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1083,7 +1083,7 @@
         "shape": "box",
         "position": [
           -116.886,
-          4.5,
+          0,
           11.315
         ],
         "rotation": 101.25,
@@ -1094,7 +1094,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1108,7 +1108,7 @@
         "shape": "box",
         "position": [
           -116.886,
-          4.5,
+          0,
           -11.315
         ],
         "rotation": 78.75,
@@ -1119,7 +1119,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1133,7 +1133,7 @@
         "shape": "box",
         "position": [
           -108.225,
-          4.5,
+          0,
           -32.223
         ],
         "rotation": 56.25,
@@ -1144,7 +1144,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1158,7 +1158,7 @@
         "shape": "box",
         "position": [
           -92.223,
-          4.5,
+          0,
           -48.225
         ],
         "rotation": 33.75,
@@ -1169,7 +1169,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1183,7 +1183,7 @@
         "shape": "box",
         "position": [
           -71.315,
-          4.5,
+          0,
           -56.886
         ],
         "rotation": 11.25,
@@ -1194,7 +1194,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1219,7 +1219,7 @@
         ],
         "color": "#c9c4ba",
         "notes": "Glass-fronted press box and suites above the main grandstand.",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1238,9 +1238,9 @@
         ],
         "rotation": 0,
         "scale": [
-          2,
-          6,
-          2
+          1,
+          4,
+          1
         ],
         "color": "#c9c27a",
         "notes": "Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top.",
@@ -1263,13 +1263,13 @@
         ],
         "rotation": 0,
         "scale": [
-          2,
-          6,
-          2
+          1,
+          4,
+          1
         ],
         "color": "#c9c27a",
         "notes": "",
-        "lookFrom": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1288,13 +1288,13 @@
         ],
         "rotation": 0,
         "scale": [
-          2,
-          6,
-          2
+          1,
+          4,
+          1
         ],
         "color": "#c9c27a",
         "notes": "",
-        "lookFrom": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1313,13 +1313,13 @@
         ],
         "rotation": 0,
         "scale": [
-          2,
-          6,
-          2
+          1,
+          4,
+          1
         ],
         "color": "#c9c27a",
         "notes": "",
-        "lookFrom": "b8bfbc79-f92e-405e-b16b-231afc0ac202",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -1332,17 +1332,17 @@
         "kind": "vehicle",
         "shape": "car",
         "position": [
-          40,
-          0,
-          -37
+          -55,
+          0.08,
+          38
         ],
-        "rotation": 0,
+        "rotation": 90,
         "scale": [
           1,
           1,
           1
         ],
-        "color": "#2459D8",
+        "color": "#238ce3",
         "notes": "Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors.",
         "lookFrom": null,
         "styleNotes": "",
@@ -1352,330 +1352,173 @@
           {
             "t": 0,
             "p": [
-              46,
-              0,
-              -42
-            ]
+              -55,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 0.38,
+            "t": 1,
             "p": [
-              38,
-              0,
-              -42
-            ]
+              -49.6,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 0.75,
+            "t": 2,
             "p": [
-              30,
-              0,
-              -42
-            ]
-          },
-          {
-            "t": 1.12,
-            "p": [
-              22,
-              0,
-              -42
-            ]
-          },
-          {
-            "t": 1.5,
-            "p": [
-              14.01,
-              0,
-              -42
-            ]
-          },
-          {
-            "t": 1.88,
-            "p": [
-              6.01,
-              0,
-              -42
-            ]
-          },
-          {
-            "t": 2.25,
-            "p": [
-              -1.99,
-              0,
-              -42
-            ]
-          },
-          {
-            "t": 2.62,
-            "p": [
-              -9.99,
-              0,
-              -42
-            ]
+              -44.2,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
             "t": 3,
             "p": [
-              -17.99,
-              0,
-              -42
-            ]
+              -38.8,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 3.38,
+            "t": 4,
             "p": [
-              -25.99,
-              0,
-              -42
-            ]
+              -33.4,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 3.75,
+            "t": 5,
             "p": [
-              -33.99,
-              0,
-              -42
-            ]
-          },
-          {
-            "t": 4.12,
-            "p": [
-              -41.99,
-              0,
-              -42
-            ]
-          },
-          {
-            "t": 4.5,
-            "p": [
-              -49.98,
-              0,
-              -42
-            ]
-          },
-          {
-            "t": 4.88,
-            "p": [
-              -57.98,
-              0,
-              -42
-            ]
-          },
-          {
-            "t": 5.25,
-            "p": [
-              -65.96,
-              0,
-              -41.57
-            ]
-          },
-          {
-            "t": 5.62,
-            "p": [
-              -73.72,
-              0,
-              -39.69
-            ]
+              -28,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
             "t": 6,
             "p": [
-              -80.99,
-              0,
-              -36.38
-            ]
+              -22.6,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 6.38,
+            "t": 7,
             "p": [
-              -87.5,
-              0,
-              -31.75
-            ]
+              -17.2,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 6.75,
+            "t": 8,
             "p": [
-              -93.01,
-              0,
-              -25.97
-            ]
-          },
-          {
-            "t": 7.12,
-            "p": [
-              -97.33,
-              0,
-              -19.25
-            ]
-          },
-          {
-            "t": 7.5,
-            "p": [
-              -100.3,
-              0,
-              -11.84
-            ]
-          },
-          {
-            "t": 7.88,
-            "p": [
-              -101.81,
-              0,
-              -4
-            ]
-          },
-          {
-            "t": 8.25,
-            "p": [
-              -101.81,
-              0,
-              3.99
-            ]
-          },
-          {
-            "t": 8.62,
-            "p": [
-              -100.3,
-              0,
-              11.83
-            ]
+              -11.8,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
             "t": 9,
             "p": [
-              -97.33,
-              0,
-              19.25
-            ]
+              -6.4,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 9.38,
+            "t": 10,
             "p": [
-              -93.01,
-              0,
-              25.97
-            ]
+              -1,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 9.75,
+            "t": 11,
             "p": [
-              -87.5,
-              0,
-              31.75
-            ]
-          },
-          {
-            "t": 10.12,
-            "p": [
-              -80.99,
-              0,
-              36.38
-            ]
-          },
-          {
-            "t": 10.5,
-            "p": [
-              -73.73,
-              0,
-              39.69
-            ]
-          },
-          {
-            "t": 10.88,
-            "p": [
-              -65.97,
-              0,
-              41.57
-            ]
-          },
-          {
-            "t": 11.25,
-            "p": [
-              -57.99,
-              0,
-              42
-            ]
-          },
-          {
-            "t": 11.62,
-            "p": [
-              -49.99,
-              0,
-              42
-            ]
+              4.4,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
             "t": 12,
             "p": [
-              -41.99,
-              0,
-              42
-            ]
+              9.8,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 12.38,
+            "t": 13,
             "p": [
-              -33.99,
-              0,
-              42
-            ]
+              15.2,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
-            "t": 12.75,
+            "t": 14,
             "p": [
-              -25.99,
-              0,
-              42
-            ]
-          },
-          {
-            "t": 13.12,
-            "p": [
-              -17.99,
-              0,
-              42
-            ]
-          },
-          {
-            "t": 13.5,
-            "p": [
-              -9.99,
-              0,
-              42
-            ]
-          },
-          {
-            "t": 13.88,
-            "p": [
-              -2,
-              0,
-              42
-            ]
-          },
-          {
-            "t": 14.25,
-            "p": [
-              6,
-              0,
-              42
-            ]
-          },
-          {
-            "t": 14.62,
-            "p": [
-              14,
-              0,
-              42
-            ]
+              20.6,
+              0.08,
+              38
+            ],
+            "r": 90
           },
           {
             "t": 15,
             "p": [
-              22,
-              0,
-              42
-            ]
+              26,
+              0.08,
+              38
+            ],
+            "r": 90
+          },
+          {
+            "t": 16,
+            "p": [
+              31.4,
+              0.08,
+              38
+            ],
+            "r": 90
+          },
+          {
+            "t": 17,
+            "p": [
+              36.8,
+              0.08,
+              38
+            ],
+            "r": 90
+          },
+          {
+            "t": 18,
+            "p": [
+              42.2,
+              0.08,
+              38
+            ],
+            "r": 90
           }
         ],
         "parent": null,
@@ -1795,17 +1638,17 @@
         "kind": "vehicle",
         "shape": "car",
         "position": [
-          48,
-          0,
-          -43
+          -51,
+          0.08,
+          42
         ],
-        "rotation": 0,
+        "rotation": 90,
         "scale": [
           1,
           1,
           1
         ],
-        "color": "#16181A",
+        "color": "#86c945",
         "notes": "Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos.",
         "lookFrom": null,
         "styleNotes": "",
@@ -1815,330 +1658,173 @@
           {
             "t": 0,
             "p": [
-              36,
-              0,
-              -37
-            ]
+              -51,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 0.38,
+            "t": 1,
             "p": [
-              28.77,
-              0,
-              -37
-            ]
+              -46.2,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 0.75,
+            "t": 2,
             "p": [
-              21.54,
-              0,
-              -37
-            ]
-          },
-          {
-            "t": 1.12,
-            "p": [
-              14.31,
-              0,
-              -37
-            ]
-          },
-          {
-            "t": 1.5,
-            "p": [
-              7.08,
-              0,
-              -37
-            ]
-          },
-          {
-            "t": 1.88,
-            "p": [
-              -0.15,
-              0,
-              -37
-            ]
-          },
-          {
-            "t": 2.25,
-            "p": [
-              -7.39,
-              0,
-              -37
-            ]
-          },
-          {
-            "t": 2.62,
-            "p": [
-              -14.62,
-              0,
-              -37
-            ]
+              -41.4,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
             "t": 3,
             "p": [
-              -21.85,
-              0,
-              -37
-            ]
+              -36.6,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 3.38,
+            "t": 4,
             "p": [
-              -29.08,
-              0,
-              -37
-            ]
+              -31.8,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 3.75,
+            "t": 5,
             "p": [
-              -36.31,
-              0,
-              -37
-            ]
-          },
-          {
-            "t": 4.12,
-            "p": [
-              -43.54,
-              0,
-              -37
-            ]
-          },
-          {
-            "t": 4.5,
-            "p": [
-              -50.77,
-              0,
-              -37
-            ]
-          },
-          {
-            "t": 4.88,
-            "p": [
-              -58,
-              0,
-              -37
-            ]
-          },
-          {
-            "t": 5.25,
-            "p": [
-              -65.22,
-              0,
-              -36.63
-            ]
-          },
-          {
-            "t": 5.62,
-            "p": [
-              -72.23,
-              0,
-              -34.92
-            ]
+              -27,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
             "t": 6,
             "p": [
-              -78.78,
-              0,
-              -31.88
-            ]
+              -22.2,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 6.38,
+            "t": 7,
             "p": [
-              -84.61,
-              0,
-              -27.63
-            ]
+              -17.4,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 6.75,
+            "t": 8,
             "p": [
-              -89.51,
-              0,
-              -22.32
-            ]
-          },
-          {
-            "t": 7.12,
-            "p": [
-              -93.28,
-              0,
-              -16.17
-            ]
-          },
-          {
-            "t": 7.5,
-            "p": [
-              -95.79,
-              0,
-              -9.4
-            ]
-          },
-          {
-            "t": 7.88,
-            "p": [
-              -96.93,
-              0,
-              -2.27
-            ]
-          },
-          {
-            "t": 8.25,
-            "p": [
-              -96.67,
-              0,
-              4.95
-            ]
-          },
-          {
-            "t": 8.62,
-            "p": [
-              -95.01,
-              0,
-              11.97
-            ]
+              -12.6,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
             "t": 9,
             "p": [
-              -92.02,
-              0,
-              18.54
-            ]
+              -7.8,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 9.38,
+            "t": 10,
             "p": [
-              -87.81,
-              0,
-              24.41
-            ]
+              -3,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 9.75,
+            "t": 11,
             "p": [
-              -82.54,
-              0,
-              29.34
-            ]
-          },
-          {
-            "t": 10.12,
-            "p": [
-              -76.41,
-              0,
-              33.16
-            ]
-          },
-          {
-            "t": 10.5,
-            "p": [
-              -69.66,
-              0,
-              35.72
-            ]
-          },
-          {
-            "t": 10.88,
-            "p": [
-              -62.54,
-              0,
-              36.91
-            ]
-          },
-          {
-            "t": 11.25,
-            "p": [
-              -55.31,
-              0,
-              37
-            ]
-          },
-          {
-            "t": 11.62,
-            "p": [
-              -48.08,
-              0,
-              37
-            ]
+              1.8,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
             "t": 12,
             "p": [
-              -40.85,
-              0,
-              37
-            ]
+              6.6,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 12.38,
+            "t": 13,
             "p": [
-              -33.62,
-              0,
-              37
-            ]
+              11.4,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
-            "t": 12.75,
+            "t": 14,
             "p": [
-              -26.39,
-              0,
-              37
-            ]
-          },
-          {
-            "t": 13.12,
-            "p": [
-              -19.15,
-              0,
-              37
-            ]
-          },
-          {
-            "t": 13.5,
-            "p": [
-              -11.92,
-              0,
-              37
-            ]
-          },
-          {
-            "t": 13.88,
-            "p": [
-              -4.69,
-              0,
-              37
-            ]
-          },
-          {
-            "t": 14.25,
-            "p": [
-              2.54,
-              0,
-              37
-            ]
-          },
-          {
-            "t": 14.62,
-            "p": [
-              9.77,
-              0,
-              37
-            ]
+              16.2,
+              0.08,
+              42
+            ],
+            "r": 90
           },
           {
             "t": 15,
             "p": [
-              17,
-              0,
-              37
-            ]
+              21,
+              0.08,
+              42
+            ],
+            "r": 90
+          },
+          {
+            "t": 16,
+            "p": [
+              25.8,
+              0.08,
+              42
+            ],
+            "r": 90
+          },
+          {
+            "t": 17,
+            "p": [
+              30.6,
+              0.08,
+              42
+            ],
+            "r": 90
+          },
+          {
+            "t": 18,
+            "p": [
+              35.4,
+              0.08,
+              42
+            ],
+            "r": 90
           }
         ],
         "parent": null,
@@ -2529,7 +2215,7 @@
         ],
         "color": "#3b3d42",
         "notes": "Banked asphalt racing surface, white lane lines, tyre rubber marks.",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2554,7 +2240,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2579,7 +2265,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2604,7 +2290,7 @@
         ],
         "color": "#3b3d42",
         "notes": "Asphalt back straight.",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2629,7 +2315,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2654,7 +2340,7 @@
         ],
         "color": "#3b3d42",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2668,7 +2354,7 @@
         "shape": "box",
         "position": [
           -40,
-          0.6,
+          0,
           47.5
         ],
         "rotation": 0,
@@ -2679,7 +2365,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "SAFER barrier wall with catch fence.",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2693,7 +2379,7 @@
         "shape": "box",
         "position": [
           0,
-          0.6,
+          0,
           47.5
         ],
         "rotation": 0,
@@ -2704,7 +2390,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2718,7 +2404,7 @@
         "shape": "box",
         "position": [
           40,
-          0.6,
+          0,
           47.5
         ],
         "rotation": 0,
@@ -2729,7 +2415,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2743,7 +2429,7 @@
         "shape": "box",
         "position": [
           -40,
-          0.5,
+          0,
           32.5
         ],
         "rotation": 0,
@@ -2754,7 +2440,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2768,7 +2454,7 @@
         "shape": "box",
         "position": [
           0,
-          0.5,
+          0,
           32.5
         ],
         "rotation": 0,
@@ -2779,7 +2465,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2793,7 +2479,7 @@
         "shape": "box",
         "position": [
           40,
-          0.5,
+          0,
           32.5
         ],
         "rotation": 0,
@@ -2804,7 +2490,7 @@
         ],
         "color": "#e8e4dc",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2818,7 +2504,7 @@
         "shape": "box",
         "position": [
           -40,
-          1.5,
+          0,
           54
         ],
         "rotation": 0,
@@ -2829,7 +2515,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2843,7 +2529,7 @@
         "shape": "box",
         "position": [
           0,
-          1.5,
+          0,
           54
         ],
         "rotation": 0,
@@ -2854,7 +2540,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2868,7 +2554,7 @@
         "shape": "box",
         "position": [
           40,
-          1.5,
+          0,
           54
         ],
         "rotation": 0,
@@ -2879,7 +2565,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2893,7 +2579,7 @@
         "shape": "box",
         "position": [
           -40,
-          4.5,
+          0,
           58
         ],
         "rotation": 0,
@@ -2904,7 +2590,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2918,7 +2604,7 @@
         "shape": "box",
         "position": [
           0,
-          4.5,
+          0,
           58
         ],
         "rotation": 0,
@@ -2929,7 +2615,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2943,7 +2629,7 @@
         "shape": "box",
         "position": [
           40,
-          4.5,
+          0,
           58
         ],
         "rotation": 0,
@@ -2954,7 +2640,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2968,7 +2654,7 @@
         "shape": "box",
         "position": [
           -40,
-          7.5,
+          0,
           62
         ],
         "rotation": 0,
@@ -2979,7 +2665,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -2993,7 +2679,7 @@
         "shape": "box",
         "position": [
           0,
-          7.5,
+          0,
           62
         ],
         "rotation": 0,
@@ -3004,7 +2690,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3018,7 +2704,7 @@
         "shape": "box",
         "position": [
           40,
-          7.5,
+          0,
           62
         ],
         "rotation": 0,
@@ -3029,7 +2715,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3043,7 +2729,7 @@
         "shape": "box",
         "position": [
           -40,
-          1.5,
+          0,
           -54
         ],
         "rotation": 0,
@@ -3054,7 +2740,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3068,7 +2754,7 @@
         "shape": "box",
         "position": [
           0,
-          1.5,
+          0,
           -54
         ],
         "rotation": 0,
@@ -3079,7 +2765,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3093,7 +2779,7 @@
         "shape": "box",
         "position": [
           40,
-          1.5,
+          0,
           -54
         ],
         "rotation": 0,
@@ -3104,7 +2790,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3118,7 +2804,7 @@
         "shape": "box",
         "position": [
           -40,
-          4.5,
+          0,
           -58
         ],
         "rotation": 0,
@@ -3129,7 +2815,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3143,7 +2829,7 @@
         "shape": "box",
         "position": [
           0,
-          4.5,
+          0,
           -58
         ],
         "rotation": 0,
@@ -3154,7 +2840,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3168,7 +2854,7 @@
         "shape": "box",
         "position": [
           40,
-          4.5,
+          0,
           -58
         ],
         "rotation": 0,
@@ -3179,7 +2865,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3193,7 +2879,7 @@
         "shape": "box",
         "position": [
           -40,
-          7.5,
+          0,
           -62
         ],
         "rotation": 0,
@@ -3204,7 +2890,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3218,7 +2904,7 @@
         "shape": "box",
         "position": [
           0,
-          7.5,
+          0,
           -62
         ],
         "rotation": 0,
@@ -3229,7 +2915,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3243,7 +2929,7 @@
         "shape": "box",
         "position": [
           40,
-          7.5,
+          0,
           -62
         ],
         "rotation": 0,
@@ -3254,7 +2940,7 @@
         ],
         "color": "#8d929b",
         "notes": "",
-        "lookFrom": "8e8266b4-a991-4275-8b9c-da5c8341effe",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3279,7 +2965,7 @@
         ],
         "color": "#4f7a3e",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
@@ -3304,12 +2990,38 @@
         ],
         "color": "#4f7a3e",
         "notes": "",
-        "lookFrom": "88a4f0c4-5fdf-4860-b0ba-691ea77a9502",
+        "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
         "parent": "00a1d9ec-8bc9-4030-8806-0952f7447aaa"
+      },
+      {
+        "id": "b965a7b6-e548-4dcc-a778-c7b8fcf636c0",
+        "name": "Speedway surroundings",
+        "kind": "environment",
+        "shape": "terrain",
+        "position": [
+          0,
+          -0.6,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          0.05,
+          2
+        ],
+        "color": "#708c50",
+        "notes": "",
+        "look": null,
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
       }
     ],
     "references": [
@@ -3743,32 +3455,325 @@
     {
       "id": "f686194e-b8b4-4b88-a531-92667d29a84c",
       "title": "Final lap",
-      "description": "High aerial sweeping down behind @rival-car and @comfy-car as they exit turn four side by side onto the front stretch, the grandstands roaring.",
+      "description": "@comfy-car in blue and yellow runs in the inside lane alongside the green @rival-car. The two cars are fighting for the final lap; both travel nose-first toward the finish.",
       "duration": 4,
-      "start": 4,
+      "start": 0,
       "camera": {
-        "move": "crane-down",
-        "target": "5152add7-b749-4ce5-a4de-1aea29da0857",
+        "move": "custom",
+        "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
         "distance": 22,
         "height": 10,
         "angle": 150,
-        "mm": 40,
-        "keys": null
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -41,
+              6,
+              28
+            ],
+            "look": [
+              -53,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.05,
+            "p": [
+              -40.306,
+              5.925,
+              28
+            ],
+            "look": [
+              -52.306,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.1,
+            "p": [
+              -39.327,
+              5.85,
+              28
+            ],
+            "look": [
+              -51.327,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.15,
+            "p": [
+              -38.185,
+              5.775,
+              28
+            ],
+            "look": [
+              -50.185,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2,
+            "p": [
+              -37.002,
+              5.7,
+              28
+            ],
+            "look": [
+              -49.002,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -35.9,
+              5.625,
+              28
+            ],
+            "look": [
+              -47.9,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.3,
+            "p": [
+              -34.88,
+              5.55,
+              28
+            ],
+            "look": [
+              -46.88,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.35,
+            "p": [
+              -33.86,
+              5.475,
+              28
+            ],
+            "look": [
+              -45.86,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4,
+            "p": [
+              -32.84,
+              5.4,
+              28
+            ],
+            "look": [
+              -44.84,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.45,
+            "p": [
+              -31.82,
+              5.325,
+              28
+            ],
+            "look": [
+              -43.82,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -30.8,
+              5.25,
+              28
+            ],
+            "look": [
+              -42.8,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.55,
+            "p": [
+              -29.78,
+              5.175,
+              28
+            ],
+            "look": [
+              -41.78,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.6,
+            "p": [
+              -28.76,
+              5.1,
+              28
+            ],
+            "look": [
+              -40.76,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.65,
+            "p": [
+              -27.74,
+              5.025,
+              28
+            ],
+            "look": [
+              -39.74,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7,
+            "p": [
+              -26.72,
+              4.95,
+              28
+            ],
+            "look": [
+              -38.72,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -25.7,
+              4.875,
+              28
+            ],
+            "look": [
+              -37.7,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.8,
+            "p": [
+              -24.68,
+              4.8,
+              28
+            ],
+            "look": [
+              -36.68,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.85,
+            "p": [
+              -23.66,
+              4.725,
+              28
+            ],
+            "look": [
+              -35.66,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9,
+            "p": [
+              -22.64,
+              4.65,
+              28
+            ],
+            "look": [
+              -34.64,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.95,
+            "p": [
+              -21.62,
+              4.575,
+              28
+            ],
+            "look": [
+              -33.62,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 1,
+            "p": [
+              -20.6,
+              4.5,
+              28
+            ],
+            "look": [
+              -32.6,
+              0.8,
+              40
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
         "exclude": []
       },
       "style": {
-        "movement": [
-          "crane down",
-          "drone flyover"
-        ],
+        "movement": [],
         "cuts": [
           "continuous take, no cuts"
         ],
         "lens": [
-          "35mm natural"
+          "35mm"
         ],
         "filter": [
           "saturated primaries"
@@ -3788,7 +3793,8 @@
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
             "seed": 4242,
-            "prompt": "Cinematic film still, single frame. Wide aerial as Rival car leads Comfy car out of turn four onto the front stretch, the grandstands roaring. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Mown infield grass with painted logo-free surface. Asphalt back straight. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. This is the last frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. Image 4 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks."
+            "prompt": "Cinematic film still, single frame. Wide aerial as Rival car leads Comfy car out of turn four onto the front stretch, the grandstands roaring. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Mown infield grass with painted logo-free surface. Asphalt back straight. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. This is the last frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. Image 4 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks.",
+            "signature": "a6d230b9"
           }
         },
         {
@@ -3804,7 +3810,8 @@
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
             "seed": 638146,
-            "prompt": "Cinematic film still, single frame. High aerial sweeping down behind Rival car and Comfy car as they exit turn four side by side onto the front stretch, the grandstands roaring. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Mown infield grass with painted logo-free surface.; Banked asphalt racing surface, white lane lines, tyre rubber marks. Mown infield grass with painted logo-free surface.; Asphalt back straight. Mown infield grass with painted logo-free surface. Mown infield grass with painted logo-free surface.; SAFER barrier wall with catch fence. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. Filter: saturated primaries.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Turns 3–4 · surface 5 looks exactly like image 4. The Turns 3–4 stands 4 looks exactly like image 5. The Front stretch 1 looks exactly like image 6. No text, captions or labels."
+            "prompt": "Cinematic film still, single frame. High aerial sweeping down behind Rival car and Comfy car as they exit turn four side by side onto the front stretch, the grandstands roaring. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Mown infield grass with painted logo-free surface.; Banked asphalt racing surface, white lane lines, tyre rubber marks. Mown infield grass with painted logo-free surface.; Asphalt back straight. Mown infield grass with painted logo-free surface. Mown infield grass with painted logo-free surface.; SAFER barrier wall with catch fence. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. Filter: saturated primaries.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Turns 3–4 · surface 5 looks exactly like image 4. The Turns 3–4 stands 4 looks exactly like image 5. The Front stretch 1 looks exactly like image 6. No text, captions or labels.",
+            "signature": "a6d230b9"
           }
         }
       ]
@@ -3812,32 +3819,325 @@
     {
       "id": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
       "title": "The draft",
-      "description": "Low tracking shot alongside as @comfy-car pulls out of @rival-car's draft and draws level.",
+      "description": "@comfy-car draws level with @rival-car, holding the inside lane. Both cars stay side by side as the Comfy car begins to edge ahead.",
       "duration": 4,
-      "start": 8,
+      "start": 4,
       "camera": {
-        "move": "truck-right",
+        "move": "custom",
         "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
         "distance": 8,
         "height": 1.8,
         "angle": -90,
         "mm": 35,
-        "keys": null
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -19.6,
+              2.6,
+              34
+            ],
+            "look": [
+              -31.6,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.05,
+            "p": [
+              -18.58,
+              2.6,
+              34
+            ],
+            "look": [
+              -30.58,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.1,
+            "p": [
+              -17.56,
+              2.6,
+              34
+            ],
+            "look": [
+              -29.56,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.15,
+            "p": [
+              -16.54,
+              2.6,
+              34
+            ],
+            "look": [
+              -28.54,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2,
+            "p": [
+              -15.52,
+              2.6,
+              34
+            ],
+            "look": [
+              -27.52,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -14.5,
+              2.6,
+              34
+            ],
+            "look": [
+              -26.5,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.3,
+            "p": [
+              -13.48,
+              2.6,
+              34
+            ],
+            "look": [
+              -25.48,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.35,
+            "p": [
+              -12.46,
+              2.6,
+              34
+            ],
+            "look": [
+              -24.46,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4,
+            "p": [
+              -11.44,
+              2.6,
+              34
+            ],
+            "look": [
+              -23.44,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.45,
+            "p": [
+              -10.42,
+              2.6,
+              34
+            ],
+            "look": [
+              -22.42,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -9.4,
+              2.6,
+              34
+            ],
+            "look": [
+              -21.4,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.55,
+            "p": [
+              -8.38,
+              2.6,
+              34
+            ],
+            "look": [
+              -20.38,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.6,
+            "p": [
+              -7.36,
+              2.6,
+              34
+            ],
+            "look": [
+              -19.36,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.65,
+            "p": [
+              -6.34,
+              2.6,
+              34
+            ],
+            "look": [
+              -18.34,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7,
+            "p": [
+              -5.32,
+              2.6,
+              34
+            ],
+            "look": [
+              -17.32,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -4.3,
+              2.6,
+              34
+            ],
+            "look": [
+              -16.3,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.8,
+            "p": [
+              -3.28,
+              2.6,
+              34
+            ],
+            "look": [
+              -15.28,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.85,
+            "p": [
+              -2.26,
+              2.6,
+              34
+            ],
+            "look": [
+              -14.26,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9,
+            "p": [
+              -1.24,
+              2.6,
+              34
+            ],
+            "look": [
+              -13.24,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.95,
+            "p": [
+              -0.22,
+              2.6,
+              34
+            ],
+            "look": [
+              -12.22,
+              1,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 1,
+            "p": [
+              0.8,
+              2.6,
+              34
+            ],
+            "look": [
+              -11.2,
+              1,
+              40
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
         "exclude": []
       },
       "style": {
-        "movement": [
-          "dolly alongside",
-          "tracking shot"
-        ],
+        "movement": [],
         "cuts": [
           "continuous take, no cuts"
         ],
         "lens": [
-          "35mm natural"
+          "35mm"
         ],
         "filter": [
           "saturated primaries"
@@ -3857,7 +4157,8 @@
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
             "seed": 4242,
-            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy car pulls out of Rival car's draft and draws level. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. Asphalt back straight. SAFER barrier wall with catch fence. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Checkered start-finish line painted across the track. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. This is the last frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks."
+            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy car pulls out of Rival car's draft and draws level. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. Asphalt back straight. SAFER barrier wall with catch fence. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Checkered start-finish line painted across the track. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. This is the last frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks.",
+            "signature": "b50e3d58"
           }
         },
         {
@@ -3873,7 +4174,8 @@
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
             "seed": 4242,
-            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy car pulls out of Rival car's draft and draws level. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. Asphalt back straight. SAFER barrier wall with catch fence. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Checkered start-finish line painted across the track. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. This is the first frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks."
+            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy car pulls out of Rival car's draft and draws level. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. Asphalt back straight. SAFER barrier wall with catch fence. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Checkered start-finish line painted across the track. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. This is the first frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks.",
+            "signature": "b50e3d58"
           }
         }
       ]
@@ -3881,214 +4183,325 @@
     {
       "id": "62ca4116-75ee-47e7-8b57-dd934421c864",
       "title": "From the stands",
-      "description": "Handheld point of view from the front-stretch stands as @rival-car and @comfy-car thunder side by side toward the line, the crowd's arms in the bottom of frame.",
+      "description": "@comfy-car pulls ahead of @rival-car on the front straight. The blue car stays inside; the green rival stays outside, separated by a clear lane.",
       "duration": 4,
-      "start": 11,
+      "start": 8,
       "camera": {
         "move": "custom",
         "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
         "distance": 20,
         "height": 11,
         "angle": 20,
-        "mm": 26,
+        "mm": 45,
         "keys": [
           {
             "t": 0,
             "p": [
-              9,
-              3.3,
-              50.2
+              -9.2,
+              8,
+              57
             ],
             "look": [
-              -72.71,
+              -12.2,
               0.8,
-              39.94
+              40
             ],
-            "mm": 26
+            "mm": 45
           },
           {
-            "t": 0.083,
+            "t": 0.05,
             "p": [
-              9.04,
-              3.27,
-              50.22
+              -8.18,
+              8,
+              57
             ],
             "look": [
-              -66.52,
-              0.53,
-              41.47
+              -11.18,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
           },
           {
-            "t": 0.167,
+            "t": 0.1,
             "p": [
-              8.97,
-              3.35,
-              50.16
+              -7.16,
+              8,
+              57
             ],
             "look": [
-              -61.17,
-              1.17,
-              41.6
+              -10.16,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
+          },
+          {
+            "t": 0.15,
+            "p": [
+              -6.14,
+              8,
+              57
+            ],
+            "look": [
+              -9.14,
+              0.8,
+              40
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.2,
+            "p": [
+              -5.12,
+              8,
+              57
+            ],
+            "look": [
+              -8.12,
+              0.8,
+              40
+            ],
+            "mm": 45
           },
           {
             "t": 0.25,
             "p": [
-              9.05,
-              3.32,
-              50.23
+              -4.1,
+              8,
+              57
             ],
             "look": [
-              -52.21,
-              0.96,
-              42.27
+              -7.1,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
           },
           {
-            "t": 0.333,
+            "t": 0.3,
             "p": [
-              8.95,
-              3.26,
-              50.21
+              -3.08,
+              8,
+              57
             ],
             "look": [
-              -42.61,
-              0.57,
-              42
+              -6.08,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
           },
           {
-            "t": 0.417,
+            "t": 0.35,
             "p": [
-              9.02,
-              3.36,
-              50.17
+              -2.06,
+              8,
+              57
             ],
             "look": [
-              -30.89,
-              1.05,
-              41.79
+              -5.06,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
+          },
+          {
+            "t": 0.4,
+            "p": [
+              -1.04,
+              8,
+              57
+            ],
+            "look": [
+              -4.04,
+              0.8,
+              40
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.45,
+            "p": [
+              -0.02,
+              8,
+              57
+            ],
+            "look": [
+              -3.02,
+              0.8,
+              40
+            ],
+            "mm": 45
           },
           {
             "t": 0.5,
             "p": [
-              8.96,
-              3.28,
-              50.25
+              1,
+              8,
+              57
             ],
             "look": [
-              -19.68,
-              0.75,
-              42.1
+              -2,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
           },
           {
-            "t": 0.583,
+            "t": 0.55,
             "p": [
-              9.06,
-              3.33,
-              50.18
+              2.02,
+              8,
+              57
             ],
             "look": [
-              -11.28,
-              0.9,
-              41.94
+              -0.98,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
           },
           {
-            "t": 0.667,
+            "t": 0.6,
             "p": [
-              8.98,
-              3.25,
-              50.24
+              3.04,
+              8,
+              57
             ],
             "look": [
-              -6.55,
-              0.71,
-              42.09
+              0.04,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
+          },
+          {
+            "t": 0.65,
+            "p": [
+              4.06,
+              8,
+              57
+            ],
+            "look": [
+              1.06,
+              0.8,
+              40
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.7,
+            "p": [
+              5.08,
+              8,
+              57
+            ],
+            "look": [
+              2.08,
+              0.8,
+              40
+            ],
+            "mm": 45
           },
           {
             "t": 0.75,
             "p": [
-              9.03,
-              3.34,
-              50.15
+              6.1,
+              8,
+              57
             ],
             "look": [
-              -0.43,
-              0.84,
-              41.95
+              3.1,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
           },
           {
-            "t": 0.833,
+            "t": 0.8,
             "p": [
-              8.94,
-              3.31,
-              50.22
+              7.12,
+              8,
+              57
             ],
             "look": [
-              6.68,
-              0.81,
-              42.02
+              4.12,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
           },
           {
-            "t": 0.917,
+            "t": 0.85,
             "p": [
-              9.04,
-              3.27,
-              50.17
+              8.14,
+              8,
+              57
             ],
             "look": [
-              14.6,
-              0.77,
-              41.98
+              5.14,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
+          },
+          {
+            "t": 0.9,
+            "p": [
+              9.16,
+              8,
+              57
+            ],
+            "look": [
+              6.16,
+              0.8,
+              40
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.95,
+            "p": [
+              10.18,
+              8,
+              57
+            ],
+            "look": [
+              7.18,
+              0.8,
+              40
+            ],
+            "mm": 45
           },
           {
             "t": 1,
             "p": [
-              9,
-              3.32,
-              50.2
+              11.2,
+              8,
+              57
             ],
             "look": [
-              22,
-              0.83,
-              42
+              8.2,
+              0.8,
+              40
             ],
-            "mm": 26
+            "mm": 45
           }
-        ]
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
         "exclude": []
       },
       "style": {
-        "movement": [
-          "handheld"
-        ],
+        "movement": [],
         "cuts": [
           "continuous take, no cuts"
         ],
         "lens": [
-          "24mm wide"
+          "45mm"
         ],
         "filter": [
           "high contrast"
@@ -4108,7 +4521,8 @@
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
             "seed": 4242,
-            "prompt": "Cinematic film still, single frame. Handheld phone view from Fan with phone in the front stretch stands as both cars thunder side by side toward the line. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Checkered start-finish line painted across the track. Starter flag stand above the start-finish line; official waving a checkered flag. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Asphalt back straight. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 26mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. This is the last frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Flag stand looks exactly like image 3. The Rival car looks exactly like image 4. Image 5 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks."
+            "prompt": "Cinematic film still, single frame. Handheld phone view from Fan with phone in the front stretch stands as both cars thunder side by side toward the line. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Checkered start-finish line painted across the track. Starter flag stand above the start-finish line; official waving a checkered flag. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Asphalt back straight. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 26mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. This is the last frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Flag stand looks exactly like image 3. The Rival car looks exactly like image 4. Image 5 is the previous frame of this film: keep lighting, colour grade and designs continuous. One single photographic frame, no split panels, no captions or watermarks.",
+            "signature": "1feed0d7"
           }
         },
         {
@@ -4124,7 +4538,8 @@
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
             "seed": 4242,
-            "prompt": "Cinematic film still, single frame. Handheld phone view from Fan with phone in the front stretch stands as both cars thunder side by side toward the line. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Checkered start-finish line painted across the track. Starter flag stand above the start-finish line; official waving a checkered flag. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Asphalt back straight. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 26mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. This is the first frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Flag stand looks exactly like image 3. The Rival car looks exactly like image 4. One single photographic frame, no split panels, no captions or watermarks."
+            "prompt": "Cinematic film still, single frame. Handheld phone view from Fan with phone in the front stretch stands as both cars thunder side by side toward the line. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Checkered start-finish line painted across the track. Starter flag stand above the start-finish line; official waving a checkered flag. Glass-fronted press box and suites above the main grandstand. Banked asphalt racing surface, white lane lines, tyre rubber marks. SAFER barrier wall with catch fence. Asphalt back straight. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 26mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. This is the first frame of the shot.\nImage 1 is a grey 3D blockout of this exact frame: match its camera position, lens, framing and every object's position, heading and pose exactly; do not copy its grey look or labels. The Comfy car looks exactly like image 2. The Flag stand looks exactly like image 3. The Rival car looks exactly like image 4. One single photographic frame, no split panels, no captions or watermarks.",
+            "signature": "1feed0d7"
           }
         }
       ]
@@ -4132,17 +4547,313 @@
     {
       "id": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
       "title": "Checkered flag",
-      "description": "Low angle at the start-finish line: @comfy-car blurs past and takes the checkered flag by a nose from @rival-car, the flag snapping above.",
-      "duration": 3,
+      "description": "@comfy-car crosses the white @start-finish-line ahead of @rival-car and opens a full car-length lead. Both cars continue nose-first through the finish.",
+      "duration": 4,
       "start": 12,
       "camera": {
-        "move": "static",
+        "move": "custom",
         "target": "3d293ff5-057c-4f47-ae7a-90411cdeb789",
         "distance": 12,
         "height": 0.6,
         "angle": 120,
-        "mm": 24,
-        "keys": null
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              20.2,
+              3.3,
+              33.8
+            ],
+            "look": [
+              9.2,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.05,
+            "p": [
+              21.22,
+              3.35,
+              33.8
+            ],
+            "look": [
+              10.22,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.1,
+            "p": [
+              22.24,
+              3.4,
+              33.8
+            ],
+            "look": [
+              11.24,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.15,
+            "p": [
+              23.26,
+              3.45,
+              33.8
+            ],
+            "look": [
+              12.26,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2,
+            "p": [
+              24.28,
+              3.5,
+              33.8
+            ],
+            "look": [
+              13.28,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.25,
+            "p": [
+              25.3,
+              3.55,
+              33.8
+            ],
+            "look": [
+              14.3,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.3,
+            "p": [
+              26.32,
+              3.6,
+              33.8
+            ],
+            "look": [
+              15.32,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.35,
+            "p": [
+              27.34,
+              3.65,
+              33.8
+            ],
+            "look": [
+              16.34,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4,
+            "p": [
+              28.36,
+              3.7,
+              33.8
+            ],
+            "look": [
+              17.36,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.45,
+            "p": [
+              29.38,
+              3.75,
+              33.8
+            ],
+            "look": [
+              18.38,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5,
+            "p": [
+              30.4,
+              3.8,
+              33.8
+            ],
+            "look": [
+              19.4,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.55,
+            "p": [
+              31.42,
+              3.85,
+              33.8
+            ],
+            "look": [
+              20.42,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.6,
+            "p": [
+              32.44,
+              3.9,
+              33.8
+            ],
+            "look": [
+              21.44,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.65,
+            "p": [
+              33.46,
+              3.95,
+              33.8
+            ],
+            "look": [
+              22.46,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7,
+            "p": [
+              34.48,
+              4,
+              33.8
+            ],
+            "look": [
+              23.48,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.75,
+            "p": [
+              35.5,
+              4.05,
+              33.8
+            ],
+            "look": [
+              24.5,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.8,
+            "p": [
+              36.52,
+              4.1,
+              33.8
+            ],
+            "look": [
+              25.52,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.85,
+            "p": [
+              37.54,
+              4.15,
+              33.8
+            ],
+            "look": [
+              26.54,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9,
+            "p": [
+              38.56,
+              4.2,
+              33.8
+            ],
+            "look": [
+              27.56,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.95,
+            "p": [
+              39.58,
+              4.25,
+              33.8
+            ],
+            "look": [
+              28.58,
+              0.8,
+              40
+            ],
+            "mm": 35
+          },
+          {
+            "t": 1,
+            "p": [
+              40.6,
+              4.3,
+              33.8
+            ],
+            "look": [
+              29.6,
+              0.8,
+              40
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
       },
       "cast": {
         "include": [],
@@ -4151,14 +4862,12 @@
         ]
       },
       "style": {
-        "movement": [
-          "static locked-off shot"
-        ],
+        "movement": [],
         "cuts": [
-          "speed ramp"
+          "continuous take, no cuts"
         ],
         "lens": [
-          "24mm wide"
+          "35mm"
         ],
         "filter": [
           "high contrast"
@@ -4178,7 +4887,8 @@
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
             "seed": 793786,
-            "prompt": "Cinematic film still, single frame. Low angle at the start-finish line: Comfy car blurs past and takes the checkered flag by a nose from Rival car, the flag snapping above. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Mown infield grass with painted logo-free surface.; Checkered start-finish line painted across the track. Glass-fronted press box and suites above the main grandstand. Mown infield grass with painted logo-free surface.; Banked asphalt racing surface, white lane lines, tyre rubber marks. Mown infield grass with painted logo-free surface.; SAFER barrier wall with catch fence. Starter flag stand above the start-finish line; official waving a checkered flag. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 24mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. Filter: high contrast.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The Comfy car looks exactly like image 2. The Flag stand looks exactly like image 3. The Rival car looks exactly like image 4. The Light tower 1 looks exactly like image 5. The Infield grass looks exactly like image 6. The Press box looks exactly like image 7. The Turns 3–4 · surface 1 looks exactly like image 8. Image 9 is the previous shot: keep lighting and style continuous. No text, captions or labels."
+            "prompt": "Cinematic film still, single frame. Low angle at the start-finish line: Comfy car blurs past and takes the checkered flag by a nose from Rival car, the flag snapping above. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Mown infield grass with painted logo-free surface.; Checkered start-finish line painted across the track. Glass-fronted press box and suites above the main grandstand. Mown infield grass with painted logo-free surface.; Banked asphalt racing surface, white lane lines, tyre rubber marks. Mown infield grass with painted logo-free surface.; SAFER barrier wall with catch fence. Starter flag stand above the start-finish line; official waving a checkered flag. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Framing: 24mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. Filter: high contrast.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and every object's position and pose, not its grey look or labels. The Comfy car looks exactly like image 2. The Flag stand looks exactly like image 3. The Rival car looks exactly like image 4. The Light tower 1 looks exactly like image 5. The Infield grass looks exactly like image 6. The Press box looks exactly like image 7. The Turns 3–4 · surface 1 looks exactly like image 8. Image 9 is the previous shot: keep lighting and style continuous. No text, captions or labels.",
+            "signature": "1371f7c2"
           }
         }
       ]
@@ -4595,6 +5305,54 @@
       "fps": 24,
       "frameCount": 73,
       "duration": 3.042
+    },
+    {
+      "path": "media/assets/d0bfc767-2ae8-4498-8842-df713e1b7625.mp4",
+      "kind": "video",
+      "bytes": 591527,
+      "sha256": "05e282f59b3e8e86ce8d9b7c378d7a668de1e57d14a26efc808aacd7165c1fb0",
+      "sourceSha256": "05e282f59b3e8e86ce8d9b7c378d7a668de1e57d14a26efc808aacd7165c1fb0",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/1f3ee84f-8c88-4d1e-9388-b50d77c90cdd.mp4",
+      "kind": "video",
+      "bytes": 405987,
+      "sha256": "b565c0329ad0cebde9f2dcd26a4c83c1af7d49ff81404458149b4779c923444d",
+      "sourceSha256": "b565c0329ad0cebde9f2dcd26a4c83c1af7d49ff81404458149b4779c923444d",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/df7c6220-fe04-4c2e-af97-4e09dff0f389.mp4",
+      "kind": "video",
+      "bytes": 222217,
+      "sha256": "02037e30c29f572a7cf954796f91a511b555158a081c148fa077644fd1f9d7c9",
+      "sourceSha256": "02037e30c29f572a7cf954796f91a511b555158a081c148fa077644fd1f9d7c9",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/666f992d-ad7b-49eb-9b00-58f5398cca48.mp4",
+      "kind": "video",
+      "bytes": 675602,
+      "sha256": "c6cea9c6e8cdae16baa73218d30d533d591e4964237e0208675197c846f85c64",
+      "sourceSha256": "c6cea9c6e8cdae16baa73218d30d533d591e4964237e0208675197c846f85c64",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
     }
   ],
   "assets": [
@@ -4704,6 +5462,58 @@
         "backend": "cloud",
         "prompt": "Cinematic live-action shot. Low angle at the start-finish line: Comfy car blurs past and takes the checkered flag by a nose from Rival car, the flag snapping above. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Mown infield grass with painted logo-free surface. Mown infield grass with painted logo-free surface.; Checkered start-finish line painted across the track. Glass-fronted press box and suites above the main grandstand. Mown infield grass with painted logo-free surface.; Banked asphalt racing surface, white lane lines, tyre rubber marks. Mown infield grass with painted logo-free surface.; SAFER barrier wall with catch fence. Starter flag stand above the start-finish line; official waving a checkered flag. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Setting: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds.. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours.. Camera: Locked-off on Comfy car, 24mm wide, low angle, 3s. Follow the supplied camera motion exactly. Movement: static locked-off shot. Cuts: speed ramp. Lens: 24mm wide. Filter: high contrast.",
         "sourceAssetId": "a05373de-ef4e-4240-8b59-0467c2a3b7f3"
+      }
+    },
+    {
+      "id": "d0bfc767-2ae8-4498-8842-df713e1b7625",
+      "kind": "camera-render",
+      "shotId": "f686194e-b8b4-4b88-a531-92667d29a84c",
+      "file": "assets/d0bfc767-2ae8-4498-8842-df713e1b7625.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-10-31T02:35:34.798Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "5641b314"
+      }
+    },
+    {
+      "id": "1f3ee84f-8c88-4d1e-9388-b50d77c90cdd",
+      "kind": "camera-render",
+      "shotId": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
+      "file": "assets/1f3ee84f-8c88-4d1e-9388-b50d77c90cdd.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-10-31T02:35:34.799Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "371d55e8"
+      }
+    },
+    {
+      "id": "df7c6220-fe04-4c2e-af97-4e09dff0f389",
+      "kind": "camera-render",
+      "shotId": "62ca4116-75ee-47e7-8b57-dd934421c864",
+      "file": "assets/df7c6220-fe04-4c2e-af97-4e09dff0f389.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-10-31T02:35:34.799Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "5cb10508"
+      }
+    },
+    {
+      "id": "666f992d-ad7b-49eb-9b00-58f5398cca48",
+      "kind": "camera-render",
+      "shotId": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
+      "file": "assets/666f992d-ad7b-49eb-9b00-58f5398cca48.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-10-31T02:35:34.800Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "c46bc8c"
       }
     }
   ],
