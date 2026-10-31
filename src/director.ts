@@ -91,14 +91,24 @@ const stepBtns: Record<Step, HTMLElement> = {
   cut: stepBtn('cut', 'Cut', 'Cut the film: every shot in order, choose videos, play and export'),
 };
 const modeSwitch = h('nav', { class: 'steps', role: 'tablist', 'aria-label': 'Step' }, stepBtns.build, h('i', { class: 'st-sep', 'aria-hidden': 'true' }), stepBtns.shoot, h('i', { class: 'st-sep', 'aria-hidden': 'true' }), stepBtns.cut);
+// Tabs keep one Tab stop (the current step); arrows, Home and End move between the steps.
+modeSwitch.onkeydown = ev => {
+  const order: Step[] = ['build', 'shoot', 'cut'], i = order.indexOf(step);
+  const k = ev.key === 'ArrowRight' ? i + 1 : ev.key === 'ArrowLeft' ? i - 1 : ev.key === 'Home' ? 0 : ev.key === 'End' ? 2 : null;
+  if (k === null) return;
+  ev.preventDefault(); const next = order[(k + 3) % 3]!; setStep(next); stepBtns[next].focus();
+};
 function menuState(menu: HTMLElement, open: boolean, opener?: HTMLElement, focus = false) {
   menu.hidden = !open;
   opener?.setAttribute('aria-expanded', String(open));
   if (open && focus) menu.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
 }
-function menuKeys(menu: HTMLElement, opener: HTMLElement) {
-  opener.setAttribute('aria-haspopup', 'menu'); opener.setAttribute('aria-expanded', 'false');
-  new MutationObserver(() => opener.setAttribute('aria-expanded', String(!menu.hidden))).observe(menu, { attributes: true, attributeFilter: ['hidden'] });
+// `aria: false` for an opener whose role can't carry popup state (the viewport canvas opens the add menu on right-click).
+function menuKeys(menu: HTMLElement, opener: HTMLElement, aria = true) {
+  if (aria) {
+    opener.setAttribute('aria-haspopup', 'menu'); opener.setAttribute('aria-expanded', 'false');
+    new MutationObserver(() => opener.setAttribute('aria-expanded', String(!menu.hidden))).observe(menu, { attributes: true, attributeFilter: ['hidden'] });
+  }
   opener.addEventListener('keydown', ev => { if (['ArrowDown', 'ArrowUp'].includes(ev.key)) { ev.preventDefault(); if (menu.hidden) opener.click(); const items = Array.from(menu.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')); (ev.key === 'ArrowUp' ? items.at(-1) : items[0])?.focus(); } });
   menu.addEventListener('keydown', ev => {
     const items = Array.from(menu.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')).filter(el => el.getClientRects().length);
@@ -137,7 +147,8 @@ const top = h('header', { class: 'ws-top' },
   h('div', { class: 'right' }, DEMO ? demoBadge() : null, h('div', { class: 'top-strip' }, topStatus, claudeChip), topGo, h('div', { class: 'menu-wrap' }, helpMenuBtn, helpMenu)));
 document.addEventListener('pointerdown', ev => { if (!helpMenu.hidden && !(ev.target as HTMLElement).closest?.('.menu-wrap')) helpMenu.hidden = true; });
 
-const shotList = h('div', { class: 'shots', role: 'listbox', 'aria-label': 'Shots' });
+// A group of buttons (the current shot is aria-current), so phones can end it with a New shot button.
+const shotList = h('div', { class: 'shots', role: 'group', 'aria-label': 'Shots' });
 const outline = h('div', { class: 'outline', 'aria-label': 'Scene objects' });
 const addMenu = h('div', { class: 'add-menu', role: 'menu', hidden: true });
 for (const shape of Object.keys(SHAPES).filter(x => x !== 'group')) addMenu.append(h('button', { type: 'button', role: 'menuitem', title: `Add ${shape}`, onclick: () => addObject(shape) }, shapeIcon(shape), shape));
@@ -147,7 +158,12 @@ filterInput.oninput = () => { outlineFilter = filterInput.value.trim().toLowerCa
 const shotsSection = h('section', { class: 'rail-section rail-shots' },
   h('div', { class: 'rail-head' }, h('span', { class: 'eyebrow' }, 'Shots'), h('button', { class: 'btn ghost sm', type: 'button', title: 'Add a shot after this one', onclick: () => addShot() }, '+ Shot')),
   shotList);
-const railSplit = h('div', { class: 'rail-split', role: 'separator', 'aria-orientation': 'horizontal', 'aria-label': 'Resize shots and scene', tabindex: 0, title: 'Drag to resize · double-click to reset' });
+const railSplit = h('div', { class: 'rail-split', role: 'separator', 'aria-orientation': 'horizontal', 'aria-label': 'Resize shots and scene', tabindex: 0, title: 'Drag to resize · arrow keys · double-click to reset' });
+/** A focusable separator's value: the panel size in pixels, for screen readers (ARIA requires valuenow on it). */
+function separatorValue(el: HTMLElement, now: number, min: number, max: number) {
+  el.setAttribute('aria-valuemin', String(min)); el.setAttribute('aria-valuemax', String(Math.max(min, max)));
+  el.setAttribute('aria-valuenow', String(Math.round(Math.max(min, Math.min(max, now))))); el.setAttribute('aria-valuetext', `${Math.round(now)} pixels`);
+}
 const rail = h('aside', { class: 'rail' },
   shotsSection, railSplit,
   h('section', { class: 'rail-section rail-scene', style: 'flex:1' },
@@ -156,9 +172,14 @@ const rail = h('aside', { class: 'rail' },
 {
   const saved = Number(localStorage.getItem('previs.shotsH'));
   if (saved) rail.style.setProperty('--shots-h', `${saved}px`);
+  const shotsHeight = () => shotsSection.getBoundingClientRect().height || saved || 200;
+  const setShots = (px: number) => { const r = rail.getBoundingClientRect(); const v = Math.round(Math.max(90, Math.min(r.height - 160, px))); rail.style.setProperty('--shots-h', `${v}px`); localStorage.setItem('previs.shotsH', String(v)); separatorValue(railSplit, v, 90, r.height - 160); };
+  separatorValue(railSplit, saved || 200, 90, 2000);
+  railSplit.onfocus = () => separatorValue(railSplit, shotsHeight(), 90, rail.getBoundingClientRect().height - 160);
+  railSplit.onkeydown = ev => { if (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown') return; ev.preventDefault(); setShots(shotsHeight() + (ev.key === 'ArrowDown' ? 16 : -16)); };
   railSplit.onpointerdown = ev => {
     ev.preventDefault(); railSplit.setPointerCapture(ev.pointerId); railSplit.classList.add('active');
-    const move = (e: PointerEvent) => { const r = rail.getBoundingClientRect(); const v = Math.round(Math.max(90, Math.min(r.height - 160, e.clientY - r.top - 40))); rail.style.setProperty('--shots-h', `${v}px`); localStorage.setItem('previs.shotsH', String(v)); };
+    const move = (e: PointerEvent) => setShots(e.clientY - rail.getBoundingClientRect().top - 40);
     const end = () => { railSplit.classList.remove('active'); railSplit.removeEventListener('pointermove', move); railSplit.removeEventListener('pointerup', end); };
     railSplit.addEventListener('pointermove', move); railSplit.addEventListener('pointerup', end);
   };
@@ -172,9 +193,9 @@ const monitor = h('div', { class: 'monitor', title: 'Click to look through the s
 monitor.style.background = 'transparent';
 const frameLabel = h('div', { class: 'mon-label' });
 const camFrame = h('div', { class: 'cam-frame', hidden: true }, h('div', { class: 'thirds' }), frameLabel);
-const viewSeg = h('div', { class: 'seg on-stage vp-view', role: 'tablist', 'aria-label': 'View' });
-const setBtn = h('button', { type: 'button', class: 'on', title: 'Free view of the whole set (Esc)', onclick: () => setView('set') }, 'Director view');
-const camBtn = h('button', { type: 'button', title: 'Look through the shot camera (C)', onclick: () => setView('camera') }, 'Shot camera');
+const viewSeg = h('div', { class: 'seg on-stage vp-view', role: 'group', 'aria-label': 'View' });
+const setBtn = h('button', { type: 'button', class: 'on', 'aria-pressed': 'true', title: 'Free view of the whole set (Esc)', onclick: () => setView('set') }, 'Director view');
+const camBtn = h('button', { type: 'button', 'aria-pressed': 'false', title: 'Look through the shot camera (C)', onclick: () => setView('camera') }, 'Shot camera');
 viewSeg.append(setBtn, camBtn);
 const inspector = h('div', { class: 'inspector', hidden: true });
 const modeSeg = h('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Transform tool' });
@@ -206,7 +227,7 @@ const playBtn = h('button', { class: 'btn sm icon', type: 'button', 'aria-label'
 const scrub = h('input', { type: 'range', min: 0, max: 3, step: 0.01, value: 0, 'aria-label': 'Playhead' });
 const timeOut = h('span', { class: 'time' });
 const moveChip = h('span', { class: 'movechip' });
-const keyTrack = h('div', { class: 'keytrack', 'aria-label': 'Keyframes of the selection' });
+const keyTrack = h('div', { class: 'keytrack', role: 'group', 'aria-label': 'Keyframes of the selection' });
 const scrubWrap = h('div', { class: 'scrubwrap' }, scrub, keyTrack);
 const keyBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'data-tip': 'Insert keyframe', 'data-keys': 'I', 'aria-label': 'Insert keyframe for the selection', onclick: () => insertKeys() }, '◆');
 const prevKeyBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Previous keyframe', title: 'Previous keyframe', onclick: () => jumpKey(-1) }, '‹◆');
@@ -291,10 +312,13 @@ function setPanelWidth(which: keyof typeof PANEL, width: number | null) {
   const room = wsBody.getBoundingClientRect().width - other - 320; // keep the viewport usable
   const w = Math.round(Math.max(cfg.min, Math.min(cfg.max, room, width)));
   wsBody.style.setProperty(prop, `${w}px`); localStorage.setItem(cfg.key, String(w));
+  const handle = (which === 'rail' ? rail : side).querySelector<HTMLElement>(':scope > .resizer');
+  if (handle) separatorValue(handle, w, cfg.min, cfg.max);
 }
 for (const which of ['rail', 'side'] as const) {
   const panel = which === 'rail' ? rail : side, cfg = PANEL[which];
-  const handle = h('div', { class: `resizer ${cfg.edge}`, role: 'separator', 'aria-orientation': 'vertical', 'aria-label': which === 'rail' ? 'Resize shots and scene panel' : 'Resize direction panel', tabindex: 0, title: 'Drag to resize · double-click to reset' });
+  const handle = h('div', { class: `resizer ${cfg.edge}`, role: 'separator', 'aria-orientation': 'vertical', 'aria-label': which === 'rail' ? 'Resize shots and scene panel' : 'Resize direction panel', tabindex: 0, title: 'Drag to resize · arrow keys · double-click to reset' });
+  handle.onfocus = () => separatorValue(handle, panel.getBoundingClientRect().width, cfg.min, cfg.max);
   handle.onpointerdown = ev => {
     ev.preventDefault(); handle.setPointerCapture(ev.pointerId); handle.classList.add('active'); wsBody.classList.add('resizing');
     const move = (e: PointerEvent) => { const r = panel.getBoundingClientRect(); setPanelWidth(which, cfg.edge === 'right' ? e.clientX - r.left : r.right - e.clientX); };
@@ -311,6 +335,7 @@ for (const which of ['rail', 'side'] as const) {
   panel.append(handle);
   const saved = Number(localStorage.getItem(cfg.key));
   if (saved) wsBody.style.setProperty(which === 'rail' ? '--rail-w' : '--side-w', `${saved}px`);
+  separatorValue(handle, saved || (which === 'rail' ? 264 : 400), cfg.min, cfg.max);
 }
 
 // Collapsible panels with toolbar toggles (Cmd/Ctrl+B left, Alt+Cmd/Ctrl+B right).
@@ -434,7 +459,7 @@ function renderShots() {
     // Filmstrip frame: the still nearest mid-shot, else the blockout frame at mid-shot.
     const c = h('canvas', { width: 176, height: 99 });
     const thumb = still ? h('img', { class: 'thumb', src: refUrl(still), alt: '', loading: 'lazy', decoding: 'async' }) : c;
-    const b = h('button', { class: 'shot' + (s.id === shotId ? ' active' : ''), type: 'button', role: 'option', 'data-shot': s.id, 'aria-selected': String(s.id === shotId), title: `${s.title} · ${pips.label}`, onclick: () => selectShot(s.id) },
+    const b = h('button', { class: 'shot' + (s.id === shotId ? ' active' : ''), type: 'button', 'data-shot': s.id, 'aria-current': s.id === shotId ? 'true' : null, title: `${s.title} · ${pips.label}`, onclick: () => selectShot(s.id) },
       h('span', { class: 'shot-frame' }, thumb, h('span', { class: 'shot-dur' }, `${s.duration}s`), video ? h('span', { class: 'shot-vid', 'aria-hidden': 'true' }, '▶') : null),
       h('span', { class: 'info' },
         h('span', { class: 'num' }, String(i + 1).padStart(2, '0'), h('span', { class: 'shot-pips', role: 'img', 'aria-label': pips.label }, ...pipEls(pips))),
@@ -470,14 +495,22 @@ function renderOutline() {
     const children = kids(e.id), open = openGroups.has(e.id) || (!!outlineFilter && children.some(c => visible.has(c.id)));
     const off = hiddenObjs.has(e.id);
     const ref = objectLooks(project, e.id)[0] || allRefs().find(r => r.entityId === e.id && r.role !== 'style');
-    const btn = h('button', { class: 'obj' + (selection.has(e.id) ? ' active' : '') + (children.length ? ' parent' : '') + (off ? ' off' : ''), 'data-id': e.id, title: e.name, type: 'button', style: `--depth:${depth};--k:${KIND_COLORS[e.kind]}`, onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.pivotOn(e.id); } if (selection.ids.length) openObject(); }, ondblclick: () => scene.focusOn(e) },
-      children.length ? h('span', { class: 'twisty' + (open ? ' open' : ''), role: 'button', 'aria-label': open ? 'Collapse' : 'Expand', onclick: (ev: MouseEvent) => { ev.stopPropagation(); toggleGroup(e.id); } }, '›') : h('span', { class: 'twisty none' }),
+    // The row is a plain container (a click anywhere selects); its controls are sibling buttons, never nested:
+    // the name selects (Tab stop; ←/→ fold a group, ↑/↓ move between rows), the twisty folds, the eye hides.
+    const btn = h('div', { class: 'obj' + (selection.has(e.id) ? ' active' : '') + (children.length ? ' parent' : '') + (off ? ' off' : ''), 'data-id': e.id, title: e.name, style: `--depth:${depth};--k:${KIND_COLORS[e.kind]}`, onclick: (ev: MouseEvent) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) selection.toggle(e.id); else { selection.set([e.id], e.id); if (scene.view() === 'set') scene.pivotOn(e.id); } if (selection.ids.length) openObject(); }, ondblclick: () => scene.focusOn(e) },
+      children.length ? h('button', { type: 'button', class: 'twisty' + (open ? ' open' : ''), tabindex: -1, 'aria-label': `${open ? 'Collapse' : 'Expand'} ${e.name}`, 'aria-expanded': String(open), onclick: (ev: MouseEvent) => { ev.stopPropagation(); toggleGroup(e.id); } }, '›') : h('span', { class: 'twisty none' }),
       e.shape === 'group' ? h('span', { class: 'sw grp' }) : h('span', { class: 'sw', style: `background:${e.color}` }),
-      h('span', { class: 'name' }, e.name),
+      h('button', { type: 'button', class: 'name', 'aria-current': selection.has(e.id) ? 'true' : null, 'aria-expanded': children.length ? String(open) : null,
+        onkeydown: (ev: KeyboardEvent) => {
+          if (children.length && ((ev.key === 'ArrowRight' && !open) || (ev.key === 'ArrowLeft' && open))) { ev.preventDefault(); ev.stopPropagation(); toggleGroup(e.id); outline.querySelector<HTMLElement>(`.obj[data-id="${e.id}"] .name`)?.focus(); return; }
+          if (ev.key !== 'ArrowDown' && ev.key !== 'ArrowUp') return;
+          const names = Array.from(outline.querySelectorAll<HTMLElement>('.obj .name')), k = names.indexOf(ev.currentTarget as HTMLElement);
+          ev.preventDefault(); ev.stopPropagation(); names[k + (ev.key === 'ArrowDown' ? 1 : -1)]?.focus();
+        } }, e.name),
       children.length ? h('span', { class: 'count' }, String(withDescendants(all, [e.id]).length - 1)) : null,
       e.id === shot().camera.target ? h('span', { class: 'tgt', title: 'Camera target' }, '◎') : null,
       ref ? h('img', { class: 'refdot', src: refUrl(ref), alt: '', title: `Image: ${ref.name}` }) : null,
-      h('span', { class: 'eye', role: 'button', tabindex: -1, 'aria-label': off ? `Show ${e.name}` : `Hide ${e.name}`, title: off ? 'Show in the viewport' : 'Hide in the viewport (the blockout still includes it)', onclick: (ev: MouseEvent) => { ev.stopPropagation(); toggleHidden(e.id); } }, svgIcon(off ? ICON.eyeOff : ICON.eye)));
+      h('button', { type: 'button', class: 'eye', 'aria-label': off ? `Show ${e.name}` : `Hide ${e.name}`, 'aria-pressed': String(off), title: off ? 'Show in the viewport' : 'Hide in the viewport (the blockout still includes it)', onclick: (ev: MouseEvent) => { ev.stopPropagation(); toggleHidden(e.id); } }, svgIcon(off ? ICON.eyeOff : ICON.eye)));
     return [btn, ...(open ? children.flatMap(c => row(c, depth + 1)) : [])];
   };
   for (const [kind, list] of Object.entries(groups)) {
@@ -1165,12 +1198,14 @@ function castBlock(s: Shot) {
     const id = r.entity.id;
     return h('div', { class: 'cast-row' + (r.inCast ? ' in' : '') + (open ? ' open' : '') + (c ? ' colored' : ''), 'data-cast': id, style: c ? `--c:${c}` : '',
       onmouseenter: () => { scene.setHover(id); highlightPrompt(id); }, onmouseleave: () => { scene.setHover(null); highlightPrompt(selected); } },
-      h('div', { class: 'cast-head', role: 'button', tabindex: 0, 'aria-expanded': String(open), title: open ? 'Close' : 'Open: description, cast images and generation',
-        onkeydown: (ev: KeyboardEvent) => { if (ev.target === ev.currentTarget && ['Enter', ' '].includes(ev.key)) { ev.preventDefault(); ev.stopPropagation(); (ev.currentTarget as HTMLElement).click(); } },
+      // A click anywhere on the head opens the row; for the keyboard the name block is the button, a sibling of the
+      // checkbox (a control can't sit inside another).
+      h('div', { class: 'cast-head', title: open ? 'Close' : 'Open: description, cast images and generation',
         onclick: () => { if (selected === id) selection.clear(); else { selection.set([id], id); if (scene.view() === 'set') scene.pivotOn(id); openObject(); } } },
         box,
         look ? h('img', { class: 'cast-thumb', src: refUrl(look), alt: '' }) : h('span', { class: 'cast-ph' }, shapeIcon(r.entity.shape)),
-        h('div', { class: 'cast-main' },
+        h('div', { class: 'cast-main', role: 'button', tabindex: 0, 'aria-expanded': String(open),
+          onkeydown: (ev: KeyboardEvent) => { if (['Enter', ' '].includes(ev.key)) { ev.preventDefault(); ev.stopPropagation(); (ev.currentTarget as HTMLElement).click(); } } },
           h('span', { class: 'cast-name' }, r.entity.name),
           h('span', { class: 'cast-why' }, why, looks.length ? ` · ${looks.length} image${looks.length === 1 ? '' : 's'}` : '', card.sharedFrom ? ` · shares ${entity(card.sharedFrom)?.name}` : ''),
           r.inCast && card.description ? h('span', { class: 'cast-desc', hidden: open }, card.description) : null),
@@ -1388,7 +1423,7 @@ const colorOf = (id: string | null) => (id ? objectColors(project, shot()).get(i
 function placeObjectPane(scroll = false) {
   for (const row of Array.from(shotPane.querySelectorAll<HTMLElement>('[data-cast]'))) {
     const open = row.dataset.cast === selected; row.classList.toggle('open', open);
-    row.querySelector('.cast-head')?.setAttribute('aria-expanded', String(open));
+    row.querySelector('.cast-head > .cast-main')?.setAttribute('aria-expanded', String(open));
     const desc = row.querySelector<HTMLElement>('.cast-desc'); if (desc) desc.hidden = open;
   }
   if (mobile?.active()) { mobile.placeObject(objectPane, selected); return; }
@@ -1410,6 +1445,7 @@ function highlightPrompt(id: string | null) {
 }
 function setView(v: 'set' | 'camera') {
   scene.setView(v); setBtn.classList.toggle('on', v === 'set'); camBtn.classList.toggle('on', v === 'camera');
+  setBtn.setAttribute('aria-pressed', String(v === 'set')); camBtn.setAttribute('aria-pressed', String(v === 'camera'));
   viewport.classList.toggle('camview', v === 'camera');
   if (v === 'camera' && !coach.hidden) { coach.hidden = true; localStorage.setItem('previs.coach.viewport', '1'); }
 }
@@ -1672,7 +1708,7 @@ flyBtn.onclick = () => {
 flyDevice.onclick = () => { renderFlyMenu(); menuState(flyMenu, flyMenu.hidden, flyDevice, true); };
 document.addEventListener('pointerdown', ev => { if (!flyMenu.hidden && !(ev.target as HTMLElement).closest?.('.fly, .fly-menu')) flyMenu.hidden = true; });
 menuKeys(helpMenu, helpMenuBtn); menuKeys(flyMenu, flyDevice);
-menuKeys(addMenu, rail.querySelector<HTMLElement>('.add-obj')!); menuKeys(addPopup, canvas);
+menuKeys(addMenu, rail.querySelector<HTMLElement>('.add-obj')!); menuKeys(addPopup, canvas, false);
 canvas.tabIndex = 0;
 fly.onChange(() => { renderFly(); renderCamHero(); });
 window.addEventListener('gamepadconnected', () => renderFly());
