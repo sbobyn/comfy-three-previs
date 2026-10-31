@@ -29,7 +29,9 @@ async function fixture() {
 }
 
 function fakePrevis(p, { jobs = 'ok', headless = true, unpriced = false } = {}) {
-  const calls = [];
+  const calls = [], definitions = [];
+  let bound = {}; // the engine reports the camera source of what was bound (shared/camera-source.mjs cameraSourceOf)
+  const boundCamera = () => (bound.sourceVideo ? 'blockout' : bound.firstFrame && bound.lastFrame ? 'keyframes' : 'still');
   let submits = 0, batchPolls = 0;
   const batch = status => ({ id: 'b0000000-0000-4000-8000-000000000001', projectId: p.id, status, tier: 'draft', steps: ['stills'], estimateUsd: 0.09, reserveUsd: 0.099, breakdown: { listUsd: 0.056, refsUsd: 0.034, graderUsd: 0, expectedUsd: 0.09, marginUsd: 0.009, reserveUsd: 0.099, marginPct: 10 }, spentEstimateUsd: status === 'completed' ? 0.09 : 0, maxCostUsd: 1, budgetSkipped: 0,
     nodes: [{ id: 'still:a', type: 'still', label: 'Shot 1 · start still', status: status === 'completed' ? 'done' : 'running', deps: [], estimateUsd: 0.03 }, { id: 'still:b', type: 'still', label: 'Shot 2 · start still', status: status === 'completed' ? 'failed' : 'ready', error: 'Fake failure', deps: [], estimateUsd: 0.03 }, { id: 'still:c', type: 'still', label: 'Shot 3', status: 'budget', deps: [], estimateUsd: 0.03 }],
@@ -45,12 +47,14 @@ function fakePrevis(p, { jobs = 'ok', headless = true, unpriced = false } = {}) 
     'POST /api/director/refgen/track': () => ({ job: { status: 'completed', referenceIds: ['ref-' + calls.length] } }),
     'POST /api/director/edit': b => { for (const op of b.ops) if (op.op === 'update_entity' && op.patch.sheets) p.scene.entities.find(e => e.id === op.id).sheets = op.patch.sheets; return { project: p }; },
     'POST /api/director/sheet/compose': () => ({ referenceId: 'composed-1', project: p }),
-    'GET /api/generation': () => ({ presets: [...builtInPresets, ...(unpriced ? [{ id: 'unpriced-edit', title: 'Unpriced edit', task: 'transform-video', inputs: { sourceVideo: {} }, parameters: {}, pricing: null }] : [])], definitions: [], jobs: [] }),
+    'GET /api/generation': () => ({ presets: [...builtInPresets, ...(unpriced ? [{ id: 'unpriced-edit', title: 'Unpriced edit', task: 'transform-video', inputs: { sourceVideo: {} }, parameters: {}, pricing: null }] : [])], definitions, jobs: [] }),
+    // Like the real route: a built-in preset is saved under a new id before it can be bound.
+    'POST /api/generation/preset': b => { const definition = { ...b.definition, id: `saved-${definitions.length + 1}` }; definitions.push(definition); return { project: { revision: 2 }, definition }; },
     'GET /api/project': () => ({ project: { revision: 1, renders: [] } }),
-    'POST /api/director/video-refs': () => ({ references: [{ label: 'start still', role: 'frame', renderId: 'r-start' }] }),
-    'POST /api/generation/bind': () => ({ project: { revision: 2 }, workflowBindingId: 'wb1' }),
-    'POST /api/generation/quote': b => ({ job: { id: b.requestId, fingerprint: 'gfp', cameraSource: 'blockout' } }),
-    'POST /api/generation/submit': b => ({ job: { id: b.requestId, status: 'queued', cameraSource: 'blockout' } }),
+    'POST /api/director/video-refs': b => ({ references: [{ label: b.firstFrame ? 'start key frame' : 'start still', role: 'frame', renderId: 'r-start' }] }),
+    'POST /api/generation/bind': b => { bound = b.assetBindings; return { project: { revision: 2 }, workflowBindingId: 'wb1' }; },
+    'POST /api/generation/quote': b => ({ job: { id: b.requestId, fingerprint: 'gfp', cameraSource: boundCamera() } }),
+    'POST /api/generation/submit': b => ({ job: { id: b.requestId, status: 'queued', cameraSource: boundCamera() } }),
     'POST /api/director/batch': b => ({ batch: { ...batch(b.dryRun ? 'planned' : 'running'), ...(b.dryRun ? { status: 'planned' } : {}) } }),
     'GET /api/director/batch': () => ({ batch: batch(++batchPolls >= 2 ? 'completed' : 'running') }),
     'GET /api/jobs': () => (jobs === 'missing' ? [404, { error: 'File not found; run pnpm build first.' }] : { jobs: [
@@ -182,6 +186,16 @@ test('generate_sheet compose:true composes once every view lands', async () => {
     assert.ok(r.results.length > 0 && r.results.every(x => x.status === 'completed'));
     assert.deepEqual(r.compose, { composed: true, referenceId: 'composed-1' });
     assert.deepEqual(fake.calls.find(c => c.path === '/api/director/sheet/compose').body, { projectId: p.id, entityId: p.scene.entities.find(e => e.name === 'Bald eagle').id, sheetId: r.sheetId });
+    // maxCostUsd bounds the whole set: each view's allowance is what is left after the views before it ($0.03 each here).
+    const allowances = [...new Map(fake.calls.filter(c => c.path === '/api/director/refgen/submit').map(c => [c.body.requestId, c.body.approval.allowance.maxAmount])).values()];
+    assert.deepEqual(allowances, allowances.map((_, i) => Math.round((1 - 0.03 * i) * 10000) / 10000));
+  });
+  // A set whose expected total (list + the identity image per view) passes maxCostUsd is refused before anything is prepared.
+  const p2 = await fixture(), fake2 = fakePrevis(p2);
+  await withAgent(fake2, async ({ call }) => {
+    const r = await call('previs_director_generate_sheet', { projectId: p2.id, object: 'Bald eagle', setId: setsFor('character')[0].id, maxCostUsd: 0.05 });
+    assert.equal(r.submitted, false); assert.match(r.reason, /above maxCostUsd \$0\.05/);
+    assert.equal(fake2.calls.filter(c => c.path === '/api/director/refgen/prepare' || c.path === '/api/director/refgen/submit').length, 0, 'nothing prepared or sent');
   });
 });
 
@@ -259,7 +273,10 @@ test('generate_video takes its camera from the blockout by preference, reports c
     const r = await call('previs_director_generate_video', { projectId: p.id, shot: '1', cameraSource: 'blockout', maxCostUsd: 3 });
     assert.equal(r.submitted, true); assert.equal(r.cameraSource, 'blockout'); assert.equal(r.camera, 'Camera: from blockout');
     const bind = fake.calls.find(c => c.path === '/api/generation/bind').body;
-    assert.equal(bind.definitionId, 'kling-o1-edit-v1', 'cheapest cloud model that follows the blockout');
+    const saved = fake.calls.find(c => c.path === '/api/generation/preset').body.definition;
+    assert.equal(saved.provenance.presetId, 'kling-o1-edit-v1', 'cheapest cloud model that follows the blockout');
+    assert.equal(saved.provenance.referenceImages, 1, 'saved with the reference slots it binds');
+    assert.equal(bind.definitionId, 'saved-1', 'binds the saved definition, never the bare preset id');
     assert.deepEqual(bind.assetBindings, { sourceVideo: { assetId: p.shots[0].render.assetId }, referenceImage1: { renderId: 'r-start' } });
     assert.match(bind.prompt, /blockout video exactly; it is the camera/);
     assert.equal(fake.calls.find(c => c.path === '/api/director/video-refs').body.stills, true);
@@ -269,6 +286,37 @@ test('generate_video takes its camera from the blockout by preference, reports c
     assert.equal(fake.calls.filter(c => c.path === '/api/generation/bind').length, binds, 'nothing bound for a refused model');
     const inputs = await call('previs_director_shot_inputs', { projectId: p.id, shot: '1', model: 'seedance-25-edit-v1' });
     assert.equal(inputs.cameraSource, 'blockout'); assert.equal(inputs.blockout.current, true);
+  });
+});
+
+test('generate_video: a missing end still is an explicit choice, a stale start is refused, and the reply shows the effective camera, length and prompt', async () => {
+  const p = await fixture(), fake = fakePrevis(p);
+  await withAgent(fake, async ({ call }) => {
+    const binds = () => fake.calls.filter(c => c.path === '/api/generation/bind').map(c => c.body);
+    // Shot 1 has a start still and no end still: a start → end model is refused, naming the start-only choice.
+    const no = await call('previs_director_generate_video', { projectId: p.id, shot: '1', model: 'ltx-25-flf-v1', maxCostUsd: 3 });
+    assert.equal(no.submitted, false); assert.match(no.reason, /needs an end key frame, or choose to animate the start still alone with LTX 2\.5 Pro.*allowStartOnly: true/);
+    assert.equal(no.startOnlyModel, 'ltx-25-i2v-v1'); assert.equal(binds().length, 0, 'nothing bound');
+    const yes = await call('previs_director_generate_video', { projectId: p.id, shot: '1', model: 'ltx-25-flf-v1', maxCostUsd: 3, allowStartOnly: true });
+    assert.equal(yes.submitted, true); assert.equal(yes.modelId, 'ltx-25-i2v-v1'); assert.equal(yes.cameraSource, 'still'); assert.equal(yes.clipSeconds, 5);
+    assert.equal(yes.estimateUsd, 0.86, '5 s × $0.172/s');
+    assert.match(yes.prompt, /Hold the still’s framing/);
+    assert.deepEqual(Object.keys(binds()[0].assetBindings), ['firstFrame']);
+    assert.equal(fake.calls.find(c => c.path === '/api/generation/preset').body.definition.provenance.presetId, 'ltx-25-i2v-v1');
+  });
+  // The same start still, made for an earlier blocking: refused before anything is registered or bound.
+  const old = await fixture(); old.shots[0].references.find(r => r.note === 'key frame start').generated.signature = 'earlier-blocking';
+  old.shots[0].prompts = { video: { text: 'Slow dolly left, whip pan to the eagle.', edited: true } };
+  const fake2 = fakePrevis(old);
+  await withAgent(fake2, async ({ call }) => {
+    const r = await call('previs_director_generate_video', { projectId: old.id, shot: '1', model: 'ltx-25-i2v-v1', maxCostUsd: 3 });
+    assert.equal(r.submitted, false); assert.match(r.reason, /start still was made before the shot’s camera, timing or scene changed.*nothing was sent/);
+    assert.equal(fake2.calls.filter(c => c.path === '/api/director/video-refs' || c.path.startsWith('/api/generation/')).length, 0);
+    const inputs = await call('previs_director_shot_inputs', { projectId: old.id, shot: '1', model: 'ltx-25-flf-v1' });
+    assert.equal(inputs.keyFrames.start, 'stale'); assert.equal(inputs.keyFrames.end, 'missing'); assert.match(inputs.keyFrames.withoutEnd, /allowStartOnly/);
+    assert.match(inputs.promptWarning, /“dolly left”, “whip pan”.*camera comes from the start and end stills/, 'free text that directs the camera is surfaced');
+    const models = await call('previs_director_models', { projectId: old.id });
+    assert.equal(models.imageModels[0].usdPerImage, 0.03, 'image prices come from the preset pricing');
   });
 });
 

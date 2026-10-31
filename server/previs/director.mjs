@@ -12,7 +12,7 @@ import { atomicJson } from './atomic.mjs';
 import { interpret } from './director-parse.mjs';
 import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
 import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
-import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, keyStills, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
+import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, keyStills, stillStale, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
 import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
 import { loadStarters, starterCard, instantiateStarter, attachStarterMedia } from './starters.mjs';
@@ -723,6 +723,11 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
         const references = [];
         // First-frame workflows take one image: the shot's newest key frame.
         const { start: startFrame, end: endFrame } = keyStills(s);
+        // A key frame made for an earlier blocking would animate the old layout: refuse it for every caller (UI, batch, agent).
+        if (input.firstFrame) {
+          const old = [startFrame && stillStale(p, s, startFrame) && 'start', input.lastFrame && endFrame && stillStale(p, s, endFrame) && 'end'].filter(Boolean);
+          if (old.length) throw Object.assign(Error(`The ${old.join(' and ')} still${old.length > 1 ? 's were' : ' was'} made before the shot’s camera, timing or scene changed. Make ${old.length > 1 ? 'them' : 'it'} again in the Storyboard (or previs_director_generate_still); nothing was sent.`), { status: 409, apiCode: 'stale-still' });
+        }
         // keyFrames: [start, end?] for first/last-frame workflows. `stills`: blockout-driven models get the start/end stills first, as the look.
         const picks = input.firstFrame ? [startFrame && { ref: startFrame, entityId: null, role: 'frame', label: 'start key frame' }, input.lastFrame && endFrame && { ref: endFrame, entityId: null, role: 'frame', label: 'end key frame' }].filter(Boolean) : videoReferences(p, s, max, { stills: input.stills === true });
         for (const x of picks) {

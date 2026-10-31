@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
+import { cameraMotionWarning, CAMERA_SOURCE_LABELS } from '../shared/camera-source.mjs';
 const source = await readFile(new URL('../src/director.ts', import.meta.url), 'utf8');
 const compile = s => ts.transpileModule(s, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 const h = (tag, attrs = {}, ...children) => ({ tag, checked: false, ...attrs, children: children.filter(c => c != null && c !== false), className: attrs.class || '', style: {}, replaceChildren(...c) { this.children = c; }, scrollIntoView() {} });
@@ -12,23 +13,25 @@ const text = n => typeof n === 'string' ? n : (n.children || []).map(text).join(
 test('single-shot preparation creates a review card and never clicks submission', async () => {
   const a = source.indexOf('  quoteBtn.onclick = async () => {', source.indexOf('async function renderGenerate'));
   const b = source.indexOf('\n  const drawJobs', a);
-  const quoteBtn = {}, controls = [{ value: 'h3' }, { value: 'cloud' }, { checked: true }, { checked: true }];
-  let prepared = 0, reviewed = 0;
-  const ctx = { quoteBtn, wf: controls[0], backendSel: controls[1], useRefs: controls[2], timing: controls[3], project: { revision: 7 }, s: {}, st: {}, choices: [], h,
+  const quoteBtn = {}, controls = [{ value: 'h3' }, { value: 'cloud' }, { checked: true }, { checked: true }, { checked: false }];
+  let prepared = 0, reviewed = 0, options = null, plan = null;
+  const ctx = { quoteBtn, wf: controls[0], backendSel: controls[1], useRefs: controls[2], timing: controls[3], startOnly: controls[4], project: { revision: 7 }, s: {}, st: {}, choices: [], h,
     out: h('div'), getPrompt: () => 'Preserve Video 1',
-    prepareShotVideo: async () => { prepared++; return { def: {}, job: { validation: { compatible: true } }, request: {} }; },
-    genQuote: () => { reviewed++; return { querySelector() { throw Error('Must not auto-click submission'); } }; },
+    prepareShotVideo: async o => { prepared++; options = o; return { def: {}, job: { validation: { compatible: true } }, request: {}, est: 0.8, seconds: 4 }; },
+    genQuote: (job, def, request, s, p) => { reviewed++; plan = p; return { querySelector() { throw Error('Must not auto-click submission'); } }; },
   };
   runInNewContext(compile(source.slice(a, b)), ctx);
   await quoteBtn.onclick();
   assert.equal(prepared, 1); assert.equal(reviewed, 1);
+  assert.equal(options.startOnly, false, 'animating the start still alone is only ever the artist’s explicit choice');
+  assert.deepEqual([plan.est, plan.seconds], [0.8, 4], 'the card gets the prepared estimate for the seconds the model makes');
   assert.ok(controls.every(c => c.disabled === false));
 });
 
 test('paid submission requires explicit review, allowance and unknown-charge acknowledgment; it dispatches once', async () => {
   const a = source.indexOf('function genQuote('), b = source.indexOf('// ---------- Live sync', a);
   const sent = [], timers = [];
-  const ctx = { h, api: async (path, body) => { sent.push({ path, body }); return { job: { id: 'job', status: 'queued' } }; }, setTimeout: fn => timers.push(fn) };
+  const ctx = { h, cameraMotionWarning, CAMERA_SOURCE_LABELS, api: async (path, body) => { sent.push({ path, body }); return { job: { id: 'job', status: 'queued' } }; }, setTimeout: fn => timers.push(fn) };
   runInNewContext(compile(source.slice(a, b)), ctx);
   const job = { id: 'job', fingerprint: 'exact-fingerprint', quote: { status: 'unknown' }, validation: { compatible: true }, sources: { sourceVideo: { id: 'source', frameCount: 96, duration: 4 } } };
   const card = ctx.genQuote(job, { title: 'H3' }, { backend: { kind: 'cloud' } }, {});

@@ -374,11 +374,18 @@ export function keyStills(shot) {
   return { start, end: frames.filter(r => r.note === 'key frame end').at(-1) || null };
 }
 
+/** The shot's chosen start and end stills with readiness: 'missing', 'stale' (made for an earlier blocking) or 'ready'. */
+export function keyStillState(project, shot) {
+  const ks = keyStills(shot), state = r => (!r ? 'missing' : stillStale(project, shot, r) ? 'stale' : 'ready');
+  return { start: ks.start, end: ks.end, startState: state(ks.start), endState: state(ks.end) };
+}
+
 /**
  * Reference images a shot's video generation should use, in order, capped at `max`:
  * the look of each object in the shot (subject first), then environment references, then style, then key frames.
  * With `stills` (a model that follows the blockout clip) the start and end stills lead instead, as the look
- * of the shot, and the cast follows. Returns [{ ref, entityId, role, label }].
+ * of the shot, and the cast follows. Stills made for an earlier blocking (stillStale) are never used.
+ * Returns [{ ref, entityId, role, label }].
  */
 export function videoReferences(project, shot, max = 4, { stills = false } = {}) {
   const cast = shotObjects(project, shot);
@@ -387,9 +394,10 @@ export function videoReferences(project, shot, max = 4, { stills = false } = {})
   const envObjects = cast.filter(c => c.entity.kind === 'environment').map(c => ({ ref: look(c.entity.id), entityId: c.entity.id, role: 'environment', label: c.entity.name })).filter(x => x.ref);
   const envShot = shot.references.filter(r => r.role === 'environment' && !r.entityId).map(r => ({ ref: r, entityId: null, role: 'environment', label: 'environment' }));
   const style = shot.references.filter(r => r.role === 'style').map(r => ({ ref: r, entityId: null, role: 'style', label: 'style' }));
-  const ks = keyStills(shot);
-  const lead = stills ? [ks.start && { ref: ks.start, entityId: null, role: 'frame', label: 'start still' }, ks.end && ks.end.id !== ks.start?.id && { ref: ks.end, entityId: null, role: 'frame', label: 'end still' }].filter(Boolean) : [];
-  const frames = stills ? [] : shot.references.filter(r => r.role === 'frame').slice(-1).map(r => ({ ref: r, entityId: null, role: 'frame', label: 'key frame' }));
+  // A still made for an earlier blocking would hand the model the old layout: it is left out (the caller says so).
+  const ks = keyStills(shot), fresh = r => r && !stillStale(project, shot, r);
+  const lead = stills ? [fresh(ks.start) && { ref: ks.start, entityId: null, role: 'frame', label: 'start still' }, fresh(ks.end) && ks.end.id !== ks.start?.id && { ref: ks.end, entityId: null, role: 'frame', label: 'end still' }].filter(Boolean) : [];
+  const frames = stills ? [] : shot.references.filter(r => r.role === 'frame').slice(-1).filter(fresh).map(r => ({ ref: r, entityId: null, role: 'frame', label: 'key frame' }));
   const env = [...envShot, ...envObjects];
   // Keep a slot for the environment when there is one, so every shot shares the same world (the stills already show it).
   const room = Math.max(0, max - lead.length - (env.length && !lead.length ? 1 : 0));

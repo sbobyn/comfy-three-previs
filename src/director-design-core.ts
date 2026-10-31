@@ -100,11 +100,17 @@ export function heroSweepAt(u: number): number {
 }
 
 // ---------- Generate dialog ----------
-/** The header's estimate: rate × shot length, free when it runs locally, else priced at the quote. */
-export function dialogEstimate(def: { pricing?: { ratePerSecond?: number } } | null, seconds: number, backend: string): string {
-  if (backend === 'local') return 'Free · local';
+/**
+ * The header's estimate: rate × the seconds the model makes (start-still models snap to their clip lengths). The graph is
+ * priced, not the host: a partner (paid) model still bills when it runs through Local ComfyUI. Only a model with a $0 rate
+ * running locally is free; anything unpriced is priced at the quote.
+ */
+export function dialogEstimate(def: { id?: string; pricing?: { ratePerSecond?: number } } | null, seconds: number, backend: string): string {
   const rate = def?.pricing?.ratePerSecond;
-  return rate ? `≈ $${(rate * seconds).toFixed(2)}` : 'Priced at quote';
+  if (rate) return `≈ $${(rate * seconds).toFixed(2)} for ${seconds}s${backend === 'local' ? ' · not free on Local' : ''}`;
+  // `wan-` presets are native local graphs (no partner nodes), as elsewhere in the app.
+  if (backend === 'local' && (rate === 0 || def?.id?.startsWith('wan-'))) return 'Free · local';
+  return 'Priced at quote';
 }
 
 // ---------- Cast list: look families ----------

@@ -1,7 +1,7 @@
 // Prepare one shot's video generation: the blockout video plus the reference images of every object
 // the shot's camera sees (and its environment, style and key frame), wired into the model, then quoted.
 // Nothing is sent to a backend here; quoting is free.
-import { compilePrompt, referenceLegend, videoReferences } from '../shared/director.mjs';
+import { compilePrompt, keyStillState, referenceLegend, videoReferences } from '../shared/director.mjs';
 import type { DirectorProject, Shot, VideoRef } from '../shared/director.mjs';
 import { withReferenceImages, maxReferences } from '../shared/video-refs.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
@@ -67,7 +67,7 @@ async function definitionFor(st: GenState, id: string, refCount: number): Promis
 }
 
 /** Bind and quote one shot. Re-run this right before every submit: each submit needs a fresh binding. */
-export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot; st: GenState; definitionId: string; useReferences?: boolean; userPrompt?: string | null; backend?: 'cloud' | 'local'; acceptTimingChange?: boolean }) {
+export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot; st: GenState; definitionId: string; useReferences?: boolean; userPrompt?: string | null; backend?: 'cloud' | 'local'; acceptTimingChange?: boolean; startOnly?: boolean }) {
   const { project, shot: s, st } = o;
   const r = s.render; if (!r) throw Error('Make the blockout first');
   const base = baseOf(st, o.definitionId);
@@ -91,22 +91,23 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   const backend = o.backend || (def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-') ? 'local' : 'cloud');
   const request = { requestId: crypto.randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: backend } };
   const job = (await api('generation/quote', request)).job;
-  const src = job.sources?.sourceVideo || job.sources?.controlVideo;
-  const est = def.pricing?.ratePerSecond && src?.duration ? def.pricing.ratePerSecond * src.duration : null;
-  return { def, job, request, est, refs: registered, prompt, cameraSource };
+  const src = job.sources?.sourceVideo || job.sources?.controlVideo, seconds: number = src?.duration ?? r.duration;
+  const est = def.pricing?.ratePerSecond && seconds ? def.pricing.ratePerSecond * seconds : null;
+  return { def, job, request, est, refs: registered, prompt, cameraSource, seconds };
 }
 
 /** Image-to-video (LTX, Seedance, Kling, Veo, Hailuo, Wan): animate the shot's key frame, else its first blockout frame. */
 async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base: Def) {
   const { project, shot: s, st } = o, r = s.render!;
   let wantsLast = !!base.inputs?.lastFrame;
+  // No current End still: only an explicit choice (startOnly) animates the start still alone with the start-only sibling.
+  const fallback = wantsLast && keyStillState(project, s).endState !== 'ready' ? st.presets.find(p => p.id === startOnlyFallback(base)) : null;
+  if (fallback && o.startOnly) { base = fallback; wantsLast = false; }
+  // The server refuses a still made for an earlier blocking (409); its message says which one to make again.
   const frame: EngineRef[] = (await api('director/video-refs', { projectId: project.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast })).references;
   let renderId = frame.find(x => x.label === 'start key frame')?.renderId;
   const lastId = frame.find(x => x.label === 'end key frame')?.renderId;
-  // No end still: a start → end model with a start-only sibling animates the start still alone (as the batch does).
-  const fallback = wantsLast && !lastId ? st.presets.find(p => p.id === startOnlyFallback(base)) : null;
-  if (fallback) { base = fallback; wantsLast = false; }
-  if (wantsLast && (!renderId || !lastId)) throw Error('Generate this shot’s start and end key frames first');
+  if (wantsLast && (!renderId || !lastId)) throw Error(fallback && renderId ? `This shot has no End still. Add one in the Storyboard, or choose to animate the start still alone with ${fallback.title.split(' ·')[0]} (the camera then comes from one still, approximate).` : 'Generate this shot’s start and end key frames first');
   const main = (await api('project')).project;
   if (!renderId) renderId = main.renders?.find((x: any) => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
   if (!renderId) throw Error('No start image: generate a key frame for this shot, or make the blockout again');
@@ -125,5 +126,5 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   const request = { requestId: crypto.randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: o.backend || 'cloud' } };
   const job = (await api('generation/quote', request)).job;
   const est = def.pricing?.ratePerSecond ? def.pricing.ratePerSecond * secs : null;
-  return { def, job, request, est, refs: frame, prompt, cameraSource };
+  return { def, job, request, est, refs: frame, prompt, cameraSource, seconds: secs };
 }

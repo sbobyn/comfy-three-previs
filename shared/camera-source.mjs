@@ -74,3 +74,37 @@ export function fitPrompt(text, max, source) {
   const cut = body.length > room ? body.slice(0, room).replace(/\s+\S*$/, '') : body;
   return `${cut} ${line}${legend ? `\n${legend}` : ''}`.slice(0, max);
 }
+
+// Phrases that direct the camera itself. Object motion ("the actor turns", "the car pans across") is not listed: only
+// words a model reads as a camera instruction. The blockout (or the stills made from it) is the camera, so a video
+// prompt carries none of these; free text that does contradicts the camera line.
+const CAMERA_MOTION = [
+  /\bdolly(?:ing)?(?:[- ](?:in|out|left|right|zoom|alongside))?\b/gi, /\bwhip[- ]pans?\b/gi, /\b(?:slow |fast )?pan(?:s|ning|ned)? (?:left|right|across|up|down|over|to)\b/gi,
+  /\btilt(?:s|ing|ed)? (?:up|down)\b/gi, /\bcrane(?:s|d)? (?:up|down|shot|over)\b/gi, /\b(?:crash |dolly )?zoom(?:s|ing|ed)? (?:in|out)\b/gi, /\bcrash zoom\b/gi,
+  /\btruck(?:s|ing)? (?:left|right)\b/gi, /\borbit(?:s|ing)? (?:left|right|around the subject)\b/gi, /\b(?:slow |fast )?push(?:es)?[- ]in\b/gi, /\bpull(?:s)?[- ](?:out|back)\b/gi,
+  /\btracking shot\b/gi, /\bsteadicam\b/gi, /\bhandheld\b/gi, /\bdrone (?:shot|flyover|chase)\b/gi, /\bfpv\b/gi,
+  /\bcamera (?:moves|pushes|pulls|rises|drops|swoops|follows|circles|pans|tilts|tracks|cranes|zooms|dollies|orbits|flies)\b/gi,
+];
+/**
+ * Camera-motion phrases in a video prompt, outside its camera line (distinct, as written). Empty when the text leaves the
+ * camera to its source. Surfaced to the user and the agent; the text is never rewritten.
+ */
+export function cameraMotionWords(text) {
+  let t = String(text || '');
+  for (const line of Object.values(CAMERA_LINES)) t = t.split(line).join(' ');
+  for (const k of LEGACY) t = t.replace(k, ' ');
+  // Longest phrase wins where two overlap ("whip pan to" is one instruction, not two).
+  const hits = CAMERA_MOTION.flatMap(re => [...t.matchAll(re)].map(m => ({ at: m.index, end: m.index + m[0].length, text: m[0] })))
+    .sort((a, b) => a.at - b.at || b.end - a.end);
+  const kept = [], found = new Map();
+  for (const h of hits) if (!kept.some(k => h.at < k.end && k.at < h.end)) kept.push(h);
+  for (const h of kept) { const k = h.text.toLowerCase(); if (!found.has(k)) found.set(k, h.text); }
+  return [...found.values()];
+}
+/** One sentence for a prompt with camera-motion words, or '' when it has none. */
+export function cameraMotionWarning(text, source = 'blockout') {
+  const words = cameraMotionWords(text);
+  if (!words.length) return '';
+  const from = source === 'blockout' ? 'the blockout clip' : source === 'keyframes' ? 'the start and end stills' : 'the start still';
+  return `The prompt directs the camera (${words.map(w => `“${w}”`).join(', ')}), but the camera comes from ${from}. Remove those words, or change the camera in the shot.`;
+}

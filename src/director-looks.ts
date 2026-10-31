@@ -5,6 +5,7 @@ import './director-looks.css';
 import { objectLooks, lookPrompt, lookViews, shotCast, handleOf, lookSource } from '../shared/director.mjs';
 import type { DirectorProject, Entity } from '../shared/director.mjs';
 import { api, h, shapeIcon, toast } from './director-common';
+import { expectedUsd, isFree, submitImage, suggestedCap } from './director-spend';
 
 type Preset = { id: string; title: string; backend: 'cloud' | 'local'; note: string };
 export type LooksCtx = {
@@ -50,7 +51,7 @@ export function openLooksBoard(ctx: LooksCtx) {
   const pickAll = h('input', { type: 'checkbox', 'aria-label': 'Select every object' });
   const missingBox = h('input', { type: 'checkbox' });
   const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, 'Generate');
-  const estLooks = () => { const p: any = ctx.refgen().presets.find(x => x.id === presetSel.value); if (p?.backend === 'local') return ' · free'; const usd = p?.pricing?.usdPerImage; const n = P().scene.entities.filter(e => picked.has(e.id) && !e.lookFrom).length; return usd != null && n ? ` · ≈ $${(usd * n * Number(countSel.value)).toFixed(2)}` : ''; };
+  const estLooks = () => { const p: any = ctx.refgen().presets.find(x => x.id === presetSel.value); if (p?.backend === 'local') return ' · free'; const usd = p?.pricing?.usdPerImage; const n = P().scene.entities.filter(e => picked.has(e.id) && !e.lookFrom).length; return usd != null && n ? ` · list ≈ $${(usd * n * Number(countSel.value)).toFixed(2)}` : ''; };
   // Bulk: give every selected object the image of one object (e.g. all police cars → Police 1).
   const shareFrom = h('select', { class: 'field', 'aria-label': 'Use the image of' });
   const shareBtn = h('button', { class: 'btn', type: 'button', title: 'Selected objects reuse this object’s images and description' }, 'Use this image');
@@ -99,7 +100,7 @@ export function openLooksBoard(ctx: LooksCtx) {
   function syncToolbar() {
     const list = shown();
     pickAll.checked = list.length > 0 && list.every(e => picked.has(e.id)); pickAll.indeterminate = !pickAll.checked && list.some(e => picked.has(e.id));
-    quoteBtn.textContent = picked.size ? `Generate ${picked.size} image${picked.size === 1 ? '' : 's'}${estLooks()}` : 'Generate';
+    quoteBtn.textContent = picked.size ? `Quote ${picked.size} image${picked.size === 1 ? '' : 's'}${estLooks()}` : 'Quote';
     quoteBtn.disabled = busy || !picked.size;
     const keep = shareFrom.value;
     shareFrom.replaceChildren(h('option', { value: '' }, 'Give selected the image of…'), ...P().scene.entities.filter(x => !x.lookFrom && objectLooks(P(), x.id).length).map(x => h('option', { value: x.id, selected: x.id === keep }, x.name)));
@@ -113,7 +114,7 @@ export function openLooksBoard(ctx: LooksCtx) {
     syncToolbar();
   }
 
-  // ---------- Batch: prepare (quote) every selected object, one approval, generate one at a time ----------
+  // ---------- Batch: prepare (quote) every selected object, show the quote, one approval, generate one at a time ----------
   quoteBtn.onclick = async () => {
     busy = true; syncToolbar();
     batch.hidden = false; batch.replaceChildren(h('p', { class: 'status-line' }, 'Preparing each object…'));
@@ -128,21 +129,20 @@ export function openLooksBoard(ctx: LooksCtx) {
       } catch (err) { plan.push({ e, job: null, issue: (err as Error).message }); }
     }
     busy = false; await ctx.reloadRefgen(); draw();
-    // One click: send everything that checks out, one object at a time.
-    const ready = plan.filter(x => x.job && !x.issue), skipped = plan.filter(x => !x.job || x.issue);
-    if (skipped.length) toast(`Skipped ${skipped.map(x => `${x.e.name} (${x.issue})`).join(', ')}`, true);
-    const free = ready.every(x => x.job.quote?.status === 'known' && x.job.quote.amount === 0), total = ready.reduce((t, x) => t + (x.job.quote?.estimate ?? 0.1), 0);
-    if (ready.length) void run(ready, free ? 0 : Math.max(1, Math.ceil(total * 150) / 100), free); else batch.hidden = true;
+    // Nothing is sent yet: the quote table asks for approval of a total.
+    drawPlan();
   };
   function drawPlan() {
-    const ready = plan.filter(x => x.job && !x.issue), total = ready.reduce((t, x) => t + (x.job.quote?.estimate ?? 0), 0);
-    const free = ready.every(x => x.job.quote?.status === 'known' && x.job.quote.amount === 0);
+    // A request without an estimate is skipped, never sent under a guessed price.
+    for (const x of plan) if (x.job && !x.issue && expectedUsd(x.job) === null) x.issue = 'no cost estimate for this model';
+    const ready = plan.filter(x => x.job && !x.issue), total = ready.reduce((t, x) => t + (expectedUsd(x.job) ?? 0), 0);
+    const free = ready.every(x => isFree(x.job));
     const blocked = !free && !ctx.refgen().paidExecutionEnabled;
     const approve = h('input', { type: 'checkbox' });
-    const cap = h('input', { class: 'field mono', type: 'number', min: 0, step: 0.01, value: Math.max(0.5, Math.ceil(total * 1.5 * 100) / 100).toFixed(2), style: 'width:84px', 'aria-label': 'Maximum USD for the batch' });
+    const cap = h('input', { class: 'field mono', type: 'number', min: 0, step: 0.01, value: suggestedCap(total).toFixed(2), style: 'width:84px', 'aria-label': 'Maximum USD for the batch' });
     const go = h('button', { class: 'btn camera', type: 'button', disabled: true }, `${free ? 'Generate' : 'Approve & generate'} ${ready.length}`);
     approve.onchange = () => { go.disabled = blocked || !approve.checked || !ready.length; };
-    go.onclick = () => void run(ready, free ? 0 : Number(cap.value) || 0, free);
+    go.onclick = () => void run(ready, free ? 0 : Number(cap.value) || 0);
     batch.replaceChildren(
       h('div', { class: 'lk-batch-head' }, h('strong', {}, 'Quote'), h('span', { class: 'muted' }, 'Nothing has been sent'), h('span', { style: 'flex:1' }), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close quote', onclick: () => { batch.hidden = true; } }, '✕')),
       h('table', { class: 'lk-quote' }, h('tbody', {}, ...plan.map(x => h('tr', { class: x.issue || !x.job ? 'skip' : '' },
@@ -153,18 +153,17 @@ export function openLooksBoard(ctx: LooksCtx) {
         h('label', {}, approve, free ? 'I approve these requests' : 'I approve these requests, up to'), free ? null : cap, free ? null : h('span', {}, 'USD in total'), go,
         blocked ? h('p', { class: 'note', style: 'margin:0;flex-basis:100%' }, 'Paid generation is off on this server (PREVIS_ALLOW_PAID≠1). Nothing will be sent.') : h('p', { class: 'note', style: 'margin:0;flex-basis:100%' }, 'Objects run one at a time. A failed or uncertain request stops the batch and is never retried. New images become primary on objects that had none.')) : h('p', { class: 'note' }, 'Nothing to generate.'));
   }
-  async function run(list: Planned[], cap: number, free: boolean) {
+  async function run(list: Planned[], cap: number) {
     busy = true; syncToolbar();
-    const log = h('div', { class: 'lk-log' }); let spent = 0;
+    const log = h('div', { class: 'lk-log' }), bound = { capUsd: cap, spentUsd: 0 }, free = list.every(x => isFree(x.job));
     batch.replaceChildren(h('div', { class: 'lk-batch-head' }, h('strong', {}, `Generating images for ${list.length} object${list.length === 1 ? '' : 's'}`)), log);
     const line = (t: string, cls = '') => { const l = h('div', { class: cls }, t); log.append(l); return l; };
     try {
       for (const x of list) {
-        const est = x.job.quote?.estimate ?? 0;
-        if (!free && spent + est > cap + 1e-9) { line(`${x.e.name}: would pass the $${cap.toFixed(2)} limit — stopped`, 'err'); break; }
-        const allowance = { currency: 'USD', maxAmount: free ? 0 : Math.max(0.01, Math.min(cap - spent, Math.max(0.5, Math.ceil(est * 200) / 100))), ...(free ? {} : { allowUnknownCharges: true }) };
-        let job = (await api('director/refgen/submit', { projectId: P().id, requestId: x.job.id, approval: { approved: true, fingerprint: x.job.fingerprint, allowance } })).job;
-        spent += est;
+        // Sent once under the approved total; a request whose estimate would pass it is not sent and stops the batch.
+        let job: any;
+        try { job = (await submitImage(api, P().id, x.job, bound)).job; }
+        catch (err) { if (!(err as any).refused) throw err; line(`${x.e.name}: ${(err as Error).message} Stopped.`, 'err'); break; }
         const l = line(`${x.e.name}: ${job.status}…`); const t0 = Date.now();
         while (job.status === 'submitted') {
           await sleep(5000);
@@ -176,7 +175,7 @@ export function openLooksBoard(ctx: LooksCtx) {
         await ctx.reloadRefgen(); draw();
         if (job.status !== 'completed') { line('Batch stopped. Nothing is retried automatically.', 'err'); break; }
       }
-      line(free ? 'Done' : `Done · estimated spend ≈ $${spent.toFixed(2)}`, 'muted');
+      line(free ? 'Done' : `Done · estimated spend ≈ $${bound.spentUsd.toFixed(2)} of $${cap.toFixed(2)} approved`, 'muted');
     } catch (err) { if ((err as Error).message !== 'stop') line((err as Error).message, 'err'); }
     finally { busy = false; picked.clear(); await ctx.reloadRefgen(); draw(); toast('Cast images updated'); }
   }
