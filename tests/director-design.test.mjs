@@ -152,7 +152,7 @@ test('Claude’s example asks use the hero cast and include one end-to-end ask w
   assert.deepEqual(plain(core.heroCast(p)), ['Comfy car', 'Rival car', 'Flag stand']);
   const asks = core.claudeExamples(p);
   assert.equal(asks.length, 3);
-  assert.match(asks[0], /Comfy car/); assert.match(asks[1], /Rival car and Comfy car/);
+  assert.match(asks[0], /^Orbit Comfy car .*Rival car/); assert.match(asks[1], /Rival car’s colours red.*start still/);
   assert.match(asks[2], /under \$1/); assert.match(asks[2], /Quote first/);
   assert.ok(asks.every(a => !/Flag stand|Light tower|Oval track/.test(a)), 'never the dullest objects');
   assert.match(core.claudeExamples(null)[0], /the main character/);
