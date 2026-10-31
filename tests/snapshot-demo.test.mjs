@@ -154,3 +154,23 @@ test('engine-only generated PNG ancestors retain receipts, source media and nest
   assert.ok(published.has(saved.jobs[1].results[0].url));
   assert.deepEqual(gen, before);
 });
+
+test('shared upstream receipts retain the union of outputs needed by all projects in either order', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'demo-shared-receipt-')), data = join(root, 'data');
+  const input = id => ({ id, filename: `${id}.mp4`, url: `/assets/${id}.mp4`, mime: 'video/mp4', sourceType: 'asset', generationJobId: 'shared' });
+  const projects = ['a', 'b'].map(id => ({ id, scene: { entities: [], references: [] }, shots: [{ id: 's', references: [] }],
+    assets: [{ id: `video-${id}`, shotId: 's', file: `assets/video-${id}.mp4`, mime: 'video/mp4', kind: 'workflow-result', source: { jobId: `job-${id}` } }] }));
+  const gen = { jobs: [{ id: 'shared', sources: {}, results: [input('a'), input('b'), input('unused')] },
+    ...projects.map(p => ({ id: `job-${p.id}`, sources: { sourceVideo: input(p.id) }, results: [] }))] };
+  for (const p of projects) for (const file of [`director/${p.id}/assets/video-${p.id}.mp4`, `assets/${p.id}.mp4`]) {
+    await mkdir(join(data, file, '..'), { recursive: true }); await writeFile(join(data, file), Buffer.from(file));
+  }
+  const get = async path => path === 'director/projects' ? { projects: projects.map(p => ({ id: p.id })) } : path === 'director/archived' ? { projects: [] } : path.startsWith('director/project?') ? { project: projects.find(p => path.endsWith(`=${p.id}`)) } : path === 'generation' ? gen : { jobs: [] };
+  for (const ids of [['a', 'b'], ['b', 'a']]) {
+    const out = join(root, ids.join('-')); await snapshotDemo({ get, data, out, ids });
+    const saved = JSON.parse(await readFile(join(out, 'demo-data/generation.json')));
+    const results = saved.jobs.find(j => j.id === 'shared').results;
+    assert.deepEqual(results.map(r => r.id).sort(), ['a', 'b']);
+    for (const result of results) assert.deepEqual(await readFile(join(out, 'demo-media', result.url)), Buffer.from(`assets/${result.id}.mp4`));
+  }
+});

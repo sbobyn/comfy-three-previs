@@ -273,7 +273,7 @@ export async function snapshotDemo({ get, data, out, ids = DEFAULT_PROJECTS, bud
       imageJobs.push(job);
     }
     for (const originalJob of keep.videoJobs) {
-      if (jobs.has(originalJob.id)) continue;
+      const previousJob = jobs.get(originalJob.id);
       const job = structuredClone(originalJob);
       const copyInput = async input => {
         const mime = input.mime || input.mimeType || '';
@@ -291,8 +291,8 @@ export async function snapshotDemo({ get, data, out, ids = DEFAULT_PROJECTS, bud
       };
       for (const [key, input] of Object.entries(job.sources || {})) job.sources[key] = await copyInput(input);
       job.demoOriginalResults = (job.results || []).map(r => ({ id: r.id, url: r.url, sha256: r.sha256 }));
-      const results = [];
-      for (const result of job.results || []) if (keep.assets.has(result.id) || keep.engineAssets.has(result.id)) {
+      const results = [...(previousJob?.results || [])];
+      for (const result of job.results || []) if (!results.some(r => r.id === result.id) && (keep.assets.has(result.id) || keep.engineAssets.has(result.id))) {
         results.push(assetURLs.has(result.id) ? { ...result, url: assetURLs.get(result.id) } : await copyInput(result));
       }
       job.results = results;
