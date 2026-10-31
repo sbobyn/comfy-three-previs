@@ -50,7 +50,7 @@ Make the grey blockout, then ask a video model to turn it into the shot.
 - Choose a video model. Some models follow a clip; others animate from one or two stills and do not see the full camera move.
 - Review the inputs, where the model runs and the estimated cost. Paid work needs explicit approval; opening the guide never approves anything.
 - Inspect the result against the blockout. A still is typically a few cents and a five-second video about a dollar, but the estimate for your selected model is the one to check.
-- Set a budget so a busy day cannot run away: `PREVIS_BUDGET_CAP_USD` (account, per month) and `PREVIS_BUDGET_PROJECT_CAP_USD` (per project). Paid work over a cap is refused before it is sent, the Jobs panel shows what is left, and `pnpm usage:report` shows what was actually billed (README, Configuration).
+- Set a budget so a busy day cannot run away: `PREVIS_BUDGET_CAP_USD` (account, per month) and `PREVIS_BUDGET_PROJECT_CAP_USD` (per project). Paid work over a cap is refused before it is sent, the Jobs panel shows what is left, `pnpm usage:report` shows what was actually billed and `pnpm usage:settle` compares it with the ledger (README, Configuration). Estimates include reference images and the paid grader, and reservations add `PREVIS_BUDGET_MARGIN` (10% by default); a dry-run batch shows each part.
 
 [Watch the blockout](../public/guide/final-lap-s2-blockout.mp4) · [Watch the generated shot](../public/guide/final-lap-s2-generated.mp4)
 
@@ -67,7 +67,7 @@ A still remembers the blocking it was made from. When the shot changes (camera, 
 
 **FLUX 3** follows the blockout best on side profiles and people and is the storyboard default; **Nano Banana 2.1** also follows it well, phrased as an edit of image 1, but tends to turn side profiles into chase angles. On head-on and going-away vehicles it is the other way round: FLUX 3 reversed a car or split the field with a wall (graded 5), and Nano Banana 2.1 matched (9); GPT Image 2.5, the final tier's still model, also matched (9). See `.evidence/stillmatch-20261030/RESULTS.md` and `.evidence/hero-20261030/HERO.md` in the integration checkout.
 
-**Match check.** With `PREVIS_MATCH_GRADER=gemini` (and paid generation on), each new key frame is graded 0–10 for camera and blocking by Gemini 3.5 Flash on Comfy Cloud (a few cents; about 20 s before the still attaches). The storyboard shows "matches blockout N/10", and a batch with `retryWeakMatch: true` redoes a still graded below 6 once with FLUX 3 (or Nano Banana 2.1 if it was FLUX 3), charged to the batch budget. Without the flag a free local edge-and-light score is stored with `rough: true`; it did not track camera match on hand-labelled stills, so it is never shown as a match score and never triggers a retry.
+**Match check.** With `PREVIS_MATCH_GRADER=gemini` (and paid generation on), each new key frame is graded 0–10 for camera and blocking by Gemini 3.5 Flash on Comfy Cloud (about $0.05 per graded still, counted in the still's quote, reservation and batch estimate; about 20 s before the still attaches). The storyboard shows "matches blockout N/10", and a batch with `retryWeakMatch: true` redoes a still graded below 6 once with FLUX 3 (or Nano Banana 2.1 if it was FLUX 3), charged to the batch budget. Without the flag a free local edge-and-light score is stored with `rough: true`; it did not track camera match on hand-labelled stills, so it is never shown as a match score and never triggers a retry.
 
 ![Generate: review inputs and estimate](../public/guide/generate.webp)
 
