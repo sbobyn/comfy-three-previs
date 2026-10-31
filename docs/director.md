@@ -137,7 +137,7 @@ Choose the versions, order and timing of the film.
 
 ## Other ways to work
 
-You can direct the same project through Claude using the MCP connector; see the [README setup](../README.md#direct-scenes-from-claude-mcp). Phone aiming requires local HTTPS and a trusted certificate. The public demo is read-only; generation needs a local installation.
+You can direct the same project through Claude using the MCP connector; see the [README setup](../README.md#direct-scenes-from-claude-mcp). A shot built in Blender can become a shot's blockout, with its camera, objects and rendered frames; see [Import a Blender shot](blender-import.md). Phone aiming requires local HTTPS and a trusted certificate. The public demo is read-only; generation needs a local installation.
 
 ## Guide media and maintenance
 
