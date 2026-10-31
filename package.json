@@ -18,6 +18,7 @@
     "dev:camera": "vite --host 127.0.0.1 --port 5187",
     "docs:models": "node scripts/models-table.mjs",
     "usage:report": "node --env-file-if-exists=.env scripts/usage-report.mjs",
+    "usage:settle": "node --env-file-if-exists=.env scripts/usage-settle.mjs",
     "starters:export": "node scripts/export-starters.mjs",
     "demo:build": "VITE_DEMO=1 vite build --base=/comfy-three-previs/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs"
   },
