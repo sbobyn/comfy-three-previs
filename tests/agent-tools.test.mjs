@@ -184,6 +184,16 @@ test('generate_sheet compose:true composes once every view lands', async () => {
     assert.ok(r.results.length > 0 && r.results.every(x => x.status === 'completed'));
     assert.deepEqual(r.compose, { composed: true, referenceId: 'composed-1' });
     assert.deepEqual(fake.calls.find(c => c.path === '/api/director/sheet/compose').body, { projectId: p.id, entityId: p.scene.entities.find(e => e.name === 'Bald eagle').id, sheetId: r.sheetId });
+    // maxCostUsd bounds the whole set: each view's allowance is what is left after the views before it ($0.03 each here).
+    const allowances = [...new Map(fake.calls.filter(c => c.path === '/api/director/refgen/submit').map(c => [c.body.requestId, c.body.approval.allowance.maxAmount])).values()];
+    assert.deepEqual(allowances, allowances.map((_, i) => Math.round((1 - 0.03 * i) * 10000) / 10000));
+  });
+  // A set whose expected total (list + the identity image per view) passes maxCostUsd is refused before anything is prepared.
+  const p2 = await fixture(), fake2 = fakePrevis(p2);
+  await withAgent(fake2, async ({ call }) => {
+    const r = await call('previs_director_generate_sheet', { projectId: p2.id, object: 'Bald eagle', setId: setsFor('character')[0].id, maxCostUsd: 0.05 });
+    assert.equal(r.submitted, false); assert.match(r.reason, /above maxCostUsd \$0\.05/);
+    assert.equal(fake2.calls.filter(c => c.path === '/api/director/refgen/prepare' || c.path === '/api/director/refgen/submit').length, 0, 'nothing prepared or sent');
   });
 });
 

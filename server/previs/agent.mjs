@@ -6,7 +6,7 @@ import { cameraSourceOf, fitPrompt, cameraMotionWarning, CAMERA_SOURCE_LABELS } 
 import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, handleOf, videoReferences, blockoutStale, keyStillState } from '../../shared/director.mjs';
 import { videoPreparer, videoPrompt } from './batch-drivers.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
-import { clipSecondsFor, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
+import { clipSecondsFor, estimateBreakdown, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 import { stillPrompt, stillReferences, STILL_MAX_REFS } from '../../shared/still-match.mjs';
 import { setsFor, planSlots, slotAspect, viewPrompt, EXPRESSION_PACKS, INTENSITIES, MAX_SHEET_SLOTS } from '../../shared/sheet-presets.mjs';
 const base = process.env.PREVIS_URL || 'http://127.0.0.1:5190';
@@ -198,13 +198,14 @@ async function generateSheet(a) {
   const presetId = a.presetId || 'flux-2-pro';
   const preset = ((await get(`/api/director/refgen?projectId=${p.id}`)).presets || []).find(x => x.id === presetId);
   if (!preset || !(preset.maxRefs > 0)) throw Error('Choose an image model that takes reference images (see previs_director_models: flux-2-pro, flux-3, flux-2-max, gpt-image-25, seedream-5-pro or Nano Banana)');
-  const per = preset.pricing?.usdPerImage ?? null, total = per == null ? null : Math.round(per * planned.length * 1000) / 1000;
+  // Expected = list + the identity reference image per view (shared/tiers.mjs, the prices the server quotes from).
+  const per = preset.pricing?.usdPerImage ?? null, total = per == null ? null : estimateBreakdown('sheet', presetId, { count: planned.length, refs: 1 })?.expectedUsd ?? Math.round(per * planned.length * 1000) / 1000;
   if (total === null || total > a.maxCostUsd) return { submitted: false, reason: total === null ? 'Cost unknown for this model' : `Estimated $${total} for ${planned.length} views is above maxCostUsd $${a.maxCostUsd}`, views: planned.map(x => x.label) };
   const rid = () => Math.random().toString(36).slice(2, 10);
   const sheetId = 's' + rid(), card = castCard(p, e.id);
   const label = a.setId === 'expressions' ? `Expressions · ${EXPRESSION_PACKS.find(x => x.id === a.options?.pack)?.label || 'Basic 6'}` : a.setId === 'custom' ? planned[0].label : setsFor(e.kind).find(s => s.id === a.setId).label;
   await patchSheets(p.id, e.id, sheets => sheets.push({ id: sheetId, setId: a.setId, label, options: a.options || {}, presetId, createdAt: new Date().toISOString(), slots: all.map(x => ({ ...x, attempts: [], selected: null, accepted: null })) }));
-  const results = [];
+  const results = []; let spent = 0; // maxCostUsd bounds the whole set: each view gets only what is left of it
   for (const [i, s] of planned.entries()) {
     const seed = Math.floor(Math.random() * 1e9), attemptId = rid();
     const prompt = viewPrompt({ kind: e.kind, spec: s.spec, description: objectNotes(p, e), styleNotes: card?.styleNotes, projectStyle: p.scene.environment.style, note: a.note || '' });
@@ -213,8 +214,10 @@ async function generateSheet(a) {
     try { job = (await post('/api/director/refgen/prepare', { projectId: p.id, entityId: e.id, presetId, prompt, aspect: slotAspect(s.spec, e.kind), count: 1, seed, referenceIds: [identity.id], sheet: { sheetId, slotId: s.id, label: s.label } })).job; }
     catch (err) { results.push({ slot: s.id, label: s.label, status: 'failed', message: err.message }); continue; }
     await setAttempt({ requestId: job.id });
+    const viewEst = job.quote?.estimate ?? null, left = Math.round((a.maxCostUsd - spent) * 10000) / 10000;
+    if (viewEst === null || viewEst > left + 1e-9) { const message = viewEst === null ? 'Cost unknown for this view; nothing was sent' : `Estimated $${viewEst} would pass what is left of maxCostUsd ($${left.toFixed(2)}); nothing was sent`; await setAttempt({ error: message }); results.push({ slot: s.id, label: s.label, status: 'not sent', message }); return { sheetId, stopped: message, results, skipped: planned.slice(i + 1).map(x => x.id) }; }
     let r = null, error = null;
-    for (let w = 0; w < 180; w++) { try { r = (await post('/api/director/refgen/submit', { projectId: p.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: a.maxCostUsd, allowUnknownCharges: true } } })).job; break; } catch (err) { if (!isBusy(err)) { error = err.message; break; } await sleep(busyWait(err)); } }
+    for (let w = 0; w < 180; w++) { try { r = (await post('/api/director/refgen/submit', { projectId: p.id, requestId: job.id, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: left, allowUnknownCharges: true } } })).job; spent += viewEst; break; } catch (err) { if (!isBusy(err)) { error = err.message; break; } await sleep(busyWait(err)); } }
     if (!r) { await setAttempt({ error: error || 'Image backend stayed busy; nothing was sent' }); results.push({ slot: s.id, label: s.label, status: 'failed', message: error || 'Image backend stayed busy; nothing was sent' }); continue; }
     if (r.status === 'uncertain') { await setAttempt({ error: r.message.slice(0, 300) }); results.push({ slot: s.id, label: s.label, status: 'uncertain', message: r.message }); return { sheetId, stopped: 'A dispatch outcome is unknown; the batch stopped and nothing is resent.', results, skipped: planned.slice(i + 1).map(x => x.id) }; }
     const t0 = Date.now(); while (r.status === 'submitted' && Date.now() - t0 < 300000) { await sleep(Math.min(4000, POLL_MS)); r = (await post('/api/director/refgen/track', { projectId: p.id, requestId: job.id })).job; }
