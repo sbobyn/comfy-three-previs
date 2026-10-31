@@ -168,7 +168,7 @@ async function generateVideo(a, rendered = false) {
   if (!s.render) return { submitted: false, reason: 'The shot’s blockout is not rendered. Render it with previs_director_render_blockout (or ask the user to click Make blockout), then call again.' };
   if (d.task === 'first-frame') {
     // Key frames must be current: a still made for an earlier blocking would animate the old layout.
-    const ks = keyStillState(p, s), stale = [ks.startState === 'stale' && 'start', m.inputs.endFrame && ks.endState === 'stale' && 'end'].filter(Boolean);
+    const ks = keyStillState(p, s), stale = [ks.startState === 'stale' && 'start', m.inputs.endFrame && a.allowStartOnly !== true && ks.endState === 'stale' && 'end'].filter(Boolean);
     if (stale.length) return { submitted: false, reason: `The ${stale.join(' and ')} still${stale.length > 1 ? 's were' : ' was'} made before the shot’s camera, timing or scene changed. Make ${stale.length > 1 ? 'them' : 'it'} again (previs_director_generate_still at:"${stale[0]}"); nothing was sent.` };
     if (ks.startState !== 'ready') return { submitted: false, reason: 'This model animates key frames: generate the shot’s start (and end) stills first (previs_director_generate_still at:"start" / at:"end").' };
   }

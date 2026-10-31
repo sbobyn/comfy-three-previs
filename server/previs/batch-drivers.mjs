@@ -1,7 +1,7 @@
 // Batch drivers. `fakeBackend()` simulates refgen/generation jobs and the job dashboard (tests, PREVIS_BATCH_FAKE=1);
 // it never touches real job stores and never sends anything. `loopbackDrivers()` drives the real routes over loopback HTTP.
 import { randomUUID } from 'node:crypto';
-import { blockoutStale, castCard, compilePrompt, lookPrompt, lookSource, objectLooks, objectNotes, referenceLegend, videoReferences } from '../../shared/director.mjs';
+import { blockoutStale, castCard, compilePrompt, keyStillState, lookPrompt, lookSource, objectLooks, objectNotes, referenceLegend, videoReferences } from '../../shared/director.mjs';
 import { shotPrompt } from '../../shared/prompt.mjs';
 import { stillPrompt, stillReferences } from '../../shared/still-match.mjs';
 import { cameraMotionWarning, cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../../shared/camera-source.mjs';
@@ -130,11 +130,11 @@ export function videoPreparer({ get, post }) {
     let def, parameters, registered = [], seconds = r.duration ?? s.duration;
     if (base.task === 'first-frame') {
       let wantsLast = !!base.inputs?.lastFrame;
+      // No current end still: only an explicit choice (startOnly) animates the start still alone with the start-only sibling.
+      const sibling = wantsLast && FIRST_FRAME_FALLBACK[base.id] && keyStillState(p, s).endState !== 'ready' ? pick(FIRST_FRAME_FALLBACK[base.id]) : null;
+      if (sibling && startOnly) { base = sibling; wantsLast = false; }
       const frames = (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast }))).references;
       let start = frames.find(x => x.label === 'start key frame')?.renderId; const end = frames.find(x => x.label === 'end key frame')?.renderId;
-      // No end still: only an explicit choice (startOnly) animates the start still alone with the start-only sibling.
-      const sibling = wantsLast && !end && FIRST_FRAME_FALLBACK[base.id] ? pick(FIRST_FRAME_FALLBACK[base.id]) : null;
-      if (sibling && startOnly) { base = sibling; wantsLast = false; }
       if (wantsLast && (!start || !end)) throw Object.assign(notSent(`This model animates start → end: the shot needs ${!start && !end ? 'start and end key frames' : !start ? 'a start key frame' : 'an end key frame'}${sibling && start ? `, or choose to animate the start still alone with ${sibling.title.split(' · ')[0]} (camera from one still, approximate)` : ''}`), { startOnly: sibling && start ? sibling.id : null });
       if (!start) start = (await get('/api/project')).project.renders?.find(x => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
       if (!start) throw notSent('No start image: generate a key frame for this shot, or render the blockout again');

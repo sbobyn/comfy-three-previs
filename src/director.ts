@@ -2,7 +2,7 @@ import { loadBlockoutModels } from './director-models';
 import './director.css';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf, keyStills } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
-import { starterBlockout, starterMediaStatus, videoStale } from '../shared/director.mjs';
+import { starterBlockout, starterMediaStatus, videoStale, keyStillState, blenderBlockout } from '../shared/director.mjs';
 import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge } from './director-common';
 import type { Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
@@ -33,7 +33,7 @@ import { initMobile } from './director-mobile'; // [mobile]
 import { stepAction, stepStatus, keyFrameSlots, shotPips, midStill, filmSegments, externalChanges, shouldTour, TOUR, TOUR_KEY, moments, useTakeEntry, keyFrameCopy } from './director-desktop-core';
 import type { ShotPips } from './director-desktop-core';
 import { VIDEO_PRICES } from '../shared/tiers.mjs';
-import { cameraSourceOf, CAMERA_SOURCE_LABELS } from '../shared/camera-source.mjs';
+import { cameraSourceOf, cameraMotionWarning, CAMERA_SOURCE_LABELS } from '../shared/camera-source.mjs';
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -725,12 +725,14 @@ function modelBlock(s: Shot) {
   const pick = h('select', { class: 'field vm-pick', 'aria-label': 'Video model for this shot' }, ...choices.map((d: any) => h('option', { value: d.id, selected: d.id === def.id }, modelLabel(d))));
   pick.onchange = () => { localStorage.setItem(modelKey(s), pick.value); shotPane.dataset.shot = ''; renderShotPane(); };
   const cap = referenceCapacity(st as any, def.id), refs = cap ? plannedReferences(project, s, st as any, def.id) : [];
-  const cam = cameraSourceOf(def), ks = keyStills(s);
+  const cam = cameraSourceOf(def), ks = keyStillState(project, s);
   const usesClip = def.task === 'transform-video' || def.task === 'control-video';
   const usesFrames = def.task === 'first-frame', twoFrames = usesFrames && !!def.inputs?.lastFrame;
-  const frames = s.references.filter(r => r.role === 'frame');
-  const hasStart = frames.some(r => r.note === 'key frame start' || !r.note), hasEnd = frames.some(r => r.note === 'key frame end');
-  const maxLen = def.constraints?.promptMaxLength as number | undefined, promptLen = shotPrompt(project, s, 'video', { cameraSource: cameraSourceOf(def) }).length;
+  // The stills the video would get (the same pick as the server), and whether each is current for this blocking.
+  const hasStart = ks.startState === 'ready', hasEnd = ks.endState === 'ready';
+  const stillNote = (k: 'start' | 'end') => { const st = k === 'start' ? ks.startState : ks.endState, K = k === 'start' ? 'Start' : 'End'; return st === 'ready' ? `${K} still ready (Storyboard)` : st === 'stale' ? `${K} still is out of date: the camera, timing or scene changed since it was made. Make a new one in the Storyboard below` : `Add ${k === 'start' ? 'a Start' : 'an End'} still in the Storyboard below`; };
+  const videoText = shotPrompt(project, s, 'video', { cameraSource: cameraSourceOf(def) }), cameraWords = cameraMotionWarning(videoText, cam);
+  const maxLen = def.constraints?.promptMaxLength as number | undefined, promptLen = videoText.length;
   const stale = s.render && s.render.signature && s.render.signature !== signature(project, s);
   const rate = def.pricing?.ratePerSecond as number | undefined, secs = clipSeconds(def, s), lengths = clipLengths(def);
   const fallback = twoFrames ? choices.find((d: any) => d.id === startOnlyFallback(def)) : null;
@@ -748,18 +750,18 @@ function modelBlock(s: Shot) {
       h('div', { class: 'vm-in' + (cam === 'blockout' ? (s.render && !stale ? ' ok' : ' warn') : ' off'), role: 'listitem', title: cam === 'blockout' ? (s.render ? (stale ? 'The scene changed since; a new blockout is made when you generate' : 'Your camera move, sent as the video input') : 'Made from your camera when you generate') : 'Not used by this model' },
         cam === 'blockout' && s.render ? h('video', { src: `/assets/${s.render.assetId}.mp4#t=0.1`, muted: true, playsinline: true, preload: 'metadata', 'aria-hidden': 'true' }) : h('span', { class: 'vm-ph' }),
         h('small', {}, cam === 'blockout' ? 'Camera · blockout' : 'Blockout · not used')),
-      ...([['start', ks.start], ['end', ks.end]] as const).filter(([k, r]) => r || k === 'start' || twoFrames).map(([k, r]) => h('div', { class: 'vm-in' + (r ? ' ok' : ' warn'), role: 'listitem', title: r ? `${k === 'start' ? 'Start' : 'End'} still: ${r.name}` : `No ${k} still yet: add one in the Storyboard` },
+      ...([['start', ks.start, hasStart], ['end', ks.end, hasEnd]] as const).filter(([k, r]) => r || k === 'start' || twoFrames).map(([k, r, ok]) => h('div', { class: 'vm-in' + (ok ? ' ok' : ' warn'), role: 'listitem', title: r ? `${k === 'start' ? 'Start' : 'End'} still: ${r.name}${ok ? '' : ' · out of date, not sent'}` : `No ${k} still yet: add one in the Storyboard` },
         r ? h('img', { src: refUrl(r), alt: '' }) : h('span', { class: 'vm-ph' }), h('small', {}, `${cam === 'blockout' ? 'Look' : 'Camera + look'} · ${k}`))),
       cap ? h('div', { class: 'vm-in' + (refs.some(r => r.role !== 'frame') ? ' ok' : ''), role: 'listitem', title: `${refs.filter(r => r.role !== 'frame').length} cast image(s) of up to ${cap} images` }, h('b', {}, String(refs.filter(r => r.role !== 'frame').length)), h('small', {}, 'Cast refs')) : null),
     h('div', { class: 'vm-inputs' },
       h('div', { class: 'vm-head' }, 'What this model takes'), modelInputsDiagram(def.task, { twoFrames, castImages: refs.length }),
       slot(!maxLen || promptLen <= maxLen, 'Text prompt', maxLen ? h('span', {}, `${promptLen.toLocaleString()} / ${maxLen.toLocaleString()} characters`, promptLen > maxLen ? h('b', { class: 'vm-over' }, ' · will be cut') : '') : `${promptLen.toLocaleString()} characters`),
+      cameraWords ? slot(false, 'Camera words', cameraWords) : null,
       usesClip ? slot(s.render ? !stale : false, 'Blockout video', s.render ? (stale ? (fromBlender(s) ? BLENDER_STALE : 'The scene changed since · a new blockout is made when you generate') : `${fromBlender(s) ? 'Blender clip' : 'Your camera move'} · ${s.render.duration}s, ${s.render.frameCount} frames`) : 'Made from your camera when you generate')
         : cam === 'keyframes' ? slot(null, 'Blockout video', 'Not sent · the start and end stills from its first and last frames stand in (approximate)')
         : slot(false, 'Blockout video', 'Not used · this model guesses the camera from one still; pick a blockout model to keep your move'),
-      usesFrames ? slot(hasStart, twoFrames ? 'Start frame' : 'First frame', hasStart ? 'Start still ready (Storyboard)' : 'Add a Start still in the Storyboard below') : null,
-      twoFrames ? (fallback ? slot(hasEnd || null, 'End frame (optional)', hasEnd ? 'End still ready (Storyboard)' : `Optional · without an End still, ${fallback.title.split(' ·')[0]} animates the start still alone`)
-        : slot(hasEnd, 'End frame', hasEnd ? 'End still ready (Storyboard)' : 'Add an End still in the Storyboard below')) : null,
+      usesFrames ? slot(hasStart, twoFrames ? 'Start frame' : 'First frame', stillNote('start')) : null,
+      twoFrames ? slot(hasEnd, 'End frame', hasEnd || !fallback ? stillNote('end') : `${stillNote('end')}, or choose to animate the start still alone with ${fallback.title.split(' ·')[0]} when you generate (camera from one still, approximate)`) : null,
       usesFrames && lengths ? slot(null, 'Clip length', `${secs}s for this ${s.duration}s shot · the model makes ${lengths}`) : null,
       slot(cap ? refs.length > 0 : null, 'Cast images', cap ? `${refs.length} of up to ${cap}` : 'Not accepted by this model')),
     cap ? h('div', { class: 'vm-map' },
@@ -998,8 +1000,9 @@ function keyFrameBlock(s: Shot) {
   const head = h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Storyboard · ${frames.length}`), h('span', { class: 'muted', style: 'font-size:11.5px' }, running.length ? `Generating ${running.length}…` : 'Stills of the shot, moment by moment'));
   if (!f.open) return h('div', { class: 'block sb' }, head, track, adds, strip, ...jobs.filter(j => j.status === 'failed').slice(0, 1).map(jobRow));
 
-  // Composer for a still at the playhead.
-  const t = at, guidePng = scene.capture(t, 1280, 720, 'image/png', undefined, { guide: true });
+  // Composer for a still at the playhead. Image 1 is the frame the video's camera comes from: an imported Blender clip's own
+  // frame (from the server, as the batch and agent use), else the proxy blockout with its guide markers.
+  const t = at, blender = blenderBlockout(project, s), guide = guideFrame(s, t, blender);
   const chosen = stillPresets.find(p => p.id === f.presetId), cap = chosen?.maxRefs ?? 0;
   const words = describeFrame(project, s, t);
   const looks = stillReferences(project, s, t, cap).looks; // objects in frame, one environment image
@@ -1019,8 +1022,8 @@ function keyFrameBlock(s: Shot) {
     try {
       const text = [prompt.value.trim(), moment.value.trim() ? `At this moment: ${moment.value.trim()}.` : ''].filter(Boolean).join(' ');
       const frameAt = t === 0 ? 'start' : Math.abs(t - s.duration) < 0.01 ? 'end' : t;
-      const full = stillPrompt({ project, shot: s, t, text, presetId: f.presetId, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null, frame: words });
-      const { job } = await api('director/refgen/prepare', { projectId, target: 'shot', shotId: s.id, frameAt, presetId: f.presetId, prompt: full, aspect: '16:9', count: f.count, seed: f.seed, referenceIds: refIds, guide: guidePng.split(',')[1] });
+      const full = stillPrompt({ project, shot: s, t, text, presetId: f.presetId, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null, frame: words, markers: !blender });
+      const { job } = await api('director/refgen/prepare', { projectId, target: 'shot', shotId: s.id, frameAt, presetId: f.presetId, prompt: full, aspect: '16:9', count: f.count, seed: f.seed, referenceIds: refIds, guide: (await guide.data).split(',')[1] });
       await generateNow(job); f.open = false; f.seed = Math.floor(Math.random() * 1e6);
       toast(`Generating ${f.count > 1 ? `${f.count} takes` : 'a still'} at ${label(t)} · it pins to the storyboard when ready`);
       shotPane.dataset.shot = ''; renderShotPane();
@@ -1029,7 +1032,7 @@ function keyFrameBlock(s: Shot) {
   };
   const inputs = h('div', { class: 'sb-inputs' },
     h('div', { class: 'vm-head' }, `Still at ${label(t)} · what the image model gets`),
-    h('div', { class: 'sb-in' }, h('figure', {}, h('img', { src: guidePng, alt: 'Blockout frame' }), h('figcaption', {}, h('b', {}, 'Image 1'), ' blockout frame · composition')),
+    h('div', { class: 'sb-in' }, h('figure', {}, guide.img, h('figcaption', {}, h('b', {}, 'Image 1'), blender ? ' Blender frame · composition' : ' blockout frame · composition')),
       ...looks.slice(0, refIds.length).map((r, i) => h('figure', { style: `--k:${KIND_COLORS[entity(r.entityId!)?.kind || 'prop']}` }, h('img', { src: refUrl(r.ref), alt: '' }), h('figcaption', {}, h('b', {}, `Image ${i + 2}`), ' ', r.label))),
       prev && refIds.includes(prev.id) ? h('figure', {}, h('img', { src: refUrl(prev), alt: '' }), h('figcaption', {}, h('b', {}, `Image ${refIds.indexOf(prev.id) + 2}`), ' previous shot · continuity')) : null),
     !cap ? h('p', { class: 'note', style: 'margin:0' }, 'This model takes no cast images; only the prompt and blockout frame guide it.') : null,
@@ -1040,6 +1043,18 @@ function keyFrameBlock(s: Shot) {
       h('div', { class: 'grid2' }, h('label', {}, 'Image model', model), h('label', {}, 'Takes', count)),
       h('div', { class: 'sb-actions' }, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { f.open = false; shotPane.dataset.shot = ''; renderShotPane(); } }, 'Cancel'), go), status),
     strip);
+}
+
+/** Image 1 of a still: the imported Blender frame at `t` from the server (cached per clip and time), else the proxy capture. */
+const blenderGuides = new Map<string, Promise<string>>();
+function guideFrame(s: Shot, t: number, blender: boolean): { img: HTMLImageElement; data: Promise<string> } {
+  const img = h('img', { alt: blender ? 'Blender frame' : 'Blockout frame' });
+  if (!blender) { img.src = scene.capture(t, 1280, 720, 'image/png', undefined, { guide: true }); return { img, data: Promise.resolve(img.src) }; }
+  const key = `${s.render!.assetId}@${t}`;
+  let data = blenderGuides.get(key);
+  if (!data) { data = api('director/frame', { projectId, shotId: s.id, t, width: 1280, height: 720, guide: true }).then(r => `data:${r.mime || 'image/png'};base64,${r.data}`); blenderGuides.set(key, data); data.catch(() => blenderGuides.delete(key)); }
+  void data.then(url => { img.src = url; }, () => { img.alt = 'Blender frame unavailable'; });
+  return { img, data };
 }
 
 /** "Matches blockout 8/10" for a key frame that was checked against its guide frame. */
@@ -1754,11 +1769,15 @@ function openRender() {
   const hWf = h('select', { class: 'field', 'aria-label': 'Video model' }, h('option', {}, 'Loading models…'));
   const hBackend = h('select', { class: 'field', 'aria-label': 'Runs on' }, h('option', { value: 'cloud' }, 'Comfy Cloud'), h('option', { value: 'local' }, 'Local ComfyUI'));
   const hEst = h('span', { class: 'rg-est mono', title: 'Rate × shot length. The quote shows the exact estimate before anything runs.' }, '');
+  // What the blockout clip is to the chosen model: the camera itself, or only the source of the stills that stand in for it.
+  const blockoutNote = h('p', {}, 'The grey camera clip: every frame through the shot camera at 24 fps.');
   const hGo = h('button', { class: 'btn cta', type: 'button', title: 'Make the blockout if needed, then quote. Nothing runs until you approve the quote.' }, 'Generate ▸');
   const headModel = () => {
     const st = genCache, def: any = st ? videoChoices(st as any).find(d => d.id === hWf.value) : null; if (!st || !def) return;
     const refs = referenceCapacity(st as any, def.id) ? plannedReferences(project, s, st as any, def.id) : [];
     hEst.textContent = dialogEstimate(def, s.duration, hBackend.value);
+    const cam = cameraSourceOf(def);
+    blockoutNote.textContent = `The grey camera clip: every frame through the shot camera at 24 fps. ${cam === 'blockout' ? 'This model takes the clip itself: it is the camera.' : cam === 'keyframes' ? 'This model does not take the clip: it moves between the start and end stills made from it, so the move in between is approximate.' : 'This model does not take the clip: it animates one still, so the camera move is approximate.'}`;
     const fig = modelInputsDiagram(def.task, { twoFrames: def.task === 'first-frame' && !!def.inputs?.lastFrame, castImages: refs.length });
     diagram.replaceChildren(fig, h('p', {}, h('b', {}, 'What this model takes. '), fig.querySelector('[aria-label]')?.getAttribute('aria-label') || ''));
   };
@@ -1780,7 +1799,7 @@ function openRender() {
   const status = h('div', { class: 'status-line' });
   const capture = h('button', { class: 'btn camera', type: 'button' }, s.render ? (fromBlender(s) ? 'Replace Blender clip with proxies' : 'Remake blockout') : 'Make blockout');
   const prompt = h('textarea', { class: 'field', rows: 5, 'aria-label': 'Render prompt' }, shotPrompt(project, s, 'video'));
-  const step1 = h('div', { class: 'step active' }, h('span', { class: 'n' }, '1'), h('div', {}, h('h3', {}, 'Blockout'), h('p', {}, 'The grey camera clip: every frame through the shot camera at 24 fps, the exact motion the video model follows.'), res, h('div', { style: 'height:8px' }), facts, h('div', { style: 'height:10px' }), capture, h('div', { style: 'height:8px' }), progress, status));
+  const step1 = h('div', { class: 'step active' }, h('span', { class: 'n' }, '1'), h('div', {}, h('h3', {}, 'Blockout'), blockoutNote, res, h('div', { style: 'height:8px' }), facts, h('div', { style: 'height:10px' }), capture, h('div', { style: 'height:8px' }), progress, status));
   const refsByFile = new Map<string, { ref: Reference; names: Set<string> }>();
   const addRef = (ref: Reference, name?: string) => { const entry = refsByFile.get(ref.file) || { ref, names: new Set<string>() }; if (name) entry.names.add(name); refsByFile.set(ref.file, entry); };
   // Unique images of this shot's cast (one line per image, however many objects share it), then the shot's own images.
@@ -1859,7 +1878,17 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
       : h('span', { class: 'note' }, useRefs.checked ? 'No images yet for the cast of this shot. Give them one in Cast.' : 'Cast images off.'));
   };
   useRefs.onchange = () => { localStorage.setItem('previs.seq.refs', useRefs.checked ? '1' : '0'); showRefs(); out.replaceChildren(); };
-  wf.onchange = () => { showNote(); showRefs(); out.replaceChildren(); timing.checked = false; }; showNote(); showRefs();
+  // A start → end model and no current End still: animating the start still alone is the artist's explicit choice, never a silent fallback.
+  const startOnly = h('input', { type: 'checkbox' }), startOnlyText = h('span', {});
+  const startOnlyRow = h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, startOnly, startOnlyText);
+  const showStartOnly = () => {
+    const d = choices.find(c => c.id === wf.value), alt = d?.task === 'first-frame' && d.inputs?.lastFrame ? choices.find(c => c.id === startOnlyFallback(d)) : null;
+    const need = !!alt && keyStillState(project, s).endState !== 'ready';
+    startOnlyRow.hidden = !need; if (!need) startOnly.checked = false;
+    startOnlyText.textContent = alt ? `No current End still: animate the start still alone with ${alt.title.split(' ·')[0]} (the camera then comes from one still, approximate).` : '';
+  };
+  startOnly.onchange = () => out.replaceChildren();
+  wf.onchange = () => { showNote(); showRefs(); showStartOnly(); out.replaceChildren(); timing.checked = false; }; showNote(); showRefs(); showStartOnly();
   backendSel.onchange = () => out.replaceChildren();
   const timing = h('input', { type: 'checkbox' });
   timing.onchange = () => out.replaceChildren();
@@ -1868,13 +1897,14 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   const jobsBox = h('div', { class: 'gen-jobs' });
   quoteBtn.onclick = async () => {
     const revision = project.revision, prompt = getPrompt();
-    for (const input of [quoteBtn, wf, backendSel, useRefs, timing]) input.disabled = true;
+    for (const input of [quoteBtn, wf, backendSel, useRefs, timing, startOnly]) input.disabled = true;
     out.replaceChildren(h('p', { class: 'status-line' }, 'Preparing the request; nothing is being submitted…'));
     try {
-      const { def, job, request } = await prepareShotVideo({ project, shot: s, st: st as any, definitionId: wf.value, useReferences: useRefs.checked, userPrompt: prompt, backend: backendSel.value === 'local' ? 'local' : 'cloud', acceptTimingChange: timing.checked });
+      const prepared = await prepareShotVideo({ project, shot: s, st: st as any, definitionId: wf.value, useReferences: useRefs.checked, userPrompt: prompt, backend: backendSel.value === 'local' ? 'local' : 'cloud', acceptTimingChange: timing.checked, startOnly: startOnly.checked });
+      const { def, job, request } = prepared;
       if (project.revision !== revision || getPrompt() !== prompt) throw Error('Shot or prompt changed while preparing. Review a fresh quote. Nothing submitted.');
       if (!job.validation?.compatible) throw Error((job.validation?.issues || []).map((i: any) => i.message).slice(0, 3).join('; ') || 'This workflow can’t run with these inputs');
-      const card = genQuote(job, def, request, s); out.replaceChildren(card);
+      const card = genQuote(job, def, request, s, prepared); out.replaceChildren(card);
       out.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     } catch (e) {
       let msg = (e as Error).message;
@@ -1882,7 +1912,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
       if (/constraints: .*duration/.test(msg) && lim) msg = `${d.title.split(' ·')[0]} needs a ${lim.min}–${Math.floor(lim.max)} s source and this shot is ${s.duration} s. Set the shot's duration to at least ${lim.min} s, render again, then quote.`;
       out.replaceChildren(h('p', { class: 'status-line err' }, msg));
     }
-    finally { for (const input of [quoteBtn, wf, backendSel, useRefs, timing]) input.disabled = false; }
+    finally { for (const input of [quoteBtn, wf, backendSel, useRefs, timing, startOnly]) input.disabled = false; }
   };
   const drawJobs = () => {
     const mine = st.jobs.filter(j => j.shotId === previsShotId || (project.assets || []).some(a => a.kind === 'camera-render' && a.shotId === s.id && a.source.engineShotId === j.shotId)).slice(-4).reverse();
@@ -1890,12 +1920,16 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   };
   drawJobs();
   box.replaceChildren(note,
-    h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, useRefs, 'Send the cast’s images with the request'), refsBox,
+    h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, useRefs, 'Send the cast’s images with the request'), refsBox, startOnlyRow,
     h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, timing, 'I have reviewed that output timing/resolution may differ from the source; originals will not be fitted or replaced.'),
     h('div', {}, quoteBtn), out, jobsBox);
 }
-function genQuote(job: any, def: any, request: any, s: Shot) {
-  const est = def.pricing?.ratePerSecond && job.sources?.sourceVideo?.duration ? def.pricing.ratePerSecond * job.sources.sourceVideo.duration : null;
+/** `plan`: what preparation decided (prepareShotVideo): the estimate for the seconds the model makes, the camera source and the final prompt. */
+function genQuote(job: any, def: any, request: any, s: Shot, plan?: { est: number | null; seconds?: number; cameraSource?: string; prompt?: string }) {
+  const seconds = plan?.seconds ?? job.sources?.sourceVideo?.duration ?? null;
+  const est = plan ? plan.est : def.pricing?.ratePerSecond && seconds ? def.pricing.ratePerSecond * seconds : null;
+  const cameraSource = (job.cameraSource || plan?.cameraSource || 'still') as keyof typeof CAMERA_SOURCE_LABELS, finalPrompt: string = job.binding?.prompt ?? plan?.prompt ?? '';
+  const cameraWords = cameraMotionWarning(finalPrompt, cameraSource);
   const free = job.quote?.status === 'known' && job.quote.amount === 0;
   const issues = job.validation?.issues || [];
   const approve = h('input', { type: 'checkbox' }), unknown = h('input', { type: 'checkbox' });
@@ -1928,10 +1962,14 @@ function genQuote(job: any, def: any, request: any, s: Shot) {
   return h('div', { class: 'prompt-box', style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
     h('div', { class: 'facts' }, 'Model', h('b', {}, def.title), 'Runs on', h('b', {}, request.backend.kind === 'cloud' ? 'Comfy Cloud' : 'Local ComfyUI'),
       'Ready', h('b', { style: `color:${job.validation?.compatible ? 'var(--ok)' : 'var(--bad)'}` }, job.validation?.compatible ? 'Inputs ready' : 'Missing requirements'),
+      'Camera', h('b', {}, CAMERA_SOURCE_LABELS[cameraSource] || cameraSource),
+      'Output', h('b', {}, seconds ? `${seconds}s${Math.abs(seconds - s.duration) > 0.05 ? ` (shot ${s.duration}s)` : ''}` : '—'),
       'Estimated cost', h('b', { style: `color:${free ? 'var(--ok)' : 'var(--warn)'}` }, free ? 'No charge (local)' : est ? `≈ $${est.toFixed(3)} estimate; Cloud total unknown` : 'Unknown — needs approval'),
       'Quote', h('b', {}, String(job.fingerprint || '').slice(0, 12))),
     h('p', { class: 'note' }, `Exact source: ${job.sources?.sourceVideo?.id || job.sources?.controlVideo?.id || job.sources?.firstFrame?.id || 'see request'} · ${job.sources?.sourceVideo?.frameCount ?? 'image'} frames · ${job.sources?.sourceVideo?.duration ?? '—'} s. Preparation does not upload inputs.`),
     def.pricing?.partnerEstimate ? h('p', { class: 'note' }, `Published partner estimate: $${def.pricing.partnerEstimate.min.toFixed(4)}–$${def.pricing.partnerEstimate.max.toFixed(4)} USD. ${def.pricing.partnerEstimate.note}`) : null,
+    finalPrompt ? h('div', { class: 'gen-final' }, h('span', { class: 'eyebrow' }, 'Final prompt · exactly what is sent'), h('pre', { style: 'max-height:160px;overflow:auto;white-space:pre-wrap;margin:4px 0 0' }, finalPrompt)) : null,
+    cameraWords ? h('p', { class: 'status-line err', role: 'status' }, cameraWords) : null,
     h('details', {}, h('summary', {}, 'Details'), h('pre', { style: 'max-height:240px;overflow:auto;white-space:pre-wrap' }, JSON.stringify({ prompt: job.binding?.prompt, sources: job.sources, graph: job.preparedGraph }, null, 2))),
     issues.length ? h('ul', { class: 'note', style: 'margin:0;padding-left:16px' }, ...issues.slice(0, 5).map((i: any) => h('li', {}, i.message))) : null,
     h('label', {}, approve, ' I approve this exact request, with an allowance of ', max, ' USD.'),

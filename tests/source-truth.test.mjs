@@ -6,9 +6,22 @@ import assert from 'node:assert/strict';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { runInNewContext } from 'node:vm';
+import ts from 'typescript';
 import { openDirector, directorRoutes } from '../server/previs/director.mjs';
-import { keyStillState, shotSignature, videoReferences } from '../shared/director.mjs';
-import { cameraMotionWords, cameraMotionWarning, CAMERA_LINES, withCameraLine } from '../shared/camera-source.mjs';
+import { builtInPresets } from '../server/previs/presets.mjs';
+import { castRows, keyStillState, objectLooks, shotSignature, videoReferences } from '../shared/director.mjs';
+import { shotPrompt } from '../shared/prompt.mjs';
+import { FIRST_FRAME_FALLBACK } from '../shared/tiers.mjs';
+import { cameraMotionWords, cameraMotionWarning, cameraSourceOf, CAMERA_LINES, CAMERA_SOURCE_LABELS, withCameraLine } from '../shared/camera-source.mjs';
+
+const source = await readFile(new URL('../src/director.ts', import.meta.url), 'utf8');
+const compile = s => ts.transpileModule(s, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+const slice = (from, to) => source.slice(source.indexOf(from), source.indexOf(to, source.indexOf(from)));
+// A tiny DOM stand-in: the workspace builds plain objects that we read as text.
+const h = (tag, attrs = {}, ...children) => ({ tag, ...attrs, children: children.flat().filter(c => c != null && c !== false) });
+const text = n => (n == null ? '' : typeof n === 'string' ? n : (n.children || []).map(text).join(' '));
 
 const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==';
 
@@ -52,4 +65,56 @@ test('camera-motion words in free text are found outside the camera line; object
   assert.equal(cameraMotionWarning('A quiet street.'), '');
   assert.match(cameraMotionWarning('Whip pan to the car.', 'blockout'), /“Whip pan”.*camera comes from the blockout clip/);
   assert.match(cameraMotionWarning('Dolly in.', 'keyframes'), /start and end stills/);
+});
+
+test('workspace: the model input card reports stale stills after a camera edit (not “ready”), and the End choice is explicit', async () => {
+  const director = await openDirector(await mkdtemp(join(tmpdir(), 'previs-source-truth-ui-')));
+  let p = await director.create({ template: 'street' });
+  for (const at of ['start', 'end']) p = (await director.reference(p.id, { shotId: p.shots[0].id, role: 'frame', note: `key frame ${at}`, data: PNG, generated: { requestId: `req-${at}`, outputKey: 'o1', signature: shotSignature(p, p.shots[0]), model: 'FLUX 3' } })).project;
+  const def = builtInPresets.find(d => d.id === 'ltx-25-flf-v1'), choices = builtInPresets.filter(d => d.task === 'first-frame');
+  const card = project => {
+    const ctx = { h, project, genCache: { presets: choices, definitions: [], jobs: [] }, shotModel: () => def, videoChoices: st => st.presets, modelLabel: d => d.title, referenceCapacity: () => 0, plannedReferences: () => [],
+      cameraSourceOf, keyStillState, shotPrompt, cameraMotionWarning, CAMERA_SOURCE_LABELS, castRows, objectLooks, signature: shotSignature, clipSeconds: () => 5, clipLengths: () => '2–10 s', startOnlyFallback: d => FIRST_FRAME_FALLBACK[d.id],
+      modelInputsDiagram: () => h('div'), refUrl: r => r.file, fromBlender: () => false, localStorage: { setItem() {} }, shotPane: { dataset: {} }, KIND_COLORS: {}, entity: () => null };
+    runInNewContext(compile(slice('function modelBlock(s: Shot) {', '// ---------- Shot panel sections')), ctx);
+    return text(ctx.modelBlock(project.shots[0]));
+  };
+  const before = card(p);
+  assert.match(before, /Start still ready/); assert.match(before, /End still ready/);
+  p = (await director.edit(p.id, [{ op: 'update_shot', id: p.shots[0].id, patch: { camera: { angle: 40 }, description: 'Slow dolly left, whip pan to the car.' } }])).project;
+  const after = card(p);
+  assert.doesNotMatch(after, /still ready/, 'the review saw “Start still ready” / “End still ready” here after the edit');
+  assert.match(after, /Start still is out of date: the camera, timing or scene changed/); assert.match(after, /End still is out of date/);
+  assert.match(after, /or choose to animate the start still alone with LTX 2\.5 Pro when you generate/, 'the start-only path is offered as a choice, not taken silently');
+  assert.match(after, /Camera words.*“dolly left”, “whip pan”/, 'free text that directs the camera is flagged');
+});
+
+test('workspace: a Blender shot’s still guide is the imported frame from the server, without proxy markers', async () => {
+  const calls = [], captures = [];
+  const ctx = { h, projectId: 'proj', scene: { capture: (...a) => { captures.push(a); return 'data:image/png;base64,UFJPWFk='; } }, api: async (path, body) => { calls.push({ path, body }); return { data: 'QkxFTkRFUg==', mime: 'image/png', source: 'blender', frame: 0 }; } };
+  runInNewContext(compile(slice('const blenderGuides = new Map', '/** "Matches blockout 8/10"')), ctx);
+  const shot = { id: 'shot', render: { assetId: 'clip' } };
+  const b = ctx.guideFrame(shot, 0, true);
+  assert.equal(await b.data, 'data:image/png;base64,QkxFTkRFUg=='); assert.equal(captures.length, 0, 'no proxy capture for an imported clip');
+  assert.deepEqual(JSON.parse(JSON.stringify(calls[0])), { path: 'director/frame', body: { projectId: 'proj', shotId: 'shot', t: 0, width: 1280, height: 720, guide: true } });
+  assert.equal(b.img.src, 'data:image/png;base64,QkxFTkRFUg=='); assert.equal(b.img.alt, 'Blender frame');
+  await ctx.guideFrame(shot, 0, true).data; assert.equal(calls.length, 1, 'cached per clip and time');
+  const proxy = ctx.guideFrame(shot, 1, false);
+  assert.equal(await proxy.data, 'data:image/png;base64,UFJPWFk='); assert.equal(captures.length, 1);
+  const composer = slice('function keyFrameBlock(s: Shot) {', '/** Image 1 of a still');
+  assert.match(composer, /markers: !blender/, 'the prompt drops the proxy-marker legend for a Blender frame');
+  assert.match(composer, /guide: \(await guide\.data\)\.split/, 'the request sends the previewed guide');
+  assert.doesNotMatch(composer, /scene\.capture\(t, 1280, 720/, 'the composer never captures the proxy itself');
+});
+
+test('workspace: the video quote card shows the effective camera, output seconds and final prompt, and flags camera words', () => {
+  const ctx = { h, cameraMotionWarning, CAMERA_SOURCE_LABELS, api: async () => ({}), setTimeout() {} };
+  runInNewContext(compile(slice('function genQuote(', '// ---------- Live sync')), ctx);
+  const job = { id: 'job', fingerprint: 'fp', cameraSource: 'still', quote: { status: 'unknown' }, validation: { compatible: true }, sources: { firstFrame: { id: 'img' } }, binding: { prompt: 'Whip pan to the car. Hold the still’s framing; keep the camera move subtle and consistent with it.' } };
+  const card = text(ctx.genQuote(job, { title: 'LTX 2.5 Pro · start still', pricing: { ratePerSecond: 0.172 } }, { backend: { kind: 'cloud' } }, { duration: 5 }, { est: 0.8, seconds: 4, cameraSource: 'still', prompt: 'ignored: the bound prompt wins' }));
+  assert.match(card, /Camera: from still \(approximate\)/);
+  assert.match(card, /4s \(shot 5s\)/, 'the seconds the model makes, next to the shot length');
+  assert.match(card, /≈ \$0\.800 estimate/, 'the prepared estimate for those seconds, not rate × shot length');
+  assert.match(card, /Final prompt · exactly what is sent.*Whip pan to the car/);
+  assert.match(card, /“Whip pan”.*camera comes from the start still/);
 });
