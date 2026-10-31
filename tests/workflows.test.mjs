@@ -385,9 +385,10 @@ test('budget: an unpriced Cloud request is refused before any upload; a priced o
   assert.equal(generationEstimate(q2), 1, '0.2/s × the 5 s default');
   await generation.submit({ ...priced, approval: consent(q2) });
   assert.equal(budget.get(priced.requestId).state, 'reserved'); assert.equal(budget.get(priced.requestId).estimateUsd, 1);
+  assert.equal(budget.get(priced.requestId).reserveMicros, 1100000, 'the default 10% safety margin is held on top of the list price');
   f.state.visible = true;
   assert.equal((await generation.track(priced.requestId)).status, 'completed');
-  assert.equal(budget.get(priced.requestId).state, 'settled');
+  assert.equal(budget.get(priced.requestId).state, 'settled'); assert.equal(budget.get(priced.requestId).costMicros, 1000000, 'settled at the list price, the margin released');
   // Local work without partner API nodes never touches the ledger.
   const local = f.input(), q3 = await generation.quote(local);
   await generation.submit({ ...local, approval: approve(q3) });

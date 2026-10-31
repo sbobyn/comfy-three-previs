@@ -8,12 +8,10 @@
 // --max-cost <usd per project> (default 4), --steps looks,sheets,stills,videos, --only <slug>[,<slug>].
 // One batch per starter, all at once (the server shares backend slots between them); progress follows each batch's SSE
 // stream, falling back to polling. A batch that pauses (an uncertain job) is left for the operator; nothing is resent.
-const STARTERS = [
-  { slug: 'breaking-news', id: 'ff685e99-00bf-4f5f-979a-944f0caca7c9' },
-  { slug: 'wingspan', id: 'f158baf1-2cac-4311-859a-e5c590d381d4' },
-  { slug: 'final-lap', id: 'ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f' },
-  { slug: 'posterized', id: '5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6' },
-];
+import { SOURCES } from '../export-starters.mjs';
+
+// The canonical source projects (`pnpm starters:import` writes them from the bundles; see scripts/README.md).
+const STARTERS = SOURCES.map(({ slug, id }) => ({ slug, id }));
 const TERMINAL = ['completed', 'failed', 'cancelled', 'paused'];
 
 const args = process.argv.slice(2);

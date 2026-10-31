@@ -11,7 +11,7 @@ import { backendSnapshot } from '../server/previs/backends.mjs';
 import { createSlots } from '../server/previs/concurrency.mjs';
 import { createJobTracker } from '../server/previs/job-tracker.mjs';
 import { lookPrompt, compilePrompt, objectLooks } from '../shared/director.mjs';
-import { IMAGE_PRICES } from '../shared/tiers.mjs';
+import { IMAGE_PRICES, referenceUsd } from '../shared/tiers.mjs';
 
 // Live Comfy Cloud /object_info for the partner nodes the presets use (captured 2026-10-30, trimmed to the schema).
 const liveInfo = JSON.parse(await readFile(new URL('./fixtures/partner-object-info.json', import.meta.url), 'utf8'));
@@ -158,7 +158,10 @@ test('Nano Banana Pro and 2.1 take cast references on the single-request route; 
   for (const presetId of ['nano-banana-pro', 'nano-banana-2-1', 'gpt-image-25', 'seedream-5-pro', 'flux-2-max']) {
     const job = await refgen.prepare({ ...base, presetId });
     assert.equal(job.refs.length, 2, presetId); assert.equal(job.status, 'quoted');
-    assert.equal(job.quote.estimate, IMAGE_PRICES[presetId], `${presetId} quotes its list estimate`);
+    // The estimate is the list price plus the three image inputs (the guide and two cast looks); the list price itself is unchanged.
+    assert.equal(job.quote.breakdown.listUsd, IMAGE_PRICES[presetId], `${presetId} quotes its list price`);
+    assert.equal(job.quote.breakdown.refs, 3, presetId);
+    assert.equal(job.quote.estimate, Math.round((IMAGE_PRICES[presetId] + referenceUsd(presetId, 3)) * 10000) / 10000, `${presetId} estimate = list + references`);
   }
   const pro = await refgen.prepare({ ...base, presetId: 'nano-banana-pro', seed: 4 });
   await refgen.submit({ projectId: project.id, requestId: pro.id, approval: consent(pro) });
@@ -410,4 +413,76 @@ test('budget: a backend rejection before it ran releases the reservation; an exe
   await refgen.submit({ projectId: project.id, requestId: ran.id, approval: approve(ran) });
   assert.equal((await refgen.track({ projectId: project.id, requestId: ran.id })).status, 'failed');
   assert.equal(budget.get(ran.id).state, 'held');
+});
+
+// ---- Budget v2: grader, references and refusals are counted (2026-10-31 regeneration overran its cap by $1.84) ----
+const keyFrame = (project, presetId, extra = {}) => ({ projectId: project.id, target: 'shot', shotId: project.shots[0].id, frameAt: 'start', presetId, prompt: 'Image 1 is the blockout.', aspect: '16:9', count: 1, seed: 5, guide: PNG.toString('base64'), ...extra });
+const approveAll = job => ({ approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 1, allowUnknownCharges: true } });
+const saveNode = job => Object.entries(job.graph).find(([, x]) => x.class_type === 'SaveImage')[0];
+
+test('budget v2: with the paid grader on, a key-frame quote and reservation include the grade, and it settles for the grades it asked for', async () => {
+  const { openBudget } = await import('../server/previs/budget.mjs');
+  const root = await mkdtemp(join(tmpdir(), 'previs-refgen-grader-'));
+  const budget = await openBudget(join(root, 'budget'), { env: {} }); // 10% margin
+  const log = []; log.objectInfo = liveInfo;
+  const graderIds = new Set(), base = mockBackend(log);
+  const backend = input => { const b = base(input); return { ...b,
+    async submit(req) { const r = await b.submit(req); if (req.graph[3]?.class_type === 'GeminiNodeV3') { graderIds.add(r.promptId); log.push('grade'); } return r; },
+    async history(id) { return graderIds.has(id) ? { status: { completed: true, status_str: 'success' }, outputs: { 4: { text: ['{"camera":8,"layout":8,"headings":8,"score":8,"why":"close"}'] } } } : b.history(id); } }; };
+  const { project, refgen } = await (async () => { const director = await openDirector(root), project = await director.create({ template: 'street' }); return { project, refgen: await openRefgen(root, director, { backend, allowPaid: true, budget, grader: 'gemini' }) }; })();
+  assert.equal(refgen.graderOn(), true);
+  const job = await refgen.prepare(keyFrame(project, 'flux-2-pro'));
+  // list $0.028 + the guide as one reference image ($0.017) + one grade ($0.05)
+  assert.deepEqual({ ...job.quote.breakdown }, { listUsd: 0.028, refsUsd: 0.017, graderUsd: 0.05, expectedUsd: 0.095, marginPct: 10, marginUsd: 0.0095, reserveUsd: 0.1045, refs: 1, grades: 1 });
+  assert.equal(job.quote.estimate, 0.095); assert.match(job.quote.label, /list \$0\.028 \+ 1 reference image \$0\.017 \+ grader \$0\.050/);
+  assert.equal(job.quote.credits, Math.round(6 * 100) / 100, 'credits stay the list price');
+  await refgen.submit({ projectId: project.id, requestId: job.id, approval: approveAll(job) });
+  assert.equal(budget.get(job.id).reserveMicros, 104500); assert.equal(budget.get(job.id).components.graderUsd, 0.05);
+  log.done = true; log.outputs = { [saveNode(job)]: { images: [{ filename: 'a.png', subfolder: '', type: 'output' }] } };
+  const done = await refgen.track({ projectId: project.id, requestId: job.id });
+  assert.equal(done.status, 'completed'); assert.equal(done.graderCalls, 1); assert.equal(log.filter(x => x === 'grade').length, 1);
+  assert.equal(budget.list().filter(r => r.source === 'grader').length, 0, 'the grade rides on the still’s own reservation, not a second one');
+  const settled = budget.get(job.id);
+  assert.equal(settled.state, 'settled'); assert.equal(settled.costMicros, 95000, 'settled at list + reference + grade, without the margin');
+  // Grader off: the same key frame quotes without it.
+  const off = await openRefgen(root, await openDirector(root), { backend, allowPaid: true, budget, grader: 'off' });
+  assert.equal((await off.prepare(keyFrame(project, 'flux-2-pro', { seed: 6 }))).quote.breakdown.graderUsd, 0);
+});
+
+test('budget v2: a key frame the grader cannot be afforded for is refused up front, and the refusal carries the breakdown', async () => {
+  const { openBudget } = await import('../server/previs/budget.mjs');
+  const root = await mkdtemp(join(tmpdir(), 'previs-refgen-grader-'));
+  const budget = await openBudget(join(root, 'budget'), { env: { PREVIS_BUDGET_PROJECT_CAP_USD: '0.1' } }); // list + reference alone ($0.045) fits; with the grade and margin ($0.1045) it does not
+  const { project, refgen, log } = await setup({ allowPaid: true, budget, grader: 'gemini' }); log.objectInfo = liveInfo;
+  const job = await refgen.prepare(keyFrame(project, 'flux-2-pro'));
+  await assert.rejects(refgen.submit({ projectId: project.id, requestId: job.id, approval: approveAll(job) }), e => {
+    assert.equal(e.apiCode, 'budget'); assert.match(e.message, /\(list \$0\.03 \+ references \$0\.02 \+ grader \$0\.05 \+ 10% margin \$0\.01\)/);
+    assert.deepEqual(e.breakdown, { listUsd: 0.028, refsUsd: 0.017, graderUsd: 0.05, expectedUsd: 0.095, marginPct: 10, marginUsd: 0.0095, reserveUsd: 0.1045 }); return true;
+  });
+  assert.ok(!log.includes('submit'), 'nothing was sent');
+});
+
+test('budget v2: a moderated FLUX.2 Pro request settles at its billed amount; a refusal from a model with no known bill stays a hold', async () => {
+  const { openBudget } = await import('../server/previs/budget.mjs');
+  const root = await mkdtemp(join(tmpdir(), 'previs-refgen-moderation-'));
+  const budget = await openBudget(join(root, 'budget'), { env: {} });
+  const { project, refgen, log } = await setup({ allowPaid: true, budget }); log.objectInfo = liveInfo;
+  const moderated = { nodeType: 'Flux2ImageNode', message: 'Polling aborted due to error: Task failed: {"id": "x", "status": "Request Moderated", "details": {"Moderation Reasons": ["Content Policy Violation"]}}' };
+  const pro = await refgen.prepare(keyFrame(project, 'flux-2-pro'));
+  await refgen.submit({ projectId: project.id, requestId: pro.id, approval: approveAll(pro) });
+  log.historyError = moderated;
+  const failed = await refgen.track({ projectId: project.id, requestId: pro.id });
+  assert.equal(failed.status, 'failed'); assert.equal(failed.failure.moderated, true); assert.equal(failed.failure.billedUsd, 0.045); // list + the guide; no grader ran
+  const r = budget.get(pro.id);
+  assert.equal(r.state, 'settled', 'billed, so not a hold that expires and not $0'); assert.equal(r.costMicros, 45000); assert.equal(r.costStatus, 'billed-on-refusal');
+  assert.match(r.note, /FLUX\.2 Pro bills a moderated request/);
+  assert.equal(budget.status(project.id).project.spentUsd, 0.045);
+  // GPT Image 2.5 refused for the same reason: whether it bills is unknown, so the reservation is still held.
+  log.historyError = null;
+  const gpt = await refgen.prepare(keyFrame(project, 'gpt-image-25', { seed: 9 }));
+  await refgen.submit({ projectId: project.id, requestId: gpt.id, approval: approveAll(gpt) });
+  log.historyError = { ...moderated, nodeType: 'OpenAIGPTImageNodeV2' };
+  const refused = await refgen.track({ projectId: project.id, requestId: gpt.id });
+  assert.equal(refused.failure.moderated, true); assert.equal(refused.failure.billedUsd, undefined);
+  assert.equal(budget.get(gpt.id).state, 'held');
 });

@@ -56,6 +56,10 @@ test('rail pips show blockout, still and video, with running jobs, and the films
   assert.deepEqual([run.blockout, run.still, run.video], ['changed', 'run', 'run']);
   assert.equal(run.label, 'Scene changed since the blockout · 4 stills (one generating) · 2 videos (one generating)');
   assert.equal(core.shotPips(shot(), { stale: false, videos: 0, stillRunning: false, videoRunning: false }).blockout, 'none');
+  // A starter's bundled blockout is not "No blockout yet"; a shot with neither still says so.
+  assert.equal(core.shotPips(shot(), { stale: false, videos: 1, stillRunning: false, videoRunning: false, bundled: true }).label, 'Starter blockout · no stills · 1 video');
+  assert.equal(core.shotPips(shot(), { stale: false, videos: 0, stillRunning: false, videoRunning: false }).label, 'No blockout yet · no stills · no video');
+  assert.equal(core.shotPips(s, { stale: false, videos: 0, stillRunning: false, videoRunning: false, bundled: true }).blockout, 'ok');
   assert.equal(core.midStill(s).id, 'c', 'the newest take at the moment nearest mid-shot');
   assert.equal(core.midStill(shot([frame('u', 'something else')])), null, 'unpinned stills are not placed on the strip');
   assert.equal(core.midStill(shot()), null);

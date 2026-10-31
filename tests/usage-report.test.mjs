@@ -60,6 +60,11 @@ test('fetchUsage sends the key only as X-API-Key to cloud.comfy.org and never ec
   await fetchUsage({ start, end, groupBy: 'model', key: 'SIMULATED-KEY', fetcher });
   assert.equal(calls[0].url, 'https://cloud.comfy.org/api/billing/usage/timeseries?group_by=model&granularity=day&starting_on=2026-10-29T07%3A00%3A00.000Z&ending_before=2026-10-30T07%3A00%3A00.000Z');
   assert.equal(calls[0].init.headers['X-API-Key'], 'SIMULATED-KEY'); assert.equal(calls[0].init.redirect, 'error');
+  // Hourly buckets (used by usage:settle) are a parameter; the default stays daily.
+  await fetchUsage({ start, end, groupBy: 'model', granularity: 'hour', key: 'SIMULATED-KEY', fetcher });
+  assert.match(calls[1].url, /granularity=hour/);
+  const parsed = parseUsage(fixture.model);
+  assert.deepEqual(parsed.buckets[0], { key: 'seedance-2-5-edit', start: '2026-10-29T00:00:00Z', end: '2026-10-30T00:00:00Z', usd: 2 }); assert.equal(parsed.granularity, 'day');
   const failing = async () => new Response('{"error":"key SIMULATED-KEY is invalid"}', { status: 401 });
   await assert.rejects(fetchUsage({ start, end, groupBy: 'model', key: 'SIMULATED-KEY', fetcher: failing }), e => /HTTP 401/.test(e.message) && !e.message.includes('SIMULATED'));
 });

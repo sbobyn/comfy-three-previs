@@ -6,10 +6,13 @@
 // directory, so separate servers that share PREVIS_BUDGET_DIR (or one PREVIS_DATA_DIR) share one budget.
 //
 // Amounts are estimates from list prices: Comfy Cloud returns no binding per-job price, and the provider has no
-// spending cap of its own. scripts/usage-report.mjs reads the billed account totals.
+// spending cap of its own. A reservation is the expected charge (list price + reference images + the paid grader) plus a
+// safety margin (PREVIS_BUDGET_MARGIN percent, default 10); settling without a billed amount counts the expected charge,
+// not the margin. scripts/usage-report.mjs reads the billed account totals; scripts/usage-settle.mjs matches them to this ledger.
 import { mkdir, open, readFile, stat, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { atomicJson } from './atomic.mjs';
+import { parseMarginPct, GRADER_PRICES } from '../../shared/tiers.mjs';
 
 /** Ledger directory: PREVIS_BUDGET_DIR (share it between servers for one account budget), else <data dir>/budget. */
 export const budgetDir = (dataDir, env = process.env) => env.PREVIS_BUDGET_DIR || join(dataDir, 'budget');
@@ -20,6 +23,19 @@ const usd = m => Math.round(m) / 1e6;
 const money = x => `$${Number(x).toFixed(2)}`;
 const capOf = value => { if (value === undefined || value === null || value === '') return null; const n = Number(value); return Number.isFinite(n) && n >= 0 ? n : null; };
 const fail = (message, status = 400) => { const e = Error(message); e.status = status; throw e; };
+
+/** The budget fields of an HTTP error body: the status object and the itemized request that was refused. Empty for other errors. */
+export const refusalFields = e => ({ ...(e?.budget ? { budget: e.budget } : {}), ...(e?.breakdown ? { breakdown: e.breakdown } : {}) });
+
+/** Itemize a reservation: refs and grader as the caller knew them, the rest of the expected charge is list; plus the margin. */
+function itemize(expectedUsd, components, marginUsd, marginPct) {
+  const r4 = x => Math.round(x * 10000) / 10000;
+  const refsUsd = Math.max(0, Number(components?.refsUsd) || 0), graderUsd = Math.max(0, Number(components?.graderUsd) || 0);
+  const listUsd = r4(Math.max(0, expectedUsd - refsUsd - graderUsd));
+  return { listUsd, refsUsd: r4(refsUsd), graderUsd: r4(graderUsd), expectedUsd: r4(expectedUsd), marginPct, marginUsd: r4(marginUsd), reserveUsd: r4(expectedUsd + marginUsd) };
+}
+/** " (list $0.03 + references $0.02 + grader $0.05 + 10% margin $0.01)" for a message; empty when the request is just its list price. */
+const describe = p => (p.refsUsd || p.graderUsd || p.marginUsd ? ` (list ${money(p.listUsd)}${p.refsUsd ? ` + references ${money(p.refsUsd)}` : ''}${p.graderUsd ? ` + grader ${money(p.graderUsd)}` : ''}${p.marginUsd ? ` + ${p.marginPct}% margin ${money(p.marginUsd)}` : ''})` : '');
 
 /** USD estimate for a quote: a known amount, $0 for local work without partner API nodes, the quote's estimate, else null. */
 export function quoteEstimate(quote, backend) {
@@ -38,6 +54,7 @@ export function budgetSettings(env = process.env, config = {}) {
     projectCaps: config.projectCaps && typeof config.projectCaps === 'object' ? config.projectCaps : {},
     period, timeZone: env.PREVIS_BUDGET_TZ || undefined,
     allowUnknown: env.PREVIS_ALLOW_UNKNOWN_COST === '1',
+    marginPct: parseMarginPct(env.PREVIS_BUDGET_MARGIN),
     ttlMs: (Number.isFinite(ttl) && ttl > 0 ? ttl : 24) * 3600e3,
   };
 }
@@ -140,8 +157,10 @@ export async function openBudget(dir, { env = process.env, now = Date.now, onCha
    * Reserve before dispatch. Idempotent per id: a live or settled reservation is returned as is (a resubmit of the same
    * request never counts twice); a released or expired one is re-admitted. Throws 402 { apiCode: 'budget' } when a cap
    * would be exceeded, or the price is unknown and PREVIS_ALLOW_UNKNOWN_COST is not 1. Nothing is reserved then.
+   * estimateUsd is the expected charge; `components` ({ listUsd, refsUsd, graderUsd }) itemizes it and is kept on the
+   * reservation. The reserve is the expected charge plus the safety margin.
    */
-  async function reserve({ id, source, projectId = null, kind = null, model = null, label = null, estimateUsd }) {
+  async function reserve({ id, source, projectId = null, kind = null, model = null, label = null, estimateUsd, components = null }) {
     if (typeof id !== 'string' || !id) fail('A reservation id is required');
     const result = await withLock(async () => {
       expire();
@@ -151,7 +170,8 @@ export async function openBudget(dir, { env = process.env, now = Date.now, onCha
       if (!known && !s.allowUnknown) {
         throw Object.assign(Error(`${label || model || 'This request'} has no price estimate, so the budget cannot admit it; nothing was sent. Choose a priced model, or set PREVIS_ALLOW_UNKNOWN_COST=1 on the server to allow unknown-cost runs.`), { status: 402, apiCode: 'budget', budget: status(projectId) });
       }
-      const need = known ? micros(estimateUsd) : 0, at = now(), key = periodKey(at, s.period, s.timeZone);
+      const expected = known ? micros(estimateUsd) : 0, need = Math.round(expected * (1 + s.marginPct / 100)), at = now(), key = periodKey(at, s.period, s.timeZone);
+      const parts = known ? itemize(estimateUsd, components, usd(need) - estimateUsd, s.marginPct) : null;
       const checks = [
         { name: 'Account', cap: s.accountCapUsd, totals: scopeTotals(r => r.id !== id && periodKey(r.createdAt, s.period, s.timeZone) === key) },
         ...(projectId ? [{ name: 'Project', cap: projectCap(s, projectId), totals: scopeTotals(r => r.id !== id && r.projectId === projectId) }] : []),
@@ -160,12 +180,12 @@ export async function openBudget(dir, { env = process.env, now = Date.now, onCha
         if (c.cap === null) continue;
         const used = c.totals.spent + c.totals.held, left = Math.max(0, micros(c.cap) - used);
         if (used + need > micros(c.cap)) {
-          const why = `${c.name} budget cap reached: ${money(usd(c.totals.spent))} spent + ${money(usd(c.totals.held))} reserved + ${money(usd(need))} for this request is over the ${money(c.cap)} cap (${money(usd(left))} left). Nothing was sent.`;
-          throw Object.assign(Error(why), { status: 402, apiCode: 'budget', budget: status(projectId) });
+          const why = `${c.name} budget cap reached: ${money(usd(c.totals.spent))} spent + ${money(usd(c.totals.held))} reserved + ${money(usd(need))} for this request${parts ? describe(parts) : ''} is over the ${money(c.cap)} cap (${money(usd(left))} left). Nothing was sent.`;
+          throw Object.assign(Error(why), { status: 402, apiCode: 'budget', budget: status(projectId), ...(parts ? { breakdown: parts } : {}) });
         }
       }
       const reservation = { id, source, projectId, kind, model, label: label ? String(label).slice(0, 160) : null, state: 'reserved',
-        estimateUsd: known ? estimateUsd : null, reserveMicros: need, costMicros: null, costStatus: known ? 'estimated' : 'unknown',
+        estimateUsd: known ? estimateUsd : null, ...(parts ? { components: parts } : {}), marginPct: s.marginPct, expectedMicros: expected, reserveMicros: need, costMicros: null, costStatus: known ? 'estimated' : 'unknown',
         createdAt: new Date(at).toISOString(), expiresAt: new Date(at + s.ttlMs).toISOString(), endedAt: null, note: null };
       ledger.reservations[id] = reservation;
       const alerts = checkAlerts(projectId);
@@ -191,11 +211,11 @@ export async function openBudget(dir, { env = process.env, now = Date.now, onCha
     return result;
   }
   const iso = () => new Date(now()).toISOString();
-  /** The job ran: replace the reservation with its cost (billed when known, else the estimate). */
+  /** The job ran: replace the reservation with its cost (billed when known, else the expected charge without the margin). */
   const settle = (id, { costUsd = null, costStatus = null, note = null } = {}) => transition(id, r => {
     if (r.state === 'settled') return;
     const billed = Number.isFinite(costUsd) && costUsd >= 0;
-    Object.assign(r, { state: 'settled', costMicros: billed ? micros(costUsd) : r.reserveMicros, costStatus: costStatus || (billed ? 'billed' : r.costStatus), endedAt: iso(), note });
+    Object.assign(r, { state: 'settled', costMicros: billed ? micros(costUsd) : r.expectedMicros ?? r.reserveMicros, costStatus: costStatus || (billed ? 'billed' : r.costStatus), endedAt: iso(), note });
   });
   /** Provably nothing was sent (or an operator reconciled it): the reservation stops counting. */
   const release = (id, note = 'Released') => transition(id, r => { if (HELD.has(r.state)) Object.assign(r, { state: 'released', endedAt: iso(), note }); });
@@ -225,9 +245,11 @@ export async function openBudget(dir, { env = process.env, now = Date.now, onCha
   await load();
   return {
     reserve, settle, release, hold, setCaps, status,
+    /** Safety margin (percent) a new reservation adds to the expected charge. */
+    marginPct: () => settings().marginPct,
     /** Reload the ledger (another process may have written it) and expire stale reservations. */
     refresh: () => withLock(async () => { if (expire()) await save(); }),
-    list: () => Object.values(ledger.reservations).map(r => ({ ...structuredClone(r), reserveUsd: usd(r.reserveMicros), costUsd: r.costMicros === null ? null : usd(r.costMicros) })),
+    list: () => Object.values(ledger.reservations).map(r => ({ ...structuredClone(r), reserveUsd: usd(r.reserveMicros), expectedUsd: r.expectedMicros == null ? usd(r.reserveMicros) : usd(r.expectedMicros), costUsd: r.costMicros === null ? null : usd(r.costMicros) })),
     get: id => { const r = ledger.reservations[id]; return r ? structuredClone(r) : null; },
     subscribe: fn => { listeners.add(fn); return () => listeners.delete(fn); },
     dir,
@@ -237,8 +259,17 @@ export async function openBudget(dir, { env = process.env, now = Date.now, onCha
 /** A budget that admits everything (tests and tools that opt out explicitly). */
 export const noBudget = () => {
   const ok = async () => null;
-  return { reserve: async () => ({ reservation: null, alerts: [] }), settle: ok, release: ok, hold: ok, setCaps: async () => null, refresh: ok, status: () => null, list: () => [], get: () => null, subscribe: () => () => {} };
+  return { reserve: async () => ({ reservation: null, alerts: [] }), settle: ok, release: ok, hold: ok, setCaps: async () => null, refresh: ok, status: () => null, marginPct: () => 0, list: () => [], get: () => null, subscribe: () => () => {} };
 };
+
+/** What a finished job cost, when its receipt says more than the reservation does: { costUsd?, costStatus?, note? } or {}. */
+export function settlementOf(job) {
+  const q = job?.quote?.breakdown;
+  if (!q) return {}; // generation receipts and older refgen receipts settle at the reservation's expected charge
+  // Paid grades the job actually requested (its quote allowed for them); each one is billed whether or not the verdict was usable.
+  const grades = Math.min(Number(job.graderCalls) || 0, Number(q.grades) || 0);
+  return { costUsd: Math.round((q.listUsd + q.refsUsd + grades * GRADER_PRICES.gemini) * 10000) / 10000, costStatus: 'estimated' };
+}
 
 // Job receipt → ledger. Generation and refgen share these status names closely enough for one mapping.
 const RAN = new Set(['completed', 'orphaned', 'recovery-required', 'attaching']);
@@ -250,8 +281,10 @@ export async function followJob(budget, job, log = () => {}) {
   // Only real transitions take the ledger lock (a tracked uncertain job is persisted on every check).
   const live = HELD.has(state);
   try {
-    if (RAN.has(job.status)) { if (state !== 'settled') await budget.settle(job.id); }
+    if (RAN.has(job.status)) { if (state !== 'settled') await budget.settle(job.id, settlementOf(job)); }
     else if (DRAFT.has(job.status)) { if (live) await budget.release(job.id, 'Back to its quote; nothing was sent'); }
+    // Refused by the provider but still billed (moderation on some models): the charge is known, so settle it; do not hold or release.
+    else if (job.status === 'failed' && Number.isFinite(job.failure?.billedUsd)) { if (state !== 'settled') await budget.settle(job.id, { costUsd: job.failure.billedUsd, costStatus: 'billed-on-refusal', note: job.failure.billedNote || 'Refused, but the provider still bills it' }); }
     else if (job.status === 'failed') {
       if (job.failure?.phase === 'preparation' || job.failure?.notSent) { if (live) await budget.release(job.id, 'Refused before it ran; nothing was charged'); }
       else if (state === 'reserved') await budget.hold(job.id, `Failed after dispatch (${job.failure?.phase || 'execution'}); a charge may still arrive`);
