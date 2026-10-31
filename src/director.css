@@ -908,7 +908,8 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .act-preview:hover { background: var(--paper-3); }
 .act-go { white-space: nowrap; }
 .act-go:hover { background: var(--accent); border-color: var(--accent); }
-@container side (max-width: 420px) { .rd-cast i { display: none; } }
+/* A narrow panel wraps the readiness chips onto a second row instead of scrolling them out of view. */
+@container side (max-width: 420px) { .rd-cast i { display: none; } .ready { flex-wrap: wrap; row-gap: 4px; overflow: visible; -webkit-mask-image: none; mask-image: none; } }
 @container side (max-width: 400px) {
   .side-act { grid-template-columns: minmax(0, 1fr); gap: 8px; padding-top: 9px; }
   .act-hint strong { flex-basis: auto; }
