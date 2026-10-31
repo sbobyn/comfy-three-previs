@@ -64,6 +64,20 @@ function buildShape(shape: string, color: string): THREE.Group {
   const g = new THREE.Group(), m = material(color);
   const [w, h, d] = SHAPES[shape]?.size || [1, 1, 1];
   switch (shape) {
+    case 'bird': {
+      // A spread-wing silhouette, with the head/beak toward +z like the other directed shapes.
+      g.add(part(new THREE.SphereGeometry(1, 12, 8).scale(0.16, 0.2, 0.35), m, 0, 0.25, 0));
+      for (const side of [-1, 1]) {
+        const wing = new THREE.Shape([new THREE.Vector2(side * 0.1, 0.2), new THREE.Vector2(side * 1.2, 0.05), new THREE.Vector2(side * 1.05, -0.32), new THREE.Vector2(side * 0.15, -0.2)]);
+        const geo = new THREE.ExtrudeGeometry(wing, { depth: 0.045, bevelEnabled: false }).rotateX(Math.PI / 2);
+        g.add(part(geo, m, 0, 0.3, 0));
+      }
+      const white = material('#eee9da');
+      g.add(part(new THREE.SphereGeometry(0.12, 12, 8), white, 0, 0.32, 0.35));
+      g.add(part(new THREE.ConeGeometry(0.07, 0.18, 6).rotateX(Math.PI / 2), material('#e5b447'), 0, 0.3, 0.46));
+      g.add(part(new THREE.BoxGeometry(0.24, 0.045, 0.24), white, 0, 0.22, -0.43));
+      break;
+    }
     case 'person': {
       g.add(part(new THREE.CapsuleGeometry(0.21, 0.95, 4, 12), m, 0, 0.21 + 0.48 + 0.1, 0));
       g.add(part(new THREE.SphereGeometry(0.15, 16, 12), m, 0, 1.62, 0));
