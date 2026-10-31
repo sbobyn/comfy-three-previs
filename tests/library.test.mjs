@@ -239,7 +239,7 @@ test('bundles hold no local paths, job ids or request ids; a path in a Cast Card
     for (const secret of [REQUEST, 'out-1', 'prompt-123', 'cloud:https', 'deadbeef', root]) assert.ok(!text.includes(secret), secret);
     for (const key of ['"signature"', '"outputKey"', '"promptId"', '"backend"', '"path"', '"messages"', '"refgen"', '"dir"']) assert.ok(!text.replaceAll('"path": "refs/', '').includes(key), key);
     (function walk(v) { if (typeof v === 'string') assert.doesNotMatch(v, /^\/|^[A-Za-z]:[\\/]|^~/); else if (v && typeof v === 'object') Object.values(v).forEach(walk); })(JSON.parse(text));
-    await director.edit(p.id, [{ op: 'update_entity', id: CAR, patch: { styleNotes: '/Users/me/secret-film/notes.txt' } }]);
+    await director.edit(p.id, [{ op: 'update_entity', id: CAR, patch: { styleNotes: '/home/me/secret-film/notes.txt' } }]);
     await assert.rejects(director.library.save(p.id, { object: CAR }), /must not contain local paths \(entities\[0\]\.styleNotes/);
     await director.edit(p.id, [{ op: 'update_entity', id: CAR, patch: { styleNotes: 'C:\\film\\car.txt' } }]);
     await assert.rejects(director.library.save(p.id, { object: CAR }), /must not contain local paths/);

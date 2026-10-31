@@ -115,7 +115,7 @@ test('imports refuse files outside the allowlist, undeclared or changed files an
       ['a job id on a look', tamper(data, m => { m.references[0].generated.requestId = REQUEST; }), /references\[0\]\.generated\.requestId/],
       ['an animation path', tamper(data, m => { m.entities[0].path = [{ t: 0, p: [0, 0, 0] }]; }), /entities\[0\]\.path/],
       ['a refgen job', tamper(data, m => { m.refgen = {}; }), /: refgen/],
-      ['an absolute path in a note', tamper(data, m => { m.entities[0].notes = '/Users/me/film/car.blend'; }), /must not contain local paths \(entities\[0\]\.notes/],
+      ['an absolute path in a note', tamper(data, m => { m.entities[0].notes = '/home/me/film/car.blend'; }), /must not contain local paths \(entities\[0\]\.notes/],
       ['a Windows path', tamper(data, m => { m.description = 'C:\\Users\\me\\car'; }), /must not contain local paths \(description/],
       ['a home path', tamper(data, m => { m.origin.projectTitle = '~/films/final-lap'; }), /must not contain local paths \(origin\.projectTitle/],
       ['a file name that escapes refs/', tamper(data, m => { m.references[0].file = '../asset.json'; }), /field outside the asset format|invalid id, file or type/],
