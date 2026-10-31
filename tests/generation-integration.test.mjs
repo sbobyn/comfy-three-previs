@@ -13,9 +13,11 @@ import { generationRoutes } from '../server/previs/generation-routes.mjs';
 import { hashBytes } from '../server/previs/workflows.mjs';
 import { openGeneration } from '../server/previs/generation.mjs';
 import { backendSnapshot } from '../server/previs/backends.mjs';
-import { createSlots } from '../server/previs/concurrency.mjs';
+import { createSlots, createLimiter } from '../server/previs/concurrency.mjs';
 import { createJobTracker } from '../server/previs/job-tracker.mjs';
 import { assertNoSecrets } from '../server/previs/workflows.mjs';
+import { expandAsset } from '../server/previs/provenance.mjs';
+import { atomicJson } from '../server/previs/atomic.mjs';
 
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==', 'base64');
 const backend = { kind: 'local', url: 'http://127.0.0.1:8188' };
@@ -29,6 +31,8 @@ const definition = () => ({
   },
   inputs: { firstFrame: { nodeId: '1', input: 'image' } },
   outputs: [{ nodeId: '2', mediaType: 'image/png' }],
+  // A list price, so Cloud submits pass the budget authority (an unpriced Cloud request is refused there).
+  pricing: { status: 'estimate', currency: 'USD', ratePerSecond: 0.1 },
 });
 const schema = {
   LoadImage: { python_module: 'nodes', output: ['IMAGE', 'MASK'], input: { required: { image: [['author.png'], { image_upload: true }] } } },
@@ -95,8 +99,60 @@ async function fixture(t, { workflow = definition() } = {}) {
   return { root, project, image, workflow, state, routes, route, bind, complete };
 }
 
+// B23: provenance by reference in the legacy store.
+test('attached results keep provenance by reference to their receipt; reading it back is exact; project.json is compact', async t => {
+  const f = await fixture(t), job = await f.complete(), assets = f.project.get().assets;
+  assert.equal(assets.length, 2);
+  const receiptOf = id => f.routes.state().jobs.find(j => j.id === id);
+  for (const asset of assets) {
+    assert.deepEqual(asset.provenance.byReference, ['requestShot', 'sourceAssets']);
+    assert.equal('requestShot' in asset.provenance, false); assert.equal('sourceAssets' in asset.provenance, false);
+    assert.equal(asset.provenance.generationJobId, job.id); assert.equal(asset.provenance.prompt, 'New prompt');
+    const full = expandAsset(asset, receiptOf).provenance;
+    assert.deepEqual(full.requestShot, job.shot); assert.deepEqual(full.sourceAssets, job.sources); assert.equal('byReference' in full, false);
+  }
+  const text = await readFile(join(f.root, 'project.json'), 'utf8');
+  assert.equal(text.includes('\n'), false, 'written as compact JSON'); assert.deepEqual(JSON.parse(text), f.project.get());
+});
+
+test('an old store migrates on load without a revision bump, keeps copies that differ, and quotes made before it still submit', async t => {
+  const f = await fixture(t), job = await f.complete();
+  const receiptOf = id => f.routes.state().jobs.find(j => j.id === id);
+  // The pre-B23 store: every result carries inline copies; the second one's request shot was edited after the fact.
+  const old = f.project.get();
+  old.assets = old.assets.map(a => expandAsset(a, receiptOf));
+  old.assets[1].provenance.requestShot = { ...old.assets[1].provenance.requestShot, title: 'Edited after attach' };
+  await atomicJson(join(f.root, 'project.json'), old);
+  // A quote prepared on the old store, using a generated result as its first frame.
+  const before = await openProject(join(f.root)), engine = await openGeneration(f.root, before);
+  const bindingId = randomUUID();
+  await before.append(p => { p.workflowBindings.push({ id: bindingId, definitionId: f.workflow.id, shotId: 'shot', assetBindings: { firstFrame: { assetId: old.assets[0].id } }, prompt: 'From a result', parameters: {}, createdAt: new Date().toISOString() }); });
+  const input = { requestId: randomUUID(), revision: before.get().revision, workflowBindingId: bindingId, backend };
+  const quoted = await engine.quote(input);
+  assert.equal(quoted.sources.firstFrame.provenance.requestShot.title, job.shot.title, 'the quote saw the inline copy');
+  // Restart: the migration runs once.
+  const oldBytes = (await readFile(join(f.root, 'project.json'))).length;
+  const project = await openProject(f.root), revision = project.get().revision;
+  const routes = await generationRoutes(f.root, project);
+  const migrated = project.get();
+  assert.equal(migrated.revision, revision, 'no revision bump');
+  assert.deepEqual(migrated.assets.map(a => a.id), old.assets.map(a => a.id));
+  assert.deepEqual(migrated.assets[0].provenance.byReference, ['requestShot', 'sourceAssets']);
+  assert.deepEqual(migrated.assets[1].provenance.byReference, ['sourceAssets'], 'the edited request shot is kept inline');
+  assert.equal(migrated.assets[1].provenance.requestShot.title, 'Edited after attach');
+  const latestReceipt = id => routes.state().jobs.find(j => j.id === id);
+  assert.deepEqual(migrated.assets.map(a => expandAsset(a, latestReceipt)), old.assets, 'nothing is lost');
+  assert.ok((await readFile(join(f.root, 'project.json'))).length < oldBytes, 'the copies are gone from the file');
+  const sent = await routes.route('/api/generation/submit', { ...input, approval: approval(quoted) });
+  assert.equal(sent.job.status, 'queued', 'the old quote still matches (source provenance is read in full)');
+  // A second boot has nothing to migrate.
+  const again = await openProject(f.root), text = await readFile(join(f.root, 'project.json'), 'utf8');
+  await generationRoutes(f.root, again);
+  assert.equal(await readFile(join(f.root, 'project.json'), 'utf8'), text);
+});
+
 // Engine checks against a fake Cloud adapter (backendFactory): nothing leaves the process and nothing is paid.
-async function cloudFixture({ limit = '2', submitError = null, history = async () => null, view } = {}) {
+async function cloudFixture({ limit = '2', submitError = null, history = async () => null, view, downloads } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'previs-generation-cloud-'));
   const project = await openProject(root), image = await project.image(png);
   await project.mutate(project.get().revision, p => {
@@ -113,7 +169,7 @@ async function cloudFixture({ limit = '2', submitError = null, history = async (
     async submit({ graph, requestId }) { calls.submits++; calls.values.push(graph['1'].inputs.image); if (submitError) throw submitError(); return { promptId: 'cloud-' + requestId.slice(0, 8) }; },
     history, ...(view ? { view } : {}),
   });
-  const generation = await openGeneration(root, project, { backendFactory, allowPaid: true, slots: createSlots({ env: { PREVIS_LIMIT_CLOUD_IMAGES: limit } }) });
+  const generation = await openGeneration(root, project, { backendFactory, allowPaid: true, slots: createSlots({ env: { PREVIS_LIMIT_CLOUD_IMAGES: limit } }), ...(downloads ? { downloads } : {}) });
   async function quoted() {
     const id = randomUUID();
     await project.mutate(project.get().revision, p => { p.workflowBindings.push({ id, definitionId: 'definition', shotId: 'shot', assetBindings: { firstFrame: { renderId: image.id } }, prompt: 'cloud', parameters: {}, createdAt: new Date().toISOString() }); });
@@ -212,4 +268,27 @@ test('engine: a stalled Cloud /view for one job never delays another job\'s subm
   assert.equal(h.generation.get(first.input.requestId).status, 'collecting', 'collecting was persisted before the download');
   release();
   assert.equal((await tracking).status, 'completed'); assert.equal(h.calls.submits, 2);
+});
+
+test('engine: media downloads are bounded (FIFO); a full download queue still never delays a submit', async () => {
+  const gates = [], viewing = [];
+  const history = async promptId => { const job = h.generation.list().find(j => j.promptId === promptId); return { promptId, requestId: job.id, graph: job.submittedGraph, status: { completed: true }, outputs: { 2: { images: [{ filename: 'out.png', subfolder: '', type: 'output' }] } } }; };
+  const view = async () => { let release; const gate = new Promise(r => { release = r; }); gates.push(release); viewing.push(Date.now()); await gate; return png; };
+  const downloads = createLimiter(1);
+  const h = await cloudFixture({ limit: '4', history, view, downloads });
+  const a = await h.quoted(), b = await h.quoted();
+  for (const x of [a, b]) await h.generation.submit({ ...x.input, approval: h.consent(x.job) });
+  const trackA = h.generation.track(a.input.requestId), trackB = h.generation.track(b.input.requestId);
+  for (let i = 0; i < 50 && !gates.length; i++) await new Promise(r => setTimeout(r, 5));
+  await new Promise(r => setTimeout(r, 20));
+  assert.equal(gates.length, 1, 'only one download runs at a time');
+  assert.deepEqual(downloads.stats(), { limit: 1, running: 1, waiting: 1 });
+  assert.equal(h.generation.get(b.input.requestId).status, 'collecting', 'the waiting job has persisted collecting');
+  const c = await h.quoted(), t0 = Date.now();
+  assert.equal((await h.generation.submit({ ...c.input, approval: h.consent(c.job) })).status, 'queued'); assert.ok(Date.now() - t0 < 1000);
+  gates[0]();
+  for (let i = 0; i < 50 && gates.length < 2; i++) await new Promise(r => setTimeout(r, 5));
+  assert.equal(gates.length, 2, 'the next download starts when the first finishes'); gates[1]();
+  assert.deepEqual([(await trackA).status, (await trackB).status], ['completed', 'completed']);
+  assert.deepEqual(downloads.stats(), { limit: 1, running: 0, waiting: 0 });
 });

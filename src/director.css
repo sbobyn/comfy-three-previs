@@ -106,9 +106,9 @@ code, .mono { font-family: var(--mono); font-size: .95em; font-variant-numeric: 
 .btn:active { transform: translateY(.5px); box-shadow: none; }
 .btn:disabled { opacity: .45; cursor: default; pointer-events: none; }
 .btn svg { width: 16px; height: 16px; flex: none; }
-.btn.primary, .btn.camera { background: var(--ink); border-color: var(--ink); color: var(--on-ink); font-weight: 600; }
+.btn.primary, .btn.camera { background: var(--cta); border-color: var(--cta); color: var(--cta-ink); font-weight: 600; }
 .btn.primary { box-shadow: 0 1px 2px rgba(21,19,15,.2); }
-.btn.primary:hover, .btn.camera:hover { background: #2A2621; border-color: #2A2621; }
+.btn.primary:hover, .btn.camera:hover { background: var(--cta-hover); border-color: var(--cta-hover); }
 .btn.accent { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
 .btn.accent:hover { background: #B2371A; border-color: #B2371A; }
 .btn.ghost { background: transparent; border-color: transparent; box-shadow: none; color: var(--ink-2); }
@@ -907,8 +907,8 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .act-preview { border-radius: var(--r-full); padding: 0 14px; background: var(--card); }
 .act-preview:hover { background: var(--paper-3); }
 .act-go { white-space: nowrap; }
-.act-go:hover { background: var(--accent); border-color: var(--accent); }
-@container side (max-width: 420px) { .rd-cast i { display: none; } }
+/* A narrow panel wraps the readiness chips onto a second row instead of scrolling them out of view. */
+@container side (max-width: 420px) { .rd-cast i { display: none; } .ready { flex-wrap: wrap; row-gap: 4px; overflow: visible; -webkit-mask-image: none; mask-image: none; } }
 @container side (max-width: 400px) {
   .side-act { grid-template-columns: minmax(0, 1fr); gap: 8px; padding-top: 9px; }
   .act-hint strong { flex-basis: auto; }

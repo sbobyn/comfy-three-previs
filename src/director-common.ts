@@ -126,7 +126,7 @@ export function claudeDialog(connect: Connect, project?: DirectorProject) {
       connect ? h('details', {}, h('summary', {}, 'Claude Desktop configuration'), code(h('span', { class: 'muted' }, 'claude_desktop_config.json'), JSON.stringify({ mcpServers: { 'comfy-previs': { ...connect, env: { ...connect.env, PREVIS_URL: location.origin } } } }, null, 2))) : null,
       h('h3', {}, project ? `Try asking, in ${project.title.replace(/^Starter · /, '')}` : 'Try asking'),
       h('ul', { class: 'claude-asks' }, ...claudeExamples(project).map(t => h('li', {}, t))),
-      h('p', { class: 'note' }, 'Edits are free and can be undone here. Paid Comfy Cloud runs happen only when this server is started with PREVIS_ALLOW_PAID=1. Claude then sets a limit (maxCostUsd) on each request, and a request estimated above it is refused. Cloud bills actual usage, so the limit is an allowance, not a hard cap.')));
+      h('p', { class: 'note' }, 'Edits are free and can be undone here. Generating costs money: when this server is started with PREVIS_ALLOW_PAID=1, Claude approves its own Comfy Cloud runs up to the limit (maxCostUsd) it sets on each request, without showing you a quote here. A request estimated above its limit is refused; so is a model with no price estimate, unless you ask Claude to send it anyway. Cloud bills actual usage, so the limit is an allowance, not a hard cap.')));
   dlg.addEventListener('keydown', ev => ev.stopPropagation());
   dlg.addEventListener('close', () => { dlg.remove(); if (opener?.isConnected) opener.focus(); });
   document.body.append(dlg); dlg.showModal();

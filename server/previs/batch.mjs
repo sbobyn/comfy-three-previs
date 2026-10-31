@@ -269,6 +269,8 @@ export async function openBatches(root, options = {}) {
         setNode(b, n, { ...rest, submitting: undefined, reserved: undefined, ...(done ? { status: 'done', finishedAt: iso(now()) } : {}) }, done ? `${n.label}: done` : null);
       } catch (e) {
         if (isBusy(e)) { refund(); setNode(b, n, { status: 'ready', submitting: undefined, reserved: undefined, retryAt: iso(now() + (Number(e.retryAfterSeconds) || 15) * 1000), ...(jobIdsOf(n).length ? { resubmit: true } : {}) }, `${n.label}: backend busy, retrying in ${Number(e.retryAfterSeconds) || 15}s`); }
+        // The server's budget authority refused it before anything was sent: over budget (resume retries it), not failed.
+        else if (e.apiCode === 'budget') { refund(); setNode(b, n, { ...NO_IDS, status: 'budget', submitting: undefined, reserved: undefined, finishedAt: iso(now()), error: String(e.message).slice(0, 500) }, `${n.label}: refused by the server budget, nothing was sent`); }
         else if (e.notDispatched) { refund(); setNode(b, n, { ...NO_IDS, status: 'failed', submitting: undefined, reserved: undefined, finishedAt: iso(now()), error: String(e.message).slice(0, 500) }, `${n.label}: refused, nothing was sent`); }
         else if (jobIdsOf(n).length) setNode(b, n, { submitting: undefined, reserved: undefined, error: String(e.message).slice(0, 500) }, `${n.label}: submit error after dispatch began; following the job`);
         else { refund(); setNode(b, n, { status: 'failed', submitting: undefined, reserved: undefined, finishedAt: iso(now()), error: String(e.message).slice(0, 500) }, `${n.label}: failed before dispatch`); }

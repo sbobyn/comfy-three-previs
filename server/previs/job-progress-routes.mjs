@@ -31,7 +31,7 @@ export function createJobProgressRoutes({ resolveProject, observe, now = Date.no
     const enriched = observe?.enrich?.(filtered) || filtered;
     return { jobs: enriched.jobs.map(row => row.live ? { ...row, live: { ...row.live,
       node: row.live.node ?? null, queue: row.live.queue ?? null, estimate: row.live.estimate ?? null,
-      preview: previewMeta(row.live.preview, row) } } : row), limits: raw.limits, tracker: raw.tracker };
+      preview: previewMeta(row.live.preview, row) } } : row), limits: raw.limits, tracker: raw.tracker, ...(raw.budget ? { budget: raw.budget } : {}) };
   }
   async function handle(req, res) {
     const url = new URL(req.url, 'http://localhost');
@@ -82,6 +82,8 @@ export function createJobProgressRoutes({ resolveProject, observe, now = Date.no
       write(`id: ${epoch}:${event.seq}\nevent: ${type}\ndata: ${JSON.stringify(event)}\n\n`, type === 'snapshot' ? maxSnapshotBytes : maxBytes);
     }
     function notify(change) {
+      // Budget: remaining money and the 50/80/95% alert level, sent whenever a reservation, settlement or cap changes it.
+      if (change?.type === 'budget') { if (ready && !closed) { try { const budget = scope.snapshot()?.budget; if (budget) send('budget', { budget }); } catch { close(); } } return; }
       if (closed || !validKey(change) || !['job', 'preview', 'remove'].includes(change.type)) return;
       if (!ready) { if (pending.length >= 256) close(); else pending.push({ type: change.type, source: change.source, id: change.id }); return; }
       try {

@@ -3,11 +3,16 @@ import { openGeneration } from './generation.mjs';
 import { validateWorkflowDefinition, assertNoSecrets, validateGraph } from './workflows.mjs';
 import { inspectOutputVideo } from './media-inspect.mjs';
 import { builtInPresets } from './presets.mjs';
+import { compactAsset, compactAssets } from './provenance.mjs';
 
 export async function generationRoutes(data, project, options = {}) {
   // A legacy result is attached when every one of its results is already in the engine library.
   const attached=job=>(job.results||[]).every(r=>(project.get().assets||[]).some(a=>a.generationJobId===job.id&&a.key===r.key));
   const generation = await openGeneration(data,project,{probeVideo:inspectOutputVideo,allowPaid:process.env.PREVIS_ALLOW_PAID === '1',attached,...options,requireAttachment:true});
+  // B23: generation provenance is kept by reference to its receipt. Older stores copied each request shot and its
+  // source assets into every result; drop the copies that equal their receipt (once, without a revision bump).
+  const receiptOf=id=>{try{return generation.get(id);}catch{return null;}};
+  await project.migrate(p=>compactAssets(p,receiptOf)>0);
   const state = () => ({presets:builtInPresets,definitions:project.get().workflowDefinitions || [],jobs:generation.list(),paidExecutionEnabled:process.env.PREVIS_ALLOW_PAID === '1'});
   let tracker=null, attaching=Promise.resolve();
   // The tracker and HTTP routes can both attach one job: serialize, and re-check inside the engine write queue
@@ -18,7 +23,7 @@ export async function generationRoutes(data, project, options = {}) {
     if(!missing(project.get().assets).length)return;
     await project.append(next=>{
       const add=missing(next.assets); if(!add.length)return false;
-      for(const result of add)(next.assets ||= []).push({...result,version:1,source:'comfy',binding:(job.sources.sourceVideo||job.sources.controlVideo||job.sources.firstFrame||job.sources.image||job.sources.referenceImage)?.binding||job.shot.binding,pass:job.definition.task,provenance:{requestShot:job.shot,generationJobId:job.id,sourceAssets:job.sources,definitionHash:job.definitionHash,backend:job.backend,prompt:job.binding.prompt,parameters:job.binding.parameters}});
+      for(const result of add)(next.assets ||= []).push(compactAsset({...result,version:1,source:'comfy',binding:(job.sources.sourceVideo||job.sources.controlVideo||job.sources.firstFrame||job.sources.image||job.sources.referenceImage)?.binding||job.shot.binding,pass:job.definition.task,provenance:{requestShot:job.shot,generationJobId:job.id,sourceAssets:job.sources,definitionHash:job.definitionHash,backend:job.backend,prompt:job.binding.prompt,parameters:job.binding.parameters}},job));
     });
   }
   // Presets and bindings are additive and validated against the latest project inside the write queue, so a revision

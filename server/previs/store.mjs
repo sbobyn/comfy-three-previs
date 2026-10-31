@@ -11,7 +11,8 @@ export async function openProject(root) {
   try { project = JSON.parse(await readFile(file, 'utf8')); }
   catch (e) { if (e.code !== 'ENOENT') throw e; project = { version: 1, id: randomUUID(), revision: 0, title: 'My previs project', scenes: [], shots: [], references: [], renders: [], workflowBindings: [] }; }
   if (project.version !== 1) throw Error('Unsupported project version');
-  async function save(next) { await atomicJson(file, next); project = next; return structuredClone(project); }
+  // Compact JSON: indenting the shots' camera frames alone made this file almost 3× larger (B23).
+  async function save(next) { await atomicJson(file, next, 0); project = next; return structuredClone(project); }
   if (!project.revision) await save({ ...project, revision: 1 });
   let chain = Promise.resolve();
   return {
@@ -33,6 +34,18 @@ export async function openProject(root) {
         const next = structuredClone(project);
         if (await fn(next) === false) return structuredClone(project);
         next.revision++; return save(next);
+      });
+      chain = task.catch(() => {}); return task;
+    },
+    /**
+     * Representation-only rewrite (a storage migration): same queue, no revision bump, because the project's
+     * meaning does not change. fn edits the project it is given and returns true when there is something to write.
+     */
+    migrate(fn) {
+      const task = chain.then(async () => {
+        const next = structuredClone(project);
+        if (await fn(next) !== true) return structuredClone(project);
+        return save(next);
       });
       chain = task.catch(() => {}); return task;
     },

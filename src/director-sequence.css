@@ -57,7 +57,7 @@
 .sq-side .btn.on { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
 .sq-move { display: flex; gap: 2px; }
 
-.sq-viewer { --sq-w: min(100%, max(520px, calc((100dvh - 250px) * 16 / 9))); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 14px 12px; background: var(--paper); flex: none; }
+.sq-viewer { --sq-w: min(100%, max(520px, calc((100dvh - 340px) * 16 / 9))); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 14px 12px; background: var(--paper); flex: none; }
 .sq-screen { position: relative; width: var(--sq-w); aspect-ratio: 16 / 9; background: var(--stage); border: 0; box-shadow: var(--stage-frame); border-radius: var(--r-md); overflow: hidden; flex: none; }
 .sq-screen video { width: 100%; height: 100%; display: block; object-fit: contain; background: var(--stage); }
 .sq-screen video[hidden], .sq-empty[hidden] { display: none; }
@@ -71,6 +71,8 @@
 .sq-caption { font-size: 12px; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 .sq-export { display: flex; flex-direction: column; gap: 6px; }
 .sq-export .note { display: none; }
+/* The top bar carries Export film on desktop; the viewer keeps only its progress and the exported files (mobile shows the button). */
+.sq-export > .sq-vbar { display: none; }
 .sq-exports { display: flex; flex-direction: column; gap: 6px; }
 .sq-exp { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 8px; font-size: 12px; }
 

@@ -16,7 +16,7 @@ const ACCEPTED = {
  * observe: createJobProgress() instance. sources: { generation, refgen } tracker sources (get/list/projectIdOf).
  * legacyClientId(source, job): the historical shared client_id for receipts without progressClientId.
  */
-export function createProgressCoordinator({ observe, sources = {}, legacyClientId = (_, job) => job.projectId,
+export function createProgressCoordinator({ observe, sources = {}, budget = null, legacyClientId = (_, job) => job.projectId,
   cloudAccountKey = 'default-cloud-account', cloudClientId = randomUUID(), intervalMs = 1000, setTimer = setInterval, clearTimer = clearInterval } = {}) {
   const listeners = new Map();
   let tracker = null, timer = null, last = new Map();
@@ -95,7 +95,7 @@ export function createProgressCoordinator({ observe, sources = {}, legacyClientI
     /** Route scope: synchronous public C1 reads for one project; access policy is applied by the caller. */
     scope(projectId) {
       return {
-        snapshot: () => { const snap = tracker.snapshot(); return { ...snap, jobs: snap.jobs.filter(row => row.projectId === projectId) }; },
+        snapshot: () => { const snap = tracker.snapshot(); return { ...snap, jobs: snap.jobs.filter(row => row.projectId === projectId), ...(budget ? { budget: budget.status(projectId) } : {}) }; },
         subscribe: fn => this.subscribe(projectId, fn),
         ownsJob: (source, id) => {
           if (!SOURCES.includes(source) || !validId(id)) return false;
@@ -103,6 +103,8 @@ export function createProgressCoordinator({ observe, sources = {}, legacyClientI
         },
       };
     },
+    /** The budget changed (a reservation, settlement or cap): every open stream gets a 'budget' event (account caps are shared). */
+    publishBudget() { for (const projectId of [...listeners.keys()]) publish(projectId, { type: 'budget' }); },
     stop() { if (timer) clearTimer(timer); timer = null; listeners.clear(); observe.stop(); },
   };
 }

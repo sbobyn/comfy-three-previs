@@ -255,9 +255,9 @@ export function loopbackDrivers(base) {
         const { requestIds, fingerprints } = ctx.node, sent = [], unsent = [];
         for (const [i, requestId] of requestIds.entries()) {
           try { await send(() => post('/api/director/refgen/submit', { projectId: p.id, requestId, approval: approval(ctx, fingerprints[i]) }), () => refgenJob(p.id, requestId)); sent.push(requestId); }
-          catch (err) { if (!err.notDispatched) throw err; unsent.push({ requestId, error: err.message }); }
+          catch (err) { if (!err.notDispatched) throw err; unsent.push({ requestId, error: err.message, code: err.apiCode }); }
         }
-        if (!sent.length) throw notSent(`No view was sent: ${unsent[0]?.error || 'refused'}`);
+        if (!sent.length) throw Object.assign(notSent(`No view was sent: ${unsent[0]?.error || 'refused'}`), unsent.every(u => u.code === 'budget') ? { apiCode: 'budget' } : {});
         if (!unsent.length) return { requestIds };
         await patchSheets(p.id, e.id, sheets => { for (const slot of sheets.find(x => x.id === ctx.node.sheetId)?.slots || []) for (const a of slot.attempts) { const u = unsent.find(x => x.requestId === a.requestId); if (u) a.error = `Not sent: ${u.error}`.slice(0, 300); } });
         return { requestIds: sent, unsent: unsent.map(x => x.requestId), error: `${unsent.length} of ${requestIds.length} views not sent: ${unsent[0].error}`.slice(0, 500) };

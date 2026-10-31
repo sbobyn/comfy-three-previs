@@ -50,6 +50,7 @@ Make the grey blockout, then ask a video model to turn it into the shot.
 - Choose a video model. Some models follow a clip; others animate from one or two stills and do not see the full camera move.
 - Review the inputs, where the model runs and the estimated cost. Paid work needs explicit approval; opening the guide never approves anything.
 - Inspect the result against the blockout. A still is typically a few cents and a five-second video about a dollar, but the estimate for your selected model is the one to check.
+- Set a budget so a busy day cannot run away: `PREVIS_BUDGET_CAP_USD` (account, per month) and `PREVIS_BUDGET_PROJECT_CAP_USD` (per project). Paid work over a cap is refused before it is sent, the Jobs panel shows what is left, and `pnpm usage:report` shows what was actually billed (README, Configuration).
 
 [Watch the blockout](../public/guide/final-lap-s2-blockout.mp4) · [Watch the generated shot](../public/guide/final-lap-s2-generated.mp4)
 

@@ -6,9 +6,11 @@ import { atomicJson } from './atomic.mjs';
 import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { createBackend, backendSnapshot, safeMediaLocation, errorDetail } from './backends.mjs';
 import { telemetryHooks } from './job-progress.mjs';
-import { slotsFor } from './concurrency.mjs';
+import { slotsFor, downloadsFor } from './concurrency.mjs';
 import { keyedLock } from './keyed-lock.mjs';
 import { uploadCacheFor } from './upload-cache.mjs';
+import { expandAsset } from './provenance.mjs';
+import { openBudget, budgetDir, followJob, quoteEstimate } from './budget.mjs';
 import { assertNoSecrets, hashBytes, hashValue, validateWorkflowDefinition, legacyWorkflowDefinition, validateGraph, workflowCost, validateApproval } from './workflows.mjs';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -37,6 +39,15 @@ export const contentKey = job => hashValue({ inputs: job.definition?.inputs || {
 /** Completed identical requests within this window are refused as duplicates unless the caller passes allowDuplicate. */
 export const duplicateWindowMs = (env = process.env) => { const m = Number(env.PREVIS_DUPLICATE_WINDOW_MINUTES); return (env.PREVIS_DUPLICATE_WINDOW_MINUTES !== undefined && env.PREVIS_DUPLICATE_WINDOW_MINUTES !== '' && Number.isFinite(m) && m >= 0 ? m : 120) * 60000; };
 export const generationLabel = job => `${job.shot?.title || 'Shot'} · ${job.definition?.title || 'Workflow'}`;
+/** List-price USD for a request: its quote, else the preset's per-second rate × the seconds it asks for; null when unknown. */
+export function generationEstimate(job) {
+  const quoted = quoteEstimate(job.quote, job.backend);
+  if (quoted !== null) return quoted;
+  const rate = job.definition?.pricing?.ratePerSecond;
+  if (!(Number.isFinite(rate) && rate >= 0)) return null;
+  const seconds = Number(job.binding?.parameters?.duration) || job.sources?.sourceVideo?.duration || clipSeconds(job);
+  return Math.round(rate * seconds * 10000) / 10000;
+}
 const extensions = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'video/mp4': '.mp4', 'video/webm': '.webm', 'video/quicktime': '.mov', 'video/x-matroska': '.mkv', 'audio/wav': '.wav', 'audio/mpeg': '.mp3' };
 
 export function probePng(bytes) {
@@ -86,6 +97,8 @@ export async function openGeneration(root, project, options = {}) {
   let attachResults = options.onTerminal;
   const requiresAttachment = options.requireAttachment || Boolean(attachResults);
   const writer = options.persist || atomicJson;
+  // Every paid dispatch reserves its estimate here first (server.mjs passes the shared authority).
+  const budget = options.budget || await openBudget(budgetDir(root));
   // Optional live-progress observer: display only, never part of the dispatch outcome.
   const telemetry = telemetryHooks(options.telemetry);
   const persist = async job => {
@@ -93,6 +106,7 @@ export async function openGeneration(root, project, options = {}) {
     assertNoSecrets(job);
     await writer(join(dir, job.id + '.json'), job);
     jobs.set(job.id, structuredClone(job));
+    await followJob(budget, job, options.log);
     return structuredClone(job);
   };
   for (const file of await readdir(dir)) if (/^[a-f0-9-]{36}\.json$/i.test(file)) {
@@ -111,7 +125,7 @@ export async function openGeneration(root, project, options = {}) {
     if (requiresAttachment && job.status === 'recovery-required' && job.failure?.phase === 'attachment' && /Unknown project/.test(job.failure.detail || '')) { job.status = 'attaching'; job.recovery = { ...job.recovery, attachment: 0 }; }
     await persist(job);
   }
-  const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root);
+  const slots = options.slots || slotsFor(root), uploadCache = options.uploadCache || uploadCacheFor(root), downloads = options.downloads || downloadsFor(root);
   slots.register('generation', () => [...jobs.values()].filter(active).map(job => ({ id: job.id, backend: job.backend, kind: generationKind(job), status: job.status, uncertainAt: job.uncertainAt, dispatchStartedAt: job.dispatchStartedAt, createdAt: job.createdAt })));
   // Journal operations are serialized per request id (a slow download for one job never delays another job).
   // Submits of identical content also share a lock, so duplicate simultaneous submits are still refused.
@@ -171,7 +185,8 @@ export async function openGeneration(root, project, options = {}) {
       const source = assetBindings[name];
       if (!source || (!!source.assetId === !!source.renderId)) fail(`Explicitly bind ${name} to one project asset or saved render`);
       const render = source.renderId ? p.renders?.find(item => item.id === source.renderId) : null;
-      const original = render ? { ...render, kind: 'image', mime: 'image/png', filename: render.id + '.png' } : p.assets?.find(item => item.id === source.assetId);
+      // A generated source asset is read with its full provenance, as it was before references (B23), so quotes keep their fingerprint.
+      const original = render ? { ...render, kind: 'image', mime: 'image/png', filename: render.id + '.png' } : expandAsset(p.assets?.find(item => item.id === source.assetId), id => jobs.get(String(id).toLowerCase()));
       const asset = original ? { ...original, mime: original.mime || original.mimeType } : null;
       if (asset && !asset.filename && uuid.test(asset.id) && asset.url === `/assets/${asset.id}${extensions[asset.mime]}`) asset.filename = asset.id + extensions[asset.mime];
       if (!asset || !asset.binding || !extensions[asset.mime]) fail(`Source ${name} is missing or lacks media/provenance metadata`);
@@ -252,6 +267,9 @@ export async function openGeneration(root, project, options = {}) {
       if (queue.queue_running.length || queue.queue_pending.length) fail('Local Comfy queue is busy; Previs will not interrupt it', 409);
     }
     await requireIdle();
+    // Durable reservation before any upload or dispatch; refused (402, code 'budget') over a cap or at an unknown price.
+    const estimateUsd = generationEstimate(saved);
+    if (estimateUsd !== 0) await budget.reserve({ id, source: 'generation', projectId: saved.shot?.browser?.director?.projectId || null, kind: generationKind(saved), model: saved.definition?.title || null, label: generationLabel(saved), estimateUsd });
     // A local request gets its own live-progress client ID, saved before any upload and reused for dispatch.
     let job = await persist({ ...saved, approval: structuredClone(input.approval), status: 'uploading', message: 'Request UUID saved before uploads and dispatch.', promptId: saved.backend.kind === 'local' ? id : null,
       ...(saved.backend.kind === 'local' ? { progressClientId: saved.progressClientId || randomUUID() } : {}) });
@@ -318,7 +336,7 @@ export async function openGeneration(root, project, options = {}) {
       for (const output of job.collection) {
         if (job.results.some(result => result.key === output.key)) continue;
         phase = 'media-transfer';
-        const bytes = await adapter.view(output.location);
+        const bytes = await downloads(() => adapter.view(output.location));
         phase = 'media-probe';
         let media;
         if (output.mediaType === 'image/png') media = probePng(bytes);
@@ -371,5 +389,5 @@ export async function openGeneration(root, project, options = {}) {
     if (job.status !== 'orphaned') fail('Only a job whose project was archived or deleted can be dismissed', 409);
     return job.dismissedAt ? job : persist({ ...job, dismissedAt: now() });
   }
-  return { setAttachment: fn => { attachResults = fn; }, dismiss: byJobId(dismiss), prepare: byRequest(input => prepare(input)), quote: byRequest(input => prepare(input, true)), submit: byRequest(submit), track: byJob(track), reconcile: byJobId(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect(), isActive: active, kindOf: generationKind, expectedSeconds, label: generationLabel, duplicateOf: job => duplicateOf(job) };
+  return { setAttachment: fn => { attachResults = fn; }, dismiss: byJobId(dismiss), prepare: byRequest(input => prepare(input)), quote: byRequest(input => prepare(input, true)), submit: byRequest(submit), track: byJob(track), reconcile: byJobId(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect(), isActive: active, kindOf: generationKind, expectedSeconds, label: generationLabel, estimate: generationEstimate, duplicateOf: job => duplicateOf(job) };
 }
