@@ -5,7 +5,7 @@ import './director-sequence.css';
 import type { DirectorProject, Shot, Asset, EditClip } from '../shared/director.mjs';
 import { progressSlot } from './director-progress'; // [live-progress]
 import { api, h, toast } from './director-common';
-import { shotCast, objectLooks, shotObjects } from '../shared/director.mjs';
+import { shotCast, objectLooks, shotObjects, starterBlockout, videoStale } from '../shared/director.mjs';
 import { autoPromptSegments, KIND_COLORS } from '../shared/prompt.mjs';
 import { overlayCast, promptExcerpt, layoutChips, leaderFrom, compareBands, bandStops, sweepStops, moveStop } from './director-design-core';
 import type { Box, BandSource } from './director-design-core';
@@ -277,8 +277,11 @@ export function createSequence(ctx: SequenceCtx) {
     else requestAnimationFrame(() => { try { thumb.getContext('2d')!.drawImage(ctx.thumbnail(s, 160, 90), 0, 0); } catch {} if (a?.kind === 'workflow-result') void frameOf(a).then(f => { if (f) thumb.getContext('2d')?.drawImage(f, 0, 0); }); });
     const pick = h('input', { type: 'checkbox', checked: picked.has(s.id), 'aria-label': `Select shot ${i + 1} for generation` });
     pick.onchange = () => { pick.checked ? picked.add(s.id) : picked.delete(s.id); syncPickAll(); };
-    const bState = !s.render ? ['missing', 'No blockout'] : fresh(s) ? ['ok', 'Blockout ready'] : ['stale', 'Blockout changed'];
-    const gState = job ? ['run', `Generating · ${job.status}`] : res.length ? ['ok', `${res.length} generated`] : ['none', 'Not generated'];
+    // A starter's bundled clip is not this shot's own blockout (generating makes that first), but it is not missing either.
+    const bundled = !s.render && starterBlockout(p, s);
+    const bState = !s.render ? (bundled ? ['none', bundled.fresh === false ? 'Starter blockout · older' : 'Starter blockout'] : ['missing', 'No blockout']) : fresh(s) ? ['ok', 'Blockout ready'] : ['stale', 'Blockout changed'];
+    const older = a?.kind === 'workflow-result' && videoStale(p, s, a);
+    const gState = job ? ['run', `Generating · ${job.status}`] : res.length ? (older ? ['stale', `${res.length} generated · older`] : ['ok', `${res.length} generated`]) : ['none', 'Not generated'];
     const version = h('select', { class: 'field', 'aria-label': `Version of shot ${i + 1} in the cut`, title: 'Newest uses the latest generated video, or the blockout if there is none', disabled: !inCut },
       h('option', { value: '' }, 'Newest'),
       ...res.map((x, k) => { const cam = cameraOf(x); return h('option', { value: x.id, selected: c?.assetId === x.id, title: cam ? CAMERA_SOURCE_LABELS[cam] : '' }, `${cam ? CAMERA_SOURCE_GLYPHS[cam] + ' ' : ''}Generated ${res.length - k} · ${(x.source.workflow || '').split(' ·')[0]}`); }),
@@ -590,7 +593,9 @@ export function createSequence(ctx: SequenceCtx) {
     const stale = p.shots.filter(s => !fresh(s)).length;
     allReady.hidden = !!stale || !p.shots.length; renderAllBtn.hidden = !stale;
     renderAllBtn.disabled = busy;
-    renderAllBtn.textContent = `Make ${stale} missing blockout${stale === 1 ? '' : 's'}`;
+    // Shots that only have a starter's clip still need their own blockout before a quote, but nothing is missing.
+    const absent = p.shots.filter(s => !s.render && !starterBlockout(p, s)).length;
+    renderAllBtn.textContent = `Make ${stale}${absent === stale ? ' missing' : ''} blockout${stale === 1 ? '' : 's'}`;
     drawBoard(); syncPickAll(); drawExports();
     if (!seq) drawViewer();
   }
