@@ -76,6 +76,9 @@ const ICON = {
 };
 // Preview and Generate live in the action bar pinned to the bottom of the right panel (Build and Shoot).
 const previewBtn = h('button', { class: 'btn act-preview', type: 'button', title: 'Play the shot through the camera (Space)' }, '▶ Preview');
+// A blockout clip imported from Blender (server/previs/blender-import.mjs). A Previs edit hands the shot back to the proxies.
+const fromBlender = (s: Shot) => s.render?.origin === 'blender';
+const BLENDER_STALE = 'Edited since the Blender import: re-import from Blender to keep its clip; generating now makes a proxy blockout instead';
 const renderBtn = h('button', { class: 'btn cta act-go', type: 'button', title: 'Make the blockout and generate this shot’s video' }, 'Generate video ▸');
 const undoBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Undo', onclick: () => void undo() }, svgIcon(ICON.undo));
 const redoBtn = h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Redo', onclick: () => void redo() }, svgIcon(ICON.redo));
@@ -750,7 +753,7 @@ function modelBlock(s: Shot) {
     h('div', { class: 'vm-inputs' },
       h('div', { class: 'vm-head' }, 'What this model takes'), modelInputsDiagram(def.task, { twoFrames, castImages: refs.length }),
       slot(!maxLen || promptLen <= maxLen, 'Text prompt', maxLen ? h('span', {}, `${promptLen.toLocaleString()} / ${maxLen.toLocaleString()} characters`, promptLen > maxLen ? h('b', { class: 'vm-over' }, ' · will be cut') : '') : `${promptLen.toLocaleString()} characters`),
-      usesClip ? slot(s.render ? !stale : false, 'Blockout video', s.render ? (stale ? 'The scene changed since · a new blockout is made when you generate' : `Your camera move · ${s.render.duration}s, ${s.render.frameCount} frames`) : 'Made from your camera when you generate')
+      usesClip ? slot(s.render ? !stale : false, 'Blockout video', s.render ? (stale ? (fromBlender(s) ? BLENDER_STALE : 'The scene changed since · a new blockout is made when you generate') : `${fromBlender(s) ? 'Blender clip' : 'Your camera move'} · ${s.render.duration}s, ${s.render.frameCount} frames`) : 'Made from your camera when you generate')
         : cam === 'keyframes' ? slot(null, 'Blockout video', 'Not sent · the start and end stills from its first and last frames stand in (approximate)')
         : slot(false, 'Blockout video', 'Not used · this model guesses the camera from one still; pick a blockout model to keep your move'),
       usesFrames ? slot(hasStart, twoFrames ? 'Start frame' : 'First frame', hasStart ? 'Start still ready (Storyboard)' : 'Add a Start still in the Storyboard below') : null,
@@ -794,7 +797,7 @@ function renderReadiness() {
   const bundled = starterBlockout(project, s);
   const item = (key: string, state: 'ok' | 'warn' | 'none', label: string, value: Node | string, tip: string) => h('button', { type: 'button', class: `rd ${state}`, title: tip, onclick: () => goSection(key) }, h('span', { class: 'rd-label' }, label), h('span', { class: 'rd-val' }, value));
   readiness.replaceChildren(
-    item('camera', s.render ? (stale ? 'warn' : 'ok') : 'none', 'Blockout', s.render ? (stale ? 'changed' : '✓') : bundled ? 'starter' : '–', s.render ? (stale ? 'The scene or camera changed since the blockout' : 'Blockout is up to date') : bundled ? `The starter’s blockout clip${bundled.fresh === false ? ' shows an earlier blocking' : ''}; watch it in Cut. Generating makes this shot’s own blockout first (free, in this browser).` : 'No blockout yet: the grey camera clip is made when you generate'),
+    item('camera', s.render ? (stale ? 'warn' : 'ok') : 'none', 'Blockout', s.render ? (stale ? 'changed' : '✓') : bundled ? 'starter' : '–', s.render ? (stale ? (fromBlender(s) ? BLENDER_STALE : 'The scene or camera changed since the blockout') : fromBlender(s) ? 'Blockout is the Blender import, up to date' : 'Blockout is up to date') : bundled ? `The starter’s blockout clip${bundled.fresh === false ? ' shows an earlier blocking' : ''}; watch it in Cut. Generating makes this shot’s own blockout first (free, in this browser).` : 'No blockout yet: the grey camera clip is made when you generate'),
     item('cast', need ? 'warn' : cast.length ? 'ok' : 'none', 'Cast', h('span', { class: 'rd-cast' }, ...cast.slice(0, 5).map(r => h('i', { style: `background:${KIND_COLORS[r.entity.kind]}`, title: r.entity.name })), `${cast.length}${need ? ` · ${need} need image${need === 1 ? '' : 's'}` : ''}`), need ? `${need} of ${cast.length} cast members have no image yet` : 'Every cast member has an image'),
     item('video', edited ? 'warn' : 'ok', 'Prompt', edited ? 'edited' : 'auto', edited ? 'You edited this shot’s prompt; your text is used' : 'The prompt is composed from the cast, camera and story'),
     item('video', vids ? (older === vids ? 'warn' : 'ok') : 'none', 'Video', vids ? (older === vids ? 'older' : `✓${vids > 1 ? ` ${vids}` : ''}`) : '–', vids ? `${vids} generated video${vids === 1 ? '' : 's'}${older ? `; ${older === vids ? (vids === 1 ? 'it was' : 'all were') : `${older} were`} made for an earlier blocking and do not match the blockout` : ''}` : 'No video yet: Generate video (bottom of this panel)'));
@@ -880,7 +883,8 @@ function renderShotPane() {
   const ctx = { project: () => project, runEntry: (e: any) => runEntry(e as any), select: (id: string) => { select(id); openObject(); }, refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); }, cameraSource: (x: Shot) => (genCache ? cameraSourceOf(shotModel(x)) : 'blockout' as const) };
   const rows = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const blockoutInfo = rendered ? h('details', { class: 'facts-more' },
-    h('summary', {}, h('span', { class: 'info-i', 'aria-hidden': 'true' }, 'i'), 'Blockout clip', stale ? h('span', { class: 'fm-warn' }, ' · scene changed since') : h('span', { class: 'fm-ok' }, ' · up to date')),
+    h('summary', {}, h('span', { class: 'info-i', 'aria-hidden': 'true' }, 'i'), fromBlender(s) ? 'Blender clip' : 'Blockout clip', stale ? h('span', { class: 'fm-warn' }, fromBlender(s) ? ' · edited since the import' : ' · scene changed since') : h('span', { class: 'fm-ok' }, ' · up to date')),
+    !!stale && fromBlender(s) ? h('p', { class: 'note', style: 'margin:0' }, BLENDER_STALE) : null,
     h('video', { src: `/assets/${rendered.assetId}.mp4`, controls: true, muted: true, loop: true, playsinline: true, preload: 'metadata', style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }),
     h('div', { class: 'facts' }, 'Frames', h('b', {}, `${rendered.frameCount} @ 24 fps`), 'Duration', h('b', {}, `${Number(rendered.duration).toFixed(2)}s`), 'Size', h('b', {}, `${rendered.width}×${rendered.height}`))) : null;
   shotPane.replaceChildren(
@@ -1773,7 +1777,7 @@ function openRender() {
     ...[[1280, 720], [640, 360]].map(([w, hh]) => { const input = h('input', { type: 'radio', name: 'res', checked: w === 1280 }); input.onchange = () => { width = w; height = hh; showFacts(); }; return h('label', {}, input, `${w}×${hh}`); }));
   const bar = h('i'); const progress = h('div', { class: 'progress', hidden: true }, bar);
   const status = h('div', { class: 'status-line' });
-  const capture = h('button', { class: 'btn camera', type: 'button' }, s.render ? 'Remake blockout' : 'Make blockout');
+  const capture = h('button', { class: 'btn camera', type: 'button' }, s.render ? (fromBlender(s) ? 'Replace Blender clip with proxies' : 'Remake blockout') : 'Make blockout');
   const prompt = h('textarea', { class: 'field', rows: 5, 'aria-label': 'Render prompt' }, shotPrompt(project, s, 'video'));
   const step1 = h('div', { class: 'step active' }, h('span', { class: 'n' }, '1'), h('div', {}, h('h3', {}, 'Blockout'), h('p', {}, 'The grey camera clip: every frame through the shot camera at 24 fps, the exact motion the video model follows.'), res, h('div', { style: 'height:8px' }), facts, h('div', { style: 'height:10px' }), capture, h('div', { style: 'height:8px' }), progress, status));
   const refsByFile = new Map<string, { ref: Reference; names: Set<string> }>();

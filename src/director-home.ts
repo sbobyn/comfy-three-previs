@@ -168,6 +168,17 @@ async function importFile(file: File) {
   } catch (e) { toast((e as Error).message, true); }
 }
 
+// A Blender shot: the folder scripts/blender/previs_export.py wrote, zipped. It becomes a new project (docs/blender-import.md).
+async function importBlender(file: File) {
+  try {
+    toast('Importing the Blender shot…');
+    const r = await fetch(`/api/director/import-blender-zip?title=${encodeURIComponent(file.name.replace(/(\.previs-blender)?\.zip$/i, ''))}`, { method: 'POST', headers: { 'Content-Type': 'application/zip' }, body: file });
+    const data = await r.json();
+    if (!r.ok) throw Error(data.error);
+    location.href = `/director.html?project=${data.projectId}`;
+  } catch (e) { toast((e as Error).message, true); }
+}
+
 // Small modal in the workspace's delete-dialog style. `field` adds a text input; resolves its value (or true), null on cancel.
 function ask(title: string, body: string, ok: string, field?: string): Promise<string | true | null> {
   return new Promise(resolve => {
@@ -232,6 +243,7 @@ async function render() {
     h('div', { class: 'home-head' }, h('h2', { id: 'starters-title' }, 'Starters'), h('span', {}, 'Open one and make it yours.')),
     starterCards(starters, key => void create(key)));
   const fileInput = h('input', { type: 'file', accept: '.zip,application/zip', hidden: true, onchange: (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (f) void importFile(f); } });
+  const blenderInput = h('input', { type: 'file', accept: '.zip,application/zip', hidden: true, onchange: (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (f) void importBlender(f); } });
   const newScene = (label: string, cls = 'primary') => h('button', { class: `home-btn ${cls}`, type: 'button', onclick: () => void create('empty') }, label);
   const list = projects.length
     ? h('div', { class: 'home-projects' }, ...projects.map(projectCard))
@@ -262,6 +274,7 @@ async function render() {
       h('section', { class: 'home-section', 'aria-labelledby': 'projects-title' },
         h('div', { class: 'home-head' }, h('h2', { id: 'projects-title' }, 'Your projects'), projects.length ? h('span', {}, String(projects.length)) : null, h('i', { class: 'grow' }),
           fileInput, h('button', { class: 'home-link', type: 'button', onclick: () => fileInput.click() }, 'Import…'),
+          DEMO ? null : blenderInput, DEMO ? null : h('button', { class: 'home-link', type: 'button', title: 'A zip of the folder scripts/blender/previs_export.py wrote: Blender’s camera, objects and frames become a new project', onclick: () => blenderInput.click() }, 'Import Blender shot…'),
           archivedCount ? h('button', { class: 'home-link home-archived', type: 'button', 'aria-pressed': String(showArchived), onclick: () => { showArchived = !showArchived; void render(); } }, showArchived ? 'Hide archived' : `Archived · ${archivedCount}`) : null),
         list, archivedList)));
 }
