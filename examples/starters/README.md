@@ -77,7 +77,13 @@ to 2.5 Mbit/s with no audio. Version 1 snapshots (no media) still load.
 
 Creating a project from a starter (`POST /api/director/projects` with `template: "<slug>"`) deep-copies the
 snapshot with fresh ids and copies the media files into the new project's folder. Copying skips files that
-are already there, and a starter whose media folder is missing still opens, just without images and videos.
+are already there. A starter whose media files are missing still opens, without those images and videos; the
+project records how many were missing (`starterFiles`) and says so once when opened.
+
+Blocking signatures (on stills and blockout clips) hash entity ids, which the copy renews. A signature that matches
+the snapshot's blocking is rewritten to the copy's, so current media stays current; an older one stays out of date,
+and the app marks such stills and videos as made for an earlier blocking. The exporter keeps every blockout clip's
+signature. `PREVIS_STARTERS_DIR` points the server at another starters folder (for example one without `media/`).
 
 ## Media size and why it is in git
 
