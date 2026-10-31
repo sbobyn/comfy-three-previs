@@ -824,7 +824,7 @@ function renderSteps() {
   stepBtns.cut.querySelector('.st-count')!.textContent = `${vids} video${vids === 1 ? '' : 's'}`;
   const s = shot(), stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
   const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment'), castNeed = cast.filter(r => !objectLooks(project, r.entity.id).length).length;
-  const st = stepStatus(step, project, s, { stale, videos: shotVideos(s.id).length, castNeed, castTotal: cast.length }), text = st.parts.join(' · ');
+  const st = stepStatus(step, project, s, { stale, videos: shotVideos(s.id).length, castNeed, castTotal: cast.length, bundled: !!starterBlockout(project, s) }), text = st.parts.join(' · ');
   if (topStatus.title !== text) { topStatus.title = text; topStatus.replaceChildren(h('span', { class: 'ts-long' }, text), h('span', { class: 'ts-short', 'aria-hidden': 'true' }, st.short)); }
   const def = genCache ? shotModel(s) : null, slots = keyFrameSlots(def as any, VIDEO_PRICES), frames = s.references.filter(r => r.role === 'frame');
   const a = stepAction(step, { castNeed, keyFrames: slots.length ? (slots.includes('end') ? 'start+end' : 'start') : false, hasStart: frames.some(r => r.note === 'key frame start' || !r.note), hasEnd: frames.some(r => r.note === 'key frame end'), ...exportState });
