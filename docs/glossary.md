@@ -44,6 +44,8 @@ One name per thing, used the same way in the app, the docs and the film. When a 
 | **Generate** | Make a still or a video. Always shows a **quote** first; nothing runs until you **approve** it. |
 | **Estimate** | Rate × length, shown before the quote ("≈ $0.69"). Cloud bills actual usage, so an estimate and an allowance are not a hard cap. |
 | **Allowance** | The most you approve for one request or batch. Claude sets one per request (`maxCostUsd`); paid runs need the server started with `PREVIS_ALLOW_PAID=1`. |
+| **Budget** | The server's caps across all requests: `PREVIS_BUDGET_CAP_USD` (account, per month by default) and `PREVIS_BUDGET_PROJECT_CAP_USD` (per project). Each paid run reserves its estimate first and is refused if that would pass a cap. Unpriced models are refused unless `PREVIS_ALLOW_UNKNOWN_COST=1`. The Jobs panel shows what is left. |
+| **Usage report** | `pnpm usage:report`: what Comfy Cloud billed per model and per product for a date range, next to the local budget ledger. Read-only. |
 
 ## In the Cut viewer
 

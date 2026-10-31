@@ -45,6 +45,10 @@ pnpm start                # → http://127.0.0.1:5190
 | `PREVIS_COMFY_URL` | A local ComfyUI server, e.g. `http://127.0.0.1:8000`. |
 | `PREVIS_FFMPEG`, `PREVIS_FFPROBE` | Full paths if FFmpeg is not on your `PATH`. |
 | `PREVIS_PHONE_*` | Phone camera over HTTPS (see below). |
+| `PREVIS_BUDGET_CAP_USD`, `PREVIS_BUDGET_PROJECT_CAP_USD` | Spending caps in USD for the account (per month by default) and for each project. Unset means no cap. |
+| `PREVIS_ALLOW_UNKNOWN_COST` | Set to `1` to let models without a price estimate run. Default: they are refused. |
+
+**Budget.** Every paid run (images, sheets, stills, videos, batches, and Claude's tools) first reserves its estimated cost in a ledger at `PREVIS_DATA_DIR/budget/`. A run that would go over a cap is refused before anything is sent. The reservation becomes spend when the job finishes, and is freed if the job never ran. If a job fails after it was sent, or its outcome is unknown, the reservation is kept for 24 hours (`PREVIS_BUDGET_RESERVATION_TTL_HOURS`) because a charge may still arrive. The Jobs panel shows how much is left and warns at 50%, 80% and 95%. You can change the caps while the server runs: `POST /api/budget/caps` with `{ "accountCapUsd": 15 }` or `{ "projectId": "…", "projectCapUsd": 5 }`, saved in `budget/config.json`. Other settings: `PREVIS_BUDGET_PERIOD` (`month`, `day` or `all`), `PREVIS_BUDGET_TZ`, and `PREVIS_BUDGET_DIR` (point two servers at one ledger so they share a budget). Amounts are list-price estimates, because Comfy Cloud does not cap spending itself. `pnpm usage:report` prints what the account was billed per model and per product, next to the ledger (default: yesterday; `-- --from 2026-10-29 --to 2026-10-31`). It only reads data and needs `COMFY_CLOUD_API_KEY`.
 
 `.env` is git-ignored. Never commit it or paste keys into prompts or chat.
 
@@ -70,7 +74,7 @@ Or with Claude Code:
 claude mcp add comfy-previs -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to/comfy-three-previs/server/previs/agent.mjs
 ```
 
-Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, quote generations and run them. Paid tools do not ask you again: each call carries a `maxCostUsd` that Claude sets and the run is skipped when the estimate is higher, and nothing paid runs unless the server has `PREVIS_ALLOW_PAID=1`. Models without a price estimate are refused unless the call passes `allowUnknownCost`. Tell Claude your budget, or leave `PREVIS_ALLOW_PAID` at `0` to keep it to free work and quotes.
+Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, quote generations and run them. Paid tools do not ask you again: each call carries a `maxCostUsd` that Claude sets and the run is skipped when the estimate is higher, and nothing paid runs unless the server has `PREVIS_ALLOW_PAID=1`. Models without a price estimate are refused unless the call passes `allowUnknownCost` and the server runs with `PREVIS_ALLOW_UNKNOWN_COST=1`. Every run also counts against the server's budget caps (see Configuration). Tell Claude your budget, or leave `PREVIS_ALLOW_PAID` at `0` to keep it to free work and quotes.
 
 Claude sees the director tools (`previs_director_*`). The older engine, Blender and raw-workflow tools (`previs_render_animation`, `previs_submit_passthrough` and the like) are listed only when the MCP server runs with `PREVIS_MCP_LEGACY=1`; their Blender, transfer, raw Comfy and handoff routes also need the app started with `PREVIS_LEGACY_ROUTES=1`.
 
