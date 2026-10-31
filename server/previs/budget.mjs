@@ -24,6 +24,9 @@ const money = x => `$${Number(x).toFixed(2)}`;
 const capOf = value => { if (value === undefined || value === null || value === '') return null; const n = Number(value); return Number.isFinite(n) && n >= 0 ? n : null; };
 const fail = (message, status = 400) => { const e = Error(message); e.status = status; throw e; };
 
+/** The budget fields of an HTTP error body: the status object and the itemized request that was refused. Empty for other errors. */
+export const refusalFields = e => ({ ...(e?.budget ? { budget: e.budget } : {}), ...(e?.breakdown ? { breakdown: e.breakdown } : {}) });
+
 /** Itemize a reservation: refs and grader as the caller knew them, the rest of the expected charge is list; plus the margin. */
 function itemize(expectedUsd, components, marginUsd, marginPct) {
   const r4 = x => Math.round(x * 10000) / 10000;

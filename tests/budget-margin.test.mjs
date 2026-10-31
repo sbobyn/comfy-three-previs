@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { openBudget, budgetSettings } from '../server/previs/budget.mjs';
+import { openBudget, budgetSettings, refusalFields } from '../server/previs/budget.mjs';
 import { imagePresets } from '../server/previs/refgen.mjs';
 import { GRADER_PRICES, REFERENCE_PRICES, DEFAULT_MARGIN_PCT, parseMarginPct, referenceUsd, estimateBreakdown, sumBreakdowns, estimateFor, IMAGE_PRICES } from '../shared/tiers.mjs';
 
@@ -88,6 +88,10 @@ test('the cap counts the margin, and the refusal says what the request was made 
     return true;
   });
   assert.equal(budget.get('b'), null, 'nothing was reserved');
+  // The HTTP error body (server.mjs) carries the same breakdown beside the status object.
+  const body = await budget.reserve({ id: 'c', source: 'refgen', estimateUsd: 0.5, components: { graderUsd: 0.05 } }).catch(refusalFields);
+  assert.equal(body.breakdown.graderUsd, 0.05); assert.equal(body.breakdown.reserveUsd, 0.55); assert.equal(body.budget.account.capUsd, 1);
+  assert.deepEqual(refusalFields(Error('other')), {});
   // At exactly the margin-free amount it would have fit: the margin is what refused it.
   const zero = await open({ PREVIS_BUDGET_CAP_USD: '1', PREVIS_BUDGET_MARGIN: '0' });
   await zero.reserve({ id: 'a', source: 'refgen', estimateUsd: 0.85 });

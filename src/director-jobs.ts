@@ -72,16 +72,17 @@ export function dur(s: number) {
   return `${Math.floor(s / 3600)}h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}m`;
 }
 export const since = (iso: string | null, now = Date.now()) => (iso ? `${dur((now - Date.parse(iso)) / 1000)} ago` : 'never');
-/** The panel's one budget line: what is left of the tighter cap (amber from 50%, red from 95%), or what is committed with no cap. */
+/** The panel's one budget line: what is left of the tighter cap (amber from 50%, red from 95%), or what is committed with no cap; settled (billed or counted) and reserved (held, with the safety margin) are shown apart. */
 export function budgetLine(b?: Budget | null): { tone: 'ok' | 'warn' | 'bad' | 'muted'; text: string } | null {
   if (!b?.account) return null;
   const $ = (x: number) => `$${x.toFixed(2)}`, a = b.account;
   const when = a.period === 'day' ? ' today' : a.period === 'month' ? ' this month' : '';
   const scopes = [b.project ? { ...b.project, where: ' for this project' } : null, { ...a, where: when }].filter((x): x is BudgetScope & { where: string } => !!x && x.capUsd !== null);
   const tight = scopes.sort((x, y) => (x.remainingUsd ?? 0) - (y.remainingUsd ?? 0))[0];
-  if (!tight) { const used = a.spentUsd + a.reservedUsd; return used > 0 ? { tone: 'muted', text: `Budget: no cap set · ${$(used)} committed${when}` } : null; }
+  const split = (x: { spentUsd: number; reservedUsd: number }) => [x.spentUsd > 0 ? `${$(x.spentUsd)} settled` : '', x.reservedUsd > 0 ? `${$(x.reservedUsd)} reserved` : ''].filter(Boolean).join(' · ');
+  if (!tight) { const used = a.spentUsd + a.reservedUsd; return used > 0 ? { tone: 'muted', text: `Budget: no cap set · ${$(used)} committed${when} (${split(a)})` } : null; }
   const tone = !b.alert ? 'ok' : b.alert >= 95 ? 'bad' : 'warn';
-  return { tone, text: `Budget: ${$(tight.remainingUsd ?? 0)} left of ${$(tight.capUsd ?? 0)}${tight.where}${tight.reservedUsd > 0 ? ` · ${$(tight.reservedUsd)} reserved` : ''}` };
+  return { tone, text: `Budget: ${$(tight.remainingUsd ?? 0)} left of ${$(tight.capUsd ?? 0)}${tight.where}${split(tight) ? ` · ${split(tight)}` : ''}` };
 }
 // ---- end pure helpers ----
 
