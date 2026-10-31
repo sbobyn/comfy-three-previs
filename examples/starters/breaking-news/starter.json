@@ -18,6 +18,7 @@
         "name": "Studio floor",
         "kind": "environment",
         "shape": "box",
+        "model": "studio-floor",
         "position": [
           0,
           0,
@@ -44,6 +45,7 @@
         "name": "Video wall",
         "kind": "prop",
         "shape": "wall",
+        "model": "video-wall",
         "position": [
           0,
           0,
@@ -178,6 +180,7 @@
         "name": "Anchor desk",
         "kind": "prop",
         "shape": "table",
+        "model": "desk",
         "position": [
           0,
           0,
@@ -312,6 +315,7 @@
         "name": "News anchor",
         "kind": "character",
         "shape": "person",
+        "model": "anchor",
         "position": [
           0,
           0,
@@ -446,6 +450,7 @@
         "name": "Studio camera 1",
         "kind": "environment",
         "shape": "cylinder",
+        "model": "studio-camera",
         "position": [
           -3.2,
           0,
@@ -580,6 +585,7 @@
         "name": "Studio camera 2",
         "kind": "environment",
         "shape": "cylinder",
+        "model": "studio-camera",
         "position": [
           0,
           0,
@@ -605,6 +611,7 @@
         "name": "Studio camera 3",
         "kind": "environment",
         "shape": "cylinder",
+        "model": "studio-camera",
         "position": [
           3.4,
           0,
@@ -630,6 +637,7 @@
         "name": "Light rig 1",
         "kind": "environment",
         "shape": "lamp",
+        "model": "light",
         "position": [
           -7,
           0,
@@ -655,6 +663,7 @@
         "name": "Light rig 2",
         "kind": "environment",
         "shape": "lamp",
+        "model": "light",
         "position": [
           -3.5,
           0,
@@ -681,6 +690,7 @@
         "name": "Light rig 3",
         "kind": "environment",
         "shape": "lamp",
+        "model": "light",
         "position": [
           3.5,
           0,
@@ -814,6 +824,7 @@
         "name": "Light rig 4",
         "kind": "environment",
         "shape": "lamp",
+        "model": "light",
         "position": [
           7,
           0,
@@ -839,6 +850,7 @@
         "name": "Camera operator",
         "kind": "character",
         "shape": "person",
+        "model": "operator",
         "position": [
           -3.5,
           0,
@@ -1023,6 +1035,7 @@
         "name": "Desk front panel",
         "kind": "environment",
         "shape": "box",
+        "model": "desk-panel",
         "position": [
           0,
           0.08,

@@ -9,6 +9,7 @@ import { shotPrompt } from '../shared/prompt.mjs';
 import { setDef, slotLayout, slotPick } from '../shared/sheet-presets.mjs';
 import type { Sheet } from '../shared/sheet-presets.mjs';
 import { api } from './director-common';
+import { loadBlockoutModels } from './director-models';
 import { createDirectorScene } from './director-scene';
 import { captureShotVideo, shotSignature } from './director-capture';
 import { composeSheet, canvasBlob } from './director-sheet-compose';
@@ -27,6 +28,7 @@ async function run(): Promise<Record<string, unknown>> {
   if (!s) throw Error('Unknown shot');
   const host = document.getElementById('stage')!, el = () => host.appendChild(document.createElement('div'));
   const scene = createDirectorScene(host.querySelector('canvas')!, el(), el(), el(), { onRefImage: () => null, onClickSelect() {}, onMarquee() {}, onContextMenu() {}, onTransformCommit() {}, onModal() {} });
+  await loadBlockoutModels(project.scene.entities);
   scene.setView('camera'); scene.sync(project, s);
   if (op === 'frame') {
     const t = Number(q.get('t') ?? 0); if (!Number.isFinite(t)) throw Error('Invalid t');

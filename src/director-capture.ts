@@ -6,7 +6,7 @@ import type { DirectorScene } from './director-scene';
 
 export type CaptureDeps = {
   api: <T = any>(path: string, body?: unknown) => Promise<T>;
-  scene: Pick<DirectorScene, 'pose' | 'quaternionAt' | 'capture'>;
+  scene: Pick<DirectorScene, 'pose' | 'quaternionAt' | 'capture'> & Partial<Pick<DirectorScene, 'ready'>>;
   project: () => DirectorProject;
   entity: (id: string | null) => Entity | null;
   signature: (p: DirectorProject, s: Shot) => string;
@@ -18,11 +18,12 @@ export type CaptureDeps = {
 export type CaptureOptions = { width: number; height: number; prompt: string; onFrame?: (url: string, i: number, n: number) => void; onStatus?: (t: string) => void };
 
 /** Same hash as director.ts `signature` (kept identical; tests/headless.test.mjs compares the two). */
-export const shotSignature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+export const shotSignature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 
 export async function captureShotVideo(deps: CaptureDeps, s: Shot, o: CaptureOptions) {
   const { api, scene } = deps;
   deps.select?.(s);
+  await scene.ready?.();
   const project = deps.project();
   const idx = project.shots.findIndex(x => x.id === s.id), { width, height } = o;
   const n = Math.min(120, Math.max(2, Math.round(s.duration * 24))), at = (i: number) => i / 24;
