@@ -19,6 +19,7 @@
     "docs:models": "node scripts/models-table.mjs",
     "usage:report": "node --env-file-if-exists=.env scripts/usage-report.mjs",
     "starters:export": "node scripts/export-starters.mjs",
+    "starters:import": "node scripts/import-starters.mjs",
     "demo:build": "VITE_DEMO=1 vite build --base=/comfy-three-previs/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs"
   },
   "devDependencies": {

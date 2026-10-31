@@ -3,6 +3,12 @@
 //
 //   node scripts/export-starters.mjs --server http://127.0.0.1:5270
 //   node scripts/export-starters.mjs --data-dir ~/path/to/previs-data
+//   node scripts/export-starters.mjs --data-dir ~/path/to/previs-data --check
+//
+// The bundles in examples/starters are the source of truth. `pnpm starters:import` loads them into a data
+// directory as the canonical source projects (same ids); this script exports those projects back, and
+// `--check` proves the round trip: it exports into a scratch copy of the bundle and fails (exit 1) if any
+// JSON or media file would change, was added or would disappear. Nothing in examples/starters is written.
 //
 // Each starter is written to examples/starters/<slug>/starter.json plus a media/ folder: every object's
 // primary look and design sheet, each shot's chosen still, its blockout clip and its chosen video
@@ -10,98 +16,152 @@
 // 720p H.264 at up to 2.5 Mbit/s with no audio (needs ffmpeg and ffprobe on PATH). A file whose source
 // has not changed is not re-encoded, so re-exports leave unchanged media byte-identical.
 //
-// Options: --<slug> <project-id> overrides a source project; --only <slug>; --no-media writes the
+// Options: --check; --<slug> <project-id> overrides a source project; --only <slug>; --no-media writes the
 // version 1 snapshot (no media); --max-mb <n> (default 80) keeps only the hero shots' videos when over.
-import { readFile, writeFile, mkdir, readdir, rm } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir, rm, cp, mkdtemp } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, relative } from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { tmpdir } from 'node:os';
-import { STARTERS_DIR, starterSnapshot } from '../server/previs/starters.mjs';
+import { STARTERS_DIR, starterSnapshot, starterSourceId } from '../server/previs/starters.mjs';
 
 const run = promisify(execFile);
 
-// hero: the shots whose videos stay if the media is over budget, and explicit still picks where the
-// project's newest still is not the one to show (see .evidence content notes, 30 Oct 2026).
-export const SOURCES = [
-  { slug: 'breaking-news', id: 'ff685e99-00bf-4f5f-979a-944f0caca7c9', title: 'Breaking News', description: 'A news anchor breaks the story of this launch',
-    hero: { shots: ['3014d6d1-f093-4e8f-b791-aed102116cf3'], stills: { '3014d6d1-f093-4e8f-b791-aed102116cf3': '541259b3-11e0-4bd4-a459-4532c24a7447' } } },
-  { slug: 'wingspan', id: 'f158baf1-2cac-4311-859a-e5c590d381d4', title: 'Wingspan', description: 'Eagle dives through an alpine valley',
-    hero: { shots: ['3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a', '2c4b00d0-4453-42f2-8af7-a058616d2a3e'], stills: { '3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a': '46987310-01b1-49b3-a0dc-e09d669bd56a' } } },
-  { slug: 'final-lap', id: 'ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f', title: 'Final Lap', description: 'Comfy car wins on the last lap',
-    hero: { shots: ['95a7f87c-6236-4628-a4e9-88bcea6dc6aa'], stills: {} } },
-  { slug: 'posterized', id: '5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6', title: 'Posterized', description: 'Comfy dunk in a packed arena',
-    hero: { shots: ['755f685b-a74e-4c80-8ffd-8dc9cbdfd450', '4feea365-12b8-456f-878e-80be456c4c27'], stills: { '4feea365-12b8-456f-878e-80be456c4c27': '8a719256-c46e-4833-b6a0-37ae0eb91fdf' } } },
+// id: the canonical source project, the one `pnpm starters:import` writes from the bundle (ids kept, stable per slug).
+// legacyId: the dev project the bundle was first exported from (before the 2026-10-31 blocking pass); not used.
+// hero: the shots whose videos stay if the media is over budget. An imported source project holds exactly the
+// shown still and video of every shot, so no explicit still picks are needed.
+const SOURCE_DEFS = [
+  { slug: 'breaking-news', legacyId: 'ff685e99-00bf-4f5f-979a-944f0caca7c9', title: 'Breaking News', description: 'A composed news bulletin: the studio, a headline delivered by the anchor, and a confident sign-off.',
+    hero: { shots: ['3014d6d1-f093-4e8f-b791-aed102116cf3'] } },
+  { slug: 'wingspan', legacyId: 'f158baf1-2cac-4311-859a-e5c590d381d4', title: 'Wingspan', description: 'An eagle descends through an open alpine valley and settles into a majestic low glide across the lake toward the ridge.',
+    hero: { shots: ['3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a', '2c4b00d0-4453-42f2-8af7-a058616d2a3e'] } },
+  { slug: 'final-lap', legacyId: 'ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f', title: 'Final Lap', description: 'Two cars side by side: the Comfy car draws level, makes the pass and wins across the finish line.',
+    hero: { shots: ['95a7f87c-6236-4628-a4e9-88bcea6dc6aa'] } },
+  { slug: 'posterized', legacyId: '5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6', title: 'Posterized', description: 'A fast break, a drive into the lane, then the Comfy guard rising above the defender to finish at the rim.',
+    hero: { shots: ['755f685b-a74e-4c80-8ffd-8dc9cbdfd450', '4feea365-12b8-456f-878e-80be456c4c27'] } },
 ];
+
+export const SOURCES = SOURCE_DEFS.map(d => ({ ...d, id: starterSourceId(d.slug) }));
 
 const IMAGE_MAX_PX = 1600, VIDEO_HEIGHT = 720, VIDEO_KBPS = 2000, VIDEO_MAX_KBPS = 2500;
 
 async function main(args) {
   const opt = name => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : undefined; };
   const server = opt('server'), dataDir = opt('data-dir') || process.env.PREVIS_DATA_DIR;
-  const out = opt('out') || STARTERS_DIR, only = opt('only'), media = !args.includes('--no-media');
-  const maxBytes = Number(opt('max-mb') || 80) * 1024 * 1024;
   if (!server && !dataDir) {
-    console.error('Usage: node scripts/export-starters.mjs (--server <url> | --data-dir <dir>) [--out <dir>] [--only <slug>] [--no-media] [--max-mb 80] [--<slug> <project-id>]');
+    console.error('Usage: node scripts/export-starters.mjs (--server <url> | --data-dir <dir>) [--check] [--out <dir>] [--only <slug>] [--no-media] [--max-mb 80] [--<slug> <project-id>]');
     process.exit(2);
   }
-  const project = async id => {
-    if (server) {
-      const r = await fetch(new URL(`/api/director/project?id=${id}`, server));
-      const data = await r.json();
-      if (!r.ok) throw Error(data.error || `HTTP ${r.status}`);
-      return data.project;
-    }
-    return JSON.parse(await readFile(join(dataDir, 'director', id, 'project.json'), 'utf8'));
-  };
-  // Bytes of a file inside a project folder: refs/<file> or assets/<file>.
-  const source = async (pid, rel) => {
-    if (!server) return readFile(join(dataDir, 'director', pid, rel));
-    const [sub, name] = rel.split('/');
-    const r = await fetch(new URL(`/${sub === 'refs' ? 'director-refs' : 'director-assets'}/${pid}/${name}`, server));
-    if (!r.ok) throw Error(`${rel}: HTTP ${r.status}`);
-    return Buffer.from(await r.arrayBuffer());
-  };
+  const ids = Object.fromEntries(SOURCES.map(s => [s.slug, opt(s.slug)]).filter(([, id]) => id));
+  const { failed, diffs } = await exportStarters({ server, dataDir, out: opt('out'), only: opt('only'), media: !args.includes('--no-media'), maxMb: Number(opt('max-mb') || 80), check: args.includes('--check'), ids });
+  if (failed) process.exitCode = 1;
+  if (args.includes('--check')) {
+    if (diffs.length) {
+      console.error(`✗ Re-exporting would change ${diffs.length} bundled file${diffs.length === 1 ? '' : 's'}:`);
+      for (const d of diffs) console.error(`  ${d.change.padEnd(7)} ${d.path}`);
+      console.error('The bundle in examples/starters is the source of truth: fix the source project (or run pnpm starters:import again), not the bundle.');
+      process.exitCode = 1;
+    } else if (!failed) console.log('✓ Re-export reproduces the bundle byte for byte.');
+  }
+}
 
-  const written = [], totals = [];
-  for (const [order, src] of SOURCES.entries()) {
-    if (only && only !== src.slug) continue;
-    const id = opt(src.slug) || src.id;
-    let p;
-    try { p = await project(id); } catch (e) { console.error(`✗ ${src.slug}: could not read project ${id} (${e.message})`); process.exitCode = 1; continue; }
-    const dir = join(out, src.slug);
-    await mkdir(dir, { recursive: true });
-    let prev = null; try { prev = JSON.parse(await readFile(join(dir, 'starter.json'), 'utf8')); } catch {}
-    const snap = starterSnapshot(p, { slug: src.slug, title: src.title, description: src.description, order, media, hero: src.hero });
-    if (media) await encodeMedia(snap, dir, prev, rel => source(p.id, rel));
-    totals.push({ slug: src.slug, snap, dir, hero: src.hero });
-    written.push(src.slug);
-  }
-  // Over budget: keep the hero shots' videos only.
-  const size = () => totals.reduce((a, t) => a + t.snap.media.reduce((b, m) => b + m.bytes, 0), 0);
-  if (media && size() > maxBytes) {
-    console.log(`Media is ${mb(size())}, over ${mb(maxBytes)}: keeping only the hero shots' videos.`);
-    for (const t of totals) {
-      const drop = new Set(t.snap.assets.filter(a => a.kind === 'workflow-result' && !t.hero.shots.includes(a.shotId)).map(a => a.id));
-      t.snap.assets = t.snap.assets.filter(a => !drop.has(a.id));
-      t.snap.edit.clips = t.snap.edit.clips.filter(c => !drop.has(c.assetId));
-      t.snap.media = t.snap.media.filter(m => !drop.has(m.path.match(/([a-f0-9-]{36})\.mp4$/)?.[1]));
+/**
+ * Export the source projects into `out` (default examples/starters). With `check`, export into a scratch copy of `out`
+ * instead and return what differs from `out` (`diffs`: { path, change: 'changed' | 'added' | 'removed' }); `out` is never written.
+ * `ids` overrides a source project per slug. `failed` counts starters whose project could not be read.
+ */
+export async function exportStarters({ server, dataDir, out: outDir, only, media = true, maxMb = 80, check = false, ids = {}, log = console.log } = {}) {
+  const target = outDir || STARTERS_DIR, maxBytes = maxMb * 1024 * 1024;
+  const scratch = check ? await mkdtemp(join(tmpdir(), 'starters-check-')) : null;
+  const out = scratch || target;
+  if (scratch) await cp(target, scratch, { recursive: true });
+  try {
+    const project = async id => {
+      if (server) {
+        const r = await fetch(new URL(`/api/director/project?id=${id}`, server));
+        const data = await r.json();
+        if (!r.ok) throw Error(data.error || `HTTP ${r.status}`);
+        return data.project;
+      }
+      return JSON.parse(await readFile(join(dataDir, 'director', id, 'project.json'), 'utf8'));
+    };
+    // Bytes of a file inside a project folder: refs/<file> or assets/<file>.
+    const source = async (pid, rel) => {
+      if (!server) return readFile(join(dataDir, 'director', pid, rel));
+      const [sub, name] = rel.split('/');
+      const r = await fetch(new URL(`/${sub === 'refs' ? 'director-refs' : 'director-assets'}/${pid}/${name}`, server));
+      if (!r.ok) throw Error(`${rel}: HTTP ${r.status}`);
+      return Buffer.from(await r.arrayBuffer());
+    };
+
+    let failed = 0;
+    const written = [], totals = [];
+    for (const [order, src] of SOURCES.entries()) {
+      if (only && only !== src.slug) continue;
+      const id = ids[src.slug] || src.id;
+      let p;
+      try { p = await project(id); } catch (e) { console.error(`✗ ${src.slug}: could not read project ${id} (${e.message})`); failed++; continue; }
+      const dir = join(out, src.slug);
+      await mkdir(dir, { recursive: true });
+      let prev = null; try { prev = JSON.parse(await readFile(join(dir, 'starter.json'), 'utf8')); } catch {}
+      const snap = starterSnapshot(p, { slug: src.slug, title: src.title, description: src.description, order, media, hero: src.hero });
+      if (media) await encodeMedia(snap, dir, prev, rel => source(p.id, rel));
+      totals.push({ slug: src.slug, snap, dir, hero: src.hero });
+      written.push(src.slug);
     }
+    // Over budget: keep the hero shots' videos only.
+    const size = () => totals.reduce((a, t) => a + t.snap.media.reduce((b, m) => b + m.bytes, 0), 0);
+    if (media && size() > maxBytes) {
+      log(`Media is ${mb(size())}, over ${mb(maxBytes)}: keeping only the hero shots' videos.`);
+      for (const t of totals) {
+        const drop = new Set(t.snap.assets.filter(a => a.kind === 'workflow-result' && !t.hero.shots.includes(a.shotId)).map(a => a.id));
+        t.snap.assets = t.snap.assets.filter(a => !drop.has(a.id));
+        t.snap.edit.clips = t.snap.edit.clips.filter(c => !drop.has(c.assetId));
+        t.snap.media = t.snap.media.filter(m => !drop.has(m.path.match(/([a-f0-9-]{36})\.mp4$/)?.[1]));
+      }
+    }
+    for (const t of totals) {
+      await writeFile(join(t.dir, 'starter.json'), `${JSON.stringify(t.snap, null, 2)}\n`);
+      if (media) await prune(t.dir, t.snap.media);
+      const bytes = t.snap.media.reduce((b, m) => b + m.bytes, 0);
+      log(`✓ ${t.slug}: ${t.snap.scene.entities.length} objects, ${t.snap.shots.length} shots, ${(t.snap.scene.references || []).length} object images, ${(t.snap.assets || []).length} clips, media ${mb(bytes)}`);
+    }
+    if (media) log(`Total media ${mb(size())}`);
+    // The index lists every starter the server offers, in launch-page order.
+    let index = { starters: [] };
+    try { index = JSON.parse(await readFile(join(out, 'index.json'), 'utf8')); } catch {}
+    const order = [...new Set([...SOURCES.map(s => s.slug).filter(s => written.includes(s) || index.starters.includes(s)), ...index.starters])];
+    await writeFile(join(out, 'index.json'), `${JSON.stringify({ starters: order }, null, 2)}\n`);
+    return { failed, diffs: scratch ? await diffTrees(target, scratch, only) : [] };
+  } finally { if (scratch) await rm(scratch, { recursive: true, force: true }); }
+}
+
+/** Files that differ between the bundle (`bundled`) and what the export produced (`exported`); `only` limits it to one starter. */
+async function diffTrees(bundled, exported, only) {
+  const files = async root => {
+    const found = new Map();
+    const walk = async dir => {
+      for (const e of await readdir(dir, { withFileTypes: true })) {
+        const full = join(dir, e.name);
+        if (e.isDirectory()) await walk(full); else if (e.isFile()) found.set(relative(root, full).split('\\').join('/'), full);
+      }
+    };
+    await walk(root);
+    return found;
+  };
+  const [a, b] = [await files(bundled), await files(exported)];
+  const inScope = path => !only || path === 'index.json' || path.startsWith(`${only}/`);
+  const diffs = [];
+  for (const path of [...new Set([...a.keys(), ...b.keys()])].sort()) {
+    if (!inScope(path)) continue;
+    if (!b.has(path)) diffs.push({ path, change: 'removed' });
+    else if (!a.has(path)) diffs.push({ path, change: 'added' });
+    else if (!(await readFile(a.get(path))).equals(await readFile(b.get(path)))) diffs.push({ path, change: 'changed' });
   }
-  for (const t of totals) {
-    await writeFile(join(t.dir, 'starter.json'), `${JSON.stringify(t.snap, null, 2)}\n`);
-    if (media) await prune(t.dir, t.snap.media);
-    const bytes = t.snap.media.reduce((b, m) => b + m.bytes, 0);
-    console.log(`✓ ${t.slug}: ${t.snap.scene.entities.length} objects, ${t.snap.shots.length} shots, ${(t.snap.scene.references || []).length} object images, ${(t.snap.assets || []).length} clips, media ${mb(bytes)}`);
-  }
-  if (media) console.log(`Total media ${mb(size())}`);
-  // The index lists every starter the server offers, in launch-page order.
-  let index = { starters: [] };
-  try { index = JSON.parse(await readFile(join(out, 'index.json'), 'utf8')); } catch {}
-  const order = [...new Set([...SOURCES.map(s => s.slug).filter(s => written.includes(s) || index.starters.includes(s)), ...index.starters])];
-  await writeFile(join(out, 'index.json'), `${JSON.stringify({ starters: order }, null, 2)}\n`);
+  return diffs;
 }
 
 const mb = n => `${(n / 1024 / 1024).toFixed(1)} MB`;
@@ -115,8 +175,10 @@ async function encodeMedia(snap, dir, prev, read) {
   for (const f of snap.media) {
     const bytes = await read(f.from);
     const sourceSha256 = sha(bytes), dest = join(dir, f.path);
-    const old = prev?.media?.find(m => m.path === f.path && m.sourceSha256 === sourceSha256);
+    // A source that is the bundled file itself (an imported source project) or whose source is unchanged is not re-encoded.
+    const old = prev?.media?.find(m => m.path === f.path && (m.sourceSha256 === sourceSha256 || m.sha256 === sourceSha256));
     if (old && existsSync(dest) && sha(await readFile(dest)) === old.sha256) { out.push(old); continue; }
+    if (old && old.sha256 === sourceSha256) { await mkdir(dirname(dest), { recursive: true }); await writeFile(dest, bytes); out.push(old); continue; }
     const input = join(tmp, `in-${sourceSha256.slice(0, 16)}`);
     await writeFile(input, bytes);
     await mkdir(dirname(dest), { recursive: true });

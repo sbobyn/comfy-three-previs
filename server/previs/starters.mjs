@@ -8,7 +8,7 @@ import { readFile, copyFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { makeEntity, makeShot, shotSignature } from '../../shared/director.mjs';
 import { normalizePrompts, normalizeStyle } from '../../shared/prompt.mjs';
 
@@ -16,7 +16,8 @@ export const STARTER_FORMAT = 'comfy-previs-starter';
 export const STARTER_VERSION = 2;
 export const STARTERS_DIR = fileURLToPath(new URL('../../examples/starters/', import.meta.url));
 
-const GENERATED_KEEP = ['presetId', 'model', 'seed', 'prompt'];
+// `signature` is the blocking a still was made for; instantiateStarter rewrites it for the copy's ids.
+const GENERATED_KEEP = ['presetId', 'model', 'seed', 'prompt', 'signature'];
 const keepGenerated = g => (g ? Object.fromEntries(GENERATED_KEEP.filter(k => g[k] !== undefined).map(k => [k, g[k]])) : undefined);
 const newest = list => [...list].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))[0] || null;
 
@@ -201,6 +202,51 @@ export function instantiateStarter(s, { has = () => true } = {}) {
   if (assets.length) out.assets = assets;
   if (clips.length) out.edit = { clips, updatedAt: new Date().toISOString() };
   return out;
+}
+
+/** The project id the bundle's canonical source project gets in a data directory: stable per slug, never a random one. */
+export function starterSourceId(slug) {
+  const h = createHash('sha1').update(`comfy-previs-starter-source:${slug}`).digest('hex');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
+
+/**
+ * The inverse of starterSnapshot: the bundle as a project document that keeps every id (entities, shots, images,
+ * clips) and signature, so starterSnapshot(project) reproduces the bundle. `files` lists the copies to make into the
+ * project folder: { from: bundle-relative path, to: project-relative path }. Nothing is renewed, so blocking
+ * signatures stay valid without any remapping; only instantiateStarter (a user's copy) renews ids.
+ */
+export function starterSourceProject(s, { id = starterSourceId(s.slug) } = {}) {
+  const files = [];
+  const copyRef = r => { files.push({ from: `media/refs/${r.file}`, to: `refs/${r.file}` }); return structuredClone(r); };
+  const entities = s.scene.entities.map(e => makeEntity(structuredClone(e), e.id));
+  const shots = s.shots.map((x, i) => {
+    const shot = makeShot(structuredClone(x), x.id, i + 1, entities);
+    // style and prompts keep the bundle's key order, so the document re-exports to the same bytes.
+    for (const k of Object.keys(x)) {
+      if (k === 'prompts' && x.prompts) shot.prompts = normalizePrompts(x.prompts);
+      if (k === 'style' && x.style) shot.style = normalizeStyle(x.style);
+    }
+    shot.references = (x.references || []).map(copyRef);
+    return shot;
+  });
+  const assets = (s.assets || []).map(a => {
+    files.push({ from: `media/${a.file}`, to: a.file });
+    const m = (s.media || []).find(x => x.path === `media/${a.file}`);
+    return { ...structuredClone(a), sha256: m?.sha256 ?? null, width: m?.width ?? null, height: m?.height ?? null, fps: m?.fps ?? null, frameCount: m?.frameCount ?? null, duration: a.duration ?? m?.duration ?? null, starter: s.slug };
+  });
+  const references = (s.scene.references || []).map(copyRef);
+  const stamps = [...references, ...shots.flatMap(x => x.references), ...assets].map(x => x.createdAt).filter(Boolean).sort();
+  const at = stamps.at(-1) || '2026-01-01T00:00:00.000Z';
+  const seen = new Set();
+  const clips = (s.edit?.clips || []).map(c => { let cid = c.id || c.shotId, n = 1; while (seen.has(cid)) cid = `${c.shotId}-${++n}`; seen.add(cid); return { id: cid, shotId: c.shotId, assetId: c.assetId, in: c.in ?? 0, out: c.out ?? null }; });
+  const project = {
+    version: 1, id, title: s.title, template: s.slug, createdAt: at, updatedAt: at, revision: 1,
+    scene: { name: s.scene.name || s.title, environment: structuredClone(s.scene.environment || {}), entities, ...(references.length ? { references } : {}) },
+    shots, ...(assets.length ? { assets } : {}), ...(clips.length ? { edit: { clips, updatedAt: at } } : {}),
+    messages: [{ id: starterSourceId(`${s.slug}:note`), shotId: null, role: 'system', text: `Source project of the “${s.title}” starter, imported from examples/starters/${s.slug} with its ids kept. Re-export it with pnpm starters:export.`, attachments: [], status: 'handled', createdAt: at }],
+  };
+  return { project, files };
 }
 
 /** Copy a starter's media into a project folder. Idempotent: files already there are kept as they are. */
