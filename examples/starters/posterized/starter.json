@@ -2948,20 +2948,37 @@
       },
       "references": [
         {
-          "id": "70c992c1-d32d-4f72-b005-75c2f1508564",
-          "name": "Shot 01 Fast break · Flux.2 [pro] · 484291",
-          "file": "70c992c1-d32d-4f72-b005-75c2f1508564.webp",
+          "id": "123833d3-d985-5ad8-a6c8-e91c95cb6121",
+          "name": "Shot 01 Fast break · FLUX 3 Image · 515032",
+          "file": "123833d3-d985-5ad8-a6c8-e91c95cb6121.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-31T06:34:02.834Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 515032,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 32mm normal lens; full shot, Comfy guard head to toe; camera 4.8 m high, well above Comfy guard's head and 9.2 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival guard: lower far left of frame, about a quarter of the frame height tall, cut off by the left and bottom edges, in front of Comfy guard to the left, facing away from the camera and screen-left (three-quarter rear view). Rival defender: far right of frame, about a third of the frame height tall, beside Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: centre of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: far right of frame, about a third of the frame height tall, behind Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy center: upper far right of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing screen-right (profile).\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy guard in blue and yellow advances with Basketball while the green Rival defender retreats toward the basket. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Blue and…\nThe Rival guard looks exactly like image 2. The Comfy guard looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "ae3879eb"
+          }
+        },
+        {
+          "id": "dd0a1808-7a68-5405-ae1e-a67942578b05",
+          "name": "Shot 01 Fast break · FLUX 3 Image · 483750",
+          "file": "dd0a1808-7a68-5405-ae1e-a67942578b05.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-30T17:44:45.837Z",
+          "createdAt": "2026-10-31T06:34:08.106Z",
           "generated": {
-            "presetId": "flux-2-pro",
-            "model": "Flux.2 [pro] (BFL)",
-            "seed": 484291,
-            "prompt": "Cinematic film still, single frame. Wide arena shot as Comfy guard sprints the ball up the court on a fast break, Comfy wing and Comfy center filling the lanes, the rival defenders backpedalling, the crowd on its feet. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival t",
-            "signature": "bd8507ed"
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 483750,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 32mm normal lens; full shot, Comfy guard head to toe; camera 4.8 m high, well above Comfy guard's head and 9.1 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Comfy guard: left of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival defender: far right of frame, about half the frame height tall, cut off by the right edge, in front of Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view).\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy guard in blue and yellow advances with Basketball while the green Rival defender retreats toward the basket. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Blue and yellow only. Never black, white or green on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker. Black and neon green only. Never white, red or blue on this player. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers. Pro basketball player in a rival team uniform: black jersey and shorts with neon green…\nThe Comfy guard looks exactly like image 2. The Basketball looks exactly like image 3. The Court floor looks exactly like image 4. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "ae3879eb"
           }
         }
       ]
@@ -3295,20 +3312,37 @@
       },
       "references": [
         {
-          "id": "8a719256-c46e-4833-b6a0-37ae0eb91fdf",
-          "name": "Shot 02 The drive · Flux.2 [pro] · 366018",
-          "file": "8a719256-c46e-4833-b6a0-37ae0eb91fdf.webp",
+          "id": "0f89b5a2-5f37-54f3-a78b-489061739e75",
+          "name": "Shot 02 The drive · FLUX 3 Image · 545619",
+          "file": "0f89b5a2-5f37-54f3-a78b-489061739e75.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-31T06:42:03.490Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 545619,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 30mm normal lens; full shot, Comfy guard head to toe; camera 2.3 m high, just above Comfy guard's eye line and 8 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival defender: right of frame, about half the frame height tall, beside Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: left of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: centre of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: centre of frame, about a quarter of the frame height tall, behind Comfy guard, partly hidden by Comfy guard, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard. Comfy center: right of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing screen-right (profile).\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy guard drives into the lane with Basketball. Rival defender sets under the east rim, facing the approaching guard. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow,…\nThe Rival defender looks exactly like image 2. The Comfy guard looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "b40d8df2"
+          }
+        },
+        {
+          "id": "4866babf-656e-50c0-a3b2-5ce095fc6eb4",
+          "name": "Shot 02 The drive · FLUX 3 Image · 11958",
+          "file": "4866babf-656e-50c0-a3b2-5ce095fc6eb4.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-30T17:48:24.303Z",
+          "createdAt": "2026-10-31T06:41:26.164Z",
           "generated": {
-            "presetId": "flux-2-pro",
-            "model": "Flux.2 [pro] (BFL)",
-            "seed": 366018,
-            "prompt": "Cinematic film still, single frame. Low tracking shot alongside as Comfy guard drives hard along the baseline past Rival defender, crossing the ball between his legs, sneakers squeaking. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Clear glass backboard with a white border. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Photoreal live",
-            "signature": "d4f02c40"
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 11958,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 30mm normal lens; full shot, Comfy guard head to toe; camera 2.3 m high, just above Comfy guard's eye line and 7.6 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival defender: far right of frame, about half the frame height tall, in front of Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: left of frame, about half the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: far right of frame, about a third of the frame height tall, behind Comfy guard to the right, partly hidden by Rival defender, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: right of frame, about a third of the frame height tall, behind Comfy guard to the right, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy guard drives into the lane with Basketball. Rival defender sets under the east rim, facing the approaching guard. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Blue and yellow only. Never black, white or…\nThe Rival defender looks exactly like image 2. The Comfy guard looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "b40d8df2"
           }
         }
       ]
@@ -3643,20 +3677,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "d0177bfd-0e15-4eeb-b1e8-91a08760f1b2",
-          "name": "Shot 03 Posterized · FLUX 3 Image · 792113",
-          "file": "d0177bfd-0e15-4eeb-b1e8-91a08760f1b2.webp",
+          "id": "f87f8ac4-8f57-5be5-a621-71637f161e02",
+          "name": "Shot 03 Posterized · GPT Image 2.5 · 14891",
+          "file": "f87f8ac4-8f57-5be5-a621-71637f161e02.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-10-31T06:45:07.793Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 14891,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 26mm wide lens; full shot, Comfy guard head to toe; camera 2.8 m high, just above Comfy guard's eye line and 5.5 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Comfy guard: lower centre of frame, about half the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival defender: centre of frame, about a third of the frame height tall, behind Comfy guard, partly hidden by Comfy guard, facing away from the camera and screen-left (three-quarter rear view). Rival forward: left of frame, about a quarter of the frame height tall, behind Comfy guard to the left, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: left of frame, about a quarter of the frame height tall, behind Comfy guard to the left, partly hidden by Rival forward, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard. Comfy center: centre of frame, about a quarter of the frame height tall, behind Comfy guard, partly hidden by Rival defender, facing screen-right (profile).\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy guard takes two final strides, rises above Rival defender and slams Basketball through the east rim. The defender lands beneath him; the guard comes down after the score. Pro basketball player in the Comfy team uniform:…\nThe Comfy guard looks exactly like image 2. The Rival defender looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "9e586736"
+          }
+        },
+        {
+          "id": "16313294-f9a2-5ef2-af6a-ae9d0f2d43e6",
+          "name": "Shot 03 Posterized · GPT Image 2.5 · 83776",
+          "file": "16313294-f9a2-5ef2-af6a-ae9d0f2d43e6.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-30T19:51:14.937Z",
+          "createdAt": "2026-10-31T06:44:47.981Z",
           "generated": {
-            "presetId": "flux-3",
-            "model": "FLUX 3 Image (BFL)",
-            "seed": 792113,
-            "prompt": "Cinematic film still, single frame. Low angle under the rim: Comfy guard explodes upward and throws down a two-handed dunk over Rival defender, the net snaps, the camera rises with him, the arena erupts. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Orange breakaway rim with a white net. Orange leather basketball with black seams. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in black and neon green. No white, red or other jerseys anywhere.. Look: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups, fast shutter freezing the action.. Framing: 20mm lens, match the supplied blockout frame's composition. Lens: 14mm ultra-wide. Filter: high contrast.\nImage 1 is a grey 3D blockout of this exact frame: match its camera, lens, framing and e",
-            "signature": "ada048b4"
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 83776,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 26mm wide lens; wide shot, Comfy guard small in frame; camera 1.9 m high, at eye level and 9.7 m from Comfy guard, level; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival defender: centre of frame, about a third of the frame height tall, in front of Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: left of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: centre of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: centre of frame, a small part of the frame height tall, behind Comfy guard to the right, partly hidden by Rival forward, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard. Comfy center: centre of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing screen-right (profile).\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy guard takes two final strides, rises above Rival defender and slams Basketball through the east rim. The defender lands beneath him; the guard comes down after the score. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow…\nThe Rival defender looks exactly like image 2. The Comfy guard looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "9e586736"
           }
         }
       ]
@@ -3997,109 +4048,28 @@
       "height": 479
     },
     {
-      "path": "media/refs/70c992c1-d32d-4f72-b005-75c2f1508564.webp",
+      "path": "media/refs/123833d3-d985-5ad8-a6c8-e91c95cb6121.webp",
       "kind": "image",
-      "bytes": 89990,
-      "sha256": "011621f7cad55ddc90f5b32a638a7aba810d47a472804ecb1824997ff0116ccd",
-      "sourceSha256": "530c11b42bffba35f40aa4c5c814efa0e577843b166514162ee8afa358128e44",
-      "width": 1344,
-      "height": 768
-    },
-    {
-      "path": "media/assets/02c2d4ca-0757-4e0f-8a97-d05775d4c747.mp4",
-      "kind": "video",
-      "bytes": 1134831,
-      "sha256": "936ee9bc2a706e4e223ec9609737a5a691520e86d8543d1044131d55689632aa",
-      "sourceSha256": "1eaca31bde81d37a385b34cde1de769f99c2aac539cf5ca4d659fa804dbcdab1",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 120,
-      "duration": 5
-    },
-    {
-      "path": "media/assets/b0d8ceda-828f-4770-a0de-b358d2982789.mp4",
-      "kind": "video",
-      "bytes": 1461886,
-      "sha256": "0c1da9d7b81ac1b62fb6d8e58c83f062d90d2e034b7f93554e263867b8933269",
-      "sourceSha256": "9c241afe48d0ea8853b15e63fbafa12aebb2fdbbb66cda0c57bbda5643782f05",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 121,
-      "duration": 5.042
-    },
-    {
-      "path": "media/refs/8a719256-c46e-4833-b6a0-37ae0eb91fdf.webp",
-      "kind": "image",
-      "bytes": 70492,
-      "sha256": "20398311a0d2fd0c5919623fcfc9dc9569634211d1a44a0ad7255d754c818f7f",
-      "sourceSha256": "4aa84c3f4e9266a848765d3ecbad281124a4d96ec71a6dc7b3c68a46ab1de00e",
-      "width": 1344,
-      "height": 768
-    },
-    {
-      "path": "media/assets/0ae71643-16f5-4b7a-b84f-5beddef01b1b.mp4",
-      "kind": "video",
-      "bytes": 1002370,
-      "sha256": "e721841bcb3e65d84635019f542cd0407e1e78c00f6c4aee2b4a378a332e079a",
-      "sourceSha256": "b0bc7878f6846eb89daf9722a42638242aee2319979070d3af4bfb7ab2be2eb8",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 120,
-      "duration": 5
-    },
-    {
-      "path": "media/assets/b59ed1dd-2ccc-40b1-8daf-113266bcdc09.mp4",
-      "kind": "video",
-      "bytes": 1376108,
-      "sha256": "b0bd546ef4c4f196ce8d8f52d43faa3c0d2ef51e4ea2c42b0c92323cc32bb4c5",
-      "sourceSha256": "25e1d9044c8c1e4a71ef5aa25cb62c5312b5e39b05ba402a0e3f72b3935103fa",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 121,
-      "duration": 5.042
-    },
-    {
-      "path": "media/refs/d0177bfd-0e15-4eeb-b1e8-91a08760f1b2.webp",
-      "kind": "image",
-      "bytes": 193128,
-      "sha256": "66c83fb3d53595403cc81da8d6da58f60017163f2bc19b5c62e62e902ccf7501",
-      "sourceSha256": "108938c498222d373e2f8e41cebd67d47165f26378f6b8c94bec87ec3738453d",
+      "bytes": 133358,
+      "sha256": "d2b2db64334644dd30374a18956acb8f70d65ece1e8c5d09f2757aa7a37d2b39",
+      "sourceSha256": "eb357c402e0dcb4c63c31f7161a87174e413d03f8f8be1134097b807f4832984",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/10ff2446-6e1d-4ad6-a553-66cc8ed1e7b1.mp4",
-      "kind": "video",
-      "bytes": 1076020,
-      "sha256": "a3a65fb53180f306b98dd38e75a76681d63343f4dbfa3f724220fbcc91387951",
-      "sourceSha256": "7e0ebaa21affc6d137e6d273c5cc410efb94bd8b8e50089c242ba53bae4d2cde",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 120,
-      "duration": 5
+      "path": "media/refs/dd0a1808-7a68-5405-ae1e-a67942578b05.webp",
+      "kind": "image",
+      "bytes": 147072,
+      "sha256": "98ef527d52817d0dd428ef63e76dd7569803fad1da0031a78fd620fe8ee69e0a",
+      "sourceSha256": "77924e4d999c6750fd8bbc2f6dfe18e2e16582535321019eb84f7d7385720c5b",
+      "width": 1360,
+      "height": 768
     },
     {
-      "path": "media/assets/ae75dc86-eeaf-4d2b-b66c-97ef9403e70b.mp4",
+      "path": "media/assets/2cea6d02-5f04-49b6-8308-4296de792fdd.mp4",
       "kind": "video",
-      "bytes": 1252307,
-      "sha256": "e4cfaf406650637b9407ad854a5b6517b4d89bb6665a60b1dd67235ae96a8472",
-      "sourceSha256": "aa98d1f57e5a9f8e8d09d47af3d1beaf30796dbb3da3d54f52bd87354a81a202",
-      "width": 1280,
-      "height": 720,
-      "fps": 24,
-      "frameCount": 121,
-      "duration": 5.042
-    },
-    {
-      "path": "media/assets/7eb128d9-886e-472c-9a0d-c396267728d4.mp4",
-      "kind": "video",
-      "bytes": 300175,
-      "sha256": "6fea44114dee5a6778303040dec7f121dbf876a786d8abc7b86f098a67f60cfe",
+      "bytes": 693728,
+      "sha256": "421427184441eecfb14a646928b2f2b1a82b0ca7365dec8352b93cb9570ece47",
       "sourceSha256": "6fea44114dee5a6778303040dec7f121dbf876a786d8abc7b86f098a67f60cfe",
       "width": 1280,
       "height": 720,
@@ -4108,10 +4078,40 @@
       "duration": 4
     },
     {
-      "path": "media/assets/c7802ae5-9c1e-4330-855b-44a6a4befd7e.mp4",
+      "path": "media/assets/5d3d7e6f-52ff-5017-a7e6-c855ad35c1fb.mp4",
       "kind": "video",
-      "bytes": 359542,
-      "sha256": "b17ce375350e55465698e54dbc07a90ce508f8755d9191163466491de70519cc",
+      "bytes": 1025047,
+      "sha256": "09f29d093c94081c0e2f0da2ecfe981484d9bd7028ac47e1547f3f3e187b475f",
+      "sourceSha256": "fc1a46330069b07d6eb3f6e498c9593201665b0ebd913820bb540a7b0c8ab3ce",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 97,
+      "duration": 4.042
+    },
+    {
+      "path": "media/refs/0f89b5a2-5f37-54f3-a78b-489061739e75.webp",
+      "kind": "image",
+      "bytes": 165010,
+      "sha256": "17e320367e7e697b59870c7a91334c62d9bc19ebddedf1c584f5e007cea72733",
+      "sourceSha256": "74a1a73ec458a0c0b0e9c63ca76abaa0c2dc9de0e98ba56c14aa51695981c384",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/refs/4866babf-656e-50c0-a3b2-5ce095fc6eb4.webp",
+      "kind": "image",
+      "bytes": 182172,
+      "sha256": "dfde835fbfe0c5d1fe03adc9971ee61eb1920a3beed0ad42462e8d642d8f9c0f",
+      "sourceSha256": "ee735514f1302826be91da84671d841a8c24e39b2b32be3b1f14917d9206892e",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/17760448-b746-469a-8b86-22308c15bc5c.mp4",
+      "kind": "video",
+      "bytes": 659855,
+      "sha256": "04c22aee056142468d4b0f95e9f096ae417e2b998f0ee12b6111cb04585c55ab",
       "sourceSha256": "b17ce375350e55465698e54dbc07a90ce508f8755d9191163466491de70519cc",
       "width": 1280,
       "height": 720,
@@ -4120,137 +4120,143 @@
       "duration": 4
     },
     {
-      "path": "media/assets/8b754c86-2181-44a7-a904-2c4590285b11.mp4",
+      "path": "media/assets/92bccbfa-f6b6-5740-a7d3-b56e3fe1441f.mp4",
       "kind": "video",
-      "bytes": 686284,
-      "sha256": "1cc8680da26da056f3855dd81340a76b9df9ac65ea8ec19c0c8e2755bd100680",
+      "bytes": 1057379,
+      "sha256": "477c347654066dde6d10ef3eec7571e1ee7c5af0eb9917c9ba4dfee4dd05bcc8",
+      "sourceSha256": "dd016282a62a9943943460b781ec7e529238bd96390d6d4f1d7070f988c9dea5",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 97,
+      "duration": 4.042
+    },
+    {
+      "path": "media/refs/f87f8ac4-8f57-5be5-a621-71637f161e02.webp",
+      "kind": "image",
+      "bytes": 195620,
+      "sha256": "bbe7d8f8b5928309d64c1b7bb284573444153cbeab0cf84f011f97b4e076275b",
+      "sourceSha256": "7f52186b56a09f67d70fe1e9c467d2a41733fc16c2520eedc69e099b12aeaed3",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/16313294-f9a2-5ef2-af6a-ae9d0f2d43e6.webp",
+      "kind": "image",
+      "bytes": 179364,
+      "sha256": "50635c043a92ca5749d4cdde0ce5643b8bfeeba4d64c32dc92d287e2e2f0d9be",
+      "sourceSha256": "331112728867b31f8b43f59be79121b8a3ceb1f5e367e5575b8d8b38b3548b97",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/db4abf37-79ed-4f9e-a370-0cb30c4e6f63.mp4",
+      "kind": "video",
+      "bytes": 1128594,
+      "sha256": "b181c751d1585830e9d53b7bd4e067f156385b346f23386176aa03e7d218fcd5",
       "sourceSha256": "1cc8680da26da056f3855dd81340a76b9df9ac65ea8ec19c0c8e2755bd100680",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 120,
       "duration": 5
+    },
+    {
+      "path": "media/assets/07b22003-5f1f-5fad-adc0-84c79f52c128.mp4",
+      "kind": "video",
+      "bytes": 1114985,
+      "sha256": "c15375a403461b44f06ae4e6b961ba5ca81d9de2510bc265d4ef79484f44cc44",
+      "sourceSha256": "5764e79ab5058c90237dc64ac1bba17d89a2462086f3fa9b5ba60c51abe5ba6a",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708
     }
   ],
   "assets": [
     {
-      "id": "02c2d4ca-0757-4e0f-8a97-d05775d4c747",
+      "id": "2cea6d02-5f04-49b6-8308-4296de792fdd",
       "kind": "camera-render",
       "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
-      "file": "assets/02c2d4ca-0757-4e0f-8a97-d05775d4c747.mp4",
-      "mime": "video/mp4",
-      "duration": 5,
-      "createdAt": "2026-10-30T15:14:33.778Z",
-      "source": {
-        "engineShotId": null
-      }
-    },
-    {
-      "id": "b0d8ceda-828f-4770-a0de-b358d2982789",
-      "kind": "workflow-result",
-      "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
-      "file": "assets/b0d8ceda-828f-4770-a0de-b358d2982789.mp4",
-      "mime": "video/mp4",
-      "duration": 5.041667,
-      "createdAt": "2026-10-30T17:51:35.562Z",
-      "source": {
-        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
-        "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Wide arena shot as Comfy guard sprints the ball up the court on a fast break, Comfy wing and Comfy center filling the lanes, the rival defenders backpedalling, the crowd on its feet. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive., Blue and yellow only; never black, white or green on this player. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Clear glass backboard with a white border. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers., Black and neon green only; never white, red or blue on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker., Black and neon green only; never white, red or blue on this player. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers., Blue and yellow only; never black, white or green on this player. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron. Only two teams are on the court: the Comfy team in electric blue and yellow, and the rival team in b",
-        "sourceAssetId": "02c2d4ca-0757-4e0f-8a97-d05775d4c747"
-      }
-    },
-    {
-      "id": "0ae71643-16f5-4b7a-b84f-5beddef01b1b",
-      "kind": "camera-render",
-      "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
-      "file": "assets/0ae71643-16f5-4b7a-b84f-5beddef01b1b.mp4",
-      "mime": "video/mp4",
-      "duration": 5,
-      "createdAt": "2026-10-30T15:14:35.413Z",
-      "source": {
-        "engineShotId": null
-      }
-    },
-    {
-      "id": "b59ed1dd-2ccc-40b1-8daf-113266bcdc09",
-      "kind": "workflow-result",
-      "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
-      "file": "assets/b59ed1dd-2ccc-40b1-8daf-113266bcdc09.mp4",
-      "mime": "video/mp4",
-      "duration": 5.041667,
-      "createdAt": "2026-10-30T19:26:30.403Z",
-      "source": {
-        "workflow": "LTX 2.5 Pro · animate the key frame",
-        "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Tracking alongside Comfy guard as he drives baseline past Rival defender. Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers. Polished maple hardwood basketball court with painted lines, glossy reflections. Blue center circle with a yellow ring. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 7, no real-world logos, black and green sneakers.; Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers. Clear glass backboard with a white border. Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 1, the yellow Comfy wordmark across the chest, blue and yellow sneakers.; Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 21, the yellow Comfy wordmark across the chest, blue and yellow sneakers. Setting: A packed indoor basketball arena at night, bright court lighting, roaring crowd in tiered stands, center-hung jumbotron.. Look: Photoreal live-action sports broadcast. Crisp arena light, glossy hardwood reflections, shallow depth of field on close-ups.. Camera: Truck right on Comfy guard, 35mm normal, eye level, 5s. Follow the supplied camera motion exactly. Movement: tracking shot. Lens: 35mm natural.",
-        "sourceAssetId": "0ae71643-16f5-4b7a-b84f-5beddef01b1b"
-      }
-    },
-    {
-      "id": "10ff2446-6e1d-4ad6-a553-66cc8ed1e7b1",
-      "kind": "camera-render",
-      "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
-      "file": "assets/10ff2446-6e1d-4ad6-a553-66cc8ed1e7b1.mp4",
-      "mime": "video/mp4",
-      "duration": 5,
-      "createdAt": "2026-10-30T17:39:02.967Z",
-      "source": {
-        "engineShotId": null
-      }
-    },
-    {
-      "id": "ae75dc86-eeaf-4d2b-b66c-97ef9403e70b",
-      "kind": "workflow-result",
-      "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
-      "file": "assets/ae75dc86-eeaf-4d2b-b66c-97ef9403e70b.mp4",
-      "mime": "video/mp4",
-      "duration": 5.041667,
-      "createdAt": "2026-10-30T19:53:46.234Z",
-      "source": {
-        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
-        "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Low angle under the rim: the Comfy guard explodes upward and throws down a two-handed dunk over the rival defender, the net snaps, the camera cranes up with him, the arena erupts. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7. Orange leather basketball. Clear glass backboard, orange breakaway rim with a white net. Setting: a packed indoor basketball arena at night, only two teams on the court, blue-and-yellow versus black-and-neon-green. Look: photoreal live-action sports broadcast, crisp arena light, fast shutter. Camera: crane up from a low angle under the rim, 14mm ultra-wide, speed ramp into the dunk, 5s. Follow the supplied camera motion exactly.",
-        "sourceAssetId": "10ff2446-6e1d-4ad6-a553-66cc8ed1e7b1"
-      }
-    },
-    {
-      "id": "7eb128d9-886e-472c-9a0d-c396267728d4",
-      "kind": "camera-render",
-      "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
-      "file": "assets/7eb128d9-886e-472c-9a0d-c396267728d4.mp4",
+      "file": "assets/2cea6d02-5f04-49b6-8308-4296de792fdd.mp4",
       "mime": "video/mp4",
       "duration": 4,
-      "createdAt": "2026-10-31T02:35:34.802Z",
+      "createdAt": "2026-10-31T07:00:09.319Z",
       "source": {
         "engineShotId": null,
         "signature": "ae3879eb"
       }
     },
     {
-      "id": "c7802ae5-9c1e-4330-855b-44a6a4befd7e",
+      "id": "5d3d7e6f-52ff-5017-a7e6-c855ad35c1fb",
+      "kind": "workflow-result",
+      "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
+      "file": "assets/5d3d7e6f-52ff-5017-a7e6-c855ad35c1fb.mp4",
+      "mime": "video/mp4",
+      "duration": 4.041667,
+      "createdAt": "2026-10-31T07:00:46.010Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Comfy guard in blue and yellow advances with Basketball while the green Rival defender retreats toward the basket. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 32mm. Filter: saturated primaries.",
+        "sourceAssetId": "2cea6d02-5f04-49b6-8308-4296de792fdd"
+      }
+    },
+    {
+      "id": "17760448-b746-469a-8b86-22308c15bc5c",
       "kind": "camera-render",
       "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
-      "file": "assets/c7802ae5-9c1e-4330-855b-44a6a4befd7e.mp4",
+      "file": "assets/17760448-b746-469a-8b86-22308c15bc5c.mp4",
       "mime": "video/mp4",
       "duration": 4,
-      "createdAt": "2026-10-31T02:35:34.803Z",
+      "createdAt": "2026-10-31T07:00:15.538Z",
       "source": {
         "engineShotId": null,
         "signature": "b40d8df2"
       }
     },
     {
-      "id": "8b754c86-2181-44a7-a904-2c4590285b11",
+      "id": "92bccbfa-f6b6-5740-a7d3-b56e3fe1441f",
+      "kind": "workflow-result",
+      "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
+      "file": "assets/92bccbfa-f6b6-5740-a7d3-b56e3fe1441f.mp4",
+      "mime": "video/mp4",
+      "duration": 4.041667,
+      "createdAt": "2026-10-31T07:00:55.816Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Comfy guard drives into the lane with Basketball. Rival defender sets under the east rim, facing the approaching guard. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 30mm. Filter: high contrast.",
+        "sourceAssetId": "17760448-b746-469a-8b86-22308c15bc5c"
+      }
+    },
+    {
+      "id": "db4abf37-79ed-4f9e-a370-0cb30c4e6f63",
       "kind": "camera-render",
       "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
-      "file": "assets/8b754c86-2181-44a7-a904-2c4590285b11.mp4",
+      "file": "assets/db4abf37-79ed-4f9e-a370-0cb30c4e6f63.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-31T02:35:34.804Z",
+      "createdAt": "2026-10-31T06:50:10.070Z",
       "source": {
         "engineShotId": null,
         "signature": "9e586736"
+      }
+    },
+    {
+      "id": "07b22003-5f1f-5fad-adc0-84c79f52c128",
+      "kind": "workflow-result",
+      "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
+      "file": "assets/07b22003-5f1f-5fad-adc0-84c79f52c128.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-10-31T06:58:57.724Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 9 reference images",
+        "backend": "cloud",
+        "prompt": "Comfy guard takes two final strides, rises above Rival defender and slams Basketball through the east rim. The defender lands beneath him; the guard comes down after the score. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 26mm. Filter: high contrast.\nReference images: 1 = start still; 2 = end still; 3 = Comfy guard; 4 = Rival defender; 5 = East rim; 6 = Basketball; 7 = Court floor; 8 = Sideline stands · tier 1; 9 = East backboard.",
+        "sourceAssetId": "db4abf37-79ed-4f9e-a370-0cb30c4e6f63"
       }
     }
   ],
@@ -4258,19 +4264,19 @@
     "clips": [
       {
         "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
-        "assetId": "b0d8ceda-828f-4770-a0de-b358d2982789",
+        "assetId": "5d3d7e6f-52ff-5017-a7e6-c855ad35c1fb",
         "in": 0,
         "out": null
       },
       {
         "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
-        "assetId": "b59ed1dd-2ccc-40b1-8daf-113266bcdc09",
+        "assetId": "92bccbfa-f6b6-5740-a7d3-b56e3fe1441f",
         "in": 0,
         "out": null
       },
       {
         "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
-        "assetId": "ae75dc86-eeaf-4d2b-b66c-97ef9403e70b",
+        "assetId": "07b22003-5f1f-5fad-adc0-84c79f52c128",
         "in": 0,
         "out": null
       }
