@@ -11,7 +11,10 @@ export type JobRow = {
   backend: { kind: string | null; id: string | null }; failure: { phase: string | null; httpStatus: number | null; detail: string | null } | null;
   trackingError?: string; results?: { id: string; kind: string; url: string }[]; shotId?: string; // results: not on live-stream rows
 };
-export type JobsSnapshot = { jobs: JobRow[]; limits: Record<string, { limit: number; active: number }>; tracker: { running: boolean; startedAt: string | null; resumed: number } };
+export type BudgetScope = { capUsd: number | null; spentUsd: number; reservedUsd: number; remainingUsd: number | null; alert: number | null; period?: string };
+/** Server budget authority status (GET /api/jobs `budget`, and the jobs stream's 'budget' event). */
+export type Budget = { account: BudgetScope; project: BudgetScope | null; remainingUsd: number | null; alert: number | null };
+export type JobsSnapshot = { jobs: JobRow[]; limits: Record<string, { limit: number; active: number }>; tracker: { running: boolean; startedAt: string | null; resumed: number }; budget?: Budget };
 export type BatchSummary = {
   id: string; projectId: string; status: string; createdAt: string; updatedAt: string; steps: string[]; tier?: string;
   maxCostUsd: number; estimateUsd: number; spentEstimateUsd: number; budgetSkipped?: number;
@@ -69,6 +72,17 @@ export function dur(s: number) {
   return `${Math.floor(s / 3600)}h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}m`;
 }
 export const since = (iso: string | null, now = Date.now()) => (iso ? `${dur((now - Date.parse(iso)) / 1000)} ago` : 'never');
+/** The panel's one budget line: what is left of the tighter cap (amber from 50%, red from 95%), or what is committed with no cap. */
+export function budgetLine(b?: Budget | null): { tone: 'ok' | 'warn' | 'bad' | 'muted'; text: string } | null {
+  if (!b?.account) return null;
+  const $ = (x: number) => `$${x.toFixed(2)}`, a = b.account;
+  const when = a.period === 'day' ? ' today' : a.period === 'month' ? ' this month' : '';
+  const scopes = [b.project ? { ...b.project, where: ' for this project' } : null, { ...a, where: when }].filter((x): x is BudgetScope & { where: string } => !!x && x.capUsd !== null);
+  const tight = scopes.sort((x, y) => (x.remainingUsd ?? 0) - (y.remainingUsd ?? 0))[0];
+  if (!tight) { const used = a.spentUsd + a.reservedUsd; return used > 0 ? { tone: 'muted', text: `Budget: no cap set · ${$(used)} committed${when}` } : null; }
+  const tone = !b.alert ? 'ok' : b.alert >= 95 ? 'bad' : 'warn';
+  return { tone, text: `Budget: ${$(tight.remainingUsd ?? 0)} left of ${$(tight.capUsd ?? 0)}${tight.where}${tight.reservedUsd > 0 ? ` · ${$(tight.reservedUsd)} reserved` : ''}` };
+}
 // ---- end pure helpers ----
 
 const KIND_ICON: Record<string, string> = {
@@ -117,8 +131,9 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     const merged = snap.jobs.filter(j => j.projectId !== projectId || byKey.has(rowKey(j))).map(j => byKey.get(rowKey(j)) || j);
     for (const j of live) if (!merged.some(m => rowKey(m) === rowKey(j))) merged.push(j);
     merged.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
-    snap = { ...snap, jobs: merged };
-    if (shape(merged) !== before) render();
+    const budget = lease.client.snapshot().budget as Budget | undefined, budgetChanged = !!budget && JSON.stringify(budget) !== JSON.stringify(snap.budget);
+    snap = { ...snap, jobs: merged, ...(budget ? { budget } : {}) };
+    if (shape(merged) !== before || budgetChanged) render();
   });
 
   // A server without the S1/S3 routes answers 404 ("File not found", "Unknown director route"): stop asking.
@@ -145,7 +160,15 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
   }
   document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimeout(timer); else void load().then(schedule); });
 
+  // A budget alert (50/80/95% of a cap, or the cap itself) is toasted once as it is crossed.
+  let seenAlert: number | null = null;
+  function alertBudget() {
+    const level = snap.budget?.alert ?? 0;
+    if (seenAlert !== null && level > seenAlert) toast(level >= 100 ? 'Budget used up: new paid runs are refused' : `Budget ${level}% used · ${budgetLine(snap.budget)?.text.replace('Budget: ', '')}`, level >= 95);
+    seenAlert = level;
+  }
   function render() {
+    alertBudget();
     const live = pipState(snap.jobs, batches);
     for (const j of snap.jobs) if (isActive(j)) watched.add(j.id);
     if (live) lastBusy = Date.now();
@@ -265,7 +288,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     const slots = Object.entries(snap.limits || {}).filter(([, v]) => v && v.limit > 0).map(([k, v]) =>
       h('span', { class: 'js-slot', title: `${SLOT_NAMES[k] || k}: ${v.active} of ${v.limit} slots in use` }, h('span', { class: 'js-slot-name' }, SLOT_NAMES[k] || k),
         h('span', { class: 'js-pips', 'aria-hidden': 'true' }, ...Array.from({ length: Math.min(v.limit, 8) }, (_, i) => h('i', { class: i < v.active ? 'on' : '' })))));
-    const listed = shownBatches(batches, fetchedAt);
+    const listed = shownBatches(batches, fetchedAt), money = budgetLine(snap.budget);
     const nothing = !snap.jobs.length && !listed.length;
     const sub = !jobsOk ? 'Job tracking is not available on this server yet.' : g.attention.length ? `${g.attention.length} need${g.attention.length === 1 ? 's' : ''} attention` : g.running.length ? `${g.running.length} running` : 'Nothing running';
     sheet.replaceChildren(
@@ -273,6 +296,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
         h('div', {}, h('h2', { id: 'jobs-title' }, 'Jobs'), h('p', { class: 'js-sub' }, sub)),
         h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => sheet.close() }, '✕')),
       slots.length ? h('div', { class: 'js-slots', 'aria-label': 'Backend slots' }, ...slots) : '',
+      money ? h('p', { class: `js-budget t-${money.tone}`, title: 'Estimated from list prices. Caps: PREVIS_BUDGET_CAP_USD, PREVIS_BUDGET_PROJECT_CAP_USD' }, money.text) : '',
       h('div', { class: 'js-body' },
         section('Needs attention', 'bad', g.attention.map(jobRow)),
         section('Running', 'run', g.running.map(jobRow)),

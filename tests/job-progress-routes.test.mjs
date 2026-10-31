@@ -101,3 +101,15 @@ test('snapshot lists every active job and the newest 30 finished ones, without r
   assert.ok(first.jobs.every(j => !('results' in j)));
   f.routes.stop();
 });
+test('budget: the snapshot carries it and a budget change is streamed as a budget event', async () => {
+  const f = fixture(), original = f.scope.snapshot;
+  let budget = { account: { capUsd: 10, remainingUsd: 6, alert: null }, project: null, remainingUsd: 6, alert: null };
+  f.scope.snapshot = () => ({ ...original(), budget });
+  const { res } = await f.request();
+  assert.deepEqual(events(res)[0].budget, budget);
+  budget = { ...budget, account: { ...budget.account, remainingUsd: 4, alert: 50 }, remainingUsd: 4, alert: 50 };
+  f.notify({ type: 'budget' });
+  const sent = events(res)[1];
+  assert.equal(sent.type, 'budget'); assert.equal(sent.budget.alert, 50); assert.equal(sent.projectId, 'p');
+  f.routes.stop();
+});

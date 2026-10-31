@@ -5,7 +5,7 @@ export type ProgressJob = { source: 'generation' | 'refgen'; id: string; project
   live?: { phase: string; observedAt: string; connection: string;
     node: { id: string; label: string; value: number | null; max: number | null; unit: string | null } | null;
     queue: unknown | null; estimate: unknown | null; preview: Preview | null }; [key: string]: unknown };
-export type ProgressSnapshot = { jobs: ProgressJob[]; limits: Record<string, unknown>; tracker: Record<string, unknown> };
+export type ProgressSnapshot = { jobs: ProgressJob[]; limits: Record<string, unknown>; tracker: Record<string, unknown>; budget?: unknown };
 type Options = { document?: Document; eventSource?: ((url: string) => EventSource) | null;
   poll?: (projectId: string, signal: AbortSignal) => Promise<ProgressSnapshot> };
 const terminal = new Set(['completed', 'failed', 'cancelled', 'closed', 'invalidated', 'orphaned']);
@@ -23,19 +23,20 @@ export function createProgressClient(projectId: string, options: Options = {}) {
     const response = await fetch(`/api/jobs?projectId=${encodeURIComponent(id)}`, { signal, credentials: 'same-origin', cache: 'no-store' });
     if (!response.ok) throw Error('Status unavailable'); return response.json();
   });
-  let rows = new Map<string, ProgressJob>(), limits = {}, tracker = {}, epoch = '', seq = -1;
+  let rows = new Map<string, ProgressJob>(), limits = {}, tracker = {}, budget: unknown = undefined, epoch = '', seq = -1;
   let source: EventSource | null = null, timer: ReturnType<typeof setTimeout> | undefined, deadline: ReturnType<typeof setTimeout> | undefined;
   let abort: AbortController | null = null, generation = 0, disposed = false, started = false;
   let connection: 'connecting' | 'live' | 'polling' | 'stale' | 'hidden' = 'connecting';
   const listeners = new Set<() => void>();
   const emit = () => { for (const fn of listeners) { try { fn(); } catch { /* A surface cannot break the shared transport. */ } } };
-  const snapshot = (): ProgressSnapshot => structuredClone({ jobs: [...rows.values()], limits, tracker });
+  const snapshot = (): ProgressSnapshot => structuredClone({ jobs: [...rows.values()], limits, tracker, ...(budget ? { budget } : {}) });
   function stopTransport() {
     generation++; source?.close(); source = null; abort?.abort(); abort = null;
     clearTimeout(timer); clearTimeout(deadline);
   }
   function replace(data: ProgressSnapshot) {
     rows = new Map(data.jobs.filter(j => validJob(j, projectId)).map(j => [keyOf(j), j])); limits = data.limits; tracker = data.tracker;
+    if (data.budget && typeof data.budget === 'object') budget = data.budget;
   }
   async function polling() {
     if (disposed || doc.hidden) return;
@@ -56,7 +57,7 @@ export function createProgressClient(projectId: string, options: Options = {}) {
     try {
       const current = source = makeSource(`/api/jobs/stream?projectId=${encodeURIComponent(projectId)}`);
       deadline = setTimeout(() => { if (source === current && connection !== 'live') fallback(); }, 10000);
-      for (const type of ['snapshot', 'job', 'remove', 'preview']) current.addEventListener(type, event => {
+      for (const type of ['snapshot', 'job', 'remove', 'preview', 'budget']) current.addEventListener(type, event => {
         if (source !== current || disposed || doc.hidden) return;
         let data: any; try { data = JSON.parse((event as MessageEvent).data); } catch { return; }
         if (data.v !== 1 || data.projectId !== projectId || typeof data.epoch !== 'string' || !Number.isSafeInteger(data.seq) || data.seq < 0) return;
@@ -64,6 +65,7 @@ export function createProgressClient(projectId: string, options: Options = {}) {
         if (data.epoch === epoch && data.seq <= seq) return;
         if (type === 'snapshot') { if (!Array.isArray(data.jobs) || !data.limits || !data.tracker) return; replace(data); epoch = data.epoch; }
         else if (type === 'job') { if (!validJob(data.job, projectId)) return; rows.set(keyOf(data.job), data.job); }
+        else if (type === 'budget') { if (!data.budget || typeof data.budget !== 'object') return; budget = data.budget; }
         else {
           if (!['generation', 'refgen'].includes(data.source) || typeof data.id !== 'string') return;
           const key = keyOf(data), row = rows.get(key);

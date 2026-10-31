@@ -31,6 +31,9 @@ dialog.jobs-sheet::backdrop { background: rgba(21, 19, 15, .14); backdrop-filter
 .js-head h2 { margin: 0; font: 600 var(--fs-xl)/var(--lh-tight) var(--serif); letter-spacing: var(--track-tight); }
 .js-sub { margin: 3px 0 0; color: var(--ink-3); font-size: var(--fs-sm); }
 .js-slots { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0 18px 12px; border-bottom: 1px solid var(--line); }
+.js-budget { margin: 0; padding: 8px 18px; border-bottom: 1px solid var(--line); color: var(--ink-3); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.js-budget.t-warn { color: var(--warn); }
+.js-budget.t-bad { color: var(--bad); }
 .js-slot { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-2xs); color: var(--ink-3); }
 .js-slot-name { letter-spacing: .02em; }
 .js-pips { display: inline-flex; gap: 3px; }
