@@ -36,7 +36,7 @@ export type SequenceCtx = {
   /** [mobile] compact row template; the parts are today's controls, re-arranged by the mobile layer. */
   rowTemplate?(parts: RowParts): HTMLElement;
 };
-export type RowParts = { s: Shot; i: number; count: number; on: boolean; inCut: boolean; thumb: HTMLCanvasElement; pick: HTMLInputElement; version: HTMLSelectElement; trimIn: HTMLInputElement; trimOut: HTMLInputElement; include: HTMLButtonElement; moveUp: HTMLButtonElement; moveDown: HTMLButtonElement; open: HTMLButtonElement; bState: string[]; gState: string[]; progress?: HTMLElement | null; select(): void; reorder(from: number, to: number): Promise<void> };
+export type RowParts = { s: Shot; i: number; count: number; on: boolean; inCut: boolean; thumb: HTMLCanvasElement; pick: HTMLInputElement; version: HTMLSelectElement; trimIn: HTMLInputElement; trimOut: HTMLInputElement; include: HTMLButtonElement; moveUp: HTMLButtonElement; moveDown: HTMLButtonElement; open: HTMLButtonElement; bState: string[]; gState: string[]; progress?: HTMLElement | null; takes?: HTMLButtonElement | null; select(): void; reorder(from: number, to: number): Promise<void> };
 
 type Job = { id: string; shotId: string; status: string; message?: string; definition?: { title?: string; task?: string } };
 type Quoted = { shot: Shot; est: number | null; ok: boolean; issue?: string; refs?: EngineRef[]; cameraSource?: CameraSource };
@@ -312,7 +312,11 @@ export function createSequence(ctx: SequenceCtx) {
     const trimIn = trim('in'), trimOut = trim('out'), moveUp = move(-1), moveDown = move(1), open = h('button', { class: 'btn ghost sm', type: 'button', title: 'Open this shot in the scene', onclick: (ev: Event) => { ev.stopPropagation(); ctx.openShot(s.id); } }, 'Open');
     // [live-progress] A new version's progress, separate from the version selected for the cut.
     const progress = job ? progressSlot(p.id, 'generation', job.id, `Shot ${i + 1} new version`, 'cut') : null;
-    if (ctx.rowTemplate) return ctx.rowTemplate({ s, i, count: p.shots.length, on: s.id === selected, inCut, thumb, pick, version, trimIn, trimOut, include, moveUp, moveDown, open, bState, gState, progress, select: () => select(s.id), reorder });
+    if (ctx.rowTemplate) {
+      // [mobile] The shot sheet's way into the Take lab: same opener and same rule as the viewer's Compare takes.
+      const takes = ctx.openTakes && (res.length || s.references.some(r => r.role === 'frame')) ? h('button', { class: 'btn sm', type: 'button', title: 'Compare this shot’s takes side by side and pick the winner', onclick: (ev: Event) => { ev.stopPropagation(); ctx.openTakes?.(s.id); } }, 'Compare takes') : null;
+      return ctx.rowTemplate({ s, i, count: p.shots.length, on: s.id === selected, inCut, thumb, pick, version, trimIn, trimOut, include, moveUp, moveDown, open, bState, gState, progress, takes, select: () => select(s.id), reorder });
+    }
     const el = h('div', { class: 'sq-row' + (s.id === selected ? ' on' : '') + (inCut ? '' : ' out'), role: 'listitem', draggable: true, tabindex: 0, 'aria-label': `Shot ${i + 1} ${s.title}` },
       h('span', { class: 'sq-grip', title: 'Drag to reorder', 'aria-hidden': 'true' }, '⋮⋮'), pick,
       h('span', { class: 'sq-num mono' }, String(i + 1).padStart(2, '0')),

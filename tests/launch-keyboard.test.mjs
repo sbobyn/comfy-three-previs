@@ -94,3 +94,36 @@ test('keyboard only: starter → camera → Generate video → quote, with no fo
     await page.context().close();
   } finally { await app.stop(); }
 });
+
+test('skip links: the first Tab stops, visible on focus, reach the viewport, the side panel and the shot list', { skip: skipReason, timeout: 120_000 }, async () => {
+  const app = await startApp();
+  try {
+    const page = await app.page(SIZES[0][1]);
+    await page.goto(`${app.base}/director.html?project=${app.id}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.outline .obj', { state: 'attached' });
+    const shown = name => page.evaluate(n => { const a = [...document.querySelectorAll('.skip-link')].find(x => x.textContent === n); const r = a.getBoundingClientRect(); return a === document.activeElement && r.top >= 0 && r.bottom <= innerHeight && r.width > 0; }, name);
+    const active = () => page.evaluate(() => { const a = document.activeElement; return { canvas: a?.matches('canvas.main'), side: !!a?.closest('aside.side'), shot: a?.matches('.shots .shot[aria-current="true"]'), row: a?.matches('.sq-row.on') }; });
+
+    // One Tab per link: viewport, side panel, shot list. Each is on screen while it has focus.
+    for (const [i, name] of ['Skip to viewport', 'Skip to side panel', 'Skip to shot list'].entries()) {
+      await page.keyboard.press('Tab');
+      assert.ok(await shown(name), `Tab ${i + 1} focuses “${name}” and shows it`);
+    }
+    await page.keyboard.press('Enter');
+    assert.equal((await active()).shot, true, 'Skip to shot list lands on the current shot');
+    await page.locator('.skip-link', { hasText: 'Skip to viewport' }).focus(); await page.keyboard.press('Enter');
+    assert.equal((await active()).canvas, true, 'Skip to viewport lands on the 3D viewport');
+    // A collapsed side panel opens first.
+    await page.evaluate(() => { if (!document.querySelector('.ws-body')?.classList.contains('side-collapsed')) document.querySelector('.panel-toggle[aria-label="Toggle shot panel"]')?.click(); });
+    assert.equal(await page.evaluate(() => document.querySelector('.ws-body').classList.contains('side-collapsed')), true);
+    await page.locator('.skip-link', { hasText: 'Skip to side panel' }).focus(); await page.keyboard.press('Enter');
+    assert.equal((await active()).side, true, 'Skip to side panel opens the panel and lands inside it');
+    assert.deepEqual(await page.axe(), [], 'axe stays clean with the skip links');
+    // The Cut has no viewport or side panel: only the shot list link is left, and it lands on the current row.
+    await page.locator('.step-btn[data-step="cut"]').click(); await page.waitForSelector('.sq-row.on');
+    assert.deepEqual(await page.$$eval('.skip-link', xs => xs.filter(x => !x.hidden).map(x => x.textContent)), ['Skip to shot list']);
+    await page.locator('.skip-link', { hasText: 'Skip to shot list' }).focus(); await page.keyboard.press('Enter');
+    assert.equal((await active()).row, true, 'in the Cut, Skip to shot list lands on the current row');
+    await page.context().close();
+  } finally { await app.stop(); }
+});

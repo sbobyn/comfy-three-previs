@@ -7,7 +7,7 @@ import { withReferenceImages, maxReferences } from '../shared/video-refs.mjs';
 import { cameraSourceOf, motionInput } from '../shared/camera-source.mjs';
 import { videoPromptPlan } from '../shared/prompt-plan.mjs';
 import type { PromptPlan } from '../shared/prompt-plan.mjs';
-import { resolveVideoParams } from '../shared/model-params.mjs';
+import { autoPromptCap, resolveVideoParams } from '../shared/model-params.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
 import { api } from './director-common';
 import { clipSecondsFor, FIRST_FRAME_FALLBACK } from '../shared/tiers.mjs';
@@ -51,7 +51,7 @@ export function plannedReferences(project: DirectorProject, s: Shot, st: GenStat
  * batch, MCP and the prompt inspector use). It carries the camera line for `cameraSource` and never describes the move.
  */
 export function shotVideoPlan(project: DirectorProject, s: Shot, def: Def | null, refs: VideoRef[], userPrompt?: string | null, cameraSource: CameraSource = 'blockout'): PromptPlan {
-  return videoPromptPlan(project, s, { cameraSource, refs, maxLength: def?.constraints?.promptMaxLength, userPrompt: userPrompt ?? null, model: def?.title?.split(' ·')[0] || '' });
+  return videoPromptPlan(project, s, { cameraSource, refs, maxLength: def?.constraints?.promptMaxLength, cap: autoPromptCap(def), userPrompt: userPrompt ?? null, model: def?.title?.split(' ·')[0] || '' });
 }
 
 async function definitionFor(st: GenState, id: string, refCount: number, middleCount = 0): Promise<Def> {

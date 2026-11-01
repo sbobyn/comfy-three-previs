@@ -21,7 +21,9 @@ A valid credential does not authorize charges. Keep paid execution disabled unti
 
 ## Blender MCP
 
-Selected upstream: https://github.com/ahujasid/mcp-for-blender (formerly ahujasid/blender-mcp), package **2.2.2**, commit **5a3618fccb2d982d0dd61e7a1879912c3100073b**, MIT. Python >=3.10; upstream dependencies mcp >=1.26,<2 and httpx >=0.27. Use matching `addon.py` from that commit, installed using Blender's addon UI, and enable its server. Upstream supports a running GUI Blender, not background `-b` mode.
+Most Blender work does not need this. To bring a Blender shot into the Director, use the headless helper in [blender-import.md](blender-import.md#choose-a-route). It needs no add-on and no arbitrary-code server, and Blender Agent (Agent Link) users should use it too. This section covers Previs driving a running Blender for camera previews.
+
+Selected upstream: https://github.com/ahujasid/mcp-for-blender (formerly ahujasid/blender-mcp), package **2.2.2**, commit **5a3618fccb2d982d0dd61e7a1879912c3100073b**, MIT. This is the one pin for every Previs Blender MCP route. blender-import.md uses the same version, and the PyPI `mcp-for-blender==2.2.2` wheel bundles an `addon.py` byte-identical to this commit's. This route was tested with Blender 4.5.4 LTS (GUI); see Evidence and limits below. Python >=3.10; upstream dependencies mcp >=1.26,<2 and httpx >=0.27. Use matching `addon.py` from that commit, installed using Blender's addon UI, and enable its server. Upstream supports a running GUI Blender, not background `-b` mode.
 
 Example with uv installed:
 

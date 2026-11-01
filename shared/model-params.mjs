@@ -10,6 +10,7 @@
 import { clipSecondsFor, durationValue, estimateBreakdown, FIRST_FRAME_FALLBACK } from './tiers.mjs';
 import { cameraSourceOf } from './camera-source.mjs';
 import { maxReferences } from './video-refs.mjs';
+import { VIDEO_PROMPT_CAP } from './prompt.mjs';
 
 export const SEED_MAX = 2147483647;
 const presetOf = def => def?.provenance?.presetId || def?.id || '';
@@ -82,6 +83,15 @@ export function savedClipSeconds(shot, modelId, durations) {
   const v = shot?.settings?.video, d = v?.params?.duration;
   return v && settingsApply(v.model, { id: modelId }) && Number.isInteger(d) && (durations || []).includes(d) ? d : null;
 }
+/**
+ * The auto-prompt's length cap for video model `def`, in characters: the preset's `constraints.autoPromptCap`, else
+ * VIDEO_PROMPT_CAP (600). A heuristic for how much optional detail the composed prompt carries, not the model's hard
+ * limit (promptMaxLength) and not a known optimum; see shared/prompt.mjs.
+ */
+export function autoPromptCap(def) {
+  const n = def?.constraints?.autoPromptCap;
+  return Number.isInteger(n) && n > 0 ? n : VIDEO_PROMPT_CAP;
+}
 /** What a video model takes and costs, for pickers and the MCP model list. */
 export function videoCapabilities(def) {
   const clip = def.task === 'transform-video' || def.task === 'control-video', local = presetOf(def).startsWith('wan-');
@@ -89,6 +99,7 @@ export function videoCapabilities(def) {
     id: def.id, title: def.title, task: def.task, cameraSource: cameraSourceOf(def),
     inputs: { blockoutClip: clip, startStill: def.task === 'first-frame', endStill: def.task === 'first-frame' && !!def.inputs?.lastFrame, referenceImages: maxReferences(def), prompt: !!def.inputs?.prompt },
     promptMaxLength: def.constraints?.promptMaxLength ?? null,
+    autoPromptCap: { chars: autoPromptCap(def), heuristic: true, fromPreset: Number.isInteger(def.constraints?.autoPromptCap) && def.constraints.autoPromptCap > 0 },
     clipLengths: def.task === 'first-frame' ? def.constraints?.durations ?? null : null,
     sourceDuration: def.constraints?.sourceVideo?.duration ?? def.constraints?.controlVideo?.duration ?? null,
     ratePerSecond: local ? 0 : def.pricing?.ratePerSecond ?? null,

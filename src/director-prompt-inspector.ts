@@ -137,6 +137,8 @@ export function promptInspectorBlock(s: Shot, ctx: InspectorCtx) {
   return h('div', { class: 'block pi', 'data-kind': kind },
     head,
     h('p', { class: 'pi-facts' }, ...facts.flatMap((f, i) => [i ? h('span', { class: 'pi-sep', 'aria-hidden': 'true' }, '·') : null, h('span', {}, f)])),
+    // PV-02: the auto-prompt's length cap is per model and a rule of thumb; say so where it shapes the text.
+    plan.kind === 'video' && plan.mode === 'sections' && plan.autoPromptCap ? h('p', { class: 'note pi-cap' }, `The auto-prompt aims for about ${plan.autoPromptCap.toLocaleString('en-US')} characters for this model. That cap is a heuristic, not a measured optimum.`) : null,
     plan.cameraLabel ? h('p', { class: 'note pi-cam' }, `${plan.cameraLabel}. Video prompts name no camera move: the camera rule below says which input to follow.`) : null,
     modeNote ? h('p', { class: 'pi-mode' }, modeNote) : null,
     plan.cameraWarning ? h('p', { class: 'status-line err pi-camwarn', role: 'status' }, plan.cameraWarning) : null,
