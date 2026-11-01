@@ -4,6 +4,11 @@
 // GET requests only. Run after `VITE_DEMO=1 vite build ... --outDir dist-demo`
 // (or just `pnpm run demo:build`).
 //
+// The demo shows the bundled starters (examples/starters, the source of truth): by default it reads their source
+// projects, the ids `pnpm starters:import` writes, so the server's data dir must hold them (publish-public.sh imports
+// them into its copy of the data). Every demo project that pairs with a starter must re-export to exactly that
+// bundle's scene, shots, images, clips and cut, or the snapshot fails before writing it.
+//
 // The demo shows each project as it stands, not its history: per shot the current start and end stills, the
 // video the Cut uses and the blockout clip; per object its look and the shown take of each design-sheet slot.
 // Other takes are left out unless they are inputs to kept media. Ids are kept, so every
@@ -14,9 +19,10 @@
 //   PREVIS_URL        server to read from (default http://127.0.0.1:5230)
 //   PREVIS_DATA       that server's data dir, for media files
 //                     (default .evidence/dev-data, the same default as scripts/publish-public.sh)
-//   DEMO_PROJECTS     comma-separated project ids (default: the four starters)
+//   DEMO_PROJECTS     comma-separated project ids (default: the four starters' source projects)
 //   DEMO_MEDIA_MB     media budget in MiB (default 400); fail without dropping files
 import { mkdir, writeFile, copyFile, readFile, rm } from 'node:fs/promises';
+import { isDeepStrictEqual } from 'node:util';
 import { existsSync } from 'node:fs';
 import { join, resolve, extname, dirname, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -24,10 +30,12 @@ import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { keyStills, lookSource } from '../shared/director.mjs';
-import { starterPicks } from '../server/previs/starters.mjs';
+import { starterPicks, starterSnapshot, loadStarters } from '../server/previs/starters.mjs';
+import { SOURCES } from './export-starters.mjs';
 
 const run = promisify(execFile);
-export const DEFAULT_PROJECTS = ['ff685e99-00bf-4f5f-979a-944f0caca7c9', 'f158baf1-2cac-4311-859a-e5c590d381d4', 'ac79f20f-85d2-44ba-b1a4-0692c7eb6b0f', '5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6'];
+// The starters' source projects (starterSourceId per slug), not the dev projects they were first exported from.
+export const DEFAULT_PROJECTS = SOURCES.map(s => s.id);
 export const STILL_MAX_WIDTH = 1280, STILL_QUALITY = 82;
 export const DEFAULT_MEDIA_MB = 400;
 
@@ -128,11 +136,45 @@ export function slimProject(project, keep = demoKeep(project), media = new Map()
  * snapshotted project it opens. Starters with no project in the demo are left out; the demo cannot create one.
  */
 export function demoStarters(starters = [], projects = []) {
-  const bare = t => String(t || '').replace(/^Starter · /, '').trim().toLowerCase();
   return starters.flatMap(s => {
-    const p = projects.find(x => bare(x.title) === bare(s.title));
+    const p = projects.find(x => bareTitle(x.title) === bareTitle(s.title));
     return p ? [{ slug: s.slug, title: s.title, description: s.description, shots: s.shots, entities: s.entities, scene: s.scene, shot: s.shot, projectId: p.id }] : [];
   });
+}
+
+const bareTitle = t => String(t || '').replace(/^Starter · /, '').trim().toLowerCase();
+
+/** The bundled starter a demo project shows: by `template` slug, else by title (as demoStarters pairs cards). */
+export const starterFor = (project, starters = []) =>
+  starters.find(s => s.slug === project.template) || starters.find(s => bareTitle(s.title) === bareTitle(project.title)) || null;
+
+/**
+ * How a demo project differs from its bundled starter, as readable lines (empty when it matches). The project is
+ * exported the way `pnpm starters:export` would export it and compared with the bundle: scene name and environment,
+ * every entity (transform, path, display model, look, sheets), every shot (camera, timing, cast, prompts, stills),
+ * the scene images, the blockout clips and videos, and the cut.
+ */
+export function starterDrift(project, starter) {
+  const snap = starterSnapshot(project, { slug: starter.slug, title: starter.title, description: starter.description, order: starter.order });
+  const out = [], named = x => x.name || x.title || x.id;
+  const byId = (label, mine = [], theirs = [], name = named) => {
+    for (const t of theirs) {
+      const m = mine.find(x => x.id === t.id);
+      if (!m) { out.push(`${label} “${name(t)}” is missing`); continue; }
+      if (isDeepStrictEqual(m, t)) continue;
+      const keys = [...new Set([...Object.keys(m), ...Object.keys(t)])].filter(k => !isDeepStrictEqual(m[k], t[k]));
+      out.push(`${label} “${name(t)}” differs in ${keys.join(', ')}`);
+    }
+    for (const m of mine) if (!theirs.some(t => t.id === m.id)) out.push(`${label} “${name(m)}” is not in the bundle`);
+  };
+  if (snap.scene.name !== starter.scene.name) out.push(`scene name “${snap.scene.name}” is not “${starter.scene.name}”`);
+  if (!isDeepStrictEqual(snap.scene.environment, starter.scene.environment || {})) out.push('scene environment differs');
+  byId('shot', snap.shots, starter.shots);
+  if (!isDeepStrictEqual(snap.edit?.clips || [], starter.edit?.clips || [])) out.push('cut differs');
+  byId('entity', snap.scene.entities, starter.scene.entities);
+  byId('image', snap.scene.references, starter.scene.references);
+  byId('clip', snap.assets, starter.assets, a => `${a.kind} ${a.id}`);
+  return out;
 }
 
 /** Follow input references and source clips, not unrelated output takes from the same job. */
@@ -208,7 +250,7 @@ function clean(v) {
 }
 
 /** Build into fresh media/data directories. Failure retains evidence and never removes selected media. */
-export async function snapshotDemo({ get, data, out, ids = DEFAULT_PROJECTS, budget = DEFAULT_MEDIA_MB * 1048576, ffmpeg = process.env.PREVIS_FFMPEG || 'ffmpeg', ffprobe = process.env.PREVIS_FFPROBE || 'ffprobe' }) {
+export async function snapshotDemo({ get, data, out, ids = DEFAULT_PROJECTS, starters: bundles, budget = DEFAULT_MEDIA_MB * 1048576, ffmpeg = process.env.PREVIS_FFMPEG || 'ffmpeg', ffprobe = process.env.PREVIS_FFPROBE || 'ffprobe' }) {
   if (!Number.isFinite(budget) || budget <= 0) throw new Error('DEMO_MEDIA_MB must be positive');
   const dataDir = join(out, 'demo-data'), mediaDir = join(out, 'demo-media');
   if (existsSync(dataDir) || existsSync(mediaDir)) throw new Error('Snapshot output already exists; build into a fresh output directory');
@@ -217,7 +259,8 @@ export async function snapshotDemo({ get, data, out, ids = DEFAULT_PROJECTS, bud
   const { projects: all } = await get('director/projects');
   const { projects: archived } = await get('director/archived');
   const { projects: listed, skipped, missing } = pickProjects(ids, all, archived);
-  if (missing.length) throw new Error(`Requested projects missing: ${missing.join(', ')}`);
+  if (missing.length) throw new Error(`Requested projects missing: ${missing.join(', ')}. The demo shows the bundled starters: stop the server, run pnpm starters:import --data-dir <its data dir>, and start it again`);
+  bundles ||= await loadStarters();
   const generation = await get('generation');
   const media = [], jobs = new Map(), projects = [];
   const safe = (root, file) => {
@@ -263,6 +306,9 @@ export async function snapshotDemo({ get, data, out, ids = DEFAULT_PROJECTS, bud
       if (keep.refs.has(ref.id) && !mapped.has(ref.id)) mapped.set(ref.id, await save(`director/${pid}/refs/${ref.file}`, `director-refs/${pid}/${demoStillFile(ref.file)}`, true));
     }
     const slim = slimProject(project, keep, mapped);
+    const starter = starterFor(slim, bundles);
+    const drift = starter ? starterDrift(slim, starter) : [];
+    if (drift.length) throw new Error(`Demo project ${pid} (“${slim.title}”) differs from its bundled starter examples/starters/${starter.slug}:\n  ${[...drift.slice(0, 25), ...(drift.length > 25 ? [`… and ${drift.length - 25} more`] : [])].join('\n  ')}\nThe bundle is the source of truth: snapshot its source project (pnpm starters:import --data-dir <server data dir> --force, with the server stopped).`);
     const assetURLs = new Map();
     for (const asset of slim.assets) {
       const record = await save(`director/${pid}/${asset.file}`, `director-assets/${pid}/${asset.file.replace(/^assets\//, '')}`);

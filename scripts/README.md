@@ -8,7 +8,7 @@ Operator commands. None of them prints credential values. Paid or cloud work is 
 | `pnpm starters:import` | Loads the bundles in `examples/starters` into a data directory as the canonical source projects, ids kept. |
 | `pnpm starters:export` | Writes the bundles from the source projects. `--check` verifies the round trip and writes nothing. |
 | `node scripts/pipeline/regenerate-starters.mjs` | Regenerates starter looks, sheets, stills and videos through the batch API. Paid when run without `--dry-run`. |
-| `pnpm demo:build` | Builds the static demo; `snapshot-demo.mjs` reads a running server with GET requests only. |
+| `pnpm demo:build` | Builds the static demo of the starters' source projects; `snapshot-demo.mjs` reads a running server with GET requests only and fails if a demo project differs from its bundle. |
 | `node scripts/guide-media.mjs` | Captures the guide's media from the starters on a running server (read-only). |
 | `pnpm usage:report`, `pnpm docs:models` | Read-only usage and model tables. |
 | `publish-public.sh`, `prepare-after-hours.mjs`, `mobile-check.mjs`, `phone-certificate.mjs` | See the header comment of each script. |
