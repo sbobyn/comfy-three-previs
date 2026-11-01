@@ -120,7 +120,8 @@ test('imports refuse files outside the allowlist, undeclared or changed files an
       ['a home path', tamper(data, m => { m.origin.projectTitle = '~/films/final-lap'; }), /must not contain local paths \(origin\.projectTitle/],
       ['a file name that escapes refs/', tamper(data, m => { m.references[0].file = '../asset.json'; }), /field outside the asset format|invalid id, file or type/],
       ['a changed manifest without a new hash', tamper(data, m => { m.entities[0].notes = 'edited'; }, { rehash: false }), /content hash does not match/],
-      ['a newer format', tamper(data, m => { m.formatVersion = 2; }), /needs a newer Comfy Previs/],
+      ['a newer format', tamper(data, m => { m.formatVersion = 3; }), /needs a newer Comfy Previs/],
+      ['v2 fields in a version-1 manifest', tamper(data, m => { m.license = 'CC0-1.0'; }), /need format version 2/],
       ['a look shared from outside', tamper(data, m => { m.entities[0].lookFrom = '00000000-0000-4000-8000-000000000000'; }), /shares a look from outside the asset/],
       ['a parent outside the asset', tamper(data, m => { m.entities[0].parent = '00000000-0000-4000-8000-000000000000'; }), /must come after its parent, inside the asset/],
       ['a project export without its manifest', writeZip([{ name: 'project.json', data: Buffer.from('{}') }]), /Unexpected file in asset bundle: project\.json/],
@@ -131,6 +132,38 @@ test('imports refuse files outside the allowlist, undeclared or changed files an
     // Unsafe archive names are refused by the zip reader before anything else.
     const evil = data.toString('latin1').replaceAll('asset.json', 'a/../.json');
     await assert.rejects(b.library.importZip(Buffer.from(evil, 'latin1')), /Unsafe archive path/);
+  });
+});
+
+test('format v2: license, authors and the generator recipe travel with the asset and show on its card', async () => {
+  await withDir(async root => {
+    const a = await openDirector(join(root, 'a')), b = await openDirector(join(root, 'b'));
+    const { p } = await racecar(a);
+    await a.library.save(p.id, { object: CAR });
+    const { data } = await a.library.exportZip('red-racecar');
+    const recipe = { library: 'beret-parts', family: 'beret/car', version: '0.1.0', params: { length: 4.5, style: 'racer', wing: true }, seed: 7 };
+    const v2 = tamper(data, m => { Object.assign(m, { formatVersion: 2, license: 'CC0-1.0', authors: ['Beret Labs'], parametric: recipe }); m.origin.source = 'parametric'; });
+    const { asset } = await b.library.importZip(v2);
+    assert.equal(asset.formatVersion, 2);
+    const card = (await b.library.list()).assets[0];
+    assert.equal(card.license, 'CC0-1.0');
+    assert.deepEqual(card.authors, ['Beret Labs']);
+    assert.deepEqual(card.parametric, recipe);
+    assert.equal(card.origin.source, 'parametric');
+    // Placing still works and records where the object came from, so an agent can find the recipe again.
+    const q = await b.create({ template: 'empty', title: 'Pit lane' });
+    const placed = await b.library.place(q.id, { asset: 'red-racecar' });
+    const e = (await b.get(q.id)).scene.entities.find(x => x.id === placed.root);
+    assert.equal(e.from.asset, asset.id);
+    // Saving from a project still writes version 1, readable by older installs.
+    await a.library.save(p.id, { object: CAR, replace: true });
+    assert.equal((await a.library.list()).assets[0].formatVersion, 1);
+    // Recipes are flat scalars; anything else, or a malformed licence, is refused.
+    for (const [what, fn] of [
+      ['nested params', m => { m.parametric.params.nested = { a: 1 }; }],
+      ['a non-SPDX licence', m => { m.license = 'free for all!'; }],
+      ['a non-string author', m => { m.authors = [42]; }],
+    ]) await assert.rejects(b.library.importZip(tamper(v2, fn)), /field outside the asset format/, what);
   });
 });
 
