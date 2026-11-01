@@ -62,11 +62,11 @@ test('importing keeps every id and signature; a re-import leaves an existing sou
     assert.deepEqual(project.shots.map(x => x.id), s.shots.map(x => x.id));
     assert.deepEqual(project.assets.map(a => a.id), s.assets.map(a => a.id));
     assert.equal(files.length, s.media.length, `${s.slug} imports every listed file`);
-    // The signatures in the bundle were made with these ids, so they match the blocking as imported: nothing is remapped.
+    // Import preserves the recorded signatures exactly, including stale paid takes; nothing is remapped or falsely refreshed.
     for (const sh of project.shots) {
-      const want = shotSignature(project, sh);
-      for (const r of sh.references) assert.equal(r.generated?.signature, want, `${s.slug} ${sh.title} still ${r.id}`);
-      for (const a of project.assets.filter(x => x.shotId === sh.id && x.kind === 'camera-render')) assert.equal(a.source.signature, want, `${s.slug} ${sh.title} blockout`);
+      assert.equal(shotSignature(project, sh), shotSignature(s, s.shots.find(x => x.id === sh.id)), 'import keeps the current scene signature');
+      for (const r of sh.references) assert.equal(r.generated?.signature, s.shots.find(x => x.id === sh.id).references.find(x => x.id === r.id).generated?.signature, `${s.slug} ${sh.title} still ${r.id}`);
+      for (const a of project.assets.filter(x => x.shotId === sh.id && x.kind === 'camera-render')) assert.equal(a.source.signature, s.assets.find(x => x.id === a.id).source.signature, `${s.slug} ${sh.title} blockout`);
     }
     // And the document exports back to the same snapshot, without touching the disk.
     const src = SOURCES.find(x => x.slug === s.slug);

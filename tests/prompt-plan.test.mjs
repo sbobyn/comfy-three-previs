@@ -20,15 +20,16 @@ const starters = await loadStarters();
 const project = slug => createProjectDocument({ template: slug }, undefined, starters);
 const preset = id => builtInPresets.find(d => d.id === id);
 const SOURCES = ['blockout', 'keyframes', 'still'];
-// The assembly every caller used before the plan existed (browser shotVideoPrompt / prepareFirstFrame, batch videoPrompt), as an oracle.
+// Independent assembly oracle, reserving the reference legend before choosing optional prose.
 function legacyVideo(p, s, cameraSource, refs, max) {
-  const P = shotPrompt(p, s, 'video', { cameraSource }), auto = compilePrompt(p, s, null, { cameraSource });
+  const cap = VIDEO_PROMPT_CAP - (cameraSource === 'blockout' && refs.length ? referenceLegend(refs).length + 1 : 0);
+  const P = shotPrompt(p, s, 'video', { cameraSource, cap }), auto = compilePrompt(p, s, null, { cameraSource });
   const pre = cameraSource !== 'blockout' ? withCameraLine(P.trim() || auto, cameraSource)
     : P.trim() && P.trim() !== auto.trim() ? [withCameraLine(P, cameraSource), referenceLegend(refs)].filter(Boolean).join('\n') : compilePrompt(p, s, refs, { cameraSource });
   return fitPrompt(pre, max, cameraSource);
 }
 
-test('no drift: with no overrides the plan is byte-identical to the previous assembly, and the batch sends the plan', () => {
+test('without overrides the plan reserves reference-label space and matches the independent assembly and batch', () => {
   for (const st of starters) {
     const p = project(st.slug);
     for (const s of p.shots) {
@@ -69,7 +70,7 @@ test('override, lock and leave out persist on the shot and change exactly what i
   const p = project('final-lap'), s = p.shots[0], key = sectionedSegments(p, s, 'video').find(r => r.key.startsWith('obj:')).key;
   applyOps(p, [{ op: 'update_shot', id: s.id, patch: { promptSections: { video: { action: { mode: 'override', text: 'The Comfy car takes the lead on the last bend.' } } } } }]);
   let plan = videoPromptPlan(p, s);
-  assert.match(plan.text, /^The Comfy car takes the lead on the last bend\. /); assert.equal(plan.sections.find(r => r.key === 'action').policy, 'override');
+  assert.equal(plan.sections.find(r => r.key === 'action').text, 'The Comfy car takes the lead on the last bend.'); assert.ok(plan.text.includes(plan.sections.find(r => r.key === 'action').text)); assert.equal(plan.sections.find(r => r.key === 'action').policy, 'override');
   assert.equal(shotPrompt(p, s, 'video'), plan.text, 'shotPrompt (blockout capture, dialogs) sees the override too');
   // Lock a cast section, then change its Cast Card: the locked words stay, the source change is flagged.
   const locked = plan.sections.find(r => r.key === key).text;

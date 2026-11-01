@@ -167,3 +167,18 @@ Regenerate in the source project, never in the bundle:
 Source project ids, hero shots (the videos kept if the media goes over budget) and titles live in `SOURCES` in
 `scripts/export-starters.mjs`; override a project with `--<slug> <project-id>`. `--no-media` writes a version 1
 snapshot without media. `--max-mb <n>` changes the size budget.
+
+## Animation revision (2026-10-31)
+
+The animation pass adds blended joint poses, wheel rotation and steering, a drafting lane change, dribbles,
+a jump and cushioned landing, wing beats and dive recovery, elk head turns, and restrained studio gestures.
+All 13 cameras, shot starts and durations are unchanged. Sports action is explicitly a slow-motion replay to
+match the travel distances in the retained cameras. The arena backboard is now transparent so the scoring beat
+is visible from the existing baseline view. Shot and cast wording is shorter and checked with the prompt-plan
+assembler against every video model's auto-prompt cap; it gives no camera-motion instructions.
+
+The earlier paid stills and videos are preserved byte-for-byte and **intentionally out of date** for this new
+animation. No paid regeneration was performed. Fresh starter copies report that state, and a dry-run batch
+plans new key stills and blockouts before video generation. The invariant test pins all cameras, timing, set
+transforms, cast images and media to the pre-animation snapshot; animation tests additionally check posed shoe
+contact, scoring and prompt retention. Reproducible authoring and evidence commands are in the Blender README.

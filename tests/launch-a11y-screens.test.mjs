@@ -81,9 +81,14 @@ test('axe (WCAG 2.2 A/AA): home, Cast images, Library tabs, Save to library, Ble
       await open('shoot');
       await page.locator('.act-go:visible, .m-cta:visible').first().click(); await page.waitForSelector('dialog[open]');
       await page.getByRole('button', { name: /Generate ▸|Review request/ }).first().click();
-      await page.waitForSelector('dialog[open] .gen-quote', { state: 'attached', timeout: 30_000 });
-      if (await page.locator('dialog[open] .prompt-box[aria-label="Quote to review"]').count() === 0) await page.locator('dialog[open] .gen-quote').click();
-      await page.waitForSelector('dialog[open] .prompt-box[aria-label="Quote to review"]', { timeout: 30_000 });
+      // "Generate ▸" is the whole flow: the app makes the blockout, then asks for the quote itself. Do not click "Review request & quote"
+      // as well: a second quote begins while the first one's prompt-version edit is still landing, the project revision moves under it,
+      // and it ends in "Shot or prompt changed while preparing", with no card, depending on how slow the machine is. Wait for what the
+      // app settles on instead (the card, or the error it would show) and say what it was.
+      const quote = 'dialog[open] .prompt-box[aria-label="Quote to review"]', failure = 'dialog[open] .status-line.err:not(.prompt-box *)'; // the blockout's or the quote's own error, not a warning inside the card
+      await page.waitForSelector(`${quote}, ${failure}`, { state: 'attached', timeout: 60_000 });
+      if (await page.locator(failure).count()) assert.fail(`the video quote failed: ${await page.locator(failure).first().textContent()}`);
+      await page.waitForSelector(quote);
       await said(page, /Quote ready: /, 'the video quote is announced');
       await scan('Generate video quote');
       await page.keyboard.press('Escape');

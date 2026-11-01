@@ -2,161 +2,161 @@
   "player": {
     "shape": "person",
     "triangles": 824,
-    "bytes": 50180
+    "bytes": 59392
   },
   "anchor": {
     "shape": "person",
     "triangles": 789,
-    "bytes": 47712
+    "bytes": 56580
   },
   "operator": {
     "shape": "person",
     "triangles": 776,
-    "bytes": 45424
+    "bytes": 54228
   },
   "fan": {
     "shape": "person",
     "triangles": 820,
-    "bytes": 47984
+    "bytes": 56840
   },
   "race-car": {
     "shape": "car",
-    "triangles": 778,
-    "bytes": 43960
+    "triangles": 826,
+    "bytes": 68748
   },
   "eagle": {
     "shape": "bird",
     "triangles": 446,
-    "bytes": 28972
+    "bytes": 39032
   },
   "elk": {
     "shape": "box",
     "triangles": 1012,
-    "bytes": 58336
+    "bytes": 67076
   },
   "pine": {
     "shape": "tree",
     "triangles": 108,
-    "bytes": 8572
+    "bytes": 9532
   },
   "studio-camera": {
     "shape": "cylinder",
-    "triangles": 224,
-    "bytes": 13716
+    "triangles": 268,
+    "bytes": 21184
   },
   "light": {
     "shape": "lamp",
     "triangles": 168,
-    "bytes": 11044
+    "bytes": 13952
   },
   "court": {
     "shape": "box",
     "triangles": 828,
-    "bytes": 47208
+    "bytes": 61424
   },
   "paint": {
     "shape": "box",
     "triangles": 60,
-    "bytes": 4940
+    "bytes": 5560
   },
   "track": {
     "shape": "box",
     "triangles": 84,
-    "bytes": 6968
+    "bytes": 7796
   },
   "finish": {
     "shape": "box",
     "triangles": 252,
-    "bytes": 15256
+    "bytes": 19324
   },
   "studio-floor": {
     "shape": "box",
     "triangles": 60,
-    "bytes": 4952
+    "bytes": 5560
   },
   "grass": {
     "shape": "box",
     "triangles": 108,
-    "bytes": 7488
+    "bytes": 8968
   },
   "river": {
     "shape": "box",
     "triangles": 36,
-    "bytes": 3648
+    "bytes": 3832
   },
   "stands": {
     "shape": "box",
     "triangles": 1064,
-    "bytes": 59808
+    "bytes": 78976
   },
   "barrier": {
     "shape": "box",
     "triangles": 104,
-    "bytes": 8308
+    "bytes": 9296
   },
   "press-box": {
     "shape": "box",
     "triangles": 176,
-    "bytes": 12200
+    "bytes": 14480
   },
   "screen": {
     "shape": "box",
     "triangles": 116,
-    "bytes": 9536
+    "bytes": 10720
   },
   "video-wall": {
     "shape": "wall",
-    "triangles": 380,
-    "bytes": 23420
+    "triangles": 188,
+    "bytes": 16436
   },
   "desk-panel": {
     "shape": "box",
     "triangles": 116,
-    "bytes": 9544
+    "bytes": 10716
   },
   "desk": {
     "shape": "table",
     "triangles": 244,
-    "bytes": 17084
+    "bytes": 19992
   },
   "basketball": {
     "shape": "sphere",
     "triangles": 1208,
-    "bytes": 67924
+    "bytes": 88228
   },
   "rim": {
     "shape": "cylinder",
     "triangles": 592,
-    "bytes": 33832
+    "bytes": 43956
   },
   "circle": {
     "shape": "cylinder",
     "triangles": 572,
-    "bytes": 30560
+    "bytes": 42504
   },
   "lake": {
     "shape": "cylinder",
-    "triangles": 800,
-    "bytes": 42124
+    "triangles": 288,
+    "bytes": 22064
   },
   "support": {
     "shape": "box",
     "triangles": 132,
-    "bytes": 9416
+    "bytes": 10744
   },
   "backboard": {
     "shape": "box",
-    "triangles": 132,
-    "bytes": 9696
+    "triangles": 156,
+    "bytes": 13080
   },
   "flag-stand": {
     "shape": "box",
     "triangles": 280,
-    "bytes": 16272
+    "bytes": 21960
   },
   "terrain": {
     "shape": "terrain",
     "triangles": 4608,
-    "bytes": 362428
+    "bytes": 362424
   }
 }

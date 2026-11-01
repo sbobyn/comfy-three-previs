@@ -1,3 +1,4 @@
+import { applyBlockoutPose } from '../shared/blockout-pose.mjs';
 import * as THREE from 'three';
 import { buildBlockoutModel, loadBlockoutModels, modelReady } from './director-models';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -331,9 +332,10 @@ export function renderStill(project: Pick<DirectorProject, 'scene'>, shot: Shot,
   }
   const stage = createStage(), outdoor = isOutdoor(project.scene.entities), placed: Placed[] = [];
   applyEnv(stage, project.scene.environment.preset, outdoor); hideFlatGround(stage, outdoor);
-  for (const e of entitiesAt(project.scene.entities, shot.start || 0)) {
+  for (const e of entitiesAt(project.scene.entities, (shot.start || 0) + t)) {
     const g = buildBlockoutModel(e) || buildShape(e.shape, e.color);
     g.position.set(...e.position); g.rotation.set(rad(e.pitch || 0), rad(e.rotation), rad(e.roll || 0), 'YXZ'); g.scale.set(...e.scale);
+    applyBlockoutPose(g, e.pose);
     stage.scene.add(g); placed.push({ group: g, entity: project.scene.entities.find(x => x.id === e.id) || e });
   }
   fitSunShadow(stage.sun, casterBounds(placed), shadowFocus(shotPoses(shot, project.scene.entities)));
@@ -497,7 +499,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   const entityX = (e: Entity): XForm => ({ position: [...e.position] as Vec3, rotation: e.rotation, scale: [...e.scale] as Vec3 });
   const snapping = () => snapActive(snapPref, ctrlHeld);
 
-  function placeGroup(group: THREE.Group, e: Entity) { applyX(group, entityX(e)); group.rotation.order = 'YXZ'; group.rotation.x = rad(e.pitch || 0); group.rotation.z = rad(e.roll || 0); }
+  function placeGroup(group: THREE.Group, e: Entity) { applyX(group, entityX(e)); group.rotation.order = 'YXZ'; group.rotation.x = rad(e.pitch || 0); group.rotation.z = rad(e.roll || 0); applyBlockoutPose(group, e.pose); }
   function attachGizmo() {
     const g = primary ? groups.get(primary)?.group : null;
     if (g && view === 'set' && !modal) gizmo.attach(g); else gizmo.detach();
@@ -600,7 +602,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   function applyTime(t: number) {
     for (const [id, { group, entity }] of groups) {
       if (!entity.path?.length || gizmoDrag?.starts.has(id) || modal?.starts.has(id)) continue;
-      const a = entityAt(entity, t); group.position.set(...a.position); group.rotation.set(rad(a.pitch), rad(a.rotation), rad(a.roll), 'YXZ'); group.scale.set(...a.scale);
+      const a = entityAt(entity, t); group.position.set(...a.position); group.rotation.set(rad(a.pitch), rad(a.rotation), rad(a.roll), 'YXZ'); group.scale.set(...a.scale); applyBlockoutPose(group, a.pose);
     }
     markDirty();
   }

@@ -9,14 +9,14 @@ import { shotSignature, starterBlockout, starterMediaStatus, stillStale, videoSt
 
 const starters = await loadStarters();
 
-test('each starter ships a blockout clip of its current blocking for every shot', () => {
+test('each starter preserves its earlier blockout clip and reports revised animation as stale', () => {
   for (const s of starters) {
     const p = createProjectDocument({ template: s.slug }, undefined, starters);
     assert.deepEqual(p.starterFiles, { listed: s.media.length, missing: 0 }, `${s.slug}: every listed file is in the checkout`);
     for (const sh of p.shots) {
       const b = starterBlockout(p, sh);
       assert.ok(b, `${s.slug} ${sh.title}: bundled blockout clip`);
-      assert.equal(b.fresh, true, `${s.slug} ${sh.title}: the newest bundled clip records the current blocking`);
+      assert.equal(b.fresh, false, `${s.slug} ${sh.title}: the bundled clip predates the posed animation`);
     }
   }
 });
