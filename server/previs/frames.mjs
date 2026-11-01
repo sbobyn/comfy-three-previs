@@ -56,6 +56,9 @@ function ffmpeg(args) {
   });
 }
 
+/** Frames of local videos ({ file, t } each) tiled `cols` wide into one PNG or JPEG image. */
+export const contactSheet = (inputs, { width = 1024, cols = 1, type = 'image/png' } = {}) => ffmpeg(frameArgs(inputs, { width, cols, type }));
+
 /** One frame of a local video at t seconds as PNG or JPEG bytes, no wider than width (the clip's own size at most). */
 export async function videoFrame(file, t, { width = 1280, type = 'image/png' } = {}) {
   const bytes = await ffmpeg(frameArgs([{ file, t }], { width, cols: 1, type }));

@@ -1,6 +1,6 @@
 // Pure helpers for the Take lab (src/director-takes.ts): which takes start selected, the shared clock's frame
 // arithmetic and the words on each take's label. No DOM, so they run under node --test.
-import type { Take, TakeCost, Grade } from '../shared/takes.mjs';
+import type { Take, TakeCost, Grade, DirectionGrade } from '../shared/takes.mjs';
 import { WEAK_MATCH } from '../shared/still-match.mjs';
 
 export const MAX_LANES = 4;
@@ -62,6 +62,12 @@ export function gradeText(g: Grade): { value: string; tone: 'ok' | 'warn' | 'non
   if (g.status === 'not-assessed') return { value: 'Not assessed', tone: 'none', detail: g.note };
   if (g.status === 'not-applicable') return { value: '—', tone: 'none', detail: g.note };
   return { value: g.status === 'unknown' ? 'Unknown' : 'Not graded', tone: 'none', detail: g.note };
+}
+/** The direction check on a video take: Pass / Warn / Fail with its reason and what it booked. */
+export function directionText(d: DirectionGrade | undefined): { value: string; tone: 'ok' | 'warn' | 'bad' | 'none'; detail: string } {
+  if (!d || d.status !== 'checked') return { value: 'Not checked', tone: 'none', detail: d?.note || '' };
+  const value = d.verdict === 'pass' ? 'Pass' : d.verdict === 'warn' ? 'Warn' : 'Fail';
+  return { value, tone: d.verdict === 'pass' ? 'ok' : d.verdict === 'warn' ? 'warn' : 'bad', detail: [d.why, d.measured ? 'blockout measured from the 3D scene' : 'blockout as the grader read it', `check ${costText(d.cost)}`].filter(Boolean).join(' · ') };
 }
 /** "3 m 52 s" */
 export function duration(seconds: number | null) {

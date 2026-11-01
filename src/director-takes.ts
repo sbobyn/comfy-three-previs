@@ -6,10 +6,11 @@ import './director-takes.css';
 import type { DirectorProject, Shot, Asset } from '../shared/director.mjs';
 import { api, h, toast } from './director-common';
 import { shotTakes, winnerOps, blockoutClips, takeDifferences } from '../shared/takes.mjs';
-import type { Take, VideoTake, StillTake, TakeOptions, Grade } from '../shared/takes.mjs';
+import type { Take, VideoTake, StillTake, TakeOptions, Grade, TakeGrades } from '../shared/takes.mjs';
 import { CAMERA_SOURCE_LABELS } from '../shared/camera-source.mjs';
+import { GRADER_PRICES } from '../shared/tiers.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
-import { defaultPicks, togglePick, MAX_LANES, FPS, stepFrame, laneTime, gridColumns, timecode, costText, settingParts, gradeText, duration } from './director-takes-core';
+import { defaultPicks, togglePick, MAX_LANES, FPS, stepFrame, laneTime, gridColumns, timecode, costText, settingParts, gradeText, directionText, duration } from './director-takes-core';
 
 export type TakeLabCtx = {
   project(): DirectorProject;
@@ -20,6 +21,7 @@ export type TakeLabCtx = {
 
 const when = (iso: string) => new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 const no = (p: DirectorProject, s: Shot) => String(p.shots.indexOf(s) + 1).padStart(2, '0');
+const DIRECTION_USD = GRADER_PRICES.gemini; // one direction check books one grader charge (server/previs/take-grade.mjs)
 
 /** Receipts, ledger and image prices for the labels; each is optional (a failed read only drops detail). */
 async function loadExtras(projectId: string): Promise<TakeOptions> {
@@ -40,7 +42,10 @@ export async function openTakeLab(ctx: TakeLabCtx, shotId: string, initial?: 'vi
   const P = () => ctx.project(), shot = () => P().shots.find(s => s.id === shotId) || null;
   if (!shot()) return;
   let extras: TakeOptions = {};
-  const data = () => shotTakes(P(), shot()!, extras);
+  // Direction checks run here land on the project at the server; until the workspace's next poll brings them in, overlay them.
+  const checks = new Map<string, unknown>();
+  const withChecks = (p: DirectorProject): DirectorProject => (checks.size ? { ...p, assets: (p.assets || []).map(a => (checks.has(a.id) && !a.checks?.direction ? { ...a, checks: { ...(a.checks || {}), direction: checks.get(a.id) as any } } : a)) } : p);
+  const data = () => shotTakes(withChecks(P()), shot()!, extras);
   let kind: 'video' | 'still' = initial || (data().videos.length || !data().stills.length ? 'video' : 'still');
   let picked: string[] = defaultPicks(data().videos), moment = data().stills.find(m => m.key === '0.00')?.key || data().stills[0]?.key || '';
   let stillPicked: string[] = defaultPicks(data().stills.find(m => m.key === moment)?.takes || []);
@@ -115,7 +120,7 @@ export async function openTakeLab(ctx: TakeLabCtx, shotId: string, initial?: 'vi
   const dlg = h('dialog', { class: 'takes', id: 'takes-dialog', 'aria-labelledby': 'takes-title' },
     h('div', { class: 'dialog-head' }, title, kindSeg, clearBtn, close),
     h('div', { class: 'tk-body' }, picker, tools, transport, lanesEl, status,
-      h('p', { class: 'note tk-foot' }, 'Every take is kept. The winner is what the Cut and film export play, and a newer take never replaces it. Grades say only what was measured: layout from the paid still grader, timing from frame counts against the blockout; nothing judges identity yet.')));
+      h('p', { class: 'note tk-foot' }, 'Every take is kept. The winner is what the Cut and film export play, and a newer take never replaces it. Grades say only what was measured: layout from the paid still grader, direction from the paid direction check (which way the subject faces and travels against the blockout, on request), timing from frame counts against the blockout; nothing judges identity yet.')));
   close.onclick = () => dlg.close();
   dlg.addEventListener('close', () => { pause(); for (const m of mediaCache.values()) if (m instanceof HTMLVideoElement) { m.removeAttribute('src'); m.load(); } dlg.remove(); });
   dlg.addEventListener('keydown', ev => {
@@ -150,12 +155,29 @@ export async function openTakeLab(ctx: TakeLabCtx, shotId: string, initial?: 'vi
     let m = mediaCache.get(key); if (!m) { m = make(); mediaCache.set(key, m); } return m;
   }
   const videoEl = (url: string, label: string) => { const v = h('video', { src: url, muted: true, playsinline: true, preload: 'auto', disablePictureInPicture: true, 'aria-label': label }); v.addEventListener('loadedmetadata', () => { seekAll(t); }); return v; };
-  function gradeList(g: { layout: Grade; identity: Grade; timing: Grade }) {
-    return h('ul', { class: 'tk-grades', 'aria-label': 'Grades' }, ...([['Layout', g.layout], ['Identity', g.identity], ['Timing', g.timing]] as const).map(([name, grade]) => {
+  function gradeList(g: TakeGrades, tk: Take) {
+    const items = ([['Layout', g.layout], ['Identity', g.identity], ['Timing', g.timing]] as const).map(([name, grade]: readonly [string, Grade]) => {
       const x = gradeText(grade);
       // What was measured gets its explanation; "not graded / not assessed" is explained once, in the footer.
       return h('li', { class: `tone-${x.tone}` }, h('span', { class: 'tk-gname' }, name), h('b', {}, x.value), x.detail && x.tone !== 'none' ? h('small', {}, x.detail) : null);
-    }));
+    });
+    // Video takes: which way the subject faces and travels against the blockout (paid check, run on request).
+    if (tk.kind === 'video') {
+      const x = directionText(g.direction);
+      const run = g.direction?.status === 'checked' ? null : h('button', { class: 'btn sm tk-dircheck', type: 'button', title: g.direction?.note || '', 'aria-label': `Check direction: ${tk.label}` }, `Check direction · $${DIRECTION_USD.toFixed(2)}`);
+      if (run) run.onclick = () => void checkDirection(tk as VideoTake, run);
+      items.push(h('li', { class: `tone-${x.tone} tk-dir` }, h('span', { class: 'tk-gname' }, 'Direction'), h('b', {}, x.value), x.tone !== 'none' ? h('small', {}, x.detail) : null, run));
+    }
+    return h('ul', { class: 'tk-grades', 'aria-label': 'Grades' }, ...items);
+  }
+  /** Run the paid direction check on one take, then redraw with its result and the ledger's amount. */
+  async function checkDirection(tk: VideoTake, btn: HTMLButtonElement) {
+    btn.disabled = true; btn.textContent = 'Checking…'; say(`Checking ${tk.label}’s direction against the blockout…`);
+    try {
+      const r = await api('director/grade-take', { projectId: P().id, assetId: tk.id, maxCostUsd: DIRECTION_USD });
+      checks.set(tk.id, r.check); extras = await loadExtras(P().id);
+      say(`${tk.label} direction: ${r.check.verdict}. ${r.check.why} (check ${r.cost.status === 'billed' ? '' : '≈ '}$${r.cost.usd.toFixed(3)})`); draw();
+    } catch (e) { btn.disabled = false; btn.textContent = `Check direction · $${DIRECTION_USD.toFixed(2)}`; say(''); toast((e as Error).message); }
   }
   function fact(label: string, value: Node | string, key?: string, diffs?: Set<string>) {
     const differs = !!key && !!diffs?.has(key);
@@ -189,7 +211,7 @@ export async function openTakeLab(ctx: TakeLabCtx, shotId: string, initial?: 'vi
           isVideo ? fact('Camera', v.cameraSource ? CAMERA_SOURCE_LABELS[v.cameraSource as CameraSource] || v.cameraSource : 'Not recorded', 'cameraSource', diffs) : null,
           isVideo ? fact('Media', `${v.media.width ?? '?'}×${v.media.height ?? '?'} · ${v.media.fps ?? '?'} fps · ${v.media.frames ?? '?'} frames · ${v.media.duration == null ? '?' : v.media.duration.toFixed(2)} s`) : null,
           fact('Made', `${when(tk.createdAt)}${tk.elapsedSeconds != null ? ` · ran ${duration(tk.elapsedSeconds)}` : ''}`)),
-        gradeList(tk.grades),
+        gradeList(tk.grades, tk),
         tk.prompt && (!onlyDiff || diffs.has('prompt')) ? h('details', { class: `tk-prompt${diffs.has('prompt') ? ' diff' : ''}` }, h('summary', {}, `Prompt · ${tk.promptLength} characters`), h('p', {}, tk.prompt)) : null,
         win));
   }

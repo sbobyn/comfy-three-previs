@@ -3,6 +3,7 @@
 // which one is the winner. Shared by the Take lab (src/director-takes.ts), the Cut, film export and the MCP tools, so
 // all of them agree on what a take is and which one the cut plays. Nothing here deletes a take: losing takes stay.
 import { videoStale, stillStale } from './director.mjs';
+import { GRADER_PRICES } from './tiers.mjs';
 
 const byCreated = (a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
 const round = (v, d = 3) => (Number.isFinite(v) ? Math.round(v * 10 ** d) / 10 ** d : null);
@@ -106,6 +107,16 @@ function stillGrades(ref) {
     : { status: 'graded', score: g.layout ?? g.score, overall: g.score, camera: g.camera ?? null, headings: g.headings ?? null, why: g.why || '', method: String(g.method || '').split(':').at(-1) || g.method };
   return { layout, identity: IDENTITY, timing: { status: 'not-applicable', note: 'A still has no timing.' } };
 }
+/**
+ * The take's direction check (server/previs/take-grade.mjs): pass / warn / fail with a reason, per-moment readings, and
+ * its cost as the budget ledger books it (the same amount the Jobs panel counts).
+ */
+function directionGrade(take, ledger) {
+  const c = take.checks?.direction;
+  if (!c) return { status: 'not-checked', note: `Not checked against the blockout. Direction check: Check direction in the Take lab or previs_director_grade_take ($${GRADER_PRICES.gemini.toFixed(2)}; needs PREVIS_MATCH_GRADER=gemini).` };
+  return { status: 'checked', verdict: c.verdict, why: c.why, subject: c.subject ?? null, measured: !!c.measured, frames: c.frames || [], grader: c.grader || '', method: String(c.method || '').split(':')[0], gradedAt: c.gradedAt || null, blockoutAssetId: c.blockoutAssetId || null,
+    cost: costFrom(ledger, [c.reservationId], { usd: GRADER_PRICES.gemini, status: 'estimate' }) };
+}
 /** Timing of a video take against the blockout clip it was made from (frames, fps and seconds). */
 function videoTiming(take, source) {
   if (!source) return { status: 'unknown', note: 'The blockout this take was made from is no longer in the project.' };
@@ -155,7 +166,7 @@ export function videoTakes(project, shot, { jobs = [], ledger = {} } = {}) {
       inputs, prompt, promptLength: prompt.length,
       source: source ? { assetId: source.id, version: source.version ?? 1 } : null, stale: videoStale(project, shot, a),
       media: { width: a.width ?? null, height: a.height ?? null, fps: a.fps ?? null, frames: a.frameCount ?? null, duration: a.duration ?? null },
-      grades: { layout: { status: 'not-graded', note: 'No video grader yet.' }, identity: IDENTITY, timing: videoTiming(a, source) },
+      grades: { layout: { status: 'not-graded', note: 'No video layout grader yet; the direction check covers which way the subject faces and travels.' }, direction: directionGrade(a, ledger), identity: IDENTITY, timing: videoTiming(a, source) },
       createdAt: a.createdAt, elapsedSeconds: job ? seconds(job.acceptedAt || job.dispatchStartedAt, job.completedAt) : null,
       winner: winner?.assetId === a.id, inCut: inCut?.id === a.id,
     };

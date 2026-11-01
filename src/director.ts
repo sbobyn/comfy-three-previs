@@ -46,6 +46,7 @@ import type { KeyframePlan } from '../shared/keyframes.mjs';
 import type { ShotPips } from './director-desktop-core';
 import { VIDEO_PRICES } from '../shared/tiers.mjs';
 import { cameraSourceOf, cameraMotionWarning, CAMERA_SOURCE_LABELS } from '../shared/camera-source.mjs';
+import { blockoutFidelity, fidelityAdvice, defaultForShot } from '../shared/blockout-fidelity.mjs';
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -794,10 +795,11 @@ function loadGen() { if (genCache || genLoading) return; genLoading = true; api(
 const modelKey = (s: Shot) => `previs.shot.model.${s.id}`;
 function shotModel(s: Shot) {
   const st = genCache!; const choices = videoChoices(st as any);
-  // The model saved on the shot (project data, shared with MCP and the batch), else this browser's older pick, else the last job's.
+  // The model saved on the shot (project data, shared with MCP and the batch), else this browser's older pick, else the last job's,
+  // else for a motion/direction-critical shot the route that kept the blockout's direction (shared/blockout-fidelity.mjs).
   const saved = s.settings?.video?.model, local = localStorage.getItem(modelKey(s));
   const last = s.render ? st.jobs.filter(j => j.shotId === s.render!.previsShotId).at(-1)?.definition?.id : null;
-  return choices.find(d => d.id === saved) || choices.find(d => d.id === local) || choices.find(d => d.id === last) || choices[0] || null;
+  return choices.find(d => d.id === saved) || choices.find(d => d.id === local) || choices.find(d => d.id === last) || defaultForShot(project, s, choices) || choices[0] || null;
 }
 // ---------- [prompts] The final prompt a model would receive, from the shared assembly (shared/prompt-plan.mjs) ----------
 /** The shot's still model: the one saved on the shot, else the model that matches the blockout best. */
@@ -826,9 +828,21 @@ function modelBlock(s: Shot) {
   if (!genCache) { loadGen(); return h('div', { class: 'block vm' }, h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted' }, 'Loading…'))); }
   const st = genCache, choices = videoChoices(st as any), def: any = shotModel(s);
   if (!def) return h('div', { class: 'block vm' }, h('span', { class: 'eyebrow' }, 'Video model'), h('p', { class: 'note' }, 'No video models are set up.'));
-  const pick = h('select', { class: 'field vm-pick', 'aria-label': 'Video model for this shot' }, ...choices.map((d: any) => h('option', { value: d.id, selected: d.id === def.id }, modelLabel(d))));
+  // How well each route keeps the blockout's motion and facing (a heuristic from judged takes), and this shot's advice.
+  const advice = fidelityAdvice(project, s, def, choices), fid = blockoutFidelity(def);
+  const DIR_SHORT: Record<string, string> = { follows: 'keeps direction', mixed: 'direction sometimes lost', approximate: 'direction guessed' };
+  const pick = h('select', { class: 'field vm-pick', 'aria-label': 'Video model for this shot' }, ...choices.map((d: any) => h('option', { value: d.id, selected: d.id === def.id }, `${modelLabel(d)} · ${DIR_SHORT[blockoutFidelity(d).direction]}${advice.critical && advice.recommend?.id === d.id ? ' · recommended for this shot' : ''}`)));
   // Saved on the shot (undoable), so another browser, an export, Claude and the batch see the same choice.
-  pick.onchange = () => { const before = s.settings?.video ?? null; void runEntry({ label: 'Video model', redo: [{ op: 'update_shot', id: s.id, patch: { settings: { video: { model: pick.value } } } }], undo: [{ op: 'update_shot', id: s.id, patch: { settings: { video: before } } }] }).then(() => { shotPane.dataset.shot = ''; renderShotPane(); }); };
+  const useModel = (id: string) => { const before = s.settings?.video ?? null; void runEntry({ label: 'Video model', redo: [{ op: 'update_shot', id: s.id, patch: { settings: { video: { model: id } } } }], undo: [{ op: 'update_shot', id: s.id, patch: { settings: { video: before } } }] }).then(() => { shotPane.dataset.shot = ''; renderShotPane(); }); };
+  pick.onchange = () => useModel(pick.value);
+  const setCritical = (on: boolean) => { void runEntry({ label: on ? 'Mark motion-critical' : 'Clear motion-critical', redo: [{ op: 'update_shot', id: s.id, patch: { motionCritical: on } }], undo: [{ op: 'update_shot', id: s.id, patch: { motionCritical: s.motionCritical === true } }] }).then(() => { shotPane.dataset.shot = ''; renderShotPane(); }); };
+  const fidelity = h('div', { class: 'vm-fid' },
+    h('div', { class: `vm-fid-chip f-${fid.direction}`, title: `${fid.note} Heuristic (${fid.basis}); judge every take.` }, `${fid.routeLabel} · ${fid.label}`, h('span', { class: 'vm-heur' }, 'heuristic')),
+    h('label', { class: 'vm-crit', title: 'The subject’s motion or facing must match the blockout. Recommends a model that edits the blockout clip; nothing is blocked.' },
+      h('input', { type: 'checkbox', checked: s.motionCritical === true, onchange: (e: Event) => setCritical((e.target as HTMLInputElement).checked) }), ' Motion/direction-critical shot'),
+    advice.critical ? h('div', { class: 'vm-advice' + (advice.ok ? ' ok' : ' warn'), role: 'note' },
+      h('p', {}, advice.ok ? `${advice.reasons.length ? `${advice.reasons.join('; ').replace(/^./, c => c.toUpperCase())}. ` : ''}This model edits the blockout clip and kept direction in testing; still check each take.` : advice.message),
+      advice.recommend ? h('button', { type: 'button', class: 'btn sm', onclick: () => useModel(advice.recommend!.id) }, `Switch to ${advice.recommend.title}`) : null) : null);
   const cap = referenceCapacity(st as any, def.id), refs = cap ? plannedReferences(project, s, st as any, def.id) : [];
   const cam = cameraSourceOf(def), ks = keyStillState(project, s);
   const usesClip = def.task === 'transform-video' || def.task === 'control-video';
@@ -848,6 +862,7 @@ function modelBlock(s: Shot) {
   return h('div', { class: 'block vm' },
     h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted', style: 'font-size:11.5px' }, rate ? `≈ $${(rate * secs).toFixed(2)} for ${secs}s` : 'Cost shown at quote')),
     pick,
+    fidelity,
     h('div', { class: 'vm-camsrc' + (cam === 'blockout' ? ' ok' : ' warn'), title: cam === 'blockout' ? 'The model follows the blockout clip: your camera move is the camera.' : cam === 'keyframes' ? 'The model moves between the start and end stills made from the blockout’s first and last frames; the move in between is its guess.' : 'The model animates one still; it never sees your camera move.' }, CAMERA_SOURCE_LABELS[cam]),
     def.description ? h('p', { class: 'note vm-desc', title: def.description }, def.description) : null,
     // What goes in, in order: the camera (blockout clip, or the stills standing in for it), the look, then the cast.

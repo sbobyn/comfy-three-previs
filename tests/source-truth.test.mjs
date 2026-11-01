@@ -15,6 +15,7 @@ import { castRows, keyStillState, objectLooks, shotSignature, videoReferences } 
 import { shotPrompt } from '../shared/prompt.mjs';
 import { FIRST_FRAME_FALLBACK } from '../shared/tiers.mjs';
 import { cameraMotionWords, cameraMotionWarning, cameraSourceOf, CAMERA_LINES, CAMERA_SOURCE_LABELS, withCameraLine } from '../shared/camera-source.mjs';
+import { blockoutFidelity, fidelityAdvice } from '../shared/blockout-fidelity.mjs';
 
 const source = await readFile(new URL('../src/director.ts', import.meta.url), 'utf8');
 const compile = s => ts.transpileModule(s, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -75,12 +76,14 @@ test('workspace: the model input card reports stale stills after a camera edit (
   const card = project => {
     const ctx = { h, project, genCache: { presets: choices, definitions: [], jobs: [] }, shotModel: () => def, videoChoices: st => st.presets, modelLabel: d => d.title, referenceCapacity: () => 0, plannedReferences: () => [],
       cameraSourceOf, keyStillState, shotPrompt, cameraMotionWarning, CAMERA_SOURCE_LABELS, castRows, objectLooks, signature: shotSignature, clipSeconds: () => 5, clipLengths: () => '2–10 s', startOnlyFallback: d => FIRST_FRAME_FALLBACK[d.id],
-      modelInputsDiagram: () => h('div'), middleSlotText: () => null, refUrl: r => r.file, fromBlender: () => false, localStorage: { setItem() {} }, shotPane: { dataset: {} }, KIND_COLORS: {}, entity: () => null };
+      modelInputsDiagram: () => h('div'), middleSlotText: () => null, refUrl: r => r.file, fromBlender: () => false, localStorage: { setItem() {} }, shotPane: { dataset: {} }, KIND_COLORS: {}, entity: () => null,
+      blockoutFidelity, fidelityAdvice, runEntry: async () => {} };
     runInNewContext(compile(slice('function modelBlock(s: Shot) {', '// ---------- Shot panel sections')), ctx);
     return text(ctx.modelBlock(project.shots[0]));
   };
   const before = card(p);
   assert.match(before, /Start still ready/); assert.match(before, /End still ready/);
+  assert.match(before, /Start \+ end stills \+ text · Direction is a guess/, 'how faithfully the route keeps blockout direction (heuristic)');
   p = (await director.edit(p.id, [{ op: 'update_shot', id: p.shots[0].id, patch: { camera: { angle: 40 }, description: 'Slow dolly left, whip pan to the car.' } }])).project;
   const after = card(p);
   assert.doesNotMatch(after, /still ready/, 'the review saw “Start still ready” / “End still ready” here after the edit');
