@@ -382,7 +382,8 @@ body.m-medium .m-cr-main { grid-template-columns: 128px minmax(0, 1fr) 24px; }
 :is(body.m-compact, body.m-medium) .sequence .sq-export .note { text-align: center; font-size: var(--m-fs-xs); }
 :is(body.m-compact, body.m-medium) .sequence .sq-exp { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: var(--m-fs-sm); }
 body.m-medium .sequence .sq-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); }
-.m-shotsheet .m-row2 .btn { width: 100%; }
+/* The sheet's Move earlier/later are the Cut list's square icon buttons (.btn.sm.icon, 28 px wide): here they carry a text label and fill their grid cell. */
+.m-shotsheet .m-row2 .btn.btn { width: 100%; }
 
 /* ---------- Camera mode ---------- */
 body.m-cam :is(.op-hud, .m-appbar, .m-tabbar, .side-act, .m-steppill, .m-shootbody, .m-transport, .m-shotstrip, .vp-view, .m-vpside, .m-fab, .m-modebar, .coach) { display: none !important; }
