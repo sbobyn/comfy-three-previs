@@ -43,7 +43,8 @@ test('Final Lap shows a nose-first pass and a full car-length win across the lin
   for (const sh of s.shots) for (let t = 0; t <= sh.duration; t += 0.25) {
     for (const e of [hero, rival]) {
       const pose = entityAt(e, sh.start + t), next = entityAt(e, sh.start + t + 0.01);
-      assert.ok(next.position[0] > pose.position[0] && pose.rotation === 90, 'local +z nose follows world +x travel');
+      const heading = Math.atan2(next.position[0] - pose.position[0], next.position[2] - pose.position[2]) * 180 / Math.PI;
+      assert.ok(next.position[0] > pose.position[0] && Math.abs(heading - pose.rotation) < 1.5, 'local +z nose follows the lane-change tangent');
       const item = frameLayout(s, sh, t).items.find(x => x.id === e.id);
       assert.ok(item?.inFrame > 0.99, `${sh.title}: both cars stay in frame`);
     }
@@ -53,7 +54,7 @@ test('Final Lap shows a nose-first pass and a full car-length win across the lin
 
 test('Posterized rises above the defender and sends the ball through the rim; Wingspan stays above water and terrain', () => {
   const p = starters.find(s => s.slug === 'posterized'), guard = named(p, 'Comfy guard'), rival = named(p, 'Rival defender'), ball = named(p, 'Basketball'), rim = named(p, 'East rim');
-  assert.equal(entityAt(guard, 8).position[1], 0, 'start before the leap');
+  assert.ok(Math.abs(entityAt(guard, 8).position[1]) < .1, 'start grounded before the leap; posed shoe contact checked by rig tests');
   assert.ok(entityAt(guard, 11.1).position[1] - entityAt(rival, 11.1).position[1] > 1, 'guard rises above the rival');
   assert.ok(entityAt(ball, 10.6).position[1] > rim.position[1]);
   assert.ok(entityAt(ball, 11.4).position[1] < rim.position[1]);
@@ -70,26 +71,26 @@ test('Posterized rises above the defender and sends the ball through the rim; Wi
   }
 });
 
-// The 2026-10-31 media regeneration replaced every still and video with takes made for the revised blocking.
-test('fresh starter copies open with start and end stills and a video made from the current blocking', () => {
+// Animation changes intentionally stale the earlier paid takes; no generation is performed in this pass.
+test('starter copies preserve paid takes and mark them stale after animation changes', () => {
   for (const s of starters) {
     const p = instantiateStarter(s);
     for (const sh of p.shots) {
       const stills = sh.references.filter(r => r.generated);
       assert.deepEqual(stills.map(r => r.note).sort(), ['key frame end', 'key frame start'], `${s.slug} ${sh.title}: one start and one end still`);
-      assert.ok(stills.every(r => !stillStale(p, sh, r)), `${s.slug} ${sh.title}: still made for the current blocking`);
+      assert.ok(stills.every(r => stillStale(p, sh, r)), `${s.slug} ${sh.title}: still retains its earlier blocking signature`);
       const renders = p.assets.filter(a => a.shotId === sh.id && a.kind === 'camera-render');
       assert.equal(renders.length, 1, `${s.slug} ${sh.title}: one blockout clip, the one the video was made from`);
       assert.equal(renders[0].duration, sh.duration);
       assert.equal(renders[0].frameCount, sh.duration * 24);
       const video = p.assets.find(a => a.shotId === sh.id && a.kind === 'workflow-result');
       assert.equal(video.source.sourceAssetId, renders[0].id, `${s.slug} ${sh.title}: video keeps its actual blockout source`);
-      assert.ok(!videoStale(p, sh, video), `${s.slug} ${sh.title}: video made for the current blocking`);
+      assert.ok(videoStale(p, sh, video), `${s.slug} ${sh.title}: video retains its earlier blocking signature`);
     }
-    // Nothing a final-tier batch would pay for is remade: every key frame already exists for this blocking.
+    // A dry run must plan replacements, never feed an old posed still into the new clip.
     const plan = planBatch(p, { steps: ['stills', 'videos'], tier: 'final', dryRun: true, maxCostUsd: 50 });
     const stills = plan.nodes.filter(n => n.type === 'still');
     assert.equal(stills.length, p.shots.length * 2);
-    assert.ok(stills.every(n => n.status === 'skipped'), `${s.slug}: final-tier plan keeps the bundled stills`);
+    assert.ok(stills.every(n => n.status !== 'skipped'), `${s.slug}: final-tier plan replaces stale stills`);
   }
 });

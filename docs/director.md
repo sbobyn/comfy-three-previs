@@ -159,3 +159,29 @@ You can direct the same project through Claude using the MCP connector; see the 
 The shipped examples live in `public/guide/`; `manifest.json` records their source project, shot, asset and capture time. URLs in the app respect the deployment base, including GitHub Pages. See [guide integration and capture](guide-integration.md) for the capture command and the module APIs.
 
 Older review packs and checkpoints are historical engineering notes, not current user instructions. See [the historical document index](history/README.md).
+
+### Posing blockout characters
+
+Bundled players, anchors and operators have simple rigid-part joints; eagles have wings, feather tips and a tail,
+elk have a neck pivot, and race cars have steering, wheels and a sprung body. These are low-poly animation guides.
+Use `previs_director_animate` or agent `set_keyframes` edits to pose them:
+
+```json
+{"object":"Comfy guard","keys":[
+  {"t":0,"pose":{"armR":[-25,0,0],"forearmR":[-45,0,0]},"ease":"smoothstep"},
+  {"t":1,"pose":{"armR":[-150,0,0],"forearmR":[-12,0,0]}}
+]}
+```
+
+`pose` maps joint names to local XYZ degrees. Supported names are `body`, `head`, `armL/R`, `forearmL/R`,
+`thighL/R`, `shinL/R`, `wingL/R`, `tipL/R`, `tail`, `steerL/R`, and `wheelFL/FR/RL/RR` (expand `L/R` to `L`
+or `R`). Unsupported joints on a particular model do nothing. Pose angles blend without wrapping, so a wheel
+can turn through 720°. An empty pose `{}` returns all joints to rest; missing joints in a pose mean rest.
+Omitting pose from a transform key leaves the pose track alone. `update_entity` can also set a static `pose`
+(`null` clears it). The keyframe tools accept at most 64 keys, in scene seconds, shared across shots.
+
+An outgoing key's `ease: "linear"` gives constant segment speed; `"smoothstep"` eases to and from rest without
+overshooting. Omit it to keep the existing position spline. Pose, rotation and scale default to linear blending.
+Use linear keys for a moving car or the middle of a jump, and smoothstep for a hand settling onto the desk.
+The viewport, thumbnail stills, browser video capture and headless renderer evaluate the same pose. Pose keys
+and the posed model ID change the blocking signature, so earlier stills/videos become out of date.

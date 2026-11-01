@@ -2,6 +2,7 @@
 // Director scene model shared by the browser workspace, the server and MCP tools.
 // Units are metres. The stage faces +z: "front" is toward the default camera,
 // "left" is -x as seen from the default camera.
+import { normalizePose, blendPose, keyEase } from './blockout-pose.mjs';
 import { blockoutModel, projectMesh } from './blockout-models.mjs';
 import { normalizeSheets } from './sheet-presets.mjs';
 import { cameraLine } from './camera-source.mjs';
@@ -75,6 +76,7 @@ export function makeEntity(input, id) {
     pitch: tiltOf(input.pitch),
     roll: tiltOf(input.roll),
     path: normalizePath(input.path),
+    ...(normalizePose(input.pose) ? { pose: normalizePose(input.pose) } : {}),
     parent: typeof input.parent === 'string' && input.parent !== id ? input.parent : null,
     ...sheetsOf(input.sheets),
     ...fromOf(input.from),
@@ -305,10 +307,10 @@ export function shotCast(project, shot, { samples = 12, aspect = 16 / 9, minCove
   return entities.filter(e => best.has(e.id)).map(e => ({ entity: e, coverage: Math.min(1, best.get(e.id)) , lead: e.id === shot.camera.target })).sort((a, b) => (b.lead - a.lead) || (b.coverage - a.coverage));
 }
 
-/** Camera-truth hash: bundled display models keep the starter baseline; imported meshes change the rendered silhouette.
- * Existing clips keep their original pixels; changing display fidelity does not require paid regeneration.
+/** Camera-truth hash: unposed bundled models keep the legacy fidelity-only policy.
+ * Imported meshes and posed rigs determine the silhouette; their IDs and all pose keys invalidate earlier media.
  * Same text as src/director-capture.ts shotSignature (tests/headless.test.mjs). */
-export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, ...e }) => ({ ...e, ...(projectMesh(model) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, ...e }) => ({ ...e, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 /** The shot's blockout clip no longer matches its camera, timing or scene (it is made again before a video uses it). */
 export const blockoutStale = (project, shot) => !!(shot.render && shot.render.signature && shot.render.signature !== shotSignature(project, shot));
 /** The shot's blockout clip is a Blender render (server/previs/blender-import.mjs) that still matches the shot, so its frames are the still guide. */
@@ -561,7 +563,7 @@ export function clampStart(value) { const n = Number(value); return Number.isFin
 export function normalizePath(path) {
   if (!Array.isArray(path) || !path.length) return null;
   const ok = path.filter(k => k && Number.isFinite(k.t) && Array.isArray(k.p) && k.p.length === 3 && k.p.every(Number.isFinite)).slice(0, 64)
-    .map(k => ({ t: Math.round(Math.max(0, Math.min(MAX_SCENE_TIME, k.t)) * 100) / 100, p: k.p.map(v => Math.max(-500, Math.min(500, v))), ...(Number.isFinite(k.r) ? { r: ((k.r % 360) + 360) % 360 } : {}), ...(Array.isArray(k.s) && k.s.length === 3 && k.s.every(Number.isFinite) ? { s: k.s.map(v => Math.max(0.05, Math.min(50, v))) } : {}), ...(Number.isFinite(k.pitch) ? { pitch: tiltOf(k.pitch) } : {}), ...(Number.isFinite(k.roll) ? { roll: tiltOf(k.roll) } : {}) }))
+    .map(k => ({ t: Math.round(Math.max(0, Math.min(MAX_SCENE_TIME, k.t)) * 100) / 100, p: k.p.map(v => Math.max(-500, Math.min(500, v))), ...(Number.isFinite(k.r) ? { r: ((k.r % 360) + 360) % 360 } : {}), ...(Array.isArray(k.s) && k.s.length === 3 && k.s.every(Number.isFinite) ? { s: k.s.map(v => Math.max(0.05, Math.min(50, v))) } : {}), ...(Number.isFinite(k.pitch) ? { pitch: tiltOf(k.pitch) } : {}), ...(Number.isFinite(k.roll) ? { roll: tiltOf(k.roll) } : {}), ...(normalizePose(k.pose) ? { pose: normalizePose(k.pose) } : {}), ...(['linear', 'smoothstep'].includes(k.ease) ? { ease: k.ease } : {}) }))
     .sort((a, b) => a.t - b.t);
   const dedup = ok.filter((k, i) => i === 0 || k.t !== ok[i - 1].t);
   return dedup.length ? dedup : null;
@@ -571,7 +573,7 @@ export function upsertKey(path, t, p, r, s, tilt = {}) {
   const old = (path || []).find(k => Math.abs(k.t - t) <= 0.005) || {};
   const keys = (path || []).filter(k => Math.abs(k.t - t) > 0.005);
   const pitch = Number.isFinite(tilt.pitch) ? tilt.pitch : old.pitch, roll = Number.isFinite(tilt.roll) ? tilt.roll : old.roll;
-  keys.push({ t: Math.round(t * 100) / 100, p: p.map(v => Math.round(v * 1000) / 1000), ...(Number.isFinite(r) ? { r: Math.round(r * 100) / 100 } : {}), ...(Array.isArray(s) ? { s: s.map(v => Math.round(v * 1000) / 1000) } : {}), ...(Number.isFinite(pitch) ? { pitch } : {}), ...(Number.isFinite(roll) ? { roll } : {}) });
+  keys.push({ t: Math.round(t * 100) / 100, p: p.map(v => Math.round(v * 1000) / 1000), ...(Number.isFinite(r) ? { r: Math.round(r * 100) / 100 } : {}), ...(Array.isArray(s) ? { s: s.map(v => Math.round(v * 1000) / 1000) } : {}), ...(Number.isFinite(pitch) ? { pitch } : {}), ...(Number.isFinite(roll) ? { roll } : {}), ...(tilt.pose !== undefined || old.pose !== undefined ? { pose: tilt.pose ?? old.pose } : {}), ...(tilt.ease || old.ease ? { ease: tilt.ease || old.ease } : {}) });
   return normalizePath(keys);
 }
 export function removeKeys(path, times) { return normalizePath((path || []).filter(k => !times.some(t => Math.abs(k.t - t) <= 0.005))); }
@@ -584,7 +586,7 @@ export function setKeyframes(entity, keys, mode = 'merge') {
   for (const k of keys || []) {
     if (!Number.isFinite(k?.t)) continue;
     const now = entityAt({ ...entity, path }, k.t);
-    path = upsertKey(path, k.t, Array.isArray(k.position) ? k.position : now.position, Number.isFinite(k.rotation) ? k.rotation : undefined, Array.isArray(k.scale) ? k.scale : undefined, { pitch: k.pitch, roll: k.roll });
+    path = upsertKey(path, k.t, Array.isArray(k.position) ? k.position : now.position, Number.isFinite(k.rotation) ? k.rotation : undefined, Array.isArray(k.scale) ? k.scale : undefined, { pitch: k.pitch, roll: k.roll, pose: k.pose, ease: k.ease });
   }
   return path;
 }
@@ -594,6 +596,7 @@ function pathPoint(path, t) {
   const last = path.at(-1); if (t >= last.t) return last.p;
   let i = 1; while (path[i].t < t) i++;
   const a = path[i - 1], b = path[i], u = (t - a.t) / (b.t - a.t);
+  if (a.ease) return a.p.map((v, k) => v + (b.p[k] - v) * keyEase(a, u));
   const p0 = (path[i - 2] || a).p, p3 = (path[i + 1] || b).p;
   return a.p.map((_, k) => cr(p0[k], a.p[k], b.p[k], p3[k], u));
 }
@@ -601,7 +604,7 @@ const angLerp = (a, b, u) => { const d = ((b - a + 540) % 360) - 180; return (a 
 /** Position and facing of an object at scene time t. */
 export function entityAt(entity, t) {
   const path = entity.path;
-  if (!path?.length) return { position: entity.position, rotation: entity.rotation, scale: entity.scale, pitch: entity.pitch || 0, roll: entity.roll || 0 };
+  if (!path?.length) return { position: entity.position, rotation: entity.rotation, scale: entity.scale, pitch: entity.pitch || 0, roll: entity.roll || 0, ...(entity.pose ? { pose: entity.pose } : {}) };
   const position = pathPoint(path, t);
   let rotation = entity.rotation, scale = entity.scale;
   // Rotation keys (if any) drive facing; otherwise the object faces its direction of travel.
@@ -611,7 +614,7 @@ export function entityAt(entity, t) {
     if (t <= keys[0].t) return fn(keys[0], keys[0], 0);
     if (t >= keys.at(-1).t) return fn(keys.at(-1), keys.at(-1), 0);
     let i = 1; while (keys[i].t < t) i++;
-    return fn(keys[i - 1], keys[i], (t - keys[i - 1].t) / (keys[i].t - keys[i - 1].t));
+    return fn(keys[i - 1], keys[i], keyEase(keys[i - 1], (t - keys[i - 1].t) / (keys[i].t - keys[i - 1].t)));
   };
   if (sk.length) scale = seg(sk, (a, b, u) => a.s.map((v, i) => v + (b.s[i] - v) * u));
   const pk = path.filter(k => Number.isFinite(k.pitch)), qk = path.filter(k => Number.isFinite(k.roll));
@@ -623,7 +626,9 @@ export function entityAt(entity, t) {
     const p0 = pathPoint(path, t0), p1 = pathPoint(path, t0 + dt), dx = p1[0] - p0[0], dz = p1[2] - p0[2];
     if (Math.hypot(dx, dz) > 1e-4) rotation = ((Math.atan2(dx, dz) * 180) / Math.PI + 360) % 360;
   }
-  return { position, rotation, scale, pitch, roll };
+  const poses = path.filter(k => k.pose);
+  const pose = poses.length ? seg(poses, (a, b, u) => blendPose(a.pose, b.pose, u)) : entity.pose;
+  return { position, rotation, scale, pitch, roll, ...(pose ? { pose } : {}) };
 }
 export function entitiesAt(entities, t) { return entities.map(e => (e.path?.length ? { ...e, ...entityAt(e, t) } : e)); }
 export function sceneLength(project) {

@@ -8,8 +8,9 @@ import json
 import math
 import subprocess
 import struct
+import sys
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'public/models/blockouts'
@@ -100,35 +101,58 @@ def ring(p, radius, tube, material=WHITE, axis='y', segments=24):
     if axis == 'z': o.rotation_euler[0] = math.pi/2
     return finish(o, material)
 
+def joint(name, pivot, objects, parent=None):
+    node = bpy.data.objects.new('joint_' + name, None)
+    bpy.context.collection.objects.link(node)
+    node.location = xyz(pivot)
+    bpy.context.view_layer.update()
+    for obj in sorted(objects, key=lambda o:o.name):
+        world = obj.matrix_world.copy()
+        obj.parent = node
+        obj.matrix_world = world
+    if parent:
+        world = node.matrix_world.copy()
+        node.parent = parent
+        node.matrix_world = world
+    return node
+
 def human(role):
-    # Separate limbs, shoes, neck, face, hair; all within the original 0.5 x 1.8 x 0.35 proxy.
+    # Rigid limbs articulated at anatomical pivots; neutral bounds retain the original proxy.
     sports = role == 'player'
-    for side in (-1,1):
+    body = joint('body', (0,.94,0), [])
+    for side, label in [(-1,'L'),(1,'R')]:
         x = side*.105
-        box((x,.065,.035),(.14,.13,.28),DARK,.025)
-        rod((x,.15,0),(x,.59,-.025),.064,SKIN if sports else BODY,r2=.07)
-        rod((x,.59,-.025),(x,.94,0),.07,BODY,r2=.085)
+        foot = box((x,.065,.035),(.14,.13,.28),DARK,.025)
+        shin = rod((x,.15,0),(x,.59,-.025),.064,SKIN if sports else BODY,r2=.07)
+        thigh = rod((x,.59,-.025),(x,.94,0),.07,BODY,r2=.085)
+        upper = joint('thigh'+label,(x,.94,0),[thigh],body)
+        parts = [foot,shin]
+        if sports: parts.append(box((x,.24,.065),(.105,.16,.03),WHITE))
+        joint('shin'+label,(x,.59,-.025),parts,upper)
+    before=set(bpy.context.scene.objects)
     box((0,.93,0),(.33,.23,.23),BODY,.045)
     mesh([(-.16,1, -.11),(.16,1,-.11),(.20,1.43,-.09),(-.20,1.43,-.09),(-.16,1,.12),(.16,1,.12),(.20,1.43,.10),(-.20,1.43,.10)],[(0,3,2,1),(4,5,6,7),(0,1,5,4),(3,7,6,2),(0,4,7,3),(1,2,6,5)])
     rod((0,1.40,0),(0,1.53,0),.065,SKIN)
+    if sports:
+        box((0,1.12,.123),(.29,.045,.008),decal(GOLD))
+        box((0,1.31,.117),(.065,.13,.008),decal(WHITE))
+    if role == 'anchor':
+        mesh([(-.10,1.43,.105),(.10,1.43,.105),(0,1.17,.13)],[(0,2,1)],WHITE)
+        box((0,1.31,.137),(.035,.18,.012),GOLD)
+    for obj in sorted(set(bpy.context.scene.objects)-before, key=lambda o:o.name):
+        world=obj.matrix_world.copy(); obj.parent=body; obj.matrix_world=world
+    before=set(bpy.context.scene.objects)
     ellipsoid((0,1.64,.005),(.12,.16,.125),SKIN)
     ellipsoid((0,1.735,-.015),(.12,.065,.105),DARK)
     box((0,1.63,.128),(.045,.055,.045),SKIN,.008)
-    for side in (-1,1):
+    joint('head',(0,1.50,0),set(bpy.context.scene.objects)-before,body)
+    for side,label in [(-1,'L'),(1,'R')]:
         shoulder=(side*.19,1.38,0); elbow=(side*.205,1.14,.02)
         hand=(side*.19,1.0,.10)
         if role == 'fan': elbow=(side*.20,1.32,.08); hand=(side*.16,1.50,.12)
         if role == 'operator': hand=(side*.17,1.18,.13)
-        rod(shoulder,elbow,.048,SKIN if sports else BODY)
-        rod(elbow,hand,.041,SKIN if sports else BODY)
-        ellipsoid(hand,(.044,.055,.04),SKIN,8,4)
-    if sports:
-        box((0,1.12,.123),(.29,.045,.008),decal(GOLD))
-        box((0,1.31,.117),(.065,.13,.008),decal(WHITE))
-        for side in (-1,1): box((side*.105,.24,.065),(.105,.16,.03),WHITE)
-    if role == 'anchor':
-        mesh([(-.10,1.43,.105),(.10,1.43,.105),(0,1.17,.13)],[(0,2,1)],WHITE)
-        box((0,1.31,.137),(.035,.18,.012),GOLD)
+        upper=joint('arm'+label,shoulder,[rod(shoulder,elbow,.048,SKIN if sports else BODY)],body)
+        joint('forearm'+label,elbow,[rod(elbow,hand,.041,SKIN if sports else BODY),ellipsoid(hand,(.044,.055,.04),SKIN,8,4)],upper)
     if role == 'fan': box((0,1.51,.14),(.18,.10,.035),DARK,.01)
 
 def car():
@@ -140,8 +164,13 @@ def car():
     for side in (-1,1):
         box((side*.79,1.07,-.22),(.06,.58,.10),BODY)
         for z in (-1.38,1.40):
-            rod((side*.72,.36,z),(side*.95,.36,z),.36,DARK,sides=16)
-            rod((side*.951,.36,z),(side*.955,.36,z),.19,WHITE,sides=10)
+            label = ('F' if z > 0 else 'R') + ('L' if side < 0 else 'R')
+            tire = rod((side*.72,.36,z),(side*.95,.36,z),.36,DARK,sides=16)
+            hub = rod((side*.951,.36,z),(side*.955,.36,z),.19,WHITE,sides=10)
+            # A spoke makes rotation readable at 24 fps without a texture.
+            spoke = box((side*.958,.36,z),(.004,.29,.035),GOLD)
+            spin = joint('wheel'+label,(side*.84,.36,z),[tire,hub,spoke])
+            if z > 0: joint('steer'+('L' if side < 0 else 'R'),(side*.84,.36,z),[spin])
         box((side*.55,.67,2.17),(.43,.15,.05),WHITE,.02)
         box((side*.55,.66,-2.19-gap(2)),(.44,.12,.04),ORANGE)  # proud of the tail, not flush with it
     box((0,.42,2.23),(1.62,.11,.04),DARK)
@@ -151,18 +180,24 @@ def car():
     for x in (-.55,.55): box((x,.97,-1.94),(.07,.27,.10),DARK)
     box((0,1.12,-1.96),(1.8,.08,.36),DARK,.015)
 
+    joint('body',(0,.55,0),[o for o in bpy.context.scene.objects if o.type == 'MESH' and not o.parent])
+
 def eagle():
     ellipsoid((0,.25,0),(.16,.18,.36))
     ellipsoid((0,.35,.34),(.125,.14,.14),WHITE)
     rod((0,.34,.43),(0,.29,.55),.065,GOLD,r2=.015,sides=6)
     for side in (-1,1):
+        before=set(bpy.context.scene.objects)
         mesh([(side*.08,.28,.20),(side*.65,.34,.16),(side*1.12,.28,.02),(side*1.17,.25,-.25),(side*.58,.26,-.22),(side*.10,.23,-.20)],[(0,1,4),(1,2,3,4),(0,4,5)])
+        feathers=set(bpy.context.scene.objects)
         for i in range(6):
             x=.65+i*.09
             mesh([(side*x,.275,-.06),(side*(x+.10),.27,-.07),(side*(x+.06),.22,-(.29+(i%3)*.045)),(side*(x-.015),.23,-.27)],[(0,1,2,3)],DARK)
+        tip=joint('tip'+('L' if side < 0 else 'R'),(side*.65,.27,0),set(bpy.context.scene.objects)-feathers)
+        joint('wing'+('L' if side < 0 else 'R'),(side*.10,.27,0),[o for o in set(bpy.context.scene.objects)-before if not o.parent])
         ellipsoid((side*.09,.39,.418),(.015,.018,.012),DARK,8,4)
         rod((side*.07,.16,-.02),(side*.07,.10,.06),.025,GOLD)
-    mesh([(-.10,.23,-.24),(.10,.23,-.24),(.20,.18,-.55),(-.20,.18,-.55)],[(0,1,2,3)],WHITE)
+    joint('tail',(0,.23,-.24),[mesh([(-.10,.23,-.24),(.10,.23,-.24),(.20,.18,-.55),(-.20,.18,-.55)],[(0,1,2,3)],WHITE)])
 
 def elk():
     ellipsoid((0,.51,-.08),(.26,.24,.35))
@@ -170,6 +205,7 @@ def elk():
         for z in (-.30,.19):
             rod((x,.40,z),(x,.06,z+.035),.042,WOOD,r2=.026)
             box((x,.035,z+.05),(.075,.07,.10),DARK)
+    before=set(bpy.context.scene.objects)
     rod((0,.55,.20),(0,.79,.31),.13,BODY,r2=.085)
     ellipsoid((0,.81,.35),(.10,.11,.15))
     ellipsoid((0,.78,.46),(.075,.06,.055),DARK)
@@ -177,6 +213,8 @@ def elk():
         ellipsoid((s*.12,.89,.31),(.10,.035,.055))
         rod((s*.045,.88,.30),(s*.18,1,.20),.018,WHITE,r2=.008)
         for j in range(3): rod((s*(.07+j*.04),.91+j*.025,.28-j*.025),(s*(.13+j*.04),.99,.29-j*.03),.01,WHITE,r2=.003)
+
+    joint('head',(0,.55,.20),set(bpy.context.scene.objects)-before)
 
 def pine():
     rod((0,0,0),(0,4.6,0),.16,WOOD,r2=.055)
@@ -303,11 +341,17 @@ def support():
     box((0,.93,0),(.90,.14,.90),DARK,.04)
 
 def backboard():
-    box((0,.5,0),(1,1,1),DARK)
+    # Arena glass keeps the score readable from the fixed baseline camera behind the board.
+    pane = mat('backboard-glass', '#b8d4df')
+    pane.diffuse_color = (*pane.diffuse_color[:3], .12)
+    pane.node_tree.nodes.get('Principled BSDF').inputs['Alpha'].default_value = .12
+    pane.surface_render_method = 'DITHERED'
+    box((0,.5,0),(.90,.94,.94),pane)
+    for y in (.025,.975): box((0,y,0),(1,.05,1),DARK)
+    for z in (-.475,.475): box((0,.5,z),(1,.90,.05),DARK)
     # The existing board is thin in X (6 cm in Posterized). Decoration must be on both X faces, each layer `gap` off.
     g = gap(0)
     for side in (-1,1):
-        box((side*(.5+g+.0075),.52,0),(.015,.90,.92),decal(GLASS))
         x = .5+g+.015+g+.0075
         for z in (-.19,.19): box((side*x,.42,z),(.015,.30,.025),decal(WHITE))
         for y in (.27,.57): box((side*x,y,0),(.015,.025,.40),decal(WHITE))
@@ -361,40 +405,76 @@ def canonical_indices(file):
     json_size = struct.unpack_from('<I', data, 12)[0]
     doc = json.loads(data[20:20+json_size])
     binary = 28 + json_size
+    canonical = {}
+    aliases = {}
+    # Canonicalise even unused duplicate accessors: the exporter can arbitrarily reuse any of them.
+    for index, acc in enumerate(doc['accessors']):
+        if acc['type'] != 'SCALAR' or acc['componentType'] not in (5123, 5125): continue
+        view = doc['bufferViews'][acc['bufferView']]
+        offset = binary + view.get('byteOffset', 0) + acc.get('byteOffset', 0)
+        fmt = '<' + {5123: 'H', 5125: 'I'}[acc['componentType']] * acc['count']
+        values = struct.unpack_from(fmt, data, offset)
+        triangles = []
+        for i in range(0, len(values), 3):
+            tri = values[i:i+3]
+            triangles.append(min(tri[n:]+tri[:n] for n in range(3)))
+        ordered = tuple(i for tri in sorted(triangles) for i in tri)
+        struct.pack_into(fmt, data, offset, *ordered)
+        key = (acc['componentType'], ordered)
+        canonical.setdefault(key, index)
+        aliases[index] = canonical[key]
     for mesh_data in doc['meshes']:
         for primitive in mesh_data['primitives']:
-            assert primitive.get('mode', 4) == 4
-            acc = doc['accessors'][primitive['indices']]
-            view = doc['bufferViews'][acc['bufferView']]
-            offset = binary + view.get('byteOffset', 0) + acc.get('byteOffset', 0)
-            fmt = '<' + {5123: 'H', 5125: 'I'}[acc['componentType']] * acc['count']
-            values = struct.unpack_from(fmt, data, offset)
-            triangles = []
-            for i in range(0, len(values), 3):
-                tri = values[i:i+3]
-                triangles.append(min(tri[n:]+tri[:n] for n in range(3)))
-            struct.pack_into(fmt, data, offset, *(i for tri in sorted(triangles) for i in tri))
-    file.write_bytes(data)
+            primitive['indices'] = aliases[primitive['indices']]
+    encoded = json.dumps(doc, separators=(',', ':')).encode()
+    encoded += b' ' * (-len(encoded) % 4)
+    payload = data[binary:]
+    file.write_bytes(struct.pack('<III', 0x46546c67, 2, 28+len(encoded)+len(payload)) +
+                    struct.pack('<II', len(encoded), 0x4e4f534a) + encoded +
+                    struct.pack('<II', len(payload), 0x004e4942) + payload)
 
-manifest={}
+manifest=json.loads((OUT/'manifest.json').read_text()) if (OUT/'manifest.json').exists() else {}
+only=set(sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else set()
 for name,(shape,build) in BUILDERS.items():
+    if only and name not in only: continue
     bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
     current = name
     build()
     objects=list(bpy.context.scene.objects)
-    # Bake transforms, join by material on export, and fit the immutable proxy bounds.
-    bpy.ops.object.select_all(action='SELECT'); bpy.context.view_layer.objects.active=objects[0]
-    bpy.ops.object.convert(target='MESH'); bpy.ops.object.join()
-    o=bpy.context.object; o.name=name
-    bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
-    if shape != 'terrain':
-        coords=[v.co.copy() for v in o.data.vertices]
+    articulated = any(o.type == 'EMPTY' for o in objects)
+    if articulated:
+        # Fit once in the neutral pose. Pose changes never resize the body or its limbs.
+        bpy.ops.object.select_all(action='DESELECT')
+        for o in objects:
+            if o.type == 'MESH': o.select_set(True); bpy.context.view_layer.objects.active=o
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        bpy.context.view_layer.update()
+        coords=[o.matrix_world @ v.co for o in objects if o.type == 'MESH' for v in o.data.vertices]
         lo=[min(v[i] for v in coords) for i in range(3)]; hi=[max(v[i] for v in coords) for i in range(3)]
         w,h,d=SIZES[shape]; target=(w,d,h)
-        for v in o.data.vertices:
-            for i in range(3): v.co[i]=((v.co[i]-lo[i])/(hi[i]-lo[i])-(0 if i==2 else .5))*target[i]
-    o.data.update(); o.data.calc_loop_triangles()
-    triangles=len(o.data.loop_triangles)
+        root=bpy.data.objects.new(name, None); bpy.context.collection.objects.link(root)
+        for o in objects:
+            if not o.parent: o.parent=root
+        root.scale=tuple(target[i]/(hi[i]-lo[i]) for i in range(3))
+        root.location=tuple(-lo[i]*root.scale[i]-(0 if i==2 else target[i]/2) for i in range(3))
+        triangles=0
+        for o in objects:
+            if o.type == 'MESH': o.data.calc_loop_triangles(); triangles+=len(o.data.loop_triangles)
+        bpy.ops.object.select_all(action='SELECT')
+    else:
+        # Static models keep their canonical, joined geometry.
+        bpy.ops.object.select_all(action='SELECT'); bpy.context.view_layer.objects.active=objects[0]
+        bpy.ops.object.convert(target='MESH'); bpy.ops.object.join()
+        o=bpy.context.object; o.name=name
+        bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
+        if shape != 'terrain':
+            coords=[v.co.copy() for v in o.data.vertices]
+            lo=[min(v[i] for v in coords) for i in range(3)]; hi=[max(v[i] for v in coords) for i in range(3)]
+            w,h,d=SIZES[shape]; target=(w,d,h)
+            for v in o.data.vertices:
+                for i in range(3): v.co[i]=((v.co[i]-lo[i])/(hi[i]-lo[i])-(0 if i==2 else .5))*target[i]
+        o.data.update(); o.data.calc_loop_triangles()
+        triangles=len(o.data.loop_triangles)
     assert triangles <= 5000,(name,triangles)
     file=OUT/(name+'.glb')
     bpy.ops.export_scene.gltf(filepath=str(file),export_format='GLB',use_selection=True,export_yup=True,export_animations=False,export_cameras=False,export_lights=False,export_texcoords=False,export_normals=True,export_materials='EXPORT')

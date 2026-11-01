@@ -45,7 +45,8 @@ export function buildBlockoutModel(e: Entity): THREE.Group | null {
     mesh.material = Array.isArray(mesh.material) ? mesh.material.map(tint) : tint(mesh.material);
     // A decal's shadow is a texel-sized smudge around it: only solid parts cast.
     const decal = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).every(m => isDecalMaterial(m.name));
-    mesh.castShadow = e.shape !== 'terrain' && !decal; mesh.receiveShadow = true;
+    const glass = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).every(m => m.transparent && m.opacity < 0.5);
+    mesh.castShadow = e.shape !== 'terrain' && !decal && !glass; mesh.receiveShadow = true;
     if (e.shape === 'terrain') mesh.userData.terrain = true;
   });
   // Scene placement overwrites the root scale; keep the proxy base dimensions on its child.

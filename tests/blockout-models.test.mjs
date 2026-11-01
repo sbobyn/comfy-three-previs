@@ -13,13 +13,19 @@ const root = new URL('../public/models/blockouts/', import.meta.url);
 const manifest = JSON.parse(readFileSync(new URL('manifest.json', root), 'utf8'));
 const canonical = x => Array.isArray(x) ? x.map(canonical) : x && typeof x === 'object' ? Object.fromEntries(Object.keys(x).sort().map(k => [k, canonical(x[k])])) : x;
 const digest = x => createHash('sha256').update(JSON.stringify(canonical(x))).digest('hex');
-const baseline = JSON.parse(readFileSync(new URL('./fixtures/starter-blockout-baseline.json', import.meta.url), 'utf8'));
+const baseline = JSON.parse(readFileSync(new URL('./fixtures/starter-animation-baseline.json', import.meta.url), 'utf8'));
 
-test('all starter objects have compatible meshes and only display model ids changed from the camera-truth baseline', async () => {
+test('all starter objects have compatible meshes and animation leaves cameras, timing, set dressing and media byte-for-byte unchanged', async () => {
   for (const s of await loadStarters()) {
-    const withoutModels = structuredClone(s);
-    for (const e of withoutModels.scene.entities) delete e.model;
-    assert.equal(digest(withoutModels), baseline[s.slug], `${s.slug}: cameras, entities, timing and media must stay unchanged`);
+    const fixed = structuredClone(s);
+    const actors = { 'breaking-news': ['News anchor', 'Camera operator'], wingspan: ['Bald eagle', 'Elk 1', 'Elk 2', 'Elk 3'], 'final-lap': ['Comfy car', 'Rival car'], posterized: ['Comfy guard', 'Rival defender', 'Basketball'] };
+    const rewrittenCast = ['News anchor', 'Bald eagle', 'Comfy car', 'Rival car', 'Comfy guard', 'Rival defender'];
+    for (const e of fixed.scene.entities) {
+      if (actors[s.slug].includes(e.name)) for (const k of ['position', 'rotation', 'path', 'pose']) delete e[k];
+      if (rewrittenCast.includes(e.name)) delete e.notes;
+    }
+    for (const shot of fixed.shots) for (const k of ['description', 'prompts']) delete shot[k];
+    assert.equal(digest(fixed), baseline[s.slug], `${s.slug}: only the named actors' blocking and shot/cast action text may change`);
     for (const e of s.scene.entities) {
       if (e.shape === 'group') assert.equal(e.model, undefined);
       else assert.equal(blockoutModel(e), e.model, `${s.slug}: ${e.name}`);
@@ -29,7 +35,7 @@ test('all starter objects have compatible meshes and only display model ids chan
     assert.deepEqual(copy.scene.entities.map(e => e.model), s.scene.entities.map(e => e.model));
     const sh = copy.shots[0], sig = shotSignature(copy, sh);
     copy.scene.entities.forEach(e => delete e.model);
-    assert.equal(shotSignature(copy, sh), sig, 'display fidelity does not invalidate unchanged camera truth');
+    assert.notEqual(shotSignature(copy, sh), sig, 'a posed rig is camera truth, so removing it invalidates its silhouette');
     copy.scene.entities[0].position[0] += 1;
     assert.notEqual(shotSignature(copy, sh), sig, 'a blocking edit still invalidates media');
   }

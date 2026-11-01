@@ -328,12 +328,1067 @@
           1
         ],
         "color": "#617f9d",
-        "notes": "Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera.",
+        "notes": "News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression.",
         "lookFrom": null,
         "styleNotes": "Same face in every shot: the man from the primary reference",
         "pitch": 0,
         "roll": 0,
-        "path": null,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                4,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 0.8,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.8608273090794273,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 1.6,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                1.1994883236498062,
+                0
+              ],
+              "head": [
+                -2,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -22,
+                0,
+                4.199999999999999
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -48.6,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 2.3,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.8948462546120642,
+                0
+              ],
+              "head": [
+                1,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -28,
+                0,
+                6.3
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -50.4,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 3.4,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.30664932243219745,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 5,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -1.150709129595766,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 5.6,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.7575199654467859,
+                0
+              ],
+              "head": [
+                4,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 6.2,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.09970728338099567,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 7.1,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.8747628481510511,
+                0
+              ],
+              "head": [
+                -1,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -34,
+                0,
+                8.399999999999999
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -52.2,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 7.7,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                1.1858018806524004,
+                0
+              ],
+              "head": [
+                1,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -26,
+                0,
+                5.6
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -49.8,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 8.8,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.7019006314701141,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 10,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.6528253330672437,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 11.1,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -1.1934631058447869,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -20,
+                0,
+                3.5
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -48,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 12.2,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.4298751386841944,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 13.7,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                1.0871456907701542,
+                0
+              ],
+              "head": [
+                3,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 14.3,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                1.184126357129536,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 15,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.7803454081885401,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          }
+        ],
         "parent": null,
         "look": "d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8",
         "sheets": [
@@ -868,7 +1923,628 @@
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
-        "path": null,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 2,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                2,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                4,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -35,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 3,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 4,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 7,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                2,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                4,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -35,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 8,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 10,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 12,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                2,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                4,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -35,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 13,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 15,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          }
+        ],
         "parent": null,
         "look": "47334e07-2256-4750-8686-6f6b6fff4730",
         "sheets": [
@@ -1620,7 +3296,7 @@
     {
       "id": "a015ef8e-809e-4492-93ef-675772aba797",
       "title": "Breaking",
-      "description": "@news-anchor sits at the @anchor-desk beneath the blue @video-wall. The bulletin is about to begin.",
+      "description": "@news-anchor settles at the desk in the first second, lifts the chin, then opens one palm briefly and rests it again. Breathing is subtle; suit, face and studio graphics stay consistent.",
       "duration": 5,
       "start": 0,
       "camera": {
@@ -1944,6 +3620,7 @@
           "deep blue dusk"
         ]
       },
+      "prompts": {},
       "references": [
         {
           "id": "fa122c1d-8574-596e-a61c-19a21a427900",
@@ -1984,7 +3661,7 @@
     {
       "id": "3014d6d1-f093-4e8f-b791-aed102116cf3",
       "title": "The headline",
-      "description": "@news-anchor delivers the launch headline with composed authority; the @video-wall glows blue behind the desk.",
+      "description": "@news-anchor delivers the headline: a small nod in second one, one measured hand emphasis in seconds two to three, then stillness. Keep the same face and suit; shoulders follow the gesture softly.",
       "duration": 5,
       "start": 5,
       "camera": {
@@ -2308,6 +3985,7 @@
           "high contrast"
         ]
       },
+      "prompts": {},
       "references": [
         {
           "id": "ed40a467-dbf1-503d-a43c-bfedd21cff7a",
@@ -2348,7 +4026,7 @@
     {
       "id": "597912bb-6c6f-4f3b-9274-c203578c538e",
       "title": "On air",
-      "description": "@news-anchor finishes the bulletin at the @anchor-desk and holds a confident expression. The studio remains calm and on air.",
+      "description": "@news-anchor finishes speaking, lowers both hands, settles the shoulders and gives a restrained nod in the last second. Hold the same face, suit and studio graphics.",
       "duration": 5,
       "start": 10,
       "camera": {
@@ -2672,6 +4350,7 @@
           "deep blue dusk"
         ]
       },
+      "prompts": {},
       "references": [
         {
           "id": "ed80795a-4c4d-54f5-ab16-4ead2aa19f33",

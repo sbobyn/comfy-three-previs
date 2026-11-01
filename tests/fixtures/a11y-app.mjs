@@ -2,7 +2,7 @@
 // (launch-a11y-screens, launch-keyboard). Comfy Cloud is mocked by tests/fixtures/mock-cloud.mjs and paid generation is off,
 // so quotes can be prepared and read but nothing leaves the machine or is charged.
 import { readFileSync, existsSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, mkdir, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
@@ -49,9 +49,25 @@ export async function startApp({ starter = 'breaking-news', mock = true } = {}) 
   let exited;
   try {
     dir = await mkdtemp(join(tmpdir(), 'previs-a11y-'));
-    const id = starter ? (await (await import('../../scripts/import-starters.mjs')).importStarters({ dataDir: join(dir, 'data'), only: starter, log: () => {} }))[0].id : null;
+    let startersDir;
+    if (mock) {
+      const { loadStarters } = await import('../../server/previs/starters.mjs');
+      const { shotSignature } = await import('../../shared/director.mjs');
+      const starters = await loadStarters();
+      startersDir = join(dir, 'mock-starters');
+      await mkdir(startersDir);
+      await writeFile(join(startersDir, 'index.json'), JSON.stringify({ starters: starters.map(s => s.slug) }));
+      for (const s of starters) {
+        // Synthetic current stills exercise the quote/focus flow without paid regeneration.
+        for (const sh of s.shots) for (const r of sh.references || []) if (r.generated) r.generated.signature = shotSignature(s, sh);
+        await mkdir(join(startersDir, s.slug));
+        await writeFile(join(startersDir, s.slug, 'starter.json'), JSON.stringify(s));
+        await symlink(join(s.dir, 'media'), join(startersDir, s.slug, 'media'));
+      }
+    }
+    const id = starter ? (await (await import('../../scripts/import-starters.mjs')).importStarters({ dataDir: join(dir, 'data'), ...(startersDir ? { startersDir } : {}), only: starter, log: () => {} }))[0].id : null;
     const port = await freePort(), base = `http://127.0.0.1:${port}`;
-    const env = { ...process.env, PORT: String(port), PREVIS_DATA_DIR: join(dir, 'data'), PREVIS_BUDGET_DIR: join(dir, 'budget'), PREVIS_LIBRARY_DIR: join(dir, 'library'), PREVIS_COMFY_URL: 'http://127.0.0.1:9', PREVIS_ALLOW_PAID: '0', PREVIS_AGENT: 'off', COMFY_CLOUD_API_KEY: mock ? 'mock-key-not-real' : '', COMFY_API_KEY: '', PREVIS_HEADLESS: '' };
+    const env = { ...process.env, ...(startersDir ? { PREVIS_STARTERS_DIR: startersDir } : {}), PORT: String(port), PREVIS_DATA_DIR: join(dir, 'data'), PREVIS_BUDGET_DIR: join(dir, 'budget'), PREVIS_LIBRARY_DIR: join(dir, 'library'), PREVIS_COMFY_URL: 'http://127.0.0.1:9', PREVIS_ALLOW_PAID: '0', PREVIS_AGENT: 'off', COMFY_CLOUD_API_KEY: mock ? 'mock-key-not-real' : '', COMFY_API_KEY: '', PREVIS_HEADLESS: '' };
     server = spawn(process.execPath, [...(mock ? ['--import', './tests/fixtures/mock-cloud.mjs'] : []), 'server/previs/server.mjs'], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'] });
     exited = new Promise(resolve => server.once('exit', (code, signal) => { gone = true; resolve({ code, signal }); }));
     server.stderr.on('data', d => { stderr = (stderr + d).slice(-2000); });

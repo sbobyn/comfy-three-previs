@@ -112,6 +112,7 @@ export function applyOps(p, ops) {
         const before = { position: [...e.position], rotation: e.rotation, scale: [...e.scale] };
         const next = makeEntity({ ...e, ...patch, name: patch.name ? uniqueName(p.scene.entities.filter(x => x !== e), patch.name) : e.name }, e.id);
         Object.assign(e, next);
+        if (!next.pose) delete e.pose;
         if (!next.model) delete e.model; // changing proxy shape clears an incompatible display mesh
         if (!next.sheets) delete e.sheets; // `sheets: []` clears them (makeEntity omits an empty list)
         // Children follow their parent rigidly, unless this batch already places them (the editor sends every moved object).
