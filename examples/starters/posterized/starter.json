@@ -12040,11 +12040,11 @@
       "height": 900
     },
     {
-      "path": "media/assets/db4abf37-79ed-4f9e-a370-0cb30c4e6f63.mp4",
+      "path": "media/assets/130c0442-e1c0-420e-94e6-30dbbbbdf315.mp4",
       "kind": "video",
-      "bytes": 1128594,
-      "sha256": "b181c751d1585830e9d53b7bd4e067f156385b346f23386176aa03e7d218fcd5",
-      "sourceSha256": "1cc8680da26da056f3855dd81340a76b9df9ac65ea8ec19c0c8e2755bd100680",
+      "bytes": 1098383,
+      "sha256": "0f892a76147637aaa58204e5828d6e9644dcb2eb5dc1315e11d20f9e07e1e118",
+      "sourceSha256": "08d60c8d7a50ec413953741d93b0e25055a8f1bda25d9aa73fa42a540533a617",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -12052,16 +12052,16 @@
       "duration": 5
     },
     {
-      "path": "media/assets/07b22003-5f1f-5fad-adc0-84c79f52c128.mp4",
+      "path": "media/assets/c001d644-3a02-5a2e-adf4-97c3862930e8.mp4",
       "kind": "video",
-      "bytes": 1114985,
-      "sha256": "c15375a403461b44f06ae4e6b961ba5ca81d9de2510bc265d4ef79484f44cc44",
-      "sourceSha256": "5764e79ab5058c90237dc64ac1bba17d89a2462086f3fa9b5ba60c51abe5ba6a",
+      "bytes": 1105016,
+      "sha256": "8e6b58ca519bde403b92f16f1259f2edd357e50bb70681f074b49afc5b83ff13",
+      "sourceSha256": "21553c3755cd99036fb4e2c144fdb1b84423f2ea4e904ce974c3a482de28b114",
       "width": 1280,
       "height": 720,
       "fps": 24,
-      "frameCount": 113,
-      "duration": 4.708
+      "frameCount": 121,
+      "duration": 5.042
     }
   ],
   "assets": [
@@ -12122,31 +12122,31 @@
       }
     },
     {
-      "id": "db4abf37-79ed-4f9e-a370-0cb30c4e6f63",
+      "id": "130c0442-e1c0-420e-94e6-30dbbbbdf315",
       "kind": "camera-render",
       "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
-      "file": "assets/db4abf37-79ed-4f9e-a370-0cb30c4e6f63.mp4",
+      "file": "assets/130c0442-e1c0-420e-94e6-30dbbbbdf315.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-31T06:50:10.070Z",
+      "createdAt": "2026-11-01T07:34:00.359Z",
       "source": {
         "engineShotId": null,
-        "signature": "9e586736"
+        "signature": "4e576daf"
       }
     },
     {
-      "id": "07b22003-5f1f-5fad-adc0-84c79f52c128",
+      "id": "c001d644-3a02-5a2e-adf4-97c3862930e8",
       "kind": "workflow-result",
       "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
-      "file": "assets/07b22003-5f1f-5fad-adc0-84c79f52c128.mp4",
+      "file": "assets/c001d644-3a02-5a2e-adf4-97c3862930e8.mp4",
       "mime": "video/mp4",
-      "duration": 4.708333,
-      "createdAt": "2026-10-31T06:58:57.724Z",
+      "duration": 5.041667,
+      "createdAt": "2026-11-01T15:59:32.591Z",
       "source": {
-        "workflow": "Seedance 2.5 · edit the complete video · 9 reference images",
+        "workflow": "Kling O1 · edit the complete video · 4 reference images",
         "backend": "cloud",
-        "prompt": "Comfy guard takes two final strides, rises above Rival defender and slams Basketball through the east rim. The defender lands beneath him; the guard comes down after the score. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 26mm. Filter: high contrast.\nReference images: 1 = start still; 2 = end still; 3 = Comfy guard; 4 = Rival defender; 5 = East rim; 6 = Basketball; 7 = Court floor; 8 = Sideline stands · tier 1; 9 = East backboard.",
-        "sourceAssetId": "db4abf37-79ed-4f9e-a370-0cb30c4e6f63"
+        "prompt": "Cinematic live-action shot. Comfy guard gathers 1s, plants 2s, dunks 3s; Rival defender contests late. Ball drops through; knees cushion landing. Half-speed; same uniforms. Athletic guard: blue/yellow Comfy uniform, number 1. Blue and yellow only. Never black, white or green on this player. Tall defender: black/neon green uniform, number 7. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 26mm. Filter: high contrast.\nReference images: 1 = start still; 2 = end still; 3 = Comfy guard; 4 = Rival defender.",
+        "sourceAssetId": "130c0442-e1c0-420e-94e6-30dbbbbdf315"
       }
     }
   ],
@@ -12166,7 +12166,7 @@
       },
       {
         "shotId": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
-        "assetId": "07b22003-5f1f-5fad-adc0-84c79f52c128",
+        "assetId": "c001d644-3a02-5a2e-adf4-97c3862930e8",
         "in": 0,
         "out": null
       }
