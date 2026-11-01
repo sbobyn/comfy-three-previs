@@ -24,6 +24,8 @@ import { loadStarters, starterCard, instantiateStarter, attachStarterMedia } fro
 import { existsSync } from 'node:fs';
 import { cutAsset } from '../../shared/takes.mjs';
 import { openLibrary, libraryDir, placeAsset } from './library.mjs';
+import { meshLoader, fixCoplanar, sceneAfterOps, geometryOf, changedIds, coplanarWarnings } from './coplanar.mjs';
+import { parseGlb } from '../../shared/blockout-lint.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
@@ -449,6 +451,12 @@ export async function openDirector(root, options = {}) {
         const p = structuredClone(await load(projectId));
         const m = await library.get(input.asset);
         const plan = placeAsset(p, m, input);
+        // An asset set down exactly on a floor or wall shares its surface: lift its thin, static parts 2 mm.
+        const parsed = new Map();
+        for (const f of plan.files.filter(f => f.to.endsWith('.glb'))) { try { parsed.set(`/director-refs/${p.id}/${f.to}`, parseGlb(await readFile(join(library.assetDir(m.id), f.from)))); } catch {} }
+        const after = sceneAfterOps(p.scene.entities, plan.ops), meshOf = await meshLoader(after, { refFile: (id, file) => join(dir, id, 'refs', file), parsed });
+        const coplanar = fixCoplanar(after, { meshOf, movable: new Set(plan.entityIds) });
+        for (const op of plan.ops) if (op.op === 'add_entity' && coplanar.moves.has(op.entity.id)) op.entity.position = coplanar.moves.get(op.entity.id);
         (p.scene.references ||= []).push(...plan.references);
         applyOps(p, plan.ops);
         await mkdir(join(dir, p.id, 'refs'), { recursive: true });
@@ -460,7 +468,8 @@ export async function openDirector(root, options = {}) {
         const root = p.scene.entities.find(e => e.id === plan.rootId), handle = handleOf(root.name);
         const where = root.position.map(v => Math.round(v * 100) / 100).join(', ');
         const text = `Placed @${handle}${handle === m.handle ? '' : ` (the library's @${m.handle}; @${m.handle} was taken in this project)`} v${m.version} at [${where}]`;
-        return { project: await save(p), entityIds: plan.entityIds, root: plan.rootId, name: root.name, handle, asset: { id: m.id, handle: m.handle, version: m.version }, text, ops: plan.ops };
+        const warnings = [...coplanar.fixed, ...coplanar.warnings];
+        return { project: await save(p), entityIds: plan.entityIds, root: plan.rootId, name: root.name, handle, asset: { id: m.id, handle: m.handle, version: m.version }, text, ops: plan.ops, ...(warnings.length ? { warnings } : {}) };
       }),
     },
     async storeMesh(projectId, file, bytes) {
@@ -799,7 +808,11 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
       }
       case '/api/director/get': { const p = await director.get(input.projectId); return { project: p, prompts: Object.fromEntries(p.shots.map(s => [s.id, compilePrompt(p, s)])) }; }
       case '/api/director/edit': {
-        const r = await director.edit(input.projectId, input.ops);
+        const before = geometryOf((await director.get(input.projectId)).scene.entities);
+        let r = await director.edit(input.projectId, input.ops);
+        // Objects this edit added or moved onto another object's plane will z-fight: say so (rules: docs/blockout-modeling-rules.md).
+        const entities = r.project.scene.entities, warnings = coplanarWarnings(entities, { meshOf: await meshLoader(entities, { refFile: (id, file) => director.refFile(id, file) }), only: changedIds(before, entities) });
+        if (warnings.length) r = { warnings, ...r };
         if (meta.agent) { const text = summarizeOps(input.ops, r.project); if (text) { const pr = await director.progress(input.projectId, { text, auto: true }); if (pr.logged) r.project = pr.project; } }
         return r;
       }
@@ -820,7 +833,13 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
         const kind = input.kind === 'image' ? 'image' : 'video';
         return { shot: p.shots.indexOf(s) + 1, kind, auto: autoPromptText(p, s, kind), current: shotPrompt(p, s, kind), edited: !!(s.prompts?.[kind]?.edited) };
       }
-      case '/api/director/agent/propose': return director.propose(input.projectId, input.messageId, input.ops);
+      case '/api/director/agent/propose': {
+        // The built-in agent's proposals get the same coplanar warning as direct edits, checked on the preview.
+        const r = await director.propose(input.projectId, input.messageId, input.ops);
+        const before = geometryOf((await director.get(input.projectId)).scene.entities), entities = (await director.preview(input.projectId, input.messageId)).project.scene.entities;
+        const warnings = coplanarWarnings(entities, { meshOf: await meshLoader(entities, { refFile: (id, file) => director.refFile(id, file) }), only: changedIds(before, entities) });
+        return warnings.length ? { warnings, ...r } : r;
+      }
       case '/api/director/agent/suggest': return director.suggest(input.projectId, input.messageId, input);
       case '/api/director/agent/proposal': return director.proposal(input.projectId, input.messageId, input.action);
       case '/api/director/agent/stop': {

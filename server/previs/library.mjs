@@ -24,6 +24,8 @@ import { SHAPES, KINDS, ROLES, handleOf, descendantsOf, entitySize, lookSource, 
 import { normalizeSheets } from '../../shared/sheet-presets.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
 import { readHandoffDir, readHandoffZip, validateHandoff } from './blender-import.mjs';
+import { bundledMesh, coplanarWarnings, meshWarnings } from './coplanar.mjs';
+import { parseGlb } from '../../shared/blockout-lint.mjs';
 
 export const ASSET_FORMAT = 'comfy-previs-asset';
 export const ASSET_FORMAT_VERSION = 1;
@@ -378,6 +380,21 @@ export function placeAsset(project, m, { position, rotation, name, shot, variant
   return { ops, references, files, rootId: idMap.get(root.id), entityIds: m.entities.map(e => idMap.get(e.id)) };
 }
 
+/**
+ * Coplanar overlaps inside an asset (between its own objects, and inside each of its meshes) as plain sentences.
+ * A bundle is content-hashed, so import reports them rather than moving anything; placing it can still lift parts.
+ */
+export function bundleWarnings(m, files) {
+  const base = '/director-refs/00000000-0000-0000-0000-000000000000/', parsed = new Map(), warnings = [];
+  for (const x of m.media.filter(x => x.path.endsWith('.glb'))) {
+    const bytes = files.get(x.path), owner = m.entities.find(e => e.model === x.path);
+    try { parsed.set(base + x.path.slice(5), parseGlb(bytes)); } catch { continue; }
+    warnings.push(...meshWarnings(bytes, `the mesh of “${owner?.name || x.path}”`));
+  }
+  const entities = m.entities.map(e => (e.model?.startsWith('refs/') ? { ...e, model: base + e.model.slice(5) } : e));
+  return [...warnings, ...coplanarWarnings(entities, { meshOf: id => bundledMesh(id) ?? parsed.get(id) ?? null })].slice(0, 8);
+}
+
 // ---------- The library on disk ----------
 
 function run(cmd, args) { return new Promise((ok, no) => execFile(cmd, args, { maxBuffer: 16 * MiB }, (err, stdout) => (err ? no(err) : ok(stdout)))); }
@@ -482,10 +499,11 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
     const { assets } = await scan();
     const existing = assets.find(a => a.id === m.id), clash = assets.find(a => a.handle === m.handle && a.id !== m.id);
     if (clash) fail(`@${m.handle} is already in the library as a different asset; rename one of them, then import again`, 409);
-    if (existing && existing.contentHash === m.contentHash) return { asset: assetCard(existing), action: 'unchanged', text: `@${existing.handle} v${existing.version} is already in your library` };
+    const warnings = bundleWarnings(m, files), warn = warnings.length ? { warnings } : {};
+    if (existing && existing.contentHash === m.contentHash) return { asset: assetCard(existing), action: 'unchanged', text: `@${existing.handle} v${existing.version} is already in your library`, ...warn };
     const next = cleanManifest(existing ? { ...m, version: existing.version + 1, supersedes: existing.contentHash } : m);
     await write(next, new Map(next.media.map(x => [x.path, files.get(x.path)])), existing);
-    return { asset: assetCard(next), action: existing ? 'updated' : 'added', text: existing ? `Updated @${next.handle} in your library to v${next.version}` : `Added @${next.handle} to your library` };
+    return { asset: assetCard(next), action: existing ? 'updated' : 'added', text: existing ? `Updated @${next.handle} in your library to v${next.version}` : `Added @${next.handle} to your library`, ...warn };
   }
 
   /** One object out of a whole-project export (.previs.zip), checked like a project import, saved as an asset. */

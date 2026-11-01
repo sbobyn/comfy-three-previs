@@ -15,8 +15,10 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'public/models/blockouts'
 OUT.mkdir(parents=True, exist_ok=True)
 materials = {}
+colors = {}
 
 def mat(name, color):
+    colors[name] = color
     if name not in materials:
         m = bpy.data.materials.new(name)
         rgb = tuple(int(color[i:i+2], 16) / 255 for i in (1, 3, 5))
@@ -39,6 +41,25 @@ GOLD = mat('gold', '#f6c544')
 WOOD = mat('bark', '#594334')
 LEAF = mat('pine-shadow', '#244532')
 ORANGE = mat('rim-orange', '#e57b2a')
+
+# Never two surfaces on one plane (docs/blockout-modeling-rules.md). A decal, line or inset panel is lifted DECAL metres
+# off the surface under it, measured at the smallest scale the starters show the model, so the gap survives
+# non-uniform entity scales (a 5 cm court slab, a 6 cm backboard). Decal materials end in '-decal': the viewer gives
+# them polygonOffset and no shadow casting. shared/blockout-lint.mjs checks every GLB and starter for overlaps.
+DECAL = .003
+def decal(material): return mat(material.name + '-decal', colors[material.name])
+def starter_scales():
+    out = {}
+    for f in sorted((ROOT / 'examples/starters').glob('*/starter.json')):
+        for e in json.loads(f.read_text())['scene']['entities']:
+            if e.get('model'): out[e['model']] = [min(a, b) for a, b in zip(out.get(e['model'], [1e9] * 3), e['scale'])]
+    return out
+SCALES = starter_scales()
+current = None
+def gap(axis):
+    # Model units for DECAL metres along Previs axis 0/1/2 of the model being built (never below DECAL itself).
+    world = [s * (SIZES[BUILDERS[current][0]][i] if current in UNIT_CUBE else 1) for i, s in enumerate(SCALES.get(current, [1, 1, 1]))]
+    return DECAL / min(1, world[axis])
 
 def xyz(p): return (p[0], -p[2], p[1])
 def finish(o, material):
@@ -102,8 +123,8 @@ def human(role):
         rod(elbow,hand,.041,SKIN if sports else BODY)
         ellipsoid(hand,(.044,.055,.04),SKIN,8,4)
     if sports:
-        box((0,1.12,.123),(.29,.045,.008),GOLD)
-        box((0,1.31,.117),(.065,.13,.008),WHITE)
+        box((0,1.12,.123),(.29,.045,.008),decal(GOLD))
+        box((0,1.31,.117),(.065,.13,.008),decal(WHITE))
         for side in (-1,1): box((side*.105,.24,.065),(.105,.16,.03),WHITE)
     if role == 'anchor':
         mesh([(-.10,1.43,.105),(.10,1.43,.105),(0,1.17,.13)],[(0,2,1)],WHITE)
@@ -122,11 +143,11 @@ def car():
             rod((side*.72,.36,z),(side*.95,.36,z),.36,DARK,sides=16)
             rod((side*.951,.36,z),(side*.955,.36,z),.19,WHITE,sides=10)
         box((side*.55,.67,2.17),(.43,.15,.05),WHITE,.02)
-        box((side*.55,.66,-2.19),(.44,.12,.04),ORANGE)
+        box((side*.55,.66,-2.19-gap(2)),(.44,.12,.04),ORANGE)  # proud of the tail, not flush with it
     box((0,.42,2.23),(1.62,.11,.04),DARK)
     box((0,.65,2.205),(.54,.12,.02),DARK)
-    box((0,.94,1.33),(.24,.025,1.53),GOLD)
-    box((0,1.456,-.18),(.24,.012,1.18),GOLD)
+    box((0,.94,1.33),(.24,.025,1.53),decal(GOLD))
+    box((0,1.456,-.18),(.24,.012,1.18),decal(GOLD))
     for x in (-.55,.55): box((x,.97,-1.94),(.07,.27,.10),DARK)
     box((0,1.12,-1.96),(1.8,.08,.36),DARK,.015)
 
@@ -178,35 +199,41 @@ def equipment(kind):
         box((0,3.82,.151),(.25,.27,.01),WHITE)
 
 def surface(kind):
-    box((0,.46,0),(1,.92,1),BODY)
+    top = .92
+    box((0,top/2,0),(1,top,1),BODY)
+    def layer(x, z, w, h, d, material, level=1):
+        # Flat markings stacked on the slab: each level is its own plane, `gap` above the one below.
+        y = top + level*gap(1) + (level-1)*.03
+        box((x,y+h/2,z),(w,h,d),decal(material))
     if kind == 'court':
-        # Markings on top: world dimensions 28 x 15 through the entity scale.
-        for x in (-.48,.48): box((x,.98,0),(.003,.03,.95),WHITE)
-        for z in (-.47,.47): box((0,.98,z),(.96,.03,.005),WHITE)
-        box((0,.98,0),(.003,.03,.94),WHITE)
-        for i in range(15): box((-.46+i*.065,.94,0),(.001,.01,.94),WOOD)
+        # Markings on top: world dimensions 28 x 15 through the entity scale. Plank seams below the paint lines.
+        for i in range(15): layer(-.46+i*.065,0,.001,.01,.94,WOOD)
+        for x in (-.48,.48): layer(x,0,.003,.03,.95,WHITE,2)
+        for z in (-.47,.47): layer(0,z,.96,.03,.005,WHITE,2)
+        layer(0,0,.003,.03,.94,WHITE,2)
+        arc = top + 2*gap(1) + .03 + .015
         for side in (-1,1):
             # Open three-point arc, sampled in the existing floor's normalised space.
             for i in range(24):
                 a=-math.pi/2+i*math.pi/24; b=a+math.pi/24
-                rod((side*(.43-.22*math.cos(a)),.99,.40*math.sin(a)),(side*(.43-.22*math.cos(b)),.99,.40*math.sin(b)),.002,WHITE,sides=4)
+                rod((side*(.43-.22*math.cos(a)),arc,.40*math.sin(a)),(side*(.43-.22*math.cos(b)),arc,.40*math.sin(b)),.002,decal(WHITE),sides=4)
     elif kind == 'paint':
-        for z in (-.47,.47): box((0,.98,z),(.96,.03,.015),WHITE)
-        for x in (-.48,.48): box((x,.98,0),(.015,.03,.96),WHITE)
+        for z in (-.47,.47): layer(0,z,.96,.03,.015,WHITE)
+        for x in (-.48,.48): layer(x,0,.015,.03,.96,WHITE)
     elif kind == 'track':
-        for z in (-.46,.46): box((0,.98,z),(1,.025,.012),WHITE)
-        for x in (-.375,-.125,.125,.375): box((x,.98,0),(.10,.025,.008),GOLD)
+        for z in (-.46,.46): layer(0,z,1,.025,.012,WHITE)
+        for x in (-.375,-.125,.125,.375): layer(x,0,.10,.025,.008,GOLD)
     elif kind == 'finish':
         for x in range(2):
             for z in range(20):
-                if (x+z)%2: box((-.25+x*.5,.98,-.475+z*.05),(.5,.03,.05),DARK)
+                if (x+z)%2: layer(-.25+x*.5,-.475+z*.05,.5,.03,.05,DARK)
     elif kind == 'studio-floor':
-        for z in (-.42,.42): box((0,.98,z),(.9,.025,.004),GLASS)
-        for x in (-.42,.42): box((x,.98,0),(.004,.025,.84),GLASS)
+        for z in (-.42,.42): layer(0,z,.9,.025,.004,GLASS)
+        for x in (-.42,.42): layer(x,0,.004,.025,.84,GLASS)
     elif kind == 'grass':
-        for i in range(8): box((-.4375+i*.125,.95,0),(.0625,.02,1),LEAF)
+        for i in range(8): layer(-.4375+i*.125,0,.0625,.02,1,LEAF)
     elif kind == 'river':
-        for x in (-.27,.12): box((x,.98,0),(.012,.02,.85),GLASS)
+        for x in (-.27,.12): layer(x,0,.012,.02,.85,GLASS)
 
 def stands():
     for i in range(6):
@@ -218,29 +245,35 @@ def stands():
         rod((x,.14,-.48),(x,.99,.45),.008,WHITE)
 
 def panels(kind):
+    if kind in ('barrier', 'press-box'):
+        # The dark cap sits on the body (it does not overlap it) and overhangs it by `gap` on every side.
+        cap = .12 if kind == 'barrier' else .08
+        box((0,(1-cap)/2,0),(1,1-cap,1),BODY,.025)
+        box((0,1-cap/2,0),(1+2*gap(0),cap,1+2*gap(2)),DARK)
+        if kind == 'barrier':
+            for x in (-.375,-.125,.125,.375): box((x,.46,.5+gap(2)+.005),(.006,.72,.01),decal(GLASS))
+        else:
+            for x in range(10): box((-.45+x*.1,.55,.5+gap(2)+.005),(.085,.56,.01),decal(GLASS))
+        return
     box((0,.5,0),(1,1,1),BODY,.025)
-    if kind == 'barrier':
-        box((0,.93,0),(1,.12,1),DARK)
-        for x in (-.375,-.125,.125,.375): box((x,.50,.505),(.006,.80,.01),GLASS)
-    elif kind == 'press-box':
-        for x in range(10): box((-.45+x*.1,.6,.505),(.085,.56,.01),GLASS)
-        box((0,.96,0),(1,.08,1),DARK)
-    else:
-        box((0,.53,.505),(.92,.83,.015),DARK)
-        for x in range(4): box((-.345+x*.23,.57,.52),(.22,.62,.008),GLASS)
-        box((0,.16,.53),(.86,.04,.01),GOLD)
-        if kind == 'video-wall':
-            # Stylised world map made from broad facets, no text or textures.
-            for x,y,w,h in [(-.25,.65,.17,.20),(-.17,.4,.06,.17),(.05,.64,.10,.12),(.08,.43,.07,.19),(.25,.64,.21,.16),(.32,.34,.08,.07)]:
-                box((x,y,.537),(w,h,.01),WHITE,.01)
+    # Screen: a dark frame proud of the body, glass panels proud of the frame, then the gold strip and the map.
+    z = .5 + gap(2)
+    box((0,.53,z+.0075),(.92,.83,.015),DARK); z += .015 + gap(2)
+    for x in range(4): box((-.345+x*.23,.57,z+.004),(.22,.62,.008),decal(GLASS))
+    box((0,.16,z+.005),(.86,.04,.01),decal(GOLD)); z += .01 + gap(2)
+    if kind == 'video-wall':
+        # Stylised world map made from broad facets, no text or textures.
+        for x,y,w,h in [(-.25,.65,.17,.20),(-.17,.4,.06,.17),(.05,.64,.10,.12),(.08,.43,.07,.19),(.25,.64,.21,.16),(.32,.34,.08,.07)]:
+            box((x,y,z+.005),(w,h,.01),decal(WHITE),.01)
 
 def desk():
     box((0,.70,0),(1.6,.10,.9),BODY,.025)
     for x in (-.6,.6): box((x,.32,0),(.14,.64,.65),DARK,.03)
-    box((0,.39,.24),(1.35,.50,.11),GLASS,.02)
+    box((0,.38,.24),(1.35,.48,.11),GLASS,.02)  # stops below the legs' tops
     box((0,.15,0),(1.45,.09,.7),DARK,.03)
-    box((-.35,.745,.08),(.33,.008,.25),WHITE)
-    box((.45,.74,.03),(.25,.02,.20),DARK)
+    # Paper and tablet lie on the desk top, a `gap` above it.
+    box((-.35,.75+gap(1)+.004,.08),(.33,.008,.25),decal(WHITE))
+    box((.45,.75+gap(1)+.01,.03),(.25,.02,.20),DARK)
 
 def basketball():
     ellipsoid((0,.5,0),(.49,.49,.49),BODY,20,12)
@@ -260,21 +293,24 @@ def circle():
 
 def lake():
     rod((0,0,0),(0,1.2,0),.4,BODY,sides=64)
-    ring((0,1.195,0),.397,.002,GLASS,segments=64)
-    for x,z,s in [(-.2,-.1,.12),(.1,.12,.18),(-.05,-.25,.10)]: box((x,1.205,z),(s,.005,.002),GLASS)
+    # Shoreline ring and ripples float `gap` above the water: the lake is only 6 cm tall in Wingspan.
+    ring((0,1.2+gap(1),0),.397,.002,decal(GLASS),segments=64)
+    for x,z,s in [(-.2,-.1,.12),(.1,.12,.18),(-.05,-.25,.10)]: box((x,1.2+gap(1)+.0025,z),(s,.005,.002),decal(GLASS))
 
 def support():
     box((0,.09,0),(1,.18,1),DARK,.04)
-    box((0,.54,0),(.42,.92,.42),BODY,.04)
+    box((0,.47,0),(.42,.78,.42),BODY,.04)  # the post ends under the cap instead of sharing its top
     box((0,.93,0),(.90,.14,.90),DARK,.04)
 
 def backboard():
     box((0,.5,0),(1,1,1),DARK)
-    # The existing board is thin in X. Decoration must be on both X faces.
+    # The existing board is thin in X (6 cm in Posterized). Decoration must be on both X faces, each layer `gap` off.
+    g = gap(0)
     for side in (-1,1):
-        box((side*.51,.52,0),(.015,.90,.92),GLASS)
-        for z in (-.19,.19): box((side*.53,.42,z),(.015,.30,.025),WHITE)
-        for y in (.27,.57): box((side*.53,y,0),(.015,.025,.40),WHITE)
+        box((side*(.5+g+.0075),.52,0),(.015,.90,.92),decal(GLASS))
+        x = .5+g+.015+g+.0075
+        for z in (-.19,.19): box((side*x,.42,z),(.015,.30,.025),decal(WHITE))
+        for y in (.27,.57): box((side*x,y,0),(.015,.025,.40),decal(WHITE))
 
 def tower():
     for x in (-.38,.38):
@@ -316,6 +352,7 @@ BUILDERS = {
     'lake':('cylinder',lake), 'support':('box',support), 'backboard':('box',backboard),
     'flag-stand':('box',tower), 'terrain':('terrain',terrain),
 }
+UNIT_CUBE = {'video-wall'}  # authored in a unit cube, then stretched to its proxy size
 SIZES={'person':(.5,1.8,.35),'car':(1.9,1.45,4.5),'bird':(2.4,.5,1.1),'box':(1,1,1),'tree':(2.5,5,2.5),'cylinder':(.8,1.2,.8),'lamp':(.3,4,.3),'wall':(8,3,.25),'table':(1.6,.75,.9),'sphere':(1,1,1)}
 def canonical_indices(file):
     # Blender's parallel exporter can reorder triangles without changing geometry.
@@ -342,6 +379,7 @@ def canonical_indices(file):
 manifest={}
 for name,(shape,build) in BUILDERS.items():
     bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
+    current = name
     build()
     objects=list(bpy.context.scene.objects)
     # Bake transforms, join by material on export, and fit the immutable proxy bounds.
@@ -364,3 +402,7 @@ for name,(shape,build) in BUILDERS.items():
     manifest[name]={'shape':shape,'triangles':triangles,'bytes':file.stat().st_size}
 (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 print('BLOCKOUTS',len(manifest),'assets',sum(x['bytes'] for x in manifest.values()),'bytes')
+# The gate: no two surfaces on one plane in any GLB or starter (shared/blockout-lint.mjs). Fails the rebuild loudly.
+lint = subprocess.run(['node', 'scripts/blender/lint-blockouts.mjs'], cwd=ROOT, capture_output=True, text=True)
+print(lint.stdout + lint.stderr)
+if lint.returncode: raise SystemExit('generate-blockouts: coplanar overlaps found; fix the builders above (see docs/blockout-modeling-rules.md)')

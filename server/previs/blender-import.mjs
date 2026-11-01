@@ -16,6 +16,8 @@ import { browserVideoPlan } from '../../shared/browser-delivery.mjs';
 import { validateBrowser, addBrowserShot } from './store.mjs';
 import { createFrameStage, writeFrame, encodeFrames, saveVideoAsset, releaseFrameStage, VIDEO_LIMITS } from './video.mjs';
 import { readZip } from './zip.mjs';
+import { bundledMesh, fixCoplanar, sceneAfterOps, meshLoader } from './coplanar.mjs';
+import { parseGlb } from '../../shared/blockout-lint.mjs';
 
 export const HANDOFF_FORMAT = 'comfy-previs-blender-handoff';
 export const SIDECAR = 'blender-previs.json';
@@ -139,7 +141,7 @@ export function projectionChecks(m, keys, duration) {
  * custom linear camera. Also the 24 fps camera motion for the engine record (roll kept), the landmark checks and the
  * mapping. Pure: ids for new objects and a new shot are made here.
  */
-export function handoffToOps(project, m, { shotId = null, title = null, retitle = false, models = new Map() } = {}) {
+export function handoffToOps(project, m, { shotId = null, title = null, retitle = false, models = new Map(), meshOf = bundledMesh } = {}) {
   validateHandoff(m);
   const n = m.frameCount, warnings = (m.warnings || []).map(w => String(w).slice(0, 300)).slice(0, 20);
   const shot = shotId ? project.shots.find(s => s.id === shotId) : null;
@@ -179,6 +181,14 @@ export function handoffToOps(project, m, { shotId = null, title = null, retitle 
     }
     placed.set(id, { shape, cast: !!o.cast, recs: recs.map(r => ({ ...r, scale: fit(r.scale) })) });
   }
+  // Objects on one plane z-fight in the viewport and every Previs capture: lift thin, static imported objects 2 mm
+  // off the surface they share (the Blender clip is unaffected), and report what could not be lifted.
+  const coplanar = fixCoplanar(sceneAfterOps(entities, ops), { meshOf, movable: new Set(ops.map(o => o.entity?.id || o.id)) });
+  for (const op of ops) {
+    const to = coplanar.moves.get(op.entity?.id || op.id);
+    if (to) { if (op.entity) op.entity.position = to; else op.patch.position = to; }
+  }
+  warnings.push(...coplanar.fixed, ...coplanar.warnings);
   if (clamped.length) warnings.push(`Sizes outside what a proxy shows (0.05–50× its shape) were clamped: ${clamped.slice(0, 6).join(', ')}${clamped.length > 6 ? '…' : ''}`);
 
   // The subject: the shot's target when it is still in the scene, else the cast object filling most of the first frame.
@@ -298,7 +308,10 @@ export function openBlenderImport({ data, director, previs }) {
     // A new project's empty first shot takes the import; otherwise a new shot is added unless one was named.
     const into = shot || (!projectId && project.shots.length === 1 && !project.scene.entities.length ? project.shots[0] : null);
     const models = new Map([...meshes].map(([path]) => [path, `/director-refs/${project.id}/${randomUUID()}.glb`]));
-    const plan = handoffToOps(project, m, { shotId: into?.id ?? null, title: m.source?.camera, retitle: !projectId, models });
+    const parsed = new Map();
+    for (const [path, bytes] of meshes) { try { parsed.set(models.get(path), parseGlb(bytes)); } catch {} }
+    const meshOf = await meshLoader(project.scene.entities, { refFile: (id, file) => director.refFile(id, file), parsed });
+    const plan = handoffToOps(project, m, { shotId: into?.id ?? null, title: m.source?.camera, retitle: !projectId, models, meshOf });
     // Encode first: an ffmpeg failure leaves the project unedited.
     const stage = await createFrameStage({ width: m.width, height: m.height, fps: 24, frameCount: m.frameCount });
     let edited, s, previsShotId, asset;

@@ -18,6 +18,12 @@ pnpm starters:export --data-dir .evidence/blockout-source --check
 pnpm check && pnpm test
 ```
 
+The generator ends by running `pnpm lint:blockouts` and fails if any GLB, at its proxy size or at any starter
+scale, or any starter scene has two surfaces on one plane. Decals, lines and inset panels use `decal(material)`
+(a `-decal` material: `polygonOffset` and no shadow casting in the viewer). They are lifted `gap(axis)` off the
+surface below: 3 mm in world metres at the smallest scale the starters show that model. Caps sit on the body
+and overhang it by the same gap. Rules: [Blockout modelling rules](../../docs/blockout-modeling-rules.md).
+
 The generator was verified with Blender 5.3.0 Alpha, build `5988184be881`.
 It writes `public/models/blockouts/*.glb` and their triangle/byte manifest. Triangle index
 ordering is canonicalised; two consecutive rebuilds were verified byte-identical. Scripts resolve
@@ -43,7 +49,8 @@ The Three.js loader caches source GLBs; each entity owns its cloned mesh/materia
 and use `BASE_URL`, including the offline/static demo. Home previews, editor, shot monitor,
 still guides and headless/video captures use the same meshes. Boot and headless capture
 await models; a saved capture fails explicitly if a mesh is unavailable. Thin geometry
-is double-sided, with back-face shadow casting and a small normal bias to avoid acne.
+is double-sided, with back-face shadow casting; decals cast no shadow. The sun's shadow box is fitted to each shot,
+with biases set from its texel size (see the rules doc).
 
 The proxy shape still drives camera targets, framing, cast selection and animation.
 The optional model ID is excluded from the **blocking signature**, like cast looks: this
@@ -67,5 +74,6 @@ python3 scripts/blender/contact-sheet.py .evidence/blockouts2-20261031  # Pillow
 This uses `/api/director/frame` → `render-worker` → `scene.capture`, the app's own GPU
 capture path. It records 960×540 frames at start, midpoint, and the last 24 fps frame of
 all 13 shots. Keep the built app unchanged while capturing. `contact-sheet.png` compares
-all shot midpoints; the four scene contact sheets compare all 39 frame pairs. Raw captures,
+all shot midpoints; the four scene contact sheets compare all 39 frame pairs. `capture-closeups.mjs <server> <data-dir>
+<out>` adds fixed close-ups of the trouble spots in each starter (a close-ups copy of each source project). Raw captures,
 request manifests and gate logs remain in the ignored evidence directory.
