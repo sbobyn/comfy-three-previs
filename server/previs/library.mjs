@@ -28,7 +28,9 @@ import { bundledMesh, coplanarWarnings, meshWarnings } from './coplanar.mjs';
 import { parseGlb } from '../../shared/blockout-lint.mjs';
 
 export const ASSET_FORMAT = 'comfy-previs-asset';
-export const ASSET_FORMAT_VERSION = 1;
+// Version 2 adds optional `license`, `authors` and `parametric` (the generator recipe that made the asset, so an agent
+// can re-make it with other parameters). Bundles without those fields are still written as version 1.
+export const ASSET_FORMAT_VERSION = 2;
 const MiB = 1024 ** 2;
 // Safety limits (design §8). Tests may pass smaller ones to openLibrary; the server always uses these.
 export const LIMITS = Object.freeze({ zipBytes: 64 * MiB, zipEntries: 32, unzippedBytes: 96 * MiB, imageBytes: 10 * MiB, entities: 50, assets: 500, tags: 12, tagLength: 24, description: 300, shrinkPx: 1600 });
@@ -102,7 +104,27 @@ function cleanReference(r) {
   return { id: str(r.id, 36), name: str(r.name, 80), file: str(r.file, 60), mime: str(r.mime, 20), role: ROLES.includes(r.role) ? r.role : 'prop', entityId: str(r.entityId, 36), note: str(r.note, 500), createdAt: str(r.createdAt, 40), ...(g ? { generated: g } : {}) };
 }
 const cleanMedia = m => ({ path: str(m.path, 60), size: Number.isInteger(m.size) ? m.size : 0, sha256: str(m.sha256, 64), width: Number.isInteger(m.width) ? m.width : null, height: Number.isInteger(m.height) ? m.height : null });
-const cleanOrigin = o => ({ projectId: str(o?.projectId, 36), projectTitle: str(o?.projectTitle, 120), entityId: str(o?.entityId, 36), app: 'comfy-three-previs', source: ['project', 'project-export', 'blender'].includes(o?.source) ? o.source : 'project' });
+const cleanOrigin = o => ({ projectId: str(o?.projectId, 36), projectTitle: str(o?.projectTitle, 120), entityId: str(o?.entityId, 36), app: 'comfy-three-previs', source: ['project', 'project-export', 'blender', 'parametric'].includes(o?.source) ? o.source : 'project' });
+const SPDX = /^[A-Za-z0-9][A-Za-z0-9.+-]{0,63}$/;
+const PARAM_KEY = /^[A-Za-z][A-Za-z0-9_]{0,39}$/;
+/** v2: generator recipe. Params are flat scalars only; anything else makes the manifest differ and is refused. */
+function cleanParametric(p) {
+  const params = {};
+  if (p?.params && typeof p.params === 'object' && !Array.isArray(p.params)) {
+    for (const [k, v] of Object.entries(p.params).slice(0, 40)) {
+      if (PARAM_KEY.test(k) && (typeof v === 'boolean' || (typeof v === 'number' && Number.isFinite(v)) || typeof v === 'string')) params[k] = typeof v === 'string' ? v.slice(0, 80) : v;
+    }
+  }
+  return { library: str(p?.library, 40), family: str(p?.family, 80), version: str(p?.version, 20), params, seed: Number.isInteger(p?.seed) && p.seed >= 0 ? p.seed : 0 };
+}
+/** v2 fields, kept only when present so version-1 manifests are unchanged. */
+function cleanV2(m) {
+  return {
+    ...(m.license !== undefined ? { license: typeof m.license === 'string' && SPDX.test(m.license) ? m.license : null } : {}),
+    ...(m.authors !== undefined ? { authors: (Array.isArray(m.authors) ? m.authors : []).filter(a => typeof a === 'string').slice(0, 8).map(a => a.slice(0, 80)) } : {}),
+    ...(m.parametric !== undefined ? { parametric: cleanParametric(m.parametric) } : {}),
+  };
+}
 export function cleanTags(tags, limits = LIMITS) {
   const list = Array.isArray(tags) ? tags : typeof tags === 'string' ? tags.split(',') : [];
   return [...new Set(list.map(t => String(t).trim().toLowerCase().replace(/^#/, '').replace(/\s+/g, '-').slice(0, limits.tagLength)).filter(Boolean))].slice(0, limits.tags);
@@ -121,6 +143,7 @@ export function cleanManifest(m) {
     references: (Array.isArray(m.references) ? m.references : []).map(r => cleanReference(r && typeof r === 'object' ? r : {})),
     media: (Array.isArray(m.media) ? m.media : []).map(x => cleanMedia(x && typeof x === 'object' ? x : {})),
     footprint: vec3(m.footprint, [1, 1, 1]),
+    ...cleanV2(m),
   };
 }
 
@@ -153,6 +176,7 @@ export function assertNoLocalPaths(m) {
 export function validateManifest(m, limits = LIMITS) {
   if (!m || typeof m !== 'object' || Array.isArray(m) || m.format !== ASSET_FORMAT) fail('Not a Comfy Previs asset (asset.json format)');
   if (!Number.isInteger(m.formatVersion) || m.formatVersion < 1 || m.formatVersion > ASSET_FORMAT_VERSION) fail(`This asset needs a newer Comfy Previs (format version ${m.formatVersion})`);
+  if (m.formatVersion < 2 && (m.license !== undefined || m.authors !== undefined || m.parametric !== undefined || m.origin?.source === 'parametric')) fail('asset.json uses license, authors or parametric, which need format version 2');
   const diff = firstDiff(m, cleanManifest(m));
   if (diff) fail(`asset.json has a field outside the asset format, or an invalid value: ${diff}`);
   assertNoLocalPaths(m);
@@ -266,7 +290,7 @@ export function assetSnapshot(project, root, { name, tags, description, limits =
   for (const e of entities) if (e.model?.startsWith('refs/') && !takes.some(t => t.path === e.model)) takes.push({ path: e.model, file: e.model.slice(5), mesh: true, ref: { name: e.name } });
   const label = String(name || root.name).trim().slice(0, 60) || root.name;
   const manifest = {
-    format: ASSET_FORMAT, formatVersion: ASSET_FORMAT_VERSION, handle: handleOf(label), name: label, kind: entities[0].kind,
+    format: ASSET_FORMAT, formatVersion: 1, handle: handleOf(label), name: label, kind: entities[0].kind,
     tags: cleanTags(tags, limits), description: str(String(description ?? entities[0].notes ?? '').trim(), limits.description),
     origin: cleanOrigin({ projectId: project.id, projectTitle: project.title, entityId: root.id, source }),
     entities, references, footprint: entitySize(root).map(v => Math.round(v * 1000) / 1000),
