@@ -31,9 +31,9 @@ test('breakdown itemizes list, references and grader; the margin touches the res
   assert.equal(b.listUsd, 0.076);
   assert.equal(b.refsUsd, 0.0704); // 4 × $0.0176
   assert.equal(b.graderUsd, GRADER_PRICES.gemini);
-  assert.equal(b.expectedUsd, 0.1964);
-  assert.equal(b.marginUsd, 0.0196);
-  assert.equal(b.reserveUsd, 0.216);
+  assert.equal(b.expectedUsd, 0.1564);
+  assert.equal(b.marginUsd, 0.0156);
+  assert.equal(b.reserveUsd, 0.172);
   assert.equal(b.listUsd, estimateFor('still', 'gpt-image-25'), 'the list price is the displayed price, unchanged by margin, references or grader');
   // No grader, no references, no margin: exactly the list price.
   assert.deepEqual(estimateBreakdown('look', 'flux-3', { marginPct: 0 }), { listUsd: 0.066, refsUsd: 0, graderUsd: 0, expectedUsd: 0.066, marginPct: 0, marginUsd: 0, reserveUsd: 0.066, refs: 0, grades: 0 });
@@ -53,11 +53,11 @@ test('references: per-model assumptions, free images, unpriced models, videos an
 });
 
 test('the grader is billed on stills only, and only for models that cost something', () => {
-  assert.equal(estimateBreakdown('still', 'flux-2-pro', { grades: 2, marginPct: 0 }).graderUsd, 0.1);
+  assert.equal(estimateBreakdown('still', 'flux-2-pro', { grades: 2, marginPct: 0 }).graderUsd, 0.02);
   assert.equal(estimateBreakdown('look', 'flux-2-pro', { grades: 2, marginPct: 0 }).graderUsd, 0);
   assert.equal(estimateBreakdown('still', 'local-checkpoint', { grades: 1, marginPct: 0 }).graderUsd, 0, 'local stills are graded by the free score');
   const total = sumBreakdowns([estimateBreakdown('still', 'flux-2-pro', { refs: 1, grades: 1 }), null, estimateBreakdown('look', 'flux-3')]);
-  assert.equal(total.graderUsd, 0.05); assert.equal(total.listUsd, 0.094);
+  assert.equal(total.graderUsd, 0.01); assert.equal(total.listUsd, 0.094);
 });
 
 test('a reservation is the expected charge plus the margin; settling without a bill counts the expected charge', async () => {
