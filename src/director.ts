@@ -20,7 +20,7 @@ import { promptInspectorBlock, modelSettingsBlock, planSections } from './direct
 import type { InspectorCtx, SettingsCtx } from './director-prompt-inspector';
 import { videoPromptPlan, stillPromptPlan } from '../shared/prompt-plan.mjs';
 import type { PromptPlan } from '../shared/prompt-plan.mjs';
-import { resolveImageParams } from '../shared/model-params.mjs';
+import { autoPromptCap, resolveImageParams } from '../shared/model-params.mjs';
 import { objectColors, KIND_COLORS } from '../shared/prompt.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
 import { viewportSummary } from '../shared/viewport-summary.mjs';
@@ -817,7 +817,7 @@ function planFor(kind: 'video' | 'image', p: DirectorProject, s: Shot, t: number
     const def: any = shotModel(s); if (!def) return null;
     const cam = cameraSourceOf(def), cap = referenceCapacity(genCache as any, def.id);
     const refs = def.task === 'first-frame' || !cap ? [] : videoReferences(p, s, cap, { stills: cam === 'blockout' });
-    return videoPromptPlan(p, s, { cameraSource: cam, refs, maxLength: def.constraints?.promptMaxLength, model: def.title.split(' ·')[0] });
+    return videoPromptPlan(p, s, { cameraSource: cam, refs, maxLength: def.constraints?.promptMaxLength, cap: autoPromptCap(def), model: def.title.split(' ·')[0] });
   }
   const presetId = stillModelOf(s), x = stillLooks(p, s, t, presetId), preset = refgen.presets.find(y => y.id === presetId);
   return stillPromptPlan({ project: p, shot: s, t, presetId, model: preset?.title.split(' (')[0] || presetId, looks: x.looks, prevImage: x.prevImage, markers: !blenderBlockout(p, s) });

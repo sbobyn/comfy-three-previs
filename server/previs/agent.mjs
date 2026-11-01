@@ -9,7 +9,7 @@ import { lookPrompt, lookViews, castRows, castCard, objectLooks, objectNotes, ha
 import { videoPreparer } from './batch-drivers.mjs';
 import { promptTools, recordSentPrompt } from './agent-prompt-tools.mjs';
 import { stillPromptPlan, videoPromptPlan } from '../../shared/prompt-plan.mjs';
-import { resolveImageParams, resolveVideoParams } from '../../shared/model-params.mjs';
+import { autoPromptCap, resolveImageParams, resolveVideoParams } from '../../shared/model-params.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { estimateBreakdown, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 import { stillReferences, STILL_MAX_REFS } from '../../shared/still-match.mjs';
@@ -181,7 +181,7 @@ function shotInputs(p, s, d) {
   const ks = keyStillState(p, s), sent = new Set(planned.map(r => r.entityId).filter(Boolean));
   const rows = castRows(p, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   // The shared assembly generation binds (shared/prompt-plan.mjs); previs_director_prompt_sections shows it by section.
-  const plan = videoPromptPlan(p, s, { cameraSource, refs: planned, maxLength: d.constraints?.promptMaxLength }), prompt = plan.text, promptWarning = plan.cameraWarning;
+  const plan = videoPromptPlan(p, s, { cameraSource, refs: planned, maxLength: d.constraints?.promptMaxLength, cap: autoPromptCap(d) }), prompt = plan.text, promptWarning = plan.cameraWarning;
   const clip = d.task === 'first-frame' ? resolveVideoParams(d, s).seconds : s.render?.duration ?? s.duration;
   const stillsLeftOut = d.task === 'first-frame' || cameraSource !== 'blockout' ? [] : [['start', ks.startState], ['end', ks.endState]].filter(([, st]) => st === 'stale').map(([k]) => ({ object: `${k} still`, why: 'made before the shot changed; make it again' }));
   return { model: m, cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource], prompt, ...(promptWarning ? { promptWarning } : {}), blockout: m.inputs.blockoutVideo.used ? (s.render ? { rendered: true, current: !blockoutStale(p, s), duration: s.render.duration, frames: s.render.frameCount } : { rendered: false, action: 'Render it with previs_director_render_blockout (or ask the user to click Render shot)' }) : 'not used',

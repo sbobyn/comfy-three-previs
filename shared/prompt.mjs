@@ -38,8 +38,12 @@ export const FIELD_COLORS = { action: '#15130F', world: '#2E7D5B', style: '#8A4C
 const OBJECT_COLORS = ['#3B5BA9', '#B33A5E', '#1F7F8A', '#9A6A0C', '#4E8A2B', '#C2611E', '#7A4FC9', '#2F7A4E'];
 
 // Prompt hygiene. Every part ends in exactly one full stop, sentences repeated across parts appear
-// once, and a video prompt stays near VIDEO_PROMPT_CAP characters (video models read the first few
-// hundred characters closely and drift on long lists of set dressing).
+// once, and the auto-prompt for a video stays near a length cap: optional parts are added by priority
+// while they fit, so the action, the lead cast and the camera rule are never crowded out by set dressing.
+// The cap is a heuristic, not a measured or universal optimum. It started from LTX, which reads the first
+// few hundred characters closely and drifts on long lists of set dressing. Each video preset can set its
+// own (`constraints.autoPromptCap`, read by shared/model-params.mjs autoPromptCap); VIDEO_PROMPT_CAP is the
+// default for presets that set none, which today is all of them. Change a model's value only with evidence.
 export const VIDEO_PROMPT_CAP = 600;
 const TRAIL = /[\s.,;:]+$/;
 /** One clean sentence: collapsed spaces, no trailing ., ; or :, then a single full stop. */
