@@ -5246,37 +5246,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "26c1e565-ad03-5cad-a61d-b5f8d52f00b0",
-          "name": "Shot 03 The glide · GPT Image 2.5 · 191456",
-          "file": "26c1e565-ad03-5cad-a61d-b5f8d52f00b0.webp",
+          "id": "8c5e2493-92d2-53f8-a38f-dded1e846c94",
+          "name": "Shot 03 The glide · GPT Image 2.5 · 350673",
+          "file": "8c5e2493-92d2-53f8-a38f-dded1e846c94.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:43:36.553Z",
+          "createdAt": "2026-11-01T15:52:26.750Z",
           "generated": {
             "presetId": "gpt-image-25",
             "model": "GPT Image 2.5 (OpenAI)",
-            "seed": 191456,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 40mm normal lens; wide shot, Bald eagle small in frame; camera 4.7 m high, about level with Bald eagle's top and 10 m from Bald eagle, level; we see Bald eagle side-on, from its right side (a side profile, not a three-quarter or chase view); horizon across the middle.\nIn frame: Bald eagle: centre of frame, about a quarter of the frame width wide, front facing screen-right: a flat side profile, back at the left end, front at the right end. Elk 2: left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing toward the camera and screen-left (three-quarter front view). Elk 3: left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing screen-left (profile). Elk 1: far left of frame, a small part of the frame height tall, behind Bald eagle to the left.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Bald eagle holds a majestic low glide over turquoise water toward the sunlit ridge. Its white head leads, broad wings remain spread and the tips bank gently above the lake. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "d5a31a6c"
+            "seed": 350673,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 40mm normal lens; wide shot, Bald eagle small in frame; camera 4.6 m high, about level with Bald eagle's top and 10 m from Bald eagle, level; we see Bald eagle side-on, from its right side (a side profile, not a three-quarter or chase view); horizon across the middle.\nIn frame: Bald eagle: centre of frame, about a quarter of the frame width wide, front facing screen-right: a flat side profile, back at the left end, front at the right end. Elk 2: left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing toward the camera and screen-left (three-quarter front view). Elk 3: left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing screen-left (profile). Elk 1: far left of frame, a small part of the frame height tall, behind Bald eagle to the left.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Bald eagle skims above the lake with broad wings, gives one slow recovery beat in seconds two to three and settles into a glide. Tips flex after the shoulders; elk lift their heads. Preserve plumage and waterline. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. No clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "a439acac"
           }
         },
         {
-          "id": "ca14a077-41e4-57f5-a0f1-d825e8627684",
-          "name": "Shot 03 The glide · GPT Image 2.5 · 350096",
-          "file": "ca14a077-41e4-57f5-a0f1-d825e8627684.webp",
+          "id": "7a768674-328d-5341-ad74-6b811c9f82cd",
+          "name": "Shot 03 The glide · GPT Image 2.5 · 340585",
+          "file": "7a768674-328d-5341-ad74-6b811c9f82cd.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:44:02.783Z",
+          "createdAt": "2026-11-01T15:52:32.627Z",
           "generated": {
             "presetId": "gpt-image-25",
             "model": "GPT Image 2.5 (OpenAI)",
-            "seed": 350096,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; medium shot of Bald eagle; camera 4.7 m high, about level with Bald eagle's top and 10 m from Bald eagle, level; we see Bald eagle from the rear three-quarter, its right side; horizon across the middle.\nIn frame: Bald eagle: centre of frame, about a third of the frame width wide, front facing away from the camera and screen-right (three-quarter rear view). Elk 3: far left of frame, a small part of the frame height tall, behind Bald eagle to the left, partly hidden by Elk 2, facing toward the camera and screen-left (three-quarter front view). Elk 1: far left of frame, a small part of the frame height tall, cut off by the left edge, behind Bald eagle to the left. Elk 2: far left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Bald eagle holds a majestic low glide over turquoise water toward the sunlit ridge. Its white head leads, broad wings remain spread and the tips bank gently above the lake. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "d5a31a6c"
+            "seed": 340585,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; medium shot of Bald eagle; camera 4.7 m high, about level with Bald eagle's top and 10 m from Bald eagle, level; we see Bald eagle from the rear three-quarter, its right side; horizon across the middle.\nIn frame: Bald eagle: centre of frame, about a third of the frame width wide, front facing away from the camera and screen-right (three-quarter rear view). Elk 3: far left of frame, a small part of the frame height tall, behind Bald eagle to the left, partly hidden by Elk 2, facing toward the camera and screen-left (three-quarter front view). Elk 1: far left of frame, a small part of the frame height tall, cut off by the left edge, behind Bald eagle to the left. Elk 2: far left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Bald eagle skims above the lake with broad wings, gives one slow recovery beat in seconds two to three and settles into a glide. Tips flex after the shoulders; elk lift their heads. Preserve plumage and waterline. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. No clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "a439acac"
           }
         }
       ]
@@ -5422,29 +5422,29 @@
       "duration": 5.042
     },
     {
-      "path": "media/refs/26c1e565-ad03-5cad-a61d-b5f8d52f00b0.webp",
+      "path": "media/refs/8c5e2493-92d2-53f8-a38f-dded1e846c94.webp",
       "kind": "image",
-      "bytes": 255552,
-      "sha256": "714007302d0bd58b7914437a9c2d10d73749955bd1fb5b1e4be756e11a118fb9",
-      "sourceSha256": "19fd9c4321ac69b75cb80afc7b1b32b2b9cc0c15e1c84864e74fbe82987de227",
+      "bytes": 260656,
+      "sha256": "d7ce3490ea55df178879a80c5ac20b313e4e5f1e4d8fdb85de8d1b15fff1e0dd",
+      "sourceSha256": "3a116a49609ea3ced2ede5b0b6ed73e7e908b29b517e965ed8e5ff794e8df785",
       "width": 1600,
       "height": 900
     },
     {
-      "path": "media/refs/ca14a077-41e4-57f5-a0f1-d825e8627684.webp",
+      "path": "media/refs/7a768674-328d-5341-ad74-6b811c9f82cd.webp",
       "kind": "image",
-      "bytes": 212164,
-      "sha256": "c0175eced9e4ea837a514462f2a0703dbc9939c5078b2a4f26a500174bc5b24c",
-      "sourceSha256": "6bce6d5182e9152de93c3a1648f348478fbff5e26da50b756b5328ce59636290",
+      "bytes": 261046,
+      "sha256": "1bce9adda39083c40e580daf09a08cce73e6010b040fa613dcb97a8f91d54c6d",
+      "sourceSha256": "fa5ccd8c5e4401dad286cd5d2608bd840b019b08eed8d971569618bf5a816489",
       "width": 1600,
       "height": 900
     },
     {
-      "path": "media/assets/04ced9b8-dde0-45ad-8653-c47e4cf643de.mp4",
+      "path": "media/assets/d31d515b-8719-421b-ad56-1a344d211776.mp4",
       "kind": "video",
-      "bytes": 1068521,
-      "sha256": "3f8986f387c25c52a12c87f0cc4beebda5924438aafb2d56b583e1fff3246be6",
-      "sourceSha256": "f4f15faa48d02d3caf241a35d77f46f6bf4bc270d947d05fdccbed1ab9106078",
+      "bytes": 1101797,
+      "sha256": "7a55ba442081f9c8a4f63cd25492726707fc579787a241b66cb814ed9706d3df",
+      "sourceSha256": "27f210a24170e4ce74769ae9718d17c723c06db9c3384a1cbfa0a94d76e0dd35",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -5452,11 +5452,11 @@
       "duration": 5
     },
     {
-      "path": "media/assets/e81ba725-5ad4-5edd-a017-e252e4352a56.mp4",
+      "path": "media/assets/de694a1d-8ca3-5114-a833-78901d164692.mp4",
       "kind": "video",
-      "bytes": 1068214,
-      "sha256": "73b429d717724d7ef9570691c99ec686f46100d8aa1ffbb5e5a63dd941e727f9",
-      "sourceSha256": "2cda765c2ca7c2347beaa049f9293394c68417f44d848b168c5b160b67eba98f",
+      "bytes": 1080031,
+      "sha256": "bb51e0a6fecee4d579cb109faf2cfe5e1429473dd757303ceef5784d507e5da9",
+      "sourceSha256": "70f4782369817501f8991ca65505c51532f512778039b0ba1d8d8bb00173d108",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -5522,31 +5522,31 @@
       }
     },
     {
-      "id": "04ced9b8-dde0-45ad-8653-c47e4cf643de",
+      "id": "d31d515b-8719-421b-ad56-1a344d211776",
       "kind": "camera-render",
       "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
-      "file": "assets/04ced9b8-dde0-45ad-8653-c47e4cf643de.mp4",
+      "file": "assets/d31d515b-8719-421b-ad56-1a344d211776.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-31T06:49:58.759Z",
+      "createdAt": "2026-11-01T07:34:29.588Z",
       "source": {
         "engineShotId": null,
-        "signature": "d5a31a6c"
+        "signature": "a439acac"
       }
     },
     {
-      "id": "e81ba725-5ad4-5edd-a017-e252e4352a56",
+      "id": "de694a1d-8ca3-5114-a833-78901d164692",
       "kind": "workflow-result",
       "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
-      "file": "assets/e81ba725-5ad4-5edd-a017-e252e4352a56.mp4",
+      "file": "assets/de694a1d-8ca3-5114-a833-78901d164692.mp4",
       "mime": "video/mp4",
       "duration": 4.708333,
-      "createdAt": "2026-10-31T06:55:23.524Z",
+      "createdAt": "2026-11-01T16:01:29.474Z",
       "source": {
         "workflow": "Seedance 2.5 · edit the complete video · 6 reference images",
         "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Bald eagle holds a majestic low glide over turquoise water toward the sunlit ridge. Its white head leads, broad wings remain spread and the tips bank gently above the lake. A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 40mm. Filter: golden hour light.\nReference images: 1 = start still; 2 = end still; 3 = Bald eagle; 4 = Elk 3; 5 = Alpine lake; 6 = Alpine terrain.",
-        "sourceAssetId": "04ced9b8-dde0-45ad-8653-c47e4cf643de"
+        "prompt": "Bald eagle skims above the lake with broad wings, gives one slow recovery beat in seconds two to three and settles into a glide. Tips flex after the shoulders; elk lift their heads. Preserve plumage and waterline. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 40mm. Filter: golden hour light.\nReference images: 1 = start still; 2 = end still; 3 = Bald eagle; 4 = Elk 3; 5 = Alpine lake; 6 = Alpine terrain.",
+        "sourceAssetId": "d31d515b-8719-421b-ad56-1a344d211776"
       }
     }
   ],
@@ -5566,7 +5566,7 @@
       },
       {
         "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
-        "assetId": "e81ba725-5ad4-5edd-a017-e252e4352a56",
+        "assetId": "de694a1d-8ca3-5114-a833-78901d164692",
         "in": 0,
         "out": null
       }

@@ -10,7 +10,7 @@ import { shotSignature, starterBlockout, starterMediaStatus, stillStale, videoSt
 const starters = await loadStarters();
 
 // Shots whose video (and so blockout clip) still predates the posed animation; see tests/starter-blockouts.test.mjs EARLIER_MEDIA.
-const EARLIER_CLIPS = { wingspan: ['The valley', 'The dive', 'The glide'], posterized: ['Posterized'] };
+const EARLIER_CLIPS = { wingspan: ['The valley', 'The dive'] };
 
 test('each starter ships the blockout clip of its video, current except where the video predates the posed animation', () => {
   for (const s of starters) {

@@ -72,12 +72,11 @@ test('Posterized rises above the defender and sends the ball through the rim; Wi
 });
 
 // Animation changes intentionally stale the earlier paid takes; no generation is performed in this pass.
-// Media made before the animation pass that the 2026-11-01 regeneration did not replace (see examples/starters/README.md):
-// Wingspan was not regenerated, and Seedance refused both Posterized · Posterized videos, so that shot keeps its earlier
-// video and the blockout clip it was made from, next to new stills.
+// Media made before the animation pass that the 2026-11-01 regenerations did not replace (see examples/starters/README.md):
+// Wingspan · The valley and The dive failed their checks (the eagle flies at the camera), so they keep their earlier
+// stills, video and the blockout clip that video was made from.
 const EARLIER_MEDIA = {
-  wingspan: { 'The valley': ['stills', 'video'], 'The dive': ['stills', 'video'], 'The glide': ['stills', 'video'] },
-  posterized: { Posterized: ['video'] },
+  wingspan: { 'The valley': ['stills', 'video'], 'The dive': ['stills', 'video'] },
 };
 
 test('starter copies open with current stills and videos, except the takes listed as made for the earlier animation', () => {

@@ -27,12 +27,14 @@ animated from the start still, whose camera only approximates the blockout (the 
 Breaking News). None is trimmed in the cut. Every one of those stills, blockout clips and videos carries the signature of
 the current blocking, so a copy reports nothing as out of date and a new batch does not remake them.
 
-Two parts still show the earlier, unposed animation, and a copy reports them as made for an earlier blocking:
+A second pass the same day finished two more shots: Posterized · Posterized is a Kling O1 edit of its current blockout
+clip (Seedance had refused it twice as "may be related to copyright restrictions"), and Wingspan · The glide has new GPT
+Image 2.5 stills and a Seedance 2.5 edit. Two shots still show the earlier, unposed animation, and a copy reports them as
+made for an earlier blocking:
 
-- **Posterized · Posterized** has new stills, but Seedance refused both new videos ("may be related to copyright
-  restrictions"), so it keeps its earlier Seedance video and the blockout clip that video was made from.
-- **Wingspan** was not regenerated (the run's budget ran out). All its stills, clips and videos are the earlier ones,
-  including The valley's trim in the cut.
+- **Wingspan · The valley** and **The dive** keep their earlier stills, videos and the blockout clips those videos were
+  made from, including The valley's trim in the cut. The valley's two new FLUX 3 still pairs and The dive's two new LTX
+  videos showed the eagle flying at the camera, against the blockout, and were not used.
 
 A batch on a copy plans only those replacements.
 
