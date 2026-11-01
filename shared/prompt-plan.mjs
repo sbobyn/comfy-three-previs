@@ -54,10 +54,11 @@ const counts = rows => ({ overrides: rows.filter(r => r.policy === 'override').l
  * The text is exactly what the browser, batch and MCP bind.
  */
 export function videoPromptPlan(project, shot, { cameraSource = 'blockout', refs = [], maxLength, cap = VIDEO_PROMPT_CAP, userPrompt = null, model = '' } = {}) {
-  const opts = { cameraSource, cap }, composed = shotPrompt(project, shot, 'video', opts);
+  const legend = cameraSource === 'blockout' ? referenceLegend(refs) : '';
+  // Reference labels are sent in the same prompt: reserve their room before optional prose.
+  const opts = { cameraSource, cap: Math.max(0, cap - (legend ? legend.length + 1 : 0)) }, composed = shotPrompt(project, shot, 'video', opts);
   const P = userPrompt ?? composed, whole = !!(shot.prompts?.video?.edited && shot.prompts.video.text);
   const compiledNull = () => compilePrompt(project, shot, null, opts);
-  const legend = cameraSource === 'blockout' ? referenceLegend(refs) : '';
   let mode, rows, pre;
   if (cameraSource === 'blockout' ? !(P.trim() && P.trim() !== compiledNull().trim()) : !P.trim()) {
     mode = 'compiled';
@@ -84,7 +85,7 @@ export function videoPromptPlan(project, shot, { cameraSource = 'blockout', refs
         r.active = false; r.status = 'cut'; pre = join();
       }
     }
-    rows = composedRows(applied, 'video', cap);
+    rows = composedRows(applied, 'video', opts.cap);
   }
   if (mode !== 'sections' && mode !== 'compiled') rows.push(row({ key: 'camera', label: 'Camera', source: CAMERA_SOURCE_LABELS[cameraSource], system: true, text: cameraLine(cameraSource), changes: 'Follows the chosen model: blockout clip, start → end stills or one still.' }, 'video'));
   if (legend && mode !== 'compiled') rows.push(row({ key: 'refs', label: 'Reference legend', source: `${refs.length} numbered image${refs.length === 1 ? '' : 's'} this model receives`, system: true, text: legend, changes: 'Follows the reference images: cast looks, start and end stills, and the model’s image limit.' }, 'video'));

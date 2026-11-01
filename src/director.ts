@@ -66,7 +66,7 @@ const refUrl = (r: Reference) => `/director-refs/${project.id}/${r.file}`;
 const assetUrl = (a: Asset) => `/director-assets/${project.id}/${a.file.replace(/^assets\//, '')}`;
 const allRefs = () => project.shots.flatMap(s => s.references);
 const fmt = (t: number) => `${t.toFixed(2)}s`;
-const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, ...e }) => ({ ...e, ...(projectMesh(model) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, ...e }) => ({ ...e, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 
 let editsInFlight = 0; // while our own edit is on its way, a poll can't tell our change from someone else's
 async function edit(ops: unknown[], quiet = false) {

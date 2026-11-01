@@ -2,17 +2,17 @@
   "player": {
     "shape": "person",
     "triangles": 824,
-    "bytes": 50180
+    "bytes": 59284
   },
   "anchor": {
     "shape": "person",
     "triangles": 789,
-    "bytes": 47712
+    "bytes": 56508
   },
   "operator": {
     "shape": "person",
     "triangles": 776,
-    "bytes": 45424
+    "bytes": 54500
   },
   "fan": {
     "shape": "person",
@@ -21,18 +21,18 @@
   },
   "race-car": {
     "shape": "car",
-    "triangles": 778,
-    "bytes": 43960
+    "triangles": 826,
+    "bytes": 57416
   },
   "eagle": {
     "shape": "bird",
     "triangles": 446,
-    "bytes": 28972
+    "bytes": 39460
   },
   "elk": {
     "shape": "box",
     "triangles": 1012,
-    "bytes": 58336
+    "bytes": 67120
   },
   "pine": {
     "shape": "tree",
@@ -146,8 +146,8 @@
   },
   "backboard": {
     "shape": "box",
-    "triangles": 132,
-    "bytes": 9696
+    "triangles": 156,
+    "bytes": 11032
   },
   "flag-stand": {
     "shape": "box",

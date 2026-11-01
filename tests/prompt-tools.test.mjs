@@ -58,7 +58,7 @@ test('MCP: prompt by section equals what generation binds; overrides, locks, his
     r = await call('previs_director_set_prompt_section', { projectId: p.id, shot: '1', kind: 'video', section: 'camera', mode: 'override', text: 'Dolly in.' });
     assert.match(r.error, /system rule/);
     r = await call('previs_director_set_prompt_section', { projectId: p.id, shot: '1', kind: 'video', section: 'action', mode: 'override', text: 'The Comfy car crosses the line first; crane up over the crowd.' });
-    assert.equal(r.ok, true); assert.deepEqual(r.cameraWords, ['crane up']); assert.match(r.final, /^The Comfy car crosses the line first/);
+    assert.equal(r.ok, true); assert.deepEqual(r.cameraWords, ['crane up']); assert.equal(s.promptSections.video.action.text, 'The Comfy car crosses the line first; crane up over the crowd.'); assert.ok(r.final.includes(s.promptSections.video.action.text));
     assert.equal(s.promptSections.video.action.mode, 'override');
     assert.equal(r.final.split(CAMERA_LINES.blockout).length - 1, 1, 'the camera line stays');
 
