@@ -5,6 +5,7 @@ Run from the repository root with Node 22+ on PATH (terrain samples share the ap
 """
 import bpy
 import json
+import os
 import math
 import subprocess
 import struct
@@ -376,8 +377,13 @@ def canonical_indices(file):
             struct.pack_into(fmt, data, offset, *(i for tri in sorted(triangles) for i in tri))
     file.write_bytes(data)
 
-manifest={}
+# Ids baked by the beret-parts library (scripts/blender/library-blockouts.mjs) are skipped here and keep their
+# manifest entries. PREVIS_BLOCKOUTS_ALL=1 rebuilds every builder in Blender instead (the old path, kept as a fallback).
+LIBRARY = set() if os.environ.get('PREVIS_BLOCKOUTS_ALL') == '1' else set(json.loads((ROOT / 'scripts/blender/library-blockouts.json').read_text()))
+old_manifest = json.loads((OUT / 'manifest.json').read_text()) if (OUT / 'manifest.json').exists() else {}
+manifest={k: old_manifest[k] for k in BUILDERS if k in LIBRARY and k in old_manifest}
 for name,(shape,build) in BUILDERS.items():
+    if name in LIBRARY: continue
     bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
     current = name
     build()
@@ -385,7 +391,8 @@ for name,(shape,build) in BUILDERS.items():
     # Bake transforms, join by material on export, and fit the immutable proxy bounds.
     bpy.ops.object.select_all(action='SELECT'); bpy.context.view_layer.objects.active=objects[0]
     bpy.ops.object.convert(target='MESH'); bpy.ops.object.join()
-    o=bpy.context.object; o.name=name
+    # Name the mesh too: Blender's auto-numbered datablock names would make bytes depend on which builders ran.
+    o=bpy.context.object; o.name=name; o.data.name=name
     bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
     if shape != 'terrain':
         coords=[v.co.copy() for v in o.data.vertices]
@@ -400,7 +407,7 @@ for name,(shape,build) in BUILDERS.items():
     bpy.ops.export_scene.gltf(filepath=str(file),export_format='GLB',use_selection=True,export_yup=True,export_animations=False,export_cameras=False,export_lights=False,export_texcoords=False,export_normals=True,export_materials='EXPORT')
     canonical_indices(file)
     manifest[name]={'shape':shape,'triangles':triangles,'bytes':file.stat().st_size}
-(OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+(OUT/'manifest.json').write_text(json.dumps({k: manifest[k] for k in BUILDERS if k in manifest},indent=2)+'\n')
 print('BLOCKOUTS',len(manifest),'assets',sum(x['bytes'] for x in manifest.values()),'bytes')
 # The gate: no two surfaces on one plane in any GLB or starter (shared/blockout-lint.mjs). Fails the rebuild loudly.
 lint = subprocess.run(['node', 'scripts/blender/lint-blockouts.mjs'], cwd=ROOT, capture_output=True, text=True)
