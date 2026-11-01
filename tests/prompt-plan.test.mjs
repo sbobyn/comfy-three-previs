@@ -13,7 +13,8 @@ import { CAMERA_LINES, fitPrompt, withCameraLine } from '../shared/camera-source
 import { stillPrompt, stillReferences } from '../shared/still-match.mjs';
 import { videoPromptPlan, stillPromptPlan, promptHistory, comparePrompts } from '../shared/prompt-plan.mjs';
 import { applySections, mergePromptSections, normalizePromptSections, appendPromptVersion, MAX_PROMPT_VERSIONS, wordDiff, diffStats } from '../shared/prompt-sections.mjs';
-import { videoParamSpecs, resolveVideoParams, resolveImageParams, settingsApply, savedClipSeconds, normalizeShotSettings, videoCapabilities, videoEstimate } from '../shared/model-params.mjs';
+import { videoParamSpecs, resolveVideoParams, resolveImageParams, settingsApply, savedClipSeconds, normalizeShotSettings, videoCapabilities, videoEstimate, autoPromptCap } from '../shared/model-params.mjs';
+import { VIDEO_PROMPT_CAP } from '../shared/prompt.mjs';
 
 const starters = await loadStarters();
 const project = slug => createProjectDocument({ template: slug }, undefined, starters);
@@ -185,4 +186,31 @@ test('model parameters come from the registry; saved settings apply to their mod
   assert.equal(plan.nodes.find(n => n.id === `video:${shot0.id}`).estimateUsd, 1.6);
   applyOps(p, [{ op: 'update_shot', id: shot0.id, patch: { settings: { video: null } } }]);
   assert.equal(shot0.settings, undefined);
+});
+
+test('auto-prompt cap: per-preset data, 600 for every built-in model today, so no starter prompt changes', () => {
+  assert.equal(VIDEO_PROMPT_CAP, 600);
+  for (const d of builtInPresets) {
+    assert.equal(autoPromptCap(d), VIDEO_PROMPT_CAP, `${d.id} uses the default`);
+    assert.deepEqual(videoCapabilities(d).autoPromptCap, { chars: 600, heuristic: true, fromPreset: false }, `${d.id} capability says heuristic`);
+  }
+  for (const bad of [0, -5, 12.5, '900', null]) assert.equal(autoPromptCap({ constraints: { autoPromptCap: bad } }), VIDEO_PROMPT_CAP, `ignores ${bad}`);
+  // The model's cap reaches the plan: the default is byte-identical to no cap at all; a preset's own value changes the composed text.
+  for (const st of starters) {
+    const p = project(st.slug);
+    for (const s of p.shots) for (const d of builtInPresets) {
+      const o = { cameraSource: videoCapabilities(d).cameraSource, maxLength: d.constraints?.promptMaxLength };
+      assert.equal(videoPromptPlan(p, s, { ...o, cap: autoPromptCap(d) }).text, videoPromptPlan(p, s, o).text, `${st.slug} / ${s.title} / ${d.id}`);
+    }
+  }
+  const p = project(starters[0].slug), s = p.shots[0], def = builtInPresets[0];
+  const wide = { ...def, constraints: { ...def.constraints, autoPromptCap: 5000 } };
+  assert.equal(autoPromptCap(wide), 5000);
+  assert.deepEqual(videoCapabilities(wide).autoPromptCap, { chars: 5000, heuristic: true, fromPreset: true });
+  const plan = videoPromptPlan(p, s, { cameraSource: 'keyframes', cap: autoPromptCap(wide) }), base = videoPromptPlan(p, s, { cameraSource: 'keyframes' });
+  assert.equal(plan.autoPromptCap, 5000);
+  assert.ok(plan.length > base.length && !plan.sections.some(r => r.status === 'omitted'), 'a wider cap keeps the sections the default left out');
+  const omitted = base.sections.filter(r => r.status === 'omitted');
+  assert.ok(omitted.length, 'the starter shot is long enough to leave sections out at 600');
+  for (const r of omitted) assert.match(r.why, /about 600 characters, a rule of thumb/);
 });

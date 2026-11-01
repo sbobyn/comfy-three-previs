@@ -10,7 +10,7 @@ import { blenderBlockout, videoReferences } from '../../shared/director.mjs';
 import { stillReferences, STRONG_GUIDE_MODEL, STILL_MAX_REFS } from '../../shared/still-match.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { resolveFrame } from '../../shared/keyframes.mjs';
-import { imageEstimate, imageParamSpecs, resolveImageParams, resolveVideoParams, settingsApply, videoCapabilities, videoEstimate, videoParamSpecs } from '../../shared/model-params.mjs';
+import { autoPromptCap, imageEstimate, imageParamSpecs, resolveImageParams, resolveVideoParams, settingsApply, videoCapabilities, videoEstimate, videoParamSpecs } from '../../shared/model-params.mjs';
 
 const kindOf = k => (k === 'image' ? 'image' : 'video');
 const shortTitle = d => String(d?.title || d?.id || '').split(' · ')[0];
@@ -38,7 +38,7 @@ export function promptTools({ get, post, project, shotOf, videoDefs }) {
     if (kind === 'video') {
       const d = await videoDefFor(p, s, model), cameraSource = cameraSourceOf(d);
       const refs = d.task === 'first-frame' ? [] : videoReferences(p, s, maxReferences(d), { stills: cameraSource === 'blockout' });
-      return { model: d.id, plan: videoPromptPlan(p, s, { cameraSource, refs, maxLength: d.constraints?.promptMaxLength, model: shortTitle(d) }) };
+      return { model: d.id, plan: videoPromptPlan(p, s, { cameraSource, refs, maxLength: d.constraints?.promptMaxLength, cap: autoPromptCap(d), model: shortTitle(d) }) };
     }
     const preset = await imagePresetFor(p, s, model), t = atOf(p, s, at), cap = preset.maxRefs ?? STILL_MAX_REFS[preset.id] ?? 0;
     const looks = stillReferences(p, s, t, cap).looks, prev = p.shots[p.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);

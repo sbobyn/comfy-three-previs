@@ -223,6 +223,11 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 
 /* ---------- Workspace frame + top bar ---------- */
 .ws { height: 100vh; display: grid; grid-template-rows: 48px 1fr; overflow: hidden; }
+/* Skip links: out of the grid, off-screen until focused, then a chip over the top bar's left edge. */
+.skip-links { position: absolute; top: 0; left: 0; z-index: 100; }
+.skip-link { position: absolute; top: 6px; left: 8px; white-space: nowrap; padding: 8px 14px; border-radius: var(--r-full); background: var(--ink); color: var(--on-ink); font-weight: 600; text-decoration: none; box-shadow: var(--sh-pop); transform: translateY(-200%); }
+.skip-link:focus { transform: none; outline: none; box-shadow: var(--focus), var(--sh-pop); }
+:is(body.m-compact, body.m-medium) .skip-links { display: none; }
 .ws-top {
   display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 0 12px; border-bottom: 1px solid var(--line); background: var(--paper); min-width: 0;
   & .top-left { display: flex; align-items: center; gap: 6px; min-width: 0; }

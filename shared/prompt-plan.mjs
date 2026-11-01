@@ -11,7 +11,7 @@
 //   mode 'edit'     – the shot's whole-prompt edit (Prompt block), section controls paused
 //   mode 'request'  – text typed for this one request (Generate dialog, storyboard composer, MCP `prompt`)
 //   mode 'compiled' – the fallback compiled prompt with numbered references (shared/director.mjs compilePrompt)
-import { sectionedSegments, shotPrompt } from './prompt.mjs';
+import { sectionedSegments, shotPrompt, VIDEO_PROMPT_CAP } from './prompt.mjs';
 import { CAMERA_LINES, CAMERA_SOURCE_LABELS, cameraLine, cameraMotionWarning, cameraMotionWords, fitPrompt, withCameraLine } from './camera-source.mjs';
 import { compilePrompt, referenceLegend } from './director.mjs';
 import { editsGuide, stillPromptParts } from './still-match.mjs';
@@ -35,8 +35,10 @@ function row(r, kind) {
   if (kind === 'video' && !system && out.text) { const words = cameraMotionWords(out.text); if (words.length) out.cameraWords = words; }
   return out;
 }
-const WHY = { omitted: 'Left out to keep the video prompt short (the auto-prompt keeps about 600 characters)', shortened: 'Shortened to its first sentence to keep the video prompt short', removed: 'You removed this section', orphan: 'Saved for an object that is no longer in this shot; not sent' };
-const composedRows = (rows, kind) => rows.map(r => row({ ...r, system: r.key === 'camera', editable: r.key !== 'camera', group: sectionGroup(r.key), why: WHY[r.status], ...(r.key === 'camera' ? { changes: kind === 'video' ? 'Follows the chosen model: blockout clip, start → end stills or one still.' : 'Follows the shot camera’s lens.' } : {}) }, kind));
+const WHY = { omitted: 'Left out to keep the video prompt short', shortened: 'Shortened to its first sentence to keep the video prompt short', removed: 'You removed this section', orphan: 'Saved for an object that is no longer in this shot; not sent' };
+/** Why a section was left out; for a video, the auto-prompt cap it was left out for (a heuristic, see shared/prompt.mjs). */
+const why = (status, cap) => status === 'omitted' && Number.isFinite(cap) ? `${WHY.omitted} (this model’s auto-prompt aims for about ${cap.toLocaleString('en-US')} characters, a rule of thumb rather than a measured limit)` : WHY[status];
+const composedRows = (rows, kind, cap) => rows.map(r => row({ ...r, system: r.key === 'camera', editable: r.key !== 'camera', group: sectionGroup(r.key), why: why(r.status, cap), ...(r.key === 'camera' ? { changes: kind === 'video' ? 'Follows the chosen model: blockout clip, start → end stills or one still.' : 'Follows the shot camera’s lens.' } : {}) }, kind));
 /** Mark rows whose text did not make it into the final text (cut to the model's limit). */
 function settle(rows, final, limit) {
   for (const r of rows) if (r.text && (r.status === 'included' || r.status === 'shortened') && !final.includes(r.text)) { r.status = 'cut'; r.why = limit ? `Cut to fit the model’s ${limit.toLocaleString('en-US')}-character prompt limit` : 'Cut to fit the prompt limit'; }
@@ -47,11 +49,12 @@ const counts = rows => ({ overrides: rows.filter(r => r.policy === 'override').l
 /**
  * The final video prompt for a shot and model, by section. `cameraSource` is the model's (shared/camera-source.mjs
  * cameraSourceOf), `refs` the planner rows the model receives (shared/director.mjs videoReferences; a start-still model gets
- * none), `maxLength` the model's prompt limit, `userPrompt` text typed for this request (null: the shot's prompt).
+ * none), `maxLength` the model's prompt limit, `cap` the model's auto-prompt cap (shared/model-params.mjs autoPromptCap; a
+ * heuristic, default VIDEO_PROMPT_CAP), `userPrompt` text typed for this request (null: the shot's prompt).
  * The text is exactly what the browser, batch and MCP bind.
  */
-export function videoPromptPlan(project, shot, { cameraSource = 'blockout', refs = [], maxLength, userPrompt = null, model = '' } = {}) {
-  const opts = { cameraSource }, composed = shotPrompt(project, shot, 'video', opts);
+export function videoPromptPlan(project, shot, { cameraSource = 'blockout', refs = [], maxLength, cap = VIDEO_PROMPT_CAP, userPrompt = null, model = '' } = {}) {
+  const opts = { cameraSource, cap }, composed = shotPrompt(project, shot, 'video', opts);
   const P = userPrompt ?? composed, whole = !!(shot.prompts?.video?.edited && shot.prompts.video.text);
   const compiledNull = () => compilePrompt(project, shot, null, opts);
   const legend = cameraSource === 'blockout' ? referenceLegend(refs) : '';
@@ -81,14 +84,14 @@ export function videoPromptPlan(project, shot, { cameraSource = 'blockout', refs
         r.active = false; r.status = 'cut'; pre = join();
       }
     }
-    rows = composedRows(applied, 'video');
+    rows = composedRows(applied, 'video', cap);
   }
   if (mode !== 'sections' && mode !== 'compiled') rows.push(row({ key: 'camera', label: 'Camera', source: CAMERA_SOURCE_LABELS[cameraSource], system: true, text: cameraLine(cameraSource), changes: 'Follows the chosen model: blockout clip, start → end stills or one still.' }, 'video'));
   if (legend && mode !== 'compiled') rows.push(row({ key: 'refs', label: 'Reference legend', source: `${refs.length} numbered image${refs.length === 1 ? '' : 's'} this model receives`, system: true, text: legend, changes: 'Follows the reference images: cast looks, start and end stills, and the model’s image limit.' }, 'video'));
   const text = fitPrompt(pre, maxLength, cameraSource);
   settle(rows, text, maxLength);
   for (const r of rows) if (r.status === 'cut' && !r.why) r.why = `Cut to fit the model’s ${maxLength}-character prompt limit`;
-  return { kind: 'video', mode, model, cameraSource, cameraLabel: CAMERA_SOURCE_LABELS[cameraSource], text, length: text.length, maxLength: Number.isInteger(maxLength) ? maxLength : null, cut: pre.length > text.length, sections: rows, cameraWarning: cameraMotionWarning(text, cameraSource), ...counts(rows) };
+  return { kind: 'video', mode, model, cameraSource, cameraLabel: CAMERA_SOURCE_LABELS[cameraSource], text, length: text.length, maxLength: Number.isInteger(maxLength) ? maxLength : null, autoPromptCap: cap, cut: pre.length > text.length, sections: rows, cameraWarning: cameraMotionWarning(text, cameraSource), ...counts(rows) };
 }
 
 /**

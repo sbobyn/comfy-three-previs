@@ -1,4 +1,7 @@
 // Original small API graphs; models remain in the backend, never downloaded here.
+// constraints.promptMaxLength is the model's hard prompt limit. constraints.autoPromptCap (optional) is how long the
+// auto-prompt aims to be for this model: a heuristic, not a measured optimum (shared/prompt.mjs). No preset sets it yet,
+// so every model uses the default of 600 characters; set one only with evidence from that model's own takes.
 const saveVideo = video => ({class_type:'SaveVideo',inputs:{video,filename_prefix:'previs/video','format':'mp4','format.codec':'h264'}});
 // Start-still (and optional end-still) image-to-video presets for the partner models. `node` builds the model node from
 // the start (and end) LoadImage links; prompt/duration/resolution/seed map to its inputs. List prices: the node's live

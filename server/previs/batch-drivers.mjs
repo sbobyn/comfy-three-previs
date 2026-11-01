@@ -5,7 +5,7 @@ import { blockoutStale, castCard, keyStillState, lookPrompt, lookSource, objectL
 import { stillReferences } from '../../shared/still-match.mjs';
 import { cameraSourceOf, motionInput } from '../../shared/camera-source.mjs';
 import { stillPromptPlan, videoPromptPlan } from '../../shared/prompt-plan.mjs';
-import { resolveVideoParams } from '../../shared/model-params.mjs';
+import { autoPromptCap, resolveVideoParams } from '../../shared/model-params.mjs';
 import { planSlots, setsFor, slotAspect, viewPrompt } from '../../shared/sheet-presets.mjs';
 import { withReferenceImages, maxReferences } from '../../shared/video-refs.mjs';
 import { clipSecondsFor, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
@@ -158,7 +158,7 @@ export function videoPreparer({ get, post }) {
       cameraFor = cameraSourceOf(def); planRefs = refs;
     }
     // The shared assembly, fitted to the model's limit: keeps the camera line and the reference legend.
-    const plan = videoPromptPlan(p, s, { cameraSource: cameraFor, refs: planRefs, maxLength: def.constraints?.promptMaxLength, model: base.title?.split(' · ')[0] || base.id });
+    const plan = videoPromptPlan(p, s, { cameraSource: cameraFor, refs: planRefs, maxLength: def.constraints?.promptMaxLength, cap: autoPromptCap(def), model: base.title?.split(' · ')[0] || base.id });
     prompt = plan.text;
     const local = def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-');
     // Bind and quote are both revision-checked; concurrent batches can move the revision in between, so retry them together.

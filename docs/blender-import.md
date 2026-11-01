@@ -4,6 +4,39 @@ Build a shot in Blender, by hand or with Claude Code driving Blender MCP, and br
 
 After the import the shot is an ordinary Previs shot: Cast Cards, looks, stills, the batch, Cut and Compare all work unchanged. The import is free and local, and nothing is generated.
 
+## Choose a route
+
+| Route | What runs | Pin | Blender versions tested |
+|---|---|---|---|
+| **Headless helper (recommended)** | `blender -b scene.blend -P scripts/blender/previs_export.py -- --out …`, then import the folder | none: no add-on, no server | 5.3.0 Alpha and 4.5.4 LTS |
+| Claude drives a running Blender ([below](#blender--claude)) | MCP for Blender's `execute_blender_code` runs the same helper inside the GUI | `mcp-for-blender==2.2.2` | 5.3.0 Alpha and 4.5.4 LTS (GUI) |
+| Previs drives a running Blender ([standalone-previs.md](standalone-previs.md#blender-mcp)) | the Previs server's own MCP child renders camera previews | `mcp-for-blender` 2.2.2, commit `5a3618f` | 4.5.4 LTS (GUI) |
+
+Use the headless helper unless you need Claude to build the scene live. It needs no add-on, socket or arbitrary-code server: Blender opens your saved file, runs one script you can read and writes a folder, and Previs only reads that folder. It also runs on a machine with no display. Both MCP routes need a GUI Blender, and they work by running arbitrary Python inside it.
+
+All Previs docs use one pin, `mcp-for-blender` 2.2.2. The PyPI package `blender-mcp` is the same upstream project under its old name; its last release is 2.0.0. The `mcp-for-blender==2.2.2` wheel bundles an `addon.py` that is byte-identical to the one at commit `5a3618fccb2d982d0dd61e7a1879912c3100073b`.
+
+What "tested" means, checked on 2026-10-31:
+
+- **Headless helper.** On 5.3.0 Alpha, `tests/blender-import.test.mjs` (fixture re-export) and `tests/blender-mesh.test.mjs` pass with `PREVIS_BLENDER` set. On 4.5.4 LTS, the mesh test and the MCP import test pass. The fixture comparison does not match on 4.5.4: `build-test-scene.py` makes the car's keys linear through `action.fcurves`, which no longer exists in Blender 5. The 5.3-built fixture therefore has Bézier in-betweens, and the 4.5.4 scene has linear ones. The exporter is not involved.
+- **Claude drives a running Blender.** A GUI Blender on a private port, with the add-on registered for the session only, accepted `execute_blender_code` from `mcp-for-blender==2.2.2` and ran the helper. The 24-frame export, with two meshes, passed the Previs import checks on both versions. The same flow was tested earlier with `blender-mcp==2.0.0` on 5.3.0 Alpha.
+- **Previs drives a running Blender.** The release checkpoint ([release-checkpoint.md](release-checkpoint.md)) used Blender 4.5.4 LTS.
+
+## Using Blender Agent (Agent Link)? Export with the headless helper (`blender -b … -P scripts/blender/previs_export.py`); no arbitrary-code server needed.
+
+Blender Agent does not allow Python, shell or alternative Blender server fallbacks, and Agent Link has no export-to-Previs tool yet. Do not add an MCP for Blender connector next to it just to run `execute_blender_code`. Instead:
+
+1. Build or edit the shot with Blender Agent, then save the `.blend`.
+2. From this checkout, run the helper on the saved file. Blender can stay open, because the helper works on its own background copy and never saves the file:
+
+   ```sh
+   blender -b /abs/path/scene.blend -P scripts/blender/previs_export.py -- --out /abs/path/shot1 --fps24 --meshes
+   ```
+
+3. Import the printed folder (see [Import into Previs](#2-import-into-previs)): `previs_director_import_blender` from Claude, **Import Blender shot…** on the Home screen, or curl.
+
+This route was tested with Blender 5.3.0 Alpha and 4.5.4 LTS, the version Blender Agent targets.
+
 ## 1. Export from Blender
 
 `scripts/blender/previs_export.py` writes one shot into a folder:
@@ -107,7 +140,7 @@ Other tools can write the same sidecar. The helper's command line, its `PREVIS_E
 
 ## Limits and notes
 
-- Tested with Blender 5.3.0 Alpha (headless). The helper uses `evaluated_get`, `world_to_camera_view` and `render.render(write_still=True)`, which are stable across Blender 4.x and 5.x.
+- Tested with Blender 5.3.0 Alpha and 4.5.4 LTS, headless and inside a GUI session (see [Choose a route](#choose-a-route)). The helper uses `evaluated_get`, `world_to_camera_view` and `render.render(write_still=True)`, which are stable across Blender 4.x and 5.x.
 - Meshes bake evaluated geometry at the first frame, including modifiers, parenting, scale, pitch and roll. Movement and yaw follow the existing entity animation. Deformation, rigs, changing pitch/roll, textures and material graphs stay in Blender’s clip; the viewport mesh has one plain material. This is a blockout mesh format, not an arbitrary glTF importer.
 - Limits: 2 MiB and 20,000 triangles per GLB; 32 MiB and 100,000 triangles per export or library bundle, counting instances. The helper decimates temporary copies and fails if caps cannot be met. The importer independently checks the actual bytes and accessor counts. External resources, extensions, animation, textures and scripts are refused; nothing from a handoff is executed.
 - Meshes are copied into the project’s `refs/` assets and attached through the entity `model`. Save to library, library bundle export/import, placement, project duplication and project export/import all keep independent copies. You can also import one Blender object straight into the library with `previs_library_import` and `object`.
@@ -131,17 +164,17 @@ blender -b --factory-startup -P scripts/blender/build-test-scene.py -- --out "$P
 ## Blender + Claude
 
 1. Run Previs locally (`pnpm build && pnpm start`) and add its MCP connector to Claude using the [README](../README.md#direct-scenes-from-claude-mcp). Keep `PREVIS_ALLOW_PAID=0` for this workflow.
-2. For GUI control, install [Blender MCP](https://github.com/ahujasid/blender-mcp): download its `addon.py`, install it through Blender’s Preferences → Add-ons → Install from Disk, enable it, then use **MCP for Blender → Start Server** in the viewport sidebar. Leave paid asset integrations off. Add the connector to Claude Code:
+2. For GUI control, install [MCP for Blender](https://github.com/ahujasid/mcp-for-blender) 2.2.2. Download `addon.py` from [commit `5a3618f`](https://github.com/ahujasid/mcp-for-blender/blob/5a3618fccb2d982d0dd61e7a1879912c3100073b/addon.py) (the add-on the 2.2.2 package bundles). Install it through Blender’s Preferences → Add-ons → Install from Disk, enable it, then use **MCP for Blender → Start Server** in the viewport sidebar. Leave paid asset integrations off. Add the connector to Claude Code:
 
    ```sh
-   claude mcp add blender -- uvx --from blender-mcp==2.0.0 blender-mcp
+   claude mcp add blender -- uvx --from mcp-for-blender==2.2.2 mcp-for-blender
    ```
 
-   For a non-default socket, pass `--host 127.0.0.1 --port <port>` after `blender-mcp`. Restart Claude to load the connector. Blender must run with a GUI: the add-on cannot process commands in `blender -b`; use the headless helper directly for that.
+   For a non-default socket, pass `--host 127.0.0.1 --port <port>` after `mcp-for-blender`. Restart Claude to load the connector. Blender must run with a GUI: the add-on cannot process commands in `blender -b`; use the headless helper directly for that.
 3. Ask Claude: “Build a simple shot in Blender, tag the subjects `cast:Name`, use a perspective camera and 12–120 frames at 24 fps. Get `previs_director_blender_helper`, run it with `meshes: True` and `triangles: 2500`, then call `previs_director_import_blender` with the real output path. No paid generation.” `execute_blender_code` runs the helper in Blender; Previs only reads its exported data.
 4. Open the returned project link and choose **Shot camera**. Check the landmark receipt and the Blender clip. For a revision, keep the names and pass the same `projectId` and `shot` to the import tool; existing looks and descriptions survive. Save an object to the library to reuse its mesh elsewhere.
 
-Tested on 2026-10-31 with Blender 5.3.0 Alpha and `blender-mcp==2.0.0`: a separate GUI session accepted `execute_blender_code` and exported a cube/ring shot through the helper. The automated check used a temporary add-on registration and loopback port without saving Blender preferences. Headless acceptance used `scripts/blender/build-mesh-test-scene.py` (Suzanne, a torus, a cone and stage), then the actual `previs_director_import_blender` stdio MCP tool against a throwaway server. Nine first/middle/last-frame camera landmarks agreed within 0.01% of frame width. No paid generation was used.
+Tested on 2026-10-31 with `mcp-for-blender==2.2.2` on Blender 5.3.0 Alpha and 4.5.4 LTS. In each case a separate GUI session accepted `execute_blender_code` and exported a cube/cone shot with meshes through the helper, and the folder passed the importer's checks. An earlier run used `blender-mcp==2.0.0` (the package's old name) on 5.3.0 Alpha. Every check registered the add-on for that session only, on a loopback port, without saving Blender preferences. Headless acceptance used `scripts/blender/build-mesh-test-scene.py` (Suzanne, a torus, a cone and stage), then the actual `previs_director_import_blender` stdio MCP tool against a throwaway server. Nine first/middle/last-frame camera landmarks agreed within 0.01% of frame width. No paid generation was used.
 
 ```sh
 blender -b --factory-startup --python scripts/blender/build-mesh-test-scene.py -- --out /absolute/mesh-shot

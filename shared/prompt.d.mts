@@ -11,7 +11,7 @@ export const KIND_COLORS: Record<string, string>;
 export function objectColors(project: DirectorProject, shot: Shot): Map<string, string>;
 export const VIDEO_PROMPT_CAP: number;
 export function sentence(text: string): string;
-export type PromptOptions = { cameraSource?: 'blockout' | 'keyframes' | 'still' };
+export type PromptOptions = { cameraSource?: 'blockout' | 'keyframes' | 'still'; cap?: number };
 export function autoPromptSegments(project: DirectorProject, shot: Shot, kind?: 'video' | 'image', options?: { cap?: number } & PromptOptions): Segment[];
 export function autoPromptText(project: DirectorProject, shot: Shot, kind?: 'video' | 'image', opts?: PromptOptions): string;
 export type SectionPolicy = 'inherit' | 'override' | 'lock';
