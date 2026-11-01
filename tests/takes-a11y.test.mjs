@@ -46,9 +46,12 @@ test('Take lab: axe-clean on videos and stills (desktop, phone); lanes step toge
         found[`${size} ${name}`] = r.violations.map(v => `${v.id} (${v.impact}): ${v.nodes.slice(0, 3).map(n => n.target.join(' ')).join(' | ')}`);
       };
       await page.goto(`${base}/director.html?project=${f.id}&view=sequence`, { waitUntil: 'networkidle' });
-      if (size === 'desktop') { await page.waitForSelector('.sq-row'); await page.locator('.sq-row').nth(1).click(); }
-      else { await page.waitForSelector('.m-cutrow'); await page.locator('.m-cutrow .m-cr-main').nth(1).click(); await page.waitForTimeout(300); await page.keyboard.press('Escape'); await page.waitForTimeout(300); }
-      await page.getByRole('button', { name: 'Compare takes' }).first().click();
+      if (size === 'desktop') { await page.waitForSelector('.sq-row'); await page.locator('.sq-row').nth(1).click(); await page.getByRole('button', { name: 'Compare takes' }).first().click(); }
+      else {
+        // PV-01: on a phone the shot's own sheet opens the lab (shot 02 has four takes).
+        await page.waitForSelector('.m-cutrow'); await page.locator('.m-cutrow .m-cr-main').nth(1).click();
+        await page.locator('.m-shotsheet.m-open').getByRole('button', { name: 'Compare takes' }).click();
+      }
       await page.waitForSelector('dialog.takes[open] .tk-lane video');
       assert.match(await page.textContent('#takes-title'), /Shot 02/);
       // The winner (the starter's chosen video) and the three newest, plus the blockout lane.
@@ -73,6 +76,10 @@ test('Take lab: axe-clean on videos and stills (desktop, phone); lanes step toge
       await page.waitForSelector('dialog.takes .tk-lane img');
       await scan('stills');
       await page.keyboard.press('Escape');
+      if (size === 'phone') {
+        await page.waitForSelector('dialog.takes', { state: 'detached' });
+        assert.ok(await page.locator('.m-shotsheet.m-open').isVisible(), 'closing the lab leaves the shot sheet open');
+      }
       if (size === 'desktop') {
         const chosen = await page.locator('.sq-row').nth(1).locator('select').first().evaluate(s => s.selectedOptions[0].textContent);
         assert.match(chosen, /^★ .*Take 3 /, 'the Cut plays the winner');

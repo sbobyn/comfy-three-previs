@@ -195,7 +195,7 @@ export function initMobile(host: MobileHost): MobileApi | null {
       x.progress || '', // [live-progress] new-version progress, apart from the cut's version
       h('div', { class: 'm-row2' }, h('label', { class: 'm-lab' }, 'Trim in (s)', x.trimIn), h('label', { class: 'm-lab' }, 'Trim out (s)', x.trimOut)),
       h('div', { class: 'm-list' }, h('div', { class: 'm-lrow' }, h('span', {}, x.inCut ? 'In the cut' : 'Left out of the cut'), x.include)),
-      h('div', { class: 'm-row2' }, x.moveUp, x.moveDown), x.open,
+      h('div', { class: 'm-row2' }, x.moveUp, x.moveDown), x.open, x.takes || '',
       parts.batch.hidden ? '' : parts.batch);
   }
   function openShotSheet(id: string) {
