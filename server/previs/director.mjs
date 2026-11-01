@@ -1,5 +1,7 @@
 // Director projects: one editable blockout scene, its shots, per-shot image
 // references and the direction thread shared by the browser and an MCP agent.
+import { validateMesh } from './mesh.mjs';
+import { projectMesh } from '../../shared/blockout-models.mjs';
 import { mkdir, readFile, readdir, writeFile, copyFile, rename, cp, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { writeZip, readZip } from './zip.mjs';
@@ -435,8 +437,15 @@ export async function openDirector(root, options = {}) {
         return { project: await save(p), entityIds: plan.entityIds, root: plan.rootId, name: root.name, handle, asset: { id: m.id, handle: m.handle, version: m.version }, text, ops: plan.ops };
       }),
     },
+    async storeMesh(projectId, file, bytes) {
+      await load(projectId);
+      if (!/^[a-f0-9-]{36}\.glb$/.test(file)) fail('Invalid mesh file');
+      validateMesh(bytes);
+      await mkdir(join(dir, projectId, 'refs'), { recursive: true });
+      await writeFile(join(dir, projectId, 'refs', file), bytes, { flag: 'wx', mode: 0o600 });
+    },
     async refFile(projectId, file) {
-      if (!uuid.test(projectId) || !/^[a-f0-9-]{36}\.(png|jpg|webp)$/.test(file)) fail('Not found', 404);
+      if (!uuid.test(projectId) || !/^[a-f0-9-]{36}\.(png|jpg|webp|glb)$/.test(file)) fail('Not found', 404);
       return join(dir, projectId, 'refs', file);
     },
     async wait(projectId, timeoutSeconds = 50, name = null) {
@@ -565,7 +574,7 @@ export async function openDirector(root, options = {}) {
       const entries = [{ name: 'project.json', data: Buffer.from(JSON.stringify(p, null, 2)) }];
       for (const sub of ['refs', 'assets', 'refgen']) {
         let names = []; try { names = await readdir(join(dir, id, sub)); } catch {}
-        for (const n of names.sort()) if (/^[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json)$/.test(n)) entries.push({ name: `${sub}/${n}`, data: await readFile(join(dir, id, sub, n)) });
+        for (const n of names.sort()) if (/^[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json|glb)$/.test(n)) entries.push({ name: `${sub}/${n}`, data: await readFile(join(dir, id, sub, n)) });
       }
       const manifest = { format: EXPORT_FORMAT, version: 1, exportedAt: now(), projectId: p.id, title: p.title, files: entries.map(e => ({ name: e.name, size: e.data.length, sha256: sha(e.data) })) };
       return { filename: `${p.title.replace(/[^\w .-]+/g, '').trim().replace(/\s+/g, '-') || 'project'}.previs.zip`, data: writeZip([{ name: 'previs-export.json', data: Buffer.from(JSON.stringify(manifest, null, 2)) }, ...entries]) };
@@ -579,6 +588,11 @@ export async function openDirector(root, options = {}) {
       let p; try { p = JSON.parse(files.get('project.json').toString('utf8')); } catch { fail('Export project.json is invalid'); }
       if (p.version !== 1 || !p.scene || !Array.isArray(p.shots) || !p.shots.length) fail('Unsupported project version');
       const oldId = p.id; p.id = randomUUID(); p.title = String(p.title || 'Imported project').slice(0, 110) + ' (imported)'; p.importedFrom = { projectId: oldId, exportedAt: manifest.exportedAt };
+      for (const e of p.scene.entities) if (projectMesh(e.model)) {
+        const file = e.model.split('/').pop();
+        validateMesh(files.get(`refs/${file}`));
+        e.model = `/director-refs/${p.id}/${file}`;
+      }
       // Camera renders keep their files, but workflow hand-off needs this workspace's render engine: render again to use them.
       for (const s of p.shots) if (s.render) { s.render = null; }
       for (const a of p.assets || []) a.imported = true;
@@ -586,8 +600,9 @@ export async function openDirector(root, options = {}) {
       await mkdir(join(dir, p.id), { recursive: true });
       for (const f of manifest.files) {
         if (f.name === 'project.json') continue;
-        if (!/^(refs|assets|refgen)\/[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json)$/.test(f.name)) fail(`Unexpected file in export: ${f.name}`);
+        if (!/^(refs|assets|refgen)\/[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json|glb)$/.test(f.name)) fail(`Unexpected file in export: ${f.name}`);
         let data = files.get(f.name);
+        if (f.name.endsWith('.glb')) validateMesh(data);
         if (f.name.startsWith('refgen/')) { const job = JSON.parse(data.toString('utf8')); job.projectId = p.id; if (job.status === 'quoted') { job.status = 'expired'; job.message = 'Imported quote; get a new quote here.'; } job.imported = true; data = Buffer.from(JSON.stringify(job, null, 2)); }
         await mkdir(join(dir, p.id, f.name.split('/')[0]), { recursive: true });
         await writeFile(join(dir, p.id, f.name), data, { flag: 'wx', mode: 0o600 });
@@ -599,6 +614,7 @@ export async function openDirector(root, options = {}) {
     duplicate: id => serial(async () => {
       const src = await load(id), p = structuredClone(src);
       p.id = randomUUID(); p.title = `Copy of ${src.title}`.slice(0, 120); p.createdAt = now(); p.duplicatedFrom = src.id; p.revision = 0;
+      for (const e of p.scene.entities) if (projectMesh(e.model)) e.model = `/director-refs/${p.id}/${e.model.split('/').pop()}`;
       p.messages = p.messages.map(m => ({ ...m, status: 'handled' }));
       await mkdir(join(dir, p.id), { recursive: true });
       for (const sub of ['refs', 'assets']) { try { await cp(join(dir, id, sub), join(dir, p.id, sub), { recursive: true, errorOnExist: true, force: false }); } catch (e) { if (e.code !== 'ENOENT') throw e; } }

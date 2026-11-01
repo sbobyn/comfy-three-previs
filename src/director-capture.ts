@@ -1,5 +1,6 @@
 // Blockout capture: render a shot's camera at a fixed 24 fps and record it on the shot (the source every
 // workflow receives). Shared by the workspace (director.ts) and the headless render worker (render-worker.ts).
+import { projectMesh } from '../shared/blockout-models.mjs';
 import { focusPoint, cameraKeys } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity } from '../shared/director.mjs';
 import type { DirectorScene } from './director-scene';
@@ -18,7 +19,7 @@ export type CaptureDeps = {
 export type CaptureOptions = { width: number; height: number; prompt: string; onFrame?: (url: string, i: number, n: number) => void; onStatus?: (t: string) => void };
 
 /** Same hash as director.ts `signature` (kept identical; tests/headless.test.mjs compares the two). */
-export const shotSignature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, ...e }) => e), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+export const shotSignature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, ...e }) => ({ ...e, ...(projectMesh(model) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 
 export async function captureShotVideo(deps: CaptureDeps, s: Shot, o: CaptureOptions) {
   const { api, scene } = deps;

@@ -4,8 +4,10 @@
 // becomes ordinary Director edit ops (proxies sized from Blender's bounds, a custom camera from Blender's camera) and
 // the PNGs go through the browser capture pipeline, so the shot's blockout clip is Blender's render and every video
 // model, the batch, Cut and staleness work unchanged. Nothing in the export is executed; .blend files are never read.
-import { lstat, readFile, readdir, realpath, rm } from 'node:fs/promises';
-import { isAbsolute, join, resolve } from 'node:path';
+import { lstat, readdir, realpath, rm, open } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { MESH_LIMITS, MESH_PATH, validateMesh } from './mesh.mjs';
+import { isAbsolute, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { SHAPES, KINDS, handleOf, clampDuration, focusPoint, normalizeCamera, shotSignature } from '../../shared/director.mjs';
 import { shotProjector } from '../../shared/still-match.mjs';
@@ -77,7 +79,7 @@ const vec = v => Array.isArray(v) && v.length === 3 && v.every(x => Number.isFin
 const nameOf = o => (typeof o?.name === 'string' ? o.name.trim().slice(0, 60) : '');
 
 /** Throws the user-facing reason an export cannot be imported. `frames` (Map index → PNG bytes) is checked when given. */
-export function validateHandoff(m, frames = null) {
+export function validateHandoff(m, frames = null, meshes = null) {
   if (!m || typeof m !== 'object' || m.format !== HANDOFF_FORMAT) fail(`Not a Blender export for Previs: ${SIDECAR} needs format "${HANDOFF_FORMAT}" (write it with scripts/blender/previs_export.py)`);
   if (m.version !== 1) fail(`Unsupported Blender export version ${m.version}; this Previs reads version 1`);
   if (m.fps !== 24) fail(`The export is ${m.fps} fps; set the scene to 24 fps (the helper does this with --fps24)`);
@@ -97,6 +99,7 @@ export function validateHandoff(m, frames = null) {
     const h = handleOf(name);
     if (seen.has(h)) fail(`Two Blender objects both become “${name}” in Previs (${seen.get(h)} and ${o.blenderName || name}); rename one or set previs_name`);
     seen.set(h, o.blenderName || name);
+    if (o.mesh !== undefined && (typeof o.mesh !== 'string' || !MESH_PATH.test(o.mesh))) fail(`${name}: invalid mesh path`);
     if (!Array.isArray(o.frames) || !o.frames.length || !o.frames.every(f => vec(f?.position) && Number.isFinite(f.yaw) && vec(f.size) && f.size.every(s => s >= 0))) fail(`${name}: frames must be a list of {position, yaw, size}`);
     if (o.frames.length !== 1 && o.frames.length !== n) fail(`${name}: give one frame record (static) or one per frame (${n})`);
   }
@@ -104,6 +107,16 @@ export function validateHandoff(m, frames = null) {
   if (frames) {
     for (let i = 0; i < n; i++) { if (!frames.has(i)) fail(`${frameName(i)} is missing`); checkPng(frames.get(i), m.width, m.height, i); }
     if (frames.size !== n) fail(`The export has ${frames.size} frames; its sidecar says ${n}`);
+  }
+  if (meshes) {
+    const wanted = new Set(m.objects.map(o => o.mesh).filter(Boolean));
+    let bytes = 0, triangles = 0;
+    for (const path of wanted) {
+      if (!meshes.has(path)) fail(`${path} is missing`);
+      const info = validateMesh(meshes.get(path)); bytes += info.bytes; triangles += info.triangles * m.objects.filter(o => o.mesh === path).length;
+    }
+    if (meshes.size !== wanted.size || [...meshes.keys()].some(p => !wanted.has(p))) fail('Undeclared mesh in Blender export');
+    if (bytes > MESH_LIMITS.totalBytes || triangles > MESH_LIMITS.totalTriangles) fail('Meshes exceed 32 MB or 100000 triangles total');
   }
   return m;
 }
@@ -126,7 +139,7 @@ export function projectionChecks(m, keys, duration) {
  * custom linear camera. Also the 24 fps camera motion for the engine record (roll kept), the landmark checks and the
  * mapping. Pure: ids for new objects and a new shot are made here.
  */
-export function handoffToOps(project, m, { shotId = null, title = null, retitle = false } = {}) {
+export function handoffToOps(project, m, { shotId = null, title = null, retitle = false, models = new Map() } = {}) {
   validateHandoff(m);
   const n = m.frameCount, warnings = (m.warnings || []).map(w => String(w).slice(0, 300)).slice(0, 20);
   const shot = shotId ? project.shots.find(s => s.id === shotId) : null;
@@ -151,7 +164,7 @@ export function handoffToOps(project, m, { shotId = null, title = null, retitle 
       const resized = recs.some(r => r.scale.some((v, i) => Math.abs(v - first.scale[i]) > 0.15 * first.scale[i]));
       path = samples(n).map(i => ({ t: round(start + i / 24, 10000), p: r3(recs[i].position), r: round(recs[i].yaw, 100), ...(resized ? { s: fit(recs[i].scale) } : {}) }));
     }
-    const fields = { position: r3(first.position), rotation: round(first.yaw, 100), scale: fit(first.scale), path };
+    const fields = { model: o.mesh ? models.get(o.mesh) || null : null, pitch: 0, roll: 0, position: r3(first.position), rotation: round(first.yaw, 100), scale: fit(first.scale), path };
     let id;
     if (existing) {
       id = existing.id;
@@ -211,15 +224,23 @@ export function handoffToOps(project, m, { shotId = null, title = null, retitle 
 function parseSidecar(bytes) {
   try { return JSON.parse(bytes.toString('utf8')); } catch { fail(`${SIDECAR} is not valid JSON`); }
 }
-/** An export folder by absolute path. Reads only blender-previs.json and frames/frame-NNNNNN.png; nothing is followed. */
+/** An export folder by absolute path. Reads the sidecar, PNGs and declared meshes; symlinks are refused. */
 export async function readHandoffDir(path) {
   if (typeof path !== 'string' || !isAbsolute(path)) fail('path must be the absolute path of the export folder');
   let real; try { real = await realpath(path); } catch { fail(`No export folder at ${path}`); }
-  if (real !== resolve(path)) fail(`Use the folder's real path, without symlinks: ${real}`);
+  if (real !== path) fail(`Use the folder's real path, without symlinks: ${real}`);
   const read = async (rel, max) => {
-    let st; try { st = await lstat(join(real, rel)); } catch { return null; }
-    if (!st.isFile() || st.size > max) fail(`${rel} must be a regular file (not a link) under ${Math.round(max / 1048576)} MB`);
-    return readFile(join(real, rel));
+    let fh;
+    try { fh = await open(join(real, rel), constants.O_RDONLY | constants.O_NOFOLLOW); }
+    catch (e) { if (e.code === 'ENOENT') return null; fail(`${rel} must be a regular file (not a link)`); }
+    try {
+      const st = await fh.stat();
+      if (!st.isFile() || st.size > max) fail(`${rel} must be a regular file (not a link) under ${Math.round(max / 1048576)} MB`);
+      const bytes = Buffer.alloc(st.size + 1); let n = 0;
+      while (n < bytes.length) { const r = await fh.read(bytes, n, bytes.length - n, null); if (!r.bytesRead) break; n += r.bytesRead; }
+      if (n > st.size) fail(`${rel} changed while reading`);
+      return bytes.subarray(0, n);
+    } finally { await fh.close(); }
   };
   const json = await read(SIDECAR, MAX_SIDECAR); if (!json) fail(`No ${SIDECAR} in ${real}; export the shot with scripts/blender/previs_export.py`);
   const manifest = parseSidecar(json);
@@ -229,24 +250,35 @@ export async function readHandoffDir(path) {
   if (names.length > VIDEO_LIMITS.maxFrames) fail(`frames/ holds ${names.length} frames; Previs shots are at most 120`);
   const frames = new Map();
   for (const name of names) frames.set(Number(name.slice(6, 12)), await read(`frames/${name}`, VIDEO_LIMITS.maxFrameBytes));
-  return { manifest, frames, from: real };
+  validateHandoff(manifest);
+  const meshes = new Map(), paths = new Set(manifest.objects.map(o => o.mesh).filter(Boolean));
+  if (paths.size) {
+    if (!(await lstat(join(real, 'meshes')).catch(() => null))?.isDirectory()) fail('meshes/ must be a directory, not a link');
+    let total = 0;
+    for (const path of paths) { const bytes = await read(path, MESH_LIMITS.bytes); total += bytes?.length || 0; if (total > MESH_LIMITS.totalBytes) fail('Meshes exceed 32 MB total'); meshes.set(path, bytes); }
+  }
+  validateHandoff(manifest, frames, meshes);
+  return { manifest, frames, meshes, from: real };
 }
 /** The same folder zipped (the browser drop). Finder's __MACOSX and .DS_Store entries are ignored; anything else is refused. */
 export function readHandoffZip(buffer) {
-  const files = readZip(buffer, { maxEntries: 400, maxTotal: VIDEO_LIMITS.maxFrames * VIDEO_LIMITS.maxFrameBytes + MAX_SIDECAR });
+  const files = readZip(buffer, { maxEntries: 600, maxTotal: VIDEO_LIMITS.maxFrames * VIDEO_LIMITS.maxFrameBytes + MAX_SIDECAR + MESH_LIMITS.totalBytes });
   const junk = name => name.startsWith('__MACOSX/') || name.split('/').pop() === '.DS_Store';
   const sidecars = [...files.keys()].filter(x => !junk(x) && x.split('/').pop() === SIDECAR);
   if (sidecars.length !== 1) fail(sidecars.length ? `The zip holds ${sidecars.length} exports; import one shot at a time` : `No ${SIDECAR} in the zip; zip the folder previs_export.py wrote`);
   const prefix = sidecars[0].slice(0, -SIDECAR.length);
   if (prefix.split('/').length > 2) fail(`Put ${SIDECAR} at the top of the zip or in one folder`);
-  const frames = new Map();
+  const frames = new Map(), meshes = new Map();
   for (const [name, data] of files) {
     if (junk(name) || name === sidecars[0]) continue;
     const hit = name.startsWith(prefix) && /^frames\/frame-(\d{6})\.png$/.exec(name.slice(prefix.length));
+    if (name.startsWith(prefix) && MESH_PATH.test(name.slice(prefix.length))) { meshes.set(name.slice(prefix.length), data); continue; }
     if (!hit) fail(`Unexpected file in the Blender export: ${name}`);
     frames.set(Number(hit[1]), data);
   }
-  return { manifest: parseSidecar(files.get(sidecars[0])), frames, from: 'zip' };
+  const manifest = parseSidecar(files.get(sidecars[0]));
+  validateHandoff(manifest, frames, meshes);
+  return { manifest, frames, meshes, from: 'zip' };
 }
 
 // ---------- Import ----------
@@ -257,21 +289,23 @@ export function readHandoffZip(buffer) {
  */
 export function openBlenderImport({ data, director, previs }) {
   async function importHandoff({ projectId = null, shotId = null, title = null, handoff }) {
-    const { manifest: m, frames } = handoff;
-    validateHandoff(m, frames);
+    const { manifest: m, frames, meshes = new Map() } = handoff;
+    validateHandoff(m, frames, meshes);
     let project = projectId ? await director.get(projectId) : null;
     const shot = shotId ? project?.shots.find(s => s.id === shotId) || project?.shots.find(s => handleOf(s.title) === handleOf(shotId)) || (/^\d+$/.test(String(shotId)) ? project?.shots[Number(shotId) - 1] : null) : null;
     if (shotId && !shot) fail(`Unknown shot ${shotId}`);
     if (!project) project = await director.create({ title: String(title || m.source?.file?.replace(/\.blend$/i, '') || 'Blender shot').slice(0, 120), template: 'empty' });
     // A new project's empty first shot takes the import; otherwise a new shot is added unless one was named.
     const into = shot || (!projectId && project.shots.length === 1 && !project.scene.entities.length ? project.shots[0] : null);
-    const plan = handoffToOps(project, m, { shotId: into?.id ?? null, title: m.source?.camera, retitle: !projectId });
+    const models = new Map([...meshes].map(([path]) => [path, `/director-refs/${project.id}/${randomUUID()}.glb`]));
+    const plan = handoffToOps(project, m, { shotId: into?.id ?? null, title: m.source?.camera, retitle: !projectId, models });
     // Encode first: an ffmpeg failure leaves the project unedited.
     const stage = await createFrameStage({ width: m.width, height: m.height, fps: 24, frameCount: m.frameCount });
     let edited, s, previsShotId, asset;
     try {
       for (let i = 0; i < m.frameCount; i++) await writeFrame({ directory: stage.directory, index: i, bytes: frames.get(i) });
       const { file, metadata } = await encodeFrames(stage);
+      for (const [path, bytes] of meshes) await director.storeMesh(project.id, models.get(path).split('/').pop(), bytes);
       edited = (await director.edit(project.id, plan.ops)).project;
       s = edited.shots.find(x => x.id === plan.shotId);
       // The engine shot a browser capture would save (POST /api/browser-shot), so video-refs and video jobs accept this clip.

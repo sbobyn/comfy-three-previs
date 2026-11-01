@@ -8,6 +8,8 @@
 //
 // The functions here never take a lock: the director runs every library write on its own serial queue, so a save and
 // a place never interleave within one server. Several servers on one PREVIS_LIBRARY_DIR are not supported.
+import { validateMesh, MESH_LIMITS } from './mesh.mjs';
+import { blockoutModel, projectMesh } from '../../shared/blockout-models.mjs';
 import { mkdir, readFile, readdir, writeFile, stat, mkdtemp, rm, realpath, lstat, open } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { createHash, randomUUID } from 'node:crypto';
@@ -29,7 +31,7 @@ const MiB = 1024 ** 2;
 // Safety limits (design §8). Tests may pass smaller ones to openLibrary; the server always uses these.
 export const LIMITS = Object.freeze({ zipBytes: 64 * MiB, zipEntries: 32, unzippedBytes: 96 * MiB, imageBytes: 10 * MiB, entities: 50, assets: 500, tags: 12, tagLength: 24, description: 300, shrinkPx: 1600 });
 /** The only names a bundle may contain, in a zip or a directory. */
-export const ENTRY = /^asset\.json$|^refs\/[a-f0-9-]{36}\.(png|jpg|webp)$/;
+export const ENTRY = /^asset\.json$|^refs\/[a-f0-9-]{36}\.(png|jpg|webp|glb)$/;
 const REF_FILE = /^[a-f0-9-]{36}\.(png|jpg|webp)$/;
 const UUID = /^[a-f0-9-]{36}$/;
 const MIME = { png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp' };
@@ -83,6 +85,7 @@ function cleanEntity(e) {
     id: str(e.id, 36), name: str(e.name, 60), kind: KINDS.includes(e.kind) ? e.kind : 'prop', shape: SHAPES[e.shape] ? e.shape : 'box',
     position: vec3(e.position, [0, 0, 0]), rotation: num(e.rotation), scale: vec3(e.scale, [1, 1, 1]), color: /^#[0-9a-f]{6}$/i.test(e.color || '') ? e.color : '#8a8f98',
     notes: str(e.notes, 500), styleNotes: str(e.styleNotes, 300), pitch: num(e.pitch), roll: num(e.roll),
+    ...(blockoutModel(e) || /^refs\/[a-f0-9-]{36}\.glb$/.test(e.model || '') ? { model: e.model } : {}),
     parent: uuidOr(e.parent), look: uuidOr(e.look), lookFrom: uuidOr(e.lookFrom), ...(sheets ? { sheets } : {}),
   };
 }
@@ -170,6 +173,7 @@ export function validateManifest(m, limits = LIMITS) {
     refIds.add(r.id);
   }
   for (const e of m.entities) {
+    if (e.model?.startsWith('refs/') && !m.media.some(x => x.path === e.model)) fail(`${e.name}: its mesh is missing`);
     if (e.look && !refIds.has(e.look)) fail(`${e.name}: its look is not in the asset`);
     if (e.lookFrom && (!ids.has(e.lookFrom) || e.lookFrom === e.id)) fail(`${e.name}: it shares a look from outside the asset`);
     for (const sh of e.sheets || []) for (const s of sh.slots) for (const a of s.attempts) if (a.referenceId && !refIds.has(a.referenceId)) fail(`${e.name}: a sheet view is not in the asset`);
@@ -177,7 +181,7 @@ export function validateManifest(m, limits = LIMITS) {
   const paths = new Set();
   for (const [i, x] of m.media.entries()) {
     if (!ENTRY.test(x.path) || x.path === 'asset.json' || paths.has(x.path) || !/^[a-f0-9]{64}$/.test(x.sha256)) fail(`asset.json media[${i}] has an invalid path or hash`);
-    if (!m.references.some(r => `refs/${r.file}` === x.path)) fail(`asset.json media[${i}] is not used by any reference`);
+    if (!m.references.some(r => `refs/${r.file}` === x.path) && !m.entities.some(e => e.model === x.path)) fail(`asset.json media[${i}] is not used by any reference`);
     if (x.size > limits.imageBytes) fail(`${x.path} is over ${limits.imageBytes / MiB} MB`);
     paths.add(x.path);
   }
@@ -187,11 +191,17 @@ export function validateManifest(m, limits = LIMITS) {
 
 /** Each listed file: present, the declared size and hash, an image of the declared type under the image cap. */
 export function checkMedia(m, get, limits = LIMITS) {
+  let meshBytes = 0, triangles = 0;
   for (const x of m.media) {
     const bytes = get(x.path);
     if (!bytes) fail(`Asset is incomplete: ${x.path} is missing`);
     if (bytes.length > limits.imageBytes) fail(`${x.path} is over ${limits.imageBytes / MiB} MB`);
     if (bytes.length !== x.size || sha(bytes) !== x.sha256) fail(`Asset file changed: ${x.path}`);
+    if (x.path.endsWith('.glb')) {
+      const info = validateMesh(bytes); meshBytes += info.bytes; triangles += info.triangles * m.entities.filter(e => e.model === x.path).length;
+      if (meshBytes > MESH_LIMITS.totalBytes || triangles > MESH_LIMITS.totalTriangles) fail('Meshes exceed 32 MB or 100000 triangles total');
+      continue;
+    }
     if (sniffImage(bytes) !== MIME[x.path.split('.').pop()]) fail(`${x.path} is not the PNG, JPEG or WebP image its name says`);
   }
 }
@@ -238,6 +248,7 @@ export function assetSnapshot(project, root, { name, tags, description, limits =
       else src = { ...e, lookFrom: null };
     }
     const out = snapshotEntity(project, src, r => { if (!refs.has(r.id)) refs.set(r.id, { ref: r, entityId: e.id }); }, refById);
+    if (projectMesh(out.model)) out.model = `refs/${out.model.split('/').pop()}`;
     return cleanEntity({ ...out, lookFrom, parent: e.id === root.id ? null : e.parent });
   });
   const origin = entities[0].position;
@@ -250,6 +261,7 @@ export function assetSnapshot(project, root, { name, tags, description, limits =
     references.push({ id: r.id, name: str(r.name, 80), file: `${r.id}.${ext}`, mime: MIME[ext], role: ROLES.includes(r.role) ? r.role : 'prop', entityId, note: str(r.note, 500), createdAt: str(r.createdAt, 40), ...(g ? { generated: g } : {}) });
     takes.push({ path: `refs/${r.id}.${ext}`, file: r.file, ref: references.at(-1) });
   }
+  for (const e of entities) if (e.model?.startsWith('refs/') && !takes.some(t => t.path === e.model)) takes.push({ path: e.model, file: e.model.slice(5), mesh: true, ref: { name: e.name } });
   const label = String(name || root.name).trim().slice(0, 60) || root.name;
   const manifest = {
     format: ASSET_FORMAT, formatVersion: ASSET_FORMAT_VERSION, handle: handleOf(label), name: label, kind: entities[0].kind,
@@ -264,7 +276,8 @@ export function assetSnapshot(project, root, { name, tags, description, limits =
 export function assetContents(m) {
   const looks = m.entities.filter(e => e.look).length;
   const sheets = m.entities.flatMap(e => e.sheets || []);
-  const parts = [];
+  const parts = [], meshes = m.entities.filter(e => e.model).length;
+  if (meshes) parts.push(plural(meshes, 'mesh'));
   if (looks) parts.push(plural(looks, 'look'));
   if (sheets.length === 1) parts.push(`a ${sheets[0].slots.length}-view sheet`); else if (sheets.length) parts.push(plural(sheets.length, 'design sheet'));
   if (m.entities.length > 1) parts.push(`${plural(m.entities.length - 1, 'object')} grouped under it`);
@@ -336,6 +349,11 @@ export function placeAsset(project, m, { position, rotation, name, shot, variant
     files.push({ from: `refs/${r.file}`, to: `${id}.${ext}` });
     references.push({ ...structuredClone(r), id, file: `${id}.${ext}`, entityId: idMap.get(r.entityId) });
   }
+  const models = new Map();
+  for (const e of m.entities) if (e.model?.startsWith('refs/') && !models.has(e.model)) {
+    const file = `${randomUUID()}.glb`; files.push({ from: e.model, to: file });
+    models.set(e.model, `/director-refs/${project.id}/${file}`);
+  }
   const at = vec3(position, [0, 0, 0]);
   const yaw = typeof rotation === 'number' && Number.isFinite(rotation) ? rotation : root.rotation;
   const moved = rigidApply({ position: [0, 0, 0], rotation: root.rotation, scale: root.scale }, { position: at, rotation: yaw, scale: root.scale }, m.entities.slice(1));
@@ -345,6 +363,7 @@ export function placeAsset(project, m, { position, rotation, name, shot, variant
     const where = isRoot ? { position: at, rotation: yaw } : { position: moved[i - 1].position, rotation: moved[i - 1].rotation };
     const entity = {
       id: idMap.get(e.id), name: isRoot ? String(name || m.name).slice(0, 60) : e.name, kind: e.kind, shape: e.shape, ...where, scale: [...e.scale], color: e.color,
+      ...(e.model ? { model: models.get(e.model) || e.model } : {}),
       notes: e.notes, styleNotes: e.styleNotes, pitch: e.pitch, roll: e.roll, parent: isRoot ? null : idMap.get(e.parent),
       look: shares ? null : refMap.get(e.look) || null, lookFrom: shares ? variant.id : e.lookFrom ? idMap.get(e.lookFrom) : null,
       ...(sheets?.length ? { sheets } : {}), ...(isRoot ? { from: { asset: m.id, version: m.version, handle: m.handle } } : {}),
@@ -425,7 +444,8 @@ export function blenderObject(manifest, object) {
   const scale = f.size.map((v, i) => Math.round(Math.max(0.05, Math.min(50, v / base[i])) * 1e6) / 1e6);
   const id = stableId(`blender:${manifest.source?.scene || ''}:${o.blenderName || o.name}`);
   const entity = makeEntity({ name: o.name, shape, kind, color: o.color, rotation: f.yaw, scale }, id);
-  return { project: { id: '', title: String(manifest.source?.scene || 'Blender export').slice(0, 120), scene: { entities: [entity], references: [], environment: { preset: 'stage', description: '' } }, shots: [] }, entity };
+  if (o.mesh) entity.model = `/director-refs/${id}/${id}.glb`;
+  return { mesh: o.mesh || null, project: { id: '', title: String(manifest.source?.scene || 'Blender export').slice(0, 120), scene: { entities: [entity], references: [], environment: { preset: 'stage', description: '' } }, shots: [] }, entity };
 }
 
 export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () => {}, blender = blenderHandoffReader } = {}) {
@@ -486,10 +506,10 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
   /** One object out of a Blender handoff (folder or zip), read and validated by the Blender importer. */
   async function fromBlender(read, object, input) {
     const reader = await blender();
-    const { manifest } = await read(reader);
-    reader.validate(manifest);
-    const { project, entity } = blenderObject(manifest, object);
-    return api.save(project, entity, input, () => { throw Error('no images'); }, { source: 'blender' });
+    const { manifest, frames, meshes = new Map() } = await read(reader);
+    reader.validate(manifest, frames, meshes);
+    const { project, entity, mesh } = blenderObject(manifest, object);
+    return api.save(project, entity, input, () => meshes.get(mesh), { source: 'blender' });
   }
 
   const api = {
@@ -502,7 +522,7 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
     },
     async get(ref) { return resolveAssetRef((await scan()).assets, ref); },
     refFile(id, file) {
-      if (!REF_FILE.test(file || '')) fail('Not found', 404);
+      if (!REF_FILE.test(file || '') && !/^[a-f0-9-]{36}\.glb$/.test(file || '')) fail('Not found', 404);
       return join(assetDir(id), 'refs', file);
     },
     assetDir,
@@ -516,15 +536,17 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
       const { manifest: base, takes } = assetSnapshot(project, entity, { name: input.name, tags: input.tags, description: input.description, limits, source });
       const blobs = [];
       for (const t of takes) {
-        let bytes; try { bytes = await readRef(t.file); } catch { fail(`The image file of “${t.ref.name}” is missing from the project`); }
+        let bytes; try { bytes = await readRef(t.file); } catch {}
+        if (!Buffer.isBuffer(bytes)) fail(`The ${t.mesh ? 'mesh' : 'image'} file of “${t.ref.name}” is missing from the project`);
         if (bytes.length > limits.imageBytes) fail(`“${t.ref.name}” is over ${limits.imageBytes / MiB} MB`);
+        if (t.mesh) { validateMesh(bytes); blobs.push({ ...t, bytes }); continue; }
         if (sniffImage(bytes) !== t.ref.mime) fail(`“${t.ref.name}” is not the PNG, JPEG or WebP image its name says`);
         blobs.push({ ...t, bytes });
       }
       const total = () => blobs.reduce((n, b) => n + b.bytes.length, 0) + 64 * 1024;
       if (total() > limits.zipBytes) {
         // Over the bundle cap: shrink every image to WebP ≤ 1600 px when ffmpeg is here, else say what is big.
-        for (const b of blobs) {
+        for (const b of blobs.filter(b => !b.mesh)) {
           const small = await shrinkToWebp(b.bytes, limits.shrinkPx, ffmpeg);
           if (!small) fail(`This asset's images total ${(total() / MiB).toFixed(1)} MB, over the ${limits.zipBytes / MiB} MB limit, and ffmpeg is not available to shrink them: ${blobs.map(x => `${x.ref.name} ${(x.bytes.length / MiB).toFixed(1)} MB`).join(', ')}`);
           b.bytes = small; b.ref.file = `${b.ref.id}.webp`; b.ref.mime = 'image/webp'; b.path = `refs/${b.ref.file}`;
@@ -532,7 +554,7 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
         if (total() > limits.zipBytes) fail(`This asset's images total ${(total() / MiB).toFixed(1)} MB even as WebP, over the ${limits.zipBytes / MiB} MB limit`);
         log(`[library] shrank ${blobs.length} images of ${base.name} to WebP`);
       }
-      const media = blobs.map(b => ({ path: b.path, size: b.bytes.length, sha256: sha(b.bytes), ...imageDims(b.bytes) })).map(cleanMedia);
+      const media = blobs.map(b => ({ path: b.path, size: b.bytes.length, sha256: sha(b.bytes), ...(b.mesh ? { width: null, height: null } : imageDims(b.bytes)) })).map(cleanMedia);
       const byHandle = assets.find(a => a.handle === base.handle);
       const previous = byHandle && (input.replace === true || sameOrigin(byHandle, project, entity) || byHandle.id === entity.from?.asset) ? byHandle : null;
       if (byHandle && !previous) fail(`@${base.handle} is already in the library; choose another name or save over it with replace: true`, 409);
