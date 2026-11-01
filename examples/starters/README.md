@@ -27,17 +27,12 @@ animated from the start still, whose camera only approximates the blockout (the 
 Breaking News). None is trimmed in the cut. Every one of those stills, blockout clips and videos carries the signature of
 the current blocking, so a copy reports nothing as out of date and a new batch does not remake them.
 
-A second pass the same day finished two more shots: Posterized · Posterized is a Kling O1 edit of its current blockout
-clip (Seedance had refused it twice as "may be related to copyright restrictions"), and Wingspan · The glide has new GPT
-Image 2.5 stills and a Seedance 2.5 edit. Two shots still show the earlier, unposed animation, and a copy reports them as
-made for an earlier blocking:
-
-- **Wingspan · The valley** and **The dive** keep their earlier stills, videos and the blockout clips those videos were
-  made from, including The valley's trim in the cut. The valley's two new FLUX 3 still pairs, The dive's two new LTX
-  videos and a Kling O1 edit of each shot's blockout clip all showed the eagle facing the camera, against the blockout,
-  and were not used.
-
-A batch on a copy plans only those replacements.
+Later passes the same day finished the rest. Posterized · Posterized is a Kling O1 edit of its current blockout clip
+(Seedance had refused it twice as "may be related to copyright restrictions"). Wingspan's three shots are Seedance 2.5 edits
+of their blockout clips: The valley and The glide from new GPT Image 2.5 stills, The dive from FLUX 3 stills. Earlier
+LTX and Kling O1 takes of The valley and The dive turned the eagle toward the camera, against the blockout, and were not
+used. Every shot of every starter now carries the current blocking, so a copy reports nothing as made for an earlier
+blocking and none is trimmed in the cut.
 
 Set pieces render as blockout colours. The race's track surfaces, stands and towers no longer inherit
 an unrelated shared image; existing primary environment looks remain available. Cast identities remain

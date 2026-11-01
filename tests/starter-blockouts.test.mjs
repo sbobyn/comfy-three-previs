@@ -72,12 +72,9 @@ test('Posterized rises above the defender and sends the ball through the rim; Wi
 });
 
 // Animation changes intentionally stale the earlier paid takes; no generation is performed in this pass.
-// Media made before the animation pass that the 2026-11-01 regenerations did not replace (see examples/starters/README.md):
-// Wingspan · The valley and The dive failed their checks (the eagle flies at the camera), so they keep their earlier
-// stills, video and the blockout clip that video was made from.
-const EARLIER_MEDIA = {
-  wingspan: { 'The valley': ['stills', 'video'], 'The dive': ['stills', 'video'] },
-};
+// Media made before the animation pass that the 2026-11-01 regenerations did not replace (see examples/starters/README.md).
+// None is left: every shot of every starter carries the current blocking. List a shot here if a later pass keeps an older take.
+const EARLIER_MEDIA = {};
 
 test('starter copies open with current stills and videos, except the takes listed as made for the earlier animation', () => {
   for (const s of starters) {
