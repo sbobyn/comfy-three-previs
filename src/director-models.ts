@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { blockoutModel, projectMesh } from '../shared/blockout-models.mjs';
+import { blockoutModel, projectMesh, isDecalMaterial, DECAL_POLYGON_OFFSET } from '../shared/blockout-models.mjs';
 import { SHAPES } from '../shared/director.mjs';
 import type { Entity } from '../shared/director.mjs';
 
@@ -37,10 +37,15 @@ export function buildBlockoutModel(e: Entity): THREE.Group | null {
       // Thin wings/markings are intentional low-poly surfaces.
       copy.side = THREE.DoubleSide;
       copy.shadowSide = THREE.BackSide; // closed meshes must not shadow their own front faces
+      // Decals sit a few millimetres off the surface below (docs/blockout-modeling-rules.md); polygonOffset keeps them
+      // in front at any distance, where that gap is smaller than one depth-buffer step.
+      if (isDecalMaterial(m.name)) Object.assign(copy, { polygonOffset: true, polygonOffsetFactor: DECAL_POLYGON_OFFSET.factor, polygonOffsetUnits: DECAL_POLYGON_OFFSET.units });
       return copy;
     };
     mesh.material = Array.isArray(mesh.material) ? mesh.material.map(tint) : tint(mesh.material);
-    mesh.castShadow = e.shape !== 'terrain'; mesh.receiveShadow = true;
+    // A decal's shadow is a texel-sized smudge around it: only solid parts cast.
+    const decal = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).every(m => isDecalMaterial(m.name));
+    mesh.castShadow = e.shape !== 'terrain' && !decal; mesh.receiveShadow = true;
     if (e.shape === 'terrain') mesh.userData.terrain = true;
   });
   // Scene placement overwrites the root scale; keep the proxy base dimensions on its child.

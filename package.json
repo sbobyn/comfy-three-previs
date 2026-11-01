@@ -21,6 +21,7 @@
     "usage:settle": "node --env-file-if-exists=.env scripts/usage-settle.mjs",
     "starters:export": "node scripts/export-starters.mjs",
     "starters:import": "node scripts/import-starters.mjs",
+    "lint:blockouts": "node scripts/blender/lint-blockouts.mjs",
     "demo:build": "VITE_DEMO=1 vite build --base=/comfy-three-previs/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs"
   },
   "devDependencies": {

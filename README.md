@@ -94,6 +94,8 @@ Then ask Claude to build a scene. It can create projects, edit objects and Cast 
 
 To bring a shot in from Blender (camera, tagged objects and rendered frames as the shot's blockout), Claude uses `previs_director_blender_helper` and `previs_director_import_blender`; see [Import a Blender shot](docs/blender-import.md).
 
+When building blockouts, Claude and people follow the [blockout modelling rules](docs/blockout-modeling-rules.md): never put two surfaces on the same plane, and lift decals and lines 2 mm along the normal. Edits that break the rule come back with warnings, and imports lift thin objects automatically. Overlapping surfaces z-fight in every blockout frame, and image and video models copy it.
+
 Claude reads and edits the same prompt sections and model settings as the workspace: `previs_director_prompt_sections` returns the exact final prompt by section, `previs_director_set_prompt_section` overrides, locks or resets one section, `previs_director_prompt_history` diffs versions and takes, and `previs_director_model_settings` reads or saves the shot's model and parameters.
 
 Claude sees the director tools (`previs_director_*`) and the asset library tools (`previs_library_list`, `_save`, `_place`, `_import`, `_export`), so "put @red-racecar at the start line" places a saved car in the current project. The older engine, Blender and raw-workflow tools (`previs_render_animation`, `previs_submit_passthrough` and the like) are listed only when the MCP server runs with `PREVIS_MCP_LEGACY=1`; their Blender, transfer, raw Comfy and handoff routes also need the app started with `PREVIS_LEGACY_ROUTES=1`.

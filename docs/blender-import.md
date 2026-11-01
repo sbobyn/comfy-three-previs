@@ -88,6 +88,11 @@ Every visible mesh is exported. Meshes under 1 cm tall, such as ground planes, a
 | `previs_color` | `#rrggbb`. Default: the first material's Base Color. |
 | `previs_ignore = 1` | Leave the object out. |
 
+Never put two surfaces on the same plane. A sign flush on a wall, or a mat sunk exactly to a floor's top, z-fights in
+every Previs frame. Lift decals, lines and inset panels at least 2 mm along their normal, and make caps overhang rather
+than match the body. The helper adds a warning naming each pair of objects that share a plane. The importer lifts thin,
+static ones 2 mm and warns about the rest. See [Blockout modelling rules](blockout-modeling-rules.md).
+
 ## 2. Import into Previs
 
 There are three ways in. Each one creates a new project when no project is given.

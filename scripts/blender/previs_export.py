@@ -112,6 +112,67 @@ def bounds_of(ob, dg):
     return {'position': [round(centre.x, 4), round(centre.y, 4), round(min(zs), 4)], 'yaw': round(yaw, 3), 'size': [round(max(xs) - min(xs), 4), round(max(zs) - min(zs), 4), round(max(ys) - min(ys), 4)]}
 
 
+def coplanar_warnings(objects, dg, limit=6):
+    """Pairs of objects with surfaces on one plane (same facing, within 1 mm, overlapping by 1 mm2 or more) and different
+    colours: they z-fight in Previs. The same check as shared/blockout-lint.mjs (rules: docs/blockout-modeling-rules.md).
+    Two downward faces that are both the bottom of their objects (standing on one floor) are not reported."""
+    tol, min_area = 0.001, 1e-6
+    buckets, found = {}, {}
+    def clip(subject, by):
+        out = subject
+        for i in range(len(by)):
+            a, b = by[i], by[(i + 1) % len(by)]
+            inside = lambda p: (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]) >= 0
+            src, out = out, []
+            for j in range(len(src)):
+                p, q = src[j], src[(j + 1) % len(src)]
+                if inside(p): out.append(p)
+                if inside(p) != inside(q):
+                    dx, dy, ex, ey = q[0] - p[0], q[1] - p[1], b[0] - a[0], b[1] - a[1]
+                    den = ex * dy - ey * dx
+                    t = (ey * (p[0] - a[0]) - ex * (p[1] - a[1])) / den if den else 0
+                    out.append((p[0] + t * dx, p[1] + t * dy))
+            if not out: break
+        return out
+    def area(poly): return abs(sum(poly[i][0] * poly[(i + 1) % len(poly)][1] - poly[(i + 1) % len(poly)][0] * poly[i][1] for i in range(len(poly)))) / 2
+    for ob in objects:
+        ev = ob.evaluated_get(dg)
+        try: mesh = ev.to_mesh()
+        except RuntimeError: continue
+        try:
+            m, look = ev.matrix_world, hex_of(ob) or '#808080'
+            verts = [m @ v.co for v in mesh.vertices]
+            if not verts: continue
+            floor = min(v.z for v in verts)
+            mesh.calc_loop_triangles()
+            for tri in mesh.loop_triangles:
+                vs = [verts[i] for i in tri.vertices]
+                n = (vs[1] - vs[0]).cross(vs[2] - vs[0])
+                if n.length < 2 * min_area / 100: continue
+                n.normalize()
+                u = n.orthogonal().normalized(); w = n.cross(u)
+                p2 = [(v.dot(u), v.dot(w)) for v in vs]
+                if (p2[1][0] - p2[0][0]) * (p2[2][1] - p2[0][1]) - (p2[2][0] - p2[0][0]) * (p2[1][1] - p2[0][1]) < 0: p2.reverse()
+                d = n.dot(vs[0])
+                base = n.z < -0.9999 and all(v.z <= floor + tol for v in vs)
+                key = (round(n.x, 2), round(n.y, 2), round(n.z, 2))
+                rec = (ob.name, look, n, d, vs, base)
+                for k in (round(d / tol) - 1, round(d / tol), round(d / tol) + 1):
+                    for other in buckets.get(key + (k,), ()):
+                        if other[0] == ob.name or other[1] == look or (base and other[5]) or n.dot(other[2]) < 0.99996: continue
+                        if any(abs(other[2].dot(v) - other[3]) > tol for v in vs): continue
+                        q2 = [(v.dot(u), v.dot(w)) for v in other[4]]
+                        if (q2[1][0] - q2[0][0]) * (q2[2][1] - q2[0][1]) - (q2[2][0] - q2[0][0]) * (q2[1][1] - q2[0][1]) < 0: q2.reverse()
+                        a = area(clip(p2, q2))
+                        if a >= min_area:
+                            pair = tuple(sorted((ob.name, other[0])))
+                            found[pair] = found.get(pair, 0) + a
+                buckets.setdefault(key + (round(d / tol),), []).append(rec)
+        finally: ev.to_mesh_clear()
+    worst = sorted(found.items(), key=lambda x: -x[1])[:limit]
+    return [f'"{name_of(bpy.data.objects[a])}" and "{name_of(bpy.data.objects[b])}" share a surface ({x:.2f} m2 on one plane): they will z-fight in Previs. Never put two surfaces on the same plane: lift the decal or line 2 mm along its normal, or cut the overlap (Previs lifts a thin static one 2 mm on import)' for (a, b), x in worst]
+
+
 def camera_key(cam, f):
     cam = cam.evaluated_get(bpy.context.evaluated_depsgraph_get())  # constraints (Track To) and drivers applied
     m = cam.matrix_world
@@ -294,6 +355,10 @@ def main():
         kind = ob.get('previs_kind')
         records.append({'name': name_of(ob), 'blenderName': ob.name, 'cast': is_cast(ob), 'shape': shape_of(ob), **({'kind': kind} if kind in KINDS else {}), **({'color': hex_of(ob)} if hex_of(ob) else {}), 'frames': [a] if static else rows})
     if flat: warnings.append(f'Left out {len(flat)} flat object(s) under 1 cm tall (ground planes): {", ".join(flat[:6])}')
+    try:
+        scene.frame_set(start)
+        warnings += coplanar_warnings([scene.objects[x['blenderName']] for x in records], bpy.context.evaluated_depsgraph_get())
+    finally: scene.frame_set(frame0)
     if o['meshes']:
         os.makedirs(os.path.join(out, 'meshes'), exist_ok=True)
         total_triangles, total_bytes = 0, 0
