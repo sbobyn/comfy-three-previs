@@ -2,7 +2,7 @@
   "player": {
     "shape": "person",
     "triangles": 824,
-    "bytes": 49584
+    "bytes": 50180
   },
   "anchor": {
     "shape": "person",
@@ -22,7 +22,7 @@
   "race-car": {
     "shape": "car",
     "triangles": 778,
-    "bytes": 43940
+    "bytes": 43960
   },
   "eagle": {
     "shape": "bird",
@@ -52,37 +52,37 @@
   "court": {
     "shape": "box",
     "triangles": 828,
-    "bytes": 47196
+    "bytes": 47208
   },
   "paint": {
     "shape": "box",
     "triangles": 60,
-    "bytes": 4932
+    "bytes": 4940
   },
   "track": {
     "shape": "box",
     "triangles": 84,
-    "bytes": 6956
+    "bytes": 6968
   },
   "finish": {
     "shape": "box",
     "triangles": 252,
-    "bytes": 15252
+    "bytes": 15256
   },
   "studio-floor": {
     "shape": "box",
     "triangles": 60,
-    "bytes": 4944
+    "bytes": 4952
   },
   "grass": {
     "shape": "box",
     "triangles": 108,
-    "bytes": 7480
+    "bytes": 7488
   },
   "river": {
     "shape": "box",
     "triangles": 36,
-    "bytes": 3640
+    "bytes": 3648
   },
   "stands": {
     "shape": "box",
@@ -92,32 +92,32 @@
   "barrier": {
     "shape": "box",
     "triangles": 104,
-    "bytes": 8252
+    "bytes": 8308
   },
   "press-box": {
     "shape": "box",
     "triangles": 176,
-    "bytes": 12120
+    "bytes": 12200
   },
   "screen": {
     "shape": "box",
     "triangles": 116,
-    "bytes": 9524
+    "bytes": 9536
   },
   "video-wall": {
     "shape": "wall",
     "triangles": 380,
-    "bytes": 23400
+    "bytes": 23420
   },
   "desk-panel": {
     "shape": "box",
     "triangles": 116,
-    "bytes": 9528
+    "bytes": 9544
   },
   "desk": {
     "shape": "table",
     "triangles": 244,
-    "bytes": 17064
+    "bytes": 17084
   },
   "basketball": {
     "shape": "sphere",
@@ -137,17 +137,17 @@
   "lake": {
     "shape": "cylinder",
     "triangles": 800,
-    "bytes": 42120
+    "bytes": 42124
   },
   "support": {
     "shape": "box",
     "triangles": 132,
-    "bytes": 9400
+    "bytes": 9416
   },
   "backboard": {
     "shape": "box",
     "triangles": 132,
-    "bytes": 9692
+    "bytes": 9696
   },
   "flag-stand": {
     "shape": "box",

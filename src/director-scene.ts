@@ -175,9 +175,8 @@ export function createStage() {
   scene.fog = null; // fog off for now: it hid distant set pieces in previs shots
   const hemi = new THREE.HemisphereLight(...STUDIO.hemi);
   const sun = new THREE.DirectionalLight(...STUDIO.sun);
-  sun.position.set(...STUDIO.sunAt); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02; // keep thin model panels from shadowing their own surface
-  Object.assign(sun.shadow.camera, { left: -25, right: 25, top: 25, bottom: -25, near: 1, far: 70 });
+  sun.position.set(...STUDIO.sunAt); sun.castShadow = true;
+  fitSunShadow(sun, new THREE.Box3()); // the default box until objects arrive; sync() fits it to the scene
   scene.add(hemi, sun, sun.target);
   // Flat ground layers all sit at y = 0. Depth can't separate coplanar surfaces (especially far away),
   // so they never depth-test: they paint in a fixed order — ground, road, lane markings, grid — before
@@ -200,6 +199,109 @@ export function createStage() {
   guideGrid.position.y = 0.1; guideGrid.visible = false; scene.add(guideGrid);
   return { scene, ground, road, grid, hemi, sun, guideGrid };
 }
+
+// ---------- Shadows and depth precision (docs/blockout-modeling-rules.md) ----------
+type Placed = { group: THREE.Object3D; entity: Entity };
+const DEFAULT_SET = new THREE.Box3(new THREE.Vector3(-25, 0, -25), new THREE.Vector3(25, 4, 25));
+/** World bounds of every shadow caster (each object but terrain and group pivots), over its whole animation path. */
+export function casterBounds(items: Iterable<Placed>) {
+  const out = new THREE.Box3(), part = new THREE.Box3(), shift = new THREE.Vector3();
+  for (const { group, entity } of items) {
+    if (entity.shape === 'group' || entity.shape === 'terrain') continue;
+    group.updateWorldMatrix(true, true); part.setFromObject(group);
+    if (part.isEmpty()) continue;
+    out.union(part);
+    for (const k of entity.path || []) { const p = entityAt(entity, k.t).position; shift.set(p[0], p[1], p[2]).sub(group.position); out.union(part.clone().translate(shift)); }
+  }
+  return out;
+}
+/** Shadow map size for a set: 2048² up to 60 m across, 4096² beyond. Fixed per scene, so refits never reallocate it. */
+export const shadowMapSize = (casters: THREE.Box3) => (casters.isEmpty() || casters.getSize(new THREE.Vector3()).length() <= 60 ? 2048 : 4096);
+/**
+ * Where a camera's shadows matter: the box around its frustum out to 4× the distance to what it looks at (40–160 m).
+ * Pass several poses (a whole shot) for one box that every frame of the shot shares, so shadows never shimmer.
+ */
+export function shadowFocus(poses: ScenePose[], aspect = 16 / 9) {
+  const box = new THREE.Box3(), cam = new THREE.PerspectiveCamera(40, aspect, 0.1, 10), m = new THREE.Matrix4(), v = new THREE.Vector3();
+  for (const pose of poses) {
+    cam.position.set(...pose.p); cam.quaternion.setFromRotationMatrix(m.lookAt(cam.position, v.set(...pose.look), new THREE.Vector3(0, 1, 0)));
+    cam.setFocalLength(pose.mm); cam.updateMatrixWorld();
+    const reach = Math.min(160, Math.max(40, 4 * cam.position.distanceTo(v.set(...pose.look))));
+    // The frustum is widened to a square on its longer side, so portrait and landscape frames get the same box.
+    const t = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * Math.max(aspect, 1 / aspect, 1) * reach;
+    box.expandByPoint(cam.position);
+    for (const [x, y] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) box.expandByPoint(v.set(x * t, y * t, -reach).applyMatrix4(cam.matrixWorld));
+  }
+  return box;
+}
+/**
+ * Fit the sun's orthographic shadow camera tightly, keeping the sun's direction: across the light it covers the
+ * casters (every object but terrain, over its whole animation path) where they meet `focus` (what the camera sees);
+ * along the light it spans every caster and the focus box, so nothing that shadows the view or receives it is cut.
+ * Biases are set in world terms from the texel size (half a texel of normal bias, at least 5 mm, and a quarter texel
+ * of depth bias): enough against acne, since only back faces cast, and small enough that shadows stay attached and do
+ * not leak into narrow gaps between parts. Viewport, monitor, card stills, captures and the headless renderer all fit
+ * with the same inputs, so their shadows match.
+ */
+export function fitSunShadow(sun: THREE.DirectionalLight, casters: THREE.Box3, focus: THREE.Box3 | null = null) {
+  const box = casters.isEmpty() ? DEFAULT_SET : casters, cam = sun.shadow.camera;
+  const centre = box.getCenter(new THREE.Vector3()), radius = box.getBoundingSphere(new THREE.Sphere()).radius + (focus ? focus.getBoundingSphere(new THREE.Sphere()).radius + focus.distanceToPoint(centre) : 0);
+  const dir = sun.position.clone().sub(sun.target.position).normalize();
+  if (!Number.isFinite(dir.x) || dir.lengthSq() < 0.5) dir.set(...STUDIO.sunAt).normalize();
+  sun.target.position.copy(centre); sun.position.copy(centre).addScaledVector(dir, radius + 10);
+  sun.target.updateMatrixWorld(); sun.updateMatrixWorld();
+  cam.position.copy(sun.position); cam.lookAt(centre); cam.updateMatrixWorld(); // as DirectionalLightShadow does
+  const extent = (b: THREE.Box3) => {
+    const lo = new THREE.Vector3(Infinity, Infinity, Infinity), hi = new THREE.Vector3(-Infinity, -Infinity, -Infinity), v = new THREE.Vector3();
+    for (let i = 0; i < 8; i++) { v.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z).applyMatrix4(cam.matrixWorldInverse); lo.min(v); hi.max(v); }
+    return { lo, hi };
+  };
+  const all = extent(box), across = { lo: all.lo.clone(), hi: all.hi.clone() };
+  if (focus && !focus.isEmpty()) {
+    const f = extent(focus);
+    across.lo.max(f.lo); across.hi.min(f.hi);
+    all.lo.z = Math.min(all.lo.z, f.lo.z); all.hi.z = Math.max(all.hi.z, f.hi.z);
+    if (across.lo.x > across.hi.x || across.lo.y > across.hi.y) { across.lo.copy(f.lo); across.hi.copy(f.hi); } // nothing casts into view
+  }
+  const map = shadowMapSize(casters), pad = 0.5, size = Math.max(across.hi.x - across.lo.x, across.hi.y - across.lo.y) + 2 * pad, texel = size / map;
+  // Centre snapped to whole texels: a box that moves keeps its texel grid, so edges do not crawl.
+  const cx = Math.round((across.lo.x + across.hi.x) / 2 / texel) * texel, cy = Math.round((across.lo.y + across.hi.y) / 2 / texel) * texel;
+  Object.assign(cam, { left: cx - size / 2, right: cx + size / 2, bottom: cy - size / 2, top: cy + size / 2, near: Math.max(0.1, -all.hi.z - pad), far: -all.lo.z + pad });
+  cam.updateProjectionMatrix();
+  if (sun.shadow.mapSize.x !== map) { sun.shadow.mapSize.set(map, map); sun.shadow.map?.dispose(); sun.shadow.map = null; }
+  sun.shadow.bias = -(texel * 0.25) / (cam.far - cam.near);
+  sun.shadow.normalBias = Math.max(0.005, texel * 0.5);
+}
+/**
+ * Depth range for a camera at `at`. Precision in a perspective depth buffer is set almost entirely by the near plane,
+ * so near is half the clearance to the closest object (between 0.1 m, the old fixed value, and 2 m); nothing is
+ * closer than that, so nothing is clipped. Far reaches the farthest object outdoors; studio sets keep the far
+ * horizon of the flat ground.
+ */
+export function depthRange(at: THREE.Vector3, items: Iterable<Placed>, outdoor: boolean, helpers: THREE.Vector3[] = []): [number, number] {
+  let clear = Infinity, reach = 0;
+  for (const p of helpers) clear = Math.min(clear, Math.max(0, at.distanceTo(p) - 0.5)); // editor rigs and gizmos
+  const box = new THREE.Box3();
+  for (const { group, entity } of items) {
+    if (entity.shape === 'group') continue;
+    if (entity.shape === 'terrain') clear = Math.min(clear, Math.max(0, at.y - terrainHeight({ ...entity, position: group.position.toArray(), scale: group.scale.toArray() }, at.x, at.z)) * 0.5);
+    group.updateWorldMatrix(true, true); box.setFromObject(group);
+    if (box.isEmpty()) continue;
+    if (entity.shape !== 'terrain') clear = Math.min(clear, box.distanceToPoint(at));
+    reach = Math.max(reach, Math.hypot(Math.max(Math.abs(at.x - box.min.x), Math.abs(at.x - box.max.x)), Math.max(Math.abs(at.y - box.min.y), Math.abs(at.y - box.max.y)), Math.max(Math.abs(at.z - box.min.z), Math.abs(at.z - box.max.z))));
+  }
+  const near = Math.min(2, Math.max(0.1, clear * 0.5));
+  return [near, outdoor ? Math.min(6000, Math.max(100, reach * 1.05 + 10)) : 6000];
+}
+/** Fit `cam`'s depth range to the scene for one render; returns the function that puts the camera's own range back. */
+function fitDepthRange(cam: THREE.Camera, items: Iterable<Placed>, outdoor: boolean, helpers: THREE.Vector3[] = []) {
+  const c = cam as THREE.PerspectiveCamera;
+  if (!c.isPerspectiveCamera) return () => {};
+  const was = [c.near, c.far];
+  [c.near, c.far] = depthRange(c.position, items, outdoor, helpers); c.updateProjectionMatrix();
+  return () => { [c.near, c.far] = was; c.updateProjectionMatrix(); };
+}
+
 // Light sky outdoors so the horizon reads; a dim ceiling tone for interiors.
 const GUIDE_SKY: Record<string, number> = { stage: 0xbcc6d1, street: 0x9aa7b6, interior: 0x3b3f46 }, GUIDE_GROUND = 0x5d636b;
 
@@ -208,7 +310,7 @@ function applyEnv(stage: Pick<ReturnType<typeof createStage>, 'scene' | 'ground'
   stage.scene.background = outdoor ? outdoorSky() : new THREE.Color(e.sky);
   stage.scene.fog = outdoor ? new THREE.Fog(OUTDOOR.horizon, ...OUTDOOR.fog) : null; // studio sets stay fog-free: fog hid distant set pieces
   stage.hemi.color.setHex(light.hemi[0]); stage.hemi.groundColor.setHex(light.hemi[1]); stage.hemi.intensity = light.hemi[2];
-  stage.sun.color.setHex(light.sun[0]); stage.sun.intensity = light.sun[1]; stage.sun.position.set(light.sunAt[0], light.sunAt[1], light.sunAt[2]); // a lower, side-on sun models the slopes
+  stage.sun.color.setHex(light.sun[0]); stage.sun.intensity = light.sun[1]; stage.sun.position.set(light.sunAt[0], light.sunAt[1], light.sunAt[2]); stage.sun.target.position.set(0, 0, 0); // a lower, side-on sun models the slopes (direction only: fitSunShadow places it)
   (stage.ground.material as THREE.MeshStandardMaterial).color.setHex(e.ground); stage.road.visible = presetName === 'street';
 }
 /** Shot-camera renders of an outdoor scene: the terrain is the ground, so the flat y = 0 plane, road and grid (drawn
@@ -227,26 +329,31 @@ export function renderStill(project: Pick<DirectorProject, 'scene'>, shot: Shot,
     stillRenderer = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: true, preserveDrawingBuffer: true });
     stillRenderer.shadowMap.enabled = true; stillRenderer.shadowMap.type = THREE.PCFShadowMap; stillRenderer.outputColorSpace = THREE.SRGBColorSpace;
   }
-  const stage = createStage(), outdoor = isOutdoor(project.scene.entities);
+  const stage = createStage(), outdoor = isOutdoor(project.scene.entities), placed: Placed[] = [];
   applyEnv(stage, project.scene.environment.preset, outdoor); hideFlatGround(stage, outdoor);
   for (const e of entitiesAt(project.scene.entities, shot.start || 0)) {
     const g = buildBlockoutModel(e) || buildShape(e.shape, e.color);
     g.position.set(...e.position); g.rotation.set(rad(e.pitch || 0), rad(e.rotation), rad(e.roll || 0), 'YXZ'); g.scale.set(...e.scale);
-    stage.scene.add(g);
+    stage.scene.add(g); placed.push({ group: g, entity: project.scene.entities.find(x => x.id === e.id) || e });
   }
+  fitSunShadow(stage.sun, casterBounds(placed), shadowFocus(shotPoses(shot, project.scene.entities)));
   const cam = new THREE.PerspectiveCamera(40, width / height, 0.1, 6000);
   const pose = shotCameraAt(shot, project.scene.entities, t);
   cam.position.set(...pose.p);
   cam.quaternion.setFromRotationMatrix(new THREE.Matrix4().lookAt(cam.position, new THREE.Vector3(...pose.look), new THREE.Vector3(0, 1, 0)));
   cam.setFocalLength(pose.mm); cam.updateProjectionMatrix();
   stillRenderer.setPixelRatio(1); stillRenderer.setSize(width, height, false);
+  const depth = fitDepthRange(cam, placed, outdoor);
   stillRenderer.render(stage.scene, cam);
+  depth();
   const url = stillRenderer.domElement.toDataURL(type, 0.86);
   stage.scene.traverse(o => { const m = o as THREE.Mesh; m.geometry?.dispose(); const mat = m.material as THREE.Material | THREE.Material[] | undefined; (Array.isArray(mat) ? mat : mat ? [mat] : []).forEach(x => x.dispose()); });
   return url;
 }
 
 export type ScenePose = { p: Vec3; look: Vec3; mm: number };
+/** Nine poses across a shot: enough for one shadow box that covers the whole camera move. */
+const shotPoses = (shot: Shot, entities: Entity[]) => Array.from({ length: 9 }, (_, i) => shotCameraAt(shot, entities, (shot.duration * i) / 8));
 export type DirectorScene = ReturnType<typeof createDirectorScene>;
 export type TransformChange = { id: string; before: XForm; after: XForm };
 export type ClickMode = 'replace' | 'add' | 'toggle';
@@ -461,6 +568,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       line.computeLineDistances();
     }
     applyTime(sceneTime());
+    casters = casterBounds(groups.values());
     // Group labels sit above their members: bounds once per sync, kept as an offset from the group's own height.
     for (const item of groups.values()) {
       if (item.entity.shape !== 'group') { item.topOff = item.span = null; continue; }
@@ -477,6 +585,8 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     refreshOutline(); attachGizmo();
   }
 
+  // Shadow casters (every object over its whole path), refreshed on each sync; each render fits the sun to its view.
+  let casters = new THREE.Box3();
   const up = new THREE.Vector3(0, 1, 0), m4 = new THREE.Matrix4();
   function poseCamera(cam: THREE.PerspectiveCamera, pose: ScenePose) {
     cam.position.set(...pose.p);
@@ -495,13 +605,23 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     markDirty();
   }
   /** Render without editor-only overlays (gizmo). */
-  function cleanRender(r: THREE.WebGLRenderer, cam: THREE.Camera, all = false) {
+  /** The shadow region of a shot (its whole camera move), plus a live pose flown over it. */
+  const shotFocus = (s: Shot | null, extra: ScenePose | null = null) => shadowFocus([...(s ? shotPoses(s, entities) : []), ...(extra ? [extra] : [])]);
+  /** The editor camera's shadow box (what it looks at) and depth range (kept clear of the camera rig); returns the restore. */
+  function fitEditorView() {
+    fitSunShadow(sun, casters, shadowFocus([{ p: world.position.toArray() as Vec3, look: controls.target.toArray() as Vec3, mm: persp.getFocalLength() }]));
+    return fitDepthRange(world, groups.values(), env.endsWith(':outdoor'), [camBody.position, startDot.position, endDot.position, controls.target]);
+  }
+  /** Shadow box and depth range for one shot-camera render; returns the depth-range restore. */
+  function fitView(cam: THREE.Camera, focus: THREE.Box3 | null) { fitSunShadow(sun, casters, focus); return fitDepthRange(cam, groups.values(), env.endsWith(':outdoor')); }
+  function cleanRender(r: THREE.WebGLRenderer, cam: THREE.Camera, all = false, focus: THREE.Box3 | null = null) {
     const v = gizmoHelper.visible; gizmoHelper.visible = false;
+    const depth = fitView(cam, focus);
     const shown = all ? [...hiddenIds].map(id => groups.get(id)?.group).filter(Boolean) as THREE.Group[] : [];
     for (const g of shown) g.visible = true;
     const restore = hideFlatGround({ ground, road, grid }, env.endsWith(':outdoor'));
     r.render(scene, cam);
-    restore();
+    restore(); depth();
     for (const g of shown) g.visible = false;
     gizmoHelper.visible = v;
   }
@@ -575,14 +695,15 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     renderer.setViewport(0, 0, s.x, s.y);
     if (view === 'set') {
       // Fog is a look for the shot camera only; the editing view stays clear at any distance.
+      const depth = fitEditorView();
       const fog = scene.fog; scene.fog = null;
       composer.render();
-      scene.fog = fog;
+      scene.fog = fog; depth();
       const c = canvas.getBoundingClientRect(), m = monitorEl.getBoundingClientRect(), o = overlay.getBoundingClientRect(); // once per drawn frame
       if (m.width > 0) {
         const x = m.left - c.left, y = c.bottom - m.bottom;
         renderer.setScissorTest(true); renderer.setScissor(x, y, m.width, m.height); renderer.setViewport(x, y, m.width, m.height);
-        cleanRender(renderer, shotCam); renderer.setScissorTest(false); renderer.setViewport(0, 0, s.x, s.y);
+        cleanRender(renderer, shotCam, false, shotFocus(shot, live)); renderer.setScissorTest(false); renderer.setViewport(0, 0, s.x, s.y);
       }
       // Labels never cover the shot-camera monitor: cut a hole in the label layer where it sits.
       const nextClip = m.width > 0 ? `path(evenodd, 'M0 0 H${o.width} V${o.height} H0 Z M${m.left - o.left} ${m.top - o.top} h${m.width} v${m.height} h${-m.width} Z')` : '';
@@ -594,7 +715,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
       let w = s.x, hh = (s.x * 9) / 16; if (hh > s.y) { hh = s.y; w = (s.y * 16) / 9; }
       const x = (s.x - w) / 2, y = (s.y - hh) / 2;
       renderer.setScissorTest(true); renderer.setScissor(x, y, w, hh); renderer.setViewport(x, y, w, hh);
-      cleanRender(renderer, shotCam); renderer.setScissorTest(false);
+      cleanRender(renderer, shotCam, false, shotFocus(shot, live)); renderer.setScissorTest(false);
       for (const it of groups.values()) showLabel(it, false);
       frameEl.hidden = false; Object.assign(frameEl.style, { left: `${offsetX + x}px`, top: `${offsetY + (s.y - y - hh)}px`, width: `${w}px`, height: `${hh}px` });
     }
@@ -836,7 +957,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     guideGrid.visible = true; guideGrid.position.set(Math.round(look[0] / 2) * 2, 0.1, Math.round(look[2] / 2) * 2);
     scene.background = new THREE.Color(GUIDE_SKY[env] ?? GUIDE_SKY.stage); gm.color.setHex(GUIDE_GROUND);
     sun.target.position.set(look[0], 0, look[2]); sun.position.set(look[0] + 9, 16, look[2] + 11); sun.target.updateMatrixWorld();
-    try { render(); }
+    try { render(); } // cleanRender fits the shadow box with the guide's sun direction
     finally {
       for (const o of guideParts) o.visible = false;
       guideGrid.visible = false; scene.background = bg; gm.color.setHex(gc);
@@ -849,7 +970,8 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     capturer.setPixelRatio(1); capturer.setSize(width, height, false);
     const cam = shotCam.clone(); cam.aspect = width / height; const at = pose(t); poseCamera(cam, at);
     applyTime(sceneTime(t));
-    if (opts.guide) withGuide(at.look, () => cleanRender(capturer, cam, true)); else cleanRender(capturer, cam, true);
+    const focus = shotFocus(shot, at);
+    if (opts.guide) withGuide(at.look, () => cleanRender(capturer, cam, true, focus)); else cleanRender(capturer, cam, true, focus);
     applyTime(sceneTime());
     return captureCanvas.toDataURL(type, quality);
   }
@@ -862,7 +984,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     capturer.setPixelRatio(1); capturer.setSize(width, height, false);
     const cam = shotCam.clone(); cam.aspect = width / height;
     poseCamera(cam, shotCameraAt(other, entities, other.duration * 0.5));
-    applyTime((other.start || 0) + other.duration * 0.5); cleanRender(capturer, cam, true); applyTime(sceneTime());
+    applyTime((other.start || 0) + other.duration * 0.5); cleanRender(capturer, cam, true, shotFocus(other)); applyTime(sceneTime());
     if (!ck) return captureCanvas;
     const copy = document.createElement('canvas'); copy.width = width; copy.height = height; copy.getContext('2d')!.drawImage(captureCanvas, 0, 0);
     thumbs.set(ck, copy); if (thumbs.size > 64) thumbs.delete(thumbs.keys().next().value!);
