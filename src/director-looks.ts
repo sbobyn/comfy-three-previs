@@ -4,7 +4,7 @@
 import './director-looks.css';
 import { objectLooks, lookPrompt, lookViews, shotCast, handleOf, lookSource } from '../shared/director.mjs';
 import type { DirectorProject, Entity } from '../shared/director.mjs';
-import { api, h, shapeIcon, toast } from './director-common';
+import { api, h, shapeIcon, toast, announce, refocus } from './director-common';
 import { expectedUsd, isFree, submitImage, suggestedCap } from './director-spend';
 
 type Preset = { id: string; title: string; backend: 'cloud' | 'local'; note: string };
@@ -61,7 +61,7 @@ export function openLooksBoard(ctx: LooksCtx) {
     catch (err) { toast((err as Error).message, true); }
   };
   const grid = h('div', { class: 'lk-grid' });
-  const batch = h('div', { class: 'lk-batch', hidden: true });
+  const batch = h('div', { class: 'lk-batch', hidden: true, role: 'region', 'aria-label': 'Quote', tabindex: -1 });
   const shown = () => P().scene.entities.filter(e => !onlyMissing || !objectLooks(P(), e.id).length);
   shareFrom.onchange = () => syncToolbar();
   pickAll.onchange = () => { for (const e of shown()) pickAll.checked ? picked.add(e.id) : picked.delete(e.id); draw(); };
@@ -130,7 +130,7 @@ export function openLooksBoard(ctx: LooksCtx) {
     }
     busy = false; await ctx.reloadRefgen(); draw();
     // Nothing is sent yet: the quote table asks for approval of a total.
-    drawPlan();
+    drawPlan(); refocus(batch);
   };
   function drawPlan() {
     // A request without an estimate is skipped, never sent under a guessed price.
@@ -143,6 +143,7 @@ export function openLooksBoard(ctx: LooksCtx) {
     const go = h('button', { class: 'btn camera', type: 'button', disabled: true }, `${free ? 'Generate' : 'Approve & generate'} ${ready.length}`);
     approve.onchange = () => { go.disabled = blocked || !approve.checked || !ready.length; };
     go.onclick = () => void run(ready, free ? 0 : Number(cap.value) || 0);
+    announce(ready.length ? `Quote ready for ${ready.length} object${ready.length === 1 ? '' : 's'}, ${free ? 'no charge' : `about $${total.toFixed(2)}`}. Nothing has been sent; approve to generate.` : 'Nothing to generate: every selected object was skipped.');
     batch.replaceChildren(
       h('div', { class: 'lk-batch-head' }, h('strong', {}, 'Quote'), h('span', { class: 'muted' }, 'Nothing has been sent'), h('span', { style: 'flex:1' }), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close quote', onclick: () => { batch.hidden = true; } }, '✕')),
       h('table', { class: 'lk-quote' }, h('tbody', {}, ...plan.map(x => h('tr', { class: x.issue || !x.job ? 'skip' : '' },
@@ -155,7 +156,7 @@ export function openLooksBoard(ctx: LooksCtx) {
   }
   async function run(list: Planned[], cap: number) {
     busy = true; syncToolbar();
-    const log = h('div', { class: 'lk-log' }), bound = { capUsd: cap, spentUsd: 0 }, free = list.every(x => isFree(x.job));
+    const log = h('div', { class: 'lk-log', role: 'log', 'aria-label': 'Image generation progress' }), bound = { capUsd: cap, spentUsd: 0 }, free = list.every(x => isFree(x.job));
     batch.replaceChildren(h('div', { class: 'lk-batch-head' }, h('strong', {}, `Generating images for ${list.length} object${list.length === 1 ? '' : 's'}`)), log);
     const line = (t: string, cls = '') => { const l = h('div', { class: cls }, t); log.append(l); return l; };
     try {

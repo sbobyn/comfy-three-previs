@@ -3,6 +3,7 @@
 // any failure returns null.
 import { spawn } from 'node:child_process';
 import { guideMatchScore, MATCH_SIZE } from '../../shared/still-match.mjs';
+import { GRADER_PRICES } from '../../shared/tiers.mjs';
 
 export const MATCH_METHOD = `edges-${MATCH_SIZE.width}x${MATCH_SIZE.height}-v1`;
 
@@ -33,8 +34,8 @@ export async function stillGuideMatch(guideBytes, stillBytes, size = MATCH_SIZE)
 
 // ---------- Paid grader (opt-in: PREVIS_MATCH_GRADER=gemini) ----------
 export const GRADER_MODEL = 'Gemini 3.5 Flash';
-/** Budget reservation for one grade: token-billed, a few cents at most (two small images in, one short verdict out). */
-export const GRADER_RESERVE_USD = 0.05;
+/** Budget reservation for one grade: token-billed, about a cent (two small images in, one short verdict out). */
+export const GRADER_RESERVE_USD = GRADER_PRICES.gemini;
 export const GRADER_PROMPT = 'Image 1 is a grey 3D blockout of a film frame: the plan. Image 2 is a generated photoreal frame that should match it. Ignore colours, materials, lighting, style, identity and extra background detail. Judge only the camera and blocking: camera height and angle, lens and shot size, framing, the horizon, and where each main object is in frame and which way it faces. A main object facing the other way, or seen from another side (front, side or rear), caps headings at 3 and score at 5. Reply with JSON only: {"camera": 0-10, "layout": 0-10, "headings": 0-10, "score": 0-10, "why": "one short sentence"}. 10 = same camera and blocking, 5 = same idea but clearly different camera or placement, 0 = unrelated.';
 /** The grader workflow: guide and still in, Gemini's JSON verdict out as text. */
 export function graderGraph(guide, still, seed = 1, plan = '') {

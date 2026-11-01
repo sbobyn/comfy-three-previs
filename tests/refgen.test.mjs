@@ -432,18 +432,18 @@ test('budget v2: with the paid grader on, a key-frame quote and reservation incl
   const { project, refgen } = await (async () => { const director = await openDirector(root), project = await director.create({ template: 'street' }); return { project, refgen: await openRefgen(root, director, { backend, allowPaid: true, budget, grader: 'gemini' }) }; })();
   assert.equal(refgen.graderOn(), true);
   const job = await refgen.prepare(keyFrame(project, 'flux-2-pro'));
-  // list $0.028 + the guide as one reference image ($0.017) + one grade ($0.05)
-  assert.deepEqual({ ...job.quote.breakdown }, { listUsd: 0.028, refsUsd: 0.017, graderUsd: 0.05, expectedUsd: 0.095, marginPct: 10, marginUsd: 0.0095, reserveUsd: 0.1045, refs: 1, grades: 1 });
-  assert.equal(job.quote.estimate, 0.095); assert.match(job.quote.label, /list \$0\.028 \+ 1 reference image \$0\.017 \+ grader \$0\.050/);
+  // list $0.028 + the guide as one reference image ($0.017) + one grade ($0.01)
+  assert.deepEqual({ ...job.quote.breakdown }, { listUsd: 0.028, refsUsd: 0.017, graderUsd: 0.01, expectedUsd: 0.055, marginPct: 10, marginUsd: 0.0055, reserveUsd: 0.0605, refs: 1, grades: 1 });
+  assert.equal(job.quote.estimate, 0.055); assert.match(job.quote.label, /list \$0\.028 \+ 1 reference image \$0\.017 \+ grader \$0\.010/);
   assert.equal(job.quote.credits, Math.round(6 * 100) / 100, 'credits stay the list price');
   await refgen.submit({ projectId: project.id, requestId: job.id, approval: approveAll(job) });
-  assert.equal(budget.get(job.id).reserveMicros, 104500); assert.equal(budget.get(job.id).components.graderUsd, 0.05);
+  assert.equal(budget.get(job.id).reserveMicros, 60500); assert.equal(budget.get(job.id).components.graderUsd, 0.01);
   log.done = true; log.outputs = { [saveNode(job)]: { images: [{ filename: 'a.png', subfolder: '', type: 'output' }] } };
   const done = await refgen.track({ projectId: project.id, requestId: job.id });
   assert.equal(done.status, 'completed'); assert.equal(done.graderCalls, 1); assert.equal(log.filter(x => x === 'grade').length, 1);
   assert.equal(budget.list().filter(r => r.source === 'grader').length, 0, 'the grade rides on the still’s own reservation, not a second one');
   const settled = budget.get(job.id);
-  assert.equal(settled.state, 'settled'); assert.equal(settled.costMicros, 95000, 'settled at list + reference + grade, without the margin');
+  assert.equal(settled.state, 'settled'); assert.equal(settled.costMicros, 55000, 'settled at list + reference + grade, without the margin');
   // Grader off: the same key frame quotes without it.
   const off = await openRefgen(root, await openDirector(root), { backend, allowPaid: true, budget, grader: 'off' });
   assert.equal((await off.prepare(keyFrame(project, 'flux-2-pro', { seed: 6 }))).quote.breakdown.graderUsd, 0);
@@ -452,12 +452,12 @@ test('budget v2: with the paid grader on, a key-frame quote and reservation incl
 test('budget v2: a key frame the grader cannot be afforded for is refused up front, and the refusal carries the breakdown', async () => {
   const { openBudget } = await import('../server/previs/budget.mjs');
   const root = await mkdtemp(join(tmpdir(), 'previs-refgen-grader-'));
-  const budget = await openBudget(join(root, 'budget'), { env: { PREVIS_BUDGET_PROJECT_CAP_USD: '0.1' } }); // list + reference alone ($0.045) fits; with the grade and margin ($0.1045) it does not
+  const budget = await openBudget(join(root, 'budget'), { env: { PREVIS_BUDGET_PROJECT_CAP_USD: '0.06' } }); // list + reference alone ($0.045, $0.0495 reserved) fits; with the grade and margin ($0.0605) it does not
   const { project, refgen, log } = await setup({ allowPaid: true, budget, grader: 'gemini' }); log.objectInfo = liveInfo;
   const job = await refgen.prepare(keyFrame(project, 'flux-2-pro'));
   await assert.rejects(refgen.submit({ projectId: project.id, requestId: job.id, approval: approveAll(job) }), e => {
-    assert.equal(e.apiCode, 'budget'); assert.match(e.message, /\(list \$0\.03 \+ references \$0\.02 \+ grader \$0\.05 \+ 10% margin \$0\.01\)/);
-    assert.deepEqual(e.breakdown, { listUsd: 0.028, refsUsd: 0.017, graderUsd: 0.05, expectedUsd: 0.095, marginPct: 10, marginUsd: 0.0095, reserveUsd: 0.1045 }); return true;
+    assert.equal(e.apiCode, 'budget'); assert.match(e.message, /\(list \$0\.03 \+ references \$0\.02 \+ grader \$0\.01 \+ 10% margin \$0\.01\)/);
+    assert.deepEqual(e.breakdown, { listUsd: 0.028, refsUsd: 0.017, graderUsd: 0.01, expectedUsd: 0.055, marginPct: 10, marginUsd: 0.0055, reserveUsd: 0.0605 }); return true;
   });
   assert.ok(!log.includes('submit'), 'nothing was sent');
 });

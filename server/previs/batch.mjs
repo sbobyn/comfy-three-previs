@@ -31,7 +31,7 @@ const usd = x => `$${(Math.round((x || 0) * 100) / 100).toFixed(2)}`;
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
 const DEFAULT_COSTS = { marginPct: DEFAULT_MARGIN_PCT, graderOn: false };
 const money3 = x => `$${(Math.round((x || 0) * 1000) / 1000).toFixed(3).replace(/0$/, '')}`;
-/** "list $0.028 + references $0.017 + grader $0.05 + 10% margin $0.01" for messages. */
+/** "list $0.028 + references $0.017 + grader $0.01 + 10% margin $0.01" for messages. */
 export const describeBreakdown = b => (b ? `list ${money3(b.listUsd)}${b.refsUsd ? ` + references ${money3(b.refsUsd)}` : ''}${b.graderUsd ? ` + grader ${money3(b.graderUsd)}` : ''}${b.marginUsd ? ` + ${b.marginPct}% margin ${money3(b.marginUsd)}` : ''}` : '');
 /** The cost fields of one node: estimateUsd (expected), reserveUsd (with margin), breakdown; estimateUsd null when the price is unknown. */
 export function nodeCost(type, model, opts, costs = DEFAULT_COSTS) {

@@ -34,7 +34,7 @@ function itemize(expectedUsd, components, marginUsd, marginPct) {
   const listUsd = r4(Math.max(0, expectedUsd - refsUsd - graderUsd));
   return { listUsd, refsUsd: r4(refsUsd), graderUsd: r4(graderUsd), expectedUsd: r4(expectedUsd), marginPct, marginUsd: r4(marginUsd), reserveUsd: r4(expectedUsd + marginUsd) };
 }
-/** " (list $0.03 + references $0.02 + grader $0.05 + 10% margin $0.01)" for a message; empty when the request is just its list price. */
+/** " (list $0.03 + references $0.02 + grader $0.01 + 10% margin $0.01)" for a message; empty when the request is just its list price. */
 const describe = p => (p.refsUsd || p.graderUsd || p.marginUsd ? ` (list ${money(p.listUsd)}${p.refsUsd ? ` + references ${money(p.refsUsd)}` : ''}${p.graderUsd ? ` + grader ${money(p.graderUsd)}` : ''}${p.marginUsd ? ` + ${p.marginPct}% margin ${money(p.marginUsd)}` : ''})` : '');
 
 /** USD estimate for a quote: a known amount, $0 for local work without partner API nodes, the quote's estimate, else null. */
