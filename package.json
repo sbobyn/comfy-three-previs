@@ -1,7 +1,16 @@
 {
   "name": "comfy-three-previs",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Open-source AI previs: 3D blockouts, consistent cast images, gamepad & phone camera, AI video.",
+  "author": "Steven Bobyn",
+  "homepage": "https://sbobyn.github.io/comfy-three-previs/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sbobyn/comfy-three-previs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sbobyn/comfy-three-previs/issues"
+  },
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.18.0",
@@ -22,7 +31,8 @@
     "starters:export": "node scripts/export-starters.mjs",
     "starters:import": "node scripts/import-starters.mjs",
     "lint:blockouts": "node scripts/blender/lint-blockouts.mjs",
-    "demo:build": "VITE_DEMO=1 vite build --base=/comfy-three-previs/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs"
+    "demo:build": "VITE_DEMO=1 vite build --base=/comfy-three-previs/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs",
+    "demo:local": "bash scripts/demo-local.sh"
   },
   "devDependencies": {
     "@types/node": "^26.6.0",

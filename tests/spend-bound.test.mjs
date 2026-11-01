@@ -125,6 +125,19 @@ test('cast images board: quoting shows the table and waits; the approved total b
   assert.match(text(batch), /would pass the \$0\.60 you approved.*Stopped/);
 });
 
+test('cast images board: with no cloud key on the server, Quote lists each object as needing a key and sends nothing', async () => {
+  const looks = await read('director-looks.ts');
+  const sent = [], picked = new Set(['e1', 'e2']), ents = [...picked].map(id => ({ id, name: id.toUpperCase(), kind: 'prop' }));
+  const api = async (path, body) => { sent.push({ path, body }); return { job: quoted('j', 0.42) }; };
+  const batch = h('div');
+  const ctx = { announce() {}, announceQuote() {}, refocus() {}, h, api, batch, quoteBtn: {}, busy: false, plan: [], picked, views: {}, presetSel: { value: 'flux-3' }, countSel: { value: '1' }, P: () => ({ id: 'p', scene: { entities: ents } }), lookViews: () => ({ front: 'Front' }), lookPrompt: () => 'look', aspectFor: () => '4:3', lookSource: () => null,
+    ctx: { reloadRefgen: async () => {}, refgen: () => ({ paidExecutionEnabled: true, cloudCredential: false, presets: [{ id: 'flux-3', backend: 'cloud' }] }) }, draw() {}, syncToolbar() {}, toast() {}, sleep: async () => {}, ...spend };
+  runInNewContext(compile(between(looks, '  quoteBtn.onclick = async () => {', "\n  const dlg = h('dialog', { class: 'looks'")), ctx);
+  await ctx.quoteBtn.onclick();
+  assert.deepEqual(sent, [], 'no request reaches the server');
+  assert.match(text(batch), /E1.*Add a Comfy Cloud key \(COMFY_CLOUD_API_KEY in \.env\) to get quotes\. Nothing was sent\./);
+});
+
 test('design sheet: views wait for an approved total; the runner submits only under it and stops when it would pass', async () => {
   const sheet = await read('director-sheet.ts');
   const { estimateBreakdown } = await import('../shared/tiers.mjs');

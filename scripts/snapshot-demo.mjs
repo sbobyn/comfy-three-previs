@@ -379,12 +379,19 @@ async function main() {
   const root = resolve(import.meta.dirname, '..'), out = join(root, 'dist-demo');
   const server = process.env.PREVIS_URL || 'http://127.0.0.1:5230';
   if (!existsSync(join(out, 'director.html'))) throw new Error('dist-demo/ not built — run pnpm run demo:build');
+  const data = resolve(root, process.env.PREVIS_DATA || '.evidence/dev-data');
+  // demo:build reads a running server and its data dir. Without one, say how to get one instead of a fetch stack trace.
+  const howTo = 'To build the demo from the bundled starters with nothing running, use: pnpm run demo:local';
+  try { await fetch(server + '/api/director/projects'); } catch {
+    throw new UsageError(`No Previs server at ${server}. demo:build snapshots a running server (PREVIS_URL) and its data dir (PREVIS_DATA). ${howTo}`);
+  }
+  if (!existsSync(data)) throw new UsageError(`PREVIS_DATA ${data} not found: set it to the data dir of the server at ${server}. ${howTo}`);
   const get = async path => {
     const r = await fetch(server + '/api/' + path);
     if (!r.ok) throw new Error(`GET /api/${path} → ${r.status}`);
     return r.json();
   };
-  await snapshotDemo({ get, data: resolve(root, process.env.PREVIS_DATA || '.evidence/dev-data'), out,
+  await snapshotDemo({ get, data, out,
     ids: process.env.DEMO_PROJECTS ? process.env.DEMO_PROJECTS.split(',').map(x => x.trim()) : DEFAULT_PROJECTS,
     budget: Number(process.env.DEMO_MEDIA_MB || DEFAULT_MEDIA_MB) * 1048576 });
   await copyFile(join(out, 'start.html'), join(out, 'index.html'));
@@ -392,4 +399,8 @@ async function main() {
   await rm(join(out, 'camera.html'), { force: true });
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) await main();
+class UsageError extends Error {}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  await main().catch(e => { if (!(e instanceof UsageError)) throw e; console.error(`demo:build: ${e.message}`); process.exitCode = 1; });
+}

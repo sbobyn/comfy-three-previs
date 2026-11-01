@@ -60,6 +60,9 @@ Claude does the same with `previs_director_batch_generate` and `dryRun: true`.
 | `PREVIS_COMFY_URL` | A local ComfyUI server, e.g. `http://127.0.0.1:8000`. |
 | `PREVIS_FFMPEG`, `PREVIS_FFPROBE` | Full paths if FFmpeg is not on your `PATH`. |
 | `PREVIS_PHONE_*` | Phone camera over HTTPS (see below). |
+| `PREVIS_HEADLESS` | Set to `1` so the server renders blockouts and still guides itself in a headless browser, without the app open. Claude's still, blockout and batch tools need it. Default off. |
+| `PREVIS_HEADLESS_POOL` | How many headless pages render at once. Default `2`. |
+| `PREVIS_CHROMIUM` | Full path to the Chrome or Chromium that headless rendering uses. Default: the newest Playwright Chromium in `~/Library/Caches/ms-playwright/`, then Google Chrome in `/Applications` (macOS only; set this on other systems). |
 | `PREVIS_BUDGET_CAP_USD`, `PREVIS_BUDGET_PROJECT_CAP_USD` | Spending caps in USD for the account (per month by default) and for each project. Unset means no cap. |
 | `PREVIS_BUDGET_MARGIN` | Safety margin added to every reservation, in percent (`10` or `10%`; default 10). It is held while a job runs and released when it settles; it is never part of a displayed price. |
 | `PREVIS_ALLOW_UNKNOWN_COST` | Set to `1` to let models without a price estimate run. Default: they are refused. |
@@ -90,7 +93,7 @@ Or with Claude Code:
 claude mcp add comfy-previs -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to/comfy-three-previs/server/previs/agent.mjs
 ```
 
-Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, quote generations and run them. Paid tools do not ask you again: each call carries a `maxCostUsd` that Claude sets and the run is skipped when the estimate is higher, and nothing paid runs unless the server has `PREVIS_ALLOW_PAID=1`. Models without a price estimate are refused unless the call passes `allowUnknownCost` and the server runs with `PREVIS_ALLOW_UNKNOWN_COST=1`. Every run also counts against the server's budget caps (see Configuration). Tell Claude your budget, or leave `PREVIS_ALLOW_PAID` at `0` to keep it to free work and quotes.
+Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, quote generations and run them. For stills and blockouts without the app open in a browser, start the server with `PREVIS_HEADLESS=1` (needs Google Chrome or a Playwright Chromium; see `PREVIS_CHROMIUM`). Paid tools do not ask you again: each call carries a `maxCostUsd` that Claude sets and the run is skipped when the estimate is higher, and nothing paid runs unless the server has `PREVIS_ALLOW_PAID=1`. Models without a price estimate are refused unless the call passes `allowUnknownCost` and the server runs with `PREVIS_ALLOW_UNKNOWN_COST=1`. Every run also counts against the server's budget caps (see Configuration). Tell Claude your budget, or leave `PREVIS_ALLOW_PAID` at `0` to keep it to free work and quotes.
 
 To bring a shot in from Blender (camera, tagged objects and rendered frames as the shot's blockout), Claude uses `previs_director_blender_helper` and `previs_director_import_blender`; see [Import a Blender shot](docs/blender-import.md).
 
@@ -185,6 +188,8 @@ The server is plain Node (`server/previs/`), the browser app is Vite + three.js 
 ### Publishing
 
 `scripts/publish-public.sh` publishes the committed tree to the public repo and redeploys the live demo with the latest launch film. It runs the gate and a secret scan first, adds one commit to public `main` (the tree, not the history) and one to `gh-pages` (`pnpm run demo:build` from a temporary read-only server, plus `launch-film*.mp4` from the newest `.evidence/launch-film/v*/`), then checks the Pages build and loads the demo in headless Chrome. It never force-pushes. Settings are environment variables listed at the top of the script (`TRAILER_DIR`, `SOURCE_DATA`, `DRY_RUN=1`, …).
+
+To build the demo yourself, run `pnpm run demo:local`. It loads the bundled starters into a temporary data dir, starts a temporary read-only server on it, runs `pnpm run demo:build` against that server and writes `dist-demo/`; serve that folder under `/comfy-three-previs/`. `pnpm run demo:build` on its own needs a running server and its data dir (`PREVIS_URL`, `PREVIS_DATA`), and stops with a message naming them when there is none.
 
 The demo shows the bundled starters: the publish script runs `starters:import --force` on its copy of the data, and `pnpm demo:build` snapshots those source projects and fails if any differs from its bundle in `examples/starters` (scene, models, cameras, stills, clips or cut). The demo snapshot keeps each shot's Cut selection, current key stills and blockouts, cast looks and sheets, and their input media and generation receipts. Archived projects and `Regen …` scratch projects are excluded. Images become WebP derivatives bounded to 1280 pixels on both axes; videos, source files and generation settings are unchanged. Derivative metadata records both original and published hashes, dimensions and paths. Snapshotting needs FFmpeg and ffprobe (`PREVIS_FFMPEG` / `PREVIS_FFPROBE`); missing media or a snapshot over `DEMO_MEDIA_MB` (default 400 MiB) fails the build instead of dropping files. `demo-data/snapshot-manifest.json` records every copied file and the measured media size. Build into a fresh output directory before snapshotting again. Publishing's `DRY_RUN=1` still fetches remote refs, although it does not push.
 
