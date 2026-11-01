@@ -8,18 +8,28 @@
 // export-starters.mjs) with every entity, shot, image, clip and blocking signature id kept, plus its media files, so
 // `pnpm starters:export --data-dir <dir> --check` reproduces the bundle byte for byte. Importing never renews ids
 // (a user's copy from the Starters row does). An existing source project is left alone unless --force replaces
-// its document and files. Stop any server that uses the directory first: a running server caches projects.
-import { mkdir, copyFile } from 'node:fs/promises';
+// its document and files. A running server caches projects, so --force refuses while a live server holds the
+// directory's lock; adding source projects that are not there yet is safe while it runs (it reads new ids on demand).
+import { mkdir, copyFile, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { loadStarters, starterSourceProject, STARTERS_DIR } from '../server/previs/starters.mjs';
 import { atomicJson } from '../server/previs/atomic.mjs';
 import { SOURCES } from './export-starters.mjs';
 
+/** The pid of a live server holding `dataDir`'s lock (see server/previs/lock.mjs), else null. */
+export async function liveServer(dataDir) {
+  const pid = Number((await readFile(join(dataDir, '.server-lock'), 'utf8').catch(() => '')).trim().split(':')[0]);
+  if (!Number.isSafeInteger(pid) || pid < 1) return null;
+  try { process.kill(pid, 0); return pid; } catch (e) { return e.code === 'EPERM' ? pid : null; }
+}
+
 /** Write the source projects of the bundles (all, or `only` one) into `dataDir`. Returns [{ slug, id, files }]. */
 export async function importStarters({ dataDir, startersDir = STARTERS_DIR, only, force = false, log = console.log } = {}) {
   const starters = (await loadStarters(startersDir)).filter(s => !only || s.slug === only);
   if (only && !starters.length) throw Error(`No starter "${only}" in ${startersDir}`);
+  const pid = force && await liveServer(dataDir);
+  if (pid) throw Error(`A server (pid ${pid}) is using ${dataDir} and caches its projects: stop it before --force, or import without --force`);
   const done = [];
   for (const s of starters) {
     const src = SOURCES.find(x => x.slug === s.slug);

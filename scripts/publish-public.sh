@@ -2,15 +2,16 @@
 # Publish this checkout to the public repo and its GitHub Pages demo, in one go:
 #   1. preflight: clean tree, pushed to $SOURCE_REMOTE, `pnpm check && pnpm test`, secret/path scan
 #   2. code: the current tree (not history) as one new commit on $PUBLIC_REMOTE/$PUBLIC_BRANCH
-#   3. demo: `pnpm run demo:build` against a temporary read-only server on a copy of the data,
-#      plus the latest trailer as launch-film*.mp4, as one new commit on $PUBLIC_REMOTE/$PAGES_BRANCH
+#   3. demo: `pnpm run demo:build` against a temporary read-only server on a copy of the data with the bundled
+#      starters imported into it, plus the latest trailer as launch-film*.mp4, as one new commit on $PUBLIC_REMOTE/$PAGES_BRANCH
 #   4. verify: Pages build, HTTP checks, headless Chrome loads a starter with no console errors
 # Idempotent: a step with nothing new makes no commit. Never force-pushes.
 #
 #   PUBLIC_REMOTE   remote to publish to (default public)
 #   PUBLIC_BRANCH   code branch (default main);  PAGES_BRANCH  demo branch (default gh-pages)
 #   SOURCE_REMOTE   HEAD must already be on a branch of this remote (default origin; ALLOW_UNPUSHED=1 skips)
-#   SOURCE_DATA     server data dir to snapshot the demo from (default .evidence/dev-data; copied, never written)
+#   SOURCE_DATA     server data dir to snapshot the demo from (default .evidence/dev-data; copied, never written).
+#                   The starters always come from examples/starters, imported into the copy.
 #   TRAILER_DIR     trailer folder with trailer-16x9/-1x1/-9x16/-30s-16x9.mp4 + BUILD-REPORT.md
 #                   (default: newest .evidence/launch-film/v*/ that has a BUILD-REPORT.md)
 #   DEMO_MEDIA_MB   demo media budget (default 400); the publish stops if the snapshot skips any media
@@ -139,6 +140,10 @@ say "demo: read-only server on :$port (copy of $SOURCE_DATA)"
 copy_data() { rm -rf "$TMP/data"; if [ "$(uname)" = Darwin ]; then cp -c -R "$SOURCE_DATA" "$TMP/data"; else cp -R --reflink=auto "$SOURCE_DATA" "$TMP/data"; fi; }
 copy_data 2>/dev/null || copy_data 2>/dev/null || copy_data || die "could not copy $SOURCE_DATA"
 rm -f "$TMP/data/.server-lock" "$TMP/data/.server-lock.recovery"  # the copy belongs to no running server
+# The demo shows the bundled starters (examples/starters, the source of truth), not whatever the data dir holds:
+# load them into the copy as their source projects, replacing any local edits. snapshot-demo.mjs fails if a demo
+# project still differs from its bundle.
+node scripts/import-starters.mjs --data-dir "$TMP/data" --force >"$TMP/import.log" 2>&1 || { cat "$TMP/import.log"; die "starters:import into the data copy failed"; }
 # Clean environment: no credentials, no paid execution, no phone/Blender/headless, no local ComfyUI.
 env -i HOME="$HOME" PATH="$PATH" PORT="$port" PREVIS_DATA_DIR="$TMP/data" PREVIS_COMFY_URL=http://127.0.0.1:9 \
   node server/previs/server.mjs >"$TMP/server.log" 2>&1 &

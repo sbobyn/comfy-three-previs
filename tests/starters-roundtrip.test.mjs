@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { loadStarters, starterSnapshot, starterSourceProject, starterSourceId, STARTERS_DIR } from '../server/previs/starters.mjs';
 import { shotSignature } from '../shared/director.mjs';
 import { exportStarters, SOURCES } from '../scripts/export-starters.mjs';
-import { importStarters } from '../scripts/import-starters.mjs';
+import { importStarters, liveServer } from '../scripts/import-starters.mjs';
 
 const quiet = () => {};
 const withDir = async fn => { const root = await mkdtemp(join(tmpdir(), 'starters-roundtrip-')); try { return await fn(root); } finally { await rm(root, { recursive: true, force: true }); } };
@@ -85,5 +85,17 @@ test('importing keeps every id and signature; a re-import leaves an existing sou
     assert.equal(readFileSync(file, 'utf8'), '{"edited":true}');
     assert.equal((await importStarters({ dataDir: root, only: 'posterized', force: true, log: quiet })).length, 1);
     assert.equal(JSON.parse(readFileSync(file, 'utf8')).id, starterSourceId('posterized'));
+  });
+});
+
+test('--force refuses while a live server holds the data dir; adding missing source projects is allowed', async () => {
+  await withDir(async root => {
+    await writeFile(join(root, '.server-lock'), `${process.pid}:test`);
+    assert.equal(await liveServer(root), process.pid);
+    await assert.rejects(importStarters({ dataDir: root, only: 'wingspan', force: true, log: quiet }), /stop it before --force/);
+    assert.equal((await importStarters({ dataDir: root, only: 'wingspan', log: quiet })).length, 1);
+    await writeFile(join(root, '.server-lock'), '999999999:stale');
+    assert.equal(await liveServer(root), null);
+    assert.equal((await importStarters({ dataDir: root, only: 'wingspan', force: true, log: quiet })).length, 1);
   });
 });
