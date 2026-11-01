@@ -136,7 +136,8 @@ function horizonWords(cam, indoor) {
 }
 function momentWords(shot, t) {
   const move = shot.camera.move, name = move === 'static' ? 'locked-off shot' : move === 'custom' ? 'hand-operated camera move' : `${MOVES[move].toLowerCase()} move`;
-  const when = t <= 0.01 ? 'First frame' : Math.abs(t - shot.duration) < 0.02 ? 'Last frame' : `Frame ${Math.round(t * 10) / 10}s into`;
+  // The last encoded blockout frame (t = (n − 1) / 24, shared/keyframes.mjs) is the last frame too, not only t = duration.
+  const when = t <= 0.01 ? 'First frame' : t >= shot.duration - 1 / 24 - 1e-6 ? 'Last frame' : `Frame ${Math.round(t * 10) / 10}s into`;
   return `${when} of a ${name}`;
 }
 /** The shot's subject at t: the camera target when it is in frame, else the largest non-environment object. */
@@ -240,7 +241,17 @@ export function momentLine(shot, t) {
  * looks: [{ label }] in image order from image 2; prevImage: image number of the previous shot's still, if sent.
  */
 // markers: false when image 1 is a Blender frame (blenderBlockout), which has no headlight, face or ground-wedge markers.
-export function stillPrompt({ project, shot, t = 0, text = '', presetId = '', looks = [], prevImage = null, frame = null, max = 2500, markers = true }) {
+export function stillPrompt(o) {
+  const parts = stillPromptParts(o);
+  return parts.map(x => x.text).filter(Boolean).join('\n').slice(0, o.max ?? 2500);
+}
+/**
+ * The still prompt's parts in order, as stillPrompt joins them (one per line): guide (how to use image 1, worded for the
+ * model), frame (camera and layout measured from the blockout), moment, body (the shot text, shortened to fit `max`),
+ * refs (which image each cast member looks like) and rules (what not to copy). Each part: { key, text, full? } where
+ * `full` is the body before it was shortened. The prompt inspector shows these same parts.
+ */
+export function stillPromptParts({ project, shot, t = 0, text = '', presetId = '', looks = [], prevImage = null, frame = null, max = 2500, markers = true }) {
   const f = frame || describeFrame(project, shot, t);
   const head = editsGuide(presetId)
     ? "Edit image 1: repaint this grey 3D blockout as one photoreal film frame. Keep image 1's camera position, lens, framing, horizon and every object's position, size, heading and pose exactly; only replace the grey shapes, ground and sky with the real things described below."
@@ -252,9 +263,10 @@ export function stillPrompt({ project, shot, t = 0, text = '', presetId = '', lo
   const moment = momentLine(shot, t);
   const fixed = [head, f.text, moment, ids, tail].filter(Boolean);
   const room = max - fixed.join('\n').length - 2;
-  let body = String(text || '').trim();
+  const full = String(text || '').trim();
+  let body = full;
   if (body.length > room) body = room > 40 ? body.slice(0, room - 1).replace(/\s+\S*$/, '') + '…' : '';
-  return [head, f.text, moment, body, ids, tail].filter(Boolean).join('\n').slice(0, max);
+  return [{ key: 'guide', text: head }, { key: 'frame', text: f.text }, { key: 'moment', text: moment }, { key: 'body', text: body, full }, { key: 'refs', text: ids }, { key: 'rules', text: tail }];
 }
 
 // ---------- Match check (free) ----------

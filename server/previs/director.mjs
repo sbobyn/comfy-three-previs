@@ -1,10 +1,14 @@
 // Director projects: one editable blockout scene, its shots, per-shot image
 // references and the direction thread shared by the browser and an MCP agent.
+import { validateMesh } from './mesh.mjs';
+import { projectMesh } from '../../shared/blockout-models.mjs';
 import { mkdir, readFile, readdir, writeFile, copyFile, rename, cp, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { writeZip, readZip } from './zip.mjs';
 import { renderEdit, withTemp, imageToPng } from './edit.mjs';
 import { normalizePrompts, normalizeStyle } from '../../shared/prompt.mjs';
+import { mergePromptSections, appendPromptVersion } from '../../shared/prompt-sections.mjs';
+import { normalizeShotSettings } from '../../shared/model-params.mjs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { recoveryId, saveResultBytes } from './result-recovery.mjs';
@@ -14,9 +18,11 @@ import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
 import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
 import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, keyStills, stillStale, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
 import { cameraSourceOf } from '../../shared/camera-source.mjs';
+import { applyKeyframeOp, keyframeState } from '../../shared/keyframes.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
 import { loadStarters, starterCard, instantiateStarter, attachStarterMedia } from './starters.mjs';
 import { existsSync } from 'node:fs';
+import { cutAsset } from '../../shared/takes.mjs';
 import { openLibrary, libraryDir, placeAsset } from './library.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
@@ -32,12 +38,11 @@ function sniff(bytes) {
   return null;
 }
 
-// Which video a timeline clip plays: a chosen asset, else the shot's newest workflow result, else its newest camera render.
+// Which video a timeline clip plays: a chosen asset, else the shot's winning take, else its newest workflow result,
+// else its newest camera render (shared/takes.mjs cutAsset, the same rule the Cut and the Take lab show).
 export function clipAsset(p, clip) {
-  const assets = (p.assets || []).filter(a => a.shotId === clip.shotId && a.mime?.startsWith('video/'));
-  if (clip.assetId) return assets.find(a => a.id === clip.assetId) || null;
-  const newest = kind => assets.filter(a => a.kind === kind).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-  return newest('workflow-result') || newest('camera-render') || null;
+  const shot = p.shots.find(s => s.id === clip.shotId) || { id: clip.shotId };
+  return cutAsset(p, shot, clip);
 }
 export function editClips(p) { return p.edit?.clips?.length ? p.edit.clips : p.shots.map(s => ({ id: s.id, shotId: s.id, assetId: null, in: 0, out: null })); }
 
@@ -174,6 +179,10 @@ export function applyOps(p, ops) {
         if (patch.start !== undefined) s.start = clampStart(patch.start);
         if (patch.prompts !== undefined) s.prompts = normalizePrompts({ ...(s.prompts || {}), ...(patch.prompts || {}) });
         if (patch.style !== undefined) { if (patch.style === null) delete s.style; else s.style = normalizeStyle(patch.style); }
+        // Section overrides and locks (shared/prompt-sections.mjs): { video|image: { key: {mode,text}|null } | null } merges per section.
+        if (patch.promptSections !== undefined) { const v = patch.promptSections === null ? {} : mergePromptSections(s.promptSections, patch.promptSections); if (Object.keys(v).length) s.promptSections = v; else delete s.promptSections; }
+        // Model and settings per kind (shared/model-params.mjs): { video|image: { model, params } | null } replaces that kind.
+        if (patch.settings !== undefined) { const v = normalizeShotSettings(patch.settings === null ? {} : { ...(s.settings || {}), ...Object.fromEntries(Object.entries(patch.settings).filter(([, x]) => x !== null)) }); for (const [k, x] of Object.entries(patch.settings || {})) if (x === null) delete v[k]; if (Object.keys(v).length) s.settings = v; else delete s.settings; }
         if (patch.cast !== undefined) {
           const known = id => resolveEntity(p, id)?.id || fail(`Unknown object ${id}`);
           s.cast = normalizeCast({ include: (patch.cast?.include || []).map(known), exclude: (patch.cast?.exclude || []).map(known) });
@@ -204,6 +213,14 @@ export function applyOps(p, ops) {
         if (patch.name !== undefined) r.name = String(patch.name).slice(0, 80) || r.name;
         if (patch.note !== undefined) r.note = String(patch.note).slice(0, 500);
         results.push({ op: op.op, id: r.id }); break;
+      }
+      case 'record_prompt_version': {
+        // A version of a shot's final prompt (exactly what was, or would be, sent); identical repeats are not stored.
+        const s = resolveShot(p, op.shotId ?? op.id); if (!s) fail(`Unknown shot ${op.shotId ?? op.id}`);
+        const kind = op.kind === 'image' ? 'image' : 'video', last = s.promptVersions?.[kind]?.at(-1)?.id;
+        const list = appendPromptVersion(s.promptVersions?.[kind], op.version);
+        if (list.length) (s.promptVersions ||= {})[kind] = list;
+        results.push({ op: op.op, id: s.id, kind, added: !!list.length && list.at(-1).id !== last, versionId: list.at(-1)?.id ?? null, versions: list.length }); break;
       }
       case 'use_take': {
         // The newest take at a moment is the one in use (and a key frame's newest take is what video models get): move this one last.
@@ -242,6 +259,14 @@ export function applyOps(p, ops) {
         if (patch.environment) p.scene.environment = { preset: ['stage', 'street', 'interior'].includes(patch.environment.preset) ? patch.environment.preset : p.scene.environment.preset, description: patch.environment.description === undefined ? p.scene.environment.description : String(patch.environment.description).slice(0, 500), style: patch.environment.style === undefined ? p.scene.environment.style || '' : String(patch.environment.style).slice(0, 500) };
         results.push({ op: op.op }); break;
       }
+      case 'set_winner': {
+        // The shot's winning video take (shared/takes.mjs): the cut plays it unless its clip chose another version. null clears it.
+        const s = resolveShot(p, op.shotId); if (!s) fail('Unknown shot');
+        if (op.assetId === null || op.assetId === undefined) delete s.winner;
+        else if ((p.assets || []).some(a => a.id === op.assetId && a.shotId === s.id && a.kind === 'workflow-result' && a.mime?.startsWith('video/'))) s.winner = op.assetId;
+        else fail('That take is not a generated video of this shot');
+        results.push({ op: op.op, id: s.id }); break;
+      }
       case 'set_edit': {
         if (!Array.isArray(op.clips) || op.clips.length > 60) fail('clips must be an array of at most 60');
         p.edit = { clips: op.clips.map(c => {
@@ -257,6 +282,7 @@ export function applyOps(p, ops) {
         if (op.patch?.title !== undefined) p.title = String(op.patch.title).slice(0, 120) || p.title;
         results.push({ op: op.op }); break;
       }
+      case 'set_middle_keys': case 'use_as_key_still': results.push(applyKeyframeOp(p, op, { resolveShot, newId: randomUUID, now })); break; // shared/keyframes.mjs
       default: fail(`Unknown op ${op?.op}`);
     }
   }
@@ -264,6 +290,8 @@ export function applyOps(p, ops) {
 }
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+// What made a video take, kept on the project's copy so the Take lab and an export still show it without the receipt.
+const takeSettings = job => ({ definitionId: job.definition?.id || null, parameters: structuredClone(job.binding?.parameters || {}), inputs: Object.keys(job.binding?.assetBindings || {}) });
 const EXT = { 'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov', 'image/png': 'png' };
 export const EXPORT_FORMAT = 'comfy-previs-project';
 
@@ -435,8 +463,15 @@ export async function openDirector(root, options = {}) {
         return { project: await save(p), entityIds: plan.entityIds, root: plan.rootId, name: root.name, handle, asset: { id: m.id, handle: m.handle, version: m.version }, text, ops: plan.ops };
       }),
     },
+    async storeMesh(projectId, file, bytes) {
+      await load(projectId);
+      if (!/^[a-f0-9-]{36}\.glb$/.test(file)) fail('Invalid mesh file');
+      validateMesh(bytes);
+      await mkdir(join(dir, projectId, 'refs'), { recursive: true });
+      await writeFile(join(dir, projectId, 'refs', file), bytes, { flag: 'wx', mode: 0o600 });
+    },
     async refFile(projectId, file) {
-      if (!uuid.test(projectId) || !/^[a-f0-9-]{36}\.(png|jpg|webp)$/.test(file)) fail('Not found', 404);
+      if (!uuid.test(projectId) || !/^[a-f0-9-]{36}\.(png|jpg|webp|glb)$/.test(file)) fail('Not found', 404);
       return join(dir, projectId, 'refs', file);
     },
     async wait(projectId, timeoutSeconds = 50, name = null) {
@@ -550,7 +585,7 @@ export async function openDirector(root, options = {}) {
           const file = `assets/${r.id}.${EXT[r.mime]}`;
           await mkdir(join(dir, p.id, 'assets'), { recursive: true });
           await saveResultBytes(join(dir, p.id, file), bytes);
-          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, cameraSource: job.cameraSource || cameraSourceOf(job.definition, job.binding?.assetBindings), prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null } });
+          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, cameraSource: job.cameraSource || cameraSourceOf(job.definition, job.binding?.assetBindings), prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null, ...takeSettings(job) } });
           known.add(r.id); added++;
         }
       }
@@ -565,7 +600,7 @@ export async function openDirector(root, options = {}) {
       const entries = [{ name: 'project.json', data: Buffer.from(JSON.stringify(p, null, 2)) }];
       for (const sub of ['refs', 'assets', 'refgen']) {
         let names = []; try { names = await readdir(join(dir, id, sub)); } catch {}
-        for (const n of names.sort()) if (/^[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json)$/.test(n)) entries.push({ name: `${sub}/${n}`, data: await readFile(join(dir, id, sub, n)) });
+        for (const n of names.sort()) if (/^[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json|glb)$/.test(n)) entries.push({ name: `${sub}/${n}`, data: await readFile(join(dir, id, sub, n)) });
       }
       const manifest = { format: EXPORT_FORMAT, version: 1, exportedAt: now(), projectId: p.id, title: p.title, files: entries.map(e => ({ name: e.name, size: e.data.length, sha256: sha(e.data) })) };
       return { filename: `${p.title.replace(/[^\w .-]+/g, '').trim().replace(/\s+/g, '-') || 'project'}.previs.zip`, data: writeZip([{ name: 'previs-export.json', data: Buffer.from(JSON.stringify(manifest, null, 2)) }, ...entries]) };
@@ -579,6 +614,11 @@ export async function openDirector(root, options = {}) {
       let p; try { p = JSON.parse(files.get('project.json').toString('utf8')); } catch { fail('Export project.json is invalid'); }
       if (p.version !== 1 || !p.scene || !Array.isArray(p.shots) || !p.shots.length) fail('Unsupported project version');
       const oldId = p.id; p.id = randomUUID(); p.title = String(p.title || 'Imported project').slice(0, 110) + ' (imported)'; p.importedFrom = { projectId: oldId, exportedAt: manifest.exportedAt };
+      for (const e of p.scene.entities) if (projectMesh(e.model)) {
+        const file = e.model.split('/').pop();
+        validateMesh(files.get(`refs/${file}`));
+        e.model = `/director-refs/${p.id}/${file}`;
+      }
       // Camera renders keep their files, but workflow hand-off needs this workspace's render engine: render again to use them.
       for (const s of p.shots) if (s.render) { s.render = null; }
       for (const a of p.assets || []) a.imported = true;
@@ -586,8 +626,9 @@ export async function openDirector(root, options = {}) {
       await mkdir(join(dir, p.id), { recursive: true });
       for (const f of manifest.files) {
         if (f.name === 'project.json') continue;
-        if (!/^(refs|assets|refgen)\/[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json)$/.test(f.name)) fail(`Unexpected file in export: ${f.name}`);
+        if (!/^(refs|assets|refgen)\/[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json|glb)$/.test(f.name)) fail(`Unexpected file in export: ${f.name}`);
         let data = files.get(f.name);
+        if (f.name.endsWith('.glb')) validateMesh(data);
         if (f.name.startsWith('refgen/')) { const job = JSON.parse(data.toString('utf8')); job.projectId = p.id; if (job.status === 'quoted') { job.status = 'expired'; job.message = 'Imported quote; get a new quote here.'; } job.imported = true; data = Buffer.from(JSON.stringify(job, null, 2)); }
         await mkdir(join(dir, p.id, f.name.split('/')[0]), { recursive: true });
         await writeFile(join(dir, p.id, f.name), data, { flag: 'wx', mode: 0o600 });
@@ -599,6 +640,7 @@ export async function openDirector(root, options = {}) {
     duplicate: id => serial(async () => {
       const src = await load(id), p = structuredClone(src);
       p.id = randomUUID(); p.title = `Copy of ${src.title}`.slice(0, 120); p.createdAt = now(); p.duplicatedFrom = src.id; p.revision = 0;
+      for (const e of p.scene.entities) if (projectMesh(e.model)) e.model = `/director-refs/${p.id}/${e.model.split('/').pop()}`;
       p.messages = p.messages.map(m => ({ ...m, status: 'handled' }));
       await mkdir(join(dir, p.id), { recursive: true });
       for (const sub of ['refs', 'assets']) { try { await cp(join(dir, id, sub), join(dir, p.id, sub), { recursive: true, errorOnExist: true, force: false }); } catch (e) { if (e.code !== 'ENOENT') throw e; } }
@@ -684,6 +726,8 @@ export function summarizeOps(ops, project) {
     else if (o.op === 'clear_animation') out.push(`Cleared animation on ${name(o.id)}`);
     else if (o.op === 'set_scene') out.push('Updated the scene setting');
     else if (o.op === 'update_reference') out.push('Linked a reference');
+    else if (o.op === 'set_winner') out.push(o.assetId ? `Picked the winning take of shot ${shot(o.shotId)}` : `Cleared the winning take of shot ${shot(o.shotId)}`);
+    else if (o.op === 'use_take') out.push(`Picked the still take in use for shot ${shot(o.shotId)}`);
   }
   const counts = new Map(); for (const s of out) counts.set(s, (counts.get(s) || 0) + 1);
   const lines = [...counts].map(([s, n]) => (n > 1 ? `${s} ×${n}` : s));
@@ -728,8 +772,12 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
           const old = [startFrame && stillStale(p, s, startFrame) && 'start', input.lastFrame && endFrame && stillStale(p, s, endFrame) && 'end'].filter(Boolean);
           if (old.length) throw Object.assign(Error(`The ${old.join(' and ')} still${old.length > 1 ? 's were' : ' was'} made before the shot’s camera, timing or scene changed. Make ${old.length > 1 ? 'them' : 'it'} again in the Storyboard (or previs_director_generate_still); nothing was sent.`), { status: 409, apiCode: 'stale-still' });
         }
-        // keyFrames: [start, end?] for first/last-frame workflows. `stills`: blockout-driven models get the start/end stills first, as the look.
-        const picks = input.firstFrame ? [startFrame && { ref: startFrame, entityId: null, role: 'frame', label: 'start key frame' }, input.lastFrame && endFrame && { ref: endFrame, entityId: null, role: 'frame', label: 'end key frame' }].filter(Boolean) : videoReferences(p, s, max, { stills: input.stills === true });
+        // Timed in-between key frames (shared/keyframes.mjs: models that take them, e.g. Kling 4.0): every pinned frame needs a current still.
+        const middle = input.firstFrame && input.lastFrame && Number(input.middleFrames) > 0 ? keyframeState(p, s).middle.slice(0, Math.min(8, Math.floor(Number(input.middleFrames)))) : [];
+        const notReady = middle.filter(m => m.state !== 'ready');
+        if (notReady.length) throw Object.assign(Error(`In-between key frame${notReady.length > 1 ? 's' : ''} ${notReady.map(m => m.index).join(', ')} ${notReady.every(m => m.state === 'stale') ? `${notReady.length > 1 ? 'were' : 'was'} made before the shot’s camera, timing or scene changed` : notReady.some(m => m.outOfRange) ? 'no longer fall inside the shot' : `${notReady.length > 1 ? 'have' : 'has'} no still`}. Make ${notReady.length > 1 ? 'them' : 'it'} in the Storyboard (or previs_director_keyframe), or unpin ${notReady.length > 1 ? 'them' : 'it'}; nothing was sent.`), { status: 409, apiCode: notReady.every(m => m.state === 'stale') ? 'stale-still' : 'missing-still' });
+        // keyFrames: [start, end?, …middle] for first/last-frame workflows. `stills`: blockout-driven models get the start/end stills first, as the look.
+        const picks = input.firstFrame ? [startFrame && { ref: startFrame, entityId: null, role: 'frame', label: 'start key frame' }, input.lastFrame && endFrame && { ref: endFrame, entityId: null, role: 'frame', label: 'end key frame' }, ...middle.map((m, k) => ({ ref: m.ref, entityId: null, role: 'frame', label: `middle key frame ${k + 1}`, frame: m.index }))].filter(Boolean) : videoReferences(p, s, max, { stills: input.stills === true });
         for (const x of picks) {
           const file = await director.refFile(p.id, x.ref.file);
           const bytes = await readFile(file), sha256 = createHash('sha256').update(bytes).digest('hex');
@@ -745,7 +793,7 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
               q.renders.push(render);
             });
           }
-          references.push({ renderId: render.id, referenceId: x.ref.id, entityId: x.entityId, role: x.role, label: x.label, name: x.ref.name, file: x.ref.file });
+          references.push({ renderId: render.id, referenceId: x.ref.id, entityId: x.entityId, role: x.role, label: x.label, name: x.ref.name, file: x.ref.file, ...(x.frame !== undefined ? { frame: x.frame } : {}) });
         }
         return { references, revision: previs.get().revision };
       }

@@ -5,6 +5,7 @@
 // camera/motion part.
 import { shotObjects, castCard, MOVES } from './director.mjs';
 import { cameraLine, withCameraLine } from './camera-source.mjs';
+import { applySections, sectionsText } from './prompt-sections.mjs';
 
 // Camera vocabulary for style tags. Each term is the exact text added to the prompt.
 export const CAMERA_TERMS = {
@@ -153,12 +154,28 @@ export function objectColors(project, shot) {
 export const autoPromptText = (project, shot, kind = 'video', opts) => autoPromptSegments(project, shot, kind, opts).map(s => s.text).join(' ');
 
 /**
- * The prompt actually used: the user's edit if there is one, else the auto-prompt. A video prompt always
- * ends up with the camera line for `cameraSource` (an edited one has its camera line swapped or appended).
+ * The auto-prompt's sections with the shot's saved section overrides and locks applied (shared/prompt-sections.mjs
+ * applySections): one row per candidate section, in prompt order, with its policy and whether it is sent.
+ */
+export function sectionedSegments(project, shot, kind = 'video', opts = {}) {
+  const capped = autoPromptSegments(project, shot, kind, opts);
+  const overrides = shot.promptSections?.[kind];
+  const full = kind === 'image' && opts.cap === undefined ? capped : autoPromptSegments(project, shot, kind, { ...opts, cap: Infinity });
+  return applySections(capped, full, overrides || {});
+}
+/** The composed prompt with the shot's section overrides and locks (the auto-prompt when there are none). */
+export function composedPromptText(project, shot, kind = 'video', opts = {}) {
+  const overrides = shot.promptSections?.[kind];
+  return overrides && Object.keys(overrides).length ? sectionsText(sectionedSegments(project, shot, kind, opts)) : autoPromptText(project, shot, kind, opts);
+}
+/**
+ * The prompt actually used: the user's whole-prompt edit if there is one, else the composed prompt (the auto-prompt with
+ * any section overrides and locks). A video prompt always ends up with the camera line for `cameraSource` (an edited one
+ * has its camera line swapped or appended).
  */
 export function shotPrompt(project, shot, kind = 'video', opts = {}) {
   const saved = shot.prompts?.[kind];
-  if (!(saved?.edited && saved.text)) return autoPromptText(project, shot, kind, opts);
+  if (!(saved?.edited && saved.text)) return composedPromptText(project, shot, kind, opts);
   return kind === 'video' ? withCameraLine(saved.text, opts.cameraSource || 'blockout') : saved.text;
 }
 /** Character ranges of each segment found in a (possibly edited) text, for colouring. */

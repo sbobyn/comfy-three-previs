@@ -1,6 +1,7 @@
 // Real batch drivers (loopbackDrivers) against a mocked Previs HTTP server: request shapes, ids recorded before submit,
 // busy/refusal handling, budget allowance, the LTX start→end fallback and the sheet partial-slot policy. Nothing is sent anywhere.
 import test from 'node:test';
+import { frameCount } from '../shared/keyframes.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -89,14 +90,16 @@ test('look: quote → record id and fingerprint → submit with an allowance cap
   } finally { await m.close(); }
 });
 
-test('still: blockout frame at t as the guide, cast looks as references, frameAt end at the shot length', async () => {
+test('still: blockout frame at t as the guide, cast looks as references, end at the blockout’s last encoded frame', async () => {
   const m = await mockServer(), d = loopbackDrivers(m.base);
   try {
     const ctx = ctxFor(m, { id: `still:${dive.id}end`, type: 'still', model: 'flux-2-pro', estimateUsd: 0.028, target: { shotId: dive.id, t: 'end' } });
     await d.still.submit(ctx);
-    assert.equal(m.calls('POST /api/director/frame')[0].body.t, dive.duration);
+    // "End" is the last frame the blockout encodes ((n − 1) / 24), not the shot length: the guide, the still and its grade agree.
+    const last = frameCount(fixture, dive) - 1;
+    assert.equal(m.calls('POST /api/director/frame')[0].body.t, last / 24);
     const prep = m.calls('POST /api/director/refgen/prepare')[0].body;
-    assert.deepEqual([prep.target, prep.shotId, prep.frameAt, prep.aspect, prep.guide], ['shot', dive.id, 'end', '16:9', PNG]);
+    assert.deepEqual([prep.target, prep.shotId, prep.frameAt, prep.frame, prep.aspect, prep.guide], ['shot', dive.id, 'end', last, '16:9', PNG]);
     assert.ok(prep.referenceIds.length <= 6, 'guide takes one of the 7 image slots');
     assert.match(prep.prompt, /Image 1 is a grey 3D blockout/);
     if (prep.referenceIds.length) assert.match(prep.prompt, /looks exactly like image 2/);

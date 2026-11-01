@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { blockoutModel } from '../shared/blockout-models.mjs';
+import { blockoutModel, projectMesh } from '../shared/blockout-models.mjs';
+import { SHAPES } from '../shared/director.mjs';
 import type { Entity } from '../shared/director.mjs';
 
 const loader = new GLTFLoader();
@@ -11,9 +12,9 @@ const pending = new Map<string, Promise<void>>();
 export async function loadBlockoutModels(entities: Entity[]) {
   await Promise.all([...new Set(entities.map(blockoutModel).filter((x): x is string => !!x))].map(id => {
     if (loaded.has(id)) return;
-    if (!pending.has(id)) pending.set(id, loader.loadAsync(`${import.meta.env.BASE_URL}models/blockouts/${id}.glb`).then(gltf => {
+    if (!pending.has(id)) pending.set(id, loader.loadAsync(projectMesh(id) || `${import.meta.env.BASE_URL}models/blockouts/${id}.glb`).then(gltf => {
       loaded.set(id, gltf.scene);
-    }).catch(() => { throw Error(`Could not load blockout model “${id}”. Reload after restoring public/models/blockouts.`); }).finally(() => { pending.delete(id); }));
+    }).catch(() => { throw Error(`Could not load blockout model “${id}”. ${projectMesh(id) ? 'Re-import the Blender mesh or restore this project’s mesh file.' : 'Reload after restoring public/models/blockouts.'}`); }).finally(() => { pending.delete(id); }));
     return pending.get(id);
   }));
 }
@@ -25,6 +26,7 @@ export function buildBlockoutModel(e: Entity): THREE.Group | null {
   const id = blockoutModel(e), source = id && loaded.get(id);
   if (!source) return null;
   const group = source.clone(true);
+  if (projectMesh(id)) group.scale.fromArray(SHAPES[e.shape].size);
   group.traverse(o => {
     const mesh = o as THREE.Mesh;
     if (!mesh.isMesh) return;
@@ -41,5 +43,7 @@ export function buildBlockoutModel(e: Entity): THREE.Group | null {
     mesh.castShadow = e.shape !== 'terrain'; mesh.receiveShadow = true;
     if (e.shape === 'terrain') mesh.userData.terrain = true;
   });
+  // Scene placement overwrites the root scale; keep the proxy base dimensions on its child.
+  if (projectMesh(id)) { const root = new THREE.Group(); root.add(group); return root; }
   return group;
 }

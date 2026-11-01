@@ -13,6 +13,7 @@ import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences, c
 import type { Def, EngineRef } from './director-videogen';
 import { CAMERA_SOURCE_LABELS, CAMERA_SOURCE_GLYPHS, cameraSourceOf } from '../shared/camera-source.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
+import { cutAsset, winnerOf, winnerOps } from '../shared/takes.mjs';
 
 export type SequenceCtx = {
   project(): DirectorProject;
@@ -30,6 +31,8 @@ export type SequenceCtx = {
   openEditor?(): void;
   /** The export button's state, for the workspace top bar's Export film. */
   onExportState?(s: { ok: boolean; busy: boolean; reason: string }): void;
+  /** Open the Take lab for a shot (src/director-takes.ts): compare its takes and pick the winner. */
+  openTakes?(shotId: string, kind?: 'video' | 'still'): void;
   /** [mobile] compact row template; the parts are today's controls, re-arranged by the mobile layer. */
   rowTemplate?(parts: RowParts): HTMLElement;
 };
@@ -86,7 +89,9 @@ export function createSequence(ctx: SequenceCtx) {
   const activeJob = (s: Shot) => { const ids = engineShots(s); return gen.jobs.filter(j => ids.has(j.shotId) && !DONE.includes(j.status) && j.status !== 'quoted').at(-1) || null; };
   // The cut follows shot order; each shot keeps its chosen version and trims.
   const clipFor = (s: Shot): EditClip | null => { const p = P(); if (!p.edit?.clips?.length) return { id: s.id, shotId: s.id, assetId: null, in: 0, out: null }; return p.edit.clips.find(c => c.shotId === s.id) || null; };
-  const media = (s: Shot, c = clipFor(s)) => { if (c?.assetId) return videos(s).find(a => a.id === c.assetId) || null; return results(s)[0] || renders(s)[0] || null; };
+  // A version chosen on the clip, else the shot's winning take, else the newest (shared/takes.mjs, as film export does).
+  const media = (s: Shot, c = clipFor(s)) => cutAsset(P(), s, c);
+  const winner = (s: Shot) => { const w = winnerOf(P(), s); return w ? results(s).find(a => a.id === w.assetId) || null : null; };
   const customOrder = () => { const c = P().edit?.clips; if (!c?.length) return false; const order = P().shots.map(s => s.id).filter(id => c.some(x => x.shotId === id)); return c.length !== order.length || c.some((x, i) => x.shotId !== order[i]); };
   async function writeCut(change: (byShot: Map<string, EditClip | null>) => void, label: string) {
     const p = P(), before = structuredClone(p.edit?.clips || []);
@@ -240,6 +245,7 @@ export function createSequence(ctx: SequenceCtx) {
   const empty = h('div', { class: 'sq-empty' });
   const abSeg = h('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Version' });
   const caption = h('div', { class: 'sq-caption' });
+  const takesBtn = h('button', { class: 'btn sm', type: 'button', title: 'Compare this shot’s takes side by side and pick the winner', onclick: () => { if (selected) ctx.openTakes?.(selected); } }, 'Compare takes');
   const setCaption = (t: string) => { caption.textContent = t; caption.title = t; };
   const comparisonInfo = h('div', { class: 'sq-comparison-info', hidden: true });
   const comparisonPosition = h('div', { class: 'sq-comparison-position mono', hidden: true });
@@ -257,7 +263,7 @@ export function createSequence(ctx: SequenceCtx) {
       h('aside', { class: 'sq-viewer' },
         h('div', { class: 'sq-screen' }, video, stillLayer, over, ...extra, ovLayer, seamLayer, empty),
         h('div', { class: 'sq-ctl' },
-          h('div', { class: 'sq-vbar' }, abSeg, caption), comparisonInfo, comparisonPosition,
+          h('div', { class: 'sq-vbar' }, abSeg, takesBtn, caption), comparisonInfo, comparisonPosition,
           h('div', { class: 'sq-vbar sq-playbar' }, playSeqBtn, totals),
           h('div', { class: 'sq-export' }, h('div', { class: 'sq-vbar' }, exportBtn, h('span', { class: 'note' }, '1280×720 · 24 fps · H.264, in shot order')), exportStatus, exportsList))),
       h('div', { class: 'sq-toolbar' },
@@ -282,11 +288,18 @@ export function createSequence(ctx: SequenceCtx) {
     const bState = !s.render ? (bundled ? ['none', bundled.fresh === false ? 'Starter blockout · older' : 'Starter blockout'] : ['missing', 'No blockout']) : fresh(s) ? ['ok', 'Blockout ready'] : ['stale', 'Blockout changed'];
     const older = a?.kind === 'workflow-result' && videoStale(p, s, a);
     const gState = job ? ['run', `Generating · ${job.status}`] : res.length ? (older ? ['stale', `${res.length} generated · older`] : ['ok', `${res.length} generated`]) : ['none', 'Not generated'];
-    const version = h('select', { class: 'field', 'aria-label': `Version of shot ${i + 1} in the cut`, title: 'Newest uses the latest generated video, or the blockout if there is none', disabled: !inCut },
-      h('option', { value: '' }, 'Newest'),
-      ...res.map((x, k) => { const cam = cameraOf(x); return h('option', { value: x.id, selected: c?.assetId === x.id, title: cam ? CAMERA_SOURCE_LABELS[cam] : '' }, `${cam ? CAMERA_SOURCE_GLYPHS[cam] + ' ' : ''}Generated ${res.length - k} · ${(x.source.workflow || '').split(' ·')[0]}`); }),
+    // Choosing a generated take makes it the shot's winner (the Take lab's choice too); a blockout is a cut-only choice.
+    const win = winner(s), playing = c?.assetId || win?.id || '';
+    const version = h('select', { class: 'field', 'aria-label': `Version of shot ${i + 1} in the cut`, title: 'The take the cut plays. Choosing a generated take makes it the shot’s winner (★); Newest follows the latest one.', disabled: !inCut },
+      h('option', { value: '', selected: !playing }, 'Newest'),
+      ...res.map((x, k) => { const cam = cameraOf(x); return h('option', { value: x.id, selected: playing === x.id, title: cam ? CAMERA_SOURCE_LABELS[cam] : '' }, `${win?.id === x.id ? '★ ' : ''}${cam ? CAMERA_SOURCE_GLYPHS[cam] + ' ' : ''}Take ${res.length - k} · ${(x.source.workflow || '').split(' ·')[0]}`); }),
       ...renders(s).map(x => h('option', { value: x.id, selected: c?.assetId === x.id }, `Blockout v${x.version ?? 1}`)));
-    version.onchange = () => void writeCut(m => { const k = m.get(s.id); if (k) { k.assetId = version.value || null; k.in = 0; k.out = null; } }, 'Choose version');
+    version.onchange = () => {
+      const v = version.value;
+      if (renders(s).some(x => x.id === v)) { void writeCut(m => { const k = m.get(s.id); if (k) { k.assetId = v; k.in = 0; k.out = null; } }, 'Choose version'); return; }
+      const { redo, undo } = winnerOps(P(), s, v || null);
+      void ctx.runEntry({ label: v ? 'Choose winning take' : 'Follow the newest take', redo, undo });
+    };
     const dur = a?.duration || 0;
     const trim = (which: 'in' | 'out') => {
       const input = h('input', { class: 'field mono', type: 'number', min: 0, max: dur, step: 1 / 24, value: which === 'in' ? (c?.in || 0).toFixed(2) : (c?.out ?? dur).toFixed(2), disabled: !inCut || !a, 'aria-label': `${which === 'in' ? 'In' : 'Out'} point of shot ${i + 1}` });
@@ -375,7 +388,7 @@ export function createSequence(ctx: SequenceCtx) {
     if (!main || !screen || ctx.rowTemplate) return;
     if (screen.getBoundingClientRect().top < main.getBoundingClientRect().top - 8) main.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
-  function watchExport(a: Asset) { compareOff(); stopSeq(); selected = ''; pinned = a; abSeg.replaceChildren(); abSeg.hidden = true; setCaption(`Export v${a.version ?? 1} · ${a.source.clips?.length ?? 0} clips · ${sec(a.duration)}`); show(a); void video.play().catch(() => {}); drawBoard(); }
+  function watchExport(a: Asset) { compareOff(); stopSeq(); selected = ''; pinned = a; abSeg.replaceChildren(); abSeg.hidden = true; takesBtn.hidden = true; setCaption(`Export v${a.version ?? 1} · ${a.source.clips?.length ?? 0} clips · ${sec(a.duration)}`); show(a); void video.play().catch(() => {}); drawBoard(); }
   let shownId = '';
   // Returns true when a different video was loaded (so callers only restart playback then).
   function show(a: Asset | null, from = 0, msg = '', force = true) {
@@ -390,8 +403,9 @@ export function createSequence(ctx: SequenceCtx) {
     const p = P(), s = p.shots.find(x => x.id === selected);
     if (seq || pinned) return;
     abSeg.hidden = !s;
+    takesBtn.hidden = !s || !ctx.openTakes || (!results(s).length && !s.references.some(r => r.role === 'frame'));
     if (!s) { compareOff(); abSeg.replaceChildren(); setCaption(''); show(null, 0, 'Pick a shot to watch it, or play the whole cut.'); return; }
-    const generated = results(s)[0], b = blockout(s);
+    const generated = winner(s) || results(s)[0], b = blockout(s);
     if (view !== 'blockout' && !generated && b) view = 'blockout';
     if (view === 'overlay' && !b) view = generated ? 'generated' : 'blockout';
     const TITLES = { blockout: 'The blockout this shot was made from', generated: 'The version in the cut', compare: 'Blockout, start still and every generated version, split by draggable seams', overlay: 'Boxes around what the shot camera sees, linked to each cast image and its words in the prompt; the generated frame fades in under them' };
@@ -433,7 +447,7 @@ export function createSequence(ctx: SequenceCtx) {
   playSeqBtn.onclick = () => {
     if (seq) { stopSeq(); drawViewer(); return; }
     const list = cutList(); if (!list.length) { toast('Nothing in the cut has a blockout yet', true); return; }
-    pinned = null; abSeg.hidden = true; seq = { list, i: 0 }; playSeqBtn.textContent = '❚❚ Stop'; playAt(0);
+    pinned = null; abSeg.hidden = true; takesBtn.hidden = true; seq = { list, i: 0 }; playSeqBtn.textContent = '❚❚ Stop'; playAt(0);
   };
   video.ontimeupdate = () => { if (!seq) return; const x = seq.list[seq.i]; if (x && video.currentTime >= (x.c.out ?? x.a.duration ?? Infinity) - 0.03) playAt(seq.i + 1); };
   video.onended = () => { if (seq) playAt(seq.i + 1); };

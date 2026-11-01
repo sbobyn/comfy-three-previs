@@ -13,6 +13,7 @@ Block out a scene in 3D in your browser, give every character and prop a consist
 - **3D blockout editor** — place, name, group and animate simple objects; keyframed camera moves per shot.
 - **Cast Cards** — a description and reference images for every character, vehicle and prop. Generate images with AI, including design sheets (turnarounds and expressions), and pick a primary look.
 - **Auto-prompts** — each shot prompt is written from the scene, with every object's words colour-linked to the object in the viewport.
+- **Prompt inspector** — see the exact prompt each still and video model receives, section by section with where every part comes from (cast, shot description, style, camera rules, model-specific additions), what was left out to fit, and override, lock or leave out any section per shot. Versions of the final prompt and every take's prompt can be diffed. Model settings (seed, clip length and the like, from each model's registry entry) are saved on the shot with their estimate.
 - **Storyboard stills** — image-to-image from the rendered blockout, so composition stays locked to your camera.
 - **AI video on Comfy Cloud** — LTX 2.5 from your key frames, Seedance 2.5 and Kling O1 edits of the blockout clip, and Wan VACE on your own ComfyUI, with a model-input card showing exactly what each model receives. See [What models work today](#what-models-work-today).
 - **Live camera** — keyboard, gamepad "drone" flying, or an iPhone as a handheld camera over local HTTPS.
@@ -93,6 +94,8 @@ Then ask Claude to build a scene. It can create projects, edit objects and Cast 
 
 To bring a shot in from Blender (camera, tagged objects and rendered frames as the shot's blockout), Claude uses `previs_director_blender_helper` and `previs_director_import_blender`; see [Import a Blender shot](docs/blender-import.md).
 
+Claude reads and edits the same prompt sections and model settings as the workspace: `previs_director_prompt_sections` returns the exact final prompt by section, `previs_director_set_prompt_section` overrides, locks or resets one section, `previs_director_prompt_history` diffs versions and takes, and `previs_director_model_settings` reads or saves the shot's model and parameters.
+
 Claude sees the director tools (`previs_director_*`) and the asset library tools (`previs_library_list`, `_save`, `_place`, `_import`, `_export`), so "put @red-racecar at the start line" places a saved car in the current project. The older engine, Blender and raw-workflow tools (`previs_render_animation`, `previs_submit_passthrough` and the like) are listed only when the MCP server runs with `PREVIS_MCP_LEGACY=1`; their Blender, transfer, raw Comfy and handoff routes also need the app started with `PREVIS_LEGACY_ROUTES=1`.
 
 ## Phone camera
@@ -127,7 +130,7 @@ When a starter's blocking has changed since its stills and videos were made, it 
 
 Save any object to reuse it in other projects: select it and choose **Save to library** under Appearance (or ask Claude, `previs_library_save`). The object comes with everything grouped under it, its description, style notes, primary cast image and design sheets. The library lives in `PREVIS_DATA_DIR/library/`, outside any project, so archiving a project keeps it. In another project, open **Library → Shared assets** and choose **Place**, or tell Claude "put @red-racecar at the start line". A placed object answers to its @handle; a second copy becomes `@red-racecar-2`. Saving an object again makes a new version.
 
-To share an asset, **Export** writes one `<handle>.previs-asset.zip`. Drop it on the home page's **Import…** (it goes to the library, not a new project), use **Import asset…** in the Library dialog, or have Claude run `previs_library_import` with its path. Claude can also take one object out of a colleague's `.previs.zip` project export, or out of a Blender export (the folder `previs_export.py` writes) as a sized proxy with no images yet (the folder or a zip of it, read by the same importer as **Import Blender shot…**). Bundles hold only `asset.json` and `refs/` images (PNG, JPEG, WebP up to 10 MB each, 64 MB per bundle, 50 objects per asset). They contain no local paths, job ids or keys, and imports refuse anything else.
+To share an asset, **Export** writes one `<handle>.previs-asset.zip`. Drop it on the home page's **Import…** (it goes to the library, not a new project), use **Import asset…** in the Library dialog, or have Claude run `previs_library_import` with its path. Claude can also take one object out of a colleague's `.previs.zip` project export, or out of a Blender export (the folder `previs_export.py` writes) with its optional viewport mesh and no images yet (the folder or a zip of it, read by the same importer as **Import Blender shot…**). Bundles hold `asset.json` and `refs/` images (PNG, JPEG, WebP up to 10 MB each) plus optional validated GLB blockout meshes (2 MB/20,000 triangles each; 32 MB/100,000 triangles total). A bundle holds at most 64 MB and 50 objects. They contain no local paths, job ids or keys, and imports refuse anything else.
 
 ## What models work today
 

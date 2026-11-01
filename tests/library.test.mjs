@@ -268,7 +268,7 @@ test('HTTP routes, /library-refs and the previs_library_* MCP tools: "put @red-r
       const source = lap.scene.entities.find(e => e.name === 'Comfy car');
       const saved = await call('previs_library_save', { projectId: lap.id, object: '@comfy-car', tags: ['car', 'hero'] });
       assert.equal(saved.error, false, saved.out);
-      assert.match(saved.out.text, /^Saved @comfy-car v1 with 1 look and a \d+-view sheet$/);
+      assert.match(saved.out.text, /^Saved @comfy-car v1 with 1 mesh, 1 look and a \d+-view sheet$/);
       const listed = await call('previs_library_list', { query: 'hero' });
       assert.deepEqual(listed.out.assets.map(a => a.handle), ['comfy-car']);
       assert.equal(listed.out.assets[0].hasSheet, true);
@@ -289,6 +289,7 @@ test('HTTP routes, /library-refs and the previs_library_* MCP tools: "put @red-r
       assert.equal(redone.status, 200); assert.ok(redone.data.project.scene.entities.find(e => e.id === viaHttp.data.root).look, 'undo then redo keeps its image');
       const { data: got } = await post('/api/director/get', { projectId: night.id });
       const car = got.project.scene.entities.find(e => e.id === placed.out.root);
+      assert.equal(car.model, source.model); assert.equal(car.model, 'race-car');
       assert.equal(car.notes, source.notes); assert.equal(car.sheets.length, source.sheets.length); assert.ok(car.look);
       assert.ok(got.project.shots[0].cast.include.includes(car.id));
       assert.match(got.prompts[got.project.shots[0].id], /Comfy car/);

@@ -4,6 +4,7 @@
 // scripts/blender/build-test-scene.py (12 frames, 640×360, AUTO fit); vertical-fit.json is the same scene with a VERTICAL
 // sensor fit and a 50 mm lens. The landmark pixels in their camera.checks were projected by Blender itself.
 import test from 'node:test';
+import { createServer } from 'node:net';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { cp, mkdtemp as mkdtempRaw, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
@@ -146,17 +147,19 @@ test('rejections: each a clear message', async () => {
 });
 
 // ---------- 3, 4, 6, 7. Server round trip ----------
-async function startServer(port) {
+async function startServer() {
+  const probe = createServer(); probe.listen(0, '127.0.0.1'); await once(probe, 'listening');
+  const port = probe.address().port; await new Promise(r => probe.close(r));
   const dir = await mkdtemp(join(tmpdir(), 'previs-blender-import-'));
   const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_HEADLESS: '', PREVIS_BATCH_FAKE: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
   await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   const base = `http://127.0.0.1:${port}`;
   const call = async (path, body, headers = { 'Content-Type': 'application/json' }) => { const r = await fetch(base + path, body === undefined ? {} : { method: 'POST', headers, body: Buffer.isBuffer(body) ? body : JSON.stringify(body) }); return { status: r.status, json: await r.json() }; };
-  return { dir, call, stop: async () => { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; await rm(dir, { recursive: true, force: true }); } };
+  return { dir, base, call, stop: async () => { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; await rm(dir, { recursive: true, force: true }); } };
 }
 
 test('server round trip: import, downstream consumers, refresh, stale hand-over and the Blender still guide', { skip: !mediaAvailable && 'needs ffmpeg and ffprobe', timeout: 120000 }, async () => {
-  const srv = await startServer(15296), { call } = srv;
+  const srv = await startServer(), { call } = srv;
   try {
     // A bad export into an existing project changes nothing (validation precedes the edit).
     const made = (await call('/api/director/projects', { title: 'Lap', template: 'empty' })).json.project;
@@ -239,8 +242,8 @@ test('server round trip: import, downstream consumers, refresh, stale hand-over 
 });
 
 test('MCP: previs_director_blender_helper and previs_director_import_blender against a live server', { skip: !mediaAvailable && 'needs ffmpeg and ffprobe', timeout: 120000 }, async () => {
-  const srv = await startServer(15297);
-  const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_MCP_LEGACY: '', PREVIS_URL: 'http://127.0.0.1:15297' }, stdio: ['pipe', 'pipe', 'inherit'] });
+  const srv = await startServer();
+  const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_MCP_LEGACY: '', PREVIS_URL: srv.base }, stdio: ['pipe', 'pipe', 'inherit'] });
   const pending = new Map(); let n = 0, buffer = '';
   agent.stdout.on('data', d => { buffer += d; let i; while ((i = buffer.indexOf('\n')) >= 0) { const m = JSON.parse(buffer.slice(0, i)); buffer = buffer.slice(i + 1); pending.get(m.id)?.(m); } });
   const rpc = (method, params) => new Promise(r => { const id = ++n; pending.set(id, r); agent.stdin.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n'); });

@@ -1,7 +1,7 @@
 import type { DirectorProject, Shot, Vec3, Entity } from './director.mjs';
 export type Projector = { p: Vec3; look: Vec3; mm: number; f: Vec3; r: Vec3; u: Vec3; tanV: number; tanH: number; aspect: number; pitch: number; project(q: Vec3): { x: number; y: number; z: number } };
 export type LayoutItem = { id: string; name: string; kind: Entity['kind']; shape: string; position: Vec3; size: Vec3; box: [number, number, number, number]; x: number; y: number; depth: number; coverage: number; inFrame: number; cropped: { left: boolean; right: boolean; top: boolean; bottom: boolean }; heading: number | null; view: number | null; hiddenBy?: { id: string; name: string; share: number } };
-export type GuideMatch = { score: number; method: string; rough?: boolean; orientation?: number; edges?: number; light?: number; raw?: number; camera?: number | null; layout?: number | null; headings?: number | null; why?: string };
+export type GuideMatch = { score: number; method: string; rough?: boolean; orientation?: number; edges?: number; light?: number; raw?: number; camera?: number | null; layout?: number | null; headings?: number | null; why?: string; guideSha?: string; frame?: number };
 export function shotProjector(shot: Shot, entities: Entity[], t?: number, aspect?: number): Projector;
 export function frameLayout(project: DirectorProject, shot: Shot, t?: number, o?: { aspect?: number }): { camera: Projector; items: LayoutItem[] };
 export function headingWords(it: LayoutItem): string | null;
@@ -18,6 +18,8 @@ export const STILL_MAX_REFS: Record<string, number>;
 export function stillReferences(project: DirectorProject, shot: Shot, t: number, cap: number): { looks: import('./director.mjs').VideoRef[]; refIds: string[]; prevImage: number | null };
 export function momentLine(shot: Pick<Shot, 'duration'> | null | undefined, t: number): string;
 export function stillPrompt(o: { project: DirectorProject; shot: Shot; t?: number; text?: string; presetId?: string; looks?: { label: string }[]; prevImage?: number | null; frame?: { text: string } | null; max?: number; markers?: boolean }): string;
+export type StillPromptOptions = { project: DirectorProject; shot: Shot; t?: number; text?: string; presetId?: string; looks?: { label: string }[]; prevImage?: number | null; frame?: { text: string } | null; max?: number; markers?: boolean };
+export function stillPromptParts(o: StillPromptOptions): { key: 'guide' | 'frame' | 'moment' | 'body' | 'refs' | 'rules'; text: string; full?: string }[];
 export function guideMatchScore(a: ArrayLike<number>, b: ArrayLike<number>, w: number, h: number): { score: number; orientation: number; edges: number; light: number; raw: number };
 export const MATCH_FLOOR: number;
 export const MATCH_CEIL: number;
