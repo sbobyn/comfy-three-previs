@@ -136,7 +136,8 @@ function horizonWords(cam, indoor) {
 }
 function momentWords(shot, t) {
   const move = shot.camera.move, name = move === 'static' ? 'locked-off shot' : move === 'custom' ? 'hand-operated camera move' : `${MOVES[move].toLowerCase()} move`;
-  const when = t <= 0.01 ? 'First frame' : Math.abs(t - shot.duration) < 0.02 ? 'Last frame' : `Frame ${Math.round(t * 10) / 10}s into`;
+  // The last encoded blockout frame (t = (n − 1) / 24, shared/keyframes.mjs) is the last frame too, not only t = duration.
+  const when = t <= 0.01 ? 'First frame' : t >= shot.duration - 1 / 24 - 1e-6 ? 'Last frame' : `Frame ${Math.round(t * 10) / 10}s into`;
   return `${when} of a ${name}`;
 }
 /** The shot's subject at t: the camera target when it is in frame, else the largest non-environment object. */

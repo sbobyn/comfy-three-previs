@@ -14,6 +14,7 @@ import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
 import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
 import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, keyStills, stillStale, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
 import { cameraSourceOf } from '../../shared/camera-source.mjs';
+import { applyKeyframeOp, keyframeState } from '../../shared/keyframes.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
 import { loadStarters, starterCard, instantiateStarter, attachStarterMedia } from './starters.mjs';
 import { existsSync } from 'node:fs';
@@ -257,6 +258,7 @@ export function applyOps(p, ops) {
         if (op.patch?.title !== undefined) p.title = String(op.patch.title).slice(0, 120) || p.title;
         results.push({ op: op.op }); break;
       }
+      case 'set_middle_keys': case 'use_as_key_still': results.push(applyKeyframeOp(p, op, { resolveShot, newId: randomUUID, now })); break; // shared/keyframes.mjs
       default: fail(`Unknown op ${op?.op}`);
     }
   }
@@ -728,8 +730,12 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
           const old = [startFrame && stillStale(p, s, startFrame) && 'start', input.lastFrame && endFrame && stillStale(p, s, endFrame) && 'end'].filter(Boolean);
           if (old.length) throw Object.assign(Error(`The ${old.join(' and ')} still${old.length > 1 ? 's were' : ' was'} made before the shot’s camera, timing or scene changed. Make ${old.length > 1 ? 'them' : 'it'} again in the Storyboard (or previs_director_generate_still); nothing was sent.`), { status: 409, apiCode: 'stale-still' });
         }
-        // keyFrames: [start, end?] for first/last-frame workflows. `stills`: blockout-driven models get the start/end stills first, as the look.
-        const picks = input.firstFrame ? [startFrame && { ref: startFrame, entityId: null, role: 'frame', label: 'start key frame' }, input.lastFrame && endFrame && { ref: endFrame, entityId: null, role: 'frame', label: 'end key frame' }].filter(Boolean) : videoReferences(p, s, max, { stills: input.stills === true });
+        // Timed in-between key frames (shared/keyframes.mjs: models that take them, e.g. Kling 4.0): every pinned frame needs a current still.
+        const middle = input.firstFrame && input.lastFrame && Number(input.middleFrames) > 0 ? keyframeState(p, s).middle.slice(0, Math.min(8, Math.floor(Number(input.middleFrames)))) : [];
+        const notReady = middle.filter(m => m.state !== 'ready');
+        if (notReady.length) throw Object.assign(Error(`In-between key frame${notReady.length > 1 ? 's' : ''} ${notReady.map(m => m.index).join(', ')} ${notReady.every(m => m.state === 'stale') ? `${notReady.length > 1 ? 'were' : 'was'} made before the shot’s camera, timing or scene changed` : notReady.some(m => m.outOfRange) ? 'no longer fall inside the shot' : `${notReady.length > 1 ? 'have' : 'has'} no still`}. Make ${notReady.length > 1 ? 'them' : 'it'} in the Storyboard (or previs_director_keyframe), or unpin ${notReady.length > 1 ? 'them' : 'it'}; nothing was sent.`), { status: 409, apiCode: notReady.every(m => m.state === 'stale') ? 'stale-still' : 'missing-still' });
+        // keyFrames: [start, end?, …middle] for first/last-frame workflows. `stills`: blockout-driven models get the start/end stills first, as the look.
+        const picks = input.firstFrame ? [startFrame && { ref: startFrame, entityId: null, role: 'frame', label: 'start key frame' }, input.lastFrame && endFrame && { ref: endFrame, entityId: null, role: 'frame', label: 'end key frame' }, ...middle.map((m, k) => ({ ref: m.ref, entityId: null, role: 'frame', label: `middle key frame ${k + 1}`, frame: m.index }))].filter(Boolean) : videoReferences(p, s, max, { stills: input.stills === true });
         for (const x of picks) {
           const file = await director.refFile(p.id, x.ref.file);
           const bytes = await readFile(file), sha256 = createHash('sha256').update(bytes).digest('hex');
@@ -745,7 +751,7 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
               q.renders.push(render);
             });
           }
-          references.push({ renderId: render.id, referenceId: x.ref.id, entityId: x.entityId, role: x.role, label: x.label, name: x.ref.name, file: x.ref.file });
+          references.push({ renderId: render.id, referenceId: x.ref.id, entityId: x.entityId, role: x.role, label: x.label, name: x.ref.name, file: x.ref.file, ...(x.frame !== undefined ? { frame: x.frame } : {}) });
         }
         return { references, revision: previs.get().revision };
       }

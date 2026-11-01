@@ -55,7 +55,7 @@ export function validateWorkflowDefinition(input) {
     if (targets.has(key)) fail(`Duplicate mapping target ${key}`);
     targets.add(key);
   }
-  if (Object.keys(result.inputs).some(name => !semantics.includes(name) && !/^referenceImage[1-9]$/.test(name))) fail('Unknown semantic input mapping');
+  if (Object.keys(result.inputs).some(name => !semantics.includes(name) && !/^(referenceImage|middleFrame)[1-9]$/.test(name))) fail('Unknown semantic input mapping');
   if (result.task === 'transform-video' && !result.inputs.sourceVideo) fail('transform-video requires sourceVideo');
   if (result.task === 'control-video' && (!result.inputs.controlVideo || typeof result.inputs.controlVideo.pass !== 'string' || !result.inputs.controlVideo.pass)) fail('control-video requires an explicit controlVideo pass');
   if (result.task === 'first-frame' && !result.inputs.firstFrame) fail('first-frame requires firstFrame');

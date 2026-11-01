@@ -17,6 +17,7 @@ import { uploadCacheFor } from './upload-cache.mjs';
 import { validateGraph, workflowCost, validateApproval, hashValue, assertNoSecrets } from './workflows.mjs';
 import { followsGuide, describeFrame } from '../../shared/still-match.mjs';
 import { shotSignature } from '../../shared/director.mjs';
+import { resolveFrame, FPS } from '../../shared/keyframes.mjs';
 import { stillGuideMatch, gradeStillPaid, GRADER_RESERVE_USD } from './still-match.mjs';
 import { GRADER_PRICES, BILLED_ON_MODERATION, DEFAULT_MARGIN_PCT, referenceUsd } from '../../shared/tiers.mjs';
 import { openBudget, budgetDir, followJob, quoteEstimate } from './budget.mjs';
@@ -290,7 +291,7 @@ export async function openRefgen(root, director, options = {}) {
         const existing = refs.find(r => r.generated?.requestId === job.id && r.generated?.outputKey === output.key);
         const bytes = existing ? null : await downloads(() => adapter.view(output.location));
         const guideMatch = bytes && job.target === 'shot' && job.guide ? await matchGuide(job, adapter, bytes, output.key, tally) : null;
-        const r = existing ? { referenceId: existing.id, project: current } : await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, outputKey: output.key, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId, ...(job.signature ? { signature: job.signature } : {}), ...(guideMatch ? { guideMatch } : {}) } });
+        const r = existing ? { referenceId: existing.id, project: current } : await director.reference(job.projectId, { ...(job.target === 'shot' ? { shotId: job.shotId, role: 'frame', note: typeof job.frameAt === 'number' ? `key frame @${job.frameAt}s` : job.frameAt ? `key frame ${job.frameAt}` : '' } : { scope: 'object', entityId: job.entityId, ...(job.sheet ? { note: `sheet:${job.sheet.sheetId}:${job.sheet.slotId}` } : {}) }), name: job.sheet?.label ? `${job.entityName} · ${job.sheet.label}` : `${job.entityName} · ${job.model.split(' (')[0]} · ${job.seed}`, data: bytes.toString('base64'), generated: { requestId: job.id, outputKey: output.key, presetId: job.presetId, model: job.model, prompt: job.prompt, seed: job.seed, backend: job.backend.id, promptId: job.promptId, ...(job.signature ? { signature: job.signature } : {}), ...(job.frame ? { frame: job.frame } : {}), ...(job.guide?.sha256 ? { guideSha: job.guide.sha256 } : {}), ...(guideMatch ? { guideMatch } : {}) } });
         if (!referenceIds.includes(r.referenceId)) referenceIds.push(r.referenceId);
         const ref = [...(r.project?.scene?.references || []), ...(r.project?.shots || []).flatMap(x => x.references || [])].find(x => x.id === r.referenceId);
         const match = ref?.generated?.guideMatch; // graded scores only (the rough local one is not a match verdict)
@@ -312,10 +313,13 @@ export async function openRefgen(root, director, options = {}) {
   async function matchGuide(job, adapter, bytes, key, tally = { calls: 0 }) {
     const guideBytes = await readFile(join(dirFor(job.projectId), job.guide.file)).catch(() => null);
     if (!guideBytes) return null;
+    // What the score was judged against: this guide image (and its blockout frame, when the request named one).
+    const against = { guideSha: job.guide.sha256, ...(job.frame ? { frame: job.frame.index } : {}) };
     if (graderOn() && job.backend.kind === 'cloud') {
       const project = await director.get(job.projectId).catch(() => null), shot = project?.shots.find(s => s.id === job.shotId);
-      const t = !shot ? 0 : job.frameAt === 'end' ? shot.duration : typeof job.frameAt === 'number' ? job.frameAt : 0;
-      const plan = shot ? describeFrame(project, shot, t).text : '';
+      // The exact frame the guide shows (job.frame), and its camera words from when the still was requested.
+      const t = job.frame ? job.frame.t : !shot ? 0 : job.frameAt === 'end' ? shot.duration : typeof job.frameAt === 'number' ? job.frameAt : 0;
+      const plan = job.gradePlan ?? (shot ? describeFrame(project, shot, t).text : '');
       const requestId = `${job.id}-${hashValue(key).slice(0, 8)}`;
       // The still's own reservation already holds its grades (its quote counted them, see quoteFor), and the still settles
       // for `tally.calls` of them. A job without that allowance (an older receipt) reserves the grade separately instead,
@@ -326,11 +330,11 @@ export async function openRefgen(root, director, options = {}) {
         if (prepaid) tally.calls++; // a call that returns nothing may still be billed
         const graded = await gradeStillPaid({ adapter, upload: (b, o) => uploadCache.upload(adapter, b, o), guideBytes, stillBytes: bytes, requestId, projectId: job.projectId, plan });
         if (!prepaid) await (graded ? budget.settle(`${requestId}-grade`) : budget.hold(`${requestId}-grade`, 'Grade not returned; a charge may still arrive')).catch(() => {});
-        if (graded) return graded;
+        if (graded) return { ...graded, ...against };
       }
     }
     const local = await stillGuideMatch(guideBytes, bytes);
-    return local ? { ...local, rough: true } : null;
+    return local ? { ...local, rough: true, ...against } : null;
   }
 
   async function resolve(input) {
@@ -409,9 +413,14 @@ export async function openRefgen(root, director, options = {}) {
       if (r.guide) { await mkdir(dirFor(input.projectId), { recursive: true }); const file = `${id}-guide.png`; await writeFile(join(dirFor(input.projectId), file), r.guide, { mode: 0o600 }); guide = { file, sha256: r.guideSha }; }
       const refs = [];
       for (const [k, b] of refBytes.entries()) { const file = `${id}-ref${k + 1}.png`; await mkdir(dirFor(input.projectId), { recursive: true }); await writeFile(join(dirFor(input.projectId), file), b, { mode: 0o600 }); refs.push({ file, referenceId: refIds[k], sha256: createHash('sha256').update(b).digest('hex') }); }
-      const frameAt = !r.shot ? null : ['start', 'end'].includes(input.frameAt) ? input.frameAt : Number.isFinite(Number(input.frameAt)) && input.frameAt !== null && input.frameAt !== '' ? Math.round(Math.max(0, Number(input.frameAt)) * 100) / 100 : null;
+      // An exact blockout frame (shared/keyframes.mjs): `frame` is its number; the guide must be that frame. Older callers send frameAt only.
+      const exact = r.shot && input.frame !== undefined && input.frame !== null ? resolveFrame(r.project, r.shot, { frame: input.frame }) : null;
+      const frameAt = !r.shot ? null : exact ? exact.frameAt : ['start', 'end'].includes(input.frameAt) ? input.frameAt : Number.isFinite(Number(input.frameAt)) && input.frameAt !== null && input.frameAt !== '' ? Math.round(Math.max(0, Number(input.frameAt)) * 100) / 100 : null;
+      const frame = exact ? { index: exact.index, fps: FPS, count: exact.count, t: exact.t } : null;
+      // The grader judges the still against the guide and this frame's camera words, as they were when it was requested.
+      const gradePlan = r.shot && r.guide ? describeFrame(r.project, r.shot, frame ? frame.t : frameAt === 'end' ? r.shot.duration : typeof frameAt === 'number' ? frameAt : 0).text : null;
       // A key frame records the blocking it was made from (the blockout signature), so a later change marks it stale.
-      const target = r.shot ? { target: 'shot', shotId: r.shot.id, ...(frameAt !== null ? { frameAt } : {}), signature: shotSignature(r.project, r.shot), shotNumber: r.project.shots.indexOf(r.shot) + 1, entityName: `Shot ${String(r.project.shots.indexOf(r.shot) + 1).padStart(2, '0')} ${r.shot.title}` } : { target: 'object', entityId: r.entity.id, entityName: r.entity.name };
+      const target = r.shot ? { target: 'shot', shotId: r.shot.id, ...(frameAt !== null ? { frameAt } : {}), ...(frame ? { frame } : {}), ...(gradePlan ? { gradePlan } : {}), signature: shotSignature(r.project, r.shot), shotNumber: r.project.shots.indexOf(r.shot) + 1, entityName: `Shot ${String(r.project.shots.indexOf(r.shot) + 1).padStart(2, '0')} ${r.shot.title}` } : { target: 'object', entityId: r.entity.id, entityName: r.entity.name };
       // Design-sheet views name their image after the view and note which sheet slot it fills.
       const sheet = !r.shot && input.sheet && typeof input.sheet === 'object' ? { sheetId: String(input.sheet.sheetId || '').slice(0, 48), slotId: String(input.sheet.slotId || '').slice(0, 48), label: String(input.sheet.label || '').slice(0, 60) } : null;
       return persist({ id, projectId: input.projectId, ...target, ...(sheet ? { sheet } : {}), ...r.settings, guide, refs, backend: r.adapter.snapshot, graph: r.graph, graphHash: hashValue(r.graph), quote: r.quote, partnerNodes: r.partnerNodes, fingerprint: r.fingerprint, status: 'quoted', message: 'Quoted. Nothing was sent.', createdAt: now() });
