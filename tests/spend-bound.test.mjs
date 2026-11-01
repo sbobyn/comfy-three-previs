@@ -60,7 +60,7 @@ test('contract: only director-spend.ts submits image requests; video submits onl
 test('storyboard still: Generate prepares and shows the quote; nothing is submitted until the card is approved within its limit', async () => {
   const director = await read('director.ts');
   const { sent, api } = interceptor(), reviewing = new Map(), cards = [];
-  const ctx = { h, api, reviewing, projectId: 'p', project: {}, t: 0, s: { id: 'shot', duration: 5 }, f: { presetId: 'gpt-image-25', count: 1, seed: 7 }, words: { text: '' }, looks: [], refIds: [], prev: null, blender: false,
+  const ctx = { announce() {}, announceQuote() {}, refocus() {}, h, api, reviewing, projectId: 'p', project: {}, t: 0, s: { id: 'shot', duration: 5 }, f: { presetId: 'gpt-image-25', count: 1, seed: 7 }, words: { text: '' }, looks: [], refIds: [], prev: null, blender: false,
     guide: { data: Promise.resolve('data:image/png;base64,R1VJREU=') }, stillPrompt: () => 'full prompt', prompt: { value: 'A still' }, moment: { value: '' },
     go: {}, status: h('div'), review: job => cards.push(job) };
   runInNewContext(compile(between(director, "  go.onclick = async () => {\n    go.disabled = true; status.className = 'status-line'; status.textContent = 'Preparing the quote", "\n  const inputs = h('div', { class: 'sb-inputs' }")), ctx);
@@ -70,7 +70,7 @@ test('storyboard still: Generate prepares and shows the quote; nothing is submit
 
   // The card: the exact prepared quote, an allowance the artist sets, explicit approval; sent once.
   let closed = null;
-  const qctx = { h, api, projectId: 'p', refgen: { paidExecutionEnabled: true }, loadRefgen: async () => {}, pollJobs() {}, ...spend };
+  const qctx = { announce() {}, announceQuote() {}, refocus() {}, h, api, projectId: 'p', refgen: { paidExecutionEnabled: true }, loadRefgen: async () => {}, pollJobs() {}, ...spend };
   runInNewContext(compile(between(director, 'function quoteCard(', '\nfunction jobRow(')), qctx);
   const card = qctx.quoteCard(quoted('prep', 0.42), s => { closed = s; }), nodes = walk(card);
   assert.match(text(card), /≈ \$0\.420 estimate \(list \$0\.076/, 'the card shows the prepared quote, not the list price');
@@ -92,7 +92,7 @@ test('storyboard still: Generate prepares and shows the quote; nothing is submit
 test('object image: Review quote prepares and shows the card; nothing is submitted', async () => {
   const director = await read('director.ts');
   const { sent, api } = interceptor(), reviewing = new Map(), cards = [];
-  const ctx = { h, api, reviewing, projectId: 'p', e: { id: 'ent' }, form: { presetId: 'flux-3', prompt: 'A car', aspect: '4:3', count: 2, seed: 3, checkpoint: '' }, quoteBtn: {}, quoteStatus: h('div'), review: job => cards.push(job) };
+  const ctx = { announce() {}, announceQuote() {}, refocus() {}, h, api, reviewing, projectId: 'p', e: { id: 'ent' }, form: { presetId: 'flux-3', prompt: 'A car', aspect: '4:3', count: 2, seed: 3, checkpoint: '' }, quoteBtn: {}, quoteStatus: h('div'), review: job => cards.push(job) };
   runInNewContext(compile(between(director, "  quoteBtn.onclick = async () => {\n    quoteBtn.disabled = true; quoteStatus.className = 'status-line'; quoteStatus.textContent = 'Preparing the quote", '\n  const jobs = refgen.jobs.filter(j => j.entityId === e.id);')), ctx);
   await ctx.quoteBtn.onclick();
   assert.deepEqual(sent.map(x => x.path), ['director/refgen/prepare']); assert.equal(cards.length, 1); assert.ok(reviewing.has('entity:ent'));
@@ -103,7 +103,7 @@ test('cast images board: quoting shows the table and waits; the approved total b
   const sent = [], picked = new Set(['e1', 'e2', 'e3']), ents = [...picked].map(id => ({ id, name: id.toUpperCase(), kind: 'prop' }));
   const api = async (path, body) => { sent.push({ path, body: JSON.parse(JSON.stringify(body)) }); if (path === 'director/refgen/prepare') return { job: quoted(`j${sent.length}`, body.entityId === 'e3' ? null : 0.42) }; if (path === 'director/refgen/submit') return { job: { id: body.requestId, status: 'completed' } }; return { job: { status: 'completed' } }; };
   const batch = h('div');
-  const ctx = { h, api, batch, quoteBtn: {}, busy: false, plan: [], picked, views: {}, presetSel: { value: 'flux-3' }, countSel: { value: '1' }, P: () => ({ id: 'p', scene: { entities: ents } }), lookViews: () => ({ front: 'Front' }), lookPrompt: () => 'look', aspectFor: () => '4:3', lookSource: () => null,
+  const ctx = { announce() {}, announceQuote() {}, refocus() {}, h, api, batch, quoteBtn: {}, busy: false, plan: [], picked, views: {}, presetSel: { value: 'flux-3' }, countSel: { value: '1' }, P: () => ({ id: 'p', scene: { entities: ents } }), lookViews: () => ({ front: 'Front' }), lookPrompt: () => 'look', aspectFor: () => '4:3', lookSource: () => null,
     ctx: { reloadRefgen: async () => {}, refgen: () => ({ paidExecutionEnabled: true }) }, draw() {}, syncToolbar() {}, toast() {}, sleep: async () => {}, ...spend };
   runInNewContext(compile(between(looks, '  quoteBtn.onclick = async () => {', "\n  const dlg = h('dialog', { class: 'looks'")), ctx);
   await ctx.quoteBtn.onclick();
@@ -126,7 +126,7 @@ test('design sheet: views wait for an approved total; the runner submits only un
   const sheet = await read('director-sheet.ts');
   const { estimateBreakdown } = await import('../shared/tiers.mjs');
   let started = 0;
-  const ctx = { h, estimateBreakdown, money: n => `$${n.toFixed(3)}`, draw() {}, running: false, bound: null, asks: new Map(), ...spend };
+  const ctx = { announce() {}, announceQuote() {}, refocus() {}, h, estimateBreakdown, money: n => `$${n.toFixed(3)}`, draw() {}, running: false, bound: null, asks: new Map(), ...spend };
   runInNewContext(compile(between(sheet, 'function askApproval(', '// ---------- Actions ----------')), ctx);
   ctx.askApproval({ id: 'e' }, 4, 'flux-2-pro', 1, () => { started++; });
   const panel = ctx.approvalPanel({ id: 'e' }), nodes = walk(panel);
