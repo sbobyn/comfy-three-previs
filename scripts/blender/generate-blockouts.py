@@ -5,6 +5,7 @@ Run from the repository root with Node 22+ on PATH (terrain samples share the ap
 """
 import bpy
 import json
+import os
 import math
 import subprocess
 import struct
@@ -63,8 +64,10 @@ def gap(axis):
     return DECAL / min(1, world[axis])
 
 def xyz(p): return (p[0], -p[2], p[1])
+created = []  # mesh objects in creation order, for names that never depend on Blender's auto-numbering
 def finish(o, material):
     o.data.materials.append(material)
+    created.append(o)
     return o
 
 def box(p, s, material=BODY, bevel=0):
@@ -426,19 +429,42 @@ def canonical_indices(file):
     for mesh_data in doc['meshes']:
         for primitive in mesh_data['primitives']:
             primitive['indices'] = aliases[primitive['indices']]
+    # Keep only the accessors the meshes use, one buffer view each, packed in the order the meshes reference them, so
+    # the bytes never depend on which duplicates the exporter happened to share.
+    order = {}
+    for mesh_data in doc['meshes']:
+        for primitive in mesh_data['primitives']:
+            for key in [*primitive['attributes'].values(), primitive['indices']]: order.setdefault(key, len(order))
+    accessors, views, payload = [], [], bytearray()
+    for old in order:
+        acc = dict(doc['accessors'][old]); view = doc['bufferViews'][acc['bufferView']]
+        start = binary + view.get('byteOffset', 0)
+        views.append({k: v for k, v in {'buffer': 0, 'byteLength': view['byteLength'], 'byteOffset': len(payload), 'target': view.get('target')}.items() if v is not None})
+        payload += data[start:start+view['byteLength']]; payload += b'\0' * (-len(payload) % 4)
+        acc['bufferView'] = len(views) - 1; accessors.append(acc)
+    for mesh_data in doc['meshes']:
+        for primitive in mesh_data['primitives']:
+            primitive['attributes'] = {k: order[v] for k, v in primitive['attributes'].items()}
+            primitive['indices'] = order[primitive['indices']]
+    doc['accessors'], doc['bufferViews'], doc['buffers'] = accessors, views, [{'byteLength': len(payload)}]
     encoded = json.dumps(doc, separators=(',', ':')).encode()
     encoded += b' ' * (-len(encoded) % 4)
-    payload = data[binary:]
     file.write_bytes(struct.pack('<III', 0x46546c67, 2, 28+len(encoded)+len(payload)) +
                     struct.pack('<II', len(encoded), 0x4e4f534a) + encoded +
                     struct.pack('<II', len(payload), 0x004e4942) + payload)
 
-manifest=json.loads((OUT/'manifest.json').read_text()) if (OUT/'manifest.json').exists() else {}
+# Ids baked by the beret-parts library (scripts/blender/library-blockouts.mjs) are skipped here and keep their
+# manifest entries. PREVIS_BLOCKOUTS_ALL=1 rebuilds every builder in Blender instead (the old path, kept as a fallback).
+# `-- id ...` after the script rebuilds only those ids.
+LIBRARY = set() if os.environ.get('PREVIS_BLOCKOUTS_ALL') == '1' else set(json.loads((ROOT / 'scripts/blender/library-blockouts.json').read_text()))
 only=set(sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else set()
+old_manifest = json.loads((OUT / 'manifest.json').read_text()) if (OUT / 'manifest.json').exists() else {}
+manifest={k: old_manifest[k] for k in BUILDERS if k in old_manifest}
 for name,(shape,build) in BUILDERS.items():
-    if only and name not in only: continue
+    if name in LIBRARY or (only and name not in only): continue
     bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
     current = name
+    created.clear()
     build()
     objects=list(bpy.context.scene.objects)
     articulated = any(o.type == 'EMPTY' for o in objects)
@@ -448,6 +474,9 @@ for name,(shape,build) in BUILDERS.items():
         for o in objects:
             if o.type == 'MESH': o.select_set(True); bpy.context.view_layer.objects.active=o
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        # Name each part after the asset: Blender's auto-numbered names would make bytes depend on which builders ran.
+        assert len(created) == sum(o.type == 'MESH' for o in objects), (name, 'a mesh skipped finish()')
+        for i, o in enumerate(created): o.name = o.data.name = f'{name}.{i:03d}'
         bpy.context.view_layer.update()
         coords=[o.matrix_world @ v.co for o in objects if o.type == 'MESH' for v in o.data.vertices]
         lo=[min(v[i] for v in coords) for i in range(3)]; hi=[max(v[i] for v in coords) for i in range(3)]
@@ -465,7 +494,8 @@ for name,(shape,build) in BUILDERS.items():
         # Static models keep their canonical, joined geometry.
         bpy.ops.object.select_all(action='SELECT'); bpy.context.view_layer.objects.active=objects[0]
         bpy.ops.object.convert(target='MESH'); bpy.ops.object.join()
-        o=bpy.context.object; o.name=name
+        # Name the mesh too: Blender's auto-numbered datablock names would make bytes depend on which builders ran.
+        o=bpy.context.object; o.name=name; o.data.name=name
         bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
         if shape != 'terrain':
             coords=[v.co.copy() for v in o.data.vertices]
@@ -480,7 +510,7 @@ for name,(shape,build) in BUILDERS.items():
     bpy.ops.export_scene.gltf(filepath=str(file),export_format='GLB',use_selection=True,export_yup=True,export_animations=False,export_cameras=False,export_lights=False,export_texcoords=False,export_normals=True,export_materials='EXPORT')
     canonical_indices(file)
     manifest[name]={'shape':shape,'triangles':triangles,'bytes':file.stat().st_size}
-(OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+(OUT/'manifest.json').write_text(json.dumps({k: manifest[k] for k in BUILDERS if k in manifest},indent=2)+'\n')
 print('BLOCKOUTS',len(manifest),'assets',sum(x['bytes'] for x in manifest.values()),'bytes')
 # The gate: no two surfaces on one plane in any GLB or starter (shared/blockout-lint.mjs). Fails the rebuild loudly.
 lint = subprocess.run(['node', 'scripts/blender/lint-blockouts.mjs'], cwd=ROOT, capture_output=True, text=True)

@@ -2,10 +2,33 @@
 
 These authored, texture-free low-poly GLBs upgrade all 189 visible objects in the four
 starter scenes. Empty groups remain editor pivots. There are 32 reusable assets, about
-1.2 MB combined, each below 5,000 triangles (most below 1,500). No downloaded or generated
+1.3 MB combined, each below 5,000 triangles (most below 1,500). No downloaded or generated
 third-party art, paid generation, textures, skinning, animation clips or Blender runtime dependency.
 
-## Rebuild
+**25 of the 32 come from the [beret-parts](https://github.com/sbobyn/beret-parts) parametric library**
+(desk, light, basketball, race-car, pine, studio-camera, the court/track/floor surfaces, stands, panels, hoop parts,
+circle, lake, flag-stand). Each is a named preset of an editable family, baked in Node with no Blender.
+`scripts/blender/library-blockouts.json` lists them with family, preset, Previs shape and `minScale`. `minScale` is
+the smallest starter scale per axis; the bake sizes decal gaps for it, so the coplanar lint holds at every starter scale.
+People, animals and terrain (player, anchor, operator, fan, eagle, elk, terrain) stay on `generate-blockouts.py`,
+which skips the library ids. `PREVIS_BLOCKOUTS_ALL=1` rebuilds all 32 from the old Blender builders as a fallback.
+
+The animation pass lives in the library too. race-car's recipe has a `rig`, which makes the bake emit the `joint_body`,
+`joint_steerL/R` and `joint_wheelFL/FR/RL/RR` pivots that `shared/blockout-pose.mjs` drives. Its preset has spoked hubs, so
+wheel spin reads on camera. The rig names sides like the Blender rigs (-X is L), so the library's `wheel_fr` is
+`wheelFL`. The backboard preset uses the hoop family's clear glass: a see-through, alpha-blended `backboard-glass` pane in
+a dark frame.
+
+## Rebuild the library-built blockouts
+
+With a beret-parts checkout that has blockout `rig` support, car `spokes` and hoop `glass` (Node ≥ 23.6, `pnpm install`
+done there):
+
+```sh
+BERET_PARTS=/path/to/beret-parts node scripts/blender/library-blockouts.mjs   # bakes, updates manifest.json, runs the lint
+```
+
+## Rebuild the Blender-built blockouts
 
 From the repository root, with Blender and Node 22+ on PATH:
 
@@ -26,9 +49,10 @@ and overhang it by the same gap. Rules: [Blockout modelling rules](../../docs/bl
 
 The generator was verified with Blender 5.3.0 Alpha, build `5988184be881`.
 It writes `public/models/blockouts/*.glb` and their triangle/byte manifest. Triangle index
-ordering is canonicalised, but Blender can vary equivalent accessor sharing between rebuilds;
-byte-identical GLBs are not guaranteed. Geometry bounds, joints, triangle budgets and coplanar
-surfaces are checked by the tests and lint. Scripts resolve
+ordering is canonicalised, and each GLB is repacked with only the accessors its meshes use, in the order they use
+them, so Blender's varying accessor sharing never reaches the bytes. Every mesh is named after its asset (`anchor.012`),
+never Blender's auto-numbered names. Two full rebuilds, or a targeted one, are byte-identical. Geometry bounds, joints,
+triangle budgets and coplanar surfaces are checked by the tests and lint. Scripts resolve
 paths relative to the repository, so they contain no workstation-specific project paths.
 The assignment script modifies imported source projects, never the starter bundles directly.
 Use a private data directory with no running server, as for any starter export.
@@ -85,8 +109,8 @@ request manifests and gate logs remain in the ignored evidence directory.
 The starter leads now use small rigid-part hierarchies (`joint_*` glTF nodes), with no skinning or animation mixer.
 The Blender generator fits the neutral hierarchy once to its original proxy; posing never rescales it. Player,
 anchor and operator limbs bend at named pivots; eagle feathers overlap the wing beats; elk nod; race-car wheels
-rotate and steer independently of the body. The backboard is framed transparent arena glass so the fixed dunk
-camera can see the score. Glass does not cast an opaque shadow. All meshes remain under 5,000 triangles and the
+rotate and steer independently of the body (the library rig above). The backboard is framed transparent arena glass
+so the fixed dunk camera can see the score. Glass does not cast an opaque shadow. All meshes remain under 5,000 triangles and the
 library remains under 1.5 MB. A targeted rebuild is supported after Blender's `--`, for example `-- eagle player`.
 
 `shared/blockout-pose.mjs` validates and evaluates joint angles. `Entity.pose` and `PathKey.pose` store local XYZ
