@@ -135,6 +135,7 @@ Choose the versions, order and timing of the film.
 - Drag shot rows to reorder them.
 - Choose a version for each shot and trim its in/out times.
 - **In cut** includes or leaves out a shot. Compare blockout and generated video by dragging the seam or using the arrow keys.
+- **Compare takes** opens the shot's takes: every video it has made (Take 1 is the oldest), and its stills at each moment. Tick 2–4 to see them side by side, with the blockout as an optional reference lane. Videos play, pause, scrub and step frame by frame together (Space, ← →); a shorter take holds its last frame. Each take shows its model, settings and seed, cost, inputs and grades. Layout is graded only when the paid still grader ran; identity is not assessed; timing compares frame counts with the blockout. **Only differences** keeps just what differs. **Mark winner** makes a take the one the cut and film export play, and a newer take never replaces it. Choosing a take in the version menu does the same. No take is deleted. Through Claude: `previs_director_list_takes` and `previs_director_set_winner`.
 - Preview the sequence, then **Export film** to write an MP4 in shot order. Project export separately keeps the editable project and its media together.
 
 ![Cut board: order, version, trims and export](../public/guide/cut.webp)

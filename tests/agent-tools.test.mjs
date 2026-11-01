@@ -17,6 +17,7 @@ const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x2d, 
 const VIDEO = '7e0d0a11-0000-4000-8000-000000000001', STILL2 = '7e0d0a11-0000-4000-8000-000000000002';
 const LIBRARY_TOOLS = ['previs_library_list', 'previs_library_save', 'previs_library_place', 'previs_library_import', 'previs_library_export'];
 const BLENDER_TOOLS = ['previs_director_import_blender', 'previs_director_blender_helper'];
+const TAKE_TOOLS = ['previs_director_list_takes', 'previs_director_set_winner'];
 const NEW_TOOLS = ['previs_director_render_blockout', 'previs_director_generate_still', 'previs_director_batch_generate', 'previs_director_batch_status', 'previs_director_view_shot', 'previs_director_jobs_dashboard'];
 
 async function fixture() {
@@ -348,11 +349,11 @@ test('tools/list: the director and library tools by default; legacy engine, Blen
   await withAgent(fakePrevis(p), async ({ rpc }) => {
     const tools = (await rpc('tools/list', {})).result.tools; names = tools.map(t => t.name);
     const director = names.filter(n => n.startsWith('previs_director_')), library = names.filter(n => n.startsWith('previs_library_'));
-    assert.equal(director.length, 30, `${director.length} director tools: 28 plus the ${BLENDER_TOOLS.length} Blender import tools`);
+    assert.equal(director.length, 30 + TAKE_TOOLS.length, `${director.length} director tools: 28 plus the ${BLENDER_TOOLS.length} Blender import and ${TAKE_TOOLS.length} take tools`);
     assert.ok(director.includes('previs_director_keyframe'), 'exact-frame key stills');
-    for (const name of BLENDER_TOOLS) assert.ok(director.includes(name), name);
+    for (const name of [...BLENDER_TOOLS, ...TAKE_TOOLS]) assert.ok(director.includes(name), name);
     assert.deepEqual(library, LIBRARY_TOOLS, 'the asset library tools, as one group');
-    assert.equal(names.length, 30 + LIBRARY_TOOLS.length, 'director (with Blender import) and library tools');
+    assert.equal(names.length, 30 + TAKE_TOOLS.length + LIBRARY_TOOLS.length, 'director (with Blender import, keyframes and takes) and library tools');
     assert.deepEqual(names.filter(n => !director.includes(n) && !library.includes(n)), []);
     assert.match(tools.find(t => t.name === 'previs_director_edit').description, /\{op:"use_take",shotId,referenceId\}/);
     const refused = await rpc('tools/call', { name: 'previs_render_animation', arguments: {} });
