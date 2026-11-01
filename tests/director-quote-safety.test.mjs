@@ -31,7 +31,7 @@ test('single-shot preparation creates a review card and never clicks submission'
 test('paid submission requires explicit review, allowance and unknown-charge acknowledgment; it dispatches once', async () => {
   const a = source.indexOf('function genQuote('), b = source.indexOf('// ---------- Live sync', a);
   const sent = [], timers = [];
-  const ctx = { h, cameraMotionWarning, CAMERA_SOURCE_LABELS, api: async (path, body) => { sent.push({ path, body }); return { job: { id: 'job', status: 'queued' } }; }, setTimeout: fn => timers.push(fn) };
+  const ctx = { h, cameraMotionWarning, CAMERA_SOURCE_LABELS, planFacts: () => null, api: async (path, body) => { sent.push({ path, body }); return { job: { id: 'job', status: 'queued' } }; }, setTimeout: fn => timers.push(fn) };
   runInNewContext(compile(source.slice(a, b)), ctx);
   const job = { id: 'job', fingerprint: 'exact-fingerprint', quote: { status: 'unknown' }, validation: { compatible: true }, sources: { sourceVideo: { id: 'source', frameCount: 96, duration: 4 } } };
   const card = ctx.genQuote(job, { title: 'H3' }, { backend: { kind: 'cloud' } }, {});
