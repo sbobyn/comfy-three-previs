@@ -2,10 +2,26 @@
 
 These authored, texture-free low-poly GLBs upgrade all 189 visible objects in the four
 starter scenes. Empty groups remain editor pivots. There are 32 reusable assets, about
-1.1 MB combined, each below 5,000 triangles (most below 1,500). No downloaded or generated
+1.3 MB combined, each below 5,000 triangles (most below 1,500). No downloaded or generated
 third-party art, paid generation, textures, rigs, animation clips or Blender runtime dependency.
 
-## Rebuild
+**25 of the 32 come from the [beret-parts](https://github.com/sbobyn/beret-parts) parametric library**
+(desk, light, basketball, race-car, pine, studio-camera, the court/track/floor surfaces, stands, panels, hoop parts,
+circle, lake, flag-stand). Each is a named preset of an editable family, baked in Node with no Blender.
+`scripts/blender/library-blockouts.json` lists them with family, preset, Previs shape and `minScale`. `minScale` is
+the smallest starter scale per axis; the bake sizes decal gaps for it, so the coplanar lint holds at every starter scale.
+People, animals and terrain (player, anchor, operator, fan, eagle, elk, terrain) stay on `generate-blockouts.py`,
+which skips the library ids. `PREVIS_BLOCKOUTS_ALL=1` rebuilds all 32 from the old Blender builders as a fallback.
+
+## Rebuild the library-built blockouts
+
+With a beret-parts checkout (Node ≥ 23.6, `pnpm install` done there):
+
+```sh
+BERET_PARTS=/path/to/beret-parts node scripts/blender/library-blockouts.mjs   # bakes, updates manifest.json, runs the lint
+```
+
+## Rebuild the Blender-built blockouts
 
 From the repository root, with Blender and Node 22+ on PATH:
 
