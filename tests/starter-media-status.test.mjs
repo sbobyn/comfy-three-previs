@@ -9,14 +9,17 @@ import { shotSignature, starterBlockout, starterMediaStatus, stillStale, videoSt
 
 const starters = await loadStarters();
 
-test('each starter preserves its earlier blockout clip and reports revised animation as stale', () => {
+// Shots whose video (and so blockout clip) still predates the posed animation; see tests/starter-blockouts.test.mjs EARLIER_MEDIA.
+const EARLIER_CLIPS = { wingspan: ['The valley', 'The dive', 'The glide'], posterized: ['Posterized'] };
+
+test('each starter ships the blockout clip of its video, current except where the video predates the posed animation', () => {
   for (const s of starters) {
     const p = createProjectDocument({ template: s.slug }, undefined, starters);
     assert.deepEqual(p.starterFiles, { listed: s.media.length, missing: 0 }, `${s.slug}: every listed file is in the checkout`);
     for (const sh of p.shots) {
-      const b = starterBlockout(p, sh);
+      const b = starterBlockout(p, sh), earlier = (EARLIER_CLIPS[s.slug] || []).includes(sh.title);
       assert.ok(b, `${s.slug} ${sh.title}: bundled blockout clip`);
-      assert.equal(b.fresh, false, `${s.slug} ${sh.title}: the bundled clip predates the posed animation`);
+      assert.equal(b.fresh, !earlier, `${s.slug} ${sh.title}: the bundled clip ${earlier ? 'predates' : 'shows'} the posed animation`);
     }
   }
 });

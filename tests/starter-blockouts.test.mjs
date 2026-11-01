@@ -72,25 +72,38 @@ test('Posterized rises above the defender and sends the ball through the rim; Wi
 });
 
 // Animation changes intentionally stale the earlier paid takes; no generation is performed in this pass.
-test('starter copies preserve paid takes and mark them stale after animation changes', () => {
+// Media made before the animation pass that the 2026-11-01 regeneration did not replace (see examples/starters/README.md):
+// Wingspan was not regenerated, and Seedance refused both Posterized · Posterized videos, so that shot keeps its earlier
+// video and the blockout clip it was made from, next to new stills.
+const EARLIER_MEDIA = {
+  wingspan: { 'The valley': ['stills', 'video'], 'The dive': ['stills', 'video'], 'The glide': ['stills', 'video'] },
+  posterized: { Posterized: ['video'] },
+};
+
+test('starter copies open with current stills and videos, except the takes listed as made for the earlier animation', () => {
   for (const s of starters) {
     const p = instantiateStarter(s);
     for (const sh of p.shots) {
+      const earlier = EARLIER_MEDIA[s.slug]?.[sh.title] || [];
       const stills = sh.references.filter(r => r.generated);
       assert.deepEqual(stills.map(r => r.note).sort(), ['key frame end', 'key frame start'], `${s.slug} ${sh.title}: one start and one end still`);
-      assert.ok(stills.every(r => stillStale(p, sh, r)), `${s.slug} ${sh.title}: still retains its earlier blocking signature`);
+      assert.ok(stills.every(r => stillStale(p, sh, r) === earlier.includes('stills')), `${s.slug} ${sh.title}: stills ${earlier.includes('stills') ? 'keep the earlier' : 'carry the current'} blocking signature`);
       const renders = p.assets.filter(a => a.shotId === sh.id && a.kind === 'camera-render');
       assert.equal(renders.length, 1, `${s.slug} ${sh.title}: one blockout clip, the one the video was made from`);
       assert.equal(renders[0].duration, sh.duration);
       assert.equal(renders[0].frameCount, sh.duration * 24);
       const video = p.assets.find(a => a.shotId === sh.id && a.kind === 'workflow-result');
       assert.equal(video.source.sourceAssetId, renders[0].id, `${s.slug} ${sh.title}: video keeps its actual blockout source`);
-      assert.ok(videoStale(p, sh, video), `${s.slug} ${sh.title}: video retains its earlier blocking signature`);
+      assert.equal(videoStale(p, sh, video), earlier.includes('video'), `${s.slug} ${sh.title}: video ${earlier.includes('video') ? 'keeps the earlier' : 'follows the current'} blocking`);
+      const clip = p.edit.clips.find(c => c.shotId === sh.id);
+      assert.equal(clip?.assetId, video.id, `${s.slug} ${sh.title}: the cut uses the shot's video`);
     }
-    // A dry run must plan replacements, never feed an old posed still into the new clip.
+    // A dry run replaces exactly the stale stills: it never feeds an old posed still into a new clip, and never remakes a paid current one.
     const plan = planBatch(p, { steps: ['stills', 'videos'], tier: 'final', dryRun: true, maxCostUsd: 50 });
-    const stills = plan.nodes.filter(n => n.type === 'still');
-    assert.equal(stills.length, p.shots.length * 2);
-    assert.ok(stills.every(n => n.status !== 'skipped'), `${s.slug}: final-tier plan replaces stale stills`);
+    for (const n of plan.nodes.filter(x => x.type === 'still')) {
+      const sh = p.shots.find(x => x.id === n.target.shotId), stale = (EARLIER_MEDIA[s.slug]?.[sh.title] || []).includes('stills');
+      assert.equal(n.status === 'skipped', !stale, `${s.slug} ${sh.title}: final-tier plan ${stale ? 'replaces the stale' : 'keeps the current'} ${n.target.t} still`);
+    }
+    assert.equal(plan.nodes.filter(x => x.type === 'still').length, p.shots.length * 2);
   }
 });

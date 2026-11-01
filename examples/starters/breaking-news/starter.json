@@ -3623,37 +3623,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "fa122c1d-8574-596e-a61c-19a21a427900",
-          "name": "Shot 01 Breaking · Flux.2 [pro] · 758012",
-          "file": "fa122c1d-8574-596e-a61c-19a21a427900.webp",
+          "id": "08ffcece-2746-5d9a-a9ec-9ff715559165",
+          "name": "Shot 01 Breaking · FLUX 3 Image · 869834",
+          "file": "08ffcece-2746-5d9a-a9ec-9ff715559165.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:27:01.281Z",
+          "createdAt": "2026-11-01T07:40:45.714Z",
           "generated": {
-            "presetId": "flux-2-pro",
-            "model": "Flux.2 [pro] (BFL)",
-            "seed": 758012,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 40mm normal lens; full shot, News anchor head to toe; camera 1.8 m high, at eye level and 6.4 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, the full frame width wide, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, over half the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, over half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor sits at the Anchor desk beneath the blue Video wall. The bulletin is about to begin. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "5315c9e7"
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 869834,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 40mm normal lens; full shot, News anchor head to toe; camera 1.8 m high, at eye level and 6.4 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, the full frame width wide, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, over half the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, over half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor settles at the desk in the first second, lifts the chin, then opens one palm briefly and rests it again. Breathing is subtle; suit, face and studio graphics stay consistent. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections.…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "6853173a"
           }
         },
         {
-          "id": "313f0315-5350-577b-a39a-6de324020e91",
-          "name": "Shot 01 Breaking · FLUX 3 Image · 943129",
-          "file": "313f0315-5350-577b-a39a-6de324020e91.webp",
+          "id": "aa7429fb-ee57-5808-a186-6adec8671c06",
+          "name": "Shot 01 Breaking · FLUX 3 Image · 254835",
+          "file": "aa7429fb-ee57-5808-a186-6adec8671c06.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:48:09.899Z",
+          "createdAt": "2026-11-01T07:39:22.723Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 943129,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; full shot, News anchor head to toe; camera 2.5 m high, just above News anchor's eye line and 8 m from News anchor, looking slightly down; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, the full frame width wide, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, about a third of the frame height tall, in front of News anchor. News anchor: centre of frame, about half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor sits at the Anchor desk beneath the blue Video wall. The bulletin is about to begin. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "5315c9e7"
+            "seed": 254835,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; full shot, News anchor head to toe; camera 2.5 m high, just above News anchor's eye line and 8 m from News anchor, looking slightly down; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, the full frame width wide, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, about a third of the frame height tall, in front of News anchor. News anchor: centre of frame, about half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor settles at the desk in the first second, lifts the chin, then opens one palm briefly and rests it again. Breathing is subtle; suit, face and studio graphics stay consistent. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "6853173a"
           }
         }
       ]
@@ -3988,37 +3988,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "ed40a467-dbf1-503d-a43c-bfedd21cff7a",
-          "name": "Shot 02 The headline · GPT Image 2.5 · 864957",
-          "file": "ed40a467-dbf1-503d-a43c-bfedd21cff7a.webp",
+          "id": "29c31b1b-d11a-55bf-a099-65cd33c3d727",
+          "name": "Shot 02 The headline · GPT Image 2.5 · 161780",
+          "file": "29c31b1b-d11a-55bf-a099-65cd33c3d727.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:43:28.298Z",
+          "createdAt": "2026-11-01T07:40:43.052Z",
           "generated": {
             "presetId": "gpt-image-25",
             "model": "GPT Image 2.5 (OpenAI)",
-            "seed": 864957,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 55mm normal lens; medium shot, News anchor from the waist up; camera 1.6 m high, at eye level and 3 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: fills the whole background. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor delivers the launch headline with composed authority; the Video wall glows blue behind the desk. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Framing: 55mm lens, match the supplied blockout frame's…\nThe Video wall looks exactly like image 2. The News anchor looks exactly like image 3. The Studio floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "960aae67"
+            "seed": 161780,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 55mm normal lens; medium shot, News anchor from the waist up; camera 1.6 m high, at eye level and 3 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: fills the whole background. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor delivers the headline: a small nod in second one, one measured hand emphasis in seconds two to three, then stillness. Keep the same face and suit; shoulders follow the gesture softly. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Framing: 55mm lens, match the…\nThe Video wall looks exactly like image 2. The News anchor looks exactly like image 3. The Studio floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "cae0bba"
           }
         },
         {
-          "id": "aefaf782-a221-50a3-aceb-6f8832c3b550",
-          "name": "Shot 02 The headline · GPT Image 2.5 · 153330",
-          "file": "aefaf782-a221-50a3-aceb-6f8832c3b550.webp",
+          "id": "61342f1c-a584-5eb9-acaf-464d8a111122",
+          "name": "Shot 02 The headline · GPT Image 2.5 · 832930",
+          "file": "61342f1c-a584-5eb9-acaf-464d8a111122.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:43:26.974Z",
+          "createdAt": "2026-11-01T07:40:17.978Z",
           "generated": {
             "presetId": "gpt-image-25",
             "model": "GPT Image 2.5 (OpenAI)",
-            "seed": 153330,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 55mm normal lens; medium shot, News anchor from the waist up; camera 1.6 m high, at eye level and 3.8 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: fills the whole background. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor delivers the launch headline with composed authority; the Video wall glows blue behind the desk. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Framing: 55mm lens, match the…\nThe Video wall looks exactly like image 2. The News anchor looks exactly like image 3. The Studio floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "960aae67"
+            "seed": 832930,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 55mm normal lens; medium shot, News anchor from the waist up; camera 1.6 m high, at eye level and 3.8 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: fills the whole background. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor delivers the headline: a small nod in second one, one measured hand emphasis in seconds two to three, then stillness. Keep the same face and suit; shoulders follow the gesture softly. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Framing:…\nThe Video wall looks exactly like image 2. The News anchor looks exactly like image 3. The Studio floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "cae0bba"
           }
         }
       ]
@@ -4353,37 +4353,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "ed80795a-4c4d-54f5-ab16-4ead2aa19f33",
-          "name": "Shot 03 On air · FLUX 3 Image · 368788",
-          "file": "ed80795a-4c4d-54f5-ab16-4ead2aa19f33.webp",
+          "id": "e7ef0050-afae-54d8-a26c-65c870cb3ee3",
+          "name": "Shot 03 On air · FLUX 3 Image · 400609",
+          "file": "e7ef0050-afae-54d8-a26c-65c870cb3ee3.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:29:24.370Z",
+          "createdAt": "2026-11-01T07:42:46.458Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 368788,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 45mm normal lens; medium long shot, News anchor from the knees up; camera 1.7 m high, at eye level and 4.9 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, about three-quarters of the frame height tall, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, about three-quarters of the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, partly hidden by Anchor desk, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor finishes the bulletin at the Anchor desk and holds a confident expression. The studio remains calm and on air. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Set: A modern broadcast news…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "db0d9f0f"
+            "seed": 400609,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 45mm normal lens; medium long shot, News anchor from the knees up; camera 1.7 m high, at eye level and 4.9 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, about three-quarters of the frame height tall, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, about three-quarters of the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, partly hidden by Anchor desk, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor finishes speaking, lowers both hands, settles the shoulders and gives a restrained nod in the last second. Hold the same face, suit and studio graphics. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night:…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "11ffc962"
           }
         },
         {
-          "id": "ac8ba3c7-da4c-5eb5-aecf-632d555bdd90",
-          "name": "Shot 03 On air · FLUX 3 Image · 33646",
-          "file": "ac8ba3c7-da4c-5eb5-aecf-632d555bdd90.webp",
+          "id": "e0129786-5314-5d40-a36f-b4bb8eaa9a77",
+          "name": "Shot 03 On air · FLUX 3 Image · 506293",
+          "file": "e0129786-5314-5d40-a36f-b4bb8eaa9a77.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:29:15.494Z",
+          "createdAt": "2026-11-01T07:43:00.126Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 33646,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 45mm normal lens; full shot, News anchor head to toe; camera 1.9 m high, at eye level and 6.3 m from News anchor, looking slightly down; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, about three-quarters of the frame height tall, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, over half the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, over half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor finishes the bulletin at the Anchor desk and holds a confident expression. The studio remains calm and on air. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Set: A modern broadcast news studio at night: glossy dark floor,…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "db0d9f0f"
+            "seed": 506293,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 45mm normal lens; full shot, News anchor head to toe; camera 1.9 m high, at eye level and 6.3 m from News anchor, looking slightly down; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, about three-quarters of the frame height tall, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, over half the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, over half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor finishes speaking, lowers both hands, settles the shoulders and gives a restrained nod in the last second. Hold the same face, suit and studio graphics. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "11ffc962"
           }
         }
       ]
@@ -4724,29 +4724,29 @@
       "height": 817
     },
     {
-      "path": "media/refs/fa122c1d-8574-596e-a61c-19a21a427900.webp",
+      "path": "media/refs/08ffcece-2746-5d9a-a9ec-9ff715559165.webp",
       "kind": "image",
-      "bytes": 81520,
-      "sha256": "e946a826aaf6972c6c4f56ff057f44d28b690f87e1fb8e4e5ad5a98f51bca20c",
-      "sourceSha256": "ba4b2cdde17fbc7d4f58731b62cfad698a4915ca4e737f5fdb66ed024c7192b0",
-      "width": 1344,
-      "height": 768
-    },
-    {
-      "path": "media/refs/313f0315-5350-577b-a39a-6de324020e91.webp",
-      "kind": "image",
-      "bytes": 67388,
-      "sha256": "a415a6a494afa8852c8d54bdec3b347c1508e8d64fed33439655f907c32c9c75",
-      "sourceSha256": "f632dd0e5c0d390dcbc6d1c9d59cc4a844173a5f8ee5d9e6ca58c1941b07d381",
+      "bytes": 73060,
+      "sha256": "b137b0d142a30af74de070fb8af8dc2ac63371f3f6756b07de66b516c8b50845",
+      "sourceSha256": "d1f8afb2074d3371ed41330d0fa81b3be4d9d188b8870e83179e87a4e9913007",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/fb4ec8f6-d65d-4a5d-ad94-08d3785467ff.mp4",
+      "path": "media/refs/aa7429fb-ee57-5808-a186-6adec8671c06.webp",
+      "kind": "image",
+      "bytes": 72246,
+      "sha256": "871d404c3d2fbcd0bd881a55419c2fe73e4bb9f66641ad8318b35dccaad29bf6",
+      "sourceSha256": "376a4355b501a0af2f28511b646afce567e1016c36e3353f2844ef92f3b12beb",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/01b3e3ae-c489-4b0b-bbca-a28c1e59a87d.mp4",
       "kind": "video",
-      "bytes": 671197,
-      "sha256": "cb8ee7cad8389e14fa214b68a56edc67b9e32efbe71ed5d2202e49aacc819419",
-      "sourceSha256": "2d5729a84c519b35a1c3f68a8c8f52ee4721a121a8be8b2603e4f4fbffdf4cdb",
+      "bytes": 1107093,
+      "sha256": "292d04c9df2e062ee884c06ce4da9c8ae6b36a0326c59cd8810d9ec0b05ae398",
+      "sourceSha256": "66d550de9adc2a1b0e5e3e406f5a064e6f4ff6c1176d213a22fdffdd5aa25767",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -4754,11 +4754,11 @@
       "duration": 5
     },
     {
-      "path": "media/assets/d926219e-8388-5d92-a75a-5602d78f7058.mp4",
+      "path": "media/assets/54e27751-d91f-5586-a1c6-0ff314e9b989.mp4",
       "kind": "video",
-      "bytes": 1009809,
-      "sha256": "7fb7816098051bb6ab7e82344bcd3f10fcaf6b3d90b23206b4d7de413eb8c5c1",
-      "sourceSha256": "ca6bb90e29ea575867270f1894736d58343168fa384b4b3b8c06309956dad14d",
+      "bytes": 853230,
+      "sha256": "91ebb82c256c3c92e53bb227b71484c1456cddb13bec9dd6421bbd2056c2661b",
+      "sourceSha256": "fb4264b36df829995606a197532afef699b5403e24f18b4ac1eacb6f9efa6a1c",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -4766,29 +4766,29 @@
       "duration": 5.042
     },
     {
-      "path": "media/refs/ed40a467-dbf1-503d-a43c-bfedd21cff7a.webp",
+      "path": "media/refs/29c31b1b-d11a-55bf-a099-65cd33c3d727.webp",
       "kind": "image",
-      "bytes": 104416,
-      "sha256": "12ed6006a2718dbe757cc89d290763cd31b4a67709f651c2f777398b3729b662",
-      "sourceSha256": "66d9473fb3341e3a88bebae84ec6db91c3f754ae0fc71c1f2cb87c713688c0a1",
+      "bytes": 104500,
+      "sha256": "a7dc9d2c690997e23e621b37c4d1146e98c970413b173085143c617a01321599",
+      "sourceSha256": "c2a887cd703eef46367457ca62e67f3dcc8698681981145448961f0d69191204",
       "width": 1600,
       "height": 900
     },
     {
-      "path": "media/refs/aefaf782-a221-50a3-aceb-6f8832c3b550.webp",
+      "path": "media/refs/61342f1c-a584-5eb9-acaf-464d8a111122.webp",
       "kind": "image",
-      "bytes": 114522,
-      "sha256": "ba18b7d03ccbde3e41f0cf0dbfcb862bb0f94634d437b31acdbd8990daf6740b",
-      "sourceSha256": "93eadb68764530fa7991f16c9ad4f08854965b6f8f0d2d363658e45a3354d32a",
+      "bytes": 123682,
+      "sha256": "3564b3425e259d5a31ece4e748db1f71efdc8f72e0698bcb079e49f3f98dd191",
+      "sourceSha256": "737f03d3f9738d3a02bf44adad512aac64da0b91f1f34264ff4e748d4d1b9a9b",
       "width": 1600,
       "height": 900
     },
     {
-      "path": "media/assets/75f8d8f8-f1e3-4749-a132-e8c9f7b6394e.mp4",
+      "path": "media/assets/9a56b722-9521-48ee-9245-b9cc0eeb23b7.mp4",
       "kind": "video",
-      "bytes": 357317,
-      "sha256": "4252aafe4179af54603a02e7c998a7ffddcbc39366a95f73db9ca98703e3f963",
-      "sourceSha256": "49ab7a9fd94ec04f725207251fa0c1682364204d104a44867f072c90839fe58c",
+      "bytes": 1047013,
+      "sha256": "d0ab9d5b74879481631522ef533b7b377dafdbdd8186781034e1cfa56b8ed907",
+      "sourceSha256": "84e8f94bd492339317ede3a923c22ad4af63057525a35f815e534223ea3dabea",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -4796,11 +4796,11 @@
       "duration": 5
     },
     {
-      "path": "media/assets/2f607883-0f3c-583c-acca-dd20535321c2.mp4",
+      "path": "media/assets/6b864020-2490-5f40-ad5f-39b82eef2791.mp4",
       "kind": "video",
-      "bytes": 899405,
-      "sha256": "fb97722f41c1f561410376ff5ed71f9b61cda962ef300f5d56cf1a8f5652c41d",
-      "sourceSha256": "9092eb7e7eba10c22831742763431ee57dbe079521403faf5c7497c991f107da",
+      "bytes": 941419,
+      "sha256": "ab7c8c77ad7964655bb9e5f88e8d9eb04b60d1fc7d6df9ebab68733c461aeb3b",
+      "sourceSha256": "693651ed0c0fbccd33fd21e0f7835fee5110bfc53468bb1230eee3b134421805",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -4808,29 +4808,29 @@
       "duration": 4.708
     },
     {
-      "path": "media/refs/ed80795a-4c4d-54f5-ab16-4ead2aa19f33.webp",
+      "path": "media/refs/e7ef0050-afae-54d8-a26c-65c870cb3ee3.webp",
       "kind": "image",
-      "bytes": 52496,
-      "sha256": "cd1f12f316719982bc803c68ff7e6cc086758e8da51ff8b5dd3862b905b8d9ad",
-      "sourceSha256": "b2be92559820757367ab7fda13fad86292c62e5efbb2a25987bb0ed6c45c62d4",
+      "bytes": 91924,
+      "sha256": "1bdafa7e91ec05eff730f0212f6aa9fd715166fda604d5298a84a6735503103d",
+      "sourceSha256": "78a659c1b7ce5e7578afe98cdede9969e57d83acb14e06e71da4f9e70b26eefb",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/refs/ac8ba3c7-da4c-5eb5-aecf-632d555bdd90.webp",
+      "path": "media/refs/e0129786-5314-5d40-a36f-b4bb8eaa9a77.webp",
       "kind": "image",
-      "bytes": 68278,
-      "sha256": "e8e0ba14058339569e0ee182897e0978c0338d2aa1ad807c33e1a629074ec7e4",
-      "sourceSha256": "ece49e485045f06edbeb1c680fd9975d00327da0d04a6edc26beb7afb79c0e8b",
+      "bytes": 89044,
+      "sha256": "598b4d779e95367ab16754670337111d619b777559f344f94fbda53d917e6ae5",
+      "sourceSha256": "44b3198d76aad79d456eb9946fafde06c3b3c1a3d67c18ace782b26e3d04997c",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/d7c03400-bb69-4171-ac64-c239335e6047.mp4",
+      "path": "media/assets/27fa7ff1-fc3a-45aa-b2b1-1cc7d4f56155.mp4",
       "kind": "video",
-      "bytes": 623322,
-      "sha256": "bd792b443f9d5d97246a6111c3670f26106ab22c31ae20d499a224f28d8f6d15",
-      "sourceSha256": "797d144b936733729bd271022f26f50dbbf1abdfbfee983696aa028d45f43ad5",
+      "bytes": 1096285,
+      "sha256": "e68f3f85ede4004bbfff675f50f9a66a4aa3d164630b1e3ea487ba09cdace492",
+      "sourceSha256": "3f3123feb0136d5c2dff1b7b1d8b1db5c6ab246123ee1a5215b54f2ab70f7f57",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -4838,11 +4838,11 @@
       "duration": 5
     },
     {
-      "path": "media/assets/940b5bf0-1a52-5b3a-a979-b655401dbe85.mp4",
+      "path": "media/assets/ca766852-fbd1-5ca8-ada6-921b25a01ee5.mp4",
       "kind": "video",
-      "bytes": 1025391,
-      "sha256": "4b307a595c453c15352747d0ee439c7f9219709cc226d6156efb06cb63d49ac7",
-      "sourceSha256": "98ee66dcb294169d633a62a543a104eeca35cf704f1e992c3629b19481d8bd00",
+      "bytes": 1166228,
+      "sha256": "9971a7516463976cba71b0fedcc4b0ff241e827fb40e67eb01603bdf1e4f8d8b",
+      "sourceSha256": "34f068d003f6ab18b19b803691fd9a5bd125cfb64d4e499dd12fae0a41d465c7",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -4852,87 +4852,87 @@
   ],
   "assets": [
     {
-      "id": "fb4ec8f6-d65d-4a5d-ad94-08d3785467ff",
+      "id": "01b3e3ae-c489-4b0b-bbca-a28c1e59a87d",
       "kind": "camera-render",
       "shotId": "a015ef8e-809e-4492-93ef-675772aba797",
-      "file": "assets/fb4ec8f6-d65d-4a5d-ad94-08d3785467ff.mp4",
+      "file": "assets/01b3e3ae-c489-4b0b-bbca-a28c1e59a87d.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-31T06:59:08.974Z",
+      "createdAt": "2026-11-01T07:34:06.064Z",
       "source": {
         "engineShotId": null,
-        "signature": "5315c9e7"
+        "signature": "6853173a"
       }
     },
     {
-      "id": "d926219e-8388-5d92-a75a-5602d78f7058",
+      "id": "54e27751-d91f-5586-a1c6-0ff314e9b989",
       "kind": "workflow-result",
       "shotId": "a015ef8e-809e-4492-93ef-675772aba797",
-      "file": "assets/d926219e-8388-5d92-a75a-5602d78f7058.mp4",
+      "file": "assets/54e27751-d91f-5586-a1c6-0ff314e9b989.mp4",
       "mime": "video/mp4",
       "duration": 5.041667,
-      "createdAt": "2026-10-31T06:59:59.299Z",
+      "createdAt": "2026-11-01T07:51:41.030Z",
       "source": {
         "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
         "backend": "cloud",
-        "prompt": "Cinematic live-action shot. News anchor sits at the Anchor desk beneath the blue Video wall. The bulletin is about to begin. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Set: Glossy dark blue studio floor with soft reflections. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 40mm. Filter: deep blue dusk.",
-        "sourceAssetId": "fb4ec8f6-d65d-4a5d-ad94-08d3785467ff"
+        "prompt": "Cinematic live-action shot. News anchor settles at the desk in the first second, lifts the chin, then opens one palm briefly and rests it again. Breathing is subtle; suit, face and studio graphics stay consistent. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 40mm. Filter: deep blue dusk.",
+        "sourceAssetId": "01b3e3ae-c489-4b0b-bbca-a28c1e59a87d"
       }
     },
     {
-      "id": "75f8d8f8-f1e3-4749-a132-e8c9f7b6394e",
+      "id": "9a56b722-9521-48ee-9245-b9cc0eeb23b7",
       "kind": "camera-render",
       "shotId": "3014d6d1-f093-4e8f-b791-aed102116cf3",
-      "file": "assets/75f8d8f8-f1e3-4749-a132-e8c9f7b6394e.mp4",
+      "file": "assets/9a56b722-9521-48ee-9245-b9cc0eeb23b7.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-31T06:49:08.238Z",
+      "createdAt": "2026-11-01T07:34:11.552Z",
       "source": {
         "engineShotId": null,
-        "signature": "960aae67"
+        "signature": "cae0bba"
       }
     },
     {
-      "id": "2f607883-0f3c-583c-acca-dd20535321c2",
+      "id": "6b864020-2490-5f40-ad5f-39b82eef2791",
       "kind": "workflow-result",
       "shotId": "3014d6d1-f093-4e8f-b791-aed102116cf3",
-      "file": "assets/2f607883-0f3c-583c-acca-dd20535321c2.mp4",
+      "file": "assets/6b864020-2490-5f40-ad5f-39b82eef2791.mp4",
       "mime": "video/mp4",
       "duration": 4.708333,
-      "createdAt": "2026-10-31T06:56:24.473Z",
+      "createdAt": "2026-11-01T07:50:47.292Z",
       "source": {
         "workflow": "Seedance 2.5 · edit the complete video · 6 reference images",
         "backend": "cloud",
-        "prompt": "News anchor delivers the launch headline with composed authority; the Video wall glows blue behind the desk. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 55mm. Filter: high contrast.\nReference images: 1 = start still; 2 = end still; 3 = News anchor; 4 = Video wall; 5 = Anchor desk; 6 = Studio floor.",
-        "sourceAssetId": "75f8d8f8-f1e3-4749-a132-e8c9f7b6394e"
+        "prompt": "News anchor delivers the headline: a small nod in second one, one measured hand emphasis in seconds two to three, then stillness. Keep the same face and suit; shoulders follow the gesture softly. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 55mm. Filter: high contrast.\nReference images: 1 = start still; 2 = end still; 3 = News anchor; 4 = Video wall; 5 = Anchor desk; 6 = Studio floor.",
+        "sourceAssetId": "9a56b722-9521-48ee-9245-b9cc0eeb23b7"
       }
     },
     {
-      "id": "d7c03400-bb69-4171-ac64-c239335e6047",
+      "id": "27fa7ff1-fc3a-45aa-b2b1-1cc7d4f56155",
       "kind": "camera-render",
       "shotId": "597912bb-6c6f-4f3b-9274-c203578c538e",
-      "file": "assets/d7c03400-bb69-4171-ac64-c239335e6047.mp4",
+      "file": "assets/27fa7ff1-fc3a-45aa-b2b1-1cc7d4f56155.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-10-31T06:59:15.211Z",
+      "createdAt": "2026-11-01T07:34:17.176Z",
       "source": {
         "engineShotId": null,
-        "signature": "db0d9f0f"
+        "signature": "11ffc962"
       }
     },
     {
-      "id": "940b5bf0-1a52-5b3a-a979-b655401dbe85",
+      "id": "ca766852-fbd1-5ca8-ada6-921b25a01ee5",
       "kind": "workflow-result",
       "shotId": "597912bb-6c6f-4f3b-9274-c203578c538e",
-      "file": "assets/940b5bf0-1a52-5b3a-a979-b655401dbe85.mp4",
+      "file": "assets/ca766852-fbd1-5ca8-ada6-921b25a01ee5.mp4",
       "mime": "video/mp4",
       "duration": 5.041667,
-      "createdAt": "2026-10-31T07:00:10.617Z",
+      "createdAt": "2026-11-01T07:51:48.442Z",
       "source": {
         "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
         "backend": "cloud",
-        "prompt": "Cinematic live-action shot. News anchor finishes the bulletin at the Anchor desk and holds a confident expression. The studio remains calm and on air. Confident news anchor in a tailored navy suit, white shirt, blue tie, a small round yellow Comfy lapel pin, neat dark hair, warm expression, speaking to camera. Same face in every shot: the man from the primary reference. Sleek white news desk with a glowing blue and yellow front panel strip. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 45mm. Filter: deep blue dusk.",
-        "sourceAssetId": "d7c03400-bb69-4171-ac64-c239335e6047"
+        "prompt": "Cinematic live-action shot. News anchor finishes speaking, lowers both hands, settles the shoulders and gives a restrained nod in the last second. Hold the same face, suit and studio graphics. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 45mm. Filter: deep blue dusk.",
+        "sourceAssetId": "27fa7ff1-fc3a-45aa-b2b1-1cc7d4f56155"
       }
     }
   ],
@@ -4940,19 +4940,19 @@
     "clips": [
       {
         "shotId": "a015ef8e-809e-4492-93ef-675772aba797",
-        "assetId": "d926219e-8388-5d92-a75a-5602d78f7058",
+        "assetId": "54e27751-d91f-5586-a1c6-0ff314e9b989",
         "in": 0,
         "out": null
       },
       {
         "shotId": "3014d6d1-f093-4e8f-b791-aed102116cf3",
-        "assetId": "2f607883-0f3c-583c-acca-dd20535321c2",
+        "assetId": "6b864020-2490-5f40-ad5f-39b82eef2791",
         "in": 0,
         "out": null
       },
       {
         "shotId": "597912bb-6c6f-4f3b-9274-c203578c538e",
-        "assetId": "940b5bf0-1a52-5b3a-a979-b655401dbe85",
+        "assetId": "ca766852-fbd1-5ca8-ada6-921b25a01ee5",
         "in": 0,
         "out": null
       }

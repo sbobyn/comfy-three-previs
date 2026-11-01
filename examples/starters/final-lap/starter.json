@@ -9163,37 +9163,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "6f2263ee-ce93-5575-a26d-36973cef1b22",
-          "name": "Shot 01 Final lap · Flux.2 [pro] · 609750",
-          "file": "6f2263ee-ce93-5575-a26d-36973cef1b22.webp",
+          "id": "7776c93e-97bc-5ccc-a579-d4516a7a5397",
+          "name": "Shot 01 Final lap · FLUX 3 Image · 788340",
+          "file": "7776c93e-97bc-5ccc-a579-d4516a7a5397.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:29:08.605Z",
+          "createdAt": "2026-11-01T07:36:57.125Z",
           "generated": {
-            "presetId": "flux-2-pro",
-            "model": "Flux.2 [pro] (BFL)",
-            "seed": 609750,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 35mm normal lens; medium shot of Comfy car; camera 4.5 m high, above Comfy car and 16.2 m from Comfy car, looking slightly down; we see Comfy car from the front three-quarter, its left side; horizon near the top edge.\nIn frame: Comfy car: right of frame, about a quarter of the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view). Rival car: left of frame, about a quarter of the frame height tall, behind Comfy car to the left, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy car in blue and yellow runs in the inside lane alongside the green Rival car. The two cars are fighting for the final lap; both travel nose-first toward the finish. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur…\nThe Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Infield grass looks exactly like image 4. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "5641b314"
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 788340,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 35mm normal lens; medium shot of Comfy car; camera 4.5 m high, above Comfy car and 16.9 m from Comfy car, looking slightly down; we see Comfy car from the front three-quarter, its left side; horizon near the top edge.\nIn frame: Comfy car: right of frame, about a quarter of the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view). Rival car: left of frame, about a quarter of the frame height tall, behind Comfy car to the left, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy car drafts for 1s, then eases inside Rival car. Tires grip; the body leans outward and settles as steering unwinds. Slow-motion replay; keep liveries. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours. Framing: 35mm lens, match the supplied blockout frame's composition. Lens: 35mm. Filter: saturated primaries.\nThe Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Infield grass looks exactly like image 4. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "2a2c40ed"
           }
         },
         {
-          "id": "37573524-6488-5f3d-ac89-7f8e62c32ab5",
-          "name": "Shot 01 Final lap · FLUX 3 Image · 402519",
-          "file": "37573524-6488-5f3d-ac89-7f8e62c32ab5.webp",
+          "id": "4118ab08-8691-538c-a9f3-ea3b67a6debf",
+          "name": "Shot 01 Final lap · FLUX 3 Image · 716866",
+          "file": "4118ab08-8691-538c-a9f3-ea3b67a6debf.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:30:55.813Z",
+          "createdAt": "2026-11-01T07:36:51.990Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 402519,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 35mm normal lens; medium shot of Comfy car; camera 6 m high, high above Comfy car and 17.2 m from Comfy car, looking slightly down; we see Comfy car from the front three-quarter, its left side; the horizon is above the top edge (only ground in frame).\nIn frame: Rival car: left of frame, about a third of the frame height tall, beside Comfy car to the left, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car. Comfy car: right of frame, about a third of the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view).\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy car in blue and yellow runs in the inside lane alongside the green Rival car. The two cars are fighting for the final lap; both travel nose-first toward the finish. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top. Look: Photoreal live-action motorsport…\nThe Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Infield grass looks exactly like image 4. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "5641b314"
+            "seed": 716866,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 35mm normal lens; wide shot, Comfy car small in frame; camera 6 m high, high above Comfy car and 21.4 m from Comfy car, looking slightly down; we see Comfy car from the front three-quarter, its left side; the horizon is above the top edge (only ground in frame).\nIn frame: Rival car: left of frame, about a third of the frame height tall, in front of Comfy car to the left, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car. Comfy car: centre of frame, about a quarter of the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view).\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy car drafts for 1s, then eases inside Rival car. Tires grip; the body leans outward and settles as steering unwinds. Slow-motion replay; keep liveries. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours. Framing: 35mm lens, match the supplied blockout frame's…\nThe Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Infield grass looks exactly like image 4. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "2a2c40ed"
           }
         }
       ]
@@ -9528,37 +9528,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "333298f4-92c9-5ed4-a5eb-36798fbe38da",
-          "name": "Shot 02 The draft · FLUX 3 Image · 702750",
-          "file": "333298f4-92c9-5ed4-a5eb-36798fbe38da.webp",
+          "id": "f0737c21-23df-58f8-a4ee-59f177f2ad42",
+          "name": "Shot 02 The draft · FLUX 3 Image · 635417",
+          "file": "f0737c21-23df-58f8-a4ee-59f177f2ad42.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:39:23.813Z",
+          "createdAt": "2026-11-01T07:37:10.337Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 702750,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 35mm normal lens; medium shot of Comfy car; camera 2.6 m high, above Comfy car and 13.2 m from Comfy car, looking slightly down; we see Comfy car from straight in front; horizon in the upper third.\nIn frame: Comfy car: right of frame, about a third of the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view). Rival car: centre of frame, about a quarter of the frame height tall, behind Comfy car to the left, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy car draws level with Rival car, holding the inside lane. Both cars stay side by side as the Comfy car begins to edge ahead. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat…\nThe Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Infield grass looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "371d55e8"
+            "seed": 635417,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 35mm normal lens; medium shot of Comfy car; camera 2.6 m high, above Comfy car and 13.2 m from Comfy car, looking slightly down; we see Comfy car from straight in front; horizon in the upper third.\nIn frame: Comfy car: right of frame, about a third of the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view). Rival car: centre of frame, about a quarter of the frame height tall, behind Comfy car to the left, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy car closes for 1s, draws level with Rival car at 3s, then edges ahead. Tires grip; steering unwinds and suspension settles. Slow-motion; keep liveries. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours. Framing: 35mm lens, match the supplied blockout frame's…\nThe Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Infield grass looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "166dcfc1"
           }
         },
         {
-          "id": "de66f359-aa96-5285-a2e5-3e81801534d9",
-          "name": "Shot 02 The draft · Flux.2 [pro] · 46221",
-          "file": "de66f359-aa96-5285-a2e5-3e81801534d9.webp",
+          "id": "5e9f4b14-2063-52c5-a3ba-bfbcc11c2830",
+          "name": "Shot 02 The draft · FLUX 3 Image · 814044",
+          "file": "5e9f4b14-2063-52c5-a3ba-bfbcc11c2830.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:30:11.490Z",
+          "createdAt": "2026-11-01T07:37:02.051Z",
           "generated": {
-            "presetId": "flux-2-pro",
-            "model": "Flux.2 [pro] (BFL)",
-            "seed": 46221,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 35mm normal lens; medium shot of Comfy car; camera 2.6 m high, above Comfy car and 14.4 m from Comfy car, looking slightly down; we see Comfy car from straight in front; horizon in the upper third.\nIn frame: Rival car: left of frame, about a quarter of the frame height tall, beside Comfy car to the left, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car. Comfy car: right of frame, about a quarter of the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view).\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy car draws level with Rival car, holding the inside lane. Both cars stay side by side as the Comfy car begins to edge ahead. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top. Look: Photoreal live-action motorsport broadcast.…\nThe Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Infield grass looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "371d55e8"
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 814044,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 35mm normal lens; wide shot, Comfy car small in frame; camera 2.6 m high, above Comfy car and 15 m from Comfy car, looking slightly down; we see Comfy car from straight in front; horizon in the upper third.\nIn frame: Rival car: left of frame, about a quarter of the frame height tall, beside Comfy car to the left, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car. Comfy car: right of frame, about a quarter of the frame height tall, nose pointing toward the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy car closes for 1s, draws level with Rival car at 3s, then edges ahead. Tires grip; steering unwinds and suspension settles. Slow-motion; keep liveries. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours. Framing: 35mm lens, match the supplied blockout frame's composition. Lens:…\nThe Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Infield grass looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "166dcfc1"
           }
         }
       ]
@@ -9893,37 +9893,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "c7153137-85d2-58c7-af43-fb7a08c4da1f",
-          "name": "Shot 03 From the stands · FLUX 3 Image · 402845",
-          "file": "c7153137-85d2-58c7-af43-fb7a08c4da1f.webp",
+          "id": "e60b3038-22e9-5c9f-a440-0f587a375de7",
+          "name": "Shot 03 From the stands · FLUX 3 Image · 750912",
+          "file": "e60b3038-22e9-5c9f-a440-0f587a375de7.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:41:10.631Z",
+          "createdAt": "2026-11-01T07:42:41.153Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 402845,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 45mm normal lens; medium shot of Comfy car; camera 8 m high, high above Comfy car and 19.1 m from Comfy car, looking slightly down; we see Comfy car side-on, from its right side (a side profile, not a three-quarter or chase view); the horizon is above the top edge (only ground in frame).\nIn frame: Rival car: left of frame, about a third of the frame height tall, in front of Comfy car to the left, nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end, same direction as Comfy car. Comfy car: right of frame, about a quarter of the frame height tall, nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy car pulls ahead of Rival car on the front straight. The blue car stays inside; the green rival stays outside, separated by a clear lane. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface;…\nThe Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Infield grass looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "5cb10508"
+            "seed": 750912,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 45mm normal lens; medium shot of Comfy car; camera 8 m high, high above Comfy car and 19.1 m from Comfy car, looking slightly down; we see Comfy car side-on, from its right side (a side profile, not a three-quarter or chase view); the horizon is above the top edge (only ground in frame).\nIn frame: Rival car: left of frame, about a third of the frame height tall, in front of Comfy car to the left, nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end, same direction as Comfy car. Comfy car: right of frame, about a quarter of the frame height tall, nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy car gains half a length on Rival car over four seconds. Both hold separate lanes; wheels roll continuously and bodywork vibrates subtly. Slow-motion race replay; preserve colors and numbers. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Checkered start-finish line painted across the track; Glass-fronted press box and suites…\nThe Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Infield grass looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "6ed05ee1"
           }
         },
         {
-          "id": "556d3bab-b14d-59fe-a2b3-7a937fa0c6b9",
-          "name": "Shot 03 From the stands · FLUX 3 Image · 58721",
-          "file": "556d3bab-b14d-59fe-a2b3-7a937fa0c6b9.webp",
+          "id": "b4c221d6-d449-54d0-a754-27eb913a4475",
+          "name": "Shot 03 From the stands · FLUX 3 Image · 600408",
+          "file": "b4c221d6-d449-54d0-a754-27eb913a4475.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:32:41.974Z",
+          "createdAt": "2026-11-01T07:42:25.184Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 58721,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 45mm normal lens; medium shot of Comfy car; camera 8 m high, high above Comfy car and 19.2 m from Comfy car, looking slightly down; we see Comfy car side-on, from its right side (a side profile, not a three-quarter or chase view); the horizon is above the top edge (only ground in frame).\nIn frame: Rival car: centre of frame, about a third of the frame height tall, in front of Comfy car to the left, nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end, same direction as Comfy car. Comfy car: centre of frame, about a quarter of the frame height tall, partly hidden by Rival car, nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy car pulls ahead of Rival car on the front straight. The blue car stays inside; the green rival stays outside, separated by a clear lane. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds;…\nThe Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Infield grass looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "5cb10508"
+            "seed": 600408,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 45mm normal lens; medium shot of Comfy car; camera 8 m high, high above Comfy car and 19.2 m from Comfy car, looking slightly down; we see Comfy car side-on, from its right side (a side profile, not a three-quarter or chase view); the horizon is above the top edge (only ground in frame).\nIn frame: Rival car: centre of frame, about a third of the frame height tall, in front of Comfy car to the left, nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end, same direction as Comfy car. Comfy car: centre of frame, about a quarter of the frame height tall, partly hidden by Rival car, nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy car gains half a length on Rival car over four seconds. Both hold separate lanes; wheels roll continuously and bodywork vibrates subtly. Slow-motion race replay; preserve colors and numbers. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Mown infield grass with painted logo-free surface; Checkered start-finish line painted…\nThe Rival car looks exactly like image 2. The Comfy car looks exactly like image 3. The Infield grass looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "6ed05ee1"
           }
         }
       ]
@@ -10260,37 +10260,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "3e497a08-4b17-5af4-ad7c-57ca84c49ea9",
-          "name": "Shot 04 Checkered flag · GPT Image 2.5 · 117181",
-          "file": "3e497a08-4b17-5af4-ad7c-57ca84c49ea9.webp",
+          "id": "b9d09b7d-ba2a-5891-a611-ea722065b668",
+          "name": "Shot 04 Checkered flag · GPT Image 2.5 · 671721",
+          "file": "b9d09b7d-ba2a-5891-a611-ea722065b668.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:44:41.633Z",
+          "createdAt": "2026-11-01T07:39:07.931Z",
           "generated": {
             "presetId": "gpt-image-25",
             "model": "GPT Image 2.5 (OpenAI)",
-            "seed": 117181,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 35mm normal lens; close shot, Comfy car fills most of the frame; camera 4.3 m high, above Comfy car and 10.1 m from Comfy car, looking slightly down; we see Comfy car from the front three-quarter, its left side; horizon near the top edge.\nIn frame: Comfy car: centre of frame, about half the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view). Rival car: centre of frame, about a quarter of the frame height tall, behind Comfy car to the left, partly hidden by Comfy car, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy car crosses the white Start-finish line ahead of Rival car and opens a full car-length lead. Both cars continue nose-first through the finish. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Checkered start-finish line painted across the track; Glass-fronted press box and suites above the main grandstand; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Starter flag stand…\nThe Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "c46bc8c"
+            "seed": 671721,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 35mm normal lens; close shot, Comfy car fills most of the frame; camera 4.3 m high, above Comfy car and 10.1 m from Comfy car, looking slightly down; we see Comfy car from the front three-quarter, its left side; horizon near the top edge.\nIn frame: Comfy car: centre of frame, about half the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view). Rival car: centre of frame, about a quarter of the frame height tall, behind Comfy car to the left, partly hidden by Comfy car, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy car crosses at 2s, then Rival car. The blue car gains a full length; both accelerate, tires planted. Slow-motion replay; keep colors and numbers. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Checkered start-finish line painted across the track; Glass-fronted press box and suites above the main grandstand; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Starter flag stand above the start-finish line; official waving a checkered flag; Tall speedway floodlight tower: a steel lattice mast with a bank of…\nThe Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "f9945265"
           }
         },
         {
-          "id": "424d0bfa-fa26-5f23-a58c-0c6bbe712e3b",
-          "name": "Shot 04 Checkered flag · GPT Image 2.5 · 647906",
-          "file": "424d0bfa-fa26-5f23-a58c-0c6bbe712e3b.webp",
+          "id": "24342f08-c0c5-50ca-a39c-8df250325cdb",
+          "name": "Shot 04 Checkered flag · GPT Image 2.5 · 650725",
+          "file": "24342f08-c0c5-50ca-a39c-8df250325cdb.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:44:46.630Z",
+          "createdAt": "2026-11-01T07:38:21.625Z",
           "generated": {
             "presetId": "gpt-image-25",
             "model": "GPT Image 2.5 (OpenAI)",
-            "seed": 647906,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 35mm normal lens; medium shot of Comfy car; camera 3.3 m high, above Comfy car and 11.2 m from Comfy car, looking slightly down; we see Comfy car from straight in front; horizon near the top edge.\nIn frame: Comfy car: right of frame, about half the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view). Rival car: centre of frame, about a quarter of the frame height tall, behind Comfy car to the left, partly hidden by Comfy car, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy car crosses the white Start-finish line ahead of Rival car and opens a full car-length lead. Both cars continue nose-first through the finish. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Checkered start-finish line painted across the track; Glass-fronted press box and suites above the main grandstand; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Starter flag stand above the start-finish…\nThe Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "c46bc8c"
+            "seed": 650725,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 35mm normal lens; medium shot of Comfy car; camera 3.3 m high, above Comfy car and 11.2 m from Comfy car, looking slightly down; we see Comfy car from straight in front; horizon near the top edge.\nIn frame: Comfy car: right of frame, about half the frame height tall, nose pointing toward the camera and screen-left (three-quarter front view). Rival car: centre of frame, about a quarter of the frame height tall, behind Comfy car to the left, partly hidden by Comfy car, nose pointing toward the camera and screen-left (three-quarter front view), same direction as Comfy car.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy car crosses at 2s, then Rival car. The blue car gains a full length; both accelerate, tires planted. Slow-motion replay; keep colors and numbers. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: A packed oval speedway on a bright summer afternoon, high-banked asphalt, crowded grandstands, light towers, blue sky with a few clouds; Checkered start-finish line painted across the track; Glass-fronted press box and suites above the main grandstand; Banked asphalt racing surface, white lane lines, tyre rubber marks; SAFER barrier wall with catch fence; Starter flag stand above the start-finish line; official waving a checkered flag; Tall speedway floodlight tower: a steel lattice mast with a bank of floodlights at the top. Look:…\nThe Comfy car looks exactly like image 2. The Rival car looks exactly like image 3. The Flag stand looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "f9945265"
           }
         }
       ]
@@ -10550,29 +10550,29 @@
       "height": 817
     },
     {
-      "path": "media/refs/6f2263ee-ce93-5575-a26d-36973cef1b22.webp",
+      "path": "media/refs/7776c93e-97bc-5ccc-a579-d4516a7a5397.webp",
       "kind": "image",
-      "bytes": 120692,
-      "sha256": "2ed1dc5e331b599dd1ae9ea8e2b66bb773782b6498387cef8644bdc131e6e40f",
-      "sourceSha256": "3f60fb2d3b58afb6c8e3c4ba8909c9263133064a287f70d6975e6d7826a9ffef",
-      "width": 1344,
-      "height": 768
-    },
-    {
-      "path": "media/refs/37573524-6488-5f3d-ac89-7f8e62c32ab5.webp",
-      "kind": "image",
-      "bytes": 178000,
-      "sha256": "f8e517dedbc7032961584aa89e8e59c684c2f9f8c9795988445dbc18b8f75d6a",
-      "sourceSha256": "22f18ec135ed2be9b07fa622cb9a4cae54f75b03e5a575ba7ffa5c2acfe45f97",
+      "bytes": 175478,
+      "sha256": "4ab3c03cca9dac82dcdd69e7679caf8faeaeee4326c32e6a661b7734a1d9c3fe",
+      "sourceSha256": "f22af925419aaf41aa276b69ab3a225ecaac40fec543d646fd31195395d29d27",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/32ec50ac-3b53-421c-8e2d-501c09424bed.mp4",
+      "path": "media/refs/4118ab08-8691-538c-a9f3-ea3b67a6debf.webp",
+      "kind": "image",
+      "bytes": 122276,
+      "sha256": "6c9e04ceab7f841d254af6f1577e06668de846e799146f11eba8ed3c0c678141",
+      "sourceSha256": "1838ed1fdc8052af0b10a74ca8db03ab8cccaa91ce1a8dcbbd3f51aacb1525eb",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/85394f7b-f678-4a08-bc8b-697cb253e41e.mp4",
       "kind": "video",
-      "bytes": 753577,
-      "sha256": "47d942c3e8e81efde5520a109e40ad1b9732a0068e584e50707dfad2cda48ec4",
-      "sourceSha256": "05e282f59b3e8e86ce8d9b7c378d7a668de1e57d14a26efc808aacd7165c1fb0",
+      "bytes": 814263,
+      "sha256": "52c4fb7de047ca751d2eeeff4fa338836f649e61feb42d8b8cf8e259a43e40f7",
+      "sourceSha256": "548100af39a162992e2b8d3f5346d647d18e54865981df9df2813244c663dbc3",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -10580,11 +10580,11 @@
       "duration": 4
     },
     {
-      "path": "media/assets/17a147b3-adf5-5017-a525-0eec895bb2ca.mp4",
+      "path": "media/assets/e579502c-4f89-5185-ab04-60fea6e78e1f.mp4",
       "kind": "video",
-      "bytes": 864780,
-      "sha256": "98a4aa78474a7b63b3006deb9af0667e707325fc58d0482ccb2afe889f1b8ea8",
-      "sourceSha256": "0d5e4394e118b3e4b517b1ec0b9d9150b159f3fdb62750cf67588054018ea6a9",
+      "bytes": 841002,
+      "sha256": "1e0d8e7c6fe5428e9bab929dea7b1fd99e618ed22a93b823bf4bb7597757d0c1",
+      "sourceSha256": "c516f6ef594e956575e4595490a0a3c98960f07d96efdf792c265a85b630bf97",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -10592,29 +10592,29 @@
       "duration": 4.042
     },
     {
-      "path": "media/refs/333298f4-92c9-5ed4-a5eb-36798fbe38da.webp",
+      "path": "media/refs/f0737c21-23df-58f8-a4ee-59f177f2ad42.webp",
       "kind": "image",
-      "bytes": 194420,
-      "sha256": "8bfe82773e37fc7ab319b7ae029e7aeba2be970f62c81ff79649a08d080d3c31",
-      "sourceSha256": "6720fe917df622ce67d8afefb54e7c9c9c3f6de6ada73f76a9e0cf2c494c031a",
+      "bytes": 181448,
+      "sha256": "15436eeeba8b28f2d5a4d3af5485c7ce3a05019ab74ecb23a3b3efcb991beea3",
+      "sourceSha256": "c31a3ac130eaee53356c4e2a04eb24b00320d05849b0206207f778d90d8395e8",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/refs/de66f359-aa96-5285-a2e5-3e81801534d9.webp",
+      "path": "media/refs/5e9f4b14-2063-52c5-a3ba-bfbcc11c2830.webp",
       "kind": "image",
-      "bytes": 127304,
-      "sha256": "d10d5646c2a31cd0f0544526369d46c1f10fa090aa54c2ae4eebdf75e401d532",
-      "sourceSha256": "9b2155af0436f6151ef596cfaa9070c7efea06a2adce24f4feaa54af063b07cd",
-      "width": 1344,
+      "bytes": 202062,
+      "sha256": "38daf262d7c7a09f7d71dd43ff812eda3eb47305eb423d7f3c621b720aa9aba4",
+      "sourceSha256": "7e32937087b6b7f28c82551c75b0e6cbd52e65a8e11e34fe59c10a6e32a82548",
+      "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/b21ee017-3d46-483e-9aa5-7fa97ccd2127.mp4",
+      "path": "media/assets/ea8461cb-549d-40fa-81b3-6890fe0fc12a.mp4",
       "kind": "video",
-      "bytes": 675285,
-      "sha256": "6c02df1099951aa7035112859a92be122593d387da28404919f5c39098640d6b",
-      "sourceSha256": "b565c0329ad0cebde9f2dcd26a4c83c1af7d49ff81404458149b4779c923444d",
+      "bytes": 770257,
+      "sha256": "6fd84ee8abf0674aeaee5301b765413baaf853455a4867c9c7baf14e12e5e98c",
+      "sourceSha256": "cafee5b6c6ac7803d23c93a16b4b4ff4ee20b9393a4a3ea66df005c0c00692cc",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -10622,11 +10622,11 @@
       "duration": 4
     },
     {
-      "path": "media/assets/0f7104c6-f827-577b-adc0-745ba329241c.mp4",
+      "path": "media/assets/fd1240d2-31a2-5fa6-a5fb-96994b8168b6.mp4",
       "kind": "video",
-      "bytes": 819123,
-      "sha256": "0dae1a3c1c82d38401a0897c9eccc1a58a2aa67e4d99c55367bbe6b42440ed94",
-      "sourceSha256": "c4b5d40c778f568ae441d65d1c3d5a6542087528b1fdbbbfe133f330c13705c2",
+      "bytes": 755936,
+      "sha256": "3d6b04d20fec718cdd9be1d6f67bc2b7e0c0f3e2a614d90164eb78de2781654b",
+      "sourceSha256": "fd5fa8825146682c30de331c206ffad04e8c165a0f8754f5e68c45299a1128fa",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -10634,29 +10634,29 @@
       "duration": 4.042
     },
     {
-      "path": "media/refs/c7153137-85d2-58c7-af43-fb7a08c4da1f.webp",
+      "path": "media/refs/e60b3038-22e9-5c9f-a440-0f587a375de7.webp",
       "kind": "image",
-      "bytes": 115806,
-      "sha256": "50f673c7a75e71378f8cf5ee7bbaa74e0b30f441269831837508ac3799be94ea",
-      "sourceSha256": "0417894933c5e307abc666889020912f3e6194427f8205167a5b8d275e4b9b96",
+      "bytes": 86164,
+      "sha256": "4eb470ce356ae9a032f227f7df6b033be88582e5af4dd53433b53a064f6d47a0",
+      "sourceSha256": "764e428977949bb9acb6d39db797d1b1472ba61df60b872892a7035054e6b55b",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/refs/556d3bab-b14d-59fe-a2b3-7a937fa0c6b9.webp",
+      "path": "media/refs/b4c221d6-d449-54d0-a754-27eb913a4475.webp",
       "kind": "image",
-      "bytes": 107038,
-      "sha256": "681640ba772b2fa9585d3c4ee8633e5731cf4973d983e7bd670736dd46aabdfc",
-      "sourceSha256": "fa7f37dce8c42906e2beddf23ef49ec2c67974004e8af442d4c489ba37387236",
+      "bytes": 100382,
+      "sha256": "ef485af7e876ba34f48d80b5c1ce21c93c886fba152ee86469ec77cd57974795",
+      "sourceSha256": "829860b4e4914bedd9840cf23d4f5b49b299e98dc86f4e5c29d0dbeddbb95bae",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/c7b6d7d6-26dd-4fc4-9086-f8c67db87dc6.mp4",
+      "path": "media/assets/de6b0181-7587-438e-9991-68d6276c5df5.mp4",
       "kind": "video",
-      "bytes": 494105,
-      "sha256": "c8f9c3935002862d93a6a7940fd47c6fbdc98ad66dda7c347142fd2a264bf037",
-      "sourceSha256": "02037e30c29f572a7cf954796f91a511b555158a081c148fa077644fd1f9d7c9",
+      "bytes": 739351,
+      "sha256": "1a64dc4d2a9f70c3d90c7da10c2accfe382b33c98ef1e660bc4fff29765211a4",
+      "sourceSha256": "2ff09fa3f8f84d652aa6bd2a2008566a162a3274b828181dfadd48d8789b50ac",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -10664,11 +10664,11 @@
       "duration": 4
     },
     {
-      "path": "media/assets/63308029-ffca-5d5a-a5db-346c6d7b08e4.mp4",
+      "path": "media/assets/501086fa-987e-538a-ad04-361a408d0b40.mp4",
       "kind": "video",
-      "bytes": 1058409,
-      "sha256": "b0ab46cb7b7a7170db8999cdc28d9b751f8efe130254faac5f477f72f6b547b9",
-      "sourceSha256": "688a8e5af429b5ea6d58272de4993119e0aa6a94ac73f747b2000786ffc2b0f1",
+      "bytes": 852649,
+      "sha256": "aa47b8c7e1c0cbff43594543491c38b68f588af1381126e68e3a5359de17298a",
+      "sourceSha256": "2f8b9eb19df20dadf3a2da2b6175cd02dace4c668da43ee396960177cb04f7da",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -10676,29 +10676,29 @@
       "duration": 4.042
     },
     {
-      "path": "media/refs/3e497a08-4b17-5af4-ad7c-57ca84c49ea9.webp",
+      "path": "media/refs/b9d09b7d-ba2a-5891-a611-ea722065b668.webp",
       "kind": "image",
-      "bytes": 221334,
-      "sha256": "114ab2a207a108afe7fb7f787c2d9b5d0068aea5b476dbfce8f71ea0c2c1323f",
-      "sourceSha256": "9f362a5116c17587bd896267c7e33c452bf6414a831c4c76a5a3bbc9a58a5e38",
+      "bytes": 223598,
+      "sha256": "da2bb0be6c469b576935c55651ae22fb716f5f0900c34bf4ff1ac8372b0e6aa3",
+      "sourceSha256": "951381b9201a6ed333ffccfa1cda235976c5dd4e5e4abee1fe83e39259513c78",
       "width": 1600,
       "height": 900
     },
     {
-      "path": "media/refs/424d0bfa-fa26-5f23-a58c-0c6bbe712e3b.webp",
+      "path": "media/refs/24342f08-c0c5-50ca-a39c-8df250325cdb.webp",
       "kind": "image",
-      "bytes": 232440,
-      "sha256": "c487bacb7c7ee826f1cc0fdb2efa1dcf1a50a009e28d31501960e458d2de2a0a",
-      "sourceSha256": "1113b5d99e60eced9a5369e4eb667c20b4380dd37fe26796ec03eae9745312c8",
+      "bytes": 235500,
+      "sha256": "576b964c53064291e2144930aecd3bd8ffde863e0e27e799062896f0b4330467",
+      "sourceSha256": "623cfca4e52aa88d792158302e4b7edc8656312f45ccb760ab10dea238de6e4c",
       "width": 1600,
       "height": 900
     },
     {
-      "path": "media/assets/7af25881-84e0-40a5-89a0-0584784bb624.mp4",
+      "path": "media/assets/9b168b69-f524-4a0f-8941-af40f48b27bb.mp4",
       "kind": "video",
-      "bytes": 866620,
-      "sha256": "43d4cd16f7faed94f7b141edb1b2800e1f3625b74cf077dc2c6af5bea6451320",
-      "sourceSha256": "c6cea9c6e8cdae16baa73218d30d533d591e4964237e0208675197c846f85c64",
+      "bytes": 752417,
+      "sha256": "773feb7d621b68b4cea1b1958b0f5a1e0f511130514a7d82d7f08f782f56a30d",
+      "sourceSha256": "fb399d2d493c1ac880380a28073b423d46ceb23d3d4fa009392b26e8db3731be",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -10706,11 +10706,11 @@
       "duration": 4
     },
     {
-      "path": "media/assets/0d4a3fd4-f36b-51f0-a47b-09b9edaaa2b8.mp4",
+      "path": "media/assets/fd570334-567b-5c3c-a0c4-bb59d0f0bcd4.mp4",
       "kind": "video",
-      "bytes": 849246,
-      "sha256": "5aad712e25e648ea5679aeb314add03aa08815b8ab0816140b0f5a89ab055287",
-      "sourceSha256": "da3a11861cf074f7445b00f8f6c0858c79f691b202e44e619b82d11d1ead28e5",
+      "bytes": 838793,
+      "sha256": "b2582e5127c9a1fd9391c720893559e201ca396ac52cdc99597582c28f7fe82c",
+      "sourceSha256": "6d436662819085a889fd6cca82600145837066eec71b6421c366c61c8aef4d48",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -10720,115 +10720,115 @@
   ],
   "assets": [
     {
-      "id": "32ec50ac-3b53-421c-8e2d-501c09424bed",
+      "id": "85394f7b-f678-4a08-bc8b-697cb253e41e",
       "kind": "camera-render",
       "shotId": "f686194e-b8b4-4b88-a531-92667d29a84c",
-      "file": "assets/32ec50ac-3b53-421c-8e2d-501c09424bed.mp4",
+      "file": "assets/85394f7b-f678-4a08-bc8b-697cb253e41e.mp4",
       "mime": "video/mp4",
       "duration": 4,
-      "createdAt": "2026-10-31T06:59:49.342Z",
+      "createdAt": "2026-11-01T07:33:38.602Z",
       "source": {
         "engineShotId": null,
-        "signature": "5641b314"
+        "signature": "2a2c40ed"
       }
     },
     {
-      "id": "17a147b3-adf5-5017-a525-0eec895bb2ca",
+      "id": "e579502c-4f89-5185-ab04-60fea6e78e1f",
       "kind": "workflow-result",
       "shotId": "f686194e-b8b4-4b88-a531-92667d29a84c",
-      "file": "assets/17a147b3-adf5-5017-a525-0eec895bb2ca.mp4",
+      "file": "assets/e579502c-4f89-5185-ab04-60fea6e78e1f.mp4",
       "mime": "video/mp4",
       "duration": 4.041667,
-      "createdAt": "2026-10-31T07:00:46.156Z",
+      "createdAt": "2026-11-01T07:52:27.517Z",
       "source": {
         "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
         "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Comfy car in blue and yellow runs in the inside lane alongside the green Rival car. The two cars are fighting for the final lap; both travel nose-first toward the finish. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 35mm. Filter: saturated primaries.",
-        "sourceAssetId": "32ec50ac-3b53-421c-8e2d-501c09424bed"
+        "prompt": "Cinematic live-action shot. Comfy car drafts for 1s, then eases inside Rival car. Tires grip; the body leans outward and settles as steering unwinds. Slow-motion replay; keep liveries. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: SAFER barrier wall with catch fence. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 35mm. Filter: saturated primaries.",
+        "sourceAssetId": "85394f7b-f678-4a08-bc8b-697cb253e41e"
       }
     },
     {
-      "id": "b21ee017-3d46-483e-9aa5-7fa97ccd2127",
+      "id": "ea8461cb-549d-40fa-81b3-6890fe0fc12a",
       "kind": "camera-render",
       "shotId": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
-      "file": "assets/b21ee017-3d46-483e-9aa5-7fa97ccd2127.mp4",
+      "file": "assets/ea8461cb-549d-40fa-81b3-6890fe0fc12a.mp4",
       "mime": "video/mp4",
       "duration": 4,
-      "createdAt": "2026-10-31T06:59:54.417Z",
+      "createdAt": "2026-11-01T07:33:41.947Z",
       "source": {
         "engineShotId": null,
-        "signature": "371d55e8"
+        "signature": "166dcfc1"
       }
     },
     {
-      "id": "0f7104c6-f827-577b-adc0-745ba329241c",
+      "id": "fd1240d2-31a2-5fa6-a5fb-96994b8168b6",
       "kind": "workflow-result",
       "shotId": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
-      "file": "assets/0f7104c6-f827-577b-adc0-745ba329241c.mp4",
+      "file": "assets/fd1240d2-31a2-5fa6-a5fb-96994b8168b6.mp4",
       "mime": "video/mp4",
       "duration": 4.041667,
-      "createdAt": "2026-10-31T07:01:26.437Z",
+      "createdAt": "2026-11-01T07:52:44.787Z",
       "source": {
         "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
         "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Comfy car draws level with Rival car, holding the inside lane. Both cars stay side by side as the Comfy car begins to edge ahead. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: Mown infield grass with painted logo-free surface. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 35mm. Filter: saturated primaries.",
-        "sourceAssetId": "b21ee017-3d46-483e-9aa5-7fa97ccd2127"
+        "prompt": "Cinematic live-action shot. Comfy car closes for 1s, draws level with Rival car at 3s, then edges ahead. Tires grip; steering unwinds and suspension settles. Slow-motion; keep liveries. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Set: SAFER barrier wall with catch fence. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 35mm. Filter: saturated primaries.",
+        "sourceAssetId": "ea8461cb-549d-40fa-81b3-6890fe0fc12a"
       }
     },
     {
-      "id": "c7b6d7d6-26dd-4fc4-9086-f8c67db87dc6",
+      "id": "de6b0181-7587-438e-9991-68d6276c5df5",
       "kind": "camera-render",
       "shotId": "62ca4116-75ee-47e7-8b57-dd934421c864",
-      "file": "assets/c7b6d7d6-26dd-4fc4-9086-f8c67db87dc6.mp4",
+      "file": "assets/de6b0181-7587-438e-9991-68d6276c5df5.mp4",
       "mime": "video/mp4",
       "duration": 4,
-      "createdAt": "2026-10-31T06:59:59.449Z",
+      "createdAt": "2026-11-01T07:33:45.205Z",
       "source": {
         "engineShotId": null,
-        "signature": "5cb10508"
+        "signature": "6ed05ee1"
       }
     },
     {
-      "id": "63308029-ffca-5d5a-a5db-346c6d7b08e4",
+      "id": "501086fa-987e-538a-ad04-361a408d0b40",
       "kind": "workflow-result",
       "shotId": "62ca4116-75ee-47e7-8b57-dd934421c864",
-      "file": "assets/63308029-ffca-5d5a-a5db-346c6d7b08e4.mp4",
+      "file": "assets/501086fa-987e-538a-ad04-361a408d0b40.mp4",
       "mime": "video/mp4",
       "duration": 4.041667,
-      "createdAt": "2026-10-31T07:01:27.742Z",
+      "createdAt": "2026-11-01T07:52:53.777Z",
       "source": {
         "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
         "backend": "cloud",
-        "prompt": "Cinematic live-action shot. Comfy car pulls ahead of Rival car on the front straight. The blue car stays inside; the green rival stays outside, separated by a clear lane. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Set: Asphalt back straight. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 45mm. Filter: high contrast.",
-        "sourceAssetId": "c7b6d7d6-26dd-4fc4-9086-f8c67db87dc6"
+        "prompt": "Cinematic live-action shot. Comfy car gains half a length on Rival car over four seconds. Both hold separate lanes; wheels roll continuously and bodywork vibrates subtly. Slow-motion race replay; preserve colors and numbers. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Look: Photoreal live-action motorsport broadcast. Crisp sunlight, heat shimmer, motion blur on wheels, saturated team colours. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 45mm. Filter: high contrast.",
+        "sourceAssetId": "de6b0181-7587-438e-9991-68d6276c5df5"
       }
     },
     {
-      "id": "7af25881-84e0-40a5-89a0-0584784bb624",
+      "id": "9b168b69-f524-4a0f-8941-af40f48b27bb",
       "kind": "camera-render",
       "shotId": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
-      "file": "assets/7af25881-84e0-40a5-89a0-0584784bb624.mp4",
+      "file": "assets/9b168b69-f524-4a0f-8941-af40f48b27bb.mp4",
       "mime": "video/mp4",
       "duration": 4,
-      "createdAt": "2026-10-31T06:49:18.956Z",
+      "createdAt": "2026-11-01T07:33:49.427Z",
       "source": {
         "engineShotId": null,
-        "signature": "c46bc8c"
+        "signature": "f9945265"
       }
     },
     {
-      "id": "0d4a3fd4-f36b-51f0-a47b-09b9edaaa2b8",
+      "id": "fd570334-567b-5c3c-a0c4-bb59d0f0bcd4",
       "kind": "workflow-result",
       "shotId": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
-      "file": "assets/0d4a3fd4-f36b-51f0-a47b-09b9edaaa2b8.mp4",
+      "file": "assets/fd570334-567b-5c3c-a0c4-bb59d0f0bcd4.mp4",
       "mime": "video/mp4",
       "duration": 3.708333,
-      "createdAt": "2026-10-31T06:53:52.670Z",
+      "createdAt": "2026-11-01T07:50:19.159Z",
       "source": {
         "workflow": "Seedance 2.5 · edit the complete video · 7 reference images",
         "backend": "cloud",
-        "prompt": "Comfy car crosses the white Start-finish line ahead of Rival car and opens a full car-length lead. Both cars continue nose-first through the finish. Stock car race car in ComfyUI livery: electric blue body with bold yellow stripes and number 1, yellow wheels rims, the yellow Comfy wordmark on the hood and doors. Stock car race car in a black and neon green livery, number 7, green accents, no real-world logos. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 35mm. Filter: high contrast.\nReference images: 1 = start still; 2 = end still; 3 = Comfy car; 4 = Rival car; 5 = Flag stand; 6 = Turns 3–4 stands 1; 7 = Turns 3–4 · surface 1.",
-        "sourceAssetId": "7af25881-84e0-40a5-89a0-0584784bb624"
+        "prompt": "Comfy car crosses at 2s, then Rival car. The blue car gains a full length; both accelerate, tires planted. Slow-motion replay; keep colors and numbers. Blue/yellow Comfy stock car, number 1, yellow rims. Black stock car, neon green accents, number 7. No real-world logos. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 35mm. Filter: high contrast.\nReference images: 1 = start still; 2 = end still; 3 = Comfy car; 4 = Rival car; 5 = Flag stand; 6 = Turns 3–4 stands 1; 7 = Turns 3–4 · surface 1.",
+        "sourceAssetId": "9b168b69-f524-4a0f-8941-af40f48b27bb"
       }
     }
   ],
@@ -10836,25 +10836,25 @@
     "clips": [
       {
         "shotId": "f686194e-b8b4-4b88-a531-92667d29a84c",
-        "assetId": "17a147b3-adf5-5017-a525-0eec895bb2ca",
+        "assetId": "e579502c-4f89-5185-ab04-60fea6e78e1f",
         "in": 0,
         "out": null
       },
       {
         "shotId": "95a7f87c-6236-4628-a4e9-88bcea6dc6aa",
-        "assetId": "0f7104c6-f827-577b-adc0-745ba329241c",
+        "assetId": "fd1240d2-31a2-5fa6-a5fb-96994b8168b6",
         "in": 0,
-        "out": 2.25
+        "out": null
       },
       {
         "shotId": "62ca4116-75ee-47e7-8b57-dd934421c864",
-        "assetId": "63308029-ffca-5d5a-a5db-346c6d7b08e4",
+        "assetId": "501086fa-987e-538a-ad04-361a408d0b40",
         "in": 0,
-        "out": 2
+        "out": null
       },
       {
         "shotId": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
-        "assetId": "0d4a3fd4-f36b-51f0-a47b-09b9edaaa2b8",
+        "assetId": "fd570334-567b-5c3c-a0c4-bb59d0f0bcd4",
         "in": 0,
         "out": null
       }

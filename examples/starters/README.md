@@ -19,15 +19,22 @@ Each starter opens with bundled media, with no generation and no network:
 - for each shot, the start and end stills, the blockout clip and the video made from them;
 - the cut, with the chosen video and trim for every shot.
 
-The 2026-10-31 blocking pass kept every entity ID, cast look and design sheet; the shot media was then
-made again for the revised blocking (2026-10-31, about $14.83 at list prices). The four shots the demo
-leads with use the final tier: GPT Image 2.5 stills and a Seedance 2.5 edit of the blockout clip, so the
-blockout is the camera (Final Lap · Checkered flag, Posterized · Posterized, Wingspan · The glide,
-Breaking News · The headline). The other nine use the draft tier: FLUX.2 Pro or FLUX 3 stills and an LTX
-Fast clip animated from the start still, whose camera only approximates the blockout; three of them are
-trimmed in the cut where the clip stops matching the shot (The valley, The draft, From the stands). Every
-still and blockout clip carries the signature of the current blocking, so a copy reports nothing as out
-of date and a new batch does not remake them.
+The shot media was made again on 2026-11-01 for the animation pass (below), from blockouts captured with the
+low-poly display models and the z-fighting and shadow fixes, for about $9.60 at list prices. The shots the demo leads with
+use the final tier: GPT Image 2.5 stills and a Seedance 2.5 edit of the blockout clip, so the blockout is the camera
+(Final Lap · Checkered flag, Breaking News · The headline). The draft-tier shots use FLUX 3 stills and an LTX 2.5 Fast clip
+animated from the start still, whose camera only approximates the blockout (the other shots of Final Lap, Posterized and
+Breaking News). None is trimmed in the cut. Every one of those stills, blockout clips and videos carries the signature of
+the current blocking, so a copy reports nothing as out of date and a new batch does not remake them.
+
+Two parts still show the earlier, unposed animation, and a copy reports them as made for an earlier blocking:
+
+- **Posterized · Posterized** has new stills, but Seedance refused both new videos ("may be related to copyright
+  restrictions"), so it keeps its earlier Seedance video and the blockout clip that video was made from.
+- **Wingspan** was not regenerated (the run's budget ran out). All its stills, clips and videos are the earlier ones,
+  including The valley's trim in the cut.
+
+A batch on a copy plans only those replacements.
 
 Set pieces render as blockout colours. The race's track surfaces, stands and towers no longer inherit
 an unrelated shared image; existing primary environment looks remain available. Cast identities remain
@@ -63,9 +70,8 @@ Final Lap has low surrounding terrain to activate the renderer's daylight sky an
 The 2026-10-31 asset pass adds a bundled `model` ID to every visible object: low-poly people,
 race cars, birds and wildlife, studio equipment, court fixtures, track sections and set pieces.
 The 32 GLBs total about 1.1 MB. Every original transform, path, camera, timing and media file is
-unchanged. Display models fit the original proxies and do not change blocking signatures; the
-bundled stills and videos still contain the earlier geometry. Capture a new blockout to see the
-new meshes in a video. Reproducible Blender scripts and capture instructions:
+unchanged. Display models fit the original proxies and do not change blocking signatures. The blockout
+clips made on 2026-11-01 show these meshes (all but the earlier-animation shots listed above). Reproducible Blender scripts and capture instructions:
 [`scripts/blender/README.md`](../../scripts/blender/README.md).
 
 ## Format
@@ -98,7 +104,7 @@ signature. `PREVIS_STARTERS_DIR` points the server at another starters folder (f
 
 ## Media size and why it is in git
 
-The four starters' media is about 32 MB (the export stops at 80 MB and then keeps only the hero shots'
+The four starters' media is about 35 MB (the export stops at 80 MB and then keeps only the hero shots'
 videos). It is committed with the code rather than downloaded from a release so that a fresh clone opens
 finished starters offline, with no publish step to keep in sync, and so `pnpm demo:build` can use the same
 files. Re-exporting only rewrites a file when its source changed, so history grows only when a starter's
@@ -177,8 +183,7 @@ match the travel distances in the retained cameras. The arena backboard is now t
 is visible from the existing baseline view. Shot and cast wording is shorter and checked with the prompt-plan
 assembler against every video model's auto-prompt cap; it gives no camera-motion instructions.
 
-The earlier paid stills and videos are preserved byte-for-byte and **intentionally out of date** for this new
-animation. No paid regeneration was performed. Fresh starter copies report that state, and a dry-run batch
-plans new key stills and blockouts before video generation. The invariant test pins all cameras, timing, set
-transforms, cast images and media to the pre-animation snapshot; animation tests additionally check posed shoe
+The paid media was then made again for this animation (2026-11-01; see "What a starter opens with" for the shots that
+still carry the earlier animation). The invariant test pins all cameras, timing, set transforms and cast images to the
+pre-animation snapshot (shot media is pinned by the round-trip test instead); animation tests additionally check posed shoe
 contact, scoring and prompt retention. Reproducible authoring and evidence commands are in the Blender README.
