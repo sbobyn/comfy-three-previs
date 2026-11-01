@@ -15,7 +15,17 @@ const canonical = x => Array.isArray(x) ? x.map(canonical) : x && typeof x === '
 const digest = x => createHash('sha256').update(JSON.stringify(canonical(x))).digest('hex');
 const baseline = JSON.parse(readFileSync(new URL('./fixtures/starter-animation-baseline.json', import.meta.url), 'utf8'));
 
-test('all starter objects have compatible meshes and animation leaves cameras, timing, set dressing and media byte-for-byte unchanged', async () => {
+// The baseline hashes each pre-animation starter without its shot media (stills, clips, videos, cut), which is made again for
+// each blocking and pinned byte for byte by tests/starters-roundtrip.test.mjs. Cast images and their media entries stay in the hash.
+const withoutShotMedia = s => {
+  const cast = new Set((s.scene.references || []).map(r => `media/refs/${r.id}.webp`));
+  for (const shot of s.shots) delete shot.references;
+  delete s.assets; delete s.edit;
+  s.media = s.media.filter(m => cast.has(m.path));
+  return s;
+};
+
+test('all starter objects have compatible meshes and animation leaves cameras, timing, set dressing and cast images unchanged', async () => {
   for (const s of await loadStarters()) {
     const fixed = structuredClone(s);
     const actors = { 'breaking-news': ['News anchor', 'Camera operator'], wingspan: ['Bald eagle', 'Elk 1', 'Elk 2', 'Elk 3'], 'final-lap': ['Comfy car', 'Rival car'], posterized: ['Comfy guard', 'Rival defender', 'Basketball'] };
@@ -25,7 +35,7 @@ test('all starter objects have compatible meshes and animation leaves cameras, t
       if (rewrittenCast.includes(e.name)) delete e.notes;
     }
     for (const shot of fixed.shots) for (const k of ['description', 'prompts']) delete shot[k];
-    assert.equal(digest(fixed), baseline[s.slug], `${s.slug}: only the named actors' blocking and shot/cast action text may change`);
+    assert.equal(digest(withoutShotMedia(fixed)), baseline[s.slug], `${s.slug}: only the named actors' blocking, shot/cast action text and shot media may change`);
     for (const e of s.scene.entities) {
       if (e.shape === 'group') assert.equal(e.model, undefined);
       else assert.equal(blockoutModel(e), e.model, `${s.slug}: ${e.name}`);
