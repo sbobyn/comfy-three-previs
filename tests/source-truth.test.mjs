@@ -75,7 +75,7 @@ test('workspace: the model input card reports stale stills after a camera edit (
   const card = project => {
     const ctx = { h, project, genCache: { presets: choices, definitions: [], jobs: [] }, shotModel: () => def, videoChoices: st => st.presets, modelLabel: d => d.title, referenceCapacity: () => 0, plannedReferences: () => [],
       cameraSourceOf, keyStillState, shotPrompt, cameraMotionWarning, CAMERA_SOURCE_LABELS, castRows, objectLooks, signature: shotSignature, clipSeconds: () => 5, clipLengths: () => '2–10 s', startOnlyFallback: d => FIRST_FRAME_FALLBACK[d.id],
-      modelInputsDiagram: () => h('div'), refUrl: r => r.file, fromBlender: () => false, localStorage: { setItem() {} }, shotPane: { dataset: {} }, KIND_COLORS: {}, entity: () => null };
+      modelInputsDiagram: () => h('div'), middleSlotText: () => null, refUrl: r => r.file, fromBlender: () => false, localStorage: { setItem() {} }, shotPane: { dataset: {} }, KIND_COLORS: {}, entity: () => null };
     runInNewContext(compile(slice('function modelBlock(s: Shot) {', '// ---------- Shot panel sections')), ctx);
     return text(ctx.modelBlock(project.shots[0]));
   };
@@ -108,7 +108,7 @@ test('workspace: a Blender shot’s still guide is the imported frame from the s
 });
 
 test('workspace: the video quote card shows the effective camera, output seconds and final prompt, and flags camera words', () => {
-  const ctx = { h, cameraMotionWarning, CAMERA_SOURCE_LABELS, api: async () => ({}), setTimeout() {} };
+  const ctx = { h, cameraMotionWarning, CAMERA_SOURCE_LABELS, planFacts: () => null, api: async () => ({}), setTimeout() {} };
   runInNewContext(compile(slice('function genQuote(', '// ---------- Live sync')), ctx);
   const job = { id: 'job', fingerprint: 'fp', cameraSource: 'still', quote: { status: 'unknown' }, validation: { compatible: true }, sources: { firstFrame: { id: 'img' } }, binding: { prompt: 'Whip pan to the car. Hold the still’s framing; keep the camera move subtle and consistent with it.' } };
   const card = text(ctx.genQuote(job, { title: 'LTX 2.5 Pro · start still', pricing: { ratePerSecond: 0.172 } }, { backend: { kind: 'cloud' } }, { duration: 5 }, { est: 0.8, seconds: 4, cameraSource: 'still', prompt: 'ignored: the bound prompt wins' }));

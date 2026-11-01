@@ -8,6 +8,7 @@ import { cameraMotionWarning, cameraSourceOf, fitPrompt, motionInput, withCamera
 import { planSlots, setsFor, slotAspect, viewPrompt } from '../../shared/sheet-presets.mjs';
 import { withReferenceImages, maxReferences } from '../../shared/video-refs.mjs';
 import { clipSecondsFor, durationValue, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
+import { keyframePlan, maxMiddleFrames, middleKeys, resolveFrame, withMiddleFrames } from '../../shared/keyframes.mjs';
 
 const SECONDS = { look: 20, sheet: 30, still: 20, video: 90 };
 const busyError = (pool, retryAfterSeconds) => Object.assign(Error(`Backend busy: fake ${pool} slots in use; retry when a job finishes`), { status: 409, apiCode: 'busy', retryAfterSeconds });
@@ -109,10 +110,11 @@ export function videoPreparer({ get, post }) {
   // Saved engine definition for a preset + reference count (src/director-videogen.ts definitionFor); one at a time so
   // concurrent shots share one saved copy. A built-in preset is saved (registered) here before its first bind.
   let defining = Promise.resolve();
-  function definitionFor(base, refCount) {
+  function definitionFor(base, refCount, middleCount = 0) {
     const run = defining.then(async () => {
       const presetId = base.provenance?.presetId || base.id;
-      const wanted = withReferenceImages({ ...base, provenance: { ...(base.provenance || {}), presetId } }, refCount), n = wanted.provenance?.referenceImages || 0;
+      // Timed in-between key frames (shared/keyframes.mjs) are extra image inputs on a start → end model; the graph comparison tells variants apart.
+      const wanted = withMiddleFrames(withReferenceImages({ ...base, provenance: { ...(base.provenance || {}), presetId } }, refCount), middleCount), n = wanted.provenance?.referenceImages || 0;
       const same = d => (d.provenance?.presetId === presetId || d.id === presetId) && (d.provenance?.referenceImages || 0) === n && JSON.stringify(d.graph) === JSON.stringify(wanted.graph);
       const saved = ((await get('/api/generation')).definitions || []).find(same);
       return saved || (await withRevision(revision => post('/api/generation/preset', { revision, definition: wanted }))).definition;
@@ -127,21 +129,25 @@ export function videoPreparer({ get, post }) {
     let base = pick(model); if (!base) throw notSent(`Unknown video model ${model}`);
     let assetBindings, prompt, refs = [];
     const parametersOf = def => Object.fromEntries(Object.entries(def.parameters || {}).map(([k, m]) => [k, def.graph?.[m.nodeId]?.inputs?.[m.input]]));
-    let def, parameters, registered = [], seconds = r.duration ?? s.duration;
+    let def, parameters, registered = [], seconds = r.duration ?? s.duration, keyframes = null;
     if (base.task === 'first-frame') {
       let wantsLast = !!base.inputs?.lastFrame;
       // No current end still: only an explicit choice (startOnly) animates the start still alone with the start-only sibling.
       const sibling = wantsLast && FIRST_FRAME_FALLBACK[base.id] && keyStillState(p, s).endState !== 'ready' ? pick(FIRST_FRAME_FALLBACK[base.id]) : null;
       if (sibling && startOnly) { base = sibling; wantsLast = false; }
-      const frames = (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast }))).references;
+      // Pinned in-between frames go to models that take them (Kling 4.0); keyframePlan says where each lands.
+      const middleCount = wantsLast ? Math.min(maxMiddleFrames(base), middleKeys(s).length) : 0;
+      const frames = (await retryChanged(() => post('/api/director/video-refs', { projectId: p.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast, ...(middleCount ? { middleFrames: middleCount } : {}) }))).references;
       let start = frames.find(x => x.label === 'start key frame')?.renderId; const end = frames.find(x => x.label === 'end key frame')?.renderId;
       if (wantsLast && (!start || !end)) throw Object.assign(notSent(`This model animates start → end: the shot needs ${!start && !end ? 'start and end key frames' : !start ? 'a start key frame' : 'an end key frame'}${sibling && start ? `, or choose to animate the start still alone with ${sibling.title.split(' · ')[0]} (camera from one still, approximate)` : ''}`), { startOnly: sibling && start ? sibling.id : null });
       if (!start) start = (await get('/api/project')).project.renders?.find(x => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
       if (!start) throw notSent('No start image: generate a key frame for this shot, or render the blockout again');
-      def = await definitionFor(base, 0); parameters = parametersOf(def);
+      const mids = frames.filter(x => /^middle key frame \d+$/.test(x.label));
+      def = await definitionFor(base, 0, mids.length); parameters = parametersOf(def);
       seconds = clipSecondsFor(base, s.duration);
       if ('duration' in parameters) parameters.duration = durationValue(parameters.duration, seconds);
-      assetBindings = { firstFrame: { renderId: start }, ...(wantsLast ? { lastFrame: { renderId: end } } : {}) };
+      assetBindings = { firstFrame: { renderId: start }, ...(wantsLast ? { lastFrame: { renderId: end } } : {}), ...Object.fromEntries(mids.map((x, i) => [`middleFrame${i + 1}`, { renderId: x.renderId }])) };
+      keyframes = keyframePlan(p, s, base, { seconds });
       prompt = videoPrompt(p, s, wantsLast ? 'keyframes' : 'still', []);
     } else {
       const cap = useReferences === false ? 0 : maxReferences(base);
@@ -161,7 +167,7 @@ export function videoPreparer({ get, post }) {
       const request = { requestId: randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: local ? 'local' : 'cloud' } };
       const job = (await post('/api/generation/quote', request)).job;
       const cameraSource = job.cameraSource || cameraSourceOf(def, assetBindings);
-      return { request, job, def, modelUsed: base.id, cameraSource, prompt, refs: registered, seconds, promptWarning: cameraMotionWarning(prompt, cameraSource) };
+      return { request, job, def, modelUsed: base.id, cameraSource, prompt, refs: registered, seconds, ...(keyframes ? { keyframes } : {}), promptWarning: cameraMotionWarning(prompt, cameraSource) };
     });
   }
   return { definitionFor, prepare };
@@ -248,7 +254,8 @@ export function loopbackDrivers(base) {
       async submit(ctx) {
         const p = await ctx.project(), s = shotOf(p, ctx.node.target.shotId), at = ctx.node.target.t;
         return refgen(ctx, p.id, async () => {
-          const t = at === 'start' ? 0 : at === 'end' ? s.duration : Number(at);
+          // One encoded blockout frame (shared/keyframes.mjs): "end" is the clip's last frame; the guide, words and grade use it.
+          const f = resolveFrame(p, s, { at }), t = f.t;
           const cap = (await presets(p.id)).find(x => x.id === ctx.node.model)?.maxRefs || 0;
           const looks = stillReferences(p, s, t, cap).looks; // objects in frame, one environment image
           const prev = p.shots[p.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);
@@ -256,7 +263,7 @@ export function loopbackDrivers(base) {
           const frame = await post('/api/director/frame', { projectId: p.id, shotId: s.id, t, guide: true });
           // A Blender guide (blender-import) has no proxy markers, so the prompt does not explain them.
           const prompt = stillPrompt({ project: p, shot: s, t, text: shotPrompt(p, s, 'image'), presetId: ctx.node.model, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null, markers: frame.source !== 'blender' });
-          return { projectId: p.id, target: 'shot', shotId: s.id, frameAt: at, presetId: ctx.node.model, prompt, aspect: '16:9', count: 1, seed: randomSeed(), referenceIds: refIds, guide: frame.data };
+          return { projectId: p.id, target: 'shot', shotId: s.id, frameAt: f.frameAt, frame: f.index, presetId: ctx.node.model, prompt, aspect: '16:9', count: 1, seed: randomSeed(), referenceIds: refIds, guide: frame.data };
         });
       },
     },

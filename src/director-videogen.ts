@@ -9,10 +9,12 @@ import { cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../share
 import type { CameraSource } from '../shared/camera-source.mjs';
 import { api } from './director-common';
 import { clipSecondsFor, durationValue, FIRST_FRAME_FALLBACK } from '../shared/tiers.mjs';
+import { keyframePlan, maxMiddleFrames, middleKeys, withMiddleFrames } from '../shared/keyframes.mjs';
+import type { KeyframePlan } from '../shared/keyframes.mjs';
 
-export type Def = { id: string; title: string; task: string; description?: string; pricing?: { ratePerSecond?: number }; parameters?: Record<string, { nodeId: string; input: string }>; graph?: any; inputs?: any; provenance?: { presetId?: string; referenceImages?: number }; constraints?: any };
+export type Def = { id: string; title: string; task: string; description?: string; pricing?: { ratePerSecond?: number }; parameters?: Record<string, { nodeId: string; input: string }>; graph?: any; inputs?: any; provenance?: { presetId?: string; referenceImages?: number; middleFrames?: number }; constraints?: any };
 export type GenState = { presets: Def[]; definitions: Def[]; jobs: any[]; paidExecutionEnabled?: boolean };
-export type EngineRef = { renderId: string; referenceId: string; entityId: string | null; role: string; label: string; name: string; file: string };
+export type EngineRef = { renderId: string; referenceId: string; entityId: string | null; role: string; label: string; name: string; file: string; frame?: number };
 
 export const VIDEO_TASKS = ['transform-video', 'control-video', 'first-frame'];
 /** Compatible task definitions, including imported graphs; derived reference variants are hidden. */
@@ -52,10 +54,11 @@ export function shotVideoPrompt(project: DirectorProject, s: Shot, refs: VideoRe
   return compilePrompt(project, s, refs, { cameraSource });
 }
 
-async function definitionFor(st: GenState, id: string, refCount: number): Promise<Def> {
+async function definitionFor(st: GenState, id: string, refCount: number, middleCount = 0): Promise<Def> {
   const base = baseOf(st, id); if (!base) throw Error('Choose a video model');
   const presetId = base.provenance?.presetId || base.id;
-  const wanted = withReferenceImages({ ...base, provenance: { ...(base.provenance || {}), presetId } }, refCount) as Def;
+  // Timed in-between key frames (shared/keyframes.mjs) are extra image inputs; the graph comparison below tells variants apart.
+  const wanted = withMiddleFrames(withReferenceImages({ ...base, provenance: { ...(base.provenance || {}), presetId } }, refCount), middleCount) as Def;
   const n = wanted.provenance?.referenceImages || 0;
   const same = (d: Def) => (d.provenance?.presetId === presetId || d.id === presetId) && (d.provenance?.referenceImages || 0) === n && JSON.stringify(d.graph) === JSON.stringify(wanted.graph);
   const saved = st.definitions.find(same);
@@ -104,14 +107,17 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   const fallback = wantsLast && keyStillState(project, s).endState !== 'ready' ? st.presets.find(p => p.id === startOnlyFallback(base)) : null;
   if (fallback && o.startOnly) { base = fallback; wantsLast = false; }
   // The server refuses a still made for an earlier blocking (409); its message says which one to make again.
-  const frame: EngineRef[] = (await api('director/video-refs', { projectId: project.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast })).references;
+  // Pinned in-between frames go to models that take them (Kling 4.0); the server refuses a missing or stale one.
+  const middleCount = wantsLast ? Math.min(maxMiddleFrames(base), middleKeys(s).length) : 0;
+  const frame: EngineRef[] = (await api('director/video-refs', { projectId: project.id, shotId: s.id, previsShotId: r.previsShotId, max: 2, firstFrame: true, lastFrame: wantsLast, ...(middleCount ? { middleFrames: middleCount } : {}) })).references;
+  const mids = frame.filter(x => /^middle key frame \d+$/.test(x.label));
   let renderId = frame.find(x => x.label === 'start key frame')?.renderId;
   const lastId = frame.find(x => x.label === 'end key frame')?.renderId;
   if (wantsLast && (!renderId || !lastId)) throw Error(fallback && renderId ? `This shot has no End still. Add one in the Storyboard, or choose to animate the start still alone with ${fallback.title.split(' ·')[0]} (the camera then comes from one still, approximate).` : 'Generate this shot’s start and end key frames first');
   const main = (await api('project')).project;
   if (!renderId) renderId = main.renders?.find((x: any) => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
   if (!renderId) throw Error('No start image: generate a key frame for this shot, or make the blockout again');
-  const def = await definitionFor(st, base.id, 0);
+  const def = await definitionFor(st, base.id, 0, mids.length);
   const parameters: Record<string, unknown> = {};
   for (const [k, m] of Object.entries(def.parameters || {})) parameters[k] = def.graph?.[m.nodeId]?.inputs?.[m.input];
   // Nearest clip length this model accepts, in the parameter's own type.
@@ -122,9 +128,10 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   const chosen = (o.userPrompt ?? shotPrompt(project, s, 'video', { cameraSource })).trim();
   let prompt = withCameraLine(chosen || compilePrompt(project, s, null, { cameraSource }), cameraSource);
   prompt = fitPrompt(prompt, def.constraints?.promptMaxLength, cameraSource); // keeps the camera line and the reference legend
-  const bind = await api('generation/bind', { revision: (await api('project')).project.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings: { firstFrame: { renderId }, ...(wantsLast ? { lastFrame: { renderId: lastId } } : {}) }, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
+  const bind = await api('generation/bind', { revision: (await api('project')).project.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings: { firstFrame: { renderId }, ...(wantsLast ? { lastFrame: { renderId: lastId } } : {}), ...Object.fromEntries(mids.map((x, i) => [`middleFrame${i + 1}`, { renderId: x.renderId }])) }, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
   const request = { requestId: crypto.randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: o.backend || 'cloud' } };
   const job = (await api('generation/quote', request)).job;
   const est = def.pricing?.ratePerSecond ? def.pricing.ratePerSecond * secs : null;
-  return { def, job, request, est, refs: frame, prompt, cameraSource, seconds: secs };
+  const keyframes: KeyframePlan = keyframePlan(project, s, base, { seconds: secs });
+  return { def, job, request, est, refs: frame, prompt, cameraSource, seconds: secs, keyframes };
 }

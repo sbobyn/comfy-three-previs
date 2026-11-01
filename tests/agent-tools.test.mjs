@@ -348,10 +348,11 @@ test('tools/list: the director and library tools by default; legacy engine, Blen
   await withAgent(fakePrevis(p), async ({ rpc }) => {
     const tools = (await rpc('tools/list', {})).result.tools; names = tools.map(t => t.name);
     const director = names.filter(n => n.startsWith('previs_director_')), library = names.filter(n => n.startsWith('previs_library_'));
-    assert.equal(director.length, 29, `${director.length} director tools: 27 plus the ${BLENDER_TOOLS.length} Blender import tools`);
+    assert.equal(director.length, 30, `${director.length} director tools: 28 plus the ${BLENDER_TOOLS.length} Blender import tools`);
+    assert.ok(director.includes('previs_director_keyframe'), 'exact-frame key stills');
     for (const name of BLENDER_TOOLS) assert.ok(director.includes(name), name);
     assert.deepEqual(library, LIBRARY_TOOLS, 'the asset library tools, as one group');
-    assert.equal(names.length, 29 + LIBRARY_TOOLS.length, 'director (with Blender import) and library tools');
+    assert.equal(names.length, 30 + LIBRARY_TOOLS.length, 'director (with Blender import) and library tools');
     assert.deepEqual(names.filter(n => !director.includes(n) && !library.includes(n)), []);
     assert.match(tools.find(t => t.name === 'previs_director_edit').description, /\{op:"use_take",shotId,referenceId\}/);
     const refused = await rpc('tools/call', { name: 'previs_render_animation', arguments: {} });
