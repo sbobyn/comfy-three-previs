@@ -124,7 +124,7 @@ Your phone streams its orientation to the app over HTTPS on your local network.
 
 ## Starters
 
-Open one from the home page and make it yours: **Breaking News** (a news anchor breaks the story of this launch), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage. Each opens with every cast member's image and design sheet, stills, a blockout clip and a generated video for each shot, and a cut. The media is in the repo (about 32 MB, see [examples/starters](examples/starters/README.md)), so nothing is downloaded or generated.
+Open one from the home page and make it yours: **Breaking News** (a news anchor breaks the story of this launch), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage. Each opens with every cast member's image and design sheet, stills, a blockout clip and a generated video for each shot, and a cut. The media is in the repo (about 35 MB, see [examples/starters](examples/starters/README.md)), so nothing is downloaded or generated.
 
 When a starter's blocking has changed since its stills and videos were made, it says so when you open it and marks those videos "older"; generating makes matching ones. If its media files are not in your checkout, it opens as a blockout and says that instead. A starter's blockout clip is for watching: generating first makes the shot's own blockout (free, in the browser).
 

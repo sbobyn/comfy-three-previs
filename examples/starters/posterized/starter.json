@@ -10837,37 +10837,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "123833d3-d985-5ad8-a6c8-e91c95cb6121",
-          "name": "Shot 01 Fast break · FLUX 3 Image · 515032",
-          "file": "123833d3-d985-5ad8-a6c8-e91c95cb6121.webp",
+          "id": "2557efbe-192a-54d4-a2ef-e6a4decde717",
+          "name": "Shot 01 Fast break · FLUX 3 Image · 420128",
+          "file": "2557efbe-192a-54d4-a2ef-e6a4decde717.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:34:02.834Z",
+          "createdAt": "2026-11-01T07:44:23.917Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 515032,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 32mm normal lens; full shot, Comfy guard head to toe; camera 4.8 m high, well above Comfy guard's head and 9.2 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival guard: lower far left of frame, about a quarter of the frame height tall, cut off by the left and bottom edges, in front of Comfy guard to the left, facing away from the camera and screen-left (three-quarter rear view). Rival defender: far right of frame, about a third of the frame height tall, beside Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: centre of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: far right of frame, about a third of the frame height tall, behind Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy center: upper far right of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing screen-right (profile).\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy guard in blue and yellow advances with Basketball while the green Rival defender retreats toward the basket. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Blue and…\nThe Rival guard looks exactly like image 2. The Comfy guard looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "ae3879eb"
+            "seed": 420128,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 32mm normal lens; full shot, Comfy guard head to toe; camera 4.8 m high, well above Comfy guard's head and 9.2 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival guard: lower far left of frame, about a quarter of the frame height tall, cut off by the left and bottom edges, in front of Comfy guard to the left, facing away from the camera and screen-left (three-quarter rear view). Rival defender: far right of frame, about a third of the frame height tall, beside Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: centre of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: far right of frame, about a third of the frame height tall, behind Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy center: upper far right of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing screen-right (profile).\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy guard strides with four dribbles; Rival defender retreats. Feet push off; the ball rebounds sharply. Half-speed; same uniforms. Athletic guard: blue/yellow Comfy uniform, number 1. Blue and yellow only. Never black, white or green on this player. Tall defender: black/neon green uniform, number 7. Black and neon green only. Never white, red or blue on this player. Pro basketball…\nThe Rival guard looks exactly like image 2. The Comfy guard looks exactly like image 3. The Court floor looks exactly like image 4. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "a5880a04"
           }
         },
         {
-          "id": "dd0a1808-7a68-5405-ae1e-a67942578b05",
-          "name": "Shot 01 Fast break · FLUX 3 Image · 483750",
-          "file": "dd0a1808-7a68-5405-ae1e-a67942578b05.webp",
+          "id": "02e80850-b229-5189-a141-b4d3a0123c64",
+          "name": "Shot 01 Fast break · FLUX 3 Image · 547736",
+          "file": "02e80850-b229-5189-a141-b4d3a0123c64.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:34:08.106Z",
+          "createdAt": "2026-11-01T07:40:24.617Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 483750,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 32mm normal lens; full shot, Comfy guard head to toe; camera 4.8 m high, well above Comfy guard's head and 9.1 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Comfy guard: left of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival defender: far right of frame, about half the frame height tall, cut off by the right edge, in front of Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view).\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy guard in blue and yellow advances with Basketball while the green Rival defender retreats toward the basket. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Blue and yellow only. Never black, white or green on this player. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker. Black and neon green only. Never white, red or blue on this player. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers. Pro basketball player in a rival team uniform: black jersey and shorts with neon green…\nThe Comfy guard looks exactly like image 2. The Basketball looks exactly like image 3. The Court floor looks exactly like image 4. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "ae3879eb"
+            "seed": 547736,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 32mm normal lens; full shot, Comfy guard head to toe; camera 4.8 m high, well above Comfy guard's head and 9.1 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Comfy guard: left of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival defender: far right of frame, about half the frame height tall, cut off by the right edge, in front of Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view).\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy guard strides with four dribbles; Rival defender retreats. Feet push off; the ball rebounds sharply. Half-speed; same uniforms. Athletic guard: blue/yellow Comfy uniform, number 1. Blue and yellow only. Never black, white or green on this player. Tall defender: black/neon green uniform, number 7. Black and neon green only. Never white, red or blue on this player. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 3, no real-world logos, black and green sneakers. Pro basketball player in a rival team uniform: black jersey and shorts with neon green trim, number 17, no real-world logos, black and green sneakers. Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with yellow trim, number 11, the yellow Comfy wordmark across the chest, blue and yellow sneakers. Pro basketball player in a ComfyUI team uniform: electric blue jersey and shorts with…\nThe Comfy guard looks exactly like image 2. The Court floor looks exactly like image 3. Images 2–3 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "a5880a04"
           }
         }
       ]
@@ -11202,37 +11202,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "0f89b5a2-5f37-54f3-a78b-489061739e75",
-          "name": "Shot 02 The drive · FLUX 3 Image · 545619",
-          "file": "0f89b5a2-5f37-54f3-a78b-489061739e75.webp",
+          "id": "3fb4ad2e-c3b6-5783-a50d-ab9cc2505a60",
+          "name": "Shot 02 The drive · FLUX 3 Image · 480976",
+          "file": "3fb4ad2e-c3b6-5783-a50d-ab9cc2505a60.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:42:03.490Z",
+          "createdAt": "2026-11-01T07:51:00.925Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 545619,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 30mm normal lens; full shot, Comfy guard head to toe; camera 2.3 m high, just above Comfy guard's eye line and 8 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival defender: right of frame, about half the frame height tall, beside Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: left of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: centre of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: centre of frame, about a quarter of the frame height tall, behind Comfy guard, partly hidden by Comfy guard, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard. Comfy center: right of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing screen-right (profile).\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy guard drives into the lane with Basketball. Rival defender sets under the east rim, facing the approaching guard. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow,…\nThe Rival defender looks exactly like image 2. The Comfy guard looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "b40d8df2"
+            "seed": 480976,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 30mm normal lens; full shot, Comfy guard head to toe; camera 2.3 m high, just above Comfy guard's eye line and 8 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival defender: right of frame, about half the frame height tall, beside Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: left of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: centre of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: centre of frame, about a quarter of the frame height tall, behind Comfy guard, partly hidden by Comfy guard, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard. Comfy center: right of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing screen-right (profile).\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy guard drives low, protecting the ball. Rival defender shuffles back, plants and raises both arms by 4s. Half-speed; same uniforms. Athletic guard: blue/yellow Comfy uniform, number 1. Blue and yellow only. Never black, white or green on this player. Tall defender: black/neon green uniform, number 7. Black and neon green…\nThe Rival defender looks exactly like image 2. The Comfy guard looks exactly like image 3. The Court floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "9f578feb"
           }
         },
         {
-          "id": "4866babf-656e-50c0-a3b2-5ce095fc6eb4",
-          "name": "Shot 02 The drive · FLUX 3 Image · 11958",
-          "file": "4866babf-656e-50c0-a3b2-5ce095fc6eb4.webp",
+          "id": "f023f430-e6d9-558b-a89d-57c295487e1b",
+          "name": "Shot 02 The drive · FLUX 3 Image · 357891",
+          "file": "f023f430-e6d9-558b-a89d-57c295487e1b.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:41:26.164Z",
+          "createdAt": "2026-11-01T07:44:36.986Z",
           "generated": {
             "presetId": "flux-3",
             "model": "FLUX 3 Image (BFL)",
-            "seed": 11958,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 30mm normal lens; full shot, Comfy guard head to toe; camera 2.3 m high, just above Comfy guard's eye line and 7.6 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival defender: far right of frame, about half the frame height tall, in front of Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: left of frame, about half the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: far right of frame, about a third of the frame height tall, behind Comfy guard to the right, partly hidden by Rival defender, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: right of frame, about a third of the frame height tall, behind Comfy guard to the right, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy guard drives into the lane with Basketball. Rival defender sets under the east rim, facing the approaching guard. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Blue and yellow only. Never black, white or…\nThe Rival defender looks exactly like image 2. The Comfy guard looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "b40d8df2"
+            "seed": 357891,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 30mm normal lens; full shot, Comfy guard head to toe; camera 2.3 m high, just above Comfy guard's eye line and 7.6 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival defender: far right of frame, about half the frame height tall, in front of Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: left of frame, about half the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: far right of frame, about a third of the frame height tall, behind Comfy guard to the right, partly hidden by Rival defender, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: right of frame, about a third of the frame height tall, behind Comfy guard to the right, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy guard drives low, protecting the ball. Rival defender shuffles back, plants and raises both arms by 4s. Half-speed; same uniforms. Athletic guard: blue/yellow Comfy uniform, number 1. Blue and yellow only. Never black, white or green on this player. Tall defender: black/neon green uniform, number 7. Black and neon green only. Never white, red or blue on this player. Pro basketball player in a rival team uniform: black…\nThe Rival defender looks exactly like image 2. The Comfy guard looks exactly like image 3. The Court floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "9f578feb"
           }
         }
       ]
@@ -11567,37 +11567,37 @@
       "prompts": {},
       "references": [
         {
-          "id": "f87f8ac4-8f57-5be5-a621-71637f161e02",
-          "name": "Shot 03 Posterized · GPT Image 2.5 · 14891",
-          "file": "f87f8ac4-8f57-5be5-a621-71637f161e02.webp",
+          "id": "21b4a3da-a472-5914-a925-38dc541d676a",
+          "name": "Shot 03 Posterized · GPT Image 2.5 · 131136",
+          "file": "21b4a3da-a472-5914-a925-38dc541d676a.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame end",
-          "createdAt": "2026-10-31T06:45:07.793Z",
+          "createdAt": "2026-11-01T07:38:14.862Z",
           "generated": {
             "presetId": "gpt-image-25",
             "model": "GPT Image 2.5 (OpenAI)",
-            "seed": 14891,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 26mm wide lens; full shot, Comfy guard head to toe; camera 2.8 m high, just above Comfy guard's eye line and 5.5 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Comfy guard: lower centre of frame, about half the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival defender: centre of frame, about a third of the frame height tall, behind Comfy guard, partly hidden by Comfy guard, facing away from the camera and screen-left (three-quarter rear view). Rival forward: left of frame, about a quarter of the frame height tall, behind Comfy guard to the left, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: left of frame, about a quarter of the frame height tall, behind Comfy guard to the left, partly hidden by Rival forward, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard. Comfy center: centre of frame, about a quarter of the frame height tall, behind Comfy guard, partly hidden by Rival defender, facing screen-right (profile).\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy guard takes two final strides, rises above Rival defender and slams Basketball through the east rim. The defender lands beneath him; the guard comes down after the score. Pro basketball player in the Comfy team uniform:…\nThe Comfy guard looks exactly like image 2. The Rival defender looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "9e586736"
+            "seed": 131136,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 26mm wide lens; full shot, Comfy guard head to toe; camera 2.8 m high, just above Comfy guard's eye line and 5.5 m from Comfy guard, looking slightly down; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Comfy guard: lower centre of frame, about half the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival defender: centre of frame, about a third of the frame height tall, behind Comfy guard, partly hidden by Comfy guard, facing away from the camera and screen-left (three-quarter rear view). Rival forward: left of frame, about a quarter of the frame height tall, behind Comfy guard to the left, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: left of frame, about a quarter of the frame height tall, behind Comfy guard to the left, partly hidden by Rival forward, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard. Comfy center: centre of frame, about a quarter of the frame height tall, behind Comfy guard, partly hidden by Rival defender, facing screen-right (profile).\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Comfy guard gathers 1s, plants 2s, dunks 3s; Rival defender contests late. Ball drops through; knees cushion landing. Half-speed; same uniforms. Athletic guard: blue/yellow Comfy uniform, number 1. Blue and yellow only. Never black, white or green on this player. Tall…\nThe Comfy guard looks exactly like image 2. The Rival defender looks exactly like image 3. The Court floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "4e576daf"
           }
         },
         {
-          "id": "16313294-f9a2-5ef2-af6a-ae9d0f2d43e6",
-          "name": "Shot 03 Posterized · GPT Image 2.5 · 83776",
-          "file": "16313294-f9a2-5ef2-af6a-ae9d0f2d43e6.webp",
+          "id": "70ec5b18-2b81-5f0b-ac42-e3316b5d4e5a",
+          "name": "Shot 03 Posterized · GPT Image 2.5 · 53509",
+          "file": "70ec5b18-2b81-5f0b-ac42-e3316b5d4e5a.webp",
           "mime": "image/webp",
           "role": "frame",
           "entityId": null,
           "note": "key frame start",
-          "createdAt": "2026-10-31T06:44:47.981Z",
+          "createdAt": "2026-11-01T07:37:59.415Z",
           "generated": {
             "presetId": "gpt-image-25",
             "model": "GPT Image 2.5 (OpenAI)",
-            "seed": 83776,
-            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 26mm wide lens; wide shot, Comfy guard small in frame; camera 1.9 m high, at eye level and 9.7 m from Comfy guard, level; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival defender: centre of frame, about a third of the frame height tall, in front of Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: left of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: centre of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: centre of frame, a small part of the frame height tall, behind Comfy guard to the right, partly hidden by Rival forward, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard. Comfy center: centre of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing screen-right (profile).\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy guard takes two final strides, rises above Rival defender and slams Basketball through the east rim. The defender lands beneath him; the guard comes down after the score. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow…\nThe Rival defender looks exactly like image 2. The Comfy guard looks exactly like image 3. The Basketball looks exactly like image 4. The Court floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
-            "signature": "9e586736"
+            "seed": 53509,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 26mm wide lens; wide shot, Comfy guard small in frame; camera 1.9 m high, at eye level and 9.7 m from Comfy guard, level; we see Comfy guard from the front three-quarter, its right side.\nIn frame: Rival defender: centre of frame, about a third of the frame height tall, in front of Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy guard: left of frame, about a third of the frame height tall, facing toward the camera and screen-right (three-quarter front view). Rival forward: centre of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing away from the camera and screen-left (three-quarter rear view). Comfy wing: centre of frame, a small part of the frame height tall, behind Comfy guard to the right, partly hidden by Rival forward, facing toward the camera and screen-right (three-quarter front view), same direction as Comfy guard. Comfy center: centre of frame, about a quarter of the frame height tall, behind Comfy guard to the right, facing screen-right (profile).\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Comfy guard gathers 1s, plants 2s, dunks 3s; Rival defender contests late. Ball drops through; knees cushion landing. Half-speed; same uniforms. Athletic guard: blue/yellow Comfy uniform, number 1. Blue and yellow only. Never black, white or green on this player. Tall defender: black/neon green uniform, number 7. Black…\nThe Rival defender looks exactly like image 2. The Comfy guard looks exactly like image 3. The Court floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "4e576daf"
           }
         }
       ]
@@ -11938,29 +11938,29 @@
       "height": 479
     },
     {
-      "path": "media/refs/123833d3-d985-5ad8-a6c8-e91c95cb6121.webp",
+      "path": "media/refs/2557efbe-192a-54d4-a2ef-e6a4decde717.webp",
       "kind": "image",
-      "bytes": 133358,
-      "sha256": "d2b2db64334644dd30374a18956acb8f70d65ece1e8c5d09f2757aa7a37d2b39",
-      "sourceSha256": "eb357c402e0dcb4c63c31f7161a87174e413d03f8f8be1134097b807f4832984",
+      "bytes": 180434,
+      "sha256": "dd3713107deb62220026f5f2dfd9e1a167fae8a80c977c73b84193b2c705bbc2",
+      "sourceSha256": "0df2a9dc1b0b82eef0f01864b3196a18c2a7e372f49678757982060f8d387552",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/refs/dd0a1808-7a68-5405-ae1e-a67942578b05.webp",
+      "path": "media/refs/02e80850-b229-5189-a141-b4d3a0123c64.webp",
       "kind": "image",
-      "bytes": 147072,
-      "sha256": "98ef527d52817d0dd428ef63e76dd7569803fad1da0031a78fd620fe8ee69e0a",
-      "sourceSha256": "77924e4d999c6750fd8bbc2f6dfe18e2e16582535321019eb84f7d7385720c5b",
+      "bytes": 168666,
+      "sha256": "fdd10ab2a730276d93ef4aea5398b5ce91b12d994242a11a8587d29b663ffcbf",
+      "sourceSha256": "a58b13752cd860ddbed18779316487e26605cbe722ea3f5b4522c7276a660746",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/2cea6d02-5f04-49b6-8308-4296de792fdd.mp4",
+      "path": "media/assets/2efd5f51-e1fa-4733-a80e-fe00d3265386.mp4",
       "kind": "video",
-      "bytes": 693728,
-      "sha256": "421427184441eecfb14a646928b2f2b1a82b0ca7365dec8352b93cb9570ece47",
-      "sourceSha256": "6fea44114dee5a6778303040dec7f121dbf876a786d8abc7b86f098a67f60cfe",
+      "bytes": 934810,
+      "sha256": "58e8f49e4d2627370694f712d25d2a7c0de63674da2338a93c1627744c136ca8",
+      "sourceSha256": "7a4c39dbad520af39be07ffe570e1d8f445662fdbaa5de6beb6bd3a0c99d16b1",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -11968,11 +11968,11 @@
       "duration": 4
     },
     {
-      "path": "media/assets/5d3d7e6f-52ff-5017-a7e6-c855ad35c1fb.mp4",
+      "path": "media/assets/47d3cc17-46b6-5d78-adc7-dff1a1a83227.mp4",
       "kind": "video",
-      "bytes": 1025047,
-      "sha256": "09f29d093c94081c0e2f0da2ecfe981484d9bd7028ac47e1547f3f3e187b475f",
-      "sourceSha256": "fc1a46330069b07d6eb3f6e498c9593201665b0ebd913820bb540a7b0c8ab3ce",
+      "bytes": 916832,
+      "sha256": "dc638c81507852c0bd7ead7e2f4f9df8afb4a11fe06abfae4ed48076d68d264f",
+      "sourceSha256": "f68b668f66b9953e261fd154beeca34a71a140f054d19fb2556d72fc55287913",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -11980,29 +11980,29 @@
       "duration": 4.042
     },
     {
-      "path": "media/refs/0f89b5a2-5f37-54f3-a78b-489061739e75.webp",
+      "path": "media/refs/3fb4ad2e-c3b6-5783-a50d-ab9cc2505a60.webp",
       "kind": "image",
-      "bytes": 165010,
-      "sha256": "17e320367e7e697b59870c7a91334c62d9bc19ebddedf1c584f5e007cea72733",
-      "sourceSha256": "74a1a73ec458a0c0b0e9c63ca76abaa0c2dc9de0e98ba56c14aa51695981c384",
+      "bytes": 159166,
+      "sha256": "4e2df5ddd5b882c69c0b756ee061170b1d3e8a6336c25ef6aafb137cd1ae6c48",
+      "sourceSha256": "38bf52543d4bf3f54a54da9276b7278c4b0e605957a3ff5c3806e496c276df29",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/refs/4866babf-656e-50c0-a3b2-5ce095fc6eb4.webp",
+      "path": "media/refs/f023f430-e6d9-558b-a89d-57c295487e1b.webp",
       "kind": "image",
-      "bytes": 182172,
-      "sha256": "dfde835fbfe0c5d1fe03adc9971ee61eb1920a3beed0ad42462e8d642d8f9c0f",
-      "sourceSha256": "ee735514f1302826be91da84671d841a8c24e39b2b32be3b1f14917d9206892e",
+      "bytes": 240914,
+      "sha256": "af62c5a08cebba20d56a7a7561592357c98613b86f66845e4a3630f34fbb0ea6",
+      "sourceSha256": "8ec409b19de41d67f88d7655e6cdbe61b09ac815bf3770b2c2a1f5b4c99ef131",
       "width": 1360,
       "height": 768
     },
     {
-      "path": "media/assets/17760448-b746-469a-8b86-22308c15bc5c.mp4",
+      "path": "media/assets/fa735fd6-4458-4f57-8a61-a1ee3fd6598c.mp4",
       "kind": "video",
-      "bytes": 659855,
-      "sha256": "04c22aee056142468d4b0f95e9f096ae417e2b998f0ee12b6111cb04585c55ab",
-      "sourceSha256": "b17ce375350e55465698e54dbc07a90ce508f8755d9191163466491de70519cc",
+      "bytes": 823801,
+      "sha256": "a75406e6fd6c4e884c80b5bee6dc96f1a617c5910b55dc678825cec274348d7d",
+      "sourceSha256": "8259535ee348b53df8cb41e591cec93b0e86d629b72b7a77306e1a6e53376534",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -12010,11 +12010,11 @@
       "duration": 4
     },
     {
-      "path": "media/assets/92bccbfa-f6b6-5740-a7d3-b56e3fe1441f.mp4",
+      "path": "media/assets/72e680d1-030e-5329-a100-1a0f648f534b.mp4",
       "kind": "video",
-      "bytes": 1057379,
-      "sha256": "477c347654066dde6d10ef3eec7571e1ee7c5af0eb9917c9ba4dfee4dd05bcc8",
-      "sourceSha256": "dd016282a62a9943943460b781ec7e529238bd96390d6d4f1d7070f988c9dea5",
+      "bytes": 798046,
+      "sha256": "bfc7b313fac01bf1f07c03c39aecfb92afd82e66ffd8a15440889bd54ce646d1",
+      "sourceSha256": "647ee039005c1b947d8bb32ad83852e970f526177cd254e9dfded39f14188d38",
       "width": 1280,
       "height": 720,
       "fps": 24,
@@ -12022,20 +12022,20 @@
       "duration": 4.042
     },
     {
-      "path": "media/refs/f87f8ac4-8f57-5be5-a621-71637f161e02.webp",
+      "path": "media/refs/21b4a3da-a472-5914-a925-38dc541d676a.webp",
       "kind": "image",
-      "bytes": 195620,
-      "sha256": "bbe7d8f8b5928309d64c1b7bb284573444153cbeab0cf84f011f97b4e076275b",
-      "sourceSha256": "7f52186b56a09f67d70fe1e9c467d2a41733fc16c2520eedc69e099b12aeaed3",
+      "bytes": 191054,
+      "sha256": "6049a165df319532ba0275e44ae3e9806b3b7a23c96b471463d17ab5d72bad87",
+      "sourceSha256": "c9b879df89ade249fefe4eba6a3ad17f08a26a419f6f78c6fafcacb0862f1009",
       "width": 1600,
       "height": 900
     },
     {
-      "path": "media/refs/16313294-f9a2-5ef2-af6a-ae9d0f2d43e6.webp",
+      "path": "media/refs/70ec5b18-2b81-5f0b-ac42-e3316b5d4e5a.webp",
       "kind": "image",
-      "bytes": 179364,
-      "sha256": "50635c043a92ca5749d4cdde0ce5643b8bfeeba4d64c32dc92d287e2e2f0d9be",
-      "sourceSha256": "331112728867b31f8b43f59be79121b8a3ceb1f5e367e5575b8d8b38b3548b97",
+      "bytes": 154436,
+      "sha256": "19b81cee2aa93c9785f89b893d8d9ca78ffdff3e2cf4e45f867ab9af77a4f451",
+      "sourceSha256": "93995da53055a66b856f2758dc95c94dc10a8e2297f5328cd1262978b91c4b1a",
       "width": 1600,
       "height": 900
     },
@@ -12066,59 +12066,59 @@
   ],
   "assets": [
     {
-      "id": "2cea6d02-5f04-49b6-8308-4296de792fdd",
+      "id": "2efd5f51-e1fa-4733-a80e-fe00d3265386",
       "kind": "camera-render",
       "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
-      "file": "assets/2cea6d02-5f04-49b6-8308-4296de792fdd.mp4",
+      "file": "assets/2efd5f51-e1fa-4733-a80e-fe00d3265386.mp4",
       "mime": "video/mp4",
       "duration": 4,
-      "createdAt": "2026-10-31T07:00:09.319Z",
+      "createdAt": "2026-11-01T07:33:52.996Z",
       "source": {
         "engineShotId": null,
-        "signature": "ae3879eb"
+        "signature": "a5880a04"
       }
     },
     {
-      "id": "5d3d7e6f-52ff-5017-a7e6-c855ad35c1fb",
+      "id": "47d3cc17-46b6-5d78-adc7-dff1a1a83227",
       "kind": "workflow-result",
       "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
-      "file": "assets/5d3d7e6f-52ff-5017-a7e6-c855ad35c1fb.mp4",
+      "file": "assets/47d3cc17-46b6-5d78-adc7-dff1a1a83227.mp4",
       "mime": "video/mp4",
       "duration": 4.041667,
-      "createdAt": "2026-10-31T07:00:46.010Z",
+      "createdAt": "2026-11-01T07:51:13.748Z",
       "source": {
         "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
         "backend": "cloud",
-        "prompt": "Comfy guard in blue and yellow advances with Basketball while the green Rival defender retreats toward the basket. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 32mm. Filter: saturated primaries.",
-        "sourceAssetId": "2cea6d02-5f04-49b6-8308-4296de792fdd"
+        "prompt": "Cinematic live-action shot. Comfy guard strides with four dribbles; Rival defender retreats. Feet push off; the ball rebounds sharply. Half-speed; same uniforms. Athletic guard: blue/yellow Comfy uniform, number 1. Blue and yellow only. Never black, white or green on this player. Tall defender: black/neon green uniform, number 7. Black and neon green only. Never white, red or blue on this player. Set: Blue center circle with a yellow ring. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 32mm. Filter: saturated primaries.",
+        "sourceAssetId": "2efd5f51-e1fa-4733-a80e-fe00d3265386"
       }
     },
     {
-      "id": "17760448-b746-469a-8b86-22308c15bc5c",
+      "id": "fa735fd6-4458-4f57-8a61-a1ee3fd6598c",
       "kind": "camera-render",
       "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
-      "file": "assets/17760448-b746-469a-8b86-22308c15bc5c.mp4",
+      "file": "assets/fa735fd6-4458-4f57-8a61-a1ee3fd6598c.mp4",
       "mime": "video/mp4",
       "duration": 4,
-      "createdAt": "2026-10-31T07:00:15.538Z",
+      "createdAt": "2026-11-01T07:33:56.501Z",
       "source": {
         "engineShotId": null,
-        "signature": "b40d8df2"
+        "signature": "9f578feb"
       }
     },
     {
-      "id": "92bccbfa-f6b6-5740-a7d3-b56e3fe1441f",
+      "id": "72e680d1-030e-5329-a100-1a0f648f534b",
       "kind": "workflow-result",
       "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
-      "file": "assets/92bccbfa-f6b6-5740-a7d3-b56e3fe1441f.mp4",
+      "file": "assets/72e680d1-030e-5329-a100-1a0f648f534b.mp4",
       "mime": "video/mp4",
       "duration": 4.041667,
-      "createdAt": "2026-10-31T07:00:55.816Z",
+      "createdAt": "2026-11-01T07:52:07.525Z",
       "source": {
         "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
         "backend": "cloud",
-        "prompt": "Comfy guard drives into the lane with Basketball. Rival defender sets under the east rim, facing the approaching guard. Pro basketball player in the Comfy team uniform: electric blue jersey and shorts with bold yellow trim, the yellow Comfy wordmark across the chest, number 1 in yellow, blue and yellow sneakers, athletic build, explosive. Pro basketball player in the rival team uniform: black jersey and shorts with neon green trim and neon green number 7, black and neon green sneakers, no real-world logos, tall shot-blocker. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 30mm. Filter: high contrast.",
-        "sourceAssetId": "17760448-b746-469a-8b86-22308c15bc5c"
+        "prompt": "Cinematic live-action shot. Comfy guard drives low, protecting the ball. Rival defender shuffles back, plants and raises both arms by 4s. Half-speed; same uniforms. Athletic guard: blue/yellow Comfy uniform, number 1. Blue and yellow only. Never black, white or green on this player. Tall defender: black/neon green uniform, number 7. Black and neon green only. Never white, red or blue on this player. Set: Blue center circle with a yellow ring. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 30mm. Filter: high contrast.",
+        "sourceAssetId": "fa735fd6-4458-4f57-8a61-a1ee3fd6598c"
       }
     },
     {
@@ -12154,13 +12154,13 @@
     "clips": [
       {
         "shotId": "4960d92b-c2b0-4037-8ee5-40203fda0aeb",
-        "assetId": "5d3d7e6f-52ff-5017-a7e6-c855ad35c1fb",
+        "assetId": "47d3cc17-46b6-5d78-adc7-dff1a1a83227",
         "in": 0,
         "out": null
       },
       {
         "shotId": "4feea365-12b8-456f-878e-80be456c4c27",
-        "assetId": "92bccbfa-f6b6-5740-a7d3-b56e3fe1441f",
+        "assetId": "72e680d1-030e-5329-a100-1a0f648f534b",
         "in": 0,
         "out": null
       },
