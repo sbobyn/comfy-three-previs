@@ -1,10 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { demoKeep, demoClosure, slimProject, pickProjects, demoStillFile, downscaleStill, snapshotDemo, DEFAULT_MEDIA_MB } from '../scripts/snapshot-demo.mjs';
+import { demoKeep, demoClosure, slimProject, pickProjects, demoStillFile, downscaleStill, snapshotDemo, starterDrift, starterFor, DEFAULT_MEDIA_MB, DEFAULT_PROJECTS } from '../scripts/snapshot-demo.mjs';
+import { loadStarters, starterSourceProject, starterSourceId } from '../server/previs/starters.mjs';
+import { SOURCES } from '../scripts/export-starters.mjs';
+import { importStarters } from '../scripts/import-starters.mjs';
 
 function fixture() {
   const ref = (id, note, extra = {}) => ({ id, file: `${id}.png`, mime: 'image/png', role: 'frame', note, ...extra });
@@ -173,4 +176,51 @@ test('shared upstream receipts retain the union of outputs needed by all project
     assert.deepEqual(results.map(r => r.id).sort(), ['a', 'b']);
     for (const result of results) assert.deepEqual(await readFile(join(out, 'demo-media', result.url)), Buffer.from(`assets/${result.id}.mp4`));
   }
+});
+
+test('the demo defaults to the bundled starters’ source projects, and an imported bundle shows no drift', async () => {
+  assert.deepEqual(DEFAULT_PROJECTS, SOURCES.map(s => s.id));
+  const starters = await loadStarters();
+  assert.equal(starters.length, SOURCES.length);
+  for (const s of starters) {
+    const { project } = starterSourceProject(s);
+    assert.equal(starterFor(project, starters), s);
+    assert.ok(project.scene.entities.some(e => e.model), `${s.slug} uses Blender display models`);
+    assert.deepEqual(starterDrift(slimProject(project), s), [], s.slug);
+  }
+  // Drift a project the way the old dev projects had drifted: no display model, a different camera, another cut.
+  const s = starters.find(x => x.slug === 'breaking-news'), { project } = starterSourceProject(s);
+  const anchor = project.scene.entities.find(e => e.model === 'anchor');
+  delete anchor.model;
+  project.shots[1].camera.keys[0].p[0] += 0.5;
+  project.edit.clips[0].out = 1;
+  assert.deepEqual(starterDrift(project, s), [`shot “${project.shots[1].title}” differs in camera`, 'cut differs', `entity “${anchor.name}” differs in model`]);
+  // An old dev project pairs by its "Starter · " title.
+  assert.equal(starterFor({ id: 'legacy', title: 'Starter · Breaking News' }, starters), s);
+});
+
+test('the snapshot is built from the imported bundle and refuses a starter project that drifted from it', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'demo-starter-sync-')), data = join(root, 'data');
+  try {
+    const starters = (await loadStarters()).filter(s => s.slug === 'wingspan'), [s] = starters;
+    await importStarters({ dataDir: data, only: s.slug, log: () => {} });
+    const id = starterSourceId(s.slug), file = join(data, 'director', id, 'project.json');
+    const read = async () => JSON.parse(await readFile(file, 'utf8'));
+    let doc = await read();
+    const get = async path => path === 'director/projects' ? { projects: [{ id, title: doc.title }] } : path === 'director/archived' ? { projects: [] }
+      : path.startsWith('director/project?') ? { project: doc } : path === 'director/starters' ? { starters: starters.map(x => ({ slug: x.slug, title: x.title })) } : { jobs: [] };
+    await snapshotDemo({ get, data, out: join(root, 'ok'), ids: [id], starters });
+    const shown = JSON.parse(await readFile(join(root, 'ok', `demo-data/project-${id}.json`))).project;
+    assert.deepEqual(shown.scene.entities.map(e => e.model ?? null), s.scene.entities.map(e => e.model ?? null));
+    assert.deepEqual(shown.shots.map(x => x.camera), s.shots.map(x => x.camera));
+    assert.deepEqual(shown.edit.clips.map(c => c.assetId), s.edit.clips.map(c => c.assetId), 'the cut keeps the bundle’s chosen videos');
+    assert.deepEqual(JSON.parse(await readFile(join(root, 'ok', 'demo-data/starters.json'))).starters.map(x => x.projectId), [id]);
+
+    doc = await read();
+    for (const e of doc.scene.entities) delete e.model;
+    doc.shots[0].camera.keys[0].p[1] += 1;
+    await assert.rejects(snapshotDemo({ get, data, out: join(root, 'drifted'), ids: [id], starters }),
+      e => /differs from its bundled starter examples\/starters\/wingspan/.test(e.message) && /differs in model/.test(e.message) && e.message.includes(`shot “${doc.shots[0].title}” differs in camera`));
+    await assert.rejects(snapshotDemo({ get, data, out: join(root, 'missing'), starters }), /Requested projects missing.*pnpm starters:import/s);
+  } finally { await rm(root, { recursive: true, force: true }); }
 });
