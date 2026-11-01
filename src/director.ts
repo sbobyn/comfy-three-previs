@@ -298,6 +298,7 @@ function setStep(k: Step) {
   for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); b.tabIndex = key === k ? 0 : -1; }
   wsBody.classList.toggle('shooting', k === 'shoot');
   top.dataset.step = k; renderSteps(); renderCamHero(); if (tourAt >= 0) requestAnimationFrame(placeTour);
+  skipStage.hidden = skipSide.hidden = k === 'cut';
   if (k === 'shoot') {
     setView('camera');
     if (collapsed.side) setCollapsed('side', false);
@@ -306,7 +307,19 @@ function setStep(k: Step) {
   } else if (k === 'build' && from === 'shoot') setView('set');
   const q = new URLSearchParams(location.search); if (k === 'build') q.delete('view'); else q.set('view', k === 'cut' ? 'sequence' : 'shoot'); history.replaceState(null, '', `?${q}`);
 }
-app.replaceChildren(top, wsBody, sequence.el);
+// Skip links: the first Tab stops, shown only on focus, so the keyboard reaches the viewport, the side panel and the shots without
+// tabbing through the top bar and the rail. A collapsed panel opens first; the Cut has no viewport or side panel.
+const skipTo = (label: string, go: () => HTMLElement | null | undefined) => h('a', { class: 'skip-link', href: '#app', onclick: (ev: Event) => { ev.preventDefault(); go()?.focus(); } }, label);
+const firstFocusable = (root: HTMLElement) => Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).find(x => x.tabIndex >= 0 && !(x as HTMLButtonElement).disabled && !!x.offsetParent);
+const skipStage = skipTo('Skip to viewport', () => canvas);
+const skipSide = skipTo('Skip to side panel', () => { if (collapsed.side) setCollapsed('side', false); return firstFocusable(side); });
+const skipShots = skipTo('Skip to shot list', () => {
+  if (step === 'cut') return sequence.el.querySelector<HTMLElement>('.sq-row.on') || sequence.el.querySelector<HTMLElement>('.sq-row');
+  if (collapsed.rail) setCollapsed('rail', false);
+  return shotList.querySelector<HTMLElement>('[aria-current="true"]') || firstFocusable(shotList);
+});
+const skipLinks = h('nav', { class: 'skip-links', 'aria-label': 'Skip links' }, skipStage, skipSide, skipShots);
+app.replaceChildren(skipLinks, top, wsBody, sequence.el);
 // The read-only demo says so on arrival, before the first edit rather than in a toast after it: once per visit, in the
 // viewport hint's place (the orbit hint follows once it's dismissed).
 if (DEMO && sessionStorage.getItem('previs.demoNote') !== '1') {
