@@ -6,7 +6,7 @@ Block out a scene in 3D in your browser, give every character and prop a consist
 
 **Live demo:** <https://sbobyn.github.io/comfy-three-previs/> — read-only. Image and video generation need a local install (below).
 
-**Launch film:** <https://sbobyn.github.io/comfy-three-previs/launch-film.mp4> (also [square](https://sbobyn.github.io/comfy-three-previs/launch-film-1x1.mp4), [vertical](https://sbobyn.github.io/comfy-three-previs/launch-film-9x16.mp4) and [30 s](https://sbobyn.github.io/comfy-three-previs/launch-film-30s.mp4)).
+**Launch film:** <https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film.mp4> (also [square](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film-1x1.mp4), [vertical](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film-9x16.mp4) and [30 s](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film-30s.mp4)), from the [Launch films](https://github.com/sbobyn/comfy-three-previs/releases/tag/films) release.
 
 ## Features
 
@@ -33,7 +33,7 @@ cp .env.example .env      # optional: add COMFY_CLOUD_API_KEY for quotes and gen
 pnpm start                # → http://127.0.0.1:5190 (PORT=… to change)
 ```
 
-The shallow clone downloads about 40 MB. A plain `git clone` also downloads the live demo's `gh-pages` history, about 900 MB.
+The shallow clone downloads about 40 MB. A plain `git clone` works too and downloads about 100 MB, because it includes the history of `main`.
 
 No key is needed to try it: open a starter, build, shoot, preview, watch the starter's videos and cut. A Comfy Cloud key adds quotes and generation; nothing paid runs unless `PREVIS_ALLOW_PAID=1`. `pnpm run doctor` checks your machine and explains how to fix anything missing.
 
@@ -187,7 +187,11 @@ The server is plain Node (`server/previs/`), the browser app is Vite + three.js 
 
 ### Publishing
 
-`scripts/publish-public.sh` publishes the committed tree to the public repo and redeploys the live demo with the latest launch film. It runs the gate and a secret scan first, adds one commit to public `main` (the tree, not the history) and one to `gh-pages` (`pnpm run demo:build` from a temporary read-only server, plus `launch-film*.mp4` from the newest `.evidence/launch-film/v*/`), then checks the Pages build and loads the demo in headless Chrome. It never force-pushes. Settings are environment variables listed at the top of the script (`TRAILER_DIR`, `SOURCE_DATA`, `DRY_RUN=1`, …).
+Publishing uses three scripts. Nothing large goes into git: the demo media is not committed, and the launch films and the built demo are GitHub Release assets, so the public repo stays small to clone.
+
+- `scripts/publish-public.sh` publishes the committed tree to the public repo and redeploys the live demo. It runs the gate and a secret scan first, adds one commit to public `main` (the tree, not the history), builds the demo (`pnpm run demo:build` from a temporary read-only server) and uploads it as `demo-site.tar.gz` to the `demo-site` release. Then it deploys and checks the live site: every demo file must match the local build, the films must be served, and headless Chrome must load every starter with no console errors and play the films. It never force-pushes. Settings are environment variables listed at the top of the script (`SOURCE_DATA`, `DRY_RUN=1`, …).
+- `scripts/publish-films.sh TRAILER_DIR VERSION` (for example `scripts/publish-films.sh .evidence/launch-film/v7 v7.5`) uploads a new cut of the launch films to the `films` release under fixed names (`launch-film.mp4`, `-1x1`, `-9x16`, `-30s`), so links never change, then redeploys the demo. It takes `trailer-*-VERSION.mp4` with `BUILD-REPORT-VERSION.md`, or the same names without the suffix.
+- `scripts/publish-pages.sh` redeploys the demo on its own. It runs the `Deploy demo to Pages` workflow (`.github/workflows/pages.yml`), which builds nothing: it unpacks `demo-site.tar.gz`, adds the films (so `…/comfy-three-previs/launch-film.mp4` keeps working) and deploys with `actions/deploy-pages`. Pages is set to deploy from GitHub Actions; there is no `gh-pages` branch.
 
 To build the demo yourself, run `pnpm run demo:local`. It loads the bundled starters into a temporary data dir, starts a temporary read-only server on it, runs `pnpm run demo:build` against that server and writes `dist-demo/`; serve that folder under `/comfy-three-previs/`. `pnpm run demo:build` on its own needs a running server and its data dir (`PREVIS_URL`, `PREVIS_DATA`), and stops with a message naming them when there is none.
 

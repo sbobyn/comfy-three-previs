@@ -1,30 +1,34 @@
 #!/usr/bin/env bash
 # Publish this checkout to the public repo and its GitHub Pages demo, in one go:
-#   1. preflight: clean tree, pushed to $SOURCE_REMOTE, `pnpm check && pnpm test`, secret/path scan
+#   1. preflight: clean tree, pushed to $SOURCE_REMOTE, the `films` release exists, `pnpm check && pnpm test`,
+#      secret/path scan
 #   2. code: the current tree (not history) as one new commit on $PUBLIC_REMOTE/$PUBLIC_BRANCH
 #   3. demo: `pnpm run demo:build` against a temporary read-only server on a copy of the data with the bundled
-#      starters imported into it, plus the latest trailer as launch-film*.mp4, as one new commit on $PUBLIC_REMOTE/$PAGES_BRANCH
-#   4. verify: Pages build, HTTP checks, headless Chrome loads a starter with no console errors
-# Idempotent: a step with nothing new makes no commit. Never force-pushes.
+#      starters imported into it, uploaded as demo-site.tar.gz to the `demo-site` release (not git), then deployed
+#      by the Pages workflow (scripts/publish-pages.sh), which adds launch-film*.mp4 from the `films` release
+#   4. verify: every demo file on the live site matches dist-demo, the films are served, headless Chrome loads
+#      every starter with no console errors and plays the films
+# Idempotent: no new code makes no commit. Never force-pushes. The films are published separately by
+# scripts/publish-films.sh TRAILER_DIR VERSION.
 #
 #   PUBLIC_REMOTE   remote to publish to (default public)
-#   PUBLIC_BRANCH   code branch (default main);  PAGES_BRANCH  demo branch (default gh-pages)
+#   PUBLIC_BRANCH   code branch (default main)
 #   SOURCE_REMOTE   HEAD must already be on a branch of this remote (default origin; ALLOW_UNPUSHED=1 skips)
 #   SOURCE_DATA     server data dir to snapshot the demo from (default .evidence/dev-data; copied, never written).
 #                   The starters always come from examples/starters, imported into the copy.
-#   TRAILER_DIR     trailer folder with trailer-16x9/-1x1/-9x16/-30s-16x9.mp4 + BUILD-REPORT.md
-#                   (default: newest .evidence/launch-film/v*/ that has a BUILD-REPORT.md)
 #   DEMO_MEDIA_MB   demo media budget (default 400); the publish stops if the snapshot skips any media
 #   PAGES_URL       demo URL (default https://<owner>.github.io/<repo>/ from the remote)
 #   DEMO_PORT       port for the temporary server (default: first free port from 5320)
-#   COMMIT_TRAILER  optional line appended to both publish commit messages
-#   DRY_RUN=1       build and commit in temporary worktrees, but push and verify nothing
+#   COMMIT_TRAILER  optional line appended to the publish commit message
+#   DRY_RUN=1       build, commit in a temporary worktree and pack the demo, but push, upload and deploy nothing
 set -euo pipefail
 
 ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
 PUBLIC_REMOTE=${PUBLIC_REMOTE:-public}
 PUBLIC_BRANCH=${PUBLIC_BRANCH:-main}
-PAGES_BRANCH=${PAGES_BRANCH:-gh-pages}
+DEMO_TAG=demo-site
+FILMS_TAG=films
+FILMS="launch-film.mp4 launch-film-1x1.mp4 launch-film-9x16.mp4 launch-film-30s.mp4"
 SOURCE_REMOTE=${SOURCE_REMOTE:-origin}
 SOURCE_DATA=${SOURCE_DATA:-.evidence/dev-data}
 DRY_RUN=${DRY_RUN:-0}
@@ -43,7 +47,7 @@ TMP=$(mktemp -d "${TMPDIR:-/tmp}/publish-public.XXXXXX")
 SERVER_PID=
 cleanup() {
   [ -n "$SERVER_PID" ] && kill "$SERVER_PID" 2>/dev/null || true
-  for wt in "$TMP/main" "$TMP/pages"; do [ -d "$wt" ] && git worktree remove --force "$wt" 2>/dev/null || true; done
+  [ -d "$TMP/main" ] && git worktree remove --force "$TMP/main" 2>/dev/null || true
   git worktree prune
   rm -rf "$TMP"
 }
@@ -58,22 +62,11 @@ if [ "${ALLOW_UNPUSHED:-0}" != 1 ] && [ -z "$(git branch -r --contains "$SHA" | 
   die "HEAD $SHORT is not on any $SOURCE_REMOTE branch — push it first (or ALLOW_UNPUSHED=1)"
 fi
 
-TRAILER_FILES="trailer-16x9.mp4:launch-film.mp4 trailer-1x1.mp4:launch-film-1x1.mp4 trailer-9x16.mp4:launch-film-9x16.mp4 trailer-30s-16x9.mp4:launch-film-30s.mp4"
-if [ -z "${TRAILER_DIR:-}" ]; then
-  for d in $(ls -d .evidence/launch-film/v[0-9]*/ 2>/dev/null | sed 's#/$##' | grep -E '/v[0-9]+$' | sort -V -r); do
-    [ -f "$d/BUILD-REPORT.md" ] && { TRAILER_DIR=$d; break; }
-  done
-fi
-[ -n "${TRAILER_DIR:-}" ] && [ -f "$TRAILER_DIR/BUILD-REPORT.md" ] || die "no trailer folder with a BUILD-REPORT.md (set TRAILER_DIR)"
-TRAILER_DIR=${TRAILER_DIR%/}
-for pair in $TRAILER_FILES; do
-  f=$TRAILER_DIR/${pair%%:*}
-  [ -s "$f" ] || die "missing $f"
-  [ "$(wc -c <"$f")" -lt 95000000 ] || die "$f is over GitHub's file size limit"
+for name in $FILMS; do
+  gh api "repos/$SLUG/releases/tags/$FILMS_TAG" --jq ".assets[] | select(.name == \"$name\") | .name" 2>/dev/null | grep -qx "$name" \
+    || die "release $FILMS_TAG has no $name: run scripts/publish-films.sh TRAILER_DIR VERSION first"
 done
-[ -z "$(find "$TRAILER_DIR" -name 'trailer-*.mp4' -newer "$TRAILER_DIR/BUILD-REPORT.md")" ] \
-  || die "$TRAILER_DIR has trailers newer than its BUILD-REPORT.md — build still running?"
-echo "trailer: $TRAILER_DIR"
+echo "films: release $FILMS_TAG has $(echo $FILMS | wc -w | tr -d ' ') films"
 
 say "gate: pnpm check && pnpm test"
 pnpm check >"$TMP/check.log" 2>&1 || { tail -30 "$TMP/check.log"; die "pnpm check failed"; }
@@ -157,48 +150,50 @@ grep 'demo snapshot:' "$TMP/demo.log" || die "no snapshot summary in demo:build 
 ! grep -q 'skipped over budget' "$TMP/demo.log" || die "demo media over budget (the demo would show missing images): raise DEMO_MEDIA_MB"
 scan_dir dist-demo
 
-say "demo: dist-demo + $(basename "$TRAILER_DIR") trailer → $PUBLIC_REMOTE/$PAGES_BRANCH"
-git worktree add -q --detach "$TMP/pages" "$PUBLIC_REMOTE/$PAGES_BRANCH"
-git -C "$TMP/pages" rm -rq --ignore-unmatch .
-cp -R dist-demo/. "$TMP/pages/"
-touch "$TMP/pages/.nojekyll"
-for pair in $TRAILER_FILES; do cp "$TRAILER_DIR/${pair%%:*}" "$TMP/pages/${pair#*:}"; done
-git -C "$TMP/pages" add -A -f .
-if git -C "$TMP/pages" diff --cached --quiet; then
-  echo "public $PAGES_BRANCH already has this demo — nothing to commit"
-else
-  git -C "$TMP/pages" diff --cached --shortstat
-  git -C "$TMP/pages" commit -q -m "$(message "Deploy demo from $SHORT with trailer $(basename "$TRAILER_DIR")" "Read-only demo built from $SHA; launch-film*.mp4 from $(basename "$TRAILER_DIR").")"
-  push "$TMP/pages" "$PAGES_BRANCH"
-fi
-PAGES_SHA=$(git -C "$TMP/pages" rev-parse HEAD)
+say "demo: dist-demo → $DEMO_TAG release → Pages"
+# No AppleDouble (._*) files or extended attributes in the archive.
+tar_flags=(); [ "$(uname)" = Darwin ] && tar_flags=(--no-mac-metadata --no-xattrs)
+COPYFILE_DISABLE=1 tar "${tar_flags[@]}" -czf "$TMP/demo-site.tar.gz" -C dist-demo .
+DEMO_SHA256=$(shasum -a 256 "$TMP/demo-site.tar.gz" | cut -d' ' -f1)
+echo "demo-site.tar.gz: $(du -h "$TMP/demo-site.tar.gz" | cut -f1 | tr -d ' '), $(find dist-demo -type f | wc -l | tr -d ' ') files, sha256 $DEMO_SHA256"
 
-if [ "$DRY_RUN" = 1 ]; then say "DRY_RUN done: main $MAIN_SHA, pages $PAGES_SHA (nothing pushed)"; exit 0; fi
+if [ "$DRY_RUN" = 1 ]; then say "DRY_RUN done: main $MAIN_SHA, demo $DEMO_SHA256 (nothing pushed, uploaded or deployed)"; exit 0; fi
+
+printf 'The built read-only demo that the GitHub Pages workflow (`.github/workflows/pages.yml`) deploys, from %s. Updated by `scripts/publish-public.sh`.\n\nNot a software release: to try the app, see the [README](https://github.com/%s#quick-start). The launch films are in the [films release](https://github.com/%s/releases/tag/%s).\n' \
+  "$SHA" "$SLUG" "$SLUG" "$FILMS_TAG" >"$TMP/demo-notes.md"
+if gh release view "$DEMO_TAG" -R "$SLUG" >/dev/null 2>&1; then
+  gh release edit "$DEMO_TAG" -R "$SLUG" --notes-file "$TMP/demo-notes.md" >/dev/null
+else
+  gh release create "$DEMO_TAG" -R "$SLUG" --title "Live demo build" --notes-file "$TMP/demo-notes.md" \
+    --prerelease --latest=false --target "$PUBLIC_BRANCH" >/dev/null
+fi
+gh release upload "$DEMO_TAG" -R "$SLUG" --clobber "$TMP/demo-site.tar.gz"
+PUBLIC_REMOTE="$PUBLIC_REMOTE" DEMO_SHA256="$DEMO_SHA256" scripts/publish-pages.sh || die "Pages deploy failed"
 
 # ---------------------------------------------------------------- 4. verify
-say "verify: Pages build for ${PAGES_SHA:0:7}"
-build=
-for _ in $(seq 120); do
-  build=$(gh api "repos/$SLUG/pages/builds/latest" --jq '.status + " " + .commit' 2>/dev/null || true)
-  [ "$build" = "built $PAGES_SHA" ] && break
-  case $build in errored*) die "Pages build errored: $build";; esac
-  sleep 5
+BUST=$(date +%s)
+say "verify: every file in dist-demo is served unchanged"
+(cd dist-demo && find . -type f | sed 's#^\./##' | sort) >"$TMP/files"
+for attempt in 1 2 3 4; do  # the CDN may serve the previous deploy for a moment
+  PAGES_URL="$PAGES_URL" BUST="$BUST$attempt" xargs -P 8 -n 1 sh -c '
+    got=$(curl -sf "$PAGES_URL$1?v=$BUST" | shasum -a 256 | cut -d" " -f1)
+    [ "$got" = "$(shasum -a 256 "dist-demo/$1" | cut -d" " -f1)" ] || echo "$1"' _ <"$TMP/files" >"$TMP/mismatch"
+  [ -s "$TMP/mismatch" ] || break
+  cp "$TMP/mismatch" "$TMP/files"; sleep 15
 done
-[ "$build" = "built $PAGES_SHA" ] || die "Pages build not done after 10 min (latest: $build)"
-echo "pages build: built ${PAGES_SHA:0:7}"
+[ ! -s "$TMP/mismatch" ] || { head -10 "$TMP/mismatch"; die "$(wc -l <"$TMP/mismatch" | tr -d ' ') files differ on $PAGES_URL"; }
+echo "ok  $(find dist-demo -type f | wc -l | tr -d ' ') files match"
 
 status() { curl -sI "$1" | awk 'toupper($1) ~ /^HTTP/ {s=$2} tolower($1)=="content-length:" {l=$2} END {gsub(/\r/,"",l); print s, l}'; }
-read -r code _ < <(status "${PAGES_URL}?v=$PAGES_SHA"); echo "index: $code"; [ "$code" = 200 ] || die "demo index returned $code"
-for pair in $TRAILER_FILES; do
-  name=${pair#*:}; want=$(wc -c <"$TRAILER_DIR/${pair%%:*}" | tr -d ' ')
-  for _ in $(seq 24); do read -r code len < <(status "$PAGES_URL$name?v=$PAGES_SHA"); [ "$code $len" = "200 $want" ] && break; sleep 5; done
-  [ "$code $len" = "200 $want" ] || die "$name: got $code / $len bytes, expected 200 / $want"
-  read -r pcode plen < <(status "$PAGES_URL$name")
-  echo "$name: 200, $len bytes (uncached URL: $pcode, $plen bytes$([ "$plen" = "$want" ] || echo ' — CDN still refreshing'))"
+for name in $FILMS; do
+  want=$(gh api "repos/$SLUG/releases/tags/$FILMS_TAG" --jq ".assets[] | select(.name == \"$name\") | .size")
+  read -r code len < <(status "$PAGES_URL$name?v=$BUST")
+  [ "$code $len" = "200 $want" ] || die "$PAGES_URL$name: got $code / $len bytes, expected 200 / $want (the films release)"
+  echo "ok  $name: $len bytes on Pages, same as the $FILMS_TAG release"
 done
 
 say "verify: headless Chrome"
-PAGES_URL="$PAGES_URL" BUST="$PAGES_SHA" node --input-type=module -e '
+PAGES_URL="$PAGES_URL" BUST="$BUST" FILMS="$FILMS" RELEASE_URL="https://github.com/$SLUG/releases/download/$FILMS_TAG/" node --input-type=module -e '
 const { chromium } = await import("playwright-core");
 const { resolveExecutable, CHROMIUM_ARGS } = await import("./server/previs/headless.mjs");
 const base = process.env.PAGES_URL, q = "v=" + process.env.BUST;
@@ -229,18 +224,25 @@ for (const p of projects) {
 }
 const page = await browser.newPage();
 await page.goto(base + "?" + q);
-const film = await page.evaluate(src => new Promise(ok => { const v = document.createElement("video"); v.muted = true; v.preload = "metadata";
-  v.onloadedmetadata = () => ok({ duration: v.duration, size: v.videoWidth + "x" + v.videoHeight }); v.onerror = () => ok(null); v.src = src; }), base + "launch-film.mp4?" + q);
+// Each film must play (not just load metadata) from the release, as the README links it, and from the demo site.
+const play = src => page.evaluate(src => new Promise(ok => { const v = document.createElement("video"); v.muted = true;
+  const done = r => { clearTimeout(t); v.remove(); ok(r); }, t = setTimeout(() => done(null), 30000);
+  v.ontimeupdate = () => v.currentTime > 0.5 && done({ duration: v.duration, size: v.videoWidth + "x" + v.videoHeight });
+  v.onerror = () => done(null); v.src = src; document.body.append(v); v.play().catch(() => done(null)); }), src);
+const urls = process.env.FILMS.split(" ").flatMap(n => [process.env.RELEASE_URL + n, base + n + "?" + q]);
+for (const url of urls) {
+  const film = await play(url);
+  console.log(`${film ? "ok  " : "FAIL"} plays ${url.split("?")[0]}${film ? ": " + film.size + ", " + film.duration.toFixed(1) + " s" : ""}`);
+  if (!film) failed = true;
+}
 await browser.close();
-console.log(`${film ? "ok  " : "FAIL"} launch-film.mp4 plays: ${film ? film.size + ", " + film.duration.toFixed(1) + " s" : "did not load"}`);
-if (failed || !film) process.exit(1);
+if (failed) process.exit(1);
 ' || die "browser check failed"
 
 say "published"
 cat <<EOF
 source   $SHA ($BRANCH)
 main     $MAIN_SHA  https://github.com/$SLUG/commit/$MAIN_SHA
-gh-pages $PAGES_SHA  trailer $(basename "$TRAILER_DIR")
-demo     $PAGES_URL
-film     ${PAGES_URL}launch-film.mp4  (also launch-film-1x1.mp4, launch-film-9x16.mp4, launch-film-30s.mp4)
+demo     $PAGES_URL  (demo-site.tar.gz $DEMO_SHA256)
+films    https://github.com/$SLUG/releases/tag/$FILMS_TAG  (also served as ${PAGES_URL}launch-film*.mp4)
 EOF
