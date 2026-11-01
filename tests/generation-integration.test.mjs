@@ -271,6 +271,8 @@ test('engine: a stalled Cloud /view for one job never delays another job\'s subm
 });
 
 test('engine: media downloads are bounded (FIFO); a full download queue still never delays a submit', async () => {
+  // No wall-clock assumptions: every wait is on a state the test can see, with a generous cap so a real hang fails instead of stalling the suite.
+  const until = async (ok, what) => { for (let i = 0; i < 4000 && !ok(); i++) await new Promise(r => setTimeout(r, 5)); assert.ok(ok(), `timed out waiting for ${what}`); };
   const gates = [], viewing = [];
   const history = async promptId => { const job = h.generation.list().find(j => j.promptId === promptId); return { promptId, requestId: job.id, graph: job.submittedGraph, status: { completed: true }, outputs: { 2: { images: [{ filename: 'out.png', subfolder: '', type: 'output' }] } } }; };
   const view = async () => { let release; const gate = new Promise(r => { release = r; }); gates.push(release); viewing.push(Date.now()); await gate; return png; };
@@ -279,15 +281,17 @@ test('engine: media downloads are bounded (FIFO); a full download queue still ne
   const a = await h.quoted(), b = await h.quoted();
   for (const x of [a, b]) await h.generation.submit({ ...x.input, approval: h.consent(x.job) });
   const trackA = h.generation.track(a.input.requestId), trackB = h.generation.track(b.input.requestId);
-  for (let i = 0; i < 50 && !gates.length; i++) await new Promise(r => setTimeout(r, 5));
-  await new Promise(r => setTimeout(r, 20));
+  await until(() => gates.length >= 1 && downloads.stats().waiting === 1, 'one download running and the other waiting');
   assert.equal(gates.length, 1, 'only one download runs at a time');
   assert.deepEqual(downloads.stats(), { limit: 1, running: 1, waiting: 1 });
   assert.equal(h.generation.get(b.input.requestId).status, 'collecting', 'the waiting job has persisted collecting');
-  const c = await h.quoted(), t0 = Date.now();
-  assert.equal((await h.generation.submit({ ...c.input, approval: h.consent(c.job) })).status, 'queued'); assert.ok(Date.now() - t0 < 1000);
+  // The submit must finish while the first download is still held: had it waited on the download queue it could never return here.
+  const c = await h.quoted();
+  const sent = await Promise.race([h.generation.submit({ ...c.input, approval: h.consent(c.job) }), new Promise(r => setTimeout(() => r('blocked'), 30000))]);
+  assert.notEqual(sent, 'blocked', 'a submit is not held up by the full download queue'); assert.equal(sent.status, 'queued');
+  assert.deepEqual(downloads.stats(), { limit: 1, running: 1, waiting: 1 }, 'the first download was still held when the submit returned');
   gates[0]();
-  for (let i = 0; i < 50 && gates.length < 2; i++) await new Promise(r => setTimeout(r, 5));
+  await until(() => gates.length >= 2, 'the next download to start');
   assert.equal(gates.length, 2, 'the next download starts when the first finishes'); gates[1]();
   assert.deepEqual([(await trackA).status, (await trackB).status], ['completed', 'completed']);
   assert.deepEqual(downloads.stats(), { limit: 1, running: 0, waiting: 0 });
