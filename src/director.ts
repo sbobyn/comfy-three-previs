@@ -3,7 +3,7 @@ import './director.css';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf, keyStills } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
 import { starterBlockout, starterMediaStatus, videoStale, keyStillState, blenderBlockout } from '../shared/director.mjs';
-import { api, h, toast, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge, REPO_URL } from './director-common';
+import { api, h, toast, announce, refocus, SR_ONLY, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge, REPO_URL } from './director-common';
 import { expectedUsd, isFree, submitImage, suggestedCap } from './director-spend';
 import type { Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
@@ -16,6 +16,7 @@ import { createSequence } from './director-sequence';
 import { promptBlock, cameraStyleBlock } from './director-prompt';
 import { objectColors, KIND_COLORS } from '../shared/prompt.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
+import { viewportSummary } from '../shared/viewport-summary.mjs';
 import { describeFrame, stillPrompt, stillReferences, STRONG_GUIDE_MODEL } from '../shared/still-match.mjs';
 import { openLooksBoard, aspectFor } from './director-looks';
 import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences, clipSeconds, clipLengths, modelLabel, startOnlyFallback } from './director-videogen';
@@ -125,7 +126,8 @@ function menuKeys(menu: HTMLElement, opener: HTMLElement, aria = true) {
 // One "More" menu holds what used to be loose top-bar buttons (Library, Claude, Guide, shortcuts, tips, export).
 const helpMenu = h('div', { class: 'menu help-menu', hidden: true, role: 'menu' });
 const helpMenuBtn = h('button', { class: 'btn ghost sm icon help-menu-btn', type: 'button', 'aria-label': 'More', title: 'Library, Claude, guide and shortcuts', onclick: () => { menuState(helpMenu, helpMenu.hidden, helpMenuBtn, true); } }, '⋯');
-const menuItem = (title: string, line: string, run: () => void, icon?: string) => h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; run(); } }, h('strong', {}, icon ? svgIcon(icon) : null, title), h('span', {}, line));
+// Focus goes back to More before the action runs, so a dialog it opens returns focus there (the menu item is hidden by then).
+const menuItem = (title: string, line: string, run: () => void, icon?: string) => h('button', { type: 'button', role: 'menuitem', onclick: () => { helpMenu.hidden = true; helpMenuBtn.setAttribute('aria-expanded', 'false'); helpMenuBtn.focus(); run(); } }, h('strong', {}, icon ? svgIcon(icon) : null, title), h('span', {}, line));
 helpMenu.append(
   menuItem('Library', 'Every image, blockout, video and film', () => void openAssets(), ICON.library),
   menuItem('Direct with Claude', 'Edit this scene from Claude; changes show here live', () => claudeDialog()),
@@ -168,7 +170,7 @@ function separatorValue(el: HTMLElement, now: number, min: number, max: number) 
 const rail = h('aside', { class: 'rail' },
   shotsSection, railSplit,
   h('section', { class: 'rail-section rail-scene', style: 'flex:1' },
-    h('div', { class: 'rail-head' }, h('span', { class: 'eyebrow' }, 'Scene'), filterInput, h('button', { class: 'btn ghost sm add-obj', type: 'button', title: 'Add an object (Shift+A)', 'aria-haspopup': 'true', onclick: () => { addMenu.hidden = !addMenu.hidden; } }, '+ Add ▾')),
+    h('div', { class: 'rail-head' }, h('span', { class: 'eyebrow' }, 'Scene'), filterInput, h('button', { class: 'btn ghost sm add-obj', type: 'button', title: 'Add an object (Shift+A)', 'aria-haspopup': 'true', onclick: (ev: MouseEvent) => { addMenu.hidden = !addMenu.hidden; if (!addMenu.hidden && ev.detail === 0) addMenu.querySelector<HTMLButtonElement>('button')?.focus(); } }, '+ Add ▾')),
     addMenu, outline));
 {
   const saved = Number(localStorage.getItem('previs.shotsH'));
@@ -187,7 +189,10 @@ const rail = h('aside', { class: 'rail' },
   railSplit.ondblclick = () => { rail.style.removeProperty('--shots-h'); localStorage.removeItem('previs.shotsH'); };
 }
 
-const canvas = h('canvas', { class: 'main', 'aria-label': 'Scene viewport. Drag objects to arrange; drag empty space to orbit.' });
+// The canvas is the only picture of the blockout, so it carries a text alternative: the objects around the shot camera and the camera itself.
+const canvas = h('canvas', { class: 'main', 'aria-label': 'Scene viewport. Drag objects to arrange; drag empty space to orbit.', 'aria-describedby': 'viewport-summary' });
+const vpText = h('p', { id: 'viewport-summary', style: SR_ONLY });
+let vpView: 'set' | 'camera' = 'set';
 const labels = h('div', { class: 'labels' });
 const monLabel = h('div', { class: 'mon-label' });
 const monitor = h('div', { class: 'monitor', title: 'Click to look through the shot camera (C)', role: 'button', tabindex: 0 }, h('div', { class: 'mon-box' }, h('div', { class: 'thirds' }), h('div', { class: 'rec' }, h('i'), 'SHOT CAM'), monLabel));
@@ -221,7 +226,7 @@ camHero.append(h('span', { class: 'ch-title' }, h('i', { class: 'ch-dot', 'aria-
   h('button', { type: 'button', class: 'ch-x', 'aria-label': 'Hide the camera controls tip', title: 'Hide (Show tips again brings it back)', onclick: () => { localStorage.setItem(HERO_KEY, '1'); renderCamHero(); } }, '✕'));
 const helpToggle = h('button', { class: 'btn sm help-toggle', type: 'button', title: 'Controls & shortcuts (?)', 'aria-label': 'Controls & shortcuts', 'aria-expanded': 'false', onclick: () => { if (helpCard.hidden) renderHelp(); helpCard.hidden = !helpCard.hidden; } }, '?');
 new MutationObserver(() => helpToggle.setAttribute('aria-expanded', String(!helpCard.hidden))).observe(helpCard, { attributes: true, attributeFilter: ['hidden'] });
-const viewport = h('div', { class: 'viewport' }, canvas, labels, camFrame, monitor, monToggle, viewSeg,
+const viewport = h('div', { class: 'viewport' }, canvas, vpText, labels, camFrame, monitor, monToggle, viewSeg,
   h('div', { class: 'vp-tools' }, modeSeg, snapBtn, h('button', { class: 'btn sm', type: 'button', onclick: () => frameSelected(), title: 'Frame selected, or everything (F, . or Numpad .)' }, 'Frame'), helpToggle),
   dropHint, hud, helpCard, addPopup, coach, firstRun, camHero);
 const playBtn = h('button', { class: 'btn sm icon', type: 'button', 'aria-label': 'Play' }, '▶');
@@ -413,7 +418,7 @@ const mobile = initMobile({ // [mobile] compact/medium layout; no-op on desktop 
   app, top, wsBody, stage, viewport, shotList, outline, filterInput, shotPane, objectPane, readiness, actionBar, transport: { playBtn, scrub, timeOut }, modeSeg, snapBtn, coach, labels, titleInput, undoBtn, redoBtn,
   sequence, scene, selection, project: () => project, shot, step: () => step, setStep, selectShot, addShot, setView, setSection, openRender, openAssets, claudeDialog, requestDelete, frameSelected, duplicateSelection, toggleHidden, entity, runEntry, edit, undo, redo,
 });
-selection.subscribe(sel => { selected = sel.primary; viewport.classList.toggle('has-sel', sel.ids.length > 0); scene.setSelection(sel.ids, sel.primary); scene.setOutlineColor(colorOf(sel.primary)); renderOutline(); renderInspector(); renderObjectPane(); placeObjectPane(); highlightPrompt(selected); renderKeyTrack(); });
+selection.subscribe(sel => { selected = sel.primary; renderViewportText(); viewport.classList.toggle('has-sel', sel.ids.length > 0); scene.setSelection(sel.ids, sel.primary); scene.setOutlineColor(colorOf(sel.primary)); renderOutline(); renderInspector(); renderObjectPane(); placeObjectPane(); highlightPrompt(selected); renderKeyTrack(); });
 
 // ---------- Rendering ----------
 function apply(next: DirectorProject) {
@@ -547,8 +552,13 @@ async function ungroupSelection() {
 
 const textIfChanged = (el: HTMLElement, value: string) => { if (el.textContent !== value) el.textContent = value; };
 monLabel.append(h('span'), h('span')); frameLabel.append(h('span'), h('span'));
+function renderViewportText() {
+  if (playing) return; // a moving camera would rewrite it every frame
+  textIfChanged(vpText, viewportSummary(project, shot(), { t: Math.round(playhead * 10) / 10, selected: selection.ids, view: vpView }));
+}
 function renderTransport() {
   const s = shot();
+  renderViewportText();
   scrub.value = String(playhead);
   if (!timeOut.firstChild) timeOut.append(h('span'), h('span', { class: 't-film' }));
   textIfChanged(timeOut.children[0] as HTMLElement, `${fmt(playhead)} / ${fmt(s.duration)}`);
@@ -893,6 +903,20 @@ function openStill(at: 'start' | 'end') {
 }
 function showTipsAgain() { localStorage.removeItem('previs.coach.viewport'); localStorage.removeItem(HERO_KEY); localStorage.removeItem(TOUR_KEY); coach.hidden = false; renderCamHero(); if (step !== 'cut') showTour(0); }
 let rigExplainer: { dispose(): void } | undefined;
+/** Rebuilding a pane drops the control that has focus. Note which one it was (kind, name, and which of its namesakes) so the rebuilt twin can take focus back and a keyboard user keeps their place. */
+const FOCUSABLE = 'button, input, select, textarea, summary, a[href], [tabindex]';
+const spotName = (el: Element) => `${el.tagName}|${el.getAttribute('aria-label') || (el as HTMLElement).innerText?.trim().slice(0, 60) || el.getAttribute('title') || ''}`;
+function focusSpot(root: HTMLElement) {
+  const a = document.activeElement;
+  if (!a || a === root || !root.contains(a)) return null;
+  const name = spotName(a);
+  return { name, n: Array.from(root.querySelectorAll(FOCUSABLE)).filter(x => spotName(x) === name).indexOf(a) };
+}
+function restoreSpot(root: HTMLElement, spot: { name: string; n: number } | null) {
+  if (!spot) return;
+  const twins = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(x => spotName(x) === spot.name);
+  (twins[spot.n] ?? twins[0])?.focus({ preventScroll: true });
+}
 function renderShotPane() {
   const key = `${shotId}|${project.revision}`;
   if (shotPane.dataset.shot === key) return;
@@ -900,6 +924,7 @@ function renderShotPane() {
   rigExplainer?.dispose();
   // The rebuild detaches the object pane (re-placed below); keep typing there intact, e.g. during a refgen poll.
   const held = objectPane.contains(document.activeElement) ? document.activeElement as HTMLElement : null;
+  const spot = held ? null : focusSpot(shotPane);
   const caret = held instanceof HTMLInputElement || held instanceof HTMLTextAreaElement ? [held.selectionStart, held.selectionEnd] : null;
   const s = shot(), idx = project.shots.indexOf(s);
   const title = h('input', { class: 'field', value: s.title, maxlength: 120, 'aria-label': 'Shot title' });
@@ -932,7 +957,7 @@ function renderShotPane() {
   const blockoutInfo = rendered ? h('details', { class: 'facts-more' },
     h('summary', {}, h('span', { class: 'info-i', 'aria-hidden': 'true' }, 'i'), fromBlender(s) ? 'Blender clip' : 'Blockout clip', stale ? h('span', { class: 'fm-warn' }, fromBlender(s) ? ' · edited since the import' : ' · scene changed since') : h('span', { class: 'fm-ok' }, ' · up to date')),
     !!stale && fromBlender(s) ? h('p', { class: 'note', style: 'margin:0' }, BLENDER_STALE) : null,
-    h('video', { src: `/assets/${rendered.assetId}.mp4`, controls: true, muted: true, loop: true, playsinline: true, preload: 'metadata', style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }),
+    h('video', { 'aria-label': 'Blockout video', src: `/assets/${rendered.assetId}.mp4`, controls: true, muted: true, loop: true, playsinline: true, preload: 'metadata', style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }),
     h('div', { class: 'facts' }, 'Frames', h('b', {}, `${rendered.frameCount} @ 24 fps`), 'Duration', h('b', {}, `${Number(rendered.duration).toFixed(2)}s`), 'Size', h('b', {}, `${rendered.width}×${rendered.height}`))) : null;
   shotPane.replaceChildren(
     section('story', 'Story', h('span', { class: 'sec-meta' }, `Shot ${String(idx + 1).padStart(2, '0')}`, h('button', { class: 'btn ghost sm', type: 'button', disabled: project.shots.length < 2, title: 'Delete this shot', onclick: () => { requestDeleteShot(s); } }, 'Delete')),
@@ -970,6 +995,7 @@ function renderShotPane() {
   const rigPlay = rigHost.querySelector<HTMLElement>('.ex-play'); if (rigPlay) { rigPlay.style.width = '44px'; rigPlay.style.height = '44px'; }
   renderReadiness();
   placeObjectPane();
+  restoreSpot(shotPane, spot);
   if (held?.isConnected && document.activeElement !== held) { held.focus({ preventScroll: true }); if (caret) try { (held as HTMLInputElement).setSelectionRange(caret[0], caret[1]); } catch {} }
   shotPane.addEventListener('focusout', () => setTimeout(() => { if (!shotPane.contains(document.activeElement) && !objectPane.contains(document.activeElement)) renderShotPane(); }, 0), { once: true });
 }
@@ -1071,15 +1097,15 @@ function keyFrameBlock(s: Shot) {
   }));
   if (reviewing.has(`still:${s.id}`)) review(reviewing.get(`still:${s.id}`));
   go.onclick = async () => {
-    go.disabled = true; status.className = 'status-line'; status.textContent = 'Preparing the quote; nothing is sent…';
+    go.disabled = true; status.className = 'status-line'; status.textContent = 'Preparing the quote; nothing is sent…'; announce(status.textContent);
     try {
       const text = [prompt.value.trim(), moment.value.trim() ? `At this moment: ${moment.value.trim()}.` : ''].filter(Boolean).join(' ');
       const frameAt = t === 0 ? 'start' : Math.abs(t - s.duration) < 0.01 ? 'end' : t;
       const full = stillPrompt({ project, shot: s, t, text, presetId: f.presetId, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null, frame: words, markers: !blender });
       const { job } = await api('director/refgen/prepare', { projectId, target: 'shot', shotId: s.id, frameAt, presetId: f.presetId, prompt: full, aspect: '16:9', count: f.count, seed: f.seed, referenceIds: refIds, guide: (await guide.data).split(',')[1] });
-      reviewing.set(`still:${s.id}`, job); status.className = 'status-line'; review(job);
-    } catch (e) { status.className = 'status-line err'; status.textContent = (e as Error).message; }
-    finally { go.disabled = false; }
+      reviewing.set(`still:${s.id}`, job); status.className = 'status-line'; review(job); announceQuote(job); refocus(status.firstElementChild as HTMLElement);
+    } catch (e) { status.className = 'status-line err'; status.textContent = (e as Error).message; announce(`Quote failed: ${(e as Error).message}`); }
+    finally { go.disabled = false; refocus(go); }
   };
   const inputs = h('div', { class: 'sb-inputs' },
     h('div', { class: 'vm-head' }, `Still at ${label(t)} · what the image model gets`),
@@ -1122,7 +1148,7 @@ function resultsBlock(s: Shot): Node[] {
   return [h('div', { class: 'block videos' },
     h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Videos · ${results.length}`), results.length > 3 ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => void openAssets('result') }, 'All in Library') : null),
     ...results.slice(0, 3).map(a => h('div', { style: 'display:flex;flex-direction:column;gap:4px' },
-      a.mime.startsWith('video/') ? h('video', { src: assetUrl(a), controls: true, muted: true, loop: true, playsinline: true, preload: 'metadata', style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }) : h('img', { src: assetUrl(a), alt: '', style: 'width:100%;border-radius:8px' }),
+      a.mime.startsWith('video/') ? h('video', { 'aria-label': 'Generated video', src: assetUrl(a), controls: true, muted: true, loop: true, playsinline: true, preload: 'metadata', style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }) : h('img', { src: assetUrl(a), alt: '', style: 'width:100%;border-radius:8px' }),
       h('div', { class: 'vid-meta' }, h('span', {}, (a.source.workflow || 'Video').split(' ·')[0]), h('span', { class: 'muted' }, `${a.duration != null ? Number(a.duration).toFixed(1) : '—'}s · ${a.width}×${a.height} · ${new Date(a.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`),
         h('button', { class: 'linklike', type: 'button', title: 'Compare the video with its blockout', onclick: () => { setStep('cut'); sequence.open(s.id, 'compare'); } }, 'Compare')))))];
 }
@@ -1161,7 +1187,7 @@ async function openAssets(initial: 'all' | 'cut' | 'render' | 'result' | 'look' 
     note.textContent = filter === 'shared' ? 'Shared assets live in this computer’s library, outside any project: save an object with Save to library, then place it in any project. Export makes one .zip to share; Import asset… takes one in.' : 'Everything here lives in this project’s own folder, so exporting it carries videos, films, blockouts and images together.';
     const shown = filter === 'all' ? own : items.filter(i => i.kind === filter);
     grid.replaceChildren(...(shown.length ? shown.map(i => h('div', { class: 'asset' },
-      i.thumb ?? (i.video ? h('video', { src: i.url, muted: true, loop: true, playsinline: true, preload: 'metadata', controls: true }) : h('img', { src: i.url, alt: i.title, loading: 'lazy' })),
+      i.thumb ?? (i.video ? h('video', { 'aria-label': i.title, src: i.url, muted: true, loop: true, playsinline: true, preload: 'metadata', controls: true }) : h('img', { src: i.url, alt: i.title, loading: 'lazy' })),
       h('div', { class: 'a-body' },
         h('div', { class: 'a-title' }, h('span', { class: `badge ${i.kind === 'render' || i.kind === 'cut' ? 'render' : i.kind === 'result' ? 'result' : 'look'}` }, i.badge ?? labels[i.kind].replace(/s$/, '')), h('span', { style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap' }, i.title)),
         h('span', { class: 'muted' }, i.sub),
@@ -1389,13 +1415,13 @@ function renderObjectPane() {
   const review = (job: any) => quoteStatus.replaceChildren(quoteCard(job, () => { reviewing.delete(`entity:${e.id}`); objectPane.dataset.id = ''; renderObjectPane(); }));
   if (reviewing.has(`entity:${e.id}`)) review(reviewing.get(`entity:${e.id}`));
   quoteBtn.onclick = async () => {
-    quoteBtn.disabled = true; quoteStatus.className = 'status-line'; quoteStatus.textContent = 'Preparing the quote; nothing is sent…';
+    quoteBtn.disabled = true; quoteStatus.className = 'status-line'; quoteStatus.textContent = 'Preparing the quote; nothing is sent…'; announce(quoteStatus.textContent);
     try {
       const { job } = await api('director/refgen/prepare', { projectId, entityId: e.id, presetId: form.presetId, prompt: form.prompt, aspect: form.aspect, count: form.count, seed: form.seed, ...(form.checkpoint ? { checkpoint: form.checkpoint } : {}) });
-      reviewing.set(`entity:${e.id}`, job); quoteStatus.className = 'status-line'; review(job);
+      reviewing.set(`entity:${e.id}`, job); quoteStatus.className = 'status-line'; review(job); announceQuote(job); refocus(quoteStatus.firstElementChild as HTMLElement);
     }
-    catch (err) { quoteStatus.className = 'status-line err'; quoteStatus.textContent = (err as Error).message; }
-    finally { quoteBtn.disabled = false; }
+    catch (err) { quoteStatus.className = 'status-line err'; quoteStatus.textContent = (err as Error).message; announce(`Quote failed: ${(err as Error).message}`); }
+    finally { quoteBtn.disabled = false; refocus(quoteBtn); }
   };
   const jobs = refgen.jobs.filter(j => j.entityId === e.id);
   const upload = h('label', { class: 'ob-add', title: `Upload images for ${e.name}` }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => void uploadRefs(Array.from((ev.target as HTMLInputElement).files || []), e.id) }), '＋', h('small', {}, 'Upload'));
@@ -1451,6 +1477,11 @@ function estLabel(presetId: string, count: number) {
 }
 // Prepared image requests waiting for the artist's approval, by where they were asked for ("entity:<id>", "still:<shotId>").
 const reviewing = new Map<string, any>();
+/** The quote card appears below the button that asked for it; say so, with the price, so it is found and read. */
+function announceQuote(job: any) {
+  const cost = isFree(job) ? 'no charge' : expectedUsd(job) === null ? 'no cost estimate' : `about $${expectedUsd(job)!.toFixed(2)}`;
+  announce(`Quote ready: ${job.model}, ${job.count} image${job.count === 1 ? '' : 's'}, ${cost}. Nothing is sent until you approve it.`);
+}
 /**
  * The review step for one prepared image request: the exact quote, an allowance the artist sets, and explicit approval.
  * Sent once through submitImage (never above the allowance); `done(sent)` closes it.
@@ -1470,9 +1501,9 @@ function quoteCard(job: any, done: (sent: boolean) => void) {
     try {
       await submitImage(api, projectId, job, { capUsd: Number(max.value) || 0, spentUsd: 0 });
       done(true); await loadRefgen(); pollJobs();
-    } catch (err) { status.className = 'status-line err'; status.textContent = (err as Error).message; sync(); }
+    } catch (err) { status.className = 'status-line err'; status.textContent = (err as Error).message; announce(`Not sent: ${(err as Error).message}`); sync(); }
   };
-  return h('div', { class: 'prompt-box quote-card', style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
+  return h('div', { class: 'prompt-box quote-card', role: 'group', 'aria-label': 'Quote to review', tabindex: -1, style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
     h('div', { class: 'facts' }, 'Model', h('b', {}, job.model), 'Runs on', h('b', {}, job.backend.kind === 'cloud' ? 'Comfy Cloud' : job.backend.url), 'Images', h('b', {}, `${job.count} · ${job.aspect} · seed ${job.seed}`), 'Estimated cost', h('b', { style: `color:${free ? 'var(--ok)' : 'var(--warn)'}` }, job.quote.label), 'Quote', h('b', {}, job.fingerprint.slice(0, 12))),
     h('label', { style: 'display:flex;gap:8px;align-items:center' }, approve, 'I approve this exact request'),
     free ? null : est === null ? h('p', { class: 'note', style: 'margin:0' }, 'No cost estimate for this model, so it is not sent from here. Choose a priced model.')
@@ -1537,7 +1568,7 @@ function highlightPrompt(id: string | null) {
   shotPane.querySelectorAll<HTMLElement>('[data-ids]').forEach(el => el.classList.toggle('hl', !!id && el.dataset.ids!.split(' ').includes(id)));
 }
 function setView(v: 'set' | 'camera') {
-  scene.setView(v); setBtn.classList.toggle('on', v === 'set'); camBtn.classList.toggle('on', v === 'camera');
+  scene.setView(v); vpView = v; renderViewportText(); setBtn.classList.toggle('on', v === 'set'); camBtn.classList.toggle('on', v === 'camera');
   setBtn.setAttribute('aria-pressed', String(v === 'set')); camBtn.setAttribute('aria-pressed', String(v === 'camera'));
   viewport.classList.toggle('camview', v === 'camera');
   if (v === 'camera' && !coach.hidden) { coach.hidden = true; localStorage.setItem('previs.coach.viewport', '1'); }
@@ -1596,7 +1627,6 @@ function tick(now: number) {
 requestAnimationFrame(tick);
 playBtn.onclick = () => togglePlay();
 previewBtn.onclick = () => { if (playing) { togglePlay(false); return; } setView('camera'); playhead = 0; togglePlay(true); };
-for (const k of Object.keys(stepBtns) as Step[]) stepBtns[k].onkeydown = (ev: KeyboardEvent) => { const order: Step[] = ['build', 'shoot', 'cut']; if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return; const n = order[(order.indexOf(k) + (ev.key === 'ArrowRight' ? 1 : 2)) % 3]; setStep(n); stepBtns[n].focus(); };
 scrub.oninput = () => { playhead = Number(scrub.value); playing = false; scene.setPlayhead(playhead); renderTransport(); renderInspector(); };
 monitor.onclick = () => setView('camera');
 monitor.onkeydown = ev => { if (ev.key === 'Enter') setView('camera'); };
@@ -1869,7 +1899,8 @@ renderBtn.onclick = () => openRender();
 function openRender() {
   document.getElementById('render-dialog')?.remove();
   playing = false;
-  const s = shot(), idx = project.shots.indexOf(s);
+  // `s` follows the project: making the blockout saves a new project, and the quote has to see the shot with its new render.
+  let s = shot(); const idx = project.shots.indexOf(s);
   let width = 1280, height = 720;
   const frames = () => Math.min(120, Math.max(2, Math.round(s.duration * 24)));
   // The visual: blockout ↔ start still on one frame when the shot has a start still, else the blockout itself.
@@ -1930,7 +1961,7 @@ function openRender() {
   prompt.oninput = () => { if (s.render && s.render.signature === signature(project, s)) setOpen(s.render.previsShotId, s.render.assetId); };
   const sig = signature(project, s);
   if (s.render && s.render.signature === sig) {
-    if (!seam) media.replaceChildren(h('video', { src: `/assets/${s.render.assetId}.mp4`, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
+    if (!seam) media.replaceChildren(h('video', { 'aria-label': 'Blockout video', src: `/assets/${s.render.assetId}.mp4`, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
     step1.className = 'step done'; status.textContent = `Up to date: ${s.render.frameCount} frames · ${Number(s.render.duration).toFixed(2)}s · ${s.render.width}×${s.render.height}. Remake blockout to replace it.`;
     step2.className = 'step active'; setOpen(s.render.previsShotId, s.render.assetId);
   }
@@ -1941,8 +1972,8 @@ function openRender() {
       const img = h('img', { alt: 'Captured frame' }); media.replaceChildren(img);
       const { asset, previsShotId, project: saved } = await captureShotVideo(s, { width, height, prompt: prompt.value, onFrame: (url, i, n) => { if (i % 4 === 0) img.src = url; bar.style.width = `${((i + 1) / n) * 100}%`; status.textContent = `Blockout frame ${i + 1} / ${n}`; }, onStatus: t => { status.textContent = t; } });
       const previsShot = { id: previsShotId }; const r = { project: saved };
-      apply(r.project);
-      media.replaceChildren(seam || h('video', { src: asset.url, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
+      apply(r.project); s = project.shots.find(x => x.id === s.id) ?? s;
+      media.replaceChildren(seam || h('video', { 'aria-label': 'Blockout video', src: asset.url, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
       status.textContent = `Saved: ${asset.frameCount} frames · ${Number(asset.duration).toFixed(2)}s · ${asset.width}×${asset.height} in ${((performance.now() - started) / 1000).toFixed(1)}s.`;
       step1.className = 'step done'; step2.className = 'step done'; step3.className = 'step active';
       await setOpen(previsShot.id, asset.id);
@@ -1959,6 +1990,7 @@ function openRender() {
       else if (!gen.querySelector('.gen-quote')) await setOpen(s.render.previsShotId, s.render.assetId);
       const q = gen.querySelector<HTMLButtonElement>('.gen-quote');
       if (q) { q.click(); step3.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+      else refocus(hGo); // nothing to quote (the blockout failed): the error is in the dialog, focus stays here
     } finally { hGo.disabled = false; }
   };
   const dlg = h('dialog', { class: 'render', id: 'render-dialog', 'aria-labelledby': 'render-title' },
@@ -2010,23 +2042,24 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   const out = h('div', { class: 'gen-out' });
   const jobsBox = h('div', { class: 'gen-jobs' });
   quoteBtn.onclick = async () => {
-    const revision = project.revision, prompt = getPrompt();
+    const revision = project.revision, prompt = getPrompt(); let cardToFocus: HTMLElement | null = null;
     for (const input of [quoteBtn, wf, backendSel, useRefs, timing, startOnly]) input.disabled = true;
-    out.replaceChildren(h('p', { class: 'status-line' }, 'Preparing the request; nothing is being submitted…'));
+    out.replaceChildren(h('p', { class: 'status-line' }, 'Preparing the request; nothing is being submitted…')); announce('Preparing the request; nothing is being submitted');
     try {
       const prepared = await prepareShotVideo({ project, shot: s, st: st as any, definitionId: wf.value, useReferences: useRefs.checked, userPrompt: prompt, backend: backendSel.value === 'local' ? 'local' : 'cloud', acceptTimingChange: timing.checked, startOnly: startOnly.checked });
       const { def, job, request } = prepared;
       if (project.revision !== revision || getPrompt() !== prompt) throw Error('Shot or prompt changed while preparing. Review a fresh quote. Nothing submitted.');
       if (!job.validation?.compatible) throw Error((job.validation?.issues || []).map((i: any) => i.message).slice(0, 3).join('; ') || 'This workflow can’t run with these inputs');
-      const card = genQuote(job, def, request, s, prepared); out.replaceChildren(card);
+      const card = genQuote(job, def, request, s, prepared); out.replaceChildren(card); cardToFocus = card;
+      announce(`Quote ready: ${def.title}, ${job.quote?.status === 'known' && job.quote.amount === 0 ? 'no charge' : prepared.est ? `about $${prepared.est.toFixed(2)}` : 'cost unknown'}. ${job.validation?.compatible ? 'Review it and approve to submit.' : 'It is missing requirements.'}`);
       out.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     } catch (e) {
       let msg = (e as Error).message;
       const d = choices.find(c => c.id === wf.value), lim = d?.constraints?.sourceVideo?.duration || d?.constraints?.controlVideo?.duration;
       if (/constraints: .*duration/.test(msg) && lim) msg = `${d.title.split(' ·')[0]} needs a ${lim.min}–${Math.floor(lim.max)} s source and this shot is ${s.duration} s. Set the shot's duration to at least ${lim.min} s, render again, then quote.`;
-      out.replaceChildren(h('p', { class: 'status-line err' }, msg));
+      out.replaceChildren(h('p', { class: 'status-line err' }, msg)); announce(`Quote failed: ${msg}`);
     }
-    finally { for (const input of [quoteBtn, wf, backendSel, useRefs, timing, startOnly]) input.disabled = false; }
+    finally { for (const input of [quoteBtn, wf, backendSel, useRefs, timing, startOnly]) input.disabled = false; refocus(cardToFocus ?? quoteBtn); }
   };
   const drawJobs = () => {
     const mine = st.jobs.filter(j => j.shotId === previsShotId || (project.assets || []).some(a => a.kind === 'camera-render' && a.shotId === s.id && a.source.engineShotId === j.shotId)).slice(-4).reverse();
@@ -2058,22 +2091,23 @@ function genQuote(job: any, def: any, request: any, s: Shot, plan?: { est: numbe
   go.onclick = async () => {
     sync(); if (go.disabled) return;
     dispatched = true;
-    go.disabled = true; status.className = 'status-line'; status.textContent = 'Submitting once…';
+    go.disabled = true; status.className = 'status-line'; status.textContent = 'Submitting once…'; announce('Submitting once');
     try {
       const r = await api('generation/submit', { ...request, approval: { approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: Number(max.value) || 0, allowUnknownCharges: !free } } });
-      status.textContent = r.job.message || r.job.status;
+      status.textContent = r.job.message || r.job.status; announce(`Submitted: ${status.textContent}`);
       const poll = async () => {
         const t = await api('generation/track', { jobId: r.job.id }).catch(e => ({ job: { status: 'error', message: (e as Error).message } }));
-        status.textContent = `${t.job.status}: ${t.job.message || ''}`;
+        const line = `${t.job.status}: ${t.job.message || ''}`;
+        if (status.textContent !== line) { status.textContent = line; if (t.job.status !== 'completed') announce(`Video ${t.job.status}${t.job.message ? `: ${t.job.message}` : ''}`); }
         if (['completed', 'failed', 'uncertain', 'closed', 'error'].includes(t.job.status)) { if (t.job.status === 'completed') toast(`Shot ${String(project.shots.indexOf(s) + 1).padStart(2, '0')} video is ready — see Videos`); return; }
         setTimeout(poll, 5000);
       };
       setTimeout(poll, 4000);
       // Display only, after the authoritative status poll is scheduled; it can never affect dispatch or tracking.
       try { live.replaceChildren(progressSlot(projectId, 'generation', r.job.id, `Shot ${String(project.shots.indexOf(s) + 1).padStart(2, '0')} video`, 'quote')); } catch { /* polling continues */ }
-    } catch (e) { status.className = 'status-line err'; status.textContent = `${(e as Error).message} · No retry. Inspect request ${job.id} before preparing anything else.`; }
+    } catch (e) { status.className = 'status-line err'; status.textContent = `${(e as Error).message} · No retry. Inspect request ${job.id} before preparing anything else.`; announce(`Submit failed: ${status.textContent}`); }
   };
-  return h('div', { class: 'prompt-box', style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
+  return h('div', { class: 'prompt-box', role: 'group', 'aria-label': 'Quote to review', tabindex: -1, style: 'display:flex;flex-direction:column;gap:8px;white-space:normal' },
     h('div', { class: 'facts' }, 'Model', h('b', {}, def.title), 'Runs on', h('b', {}, request.backend.kind === 'cloud' ? 'Comfy Cloud' : 'Local ComfyUI'),
       'Ready', h('b', { style: `color:${job.validation?.compatible ? 'var(--ok)' : 'var(--bad)'}` }, job.validation?.compatible ? 'Inputs ready' : 'Missing requirements'),
       'Camera', h('b', {}, CAMERA_SOURCE_LABELS[cameraSource] || cameraSource),
@@ -2082,9 +2116,9 @@ function genQuote(job: any, def: any, request: any, s: Shot, plan?: { est: numbe
       'Quote', h('b', {}, String(job.fingerprint || '').slice(0, 12))),
     h('p', { class: 'note' }, `Exact source: ${job.sources?.sourceVideo?.id || job.sources?.controlVideo?.id || job.sources?.firstFrame?.id || 'see request'} · ${job.sources?.sourceVideo?.frameCount ?? 'image'} frames · ${job.sources?.sourceVideo?.duration ?? '—'} s. Preparation does not upload inputs.`),
     def.pricing?.partnerEstimate ? h('p', { class: 'note' }, `Published partner estimate: $${def.pricing.partnerEstimate.min.toFixed(4)}–$${def.pricing.partnerEstimate.max.toFixed(4)} USD. ${def.pricing.partnerEstimate.note}`) : null,
-    finalPrompt ? h('div', { class: 'gen-final' }, h('span', { class: 'eyebrow' }, 'Final prompt · exactly what is sent'), h('pre', { style: 'max-height:160px;overflow:auto;white-space:pre-wrap;margin:4px 0 0' }, finalPrompt)) : null,
+    finalPrompt ? h('div', { class: 'gen-final' }, h('span', { class: 'eyebrow' }, 'Final prompt · exactly what is sent'), h('pre', { tabindex: 0, role: 'region', 'aria-label': 'Final prompt', style: 'max-height:160px;overflow:auto;white-space:pre-wrap;margin:4px 0 0' }, finalPrompt)) : null,
     cameraWords ? h('p', { class: 'status-line err', role: 'status' }, cameraWords) : null,
-    h('details', {}, h('summary', {}, 'Details'), h('pre', { style: 'max-height:240px;overflow:auto;white-space:pre-wrap' }, JSON.stringify({ prompt: job.binding?.prompt, sources: job.sources, graph: job.preparedGraph }, null, 2))),
+    h('details', {}, h('summary', {}, 'Details'), h('pre', { tabindex: 0, role: 'region', 'aria-label': 'Request details', style: 'max-height:240px;overflow:auto;white-space:pre-wrap' }, JSON.stringify({ prompt: job.binding?.prompt, sources: job.sources, graph: job.preparedGraph }, null, 2))),
     issues.length ? h('ul', { class: 'note', style: 'margin:0;padding-left:16px' }, ...issues.slice(0, 5).map((i: any) => h('li', {}, i.message))) : null,
     h('label', {}, approve, ' I approve this exact request, with an allowance of ', max, ' USD.'),
     !free ? h('label', {}, unknown, ' Cloud bills actual usage, which may be unknown. This is my spending allowance for this run, not a provider-enforced spending cap.') : null,

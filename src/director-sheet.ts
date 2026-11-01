@@ -9,7 +9,7 @@ import type { DirectorProject, Entity, Reference } from '../shared/director.mjs'
 import { setsFor, setDef, planSlots, slotAspect, slotLayout, viewPrompt, editViewPrompt, slotPick, EXPRESSION_PACKS, INTENSITIES, ANGLE_LABELS, anglesFor, FRAMINGS, MAX_SHEET_SLOTS } from '../shared/sheet-presets.mjs';
 import type { Sheet, SheetSlot, SheetAttempt, PlannedSlot } from '../shared/sheet-presets.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
-import { api, h, toast } from './director-common';
+import { api, h, toast, announce } from './director-common';
 import { estimateBreakdown } from '../shared/tiers.mjs';
 import { submitImage, suggestedCap } from './director-spend';
 import type { SpendBound } from './director-spend';
@@ -190,7 +190,11 @@ async function reconcile(e: Entity) {
 }
 
 // ---------- Spending approval: a visible total before any view is prepared or sent ----------
-function askApproval(e: Entity, n: number, presetId: string, refs: number, start: () => void) { asks.set(e.id, { n, presetId, refs, start }); draw(e.id); }
+function askApproval(e: Entity, n: number, presetId: string, refs: number, start: () => void) {
+  asks.set(e.id, { n, presetId, refs, start }); draw(e.id);
+  const b = estimateBreakdown('sheet', presetId, { count: n, refs });
+  announce(b ? `Quote ready: ${n} image request${n === 1 ? '' : 's'}, about ${money(b.expectedUsd)}. Approve to generate.` : 'This model has no cost estimate, so nothing is sent from here.');
+}
 function approvalPanel(e: Entity) {
   const a = asks.get(e.id); if (!a) return null;
   const cancel = h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { asks.delete(e.id); draw(e.id); } }, 'Cancel');

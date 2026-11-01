@@ -989,7 +989,7 @@ dialog.assets { width: min(1180px, 96vw); max-height: 92vh; }
 .asset .a-body { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
 .asset .a-title { font-weight: 600; display: flex; gap: 6px; align-items: center; }
 .asset .badge { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--paper-2); color: var(--muted); font-size: 10.5px; font-weight: 500; letter-spacing: .02em; white-space: nowrap; }
-.asset .badge.render { color: var(--accent); border-color: var(--accent-line); }
+.asset .badge.render { color: color-mix(in srgb, var(--accent) 80%, #000); border-color: var(--accent-line); }
 .asset .badge.result { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
 .asset .badge.look { color: var(--info); border-color: color-mix(in srgb, var(--info) 40%, transparent); }
 .asset .a-meta { color: var(--muted); font-family: var(--mono); font-size: 11px; }

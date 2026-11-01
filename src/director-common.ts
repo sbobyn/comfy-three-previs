@@ -33,11 +33,41 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<s
   return el;
 }
 
-/** A short status line at the bottom. With an action (e.g. Undo) it stays a little longer and carries one button. */
+/** The modal dialog on top, if any: everything outside it is inert, so toasts and announcements have to live inside it. */
+const liveHost = (): HTMLElement => Array.from(document.querySelectorAll<HTMLDialogElement>('dialog[open]')).filter(d => d.matches(':modal')).pop() ?? document.body;
+export const SR_ONLY = 'position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0';
+const pending = new Map<HTMLElement, { texts: string[]; timer: number }>();
+/**
+ * Say something to screen readers without moving focus or showing anything: job progress and completion, a quote that
+ * appeared, an error. Polite, so it waits for the reader to finish. The region is created before its text is set (readers
+ * ignore a live region that arrives with its content) and sits inside the open modal dialog when there is one.
+ * Messages sent within a moment of each other are read together, in order.
+ */
+export function announce(text: string) {
+  if (!text.trim()) return;
+  const root = liveHost();
+  let region = root.querySelector<HTMLElement>(':scope > .sr-live');
+  const fresh = !region;
+  if (!region) { region = h('div', { class: 'sr-live', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true', style: SR_ONLY }); root.append(region); }
+  const entry = pending.get(region) ?? { texts: [], timer: 0 };
+  clearTimeout(entry.timer); entry.texts.push(text.trim());
+  const el = region;
+  entry.timer = window.setTimeout(() => { el.textContent = ''; el.textContent = entry.texts.join('. '); pending.delete(el); }, fresh ? 150 : 60);
+  pending.set(el, entry);
+}
+
+/** A button that disables itself while it works drops focus to the page. When the work is done, put focus on `el` unless the user has already gone somewhere else. */
+export function refocus(el: HTMLElement | null | undefined) {
+  const a = document.activeElement;
+  if (el?.isConnected && !el.hidden && (!a || a === document.body)) el.focus({ preventScroll: true });
+}
+
+/** A short status line at the bottom. With an action (e.g. Undo) it stays a little longer and carries one button. Also announced politely. */
 export function toast(text: string, error = false, action?: { label: string; run: () => void }) {
-  const t = h('div', { class: 'toast' + (error ? ' err' : ''), role: 'status' }, text);
+  const t = h('div', { class: 'toast' + (error ? ' err' : '') }, text);
   if (action) t.append(h('button', { class: 'btn', type: 'button', onclick: () => { t.remove(); action.run(); } }, action.label));
-  document.body.append(t);
+  liveHost().append(t);
+  announce(error ? `Error: ${text}` : text);
   setTimeout(() => t.remove(), action ? 8000 : error ? 6000 : 2600);
 }
 
