@@ -33,8 +33,9 @@ Image 2.5 stills and a Seedance 2.5 edit. Two shots still show the earlier, unpo
 made for an earlier blocking:
 
 - **Wingspan · The valley** and **The dive** keep their earlier stills, videos and the blockout clips those videos were
-  made from, including The valley's trim in the cut. The valley's two new FLUX 3 still pairs and The dive's two new LTX
-  videos showed the eagle flying at the camera, against the blockout, and were not used.
+  made from, including The valley's trim in the cut. The valley's two new FLUX 3 still pairs, The dive's two new LTX
+  videos and a Kling O1 edit of each shot's blockout clip all showed the eagle facing the camera, against the blockout,
+  and were not used.
 
 A batch on a copy plans only those replacements.
 
