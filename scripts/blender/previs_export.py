@@ -18,7 +18,8 @@ custom properties previs_name, previs_shape (person, car, box, ...), previs_kind
 environment), previs_color ("#rrggbb"), previs_ignore = 1 (leave it out). Untagged meshes come in as set pieces.
 The .blend file is never saved; render settings, the frame and the scene camera are restored afterwards.
 """
-import bpy, json, math, os, re, sys
+import bpy, json, math, os, re, sys, struct
+from mathutils import Matrix
 from mathutils import Vector
 from bpy_extras.object_utils import world_to_camera_view
 
@@ -35,7 +36,7 @@ class ExportError(Exception):
 
 def options():
     """argv after '--', else the PREVIS_EXPORT dict a caller set, else defaults."""
-    o = {'out': None, 'camera': None, 'start': None, 'end': None, 'fps24': False, 'size': '1280x720', 'engine': 'keep'}
+    o = {'out': None, 'camera': None, 'start': None, 'end': None, 'fps24': False, 'size': '1280x720', 'engine': 'keep', 'meshes': False, 'selected': False, 'triangles': 20000}
     given = globals().get('PREVIS_EXPORT')
     if isinstance(given, dict): o.update({k.replace('-', ''): v for k, v in given.items()})
     elif '--' in sys.argv:
@@ -43,12 +44,14 @@ def options():
         i = 0
         while i < len(args):
             key = args[i].lstrip('-').replace('-', '')
-            if key == 'fps24': o['fps24'] = True; i += 1; continue
+            if key in ('fps24', 'meshes', 'selected'): o[key] = True; i += 1; continue
             if i + 1 >= len(args): raise ExportError(f'previs_export: {args[i]} needs a value')
             o[key] = args[i + 1]; i += 2
     if not o['out']: raise ExportError('previs_export: pass --out /absolute/folder (or PREVIS_EXPORT = {"out": ...})')
     if o['size'] not in ('1280x720', '640x360'): raise ExportError('previs_export: --size must be 1280x720 or 640x360 (the sizes Previs plays)')
     for k in ('start', 'end'): o[k] = int(o[k]) if o[k] not in (None, '') else None
+    o['triangles'] = int(o['triangles'])
+    if not 4 <= o['triangles'] <= 20000: raise ExportError('previs_export: --triangles must be 4–20000')
     return o
 
 
@@ -150,13 +153,81 @@ def prepare_out(out):
     frames = os.path.join(out, 'frames')
     if os.path.isdir(out):
         # Re-exporting into an earlier export folder replaces it; anything else in the folder is refused.
-        extra = [n for n in os.listdir(out) if n not in ('blender-previs.json', 'frames')]
+        extra = [n for n in os.listdir(out) if n not in ('blender-previs.json', 'frames', 'meshes')]
         old = os.listdir(frames) if os.path.isdir(frames) else []
         if extra or any(not re.fullmatch(r'frame-\d{6}\.png', n) for n in old): raise ExportError(f'previs_export: {out} holds other files; choose an empty or new folder')
+        mesh_dir = os.path.join(out, 'meshes')
+        meshes = os.listdir(mesh_dir) if os.path.isdir(mesh_dir) else []
+        if os.path.islink(out) or os.path.islink(frames) or os.path.islink(mesh_dir) or any(not re.fullmatch(r'object-\d{3}\.glb', n) for n in meshes): raise ExportError('previs_export: output must be a real export folder without links or other files')
+        for n in meshes: os.remove(os.path.join(mesh_dir, n))
         for n in old: os.remove(os.path.join(frames, n))
         if os.path.exists(os.path.join(out, 'blender-previs.json')): os.remove(os.path.join(out, 'blender-previs.json'))
     os.makedirs(frames, exist_ok=True)
     return frames
+
+
+
+def export_mesh(ob, dg, bounds, path, triangle_cap):
+    """Bake evaluated first-frame geometry, decimate a temporary copy, write a bounded GLB without dependencies.
+
+    Coordinates are unit yaw-aligned bounds, bottom-centred, Y-up. Previs scales by its proxy base size then the
+    entity scale. Baking world transforms first preserves parents, negative scale, pitch, roll and modifiers.
+    """
+    mesh = bpy.data.meshes.new_from_object(ob.evaluated_get(dg), depsgraph=dg)
+    temp = bpy.data.objects.new('Previs export temporary', mesh)
+    bpy.context.scene.collection.objects.link(temp)
+    try:
+        mesh.transform(ob.evaluated_get(dg).matrix_world)
+        # Remove the yaw and bottom-centre translation; leave pitch/roll baked into the actual vertices.
+        yaw = Matrix.Rotation(-math.radians(bounds['yaw']), 4, 'Z')
+        mesh.transform(yaw @ Matrix.Translation(-Vector(bounds['position'])))
+        mesh.calc_loop_triangles()
+        count = len(mesh.loop_triangles)
+        if count > triangle_cap:
+            decimate = temp.modifiers.new('Previs triangle cap', 'DECIMATE')
+            decimate.ratio = max(0.00001, triangle_cap / count * 0.95)
+            decimate.use_collapse_triangulate = True
+        ev = temp.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        final = ev.to_mesh()
+        try:
+            final.calc_loop_triangles()
+            if len(final.loop_triangles) > triangle_cap: raise ExportError(f'{ob.name}: cannot decimate under {triangle_cap} triangles')
+            w, h, d = [max(v, 0.0001) for v in bounds['size']]
+            points, normals = [], []
+            for tri in final.loop_triangles:
+                vs = [Vector((final.vertices[i].co.x / w, final.vertices[i].co.z / h, -final.vertices[i].co.y / d)) for i in tri.vertices]
+                normal = (vs[1] - vs[0]).cross(vs[2] - vs[0]).normalized()
+                points.extend(vs); normals.extend([normal] * 3)
+            if not points: raise ExportError(f'{ob.name}: mesh has no triangles')
+            payload = b''.join(struct.pack('<3f', *v) for v in points + normals)
+            # One plain colour keeps files small: textures, custom properties, scripts and animation never cross.
+            rgba = (0.5, 0.5, 0.5, 1)
+            for slot in ob.material_slots:
+                if slot.material:
+                    rgba = tuple(slot.material.diffuse_color)
+                    if slot.material.use_nodes and slot.material.node_tree:
+                        bsdf = next((n for n in slot.material.node_tree.nodes if n.type == 'BSDF_PRINCIPLED'), None)
+                        if bsdf: rgba = tuple(bsdf.inputs['Base Color'].default_value)
+                    break
+            size = len(points) * 12
+            g = {'asset': {'version': '2.0', 'generator': 'Comfy Previs'}, 'scene': 0,
+                 'scenes': [{'nodes': [0]}], 'nodes': [{'mesh': 0}],
+                 'meshes': [{'primitives': [{'attributes': {'POSITION': 0, 'NORMAL': 1}, 'material': 0, 'mode': 4}]}],
+                 'materials': [{'pbrMetallicRoughness': {'baseColorFactor': [max(0, min(1, v)) for v in rgba], 'metallicFactor': 0, 'roughnessFactor': 0.8}, 'doubleSided': True}],
+                 'buffers': [{'byteLength': len(payload)}],
+                 'bufferViews': [{'buffer': 0, 'byteOffset': 0, 'byteLength': size}, {'buffer': 0, 'byteOffset': size, 'byteLength': size}],
+                 'accessors': [{'bufferView': 0, 'componentType': 5126, 'count': len(points), 'type': 'VEC3', 'min': [min(v[i] for v in points) for i in range(3)], 'max': [max(v[i] for v in points) for i in range(3)]},
+                               {'bufferView': 1, 'componentType': 5126, 'count': len(points), 'type': 'VEC3'}]}
+            raw = json.dumps(g, separators=(',', ':')).encode()
+            raw += b' ' * (-len(raw) % 4)
+            data = struct.pack('<III', 0x46546c67, 2, 28 + len(raw) + len(payload)) + struct.pack('<II', len(raw), 0x4e4f534a) + raw + struct.pack('<II', len(payload), 0x004e4942) + payload
+            if len(data) > 2 * 1024 ** 2: raise ExportError(f'{ob.name}: mesh exceeds 2 MB')
+            with open(path, 'wb') as fh: fh.write(data)
+            return len(points) // 3, len(data)
+        finally: ev.to_mesh_clear()
+    finally:
+        bpy.data.objects.remove(temp, do_unlink=True)
+        bpy.data.meshes.remove(mesh)
 
 
 def main():
@@ -178,7 +249,7 @@ def main():
     if abs(scene.unit_settings.scale_length - 1) > 1e-6: warnings.append(f'Unit scale is {scene.unit_settings.scale_length}, not 1 m; sizes are read as metres')
     if abs(cam.data.shift_x) > 1e-4 or abs(cam.data.shift_y) > 1e-4: warnings.append('The camera uses lens shift; Previs camera words and boxes ignore it')
     view_layer = bpy.context.view_layer
-    objects = [ob for ob in scene.objects if ob.type == 'MESH' and not ob.hide_render and ob.name in view_layer.objects and not ob.get('previs_ignore')]
+    objects = [ob for ob in scene.objects if ob.type == 'MESH' and not ob.hide_render and ob.name in view_layer.objects and not ob.get('previs_ignore') and (not o['selected'] or ob.select_get())]
     if len(objects) > MAX_OBJECTS:
         vol = lambda ob: math.prod(ob.dimensions) or sum(ob.dimensions)
         objects = sorted(objects, key=vol, reverse=True)[:MAX_OBJECTS]
@@ -223,6 +294,19 @@ def main():
         kind = ob.get('previs_kind')
         records.append({'name': name_of(ob), 'blenderName': ob.name, 'cast': is_cast(ob), 'shape': shape_of(ob), **({'kind': kind} if kind in KINDS else {}), **({'color': hex_of(ob)} if hex_of(ob) else {}), 'frames': [a] if static else rows})
     if flat: warnings.append(f'Left out {len(flat)} flat object(s) under 1 cm tall (ground planes): {", ".join(flat[:6])}')
+    if o['meshes']:
+        os.makedirs(os.path.join(out, 'meshes'), exist_ok=True)
+        total_triangles, total_bytes = 0, 0
+        try:
+            scene.frame_set(start)
+            for i, record in enumerate(records):
+                path = 'meshes/object-%03d.glb' % i
+                triangles, size = export_mesh(scene.objects[record['blenderName']], bpy.context.evaluated_depsgraph_get(), record['frames'][0], os.path.join(out, path), o['triangles'])
+                total_triangles += triangles; total_bytes += size
+                if total_triangles > 100000 or total_bytes > 32 * 1024 ** 2: raise ExportError('previs_export: meshes exceed 100000 triangles or 32 MB total; use --selected or lower --triangles')
+                record['mesh'] = path
+        finally: scene.frame_set(frame0)
+        warnings.append('Viewport meshes are static first-frame shapes with one material; deformation stays in the Blender clip')
     rolls = [abs(roll_of(k)) for k in keys]
     if max(rolls) > 2: warnings.append(f'The camera rolls up to {max(rolls):.1f}°; the clip keeps it, Previs camera words and boxes assume a level camera')
     if len({k['lens'] for k in keys}) > 1: warnings.append('The lens is animated; Previs follows it per frame')

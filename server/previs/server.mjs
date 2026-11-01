@@ -288,8 +288,8 @@ const server = createServer(async (req, res) => {
     let file;
     if (/^\/renders\/[a-f0-9-]{36}\.png$/.test(url.pathname)) file = join(data, url.pathname);
     else if (/^\/director-assets\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(mp4|webm|mov|png)$/.test(url.pathname)) { const [, , pid, name] = url.pathname.split('/'); file = await director.assetFile(pid, name); }
-    else if (/^\/director-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp)$/.test(url.pathname)) { const [, , pid, name] = url.pathname.split('/'); file = await director.refFile(pid, name); }
-    else if (/^\/library-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp)$/.test(url.pathname)) { const [, , id, name] = url.pathname.split('/'); file = director.library.refFile(id, name); }
+    else if (/^\/director-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp|glb)$/.test(url.pathname)) { const [, , pid, name] = url.pathname.split('/'); file = await director.refFile(pid, name); }
+    else if (/^\/library-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp|glb)$/.test(url.pathname)) { const [, , id, name] = url.pathname.split('/'); file = director.library.refFile(id, name); }
     else if (/^\/assets\/[a-f0-9-]{36}\.(mp4|webm|mov|mkv|png)$/.test(url.pathname)) file = join(data,url.pathname);
     else {
       const path = url.pathname === '/' ? '/start.html' : url.pathname;
@@ -297,7 +297,7 @@ const server = createServer(async (req, res) => {
       if (!file.startsWith(join(root, 'dist') + '/')) fail('Invalid path', 403);
     }
     const media = ['.mp4','.webm','.mov','.mkv'].includes(extname(file));
-    const headers = { 'Content-Type': ({ '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
+    const headers = { 'Content-Type': ({ '.glb':'model/gltf-binary', '.mp4':'video/mp4','.webm':'video/webm','.mov':'video/quicktime','.mkv':'video/x-matroska', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
     if (!media) { const bytes = await readFile(file); res.writeHead(200, headers); return res.end(bytes); }
     // Media: stream only the requested range (scrubbing a 40 MB film no longer reads 40 MB per request).
     const { size } = await stat(file);

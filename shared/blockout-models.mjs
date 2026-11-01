@@ -1,5 +1,5 @@
-// Bundled display meshes only: same origin, axes and bounds as their primitive proxy.
-// No arbitrary URLs. Geometry does not change camera/animation/framing calculations.
+// Display meshes: bundled names or strictly scoped project assets (never arbitrary URLs).
+// Imported GLBs have unit bounds; the viewport fits them to the entity’s proxy dimensions.
 export const BLOCKOUT_MODELS = Object.freeze({
   player: 'person', anchor: 'person', operator: 'person', fan: 'person',
   'race-car': 'car', eagle: 'bird', elk: 'box', pine: 'tree',
@@ -10,4 +10,5 @@ export const BLOCKOUT_MODELS = Object.freeze({
   rim: 'cylinder', circle: 'cylinder', lake: 'cylinder', support: 'box',
   backboard: 'box', 'flag-stand': 'box', terrain: 'terrain',
 });
-export const blockoutModel = e => typeof e.model === 'string' && Object.hasOwn(BLOCKOUT_MODELS, e.model) && BLOCKOUT_MODELS[e.model] === e.shape ? e.model : null;
+export const projectMesh = model => typeof model === 'string' && /^\/director-refs\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.glb$/.test(model) ? model : null;
+export const blockoutModel = e => typeof e.model === 'string' && Object.hasOwn(BLOCKOUT_MODELS, e.model) && BLOCKOUT_MODELS[e.model] === e.shape ? e.model : projectMesh(e.model);
