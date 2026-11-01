@@ -13,6 +13,7 @@ import { initOperate, operateBlock, fly } from './director-operate'; // [operate
 import type { FlyDevice } from './director-operate';
 import { installPhoneDemo, openPhonePairing, phoneConnected } from './director-phone'; // [director-phone]
 import { createSequence } from './director-sequence';
+import { openTakeLab } from './director-takes';
 import { promptBlock, cameraStyleBlock } from './director-prompt';
 import { objectColors, KIND_COLORS } from '../shared/prompt.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
@@ -264,7 +265,10 @@ const sequence = createSequence({
   capture: (s, o) => captureShotVideo(s, { width: 1280, height: 720, prompt: shotPrompt(project, s, 'video'), ...o }),
   openShot: id => { selectShot(id); setStep('shoot'); },
   onExportState: st => { exportState = { exportOk: st.ok, exportReason: st.reason, exportBusy: st.busy }; renderSteps(); },
+  openTakes: (id, kind) => openTakes(id, kind),
 });
+/** The Take lab (src/director-takes.ts) for one shot. */
+const openTakes = (id: string, kind?: 'video' | 'still') => void openTakeLab({ project: () => project, runEntry: e => runEntry(e as UndoEntry), assetUrl, refUrl: file => `/director-refs/${project.id}/${file}` }, id, kind);
 let wsMode: 'scene' | 'sequence' = 'scene';
 let step: Step = 'build';
 function setMode(m: typeof wsMode) {
@@ -1120,7 +1124,7 @@ function resultsBlock(s: Shot): Node[] {
   const results = (project.assets || []).filter(a => a.kind === 'workflow-result' && a.shotId === s.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   if (!results.length) return [];
   return [h('div', { class: 'block videos' },
-    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Videos · ${results.length}`), results.length > 3 ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => void openAssets('result') }, 'All in Library') : null),
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, `Videos · ${results.length}`), h('button', { class: 'btn ghost sm', type: 'button', title: 'Compare this shot’s takes side by side and pick the winner', onclick: () => openTakes(s.id, 'video') }, 'Compare takes'), results.length > 3 ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => void openAssets('result') }, 'All in Library') : null),
     ...results.slice(0, 3).map(a => h('div', { style: 'display:flex;flex-direction:column;gap:4px' },
       a.mime.startsWith('video/') ? h('video', { src: assetUrl(a), controls: true, muted: true, loop: true, playsinline: true, preload: 'metadata', style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }) : h('img', { src: assetUrl(a), alt: '', style: 'width:100%;border-radius:8px' }),
       h('div', { class: 'vid-meta' }, h('span', {}, (a.source.workflow || 'Video').split(' ·')[0]), h('span', { class: 'muted' }, `${a.duration != null ? Number(a.duration).toFixed(1) : '—'}s · ${a.width}×${a.height} · ${new Date(a.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`),

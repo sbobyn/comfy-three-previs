@@ -10,6 +10,7 @@ import { videoPreparer, videoPrompt } from './batch-drivers.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { clipSecondsFor, estimateBreakdown, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 import { stillPrompt, stillReferences, STILL_MAX_REFS } from '../../shared/still-match.mjs';
+import { takeTools } from './agent-takes.mjs';
 import { setsFor, planSlots, slotAspect, viewPrompt, EXPRESSION_PACKS, INTENSITIES, MAX_SHEET_SLOTS } from '../../shared/sheet-presets.mjs';
 const base = process.env.PREVIS_URL || 'http://127.0.0.1:5190';
 if (!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(base)) throw Error('PREVIS_URL must be loopback');
@@ -123,6 +124,8 @@ const tools = [
     content: true, run: async a => viewShot(a) },
   { name: 'previs_director_jobs_dashboard', description: 'Every image and video generation job on this server in one compact table: status, age vs expected time, cost, backend slot use. Stuck and uncertain jobs are listed first with what to do. Free; never retries or resubmits anything.', inputSchema: { type: 'object', properties: {}, additionalProperties: false },
     content: true, run: async () => jobsDashboard() },
+  // Takes: list a shot's takes with what made each, and pick the winner (server/previs/agent-takes.mjs).
+  ...takeTools({ get, post, project, shotOf }),
 ];
 // ---------- helpers for composite tools ----------
 const sleep = ms => new Promise(r => setTimeout(r, ms));

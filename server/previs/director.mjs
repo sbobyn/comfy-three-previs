@@ -17,6 +17,7 @@ import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
 import { loadStarters, starterCard, instantiateStarter, attachStarterMedia } from './starters.mjs';
 import { existsSync } from 'node:fs';
+import { cutAsset } from '../../shared/takes.mjs';
 import { openLibrary, libraryDir, placeAsset } from './library.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
@@ -32,12 +33,11 @@ function sniff(bytes) {
   return null;
 }
 
-// Which video a timeline clip plays: a chosen asset, else the shot's newest workflow result, else its newest camera render.
+// Which video a timeline clip plays: a chosen asset, else the shot's winning take, else its newest workflow result,
+// else its newest camera render (shared/takes.mjs cutAsset, the same rule the Cut and the Take lab show).
 export function clipAsset(p, clip) {
-  const assets = (p.assets || []).filter(a => a.shotId === clip.shotId && a.mime?.startsWith('video/'));
-  if (clip.assetId) return assets.find(a => a.id === clip.assetId) || null;
-  const newest = kind => assets.filter(a => a.kind === kind).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-  return newest('workflow-result') || newest('camera-render') || null;
+  const shot = p.shots.find(s => s.id === clip.shotId) || { id: clip.shotId };
+  return cutAsset(p, shot, clip);
 }
 export function editClips(p) { return p.edit?.clips?.length ? p.edit.clips : p.shots.map(s => ({ id: s.id, shotId: s.id, assetId: null, in: 0, out: null })); }
 
@@ -242,6 +242,14 @@ export function applyOps(p, ops) {
         if (patch.environment) p.scene.environment = { preset: ['stage', 'street', 'interior'].includes(patch.environment.preset) ? patch.environment.preset : p.scene.environment.preset, description: patch.environment.description === undefined ? p.scene.environment.description : String(patch.environment.description).slice(0, 500), style: patch.environment.style === undefined ? p.scene.environment.style || '' : String(patch.environment.style).slice(0, 500) };
         results.push({ op: op.op }); break;
       }
+      case 'set_winner': {
+        // The shot's winning video take (shared/takes.mjs): the cut plays it unless its clip chose another version. null clears it.
+        const s = resolveShot(p, op.shotId); if (!s) fail('Unknown shot');
+        if (op.assetId === null || op.assetId === undefined) delete s.winner;
+        else if ((p.assets || []).some(a => a.id === op.assetId && a.shotId === s.id && a.kind === 'workflow-result' && a.mime?.startsWith('video/'))) s.winner = op.assetId;
+        else fail('That take is not a generated video of this shot');
+        results.push({ op: op.op, id: s.id }); break;
+      }
       case 'set_edit': {
         if (!Array.isArray(op.clips) || op.clips.length > 60) fail('clips must be an array of at most 60');
         p.edit = { clips: op.clips.map(c => {
@@ -264,6 +272,8 @@ export function applyOps(p, ops) {
 }
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+// What made a video take, kept on the project's copy so the Take lab and an export still show it without the receipt.
+const takeSettings = job => ({ definitionId: job.definition?.id || null, parameters: structuredClone(job.binding?.parameters || {}), inputs: Object.keys(job.binding?.assetBindings || {}) });
 const EXT = { 'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov', 'image/png': 'png' };
 export const EXPORT_FORMAT = 'comfy-previs-project';
 
@@ -550,7 +560,7 @@ export async function openDirector(root, options = {}) {
           const file = `assets/${r.id}.${EXT[r.mime]}`;
           await mkdir(join(dir, p.id, 'assets'), { recursive: true });
           await saveResultBytes(join(dir, p.id, file), bytes);
-          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, cameraSource: job.cameraSource || cameraSourceOf(job.definition, job.binding?.assetBindings), prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null } });
+          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, cameraSource: job.cameraSource || cameraSourceOf(job.definition, job.binding?.assetBindings), prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null, ...takeSettings(job) } });
           known.add(r.id); added++;
         }
       }
@@ -684,6 +694,8 @@ export function summarizeOps(ops, project) {
     else if (o.op === 'clear_animation') out.push(`Cleared animation on ${name(o.id)}`);
     else if (o.op === 'set_scene') out.push('Updated the scene setting');
     else if (o.op === 'update_reference') out.push('Linked a reference');
+    else if (o.op === 'set_winner') out.push(o.assetId ? `Picked the winning take of shot ${shot(o.shotId)}` : `Cleared the winning take of shot ${shot(o.shotId)}`);
+    else if (o.op === 'use_take') out.push(`Picked the still take in use for shot ${shot(o.shotId)}`);
   }
   const counts = new Map(); for (const s of out) counts.set(s, (counts.get(s) || 0) + 1);
   const lines = [...counts].map(([s, n]) => (n > 1 ? `${s} ×${n}` : s));
