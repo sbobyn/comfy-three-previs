@@ -1,14 +1,16 @@
 // Prepare one shot's video generation: the blockout video plus the reference images of every object
 // the shot's camera sees (and its environment, style and key frame), wired into the model, then quoted.
 // Nothing is sent to a backend here; quoting is free.
-import { compilePrompt, keyStillState, referenceLegend, videoReferences } from '../shared/director.mjs';
+import { keyStillState, videoReferences } from '../shared/director.mjs';
 import type { DirectorProject, Shot, VideoRef } from '../shared/director.mjs';
 import { withReferenceImages, maxReferences } from '../shared/video-refs.mjs';
-import { shotPrompt } from '../shared/prompt.mjs';
-import { cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../shared/camera-source.mjs';
+import { cameraSourceOf, motionInput } from '../shared/camera-source.mjs';
+import { videoPromptPlan } from '../shared/prompt-plan.mjs';
+import type { PromptPlan } from '../shared/prompt-plan.mjs';
+import { resolveVideoParams } from '../shared/model-params.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
 import { api } from './director-common';
-import { clipSecondsFor, durationValue, FIRST_FRAME_FALLBACK } from '../shared/tiers.mjs';
+import { clipSecondsFor, FIRST_FRAME_FALLBACK } from '../shared/tiers.mjs';
 
 export type Def = { id: string; title: string; task: string; description?: string; pricing?: { ratePerSecond?: number }; parameters?: Record<string, { nodeId: string; input: string }>; graph?: any; inputs?: any; provenance?: { presetId?: string; referenceImages?: number }; constraints?: any };
 export type GenState = { presets: Def[]; definitions: Def[]; jobs: any[]; paidExecutionEnabled?: boolean };
@@ -43,13 +45,11 @@ export const referenceCapacity = (st: GenState, id: string) => { const b = baseO
 export function plannedReferences(project: DirectorProject, s: Shot, st: GenState, id: string) { return videoReferences(project, s, referenceCapacity(st, id), { stills: cameraSourceOf(baseOf(st, id)) === 'blockout' }); }
 
 /**
- * The prompt a shot uses: compiled with numbered references, or the user's text plus a reference legend.
- * Either way it carries the camera line for `cameraSource` and never describes the move.
+ * The final prompt a shot sends to a video model, by section (shared/prompt-plan.mjs videoPromptPlan, the same assembly the
+ * batch, MCP and the prompt inspector use). It carries the camera line for `cameraSource` and never describes the move.
  */
-export function shotVideoPrompt(project: DirectorProject, s: Shot, refs: VideoRef[], userPrompt?: string | null, cameraSource: CameraSource = 'blockout') {
-  const auto = compilePrompt(project, s, null, { cameraSource });
-  if (userPrompt && userPrompt.trim() && userPrompt.trim() !== auto.trim()) return [withCameraLine(userPrompt, cameraSource), referenceLegend(refs)].filter(Boolean).join('\n');
-  return compilePrompt(project, s, refs, { cameraSource });
+export function shotVideoPlan(project: DirectorProject, s: Shot, def: Def | null, refs: VideoRef[], userPrompt?: string | null, cameraSource: CameraSource = 'blockout'): PromptPlan {
+  return videoPromptPlan(project, s, { cameraSource, refs, maxLength: def?.constraints?.promptMaxLength, userPrompt: userPrompt ?? null, model: def?.title?.split(' ·')[0] || '' });
 }
 
 async function definitionFor(st: GenState, id: string, refCount: number): Promise<Def> {
@@ -79,13 +79,12 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   const refs: VideoRef[] = registered.map(x => ({ ref: all.find(y => y.id === x.referenceId)!, entityId: x.entityId, role: x.role, label: x.label })).filter(x => x.ref);
   const def = await definitionFor(st, o.definitionId, registered.length);
   const role = motionInput(def) || 'sourceVideo';
-  const parameters: Record<string, unknown> = {};
-  for (const [k, m] of Object.entries(def.parameters || {})) parameters[k] = def.graph?.[m.nodeId]?.inputs?.[m.input];
+  // Graph defaults plus the shot's saved settings for this model (seed …), the same as the batch and MCP.
+  const { parameters } = resolveVideoParams(def, s);
   const assetBindings: Record<string, unknown> = { [role]: { assetId: r.assetId } };
   registered.forEach((x, i) => { assetBindings[`referenceImage${i + 1}`] = { renderId: x.renderId }; });
   const cameraSource = cameraSourceOf(def);
-  let prompt = shotVideoPrompt(project, s, refs, o.userPrompt ?? shotPrompt(project, s, 'video', { cameraSource }), cameraSource);
-  prompt = fitPrompt(prompt, def.constraints?.promptMaxLength, cameraSource); // keeps the camera line and the reference legend
+  const plan = shotVideoPlan(project, s, def, refs, o.userPrompt, cameraSource), prompt = plan.text; // fitted: keeps the camera line and the reference legend
   const main = (await api('project')).project;
   const bind = await api('generation/bind', { revision: main.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
   const backend = o.backend || (def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-') ? 'local' : 'cloud');
@@ -93,7 +92,7 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   const job = (await api('generation/quote', request)).job;
   const src = job.sources?.sourceVideo || job.sources?.controlVideo, seconds: number = src?.duration ?? r.duration;
   const est = def.pricing?.ratePerSecond && seconds ? def.pricing.ratePerSecond * seconds : null;
-  return { def, job, request, est, refs: registered, prompt, cameraSource, seconds };
+  return { def, job, request, est, refs: registered, prompt, plan, cameraSource, seconds };
 }
 
 /** Image-to-video (LTX, Seedance, Kling, Veo, Hailuo, Wan): animate the shot's key frame, else its first blockout frame. */
@@ -112,19 +111,14 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   if (!renderId) renderId = main.renders?.find((x: any) => x.shotId === r.previsShotId && x.pass === 'beauty')?.id;
   if (!renderId) throw Error('No start image: generate a key frame for this shot, or make the blockout again');
   const def = await definitionFor(st, base.id, 0);
-  const parameters: Record<string, unknown> = {};
-  for (const [k, m] of Object.entries(def.parameters || {})) parameters[k] = def.graph?.[m.nodeId]?.inputs?.[m.input];
-  // Nearest clip length this model accepts, in the parameter's own type.
-  const secs = clipSecondsFor(def, s.duration);
-  if ('duration' in parameters) parameters.duration = durationValue(parameters.duration, secs);
+  // Nearest clip length this model accepts (or the shot's saved one), in the parameter's own type, plus saved settings.
+  const resolved = resolveVideoParams(def, s), parameters = resolved.parameters, secs = resolved.seconds ?? clipSecondsFor(def, s.duration);
   // Start → end stills stand in for the camera (they only approximate the move); one still leaves it to the model.
   const cameraSource: CameraSource = wantsLast ? 'keyframes' : 'still';
-  const chosen = (o.userPrompt ?? shotPrompt(project, s, 'video', { cameraSource })).trim();
-  let prompt = withCameraLine(chosen || compilePrompt(project, s, null, { cameraSource }), cameraSource);
-  prompt = fitPrompt(prompt, def.constraints?.promptMaxLength, cameraSource); // keeps the camera line and the reference legend
+  const plan = shotVideoPlan(project, s, def, [], o.userPrompt, cameraSource), prompt = plan.text;
   const bind = await api('generation/bind', { revision: (await api('project')).project.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings: { firstFrame: { renderId }, ...(wantsLast ? { lastFrame: { renderId: lastId } } : {}) }, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
   const request = { requestId: crypto.randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: o.backend || 'cloud' } };
   const job = (await api('generation/quote', request)).job;
   const est = def.pricing?.ratePerSecond ? def.pricing.ratePerSecond * secs : null;
-  return { def, job, request, est, refs: frame, prompt, cameraSource, seconds: secs };
+  return { def, job, request, est, refs: frame, prompt, plan, cameraSource, seconds: secs };
 }

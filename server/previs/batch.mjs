@@ -13,6 +13,7 @@ import { builtInPresets } from './presets.mjs';
 import { blockoutStale, stillStale, castRows, lookSource, objectLooks } from '../../shared/director.mjs';
 import { cameraSourceOf, CAMERA_SOURCE_LABELS } from '../../shared/camera-source.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
+import { savedClipSeconds } from '../../shared/model-params.mjs';
 import { planSlots } from '../../shared/sheet-presets.mjs';
 import { TIERS, modelsFor, estimateFor, estimateBreakdown, sumBreakdowns, maxRefsFor, DEFAULT_MARGIN_PCT, VIDEO_PRICES, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 import { retryModelFor, WEAK_MATCH } from '../../shared/still-match.mjs';
@@ -136,7 +137,7 @@ export function planBatch(project, raw, { definitions = builtInPresets, costs = 
     if (!want('videos')) continue;
     // Where the camera comes from: the blockout clip, start → end stills (approximate) or one still (approximate).
     const cameraSource = needs.camera === 'keyframes' && !still.has('end') && !hasStill(project, s, 'end') && FIRST_FRAME_FALLBACK[def.id] ? 'still' : needs.camera;
-    const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, ...nodeCost('video', models.videos, { duration: s.duration }, costs), deps: [blockout.id], cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource] });
+    const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, ...nodeCost('video', models.videos, { duration: savedClipSeconds(s, models.videos, VIDEO_PRICES[models.videos]?.durations) ?? s.duration }, costs), deps: [blockout.id], cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource] });
     // A model that edits the blockout clip takes only clip lengths its provider accepts (Seedance edit: 4–30 s).
     const clip = needs.camera === 'blockout' ? def.constraints?.sourceVideo?.duration : null;
     if (clip && (s.duration < clip.min || s.duration > clip.max)) Object.assign(n, { status: 'failed', planError: true, error: `${def.title.split(' · ')[0]} needs a ${clip.min}–${clip.max} s blockout clip; this shot is ${s.duration} s. Change the shot length or the model` });

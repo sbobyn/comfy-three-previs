@@ -5,6 +5,8 @@ import { createHash } from 'node:crypto';
 import { writeZip, readZip } from './zip.mjs';
 import { renderEdit, withTemp, imageToPng } from './edit.mjs';
 import { normalizePrompts, normalizeStyle } from '../../shared/prompt.mjs';
+import { mergePromptSections, appendPromptVersion } from '../../shared/prompt-sections.mjs';
+import { normalizeShotSettings } from '../../shared/model-params.mjs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { recoveryId, saveResultBytes } from './result-recovery.mjs';
@@ -174,6 +176,10 @@ export function applyOps(p, ops) {
         if (patch.start !== undefined) s.start = clampStart(patch.start);
         if (patch.prompts !== undefined) s.prompts = normalizePrompts({ ...(s.prompts || {}), ...(patch.prompts || {}) });
         if (patch.style !== undefined) { if (patch.style === null) delete s.style; else s.style = normalizeStyle(patch.style); }
+        // Section overrides and locks (shared/prompt-sections.mjs): { video|image: { key: {mode,text}|null } | null } merges per section.
+        if (patch.promptSections !== undefined) { const v = patch.promptSections === null ? {} : mergePromptSections(s.promptSections, patch.promptSections); if (Object.keys(v).length) s.promptSections = v; else delete s.promptSections; }
+        // Model and settings per kind (shared/model-params.mjs): { video|image: { model, params } | null } replaces that kind.
+        if (patch.settings !== undefined) { const v = normalizeShotSettings(patch.settings === null ? {} : { ...(s.settings || {}), ...Object.fromEntries(Object.entries(patch.settings).filter(([, x]) => x !== null)) }); for (const [k, x] of Object.entries(patch.settings || {})) if (x === null) delete v[k]; if (Object.keys(v).length) s.settings = v; else delete s.settings; }
         if (patch.cast !== undefined) {
           const known = id => resolveEntity(p, id)?.id || fail(`Unknown object ${id}`);
           s.cast = normalizeCast({ include: (patch.cast?.include || []).map(known), exclude: (patch.cast?.exclude || []).map(known) });
@@ -204,6 +210,14 @@ export function applyOps(p, ops) {
         if (patch.name !== undefined) r.name = String(patch.name).slice(0, 80) || r.name;
         if (patch.note !== undefined) r.note = String(patch.note).slice(0, 500);
         results.push({ op: op.op, id: r.id }); break;
+      }
+      case 'record_prompt_version': {
+        // A version of a shot's final prompt (exactly what was, or would be, sent); identical repeats are not stored.
+        const s = resolveShot(p, op.shotId ?? op.id); if (!s) fail(`Unknown shot ${op.shotId ?? op.id}`);
+        const kind = op.kind === 'image' ? 'image' : 'video', last = s.promptVersions?.[kind]?.at(-1)?.id;
+        const list = appendPromptVersion(s.promptVersions?.[kind], op.version);
+        if (list.length) (s.promptVersions ||= {})[kind] = list;
+        results.push({ op: op.op, id: s.id, kind, added: !!list.length && list.at(-1).id !== last, versionId: list.at(-1)?.id ?? null, versions: list.length }); break;
       }
       case 'use_take': {
         // The newest take at a moment is the one in use (and a key frame's newest take is what video models get): move this one last.
