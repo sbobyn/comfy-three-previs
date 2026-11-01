@@ -11,6 +11,7 @@ import { deflateSync, crc32 } from 'node:zlib';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { shotSignature } from '../shared/director.mjs';
+import { videoTakes } from '../shared/takes.mjs';
 
 const media = ['ffmpeg', 'ffprobe'].every(x => spawnSync(x, ['-version']).status === 0);
 
@@ -92,6 +93,22 @@ test('MCP keyframe: pin an exact frame, refuse a missing one, and send Kling 4.0
     const node = Object.values(sent[0].graph).find(x => x.class_type === 'Kling4ImageToVideoNode');
     assert.ok(node.inputs['model.first_frame'] && node.inputs['model.last_frame'] && node.inputs['model.middle_frames.middle_frame_1'], 'first, middle and last frames are wired');
     assert.equal(sent[0].graph[node.inputs['model.middle_frames.middle_frame_1'][0]].class_type, 'LoadImage');
+
+    // Saved per-shot settings (seed, 6 s clip) reach the bind, the in-between frame timing and the take's record together.
+    await tool('previs_director_model_settings', { projectId: p.id, shot: '1', kind: 'video', model: 'kling-40-flf-v1', params: { seed: 4242, duration: 6 } });
+    const six = await tool('previs_director_generate_video', { projectId: p.id, shot: '1', maxCostUsd: 2 });
+    assert.equal(six.submitted, true, six.reason); assert.equal(six.modelId, 'kling-40-flf-v1', 'the shot’s saved model'); assert.equal(six.clipSeconds, 6);
+    assert.deepEqual(six.keyFrames.middle, [{ frame: 48, slot: 1, atSeconds: 3, driftSeconds: -0.032 }], 'the in-between frame lands at the middle of the saved 6 s clip');
+    const inputs6 = await tool('previs_director_shot_inputs', { projectId: p.id, shot: '1', model: 'kling-40-flf-v1' });
+    assert.deepEqual([inputs6.clipSeconds, inputs6.keyFramePlan.outputSeconds], [6, 6], 'shot_inputs plans with the saved clip length');
+    const gen6 = await get('/api/generation'), job6 = gen6.jobs.find(j => j.id === six.jobId);
+    assert.deepEqual([job6.binding.parameters.seed, Number(job6.binding.parameters.duration)], [4242, 6]);
+    assert.deepEqual(Object.keys(job6.binding.assetBindings).sort(), ['firstFrame', 'lastFrame', 'middleFrame1'], 'the timed frame is still bound');
+    const p6 = (await get(`/api/director/project?id=${p.id}`)).project, s6 = p6.shots[0];
+    const take = videoTakes({ ...p6, assets: [...(p6.assets || []), { id: 'take-6s', kind: 'workflow-result', shotId: s6.id, mime: 'video/mp4', createdAt: new Date().toISOString(), source: { jobId: job6.id } }] }, s6, { jobs: gen6.jobs }).at(-1);
+    assert.deepEqual([take.seed, Number(take.settings.duration)], [4242, 6], 'the take records the saved settings');
+    assert.equal(s6.promptVersions.video.at(-1).text, six.prompt, 'the sent prompt is kept as a version');
+    await tool('previs_director_model_settings', { projectId: p.id, shot: '1', kind: 'video', reset: true });
 
     // A mid-shot still as the End: an override that remembers its frame.
     const end = await tool('previs_director_keyframe', { projectId: p.id, shot: '1', mode: 'attach', frame: 48, role: 'end' });

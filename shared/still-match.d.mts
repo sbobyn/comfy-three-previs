@@ -18,6 +18,8 @@ export const STILL_MAX_REFS: Record<string, number>;
 export function stillReferences(project: DirectorProject, shot: Shot, t: number, cap: number): { looks: import('./director.mjs').VideoRef[]; refIds: string[]; prevImage: number | null };
 export function momentLine(shot: Pick<Shot, 'duration'> | null | undefined, t: number): string;
 export function stillPrompt(o: { project: DirectorProject; shot: Shot; t?: number; text?: string; presetId?: string; looks?: { label: string }[]; prevImage?: number | null; frame?: { text: string } | null; max?: number; markers?: boolean }): string;
+export type StillPromptOptions = { project: DirectorProject; shot: Shot; t?: number; text?: string; presetId?: string; looks?: { label: string }[]; prevImage?: number | null; frame?: { text: string } | null; max?: number; markers?: boolean };
+export function stillPromptParts(o: StillPromptOptions): { key: 'guide' | 'frame' | 'moment' | 'body' | 'refs' | 'rules'; text: string; full?: string }[];
 export function guideMatchScore(a: ArrayLike<number>, b: ArrayLike<number>, w: number, h: number): { score: number; orientation: number; edges: number; light: number; raw: number };
 export const MATCH_FLOOR: number;
 export const MATCH_CEIL: number;

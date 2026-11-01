@@ -4,6 +4,7 @@
 import { FPS, frameLabel, frameTime, keyframePlan, keyframeState, middleKeys, resolveFrame, stillFrame, takeAt } from '../../shared/keyframes.mjs';
 import { describeFrame } from '../../shared/still-match.mjs';
 import { clipSecondsFor } from '../../shared/tiers.mjs';
+import { resolveVideoParams } from '../../shared/model-params.mjs';
 
 const r3 = x => Math.round(x * 1000) / 1000;
 /** One key frame row for the agent: frame, seconds, readiness, the still in use and where it came from. */
@@ -21,7 +22,8 @@ export function keyframeSummary(p, s) {
 }
 /** Which of the shot's key frames a video model takes, and where each in-between frame lands in its output. */
 export function planOut(p, s, def) {
-  const seconds = def.task === 'first-frame' ? clipSecondsFor(def, s.duration) : s.render?.duration ?? s.duration;
+  // The clip length generation binds: the shot's saved one for this model (shared/model-params.mjs), else the nearest.
+  const seconds = def.task === 'first-frame' ? resolveVideoParams(def, s).seconds ?? clipSecondsFor(def, s.duration) : s.render?.duration ?? s.duration;
   const plan = keyframePlan(p, s, def, { seconds });
   return { model: def.id, outputSeconds: plan.outputSeconds,
     takes: def.task !== 'first-frame' ? 'the blockout clip (no key frames as frame inputs)' : [plan.start && 'start', plan.end && 'end', plan.spacing && `up to ${8} in-between frames, spaced evenly by the provider`].filter(Boolean).join(', '),

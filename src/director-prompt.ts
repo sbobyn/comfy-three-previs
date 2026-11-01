@@ -3,7 +3,7 @@
 // Regenerate previews the new text beside the edit before replacing it. Camera style tags add their terms.
 import './director-prompt.css';
 import type { DirectorProject, Shot } from '../shared/director.mjs';
-import { autoPromptSegments, autoPromptText, highlightRanges, shotStyle, suggestedStyle, CAMERA_TERMS, CAMERA_GROUPS, FIELD_COLORS } from '../shared/prompt.mjs';
+import { composedPromptText, highlightRanges, sectionedSegments, shotStyle, suggestedStyle, CAMERA_TERMS, CAMERA_GROUPS, FIELD_COLORS } from '../shared/prompt.mjs';
 import type { Segment, StyleTags } from '../shared/prompt.mjs';
 import { withCameraLine } from '../shared/camera-source.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
@@ -31,7 +31,8 @@ export function promptBlock(s: Shot, ctx: Ctx) {
   const p = ctx.project();
   // The video prompt's camera line follows the shot's chosen video model (blockout clip, start → end stills or one still).
   const cameraSource = ctx.cameraSource?.(s) || 'blockout';
-  const segs = autoPromptSegments(p, s, kind, { cameraSource }), auto = autoPromptText(p, s, kind, { cameraSource });
+  // The composed prompt: the auto-prompt with any section overrides and locks (Prompt inspector), coloured by section.
+  const segs = sectionedSegments(p, s, kind, { cameraSource }).filter(r => r.active && r.text), auto = composedPromptText(p, s, kind, { cameraSource });
   const saved = s.prompts?.[kind];
   const edited = !!(saved?.edited && saved.text);
   const text = edited ? (kind === 'video' ? withCameraLine(saved!.text, cameraSource) : saved!.text) : auto;
