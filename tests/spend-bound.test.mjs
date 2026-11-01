@@ -60,13 +60,15 @@ test('contract: only director-spend.ts submits image requests; video submits onl
 test('storyboard still: Generate prepares and shows the quote; nothing is submitted until the card is approved within its limit', async () => {
   const director = await read('director.ts');
   const { sent, api } = interceptor(), reviewing = new Map(), cards = [];
-  const ctx = { h, api, reviewing, projectId: 'p', project: {}, t: 0, s: { id: 'shot', duration: 5 }, f: { presetId: 'gpt-image-25', count: 1, seed: 7 }, words: { text: '' }, looks: [], refIds: [], prev: null, blender: false,
-    guide: { data: Promise.resolve('data:image/png;base64,R1VJREU=') }, stillPrompt: () => 'full prompt', prompt: { value: 'A still' }, moment: { value: '' },
+  const versions = [];
+  const ctx = { h, api, reviewing, projectId: 'p', project: {}, t: 0, s: { id: 'shot', duration: 5 }, f: { presetId: 'gpt-image-25', count: 1, seed: 7 }, words: { text: '' }, looks: [], refIds: [], prev: null, prevImage: null, blender: false,
+    guide: { data: Promise.resolve('data:image/png;base64,R1VJREU=') }, stillPromptPlan: () => ({ text: 'full prompt' }), edit: async ops => { versions.push(...ops); }, prompt: { value: 'A still' }, moment: { value: '' },
     go: {}, status: h('div'), review: job => cards.push(job) };
   runInNewContext(compile(between(director, "  go.onclick = async () => {\n    go.disabled = true; status.className = 'status-line'; status.textContent = 'Preparing the quote", "\n  const inputs = h('div', { class: 'sb-inputs' }")), ctx);
   await ctx.go.onclick();
   assert.deepEqual(sent.map(x => x.path), ['director/refgen/prepare'], 'one click prepares only');
   assert.equal(cards.length, 1); assert.equal(reviewing.get('still:shot').id, 'prep');
+  assert.deepEqual(versions.map(o => [o.op, o.kind, o.version.text, o.version.reason]), [['record_prompt_version', 'image', 'full prompt', 'quote']], 'the quoted prompt is kept as a version (history only)');
 
   // The card: the exact prepared quote, an allowance the artist sets, explicit approval; sent once.
   let closed = null;

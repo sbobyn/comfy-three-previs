@@ -14,9 +14,14 @@ import type { FlyDevice } from './director-operate';
 import { installPhoneDemo, openPhonePairing, phoneConnected } from './director-phone'; // [director-phone]
 import { createSequence } from './director-sequence';
 import { promptBlock, cameraStyleBlock } from './director-prompt';
+import { promptInspectorBlock, modelSettingsBlock, planSections } from './director-prompt-inspector'; // [prompts]
+import type { InspectorCtx, SettingsCtx } from './director-prompt-inspector';
+import { videoPromptPlan, stillPromptPlan } from '../shared/prompt-plan.mjs';
+import type { PromptPlan } from '../shared/prompt-plan.mjs';
+import { resolveImageParams } from '../shared/model-params.mjs';
 import { objectColors, KIND_COLORS } from '../shared/prompt.mjs';
 import { shotPrompt } from '../shared/prompt.mjs';
-import { describeFrame, stillPrompt, stillReferences, STRONG_GUIDE_MODEL } from '../shared/still-match.mjs';
+import { describeFrame, stillReferences, STRONG_GUIDE_MODEL, STILL_MAX_REFS } from '../shared/still-match.mjs';
 import { openLooksBoard, aspectFor } from './director-looks';
 import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences, clipSeconds, clipLengths, modelLabel, startOnlyFallback } from './director-videogen';
 import type { TransformChange } from './director-scene';
@@ -758,16 +763,41 @@ function loadGen() { if (genCache || genLoading) return; genLoading = true; api(
 const modelKey = (s: Shot) => `previs.shot.model.${s.id}`;
 function shotModel(s: Shot) {
   const st = genCache!; const choices = videoChoices(st as any);
-  const saved = localStorage.getItem(modelKey(s));
+  // The model saved on the shot (project data, shared with MCP and the batch), else this browser's older pick, else the last job's.
+  const saved = s.settings?.video?.model, local = localStorage.getItem(modelKey(s));
   const last = s.render ? st.jobs.filter(j => j.shotId === s.render!.previsShotId).at(-1)?.definition?.id : null;
-  return choices.find(d => d.id === saved) || choices.find(d => d.id === last) || choices[0] || null;
+  return choices.find(d => d.id === saved) || choices.find(d => d.id === local) || choices.find(d => d.id === last) || choices[0] || null;
+}
+// ---------- [prompts] The final prompt a model would receive, from the shared assembly (shared/prompt-plan.mjs) ----------
+/** The shot's still model: the one saved on the shot, else the model that matches the blockout best. */
+const stillModelOf = (s: Shot) => s.settings?.image?.model || STRONG_GUIDE_MODEL;
+/** A still's images besides the guide, in order (as the composer, the batch and MCP pick them): looks in frame, then the previous shot's last still. */
+function stillLooks(p: DirectorProject, s: Shot, t: number, presetId: string) {
+  const cap = stillPresets.find(x => x.id === presetId)?.maxRefs ?? refgen.presets.find(x => x.id === presetId)?.maxRefs ?? (STILL_MAX_REFS as Record<string, number>)[presetId] ?? 0;
+  const looks = stillReferences(p, s, t, cap).looks;
+  const prev = p.shots[p.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);
+  const refIds = [...looks.map(r => r.ref.id), ...(prev ? [prev.id] : [])].slice(0, Math.max(0, cap - 1));
+  return { looks: looks.slice(0, refIds.length), refIds, prev, prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null };
+}
+/** The plan generation would send now: video for the shot's model, image for its still model at shot time t. */
+function planFor(kind: 'video' | 'image', p: DirectorProject, s: Shot, t: number): PromptPlan | null {
+  if (kind === 'video') {
+    if (!genCache) { loadGen(); return null; }
+    const def: any = shotModel(s); if (!def) return null;
+    const cam = cameraSourceOf(def), cap = referenceCapacity(genCache as any, def.id);
+    const refs = def.task === 'first-frame' || !cap ? [] : videoReferences(p, s, cap, { stills: cam === 'blockout' });
+    return videoPromptPlan(p, s, { cameraSource: cam, refs, maxLength: def.constraints?.promptMaxLength, model: def.title.split(' ·')[0] });
+  }
+  const presetId = stillModelOf(s), x = stillLooks(p, s, t, presetId), preset = refgen.presets.find(y => y.id === presetId);
+  return stillPromptPlan({ project: p, shot: s, t, presetId, model: preset?.title.split(' (')[0] || presetId, looks: x.looks, prevImage: x.prevImage, markers: !blenderBlockout(p, s) });
 }
 function modelBlock(s: Shot) {
   if (!genCache) { loadGen(); return h('div', { class: 'block vm' }, h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted' }, 'Loading…'))); }
   const st = genCache, choices = videoChoices(st as any), def: any = shotModel(s);
   if (!def) return h('div', { class: 'block vm' }, h('span', { class: 'eyebrow' }, 'Video model'), h('p', { class: 'note' }, 'No video models are set up.'));
   const pick = h('select', { class: 'field vm-pick', 'aria-label': 'Video model for this shot' }, ...choices.map((d: any) => h('option', { value: d.id, selected: d.id === def.id }, modelLabel(d))));
-  pick.onchange = () => { localStorage.setItem(modelKey(s), pick.value); shotPane.dataset.shot = ''; renderShotPane(); };
+  // Saved on the shot (undoable), so another browser, an export, Claude and the batch see the same choice.
+  pick.onchange = () => { const before = s.settings?.video ?? null; void runEntry({ label: 'Video model', redo: [{ op: 'update_shot', id: s.id, patch: { settings: { video: { model: pick.value } } } }], undo: [{ op: 'update_shot', id: s.id, patch: { settings: { video: before } } }] }).then(() => { shotPane.dataset.shot = ''; renderShotPane(); }); };
   const cap = referenceCapacity(st as any, def.id), refs = cap ? plannedReferences(project, s, st as any, def.id) : [];
   const cam = cameraSourceOf(def), ks = keyStillState(project, s);
   const usesClip = def.task === 'transform-video' || def.task === 'control-video';
@@ -928,6 +958,8 @@ function renderShotPane() {
   const drop = h('label', { class: 'dropzone' }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => { const files = Array.from((ev.target as HTMLInputElement).files || []); void uploadRefs(files, null); } }), 'Drop images here or click to add references for this shot');
   dropTarget(drop, files => uploadRefs(files, null));
   const ctx = { project: () => project, runEntry: (e: any) => runEntry(e as any), select: (id: string) => { select(id); openObject(); }, refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); }, cameraSource: (x: Shot) => (genCache ? cameraSourceOf(shotModel(x)) : 'blockout' as const) };
+  const settingsCtx: SettingsCtx = { project: () => project, runEntry: (e: any) => runEntry(e as any), edit: ops => edit(ops), select: (id: string) => { select(id); openObject(); }, refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); }, plan: planFor, playhead: () => playhead,
+    videoDef: x => (genCache ? (shotModel(x) as any) : (loadGen(), null)), stillPresets: () => stillPresets, stillModel: stillModelOf, stillRefs: (x, id) => stillLooks(project, x, 0, id).looks.length };
   const rows = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const blockoutInfo = rendered ? h('details', { class: 'facts-more' },
     h('summary', {}, h('span', { class: 'info-i', 'aria-hidden': 'true' }, 'i'), fromBlender(s) ? 'Blender clip' : 'Blockout clip', stale ? h('span', { class: 'fm-warn' }, fromBlender(s) ? ' · edited since the import' : ' · scene changed since') : h('span', { class: 'fm-ok' }, ' · up to date')),
@@ -958,7 +990,9 @@ function renderShotPane() {
     section('video', 'Video', shotVideos(s.id).length ? h('span', { class: 'fm-ok' }, `${shotVideos(s.id).length} ready`) : null,
       ...resultsBlock(s),
       modelBlock(s),
+      modelSettingsBlock(s, settingsCtx), // [prompts]
       promptBlock(s, ctx),
+      promptInspectorBlock(s, settingsCtx), // [prompts]
       keyFrameBlock(s),
       blockoutInfo),
     section('more', 'More', h('span', { class: 'sec-meta' }, `${s.references.length} shot image${s.references.length === 1 ? '' : 's'}`),
@@ -1010,7 +1044,8 @@ const fmtT = (t: number) => `${t.toFixed(t % 1 ? 2 : 0)}s`;
 function seekShot(t: number) { playing = false; playhead = Math.max(0, Math.min(shot().duration, t)); scene.setPlayhead(playhead); renderTransport(); renderInspector(); }
 // ---------- Storyboard: cheap, perfected stills of the shot at chosen moments, before any video ----------
 function keyFrameBlock(s: Shot) {
-  const f = frameForm[s.id] ||= { open: false, presetId: STRONG_GUIDE_MODEL, count: 1, seed: Math.floor(Math.random() * 1e6), prompt: null, moment: '', guide: true, checkpoint: '' };
+  // A new draft starts from the shot's saved still model, takes and seed (Model settings).
+  const f = frameForm[s.id] ||= (() => { const m = stillModelOf(s), sp = resolveImageParams(m, s); return { open: false, presetId: m, count: sp.count, seed: sp.seed ?? Math.floor(Math.random() * 1e6), prompt: null, moment: '', guide: true, checkpoint: '' }; })();
   const frames = s.references.filter(r => r.role === 'frame');
   const jobs = refgen.jobs.filter(j => j.target === 'shot' && j.shotId === s.id);
   const running = jobs.filter(j => j.status === 'submitted' || j.status === 'submitting');
@@ -1050,15 +1085,14 @@ function keyFrameBlock(s: Shot) {
   const t = at, blender = blenderBlockout(project, s), guide = guideFrame(s, t, blender);
   const chosen = stillPresets.find(p => p.id === f.presetId), cap = chosen?.maxRefs ?? 0;
   const words = describeFrame(project, s, t);
-  const looks = stillReferences(project, s, t, cap).looks; // objects in frame, one environment image
-  const prev = project.shots[project.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);
-  const refIds = [...looks.map(r => r.ref.id), ...(prev ? [prev.id] : [])].slice(0, Math.max(0, cap - 1));
+  const { looks, refIds, prev, prevImage } = stillLooks(project, s, t, f.presetId); // objects in frame, one environment image, previous shot
   const moment = h('input', { class: 'field', placeholder: 'At this moment… (optional) e.g. “the car is just leaving the ground”', 'aria-label': 'What happens at this moment', value: f.moment });
   moment.oninput = () => { f.moment = moment.value; };
   const prompt = h('textarea', { class: 'field sb-prompt', rows: 5, 'aria-label': 'Still prompt' }, f.prompt ?? shotPrompt(project, s, 'image'));
   prompt.oninput = () => { f.prompt = prompt.value; };
   const model = h('select', { class: 'field', 'aria-label': 'Image model' }, ...stillPresets.map(p => h('option', { value: p.id, selected: p.id === f.presetId }, `${p.title}${p.pricing?.usdPerImage ? ` · ≈ $${p.pricing.usdPerImage.toFixed(2)}/image` : ''}${p.id === STRONG_GUIDE_MODEL ? ' · matches the blockout best' : p.followsGuide === 'strong' ? ' · follows the blockout' : ''}`)));
-  model.onchange = () => { f.presetId = model.value; shotPane.dataset.shot = ''; renderShotPane(); };
+  // The model is saved on the shot too (Model settings), so the next still, Claude and the batch start from it.
+  model.onchange = () => { f.presetId = model.value; const before = s.settings?.image ?? null; void runEntry({ label: 'Still model', redo: [{ op: 'update_shot', id: s.id, patch: { settings: { image: { model: model.value } } } }], undo: [{ op: 'update_shot', id: s.id, patch: { settings: { image: before } } }] }).then(() => { shotPane.dataset.shot = ''; renderShotPane(); }); };
   const count = h('select', { class: 'field', 'aria-label': 'Takes' }, ...[1, 2, 3, 4].map(n => h('option', { value: n, selected: n === f.count }, `${n} take${n > 1 ? 's' : ''}`)));
   count.onchange = () => { f.count = Number(count.value); go.textContent = `Generate${estLabel(f.presetId, f.count)}`; };
   const status = h('div', { class: 'status-line' });
@@ -1073,18 +1107,19 @@ function keyFrameBlock(s: Shot) {
   go.onclick = async () => {
     go.disabled = true; status.className = 'status-line'; status.textContent = 'Preparing the quote; nothing is sent…';
     try {
-      const text = [prompt.value.trim(), moment.value.trim() ? `At this moment: ${moment.value.trim()}.` : ''].filter(Boolean).join(' ');
       const frameAt = t === 0 ? 'start' : Math.abs(t - s.duration) < 0.01 ? 'end' : t;
-      const full = stillPrompt({ project, shot: s, t, text, presetId: f.presetId, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null, frame: words, markers: !blender });
+      // The shared assembly (shared/prompt-plan.mjs): the same text the prompt inspector, the batch and MCP produce.
+      const full = stillPromptPlan({ project, shot: s, t, text: prompt.value, moment: moment.value, presetId: f.presetId, looks, prevImage, frame: words, markers: !blender }).text;
       const { job } = await api('director/refgen/prepare', { projectId, target: 'shot', shotId: s.id, frameAt, presetId: f.presetId, prompt: full, aspect: '16:9', count: f.count, seed: f.seed, referenceIds: refIds, guide: (await guide.data).split(',')[1] });
       reviewing.set(`still:${s.id}`, job); status.className = 'status-line'; review(job);
+      void edit([{ op: 'record_prompt_version', shotId: s.id, kind: 'image', version: { text: full, model: f.presetId, reason: 'quote', by: 'you' } }], true).catch(() => {});
     } catch (e) { status.className = 'status-line err'; status.textContent = (e as Error).message; }
     finally { go.disabled = false; }
   };
   const inputs = h('div', { class: 'sb-inputs' },
     h('div', { class: 'vm-head' }, `Still at ${label(t)} · what the image model gets`),
     h('div', { class: 'sb-in' }, h('figure', {}, guide.img, h('figcaption', {}, h('b', {}, 'Image 1'), blender ? ' Blender frame · composition' : ' blockout frame · composition')),
-      ...looks.slice(0, refIds.length).map((r, i) => h('figure', { style: `--k:${KIND_COLORS[entity(r.entityId!)?.kind || 'prop']}` }, h('img', { src: refUrl(r.ref), alt: '' }), h('figcaption', {}, h('b', {}, `Image ${i + 2}`), ' ', r.label))),
+      ...looks.map((r, i) => h('figure', { style: `--k:${KIND_COLORS[entity(r.entityId!)?.kind || 'prop']}` }, h('img', { src: refUrl(r.ref), alt: '' }), h('figcaption', {}, h('b', {}, `Image ${i + 2}`), ' ', r.label))),
       prev && refIds.includes(prev.id) ? h('figure', {}, h('img', { src: refUrl(prev), alt: '' }), h('figcaption', {}, h('b', {}, `Image ${refIds.indexOf(prev.id) + 2}`), ' previous shot · continuity')) : null),
     !cap ? h('p', { class: 'note', style: 'margin:0' }, 'This model takes no cast images; only the prompt and blockout frame guide it.') : null,
     h('p', { class: 'note sb-camera', style: 'margin:0', title: 'Added to the prompt: the shot camera and blocking in words, measured from the blockout' }, h('b', {}, 'Camera in words · '), words.text),
@@ -2019,6 +2054,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
       if (project.revision !== revision || getPrompt() !== prompt) throw Error('Shot or prompt changed while preparing. Review a fresh quote. Nothing submitted.');
       if (!job.validation?.compatible) throw Error((job.validation?.issues || []).map((i: any) => i.message).slice(0, 3).join('; ') || 'This workflow can’t run with these inputs');
       const card = genQuote(job, def, request, s, prepared); out.replaceChildren(card);
+      void edit([{ op: 'record_prompt_version', shotId: s.id, kind: 'video', version: { text: prepared.prompt, model: def.title.split(' ·')[0], reason: 'quote', by: 'you' } }], true).catch(() => {});
       out.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     } catch (e) {
       let msg = (e as Error).message;
@@ -2039,7 +2075,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
     h('div', {}, quoteBtn), out, jobsBox);
 }
 /** `plan`: what preparation decided (prepareShotVideo): the estimate for the seconds the model makes, the camera source and the final prompt. */
-function genQuote(job: any, def: any, request: any, s: Shot, plan?: { est: number | null; seconds?: number; cameraSource?: string; prompt?: string }) {
+function genQuote(job: any, def: any, request: any, s: Shot, plan?: { est: number | null; seconds?: number; cameraSource?: string; prompt?: string; plan?: PromptPlan }) {
   const seconds = plan?.seconds ?? job.sources?.sourceVideo?.duration ?? null;
   const est = plan ? plan.est : def.pricing?.ratePerSecond && seconds ? def.pricing.ratePerSecond * seconds : null;
   const cameraSource = (job.cameraSource || plan?.cameraSource || 'still') as keyof typeof CAMERA_SOURCE_LABELS, finalPrompt: string = job.binding?.prompt ?? plan?.prompt ?? '';
@@ -2083,6 +2119,7 @@ function genQuote(job: any, def: any, request: any, s: Shot, plan?: { est: numbe
     h('p', { class: 'note' }, `Exact source: ${job.sources?.sourceVideo?.id || job.sources?.controlVideo?.id || job.sources?.firstFrame?.id || 'see request'} · ${job.sources?.sourceVideo?.frameCount ?? 'image'} frames · ${job.sources?.sourceVideo?.duration ?? '—'} s. Preparation does not upload inputs.`),
     def.pricing?.partnerEstimate ? h('p', { class: 'note' }, `Published partner estimate: $${def.pricing.partnerEstimate.min.toFixed(4)}–$${def.pricing.partnerEstimate.max.toFixed(4)} USD. ${def.pricing.partnerEstimate.note}`) : null,
     finalPrompt ? h('div', { class: 'gen-final' }, h('span', { class: 'eyebrow' }, 'Final prompt · exactly what is sent'), h('pre', { style: 'max-height:160px;overflow:auto;white-space:pre-wrap;margin:4px 0 0' }, finalPrompt)) : null,
+    plan?.plan && plan.plan.text === finalPrompt ? h('details', { class: 'pi' }, h('summary', {}, 'By section · where each part comes from'), planSections(plan.plan)) : null,
     cameraWords ? h('p', { class: 'status-line err', role: 'status' }, cameraWords) : null,
     h('details', {}, h('summary', {}, 'Details'), h('pre', { style: 'max-height:240px;overflow:auto;white-space:pre-wrap' }, JSON.stringify({ prompt: job.binding?.prompt, sources: job.sources, graph: job.preparedGraph }, null, 2))),
     issues.length ? h('ul', { class: 'note', style: 'margin:0;padding-left:16px' }, ...issues.slice(0, 5).map((i: any) => h('li', {}, i.message))) : null,
