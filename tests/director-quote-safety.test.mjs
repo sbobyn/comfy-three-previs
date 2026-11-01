@@ -15,7 +15,7 @@ test('single-shot preparation creates a review card and never clicks submission'
   const b = source.indexOf('\n  const drawJobs', a);
   const quoteBtn = {}, controls = [{ value: 'h3' }, { value: 'cloud' }, { checked: true }, { checked: true }, { checked: false }];
   let prepared = 0, reviewed = 0, options = null, plan = null;
-  const ctx = { quoteBtn, wf: controls[0], backendSel: controls[1], useRefs: controls[2], timing: controls[3], startOnly: controls[4], project: { revision: 7 }, s: {}, st: {}, choices: [], h,
+  const ctx = { announce() {}, announceQuote() {}, refocus() {}, quoteBtn, wf: controls[0], backendSel: controls[1], useRefs: controls[2], timing: controls[3], startOnly: controls[4], project: { revision: 7 }, s: {}, st: {}, choices: [], h,
     out: h('div'), getPrompt: () => 'Preserve Video 1',
     prepareShotVideo: async o => { prepared++; options = o; return { def: {}, job: { validation: { compatible: true } }, request: {}, est: 0.8, seconds: 4 }; },
     genQuote: (job, def, request, s, p) => { reviewed++; plan = p; return { querySelector() { throw Error('Must not auto-click submission'); } }; },
@@ -31,7 +31,7 @@ test('single-shot preparation creates a review card and never clicks submission'
 test('paid submission requires explicit review, allowance and unknown-charge acknowledgment; it dispatches once', async () => {
   const a = source.indexOf('function genQuote('), b = source.indexOf('// ---------- Live sync', a);
   const sent = [], timers = [];
-  const ctx = { h, cameraMotionWarning, CAMERA_SOURCE_LABELS, planFacts: () => null, api: async (path, body) => { sent.push({ path, body }); return { job: { id: 'job', status: 'queued' } }; }, setTimeout: fn => timers.push(fn) };
+  const ctx = { announce() {}, announceQuote() {}, refocus() {}, h, cameraMotionWarning, CAMERA_SOURCE_LABELS, planFacts: () => null, api: async (path, body) => { sent.push({ path, body }); return { job: { id: 'job', status: 'queued' } }; }, setTimeout: fn => timers.push(fn) };
   runInNewContext(compile(source.slice(a, b)), ctx);
   const job = { id: 'job', fingerprint: 'exact-fingerprint', quote: { status: 'unknown' }, validation: { compatible: true }, sources: { sourceVideo: { id: 'source', frameCount: 96, duration: 4 } } };
   const card = ctx.genQuote(job, { title: 'H3' }, { backend: { kind: 'cloud' } }, {});
@@ -58,7 +58,7 @@ test('sequence quote displays approval and never schedules batch dispatch', asyn
   const a = source.indexOf('  async function quote() {'), b = source.indexOf('  quoteBtn.onclick', a);
   const p = { revision: 1, shots: [{ id: 'shot', title: 'Shot', render: { duration: 4 }, duration: 4 }] };
   let cards = 0;
-  const ctx = { P: () => p, picked: new Set(['shot']), busy: false, draw() {}, batch: h('div'), h, modelSel: { value: 'h3' }, choice: () => [{ id: 'h3' }], fresh: () => true, activeJob: () => null,
+  const ctx = { announce() {}, announceQuote() {}, refocus() {}, P: () => p, picked: new Set(['shot']), busy: false, draw() {}, batch: h('div'), h, modelSel: { value: 'h3' }, choice: () => [{ id: 'h3' }], fresh: () => true, activeJob: () => null,
     bindAndQuote: async () => ({ job: { validation: { compatible: true } }, est: null, refs: [] }),
     drawQuote: () => { cards++; }, setTimeout: () => { throw Error('Quote must not dispatch'); },
   };

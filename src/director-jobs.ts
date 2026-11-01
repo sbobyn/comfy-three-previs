@@ -1,5 +1,5 @@
 import './director-jobs.css';
-import { h, toast } from './director-common';
+import { h, toast, announce } from './director-common';
 import './director-progress.css';
 import { acquireProgress, mountProgressView } from './director-progress';
 
@@ -97,7 +97,7 @@ const SLOT_NAMES: Record<string, string> = { 'cloud:image': 'Cloud images', 'clo
 export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, shots }: Options) {
   const dot = h('span', { class: 'jp-dot', 'aria-hidden': 'true' });
   const word = h('span', { class: 'jp-text' }), short = h('span', { class: 'jp-short', 'aria-hidden': 'true' });
-  const pip = h('button', { class: 'jobs-pip', type: 'button', hidden: true, 'aria-haspopup': 'dialog', 'aria-live': 'polite', title: 'Generation jobs', onclick: () => open() }, dot, word, short);
+  const pip = h('button', { class: 'jobs-pip', type: 'button', hidden: true, 'aria-haspopup': 'dialog', title: 'Generation jobs', onclick: () => open() }, dot, word, short);
   host.prepend(pip);
 
   let snap: JobsSnapshot = { jobs: [], limits: {}, tracker: { running: false, startedAt: null, resumed: 0 } };
@@ -168,6 +168,19 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     if (seenAlert !== null && level > seenAlert) toast(level >= 100 ? 'Budget used up: new paid runs are refused' : `Budget ${level}% used · ${budgetLine(snap.budget)?.text.replace('Budget: ', '')}`, level >= 95);
     seenAlert = level;
   }
+  // Screen readers: say when work starts or stops and when a job finishes, never each tick. The first snapshot is only learned.
+  const wasActive = new Map<string, boolean>(); let spoken = '', primed = false;
+  function announceJobs(live: PipState | null) {
+    for (const j of snap.jobs) {
+      const key = rowKey(j), now = isActive(j);
+      if (primed && wasActive.get(key) && !now) announce(j.status === 'completed' ? `${j.label} is ready` : j.status === 'failed' ? `${j.label} failed${j.failure?.detail ? `: ${j.failure.detail.split('\n')[0].slice(0, 160)}` : ''}` : `${j.label}: ${j.status}`);
+      wasActive.set(key, now);
+    }
+    // Live states only: "All done" and "n failed" are covered by the per-job lines above.
+    const said = live ? `Jobs: ${live.text}` : '';
+    if (primed && said && said !== spoken) announce(said);
+    spoken = said; primed = true;
+  }
   function render() {
     alertBudget();
     const live = pipState(snap.jobs, batches);
@@ -176,6 +189,7 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
     // Idle: show the outcome for 60 s after the last activity this tab saw, then step out of the way.
     const state = live || (lastBusy && Date.now() - lastBusy <= 60000 ? settledState(snap.jobs, watched) : null);
     pip.hidden = !state;
+    announceJobs(live);
     clearTimeout(hideTimer);
     if (state && !live) hideTimer = window.setTimeout(render, Math.max(0, 60050 - (Date.now() - lastBusy)));
     if (state) {

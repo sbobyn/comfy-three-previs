@@ -4,17 +4,10 @@
 // app (pnpm build, which pnpm check runs first), playwright-core with a local Chrome/Chromium, and axe-core.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { spawn } from 'node:child_process';
-import { once } from 'node:events';
-import { createServer } from 'node:net';
-import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 import { demoStarters } from '../scripts/snapshot-demo.mjs';
+import { startApp, skipReason as skip, SIZES } from './fixtures/a11y-app.mjs';
 
-const require = createRequire(import.meta.url);
 const read = f => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 
 test('demo home: finished scenes open their projects, Run locally explains the install, no "Your projects"', () => {
@@ -48,39 +41,17 @@ test('still composer keeps its moment text across re-renders (model or takes cha
   assert.match(ws, /const open = \(t: number\) => \{ f\.open = true; f\.prompt = null; f\.moment = '';/, 'a new still starts empty');
 });
 
-const deps = (() => { try { require.resolve('playwright-core'); require.resolve('axe-core'); return true; } catch { return false; } })();
-const chrome = deps ? await import('../server/previs/headless.mjs').then(m => m.resolveExecutable()).catch(() => null) : null;
-const built = existsSync(new URL('../dist/director.html', import.meta.url));
-const skip = !chrome ? 'no local Chromium/Chrome, playwright-core or axe-core' : !built ? 'app not built (pnpm build)' : false;
-
-const freePort = () => new Promise((resolve, reject) => { const s = createServer().listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => resolve(port)); }).on('error', reject); });
-
+// No credentials and no mocked cloud (mock: false): nothing here can reach a paid provider. The server, browser and their shutdown
+// live in tests/fixtures/a11y-app.mjs, which keeps the event loop alive and caps every wait, so a loaded machine cannot cancel this test.
 test('axe (WCAG 2.2 A/AA): Build, Shoot, Cut, still composer and Generate video dialog, desktop and phone', { skip, timeout: 240_000 }, async () => {
-  const { importStarters } = await import('../scripts/import-starters.mjs');
-  const { chromium } = require('playwright-core');
-  const AXE = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
-  const dir = await mkdtemp(join(tmpdir(), 'previs-axe-'));
-  const [{ id }] = await importStarters({ dataDir: join(dir, 'data'), only: 'breaking-news', log: () => {} });
-  const port = await freePort(), base = `http://127.0.0.1:${port}`;
-  // No credentials and no ComfyUI: nothing here can reach a paid provider.
-  const server = spawn(process.execPath, ['server/previs/server.mjs'], { cwd: new URL('..', import.meta.url), env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: join(dir, 'data'), PREVIS_COMFY_URL: 'http://127.0.0.1:9', PREVIS_ALLOW_PAID: '0', COMFY_CLOUD_API_KEY: '', COMFY_API_KEY: '', PREVIS_HEADLESS: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
-  const browser = await chromium.launch({ executablePath: chrome, headless: true, args: ['--disable-background-networking'] });
+  const app = await startApp({ mock: false });
   const found = {};
   try {
-    for (const [size, opts] of [['desktop', { viewport: { width: 1440, height: 1000 } }], ['phone', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]]) {
-      const ctx = await browser.newContext({ ...opts, reducedMotion: 'reduce' });
-      await ctx.addInitScript(() => localStorage.setItem('previs.tour.v1', '1'));
-      await ctx.route('**/*', route => (new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort()));
-      const page = await ctx.newPage();
-      const scan = async name => {
-        await page.waitForTimeout(400);
-        await page.addScriptTag({ content: AXE });
-        const r = await page.evaluate(() => window.axe.run({ runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] } }));
-        found[`${size} ${name}`] = r.violations.map(v => `${v.id} (${v.impact}): ${v.nodes.slice(0, 3).map(n => n.target.join(' ')).join(' | ')}`);
-      };
+    for (const [size, opts] of SIZES) {
+      const page = await app.page(opts);
+      const scan = async name => { found[`${size} ${name}`] = await page.axe(); };
       const open = async view => {
-        await page.goto(`${base}/director.html?project=${id}${view ? `&view=${view}` : ''}`, { waitUntil: 'networkidle' });
+        await page.goto(`${app.base}/director.html?project=${app.id}${view ? `&view=${view}` : ''}`, { waitUntil: 'networkidle' });
         await page.waitForSelector('.ws-top .step-btn[aria-selected="true"]', { state: 'attached' });
       };
       await open(''); await page.waitForSelector('.outline .obj', { state: 'attached' }); await scan('Build');
@@ -98,13 +69,9 @@ test('axe (WCAG 2.2 A/AA): Build, Shoot, Cut, still composer and Generate video 
       await page.waitForSelector('dialog[open]'); await scan('Generate video dialog');
       await page.keyboard.press('Escape');
       await open('sequence'); await page.waitForSelector('.step-btn[data-step="cut"][aria-selected="true"]', { state: 'attached' }); await page.waitForSelector('.sq-board', { state: 'attached' }); await scan('Cut');
-      await ctx.close();
+      await page.context().close();
     }
-  } finally {
-    await browser.close();
-    const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended;
-    await rm(dir, { recursive: true, force: true });
-  }
+  } finally { await app.stop(); }
   assert.equal(Object.keys(found).length, 9, 'every screen was scanned');
   assert.deepEqual(Object.fromEntries(Object.entries(found).filter(([, v]) => v.length)), {}, 'axe violations');
 });

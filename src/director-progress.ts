@@ -150,7 +150,7 @@ export function mountProgressView(host: HTMLElement, client: ReturnType<typeof c
   }
   function render(job: ProgressJob | undefined) {
     lastJob = job; root.hidden = !job; if (!job) { serial++; controller?.abort(); return; }
-    const text = progressText(job); if (phase.textContent !== text) { phase.setAttribute('role', job.status === 'failed' ? 'alert' : 'status'); phase.textContent = text; }
+    const text = progressText(job); if (phase.textContent !== text) phase.textContent = text; // one polite region: a failure is read in turn, not over the user
     const node = job.live?.node;
     const measured = !terminal.has(job.status) && !job.uncertain && job.status !== 'uncertain' && job.live?.phase === 'running' &&
       node && Number.isFinite(node.value) && Number.isFinite(node.max) && node.value! >= 0 && node.max! > 0 && node.value! <= node.max!;

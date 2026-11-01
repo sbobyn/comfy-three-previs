@@ -406,13 +406,13 @@ test('budget v2: a plan itemizes list, references, grader and margin; the displa
   const still = byId(nodes, `still:${dive.id}start`), bd = still.breakdown;
   assert.equal(bd.listUsd, estimateFor('still', TIERS.draft.stills), 'list price is the table price');
   assert.ok(bd.refs >= 1 && bd.refsUsd > 0, 'the blockout guide is an image input');
-  assert.equal(bd.graderUsd, 0.05); assert.equal(bd.grades, 1);
+  assert.equal(bd.graderUsd, 0.01); assert.equal(bd.grades, 1);
   assert.equal(still.estimateUsd, round4(bd.listUsd + bd.refsUsd + bd.graderUsd));
   assert.equal(still.reserveUsd, round4(still.estimateUsd * 1.1));
   assert.equal(bd.marginUsd, round4(still.estimateUsd * 0.1));
   // Same plan with the grader off, no margin: only the grade and the margin go away.
   const plain = byId(planBatch(project, { steps: ['stills'], shots: [dive.id], maxCostUsd: 5 }, { costs: { marginPct: 0, graderOn: false } }).nodes, `still:${dive.id}start`);
-  assert.equal(plain.estimateUsd, round4(still.estimateUsd - 0.05)); assert.equal(plain.reserveUsd, plain.estimateUsd); assert.equal(plain.breakdown.graderUsd, 0);
+  assert.equal(plain.estimateUsd, round4(still.estimateUsd - 0.01)); assert.equal(plain.reserveUsd, plain.estimateUsd); assert.equal(plain.breakdown.graderUsd, 0);
   // Videos and looks carry no grader and no reference charge.
   const all = planBatch(project, { steps: ['looks', 'videos'], maxCostUsd: 5 }, { costs: { marginPct: 10, graderOn: true } }).nodes;
   assert.ok(all.filter(n => ['look', 'video'].includes(n.type) && n.breakdown).every(n => n.breakdown.graderUsd === 0 && n.breakdown.refsUsd === 0));
@@ -424,7 +424,7 @@ test('budget v2: the batch estimate and its cap count the grader and the margin;
   const dry = await batches.create({ projectId: project.id, steps: ['stills'], maxCostUsd: 5, dryRun: true });
   const stills = dry.nodes.filter(n => n.type === 'still' && n.status !== 'skipped');
   assert.ok(stills.length >= 2);
-  assert.equal(dry.breakdown.graderUsd, round4(0.05 * stills.length)); assert.equal(dry.breakdown.marginPct, 10); assert.equal(dry.breakdown.graderOn, true);
+  assert.equal(dry.breakdown.graderUsd, round4(0.01 * stills.length)); assert.equal(dry.breakdown.marginPct, 10); assert.equal(dry.breakdown.graderOn, true);
   assert.equal(dry.estimateUsd, round4(dry.breakdown.listUsd + dry.breakdown.refsUsd + dry.breakdown.graderUsd));
   assert.equal(dry.reserveUsd, round4(stills.reduce((t, n) => t + n.reserveUsd, 0)));
   assert.ok(dry.reserveUsd > dry.estimateUsd);
@@ -434,7 +434,7 @@ test('budget v2: the batch estimate and its cap count the grader and the margin;
   const capped = await runUntil(batches, (await batches.create({ projectId: project.id, steps: ['stills'], maxCostUsd: listOnly })).id, h.clock);
   assert.ok(capped.spentEstimateUsd <= listOnly + 1e-9, 'committed reserves never pass the cap');
   const refused = capped.nodes.filter(n => n.status === 'budget');
-  assert.ok(refused.length >= 1 && /Over budget: .*\(list \$[\d.]+ \+ references \$[\d.]+ \+ grader \$0\.05 \+ 10% margin/.test(refused[0].error), refused[0]?.error);
+  assert.ok(refused.length >= 1 && /Over budget: .*\(list \$[\d.]+ \+ references \$[\d.]+ \+ grader \$0\.01 \+ 10% margin/.test(refused[0].error), refused[0]?.error);
   assert.equal(capped.nodes.filter(n => n.status === 'done').length + refused.length, capped.nodes.filter(n => n.status !== 'skipped').length);
 });
 
@@ -444,6 +444,6 @@ test('budget v2: a weak-match retry is re-estimated with the same grader, refere
   const { nodes } = planBatch(project, { steps: ['stills'], shots: [dive.id], maxCostUsd: 5 }, { costs });
   const n = byId(nodes, `still:${dive.id}start`);
   const retry = nodeCost('still', 'flux-3', { refs: n.breakdown.refs, grades: n.breakdown.grades }, costs);
-  assert.equal(retry.breakdown.graderUsd, 0.05); assert.equal(retry.breakdown.listUsd, estimateFor('still', 'flux-3'));
+  assert.equal(retry.breakdown.graderUsd, 0.01); assert.equal(retry.breakdown.listUsd, estimateFor('still', 'flux-3'));
   assert.notEqual(model, 'flux-3');
 });

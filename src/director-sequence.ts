@@ -4,7 +4,7 @@
 import './director-sequence.css';
 import type { DirectorProject, Shot, Asset, EditClip } from '../shared/director.mjs';
 import { progressSlot } from './director-progress'; // [live-progress]
-import { api, h, toast } from './director-common';
+import { api, h, toast, announce, refocus } from './director-common';
 import { shotCast, objectLooks, shotObjects, starterBlockout, videoStale } from '../shared/director.mjs';
 import { autoPromptSegments, KIND_COLORS } from '../shared/prompt.mjs';
 import { overlayCast, promptExcerpt, layoutChips, leaderFrom, compareBands, bandStops, sweepStops, moveStop } from './director-design-core';
@@ -116,10 +116,10 @@ export function createSequence(ctx: SequenceCtx) {
     return h('span', { class: 'sq-refs' }, ...list.map((r, i) => h('span', { class: 'sq-ref', title: `${i + 1} · ${r.label}${r.role === 'environment' || r.role === 'style' || r.role === 'frame' ? ` (${r.role})` : ''} — ${r.name}` }, h('img', { src: refUrl(r.file), alt: '', loading: 'lazy' }), h('i', {}, String(i + 1)))));
   }
   const pickAll = h('input', { type: 'checkbox', 'aria-label': 'Select every shot' });
-  const batch = h('div', { class: 'sq-batch', hidden: true });
+  const batch = h('div', { class: 'sq-batch', hidden: true, role: 'region', 'aria-label': 'Quote', tabindex: -1 });
   const board = h('div', { class: 'sq-board', role: 'list', 'aria-label': 'Shots in order' });
   const banner = h('div', { class: 'sq-banner', hidden: true });
-  const video = h('video', { playsinline: true, controls: true, preload: 'metadata' });
+  const video = h('video', { playsinline: true, controls: true, preload: 'metadata', 'aria-label': 'Cut preview' });
   // Compare: bands across one frame — blockout, start still, then each generated version — split by draggable seams.
   // `over` is the newest generated version (the first video band); `extra` holds older takes and other models.
   const over = h('video', { class: 'sq-over', playsinline: true, muted: true, preload: 'auto', hidden: true, 'aria-hidden': 'true' });
@@ -528,7 +528,7 @@ export function createSequence(ctx: SequenceCtx) {
       }
       drawQuote(def, id); // Quote only; submission requires the visible approval controls.
     } catch (e) { batch.replaceChildren(h('p', { class: 'status-line err' }, (e as Error).message)); }
-    finally { busy = false; draw(); }
+    finally { busy = false; draw(); refocus(batch); }
   }
   quoteBtn.onclick = () => void quote();
   function drawQuote(def: Def, id: string) {
@@ -546,6 +546,7 @@ export function createSequence(ctx: SequenceCtx) {
       dispatched = true; go.disabled = true;
       void runBatch(def, id, ready, Number(max.value));
     };
+    announce(ready.length ? `Quote ready for ${ready.length} shot${ready.length === 1 ? '' : 's'}, ${unknownCost ? 'at least ' : ''}about $${total.toFixed(2)}. Nothing has been sent; approve to generate.` : 'Nothing to generate: every ticked shot was skipped.');
     batch.replaceChildren(
       h('div', { class: 'sq-batch-head' }, h('strong', {}, `${def.title}`), h('span', { class: 'muted' }, 'Quote — nothing has been sent'), h('span', { style: 'flex:1' }), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close quote', onclick: () => { batch.hidden = true; quoted = []; } }, '✕')),
       h('table', { class: 'sq-quote' }, h('tbody', {}, ...quoted.map(q => h('tr', { class: q.ok ? '' : 'skip' },
@@ -562,7 +563,7 @@ export function createSequence(ctx: SequenceCtx) {
   async function runBatch(def: Def, id: string, list: Quoted[], cap: number) {
     if (modelSel.value !== id) modelSel.value = id;
     busy = true; draw();
-    let spent = 0; const log = h('div', { class: 'sq-log' });
+    let spent = 0; const log = h('div', { class: 'sq-log', role: 'log', 'aria-label': 'Video generation progress' });
     batch.replaceChildren(h('div', { class: 'sq-batch-head' }, h('strong', {}, `Generating ${list.length} shot${list.length === 1 ? '' : 's'} · ${def.title.split(' ·')[0]}`)), log);
     const line = (t: string, cls = '') => { const l = h('div', { class: cls }, t); log.append(l); return l; };
     try {
