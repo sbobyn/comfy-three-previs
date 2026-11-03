@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="assets/brand/logo.png" alt="Comfy Previs logo" width="112" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/readme-header-dark.svg" />
+    <img src="assets/brand/readme-header.svg" alt="Comfy Previs" width="600" />
+  </picture>
 </p>
 
 # Comfy Previs
@@ -86,6 +89,12 @@ Try: “Build a two-person conversation in a café. Give me a wide shot, two ove
 The agent can create projects, edit objects and Cast Cards, set cameras, inspect prompt sections, import Blender shots and quote batches. Tell it your budget: paid tools carry `maxCostUsd` and can execute when the server permits paid work, without another UI confirmation. The server's spending caps still apply. Leave `PREVIS_ALLOW_PAID` off for free editing and quotes.
 
 To make stills and blockouts without the app open in a browser, start the server with `PREVIS_HEADLESS=1`. This needs Google Chrome or Playwright Chromium; set `PREVIS_CHROMIUM` to its executable path on other systems.
+
+## Asset library
+
+Save a reusable object or group with **Save to library** under Appearance, then open **Library → Shared assets → Place** in another project. Its description, style notes, cast images and design sheets travel with it. Saved objects have an `@handle` you can use when directing an agent.
+
+Export a shared asset as `.previs-asset.zip`; drop it on the home page's **Import…** or import it through the Library dialog. Agents can use `previs_library_list`, `previs_library_save`, `previs_library_place`, `previs_library_import` and `previs_library_export`. Storage lives outside individual projects, in `PREVIS_LIBRARY_DIR`, so archiving a project keeps its shared assets. See the [library guide](docs/director.md#library-reuse-objects-across-projects).
 
 ## Spending controls
 
