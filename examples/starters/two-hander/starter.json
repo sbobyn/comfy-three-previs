@@ -1,0 +1,3377 @@
+{
+  "format": "comfy-previs-starter",
+  "version": 2,
+  "slug": "two-hander",
+  "order": 8,
+  "title": "Two-Hander",
+  "description": "A café conversation in coverage: a master, two over-the-shoulders, an insert of a reach for a cup and a zooming close-up, with seated, posed figures.",
+  "scene": {
+    "name": "Corner café",
+    "environment": {
+      "preset": "interior",
+      "description": "A small neighbourhood café in the late afternoon: warm wood floor, a sage-green back wall with a tall window, a counter with a coffee machine, a pendant lamp over a round table",
+      "style": "Photoreal intimate drama. Soft window light from the left, warm practical lamp, shallow depth, natural skin tones. No logos, brand names, badges, signage or lettering anywhere"
+    },
+    "entities": [
+      {
+        "id": "6e0b21f3-07ff-4e35-8dfc-5f186d916cc9",
+        "name": "Floor",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          -0.05,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          9,
+          0.05,
+          7
+        ],
+        "color": "#8a6446",
+        "notes": "Warm oak floorboards",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0d667695-0359-449f-9476-f916b66a280d"
+      },
+      {
+        "id": "7227a75b-9588-49b3-9cbd-51c9d6fd0dab",
+        "name": "Back wall",
+        "kind": "environment",
+        "shape": "wall",
+        "position": [
+          0,
+          0,
+          -2.6
+        ],
+        "rotation": 0,
+        "scale": [
+          1.12,
+          1.1,
+          1
+        ],
+        "color": "#8fa38a",
+        "notes": "A sage-green painted plaster wall",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0d667695-0359-449f-9476-f916b66a280d"
+      },
+      {
+        "id": "5a7de672-288f-4d32-bc20-e7baa3216aed",
+        "name": "Side wall",
+        "kind": "environment",
+        "shape": "wall",
+        "position": [
+          -4.4,
+          0,
+          0.6
+        ],
+        "rotation": 90,
+        "scale": [
+          0.8,
+          1.1,
+          1
+        ],
+        "color": "#8fa38a",
+        "notes": "",
+        "lookFrom": "7227a75b-9588-49b3-9cbd-51c9d6fd0dab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0d667695-0359-449f-9476-f916b66a280d"
+      },
+      {
+        "id": "9171b241-79f2-4c64-b35c-f964b6dfa63f",
+        "name": "Window",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -4.26,
+          0.9,
+          -0.3
+        ],
+        "rotation": 90,
+        "scale": [
+          1.6,
+          1.8,
+          0.05
+        ],
+        "color": "#d8e6ee",
+        "notes": "A tall multi-pane window with soft daylight; nothing written on the glass",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0d667695-0359-449f-9476-f916b66a280d"
+      },
+      {
+        "id": "05e9b0e5-fed3-4cfe-b80c-19e3cc3bf2f3",
+        "name": "Counter",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          2.4,
+          0,
+          -1.9
+        ],
+        "rotation": 0,
+        "scale": [
+          3.2,
+          1.05,
+          0.7
+        ],
+        "color": "#5b4636",
+        "notes": "A dark wood café counter with a plain steel coffee machine; no brand names",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0d667695-0359-449f-9476-f916b66a280d"
+      },
+      {
+        "id": "ea160032-1e31-4a63-b1f9-00e42cd2c54f",
+        "name": "Coffee machine",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          2.9,
+          1.05,
+          -2
+        ],
+        "rotation": 0,
+        "scale": [
+          0.7,
+          0.5,
+          0.45
+        ],
+        "color": "#b8bcc0",
+        "notes": "",
+        "lookFrom": "05e9b0e5-fed3-4cfe-b80c-19e3cc3bf2f3",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0d667695-0359-449f-9476-f916b66a280d"
+      },
+      {
+        "id": "5d070eb7-2276-481e-9a43-17f3c7d55f55",
+        "name": "Café table",
+        "kind": "prop",
+        "shape": "table",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          0.6,
+          1,
+          0.9
+        ],
+        "color": "#a07a55",
+        "notes": "A small round wooden café table",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5d7b98a8-38fe-4e10-b276-595a7137133e"
+      },
+      {
+        "id": "6c048da3-3e36-4e94-b7ff-b59a21540212",
+        "name": "Ada’s chair",
+        "kind": "prop",
+        "shape": "chair",
+        "position": [
+          -1.1,
+          0,
+          0
+        ],
+        "rotation": 90,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#6b4f38",
+        "notes": "Bentwood café chairs in dark wood",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5d7b98a8-38fe-4e10-b276-595a7137133e"
+      },
+      {
+        "id": "64ff4f5c-daad-4eae-bf9d-575a94f88939",
+        "name": "Ben’s chair",
+        "kind": "prop",
+        "shape": "chair",
+        "position": [
+          1.1,
+          0,
+          0
+        ],
+        "rotation": 270,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#6b4f38",
+        "notes": "",
+        "lookFrom": "6c048da3-3e36-4e94-b7ff-b59a21540212",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5d7b98a8-38fe-4e10-b276-595a7137133e"
+      },
+      {
+        "id": "d7e619c5-c5c7-4643-95f2-c5bf4a8a403b",
+        "name": "Ada’s cup",
+        "kind": "prop",
+        "shape": "cylinder",
+        "position": [
+          -0.27,
+          0.75,
+          0.12
+        ],
+        "rotation": 0,
+        "scale": [
+          0.11,
+          0.09,
+          0.11
+        ],
+        "color": "#f2efe8",
+        "notes": "A plain white ceramic coffee cup on a saucer",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5d7b98a8-38fe-4e10-b276-595a7137133e"
+      },
+      {
+        "id": "e80dee5d-56bf-455a-82fe-843e0cba37d5",
+        "name": "Ben’s cup",
+        "kind": "prop",
+        "shape": "cylinder",
+        "position": [
+          0.27,
+          0.75,
+          -0.12
+        ],
+        "rotation": 0,
+        "scale": [
+          0.11,
+          0.09,
+          0.11
+        ],
+        "color": "#f2efe8",
+        "notes": "",
+        "lookFrom": "d7e619c5-c5c7-4643-95f2-c5bf4a8a403b",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5d7b98a8-38fe-4e10-b276-595a7137133e"
+      },
+      {
+        "id": "5879c6b9-6bb8-4c99-99bb-3a38fc2ea542",
+        "name": "Pendant lamp",
+        "kind": "environment",
+        "shape": "cylinder",
+        "position": [
+          0,
+          1.75,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          0.5,
+          0.2,
+          0.5
+        ],
+        "color": "#d9a441",
+        "notes": "A brass pendant lamp glowing warmly over the table",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0d667695-0359-449f-9476-f916b66a280d"
+      },
+      {
+        "id": "b09e749e-e52a-4546-a2b8-503e17e8bb44",
+        "name": "Plant",
+        "kind": "environment",
+        "shape": "tree",
+        "position": [
+          -3.6,
+          0,
+          -2
+        ],
+        "rotation": 0,
+        "scale": [
+          0.45,
+          0.4,
+          0.45
+        ],
+        "color": "#4f7f4a",
+        "notes": "A potted fig in a terracotta pot",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0d667695-0359-449f-9476-f916b66a280d"
+      },
+      {
+        "id": "0d667695-0359-449f-9476-f916b66a280d",
+        "name": "Café set",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          -0.87,
+          0,
+          -1.025
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "5d7b98a8-38fe-4e10-b276-595a7137133e",
+        "name": "Table",
+        "kind": "prop",
+        "shape": "group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "afff4920-e0f7-447a-a4a0-589284909dff",
+        "name": "Ada",
+        "kind": "character",
+        "shape": "person",
+        "model": "/director-refs/00000000-0000-0000-0000-000000000000/f25182c5-20d0-49e3-9720-8fb58b22d61b.glb",
+        "position": [
+          -0.67,
+          0,
+          0
+        ],
+        "rotation": 90,
+        "scale": [
+          1.0639999999999998,
+          1.0014444584647815,
+          0.9142856938498362
+        ],
+        "color": "#c8ccd4",
+        "notes": "A woman in her forties with a short dark bob and round tortoiseshell glasses, a mustard cardigan over a cream blouse",
+        "lookFrom": null,
+        "styleNotes": "Plain clothing without logos or lettering",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 1.2,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                -8,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -40,
+                0,
+                -70
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                70,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 2.6,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                6,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -30,
+                0,
+                -72
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                50,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 4,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                6,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 5.5,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                6,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -45,
+                0,
+                -66
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                80,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 7,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                -6,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -38,
+                0,
+                -70
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                60,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 9,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                -6,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 15.2,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                -6,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 16.6,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                -6,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -30.79,
+                0.38,
+                -95.08
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -2.23,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 18.4,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                -6,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -31.65,
+                0.46,
+                -95.19
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -2.23,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 20,
+            "p": [
+              -0.67,
+              0,
+              0
+            ],
+            "r": 90
+          }
+        ],
+        "pose": {
+          "body": [
+            -4,
+            0,
+            0
+          ],
+          "armL": [
+            -32,
+            0,
+            -80
+          ],
+          "armR": [
+            -32,
+            0,
+            -80
+          ],
+          "forearmL": [
+            0,
+            -55,
+            0
+          ],
+          "forearmR": [
+            0,
+            -55,
+            0
+          ],
+          "thighL": [
+            -88,
+            0,
+            0
+          ],
+          "thighR": [
+            -88,
+            0,
+            0
+          ],
+          "shinL": [
+            88,
+            0,
+            0
+          ],
+          "shinR": [
+            88,
+            0,
+            0
+          ]
+        },
+        "parent": null,
+        "source": {
+          "file": "mannequin-sand.glb",
+          "format": "glb",
+          "licence": "MIT — original procedural mannequin (scripts/starters/mannequin.mjs)",
+          "attribution": "Comfy Previs starters",
+          "triangles": 1992,
+          "bytes": 112384,
+          "units": "glTF metres",
+          "clips": [
+            {
+              "name": "Walk",
+              "duration": 1.1
+            },
+            {
+              "name": "Idle",
+              "duration": 3
+            },
+            {
+              "name": "Wave",
+              "duration": 2
+            }
+          ],
+          "skinned": true,
+          "rig": {
+            "humanoid": true,
+            "joints": {
+              "body": 1,
+              "spine": 2,
+              "neck": 4,
+              "head": 5,
+              "armL": 8,
+              "forearmL": 9,
+              "handL": 10,
+              "armR": 13,
+              "forearmR": 14,
+              "handR": 15,
+              "thighL": 17,
+              "shinL": 18,
+              "footL": 19,
+              "thighR": 21,
+              "shinR": 22,
+              "footR": 23
+            },
+            "parents": {
+              "body": null,
+              "spine": "body",
+              "neck": "spine",
+              "head": "neck",
+              "armL": "spine",
+              "forearmL": "armL",
+              "handL": "forearmL",
+              "armR": "spine",
+              "forearmR": "armR",
+              "handR": "forearmR",
+              "thighL": "body",
+              "shinL": "thighL",
+              "footL": "shinL",
+              "thighR": "body",
+              "shinR": "thighR",
+              "footR": "shinR"
+            },
+            "rest": {
+              "body": [
+                0,
+                0.54366,
+                -0.09375
+              ],
+              "spine": [
+                0,
+                0.61023,
+                -0.09375
+              ],
+              "neck": [
+                0,
+                0.83213,
+                -0.09375
+              ],
+              "head": [
+                0,
+                0.87651,
+                -0.09375
+              ],
+              "armL": [
+                0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmL": [
+                0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handL": [
+                1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "armR": [
+                -0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmR": [
+                -0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handR": [
+                -1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "thighL": [
+                0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinL": [
+                0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footL": [
+                0.18797,
+                0.04438,
+                -0.09375
+              ],
+              "thighR": [
+                -0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinR": [
+                -0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footR": [
+                -0.18797,
+                0.04438,
+                -0.09375
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "c77fc4d0-d001-4352-8f65-175aaf301c62",
+        "name": "Ben",
+        "kind": "character",
+        "shape": "person",
+        "model": "/director-refs/00000000-0000-0000-0000-000000000000/69b36d5f-2bca-46f0-abc1-b67bc0aacfac.glb",
+        "position": [
+          0.67,
+          0,
+          0
+        ],
+        "rotation": 270,
+        "scale": [
+          1.0639999999999998,
+          1.0014444584647815,
+          0.9142856938498362
+        ],
+        "color": "#c8ccd4",
+        "notes": "A man in his late twenties with close-cropped curly black hair and light stubble, a forest-green bomber jacket over a grey T-shirt",
+        "lookFrom": null,
+        "styleNotes": "Plain clothing without logos or lettering",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 3.2,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                12,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 3.8,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                -2,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 4.4,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                10,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 5,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                10,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 10.4,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                10,
+                0,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 11.2,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                8,
+                0
+              ],
+              "armL": [
+                -42,
+                0,
+                -68
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -75,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 12.8,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                -6,
+                -6,
+                0
+              ],
+              "armL": [
+                -30,
+                0,
+                -72
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 14.2,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                -6,
+                -6,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 16.5,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "pose": {
+              "body": [
+                -4,
+                0,
+                0
+              ],
+              "head": [
+                6,
+                8,
+                0
+              ],
+              "armL": [
+                -32,
+                0,
+                -80
+              ],
+              "armR": [
+                -32,
+                0,
+                -80
+              ],
+              "forearmL": [
+                0,
+                -55,
+                0
+              ],
+              "forearmR": [
+                0,
+                -55,
+                0
+              ],
+              "thighL": [
+                -88,
+                0,
+                0
+              ],
+              "thighR": [
+                -88,
+                0,
+                0
+              ],
+              "shinL": [
+                88,
+                0,
+                0
+              ],
+              "shinR": [
+                88,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "t": 20,
+            "p": [
+              0.67,
+              0,
+              0
+            ],
+            "r": 270
+          }
+        ],
+        "pose": {
+          "body": [
+            -4,
+            0,
+            0
+          ],
+          "armL": [
+            -32,
+            0,
+            -80
+          ],
+          "armR": [
+            -32,
+            0,
+            -80
+          ],
+          "forearmL": [
+            0,
+            -55,
+            0
+          ],
+          "forearmR": [
+            0,
+            -55,
+            0
+          ],
+          "thighL": [
+            -88,
+            0,
+            0
+          ],
+          "thighR": [
+            -88,
+            0,
+            0
+          ],
+          "shinL": [
+            88,
+            0,
+            0
+          ],
+          "shinR": [
+            88,
+            0,
+            0
+          ]
+        },
+        "parent": null,
+        "source": {
+          "file": "mannequin-slate.glb",
+          "format": "glb",
+          "licence": "MIT — original procedural mannequin (scripts/starters/mannequin.mjs)",
+          "attribution": "Comfy Previs starters",
+          "triangles": 1992,
+          "bytes": 112384,
+          "units": "glTF metres",
+          "clips": [
+            {
+              "name": "Walk",
+              "duration": 1.1
+            },
+            {
+              "name": "Idle",
+              "duration": 3
+            },
+            {
+              "name": "Wave",
+              "duration": 2
+            }
+          ],
+          "skinned": true,
+          "rig": {
+            "humanoid": true,
+            "joints": {
+              "body": 1,
+              "spine": 2,
+              "neck": 4,
+              "head": 5,
+              "armL": 8,
+              "forearmL": 9,
+              "handL": 10,
+              "armR": 13,
+              "forearmR": 14,
+              "handR": 15,
+              "thighL": 17,
+              "shinL": 18,
+              "footL": 19,
+              "thighR": 21,
+              "shinR": 22,
+              "footR": 23
+            },
+            "parents": {
+              "body": null,
+              "spine": "body",
+              "neck": "spine",
+              "head": "neck",
+              "armL": "spine",
+              "forearmL": "armL",
+              "handL": "forearmL",
+              "armR": "spine",
+              "forearmR": "armR",
+              "handR": "forearmR",
+              "thighL": "body",
+              "shinL": "thighL",
+              "footL": "shinL",
+              "thighR": "body",
+              "shinR": "thighR",
+              "footR": "shinR"
+            },
+            "rest": {
+              "body": [
+                0,
+                0.54366,
+                -0.09375
+              ],
+              "spine": [
+                0,
+                0.61023,
+                -0.09375
+              ],
+              "neck": [
+                0,
+                0.83213,
+                -0.09375
+              ],
+              "head": [
+                0,
+                0.87651,
+                -0.09375
+              ],
+              "armL": [
+                0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmL": [
+                0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handL": [
+                1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "armR": [
+                -0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmR": [
+                -0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handR": [
+                -1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "thighL": [
+                0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinL": [
+                0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footL": [
+                0.18797,
+                0.04438,
+                -0.09375
+              ],
+              "thighR": [
+                -0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinR": [
+                -0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footR": [
+                -0.18797,
+                0.04438,
+                -0.09375
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "62a5ccc6-fe1d-441e-9aa6-dfe0a24ab039",
+        "name": "Barista",
+        "kind": "character",
+        "shape": "person",
+        "model": "/director-refs/00000000-0000-0000-0000-000000000000/ca73486c-595f-40c5-a44d-6e85b6a6fa8b.glb",
+        "position": [
+          2.3,
+          0,
+          -2.75
+        ],
+        "rotation": 0,
+        "scale": [
+          1.0639999999999998,
+          1.0014444584647815,
+          0.9142856938498362
+        ],
+        "color": "#c8ccd4",
+        "notes": "A café worker in a plain dark apron over a white shirt, wiping the counter",
+        "lookFrom": null,
+        "styleNotes": "Plain clothing without logos or lettering",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null,
+        "source": {
+          "file": "mannequin-sand.glb",
+          "format": "glb",
+          "licence": "MIT — original procedural mannequin (scripts/starters/mannequin.mjs)",
+          "attribution": "Comfy Previs starters",
+          "triangles": 1992,
+          "bytes": 112384,
+          "units": "glTF metres",
+          "clips": [
+            {
+              "name": "Walk",
+              "duration": 1.1
+            },
+            {
+              "name": "Idle",
+              "duration": 3
+            },
+            {
+              "name": "Wave",
+              "duration": 2
+            }
+          ],
+          "skinned": true,
+          "rig": {
+            "humanoid": true,
+            "joints": {
+              "body": 1,
+              "spine": 2,
+              "neck": 4,
+              "head": 5,
+              "armL": 8,
+              "forearmL": 9,
+              "handL": 10,
+              "armR": 13,
+              "forearmR": 14,
+              "handR": 15,
+              "thighL": 17,
+              "shinL": 18,
+              "footL": 19,
+              "thighR": 21,
+              "shinR": 22,
+              "footR": 23
+            },
+            "parents": {
+              "body": null,
+              "spine": "body",
+              "neck": "spine",
+              "head": "neck",
+              "armL": "spine",
+              "forearmL": "armL",
+              "handL": "forearmL",
+              "armR": "spine",
+              "forearmR": "armR",
+              "handR": "forearmR",
+              "thighL": "body",
+              "shinL": "thighL",
+              "footL": "shinL",
+              "thighR": "body",
+              "shinR": "thighR",
+              "footR": "shinR"
+            },
+            "rest": {
+              "body": [
+                0,
+                0.54366,
+                -0.09375
+              ],
+              "spine": [
+                0,
+                0.61023,
+                -0.09375
+              ],
+              "neck": [
+                0,
+                0.83213,
+                -0.09375
+              ],
+              "head": [
+                0,
+                0.87651,
+                -0.09375
+              ],
+              "armL": [
+                0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmL": [
+                0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handL": [
+                1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "armR": [
+                -0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmR": [
+                -0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handR": [
+                -1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "thighL": [
+                0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinL": [
+                0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footL": [
+                0.18797,
+                0.04438,
+                -0.09375
+              ],
+              "thighR": [
+                -0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinR": [
+                -0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footR": [
+                -0.18797,
+                0.04438,
+                -0.09375
+              ]
+            }
+          }
+        },
+        "perform": {
+          "clip": "Idle",
+          "offset": 0,
+          "speed": 1
+        },
+        "standIn": "neutral"
+      }
+    ],
+    "references": []
+  },
+  "shots": [
+    {
+      "id": "d1c91695-cac9-4893-9812-8b9e813434b0",
+      "title": "Master",
+      "description": "@ada leans in and explains something with an open hand; @ben listens and nods slowly.",
+      "duration": 5,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "afff4920-e0f7-447a-a4a0-589284909dff",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              0.1,
+              1.25,
+              2.9
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.1,
+            "p": [
+              0.1,
+              1.25,
+              2.893
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.2,
+            "p": [
+              0.1,
+              1.25,
+              2.874
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.3,
+            "p": [
+              0.1,
+              1.25,
+              2.846
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.4,
+            "p": [
+              0.1,
+              1.25,
+              2.812
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.5,
+            "p": [
+              0.1,
+              1.25,
+              2.775
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.6,
+            "p": [
+              0.1,
+              1.25,
+              2.738
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.7,
+            "p": [
+              0.1,
+              1.25,
+              2.704
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.8,
+            "p": [
+              0.1,
+              1.25,
+              2.676
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.9,
+            "p": [
+              0.1,
+              1.25,
+              2.657
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          },
+          {
+            "t": 1,
+            "p": [
+              0.1,
+              1.25,
+              2.65
+            ],
+            "look": [
+              0,
+              0.92,
+              0
+            ],
+            "mm": 32
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "hard cut"
+        ],
+        "lens": [
+          "32mm"
+        ],
+        "filter": [
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "3ce1f247-51b5-4ab5-a5ae-8eec6e444a13",
+      "title": "Over Ben · on Ada",
+      "description": "@ada keeps talking, her hand rising and settling as she makes her point, eyes on @ben.",
+      "duration": 5,
+      "start": 5,
+      "camera": {
+        "move": "custom",
+        "target": "afff4920-e0f7-447a-a4a0-589284909dff",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              1.95,
+              1.32,
+              0.55
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.1,
+            "p": [
+              1.95,
+              1.32,
+              0.555
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.2,
+            "p": [
+              1.95,
+              1.32,
+              0.56
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.3,
+            "p": [
+              1.95,
+              1.32,
+              0.565
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.4,
+            "p": [
+              1.95,
+              1.32,
+              0.57
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.5,
+            "p": [
+              1.95,
+              1.32,
+              0.575
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.6,
+            "p": [
+              1.95,
+              1.32,
+              0.58
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.7,
+            "p": [
+              1.95,
+              1.32,
+              0.585
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.8,
+            "p": [
+              1.95,
+              1.32,
+              0.59
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.9,
+            "p": [
+              1.95,
+              1.32,
+              0.595
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 1,
+            "p": [
+              1.95,
+              1.32,
+              0.6
+            ],
+            "look": [
+              -0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "hard cut"
+        ],
+        "lens": [
+          "50mm",
+          "shallow depth of field"
+        ],
+        "filter": [
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "a8535c8a-6725-4841-8dee-9533e10c8f07",
+      "title": "Over Ada · on Ben",
+      "description": "@ben answers with a small shrug and an open left hand, half smiling at @ada.",
+      "duration": 5,
+      "start": 10,
+      "camera": {
+        "move": "custom",
+        "target": "c77fc4d0-d001-4352-8f65-175aaf301c62",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -1.95,
+              1.32,
+              0.55
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.1,
+            "p": [
+              -1.95,
+              1.32,
+              0.555
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.2,
+            "p": [
+              -1.95,
+              1.32,
+              0.56
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.3,
+            "p": [
+              -1.95,
+              1.32,
+              0.565
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.4,
+            "p": [
+              -1.95,
+              1.32,
+              0.57
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -1.95,
+              1.32,
+              0.575
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.6,
+            "p": [
+              -1.95,
+              1.32,
+              0.58
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.7,
+            "p": [
+              -1.95,
+              1.32,
+              0.585
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.8,
+            "p": [
+              -1.95,
+              1.32,
+              0.59
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.9,
+            "p": [
+              -1.95,
+              1.32,
+              0.595
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 1,
+            "p": [
+              -1.95,
+              1.32,
+              0.6
+            ],
+            "look": [
+              0.933,
+              1.188,
+              0
+            ],
+            "mm": 50
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "hard cut"
+        ],
+        "lens": [
+          "50mm",
+          "shallow depth of field"
+        ],
+        "filter": [
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "77fee2a9-99b2-4393-80a8-a013c040fcf6",
+      "title": "Insert · cup",
+      "description": "@ada’s hand comes to rest around @ada-s-cup on its saucer and her fingers settle on the handle.",
+      "duration": 4,
+      "start": 15,
+      "camera": {
+        "move": "custom",
+        "target": "d7e619c5-c5c7-4643-95f2-c5bf4a8a403b",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              0.25,
+              1.02,
+              1.05
+            ],
+            "look": [
+              -0.32,
+              0.82,
+              0.12
+            ],
+            "mm": 70
+          },
+          {
+            "t": 0.125,
+            "p": [
+              0.25,
+              1.02,
+              1.05
+            ],
+            "look": [
+              -0.32,
+              0.82,
+              0.12
+            ],
+            "mm": 70
+          },
+          {
+            "t": 0.25,
+            "p": [
+              0.25,
+              1.02,
+              1.05
+            ],
+            "look": [
+              -0.32,
+              0.82,
+              0.12
+            ],
+            "mm": 70
+          },
+          {
+            "t": 0.375,
+            "p": [
+              0.25,
+              1.02,
+              1.05
+            ],
+            "look": [
+              -0.32,
+              0.82,
+              0.12
+            ],
+            "mm": 70
+          },
+          {
+            "t": 0.5,
+            "p": [
+              0.25,
+              1.02,
+              1.05
+            ],
+            "look": [
+              -0.32,
+              0.82,
+              0.12
+            ],
+            "mm": 70
+          },
+          {
+            "t": 0.625,
+            "p": [
+              0.25,
+              1.02,
+              1.05
+            ],
+            "look": [
+              -0.32,
+              0.82,
+              0.12
+            ],
+            "mm": 70
+          },
+          {
+            "t": 0.75,
+            "p": [
+              0.25,
+              1.02,
+              1.05
+            ],
+            "look": [
+              -0.32,
+              0.82,
+              0.12
+            ],
+            "mm": 70
+          },
+          {
+            "t": 0.875,
+            "p": [
+              0.25,
+              1.02,
+              1.05
+            ],
+            "look": [
+              -0.32,
+              0.82,
+              0.12
+            ],
+            "mm": 70
+          },
+          {
+            "t": 1,
+            "p": [
+              0.25,
+              1.02,
+              1.05
+            ],
+            "look": [
+              -0.32,
+              0.82,
+              0.12
+            ],
+            "mm": 70
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "hard cut"
+        ],
+        "lens": [
+          "70mm",
+          "macro"
+        ],
+        "filter": [
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "ffd2d2cb-c2e6-45d7-8881-fb5dc720c41f",
+      "title": "Close-up · zoom on Ben",
+      "description": "@ben watches @ada and gives a slow, thoughtful nod.",
+      "duration": 4,
+      "start": 16,
+      "camera": {
+        "move": "custom",
+        "target": "c77fc4d0-d001-4352-8f65-175aaf301c62",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.0625,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 50.2
+          },
+          {
+            "t": 0.125,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 50.9
+          },
+          {
+            "t": 0.1875,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 51.8
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 53.1
+          },
+          {
+            "t": 0.3125,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 54.6
+          },
+          {
+            "t": 0.375,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 56.3
+          },
+          {
+            "t": 0.4375,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 58.1
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 60
+          },
+          {
+            "t": 0.5625,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 61.9
+          },
+          {
+            "t": 0.625,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 63.7
+          },
+          {
+            "t": 0.6875,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 65.4
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 66.9
+          },
+          {
+            "t": 0.8125,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 68.2
+          },
+          {
+            "t": 0.875,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 69.1
+          },
+          {
+            "t": 0.9375,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 69.8
+          },
+          {
+            "t": 1,
+            "p": [
+              -1.2,
+              1.25,
+              1.6
+            ],
+            "look": [
+              0.943,
+              1.299,
+              0
+            ],
+            "mm": 70
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "hard cut"
+        ],
+        "lens": [
+          "70mm",
+          "shallow depth of field"
+        ],
+        "filter": [
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    }
+  ],
+  "media": [
+    {
+      "path": "media/refs/f25182c5-20d0-49e3-9720-8fb58b22d61b.glb",
+      "kind": "model",
+      "bytes": 112384,
+      "sha256": "6ca519b3e3dc9c1dba7a4881f75ab121865c0a2673bf7ef97d8f2c7fe879a845",
+      "sourceSha256": "6ca519b3e3dc9c1dba7a4881f75ab121865c0a2673bf7ef97d8f2c7fe879a845"
+    },
+    {
+      "path": "media/refs/69b36d5f-2bca-46f0-abc1-b67bc0aacfac.glb",
+      "kind": "model",
+      "bytes": 112384,
+      "sha256": "6c04e355a8b06ee0c05bb84d9ac3b34e5ab2c55cc011aa7d3d4ab51298a90f57",
+      "sourceSha256": "6c04e355a8b06ee0c05bb84d9ac3b34e5ab2c55cc011aa7d3d4ab51298a90f57"
+    },
+    {
+      "path": "media/refs/ca73486c-595f-40c5-a44d-6e85b6a6fa8b.glb",
+      "kind": "model",
+      "bytes": 112384,
+      "sha256": "6ca519b3e3dc9c1dba7a4881f75ab121865c0a2673bf7ef97d8f2c7fe879a845",
+      "sourceSha256": "6ca519b3e3dc9c1dba7a4881f75ab121865c0a2673bf7ef97d8f2c7fe879a845"
+    },
+    {
+      "path": "media/assets/da3dbd5c-ec50-430a-844d-67496ddf9d48.mp4",
+      "kind": "video",
+      "bytes": 1111740,
+      "sha256": "f4cc4cbf3e6db3fa6e2950ad94da683454e1ceb4ad9f14890fe09673c56515a7",
+      "sourceSha256": "d7da9a4866767792610fe8934fda277dda764bc9d3037974fb3f5b427dc3217e",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/ae526eca-0aa8-4824-9ee3-f101c1fc0b8c.mp4",
+      "kind": "video",
+      "bytes": 895908,
+      "sha256": "1942afaf3a97acfa996435497d12a4e41733b122acb5b9ad955fe8dfcccccffa",
+      "sourceSha256": "2330721e1b9f1240a1a94a52777e856b2611d95a3a862bd89b95d83b340afc18",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/6f15ebf5-fee7-4348-914e-0e9987cf8729.mp4",
+      "kind": "video",
+      "bytes": 806795,
+      "sha256": "20f423d681c50af3dc03befdb7519a6bc1337b73e18f68dfde121ff1cf4ef81c",
+      "sourceSha256": "729dea72ff3f1fa246bd35b79d9b29b32c290d6516560e045d762482101c24e5",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/ee090598-485c-4b5a-9684-509f3ba79ba5.mp4",
+      "kind": "video",
+      "bytes": 225881,
+      "sha256": "53b73697070b84192ea94e41078af4b8708fb5b7e3ed8c28353df27dba18f39d",
+      "sourceSha256": "56875fbecf07fc72453c6987a6e7ab3f3789d649f744950abbf6b3255259ca75",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/c12c8ae7-f678-4245-baa0-ec06c1ec74ee.mp4",
+      "kind": "video",
+      "bytes": 682857,
+      "sha256": "72a32cfd4a94a935024667f3722a863a97ad518e70174b3006b204f3ed0ec5df",
+      "sourceSha256": "f8b9ec56839addddb5c484201a030c53284fe2e6a61266923a882a61b8a880ad",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    }
+  ],
+  "assets": [
+    {
+      "id": "da3dbd5c-ec50-430a-844d-67496ddf9d48",
+      "kind": "camera-render",
+      "shotId": "d1c91695-cac9-4893-9812-8b9e813434b0",
+      "file": "assets/da3dbd5c-ec50-430a-844d-67496ddf9d48.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-03T01:32:40.235Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "e95c8bd7"
+      }
+    },
+    {
+      "id": "ae526eca-0aa8-4824-9ee3-f101c1fc0b8c",
+      "kind": "camera-render",
+      "shotId": "3ce1f247-51b5-4ab5-a5ae-8eec6e444a13",
+      "file": "assets/ae526eca-0aa8-4824-9ee3-f101c1fc0b8c.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-03T01:32:42.925Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "e8ef9a1f"
+      }
+    },
+    {
+      "id": "6f15ebf5-fee7-4348-914e-0e9987cf8729",
+      "kind": "camera-render",
+      "shotId": "a8535c8a-6725-4841-8dee-9533e10c8f07",
+      "file": "assets/6f15ebf5-fee7-4348-914e-0e9987cf8729.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-03T01:32:45.414Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "544fa9ab"
+      }
+    },
+    {
+      "id": "ee090598-485c-4b5a-9684-509f3ba79ba5",
+      "kind": "camera-render",
+      "shotId": "77fee2a9-99b2-4393-80a8-a013c040fcf6",
+      "file": "assets/ee090598-485c-4b5a-9684-509f3ba79ba5.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:47.713Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "cb9e7f99"
+      }
+    },
+    {
+      "id": "c12c8ae7-f678-4245-baa0-ec06c1ec74ee",
+      "kind": "camera-render",
+      "shotId": "ffd2d2cb-c2e6-45d7-8881-fb5dc720c41f",
+      "file": "assets/c12c8ae7-f678-4245-baa0-ec06c1ec74ee.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:49.770Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "776608ee"
+      }
+    }
+  ],
+  "edit": {
+    "clips": []
+  }
+}
