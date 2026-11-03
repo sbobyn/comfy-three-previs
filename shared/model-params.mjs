@@ -11,6 +11,7 @@ import { clipSecondsFor, durationValue, estimateBreakdown, FIRST_FRAME_FALLBACK 
 import { cameraSourceOf } from './camera-source.mjs';
 import { maxReferences } from './video-refs.mjs';
 import { VIDEO_PROMPT_CAP } from './prompt.mjs';
+import { blockoutFidelity } from './blockout-fidelity.mjs';
 
 export const SEED_MAX = 2147483647;
 const presetOf = def => def?.provenance?.presetId || def?.id || '';
@@ -103,6 +104,7 @@ export function videoCapabilities(def) {
     clipLengths: def.task === 'first-frame' ? def.constraints?.durations ?? null : null,
     sourceDuration: def.constraints?.sourceVideo?.duration ?? def.constraints?.controlVideo?.duration ?? null,
     ratePerSecond: local ? 0 : def.pricing?.ratePerSecond ?? null,
+    blockoutFidelity: blockoutFidelity(def),
     priceSource: def.pricing?.source || null, priceCheckedAt: def.pricing?.checkedAt || null, local,
   };
 }

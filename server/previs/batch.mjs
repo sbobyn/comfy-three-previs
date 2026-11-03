@@ -17,6 +17,7 @@ import { savedClipSeconds } from '../../shared/model-params.mjs';
 import { planSlots } from '../../shared/sheet-presets.mjs';
 import { TIERS, modelsFor, estimateFor, estimateBreakdown, sumBreakdowns, maxRefsFor, DEFAULT_MARGIN_PCT, VIDEO_PRICES, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 import { retryModelFor, WEAK_MATCH } from '../../shared/still-match.mjs';
+import { fidelityAdvice } from '../../shared/blockout-fidelity.mjs';
 
 export const STEPS = ['looks', 'sheets', 'stills', 'videos'];
 export const DRY_RUN_TTL_MS = 3600e3;
@@ -141,6 +142,9 @@ export function planBatch(project, raw, { definitions = builtInPresets, costs = 
     // A model that edits the blockout clip takes only clip lengths its provider accepts (Seedance edit: 4–30 s).
     const clip = needs.camera === 'blockout' ? def.constraints?.sourceVideo?.duration : null;
     if (clip && (s.duration < clip.min || s.duration > clip.max)) Object.assign(n, { status: 'failed', planError: true, error: `${def.title.split(' · ')[0]} needs a ${clip.min}–${clip.max} s blockout clip; this shot is ${s.duration} s. Change the shot length or the model` });
+    // A motion/direction-critical shot on a route that may lose the subject's direction gets advice (never a refusal).
+    const advice = def ? fidelityAdvice(project, s, def, definitions) : null;
+    if (advice && !advice.ok) n.directionAdvice = { message: advice.message, ...(advice.recommend ? { recommend: advice.recommend.id } : {}) };
     if (needs.references && castLooks.length) { n.deps.push(...castLooks); n.optional = castLooks; }
     // A model that follows the blockout clip also takes the start/end stills as its look, when this batch makes them.
     if (lookStills) for (const x of ['start', 'end'].map(at => still.get(at)).filter(Boolean)) { n.deps.push(x.id); (n.optional ||= []).push(x.id); }

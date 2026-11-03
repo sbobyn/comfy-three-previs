@@ -17,7 +17,7 @@ const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x2d, 
 const VIDEO = '7e0d0a11-0000-4000-8000-000000000001', STILL2 = '7e0d0a11-0000-4000-8000-000000000002';
 const LIBRARY_TOOLS = ['previs_library_list', 'previs_library_save', 'previs_library_place', 'previs_library_import', 'previs_library_export'];
 const BLENDER_TOOLS = ['previs_director_import_blender', 'previs_director_blender_helper'];
-const TAKE_TOOLS = ['previs_director_list_takes', 'previs_director_set_winner'];
+const TAKE_TOOLS = ['previs_director_grade_take', 'previs_director_list_takes', 'previs_director_set_winner'];
 const KEYFRAME_TOOLS = ['previs_director_keyframe']; // exact-frame key stills
 const NEW_TOOLS = ['previs_director_render_blockout', 'previs_director_generate_still', 'previs_director_batch_generate', 'previs_director_batch_status', 'previs_director_view_shot', 'previs_director_jobs_dashboard'];
 
@@ -276,7 +276,10 @@ test('generate_video takes its camera from the blockout by preference, reports c
     assert.equal(r.submitted, true); assert.equal(r.cameraSource, 'blockout'); assert.equal(r.camera, 'Camera: from blockout');
     const bind = fake.calls.find(c => c.path === '/api/generation/bind').body;
     const saved = fake.calls.find(c => c.path === '/api/generation/preset').body.definition;
-    assert.equal(saved.provenance.presetId, 'kling-o1-edit-v1', 'cheapest cloud model that follows the blockout');
+    // The fixture's eagle travels about 120 m: a direction-critical shot starts on the route that kept direction (shared/blockout-fidelity.mjs).
+    assert.equal(saved.provenance.presetId, 'seedance-25-edit-v1', 'direction-critical shot: the edit route that kept the blockout’s direction');
+    assert.match(r.modelChosen, /motion\/direction-critical \(Bald eagle travels/);
+    assert.equal(r.directionAdvice, undefined, 'no warning when the chosen route keeps direction');
     assert.equal(saved.provenance.referenceImages, 1, 'saved with the reference slots it binds');
     assert.equal(bind.definitionId, 'saved-1', 'binds the saved definition, never the bare preset id');
     assert.deepEqual(bind.assetBindings, { sourceVideo: { assetId: p.shots[0].render.assetId }, referenceImage1: { renderId: 'r-start' } });
@@ -288,6 +291,29 @@ test('generate_video takes its camera from the blockout by preference, reports c
     assert.equal(fake.calls.filter(c => c.path === '/api/generation/bind').length, binds, 'nothing bound for a refused model');
     const inputs = await call('previs_director_shot_inputs', { projectId: p.id, shot: '1', model: 'seedance-25-edit-v1' });
     assert.equal(inputs.cameraSource, 'blockout'); assert.equal(inputs.blockout.current, true);
+  });
+});
+
+test('generate_video: a shot that is not direction-critical keeps the cheapest blockout model; a critical one on Kling gets advice', async () => {
+  const p = await fixture(), eagle = p.scene.entities.find(e => e.name === 'Bald eagle');
+  const still = structuredClone(p); const e = still.scene.entities.find(x => x.id === eagle.id); delete e.path; e.rotation = 0; // perched
+  const fake = fakePrevis(still);
+  await withAgent(fake, async ({ call }) => {
+    // Shot 3 sees the perched eagle side-on and nothing moves: not direction-critical.
+    const r = await call('previs_director_generate_video', { projectId: still.id, shot: '3', cameraSource: 'blockout', maxCostUsd: 3 });
+    assert.equal(fake.calls.find(c => c.path === '/api/generation/preset').body.definition.provenance.presetId, 'kling-o1-edit-v1', 'cheapest cloud model that follows the blockout');
+    assert.equal(r.modelChosen, undefined);
+  });
+  const fake2 = fakePrevis(p);
+  await withAgent(fake2, async ({ call }) => {
+    const r = await call('previs_director_generate_video', { projectId: p.id, shot: '1', model: 'kling-o1-edit-v1', maxCostUsd: 3 });
+    assert.equal(r.submitted, true, 'advice never blocks');
+    assert.match(r.directionAdvice, /Recommended: Seedance 2\.5 · edit the complete video/);
+    const inputs = await call('previs_director_shot_inputs', { projectId: p.id, shot: '1', model: 'kling-o1-edit-v1' });
+    assert.deepEqual([inputs.directionAdvice.critical, inputs.directionAdvice.ok, inputs.directionAdvice.recommend.model], [true, false, 'seedance-25-edit-v1']);
+    const models = await call('previs_director_models', { projectId: p.id });
+    assert.equal(models.videoModels.find(m => m.id === 'seedance-25-edit-v1').blockoutFidelity.direction, 'follows');
+    assert.equal(models.videoModels.find(m => m.id === 'ltx-25-i2v-fast-v1').blockoutFidelity.route, 'start');
   });
 });
 

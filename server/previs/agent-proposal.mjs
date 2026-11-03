@@ -42,6 +42,7 @@ function inverse(p, op) {
       if (patch.style !== undefined) before.style = s.style ? structuredClone(s.style) : null;
       if (patch.cast !== undefined) before.cast = structuredClone(s.cast || { include: [], exclude: [] });
       if (patch.camera !== undefined) before.camera = structuredClone(s.camera);
+      if (patch.motionCritical !== undefined) before.motionCritical = s.motionCritical === true;
       return { op: 'update_shot', id: s.id, patch: before };
     }
     case 'remove_shot': { const s = findShot(p, op.id) || fail(`Unknown shot ${op.id}`); return { op: 'add_shot', index: p.shots.indexOf(s), shot: structuredClone(s) }; }
@@ -87,6 +88,7 @@ function describe(p, op) {
       if (patch.prompts) parts.push(`set the ${Object.keys(patch.prompts).join(' and ')} prompt`);
       if (patch.style !== undefined) parts.push('camera style tags');
       if (patch.cast !== undefined) parts.push('cast');
+      if (patch.motionCritical !== undefined) parts.push(patch.motionCritical === true ? 'mark motion/direction-critical' : 'clear motion/direction-critical');
       return { kind: patch.prompts ? 'prompt' : 'camera', text: `${shotLabel(op.id)}: ${parts.join(', ') || 'update'}` };
     }
     case 'remove_shot': return { kind: 'remove', text: `Remove ${shotLabel(op.id)}` };

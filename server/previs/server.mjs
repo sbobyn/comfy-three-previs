@@ -22,6 +22,7 @@ import { zipEntryNames } from './zip.mjs';
 import { LIMITS } from './library.mjs';
 import { openAgentRunner } from './agent-runner.mjs'; // [agent]
 import { openRefgen, refgenRoutes } from './refgen.mjs';
+import { openTakeGrader } from './take-grade.mjs';
 import { setupChecks } from './setup-check.mjs';
 import { openHeadless } from './headless.mjs'; // [headless]
 import { renderRoutes } from './render-routes.mjs'; // [headless]
@@ -57,6 +58,7 @@ const director = await openDirector(data, { startersDir: process.env.PREVIS_STAR
 const blenderImport = openBlenderImport({ data, director, previs: project });
 refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen'), budget, log: console.log });
 jobSources.generation = generation.trackerSource({ director }); jobSources.refgen = refgen.trackerSource();
+const takeGrader = openTakeGrader(data, director, { budget }); // paid take direction check (PREVIS_MATCH_GRADER=gemini)
 tracker = createJobTracker({ sources: [jobSources.generation, jobSources.refgen], limits: () => slotsFor(data).snapshot(), log: line => console.log(`[jobs] ${line}`) });
 generation.useTracker(tracker); refgen.useTracker(tracker); tracker.start();
 progress.restore(); progress.start(tracker); // [live-progress] observe accepted receipts; reconcile from C1
@@ -150,6 +152,17 @@ const server = createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/api/director/asset-frame') { try { return send(await frameRoute(url)); } catch (e) { if (e.apiCode) return send({ error: e.message, code: e.apiCode }, e.status); throw e; } } // [frames]
     if (req.method === 'GET' && url.pathname === '/api/director/batch/stream') { const id = url.searchParams.get('id') || ''; if (!/^[a-f0-9-]{36}$/.test(id)) fail('Unknown batch', 404); return batches.stream(req, res, id); } // [batch]
     if (/^\/api\/director\/batch(es|\/|$)/.test(url.pathname)) { if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415); return send(await batchRoute(req.method, url, req.method === 'POST' ? await body(req) : {})); } // [batch]
+    // Take direction check: GET plans it (free, nothing sent), POST runs the paid grader once and saves the result on the take.
+    if (url.pathname === '/api/director/grade-take') {
+      if (req.method === 'GET') {
+        const { times, plan, blockout } = await takeGrader.prepare(url.searchParams.get('projectId'), url.searchParams.get('assetId'));
+        return send({ times, plan, blockoutAssetId: blockout.id, priceUsd: takeGrader.priceUsd, graderOn: takeGrader.graderOn() });
+      }
+      if (req.method !== 'POST') fail('Method not allowed', 405);
+      if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
+      const input = await body(req);
+      return send(await takeGrader.grade({ projectId: input.projectId, assetId: input.assetId, maxCostUsd: input.maxCostUsd }));
+    }
     if (url.pathname.startsWith('/api/director/')) {
       if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       if (!['GET', 'POST'].includes(req.method)) fail('Method not allowed', 405);

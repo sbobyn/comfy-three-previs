@@ -11,6 +11,7 @@ import { stillReferences, STRONG_GUIDE_MODEL, STILL_MAX_REFS } from '../../share
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { resolveFrame } from '../../shared/keyframes.mjs';
 import { autoPromptCap, imageEstimate, imageParamSpecs, resolveImageParams, resolveVideoParams, settingsApply, videoCapabilities, videoEstimate, videoParamSpecs } from '../../shared/model-params.mjs';
+import { fidelityAdvice } from '../../shared/blockout-fidelity.mjs';
 
 const kindOf = k => (k === 'image' ? 'image' : 'video');
 const shortTitle = d => String(d?.title || d?.id || '').split(' · ')[0];
@@ -99,7 +100,8 @@ export function promptTools({ get, post, project, shotOf, videoDefs }) {
           const d = await videoDefFor(p, s, a.reset ? undefined : s.settings?.video?.model), applies = settingsApply(s.settings?.video?.model, d);
           const r = resolveVideoParams(d, s), seconds = r.seconds ?? s.render?.duration ?? s.duration;
           const params = videoParamSpecs(d, s).map(x => ({ ...x, current: x.key in r.applied ? r.applied[x.key] : x.key === 'duration' ? seconds : x.value, saved: x.key in r.applied }));
-          return { shot: { id: s.id, title: s.title }, kind, model: d.id, savedOnShot: applies, capabilities: videoCapabilities(d), params, ...(r.ignored.length ? { ignored: r.ignored, note: 'These saved values are not valid for this model and are not sent.' } : {}), seconds, estimateUsd: videoEstimate(d, seconds) };
+          const advice = fidelityAdvice(p, s, d, videoDefs(await get('/api/generation')));
+          return { shot: { id: s.id, title: s.title }, kind, model: d.id, savedOnShot: applies, capabilities: videoCapabilities(d), ...(advice.critical ? { directionAdvice: { ok: advice.ok, reasons: advice.reasons, ...(advice.recommend ? { recommend: advice.recommend.id } : {}), message: advice.message } } : {}), params, ...(r.ignored.length ? { ignored: r.ignored, note: 'These saved values are not valid for this model and are not sent.' } : {}), seconds, estimateUsd: videoEstimate(d, seconds) };
         }
         const preset = await imagePresetFor(p, s), r = resolveImageParams(preset.id, s), refs = Math.min(preset.maxRefs ?? 0, stillReferences(p, s, 0, preset.maxRefs ?? 0).looks.length) + 1;
         const params = imageParamSpecs(preset).map(x => ({ ...x, current: x.key === 'seed' ? r.seed ?? 'random' : x.key === 'count' ? r.count : x.value }));

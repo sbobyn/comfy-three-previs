@@ -4,7 +4,10 @@ export type Grade =
   | { status: 'graded'; score: number; overall: number; camera: number | null; headings: number | null; why: string; method: string }
   | { status: 'match' | 'differs'; frames: number; seconds: number | null; take: { frames: number; fps: number | null; duration: number | null }; blockout: { frames: number; fps: number | null; duration: number | null }; note: string }
   | { status: 'not-graded' | 'not-assessed' | 'not-applicable' | 'unknown'; note: string };
-export type TakeGrades = { layout: Grade; identity: Grade; timing: Grade };
+export type DirectionGrade =
+  | { status: 'checked'; verdict: 'pass' | 'warn' | 'fail'; why: string; subject: string | null; measured: boolean; frames: { t: number; blockout: { facing: string | null; travel: string | null; from: string }; take: { facing: string; travel: string }; facing: string; travel: string }[]; grader: string; method: string; gradedAt: string | null; blockoutAssetId: string | null; cost: TakeCost }
+  | { status: 'not-checked'; note: string };
+export type TakeGrades = { layout: Grade; identity: Grade; timing: Grade; direction?: DirectionGrade };
 export type TakeInput = { role: string; label: string };
 type TakeBase = { id: string; shotId: string; number: number; label: string; model: string; modelId: string | null; backend: string | null; settings: Record<string, string | number | boolean | null>; seed: number | null; cost: TakeCost; inputs: TakeInput[]; prompt: string; promptLength: number; stale: boolean; grades: TakeGrades; createdAt: string; elapsedSeconds: number | null; winner: boolean };
 export type VideoTake = TakeBase & { kind: 'video'; cameraSource: string | null; source: { assetId: string; version: number } | null; media: { width: number | null; height: number | null; fps: number | null; frames: number | null; duration: number | null }; inCut: boolean };

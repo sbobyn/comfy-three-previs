@@ -63,6 +63,9 @@ dialog.takes .dialog-head { flex-wrap: wrap; }
 .tk-grades li.tone-ok b { color: var(--ok); }
 .tk-grades li.tone-warn b { color: var(--warn); }
 .tk-grades li.tone-none b { color: var(--ink-3); font-weight: 500; }
+.tk-grades li.tone-bad b { color: var(--bad); }
+.tk-grades li.tk-dir { grid-column: 1 / -1; }
+.tk-dircheck { align-self: flex-start; margin-top: 3px; }
 .tk-gname { color: var(--ink-3); font-size: var(--fs-2xs); }
 .tk-prompt summary { cursor: pointer; color: var(--ink-2); }
 .tk-prompt.diff summary { color: var(--info); font-weight: 600; }

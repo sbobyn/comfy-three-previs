@@ -1,4 +1,5 @@
 import type { Shot } from './director.mjs';
+import type { Fidelity } from './blockout-fidelity.mjs';
 export type ParamSpec = { key: string; label: string; type: 'integer' | 'enum' | 'boolean' | 'number' | 'string'; value: unknown; editable: boolean; options?: number[]; min?: number; max?: number; unit?: string; costs: boolean; note: string };
 type Def = { id: string; title?: string; task: string; graph?: any; inputs?: any; parameters?: Record<string, { nodeId: string; input: string }>; constraints?: any; pricing?: any; provenance?: { presetId?: string } };
 export const SEED_MAX: number;
@@ -6,7 +7,7 @@ export function videoParamSpecs(def: Def, shot?: Shot | null): ParamSpec[];
 export function settingsApply(saved: string | undefined | null, def: Def | null | undefined): boolean;
 export function resolveVideoParams(def: Def, shot: Shot, saved?: { model?: string; params?: Record<string, unknown> } | null): { parameters: Record<string, unknown>; seconds: number | null; applied: Record<string, unknown>; ignored: string[] };
 export function savedClipSeconds(shot: Shot, modelId: string, durations: number[] | undefined): number | null;
-export type VideoCapabilities = { id: string; title: string; task: string; cameraSource: 'blockout' | 'keyframes' | 'still'; inputs: { blockoutClip: boolean; startStill: boolean; endStill: boolean; referenceImages: number; prompt: boolean }; promptMaxLength: number | null; autoPromptCap: { chars: number; heuristic: true; fromPreset: boolean }; clipLengths: number[] | null; sourceDuration: { min: number; max: number } | null; ratePerSecond: number | null; priceSource: string | null; priceCheckedAt: string | null; local: boolean };
+export type VideoCapabilities = { id: string; title: string; task: string; cameraSource: 'blockout' | 'keyframes' | 'still'; inputs: { blockoutClip: boolean; startStill: boolean; endStill: boolean; referenceImages: number; prompt: boolean }; promptMaxLength: number | null; autoPromptCap: { chars: number; heuristic: true; fromPreset: boolean }; clipLengths: number[] | null; sourceDuration: { min: number; max: number } | null; ratePerSecond: number | null; priceSource: string | null; priceCheckedAt: string | null; local: boolean; blockoutFidelity: Fidelity };
 export function autoPromptCap(def: Def | null | undefined): number;
 export function videoCapabilities(def: Def): VideoCapabilities;
 export function videoEstimate(def: Def, seconds: number): number | null;

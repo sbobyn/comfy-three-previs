@@ -185,6 +185,8 @@ export function applyOps(p, ops) {
         // Section overrides and locks (shared/prompt-sections.mjs): { video|image: { key: {mode,text}|null } | null } merges per section.
         if (patch.promptSections !== undefined) { const v = patch.promptSections === null ? {} : mergePromptSections(s.promptSections, patch.promptSections); if (Object.keys(v).length) s.promptSections = v; else delete s.promptSections; }
         // Model and settings per kind (shared/model-params.mjs): { video|image: { model, params } | null } replaces that kind.
+        // Motion/direction-critical (shared/blockout-fidelity.mjs): video advice recommends a route that edits the blockout clip.
+        if (patch.motionCritical !== undefined) { if (patch.motionCritical === true) s.motionCritical = true; else delete s.motionCritical; }
         if (patch.settings !== undefined) { const v = normalizeShotSettings(patch.settings === null ? {} : { ...(s.settings || {}), ...Object.fromEntries(Object.entries(patch.settings).filter(([, x]) => x !== null)) }); for (const [k, x] of Object.entries(patch.settings || {})) if (x === null) delete v[k]; if (Object.keys(v).length) s.settings = v; else delete s.settings; }
         if (patch.cast !== undefined) {
           const known = id => resolveEntity(p, id)?.id || fail(`Unknown object ${id}`);
@@ -404,6 +406,15 @@ export async function openDirector(root, options = {}) {
       const m = p.messages.find(x => x.id === messageId && x.role === 'user');
       if (!m) fail('Unknown message'); if (m.status === 'handled') fail('Message already handled', 409);
       runBuiltin(p, m); return { project: await save(p) };
+    }),
+    /** Save a grader's check on a generated video take (asset.checks[kind]); not an undoable edit. */
+    recordTakeCheck: (id, assetId, kind, check) => serial(async () => {
+      if (kind !== 'direction') fail('Unknown take check');
+      const p = structuredClone(await load(id)), a = (p.assets || []).find(x => x.id === assetId && x.kind === 'workflow-result');
+      if (!a) fail('Unknown take', 404);
+      a.checks = { ...(a.checks || {}), [kind]: structuredClone(check) };
+      await save(p);
+      return structuredClone(a.checks[kind]);
     }),
     reference: (id, input) => serial(async () => {
       const p = structuredClone(await load(id));
