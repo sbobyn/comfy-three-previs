@@ -83,7 +83,7 @@ export function createSequence(ctx: SequenceCtx) {
   };
   const camGlyph = (a: Asset | null | undefined) => {
     const cam = a && a.kind === 'workflow-result' ? cameraOf(a) : a ? 'blockout' as const : null;
-    return cam ? h('span', { class: `sq-camglyph c-${cam}`, title: a!.kind === 'workflow-result' ? CAMERA_SOURCE_LABELS[cam] : 'The blockout itself', 'aria-label': CAMERA_SOURCE_LABELS[cam] }, CAMERA_SOURCE_GLYPHS[cam]) : null;
+    return cam ? h('span', { class: `sq-camglyph c-${cam}`, role: 'img', title: a!.kind === 'workflow-result' ? CAMERA_SOURCE_LABELS[cam] : 'The blockout itself', 'aria-label': CAMERA_SOURCE_LABELS[cam] }, CAMERA_SOURCE_GLYPHS[cam]) : null;
   };
   // Only what a blockout's frames show counts (shared/regen.mjs); a clip that recorded neither manifest nor signature is kept.
   const fresh = (s: Shot) => !!s.render && clipCurrent(P(), s, s.render) !== false;
@@ -297,7 +297,11 @@ export function createSequence(ctx: SequenceCtx) {
     const win = winner(s), playing = c?.assetId || win?.id || '';
     const version = h('select', { class: 'field', 'aria-label': `Version of shot ${i + 1} in the cut`, title: 'The take the cut plays. Choosing a generated take makes it the shot’s winner (★); Newest follows the latest one.', disabled: !inCut },
       h('option', { value: '', selected: !playing }, 'Newest'),
-      ...res.map((x, k) => { const cam = cameraOf(x); return h('option', { value: x.id, selected: playing === x.id, title: cam ? CAMERA_SOURCE_LABELS[cam] : '' }, `${win?.id === x.id ? '★ ' : ''}${cam ? CAMERA_SOURCE_GLYPHS[cam] + ' ' : ''}Take ${res.length - k} · ${(x.source.workflow || '').split(' ·')[0]}`); }),
+      ...res.map((x, k) => {
+        // No camera glyph in the text (the badge beside the picker shows it, labelled); the full description is the label and tooltip.
+        const cam = cameraOf(x), model = (x.source.workflow || '').split(' ·')[0], said = [`Take ${res.length - k}`, model, win?.id === x.id ? 'winner' : '', cam ? CAMERA_SOURCE_LABELS[cam] : ''].filter(Boolean).join(' · ');
+        return h('option', { value: x.id, selected: playing === x.id, title: said, 'aria-label': said }, `${win?.id === x.id ? '★ ' : ''}Take ${res.length - k} · ${model}`);
+      }),
       ...renders(s).map(x => h('option', { value: x.id, selected: c?.assetId === x.id }, `Blockout v${x.version ?? 1}`)));
     version.onchange = () => {
       const v = version.value;
