@@ -58,8 +58,8 @@ test('presets compose into the prompt sections, under your own text, and keep th
   // A subject swap replaces what the object is.
   s.look = { subjects: { [walker.id]: 'a tall knight in silver armour' } };
   assert.match(shotPrompt(p, s, 'video', { cameraSource: 'blockout' }), /A tall knight in silver armour\./);
-  // Your own section text wins over a preset (b · Night overrides world and style).
-  const b = p.shots.find(x => x.title === 'b · Night'); b.look = { time: 'dawn' };
+  // Your own section text wins over a preset (Night overrides world and style).
+  const b = p.shots.find(x => x.title === 'Night'); b.look = { time: 'dawn' };
   assert.match(shotPrompt(p, b, 'video', { cameraSource: 'blockout' }), /Set: the same street at night/);
 });
 
@@ -128,7 +128,7 @@ test('add_variants copies the base’s camera, blocking and text; a variant stil
   const vs = r.ids.map(i => p.shots.find(s => s.id === i));
   assert.deepEqual(p.shots.slice(1, 5).map(s => s.id), r.ids, 'variants follow their base');
   for (const v of vs) { assert.equal(v.variantOf, base.id); assert.equal(shotSignature(p, v), shotSignature(p, base), `${v.title}: same blocking`); assert.equal(lookDiff(effectiveLook(p, base), effectiveLook(p, v)).length, 1); }
-  assert.deepEqual(vs.map(v => v.title), ['a · Summer day (base) · Night (vs base)', 'a · Summer day (base) · Cyberpunk (vs base)', 'a · Summer day (base) · Anime (vs base)', 'a · Summer day (base) · Claymation (vs base)']);
+  assert.deepEqual(vs.map(v => v.title), ['Summer day · base · Night (vs base)', 'Summer day · base · Cyberpunk (vs base)', 'Summer day · base · Anime (vs base)', 'Summer day · base · Claymation (vs base)']);
   assert.deepEqual(applyOps(p, [{ op: 'add_variants', shotId: base.id, axes: { time: ['night'] } }])[0], { op: 'add_variants', ids: [], existing: [r.ids[0]], base: base.id }, 'an identical variant is reused');
   // The night variant: image 1 is the base still; the prompt changes only the time of day and keeps people, clothes and car.
   const night = variantStillRequest(p, vs[0], { at: 'start', t: 0, cap: 9 });
@@ -138,7 +138,7 @@ test('add_variants copies the base’s camera, blocking and text; a variant stil
   assert.ok(night.prompt.includes('No logos, badges, car emblems or readable text; no captions'));
   // Wardrobe: the clothes may change, nothing else about the person.
   assert.match(variantStillRequest(p, vs[1], { cap: 9 }).prompt, /Walker's clothes: dress them in cyberpunk clothes.*every person's face, hair, build and pose;/s);
-  // Anime: Nano Banana 2.1 with no style reference. Claymation: a clay still as a style reference (Look Lab's j · Claymation).
+  // Anime: Nano Banana 2.1 with no style reference. Claymation: a clay still as a style reference (Look Lab's Claymation).
   const anime = variantStillRequest(p, vs[2], { cap: 9 }), clay = variantStillRequest(p, vs[3], { cap: 9 });
   assert.equal(anime.model, 'nano-banana-2-1'); assert.equal(anime.styleRef, null); assert.deepEqual(anime.referenceIds, []);
   // The newest clay still in the project (Look Lab v2's stronger claymation).

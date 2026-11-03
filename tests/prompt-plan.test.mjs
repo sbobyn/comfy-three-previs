@@ -220,7 +220,7 @@ test('auto-prompt cap: per-preset data, 600 for every built-in model today, so n
 
 test('overridden sections are budgeted at their own length: the composed prompt keeps to the cap with a reference legend', () => {
   // Look Lab's Fall variant overrides its world, look and walker; with a start still the legend takes room too.
-  const p = project('look-lab'), s = p.shots.find(x => x.title === 'd · Fall'), plain = p.shots[0];
+  const p = project('look-lab'), s = p.shots.find(x => x.title === 'Fall'), plain = p.shots[0];
   const refs = [{ ref: { id: 'start-still' }, entityId: null, role: 'frame', label: 'start still' }];
   const plan = videoPromptPlan(p, s, { cameraSource: 'blockout', refs, cap: VIDEO_PROMPT_CAP, maxLength: 2500 });
   assert.ok(plan.length <= VIDEO_PROMPT_CAP, `${plan.length}`);

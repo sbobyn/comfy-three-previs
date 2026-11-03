@@ -1078,7 +1078,7 @@
   "shots": [
     {
       "id": "1fe43328-d6ec-4b05-b9be-74ab97ae88a1",
-      "title": "a · Summer day (base)",
+      "title": "Summer day · base",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -1371,7 +1371,7 @@
     },
     {
       "id": "baa04c31-b6e7-4e8b-a195-40b716fc7560",
-      "title": "b · Night",
+      "title": "Night",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -1694,7 +1694,7 @@
     },
     {
       "id": "a8cc6ee7-4e60-4779-9f34-4fb8d862c317",
-      "title": "c · Spring",
+      "title": "Spring",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -2029,7 +2029,7 @@
     },
     {
       "id": "96291fbb-61b3-42d0-9d6a-c9b47268d214",
-      "title": "d · Fall",
+      "title": "Fall",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -2364,7 +2364,7 @@
     },
     {
       "id": "84a6b620-0f8e-4537-9109-b296fab7bb22",
-      "title": "e · Winter",
+      "title": "Winter",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -2699,7 +2699,7 @@
     },
     {
       "id": "5ed3cd75-48df-4dcc-82f0-5e7af0018097",
-      "title": "f · Clothing A · raincoat",
+      "title": "Clothing · raincoat",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -3010,7 +3010,7 @@
     },
     {
       "id": "59fcc7ee-d8ee-4932-af7f-e4df26301435",
-      "title": "g · Clothing B · formal suit",
+      "title": "Clothing · formal suit",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -3321,7 +3321,7 @@
     },
     {
       "id": "3b1c7b94-6421-448c-92ea-682b0ba8610c",
-      "title": "h · Different person",
+      "title": "Different person",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -3632,7 +3632,7 @@
     },
     {
       "id": "34fe9d0f-2ce2-4b60-90df-71b8794055c5",
-      "title": "i · Anime",
+      "title": "Anime",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -3955,7 +3955,7 @@
     },
     {
       "id": "36fe014a-6b86-4a73-80b7-038b5649f160",
-      "title": "j · Claymation",
+      "title": "Claymation",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -4278,7 +4278,7 @@
     },
     {
       "id": "c267af85-5d44-427a-a9b9-f8ccc93b5625",
-      "title": "k · Stylised 3D animated feature",
+      "title": "Stylised 3D animated feature",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -4601,7 +4601,7 @@
     },
     {
       "id": "a271ed33-7629-4a6b-a8f9-8e0fdb22ab82",
-      "title": "l · Watercolour",
+      "title": "Watercolour",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -4924,7 +4924,7 @@
     },
     {
       "id": "a70ed067-1140-413c-a277-99d66b060c72",
-      "title": "m · Dawn",
+      "title": "Dawn",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -5247,7 +5247,7 @@
     },
     {
       "id": "baac0e30-0cc8-4fb0-a691-18a6c6afb029",
-      "title": "n · Golden hour",
+      "title": "Golden hour",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -5570,7 +5570,7 @@
     },
     {
       "id": "b1e6141c-ccd0-4309-9100-289d3d3fa432",
-      "title": "o · Blue hour",
+      "title": "Blue hour",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -5893,7 +5893,7 @@
     },
     {
       "id": "ba05c54c-19c9-47d3-b349-b915333c0863",
-      "title": "p · Harsh noon",
+      "title": "Harsh noon",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -6216,7 +6216,7 @@
     },
     {
       "id": "80043d9b-822e-4df2-80b0-739a9c546c3f",
-      "title": "q · Fog",
+      "title": "Fog",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -6539,7 +6539,7 @@
     },
     {
       "id": "b0af8922-ef58-4577-914f-90d0f7b72405",
-      "title": "r · Heavy rain",
+      "title": "Heavy rain",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -6874,7 +6874,7 @@
     },
     {
       "id": "255dc3ff-5ca9-465d-8e45-1cac1080c5c6",
-      "title": "s · Snowstorm",
+      "title": "Snowstorm",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -7209,7 +7209,7 @@
     },
     {
       "id": "e5479109-423b-44d0-a5b9-384eaccf0be5",
-      "title": "t · Overcast",
+      "title": "Overcast",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -7532,7 +7532,7 @@
     },
     {
       "id": "3ca314a9-07f1-4a40-a8de-3e6ae20e010c",
-      "title": "u · Cherry blossom",
+      "title": "Cherry blossom",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -7867,7 +7867,7 @@
     },
     {
       "id": "98268cc3-0a8e-4dc2-9e96-d55ddf63c27c",
-      "title": "v · Peak autumn",
+      "title": "Peak autumn",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -8202,7 +8202,7 @@
     },
     {
       "id": "34389543-6a8f-4462-bca1-c7f9cc16e82e",
-      "title": "w · Elderly woman",
+      "title": "Elderly woman",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -8525,7 +8525,7 @@
     },
     {
       "id": "54c91281-ce9a-4bc8-8f74-851fa4f17deb",
-      "title": "x · Teen",
+      "title": "Teen",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -8848,7 +8848,7 @@
     },
     {
       "id": "8d8ad939-bdd0-4a13-b4d8-324ca1f38964",
-      "title": "y · Cyclist",
+      "title": "Cyclist",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -9171,7 +9171,7 @@
     },
     {
       "id": "43400922-7dfc-4cd6-8484-f82e1dd4382e",
-      "title": "z · Dog walker",
+      "title": "Dog walker",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -9494,7 +9494,7 @@
     },
     {
       "id": "72218a6e-d0e9-4207-9b8b-b6406e129302",
-      "title": "aa · Couple",
+      "title": "Couple",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -9817,7 +9817,7 @@
     },
     {
       "id": "e6a668f3-0c57-4fe6-be56-721e48bc145b",
-      "title": "ab · Different ethnicity and build",
+      "title": "Different ethnicity and build",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -10140,7 +10140,7 @@
     },
     {
       "id": "2464d246-8a46-4887-a5e0-0e6061cf594c",
-      "title": "ac · Wardrobe · 1950s",
+      "title": "Wardrobe · 1950s",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -10463,7 +10463,7 @@
     },
     {
       "id": "cdaf87bb-0f5a-48d2-9cd0-42992d78bf6d",
-      "title": "ad · Wardrobe · cyberpunk",
+      "title": "Wardrobe · cyberpunk",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -10786,7 +10786,7 @@
     },
     {
       "id": "347d1195-83b0-4509-9ce0-ecf68b676b7d",
-      "title": "ae · Wardrobe · workwear",
+      "title": "Wardrobe · workwear",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -11109,7 +11109,7 @@
     },
     {
       "id": "62e2eb63-5cb8-4c1d-8bb7-14afcb279e92",
-      "title": "af · Wardrobe · formal evening",
+      "title": "Wardrobe · formal evening",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -11432,7 +11432,7 @@
     },
     {
       "id": "ef91b48a-05ae-4670-b2b7-6efbe63db535",
-      "title": "ag · Anime (stronger)",
+      "title": "Anime (stronger)",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -11755,7 +11755,7 @@
     },
     {
       "id": "e81c6103-bca5-4308-8e12-b48a673a87c5",
-      "title": "ah · Claymation (stronger)",
+      "title": "Claymation (stronger)",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
