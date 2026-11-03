@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Snapshot the starter projects from a running Comfy Three Previs server into
+// Snapshot the starter projects from a running Comfy Previs server into
 // a static read-only demo (dist-demo/demo-data + dist-demo/demo-media).
 // GET requests only. Run after `VITE_DEMO=1 vite build ... --outDir dist-demo`
 // (or just `pnpm run demo:build`).

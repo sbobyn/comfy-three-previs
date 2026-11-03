@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 // Pure desktop helpers, transpiled and run without a browser (same harness as director-mobile.test.mjs).
@@ -42,7 +42,7 @@ test('the status strip names the step’s state, with a short form for narrow wi
   const s = shot([frame('a', 'key frame start')], { render: { previsShotId: 'x' } });
   const p = { scene: { entities: [{ shape: 'person' }, { shape: 'group' }] }, shots: [s], assets: [{ kind: 'workflow-result', shotId: 's1' }] };
   assert.deepEqual(plain(core.stepStatus('build', p, s, { stale: false, videos: 0, castNeed: 1, castTotal: 3 })), { parts: ['1 object', '1 of 3 cast need images'], short: '1 need images' });
-  assert.deepEqual(plain(core.stepStatus('shoot', p, s, { stale: true, videos: 1, castNeed: 0, castTotal: 0 })), { parts: ['Shot 01', 'The dive', 'blockout changed', '1 still', '1 video'], short: 'blockout changed' });
+  assert.deepEqual(plain(core.stepStatus('shoot', p, s, { stale: true, videos: 1, castNeed: 0, castTotal: 0 })), { parts: ['Shot 01', 'blockout changed', '1 still', '1 video'], short: 'blockout changed' });
   assert.deepEqual(plain(core.stepStatus('cut', p, s, { stale: false, videos: 1, castNeed: 0, castTotal: 0 }).short), '1/1 video');
   assert.deepEqual(plain(core.keyFrameSlots({ id: 'ltx-25-flf-v1', task: 'first-frame', inputs: { lastFrame: {} } })), ['start', 'end']);
   assert.deepEqual(plain(core.keyFrameSlots({ id: 'x', task: 'transform-video' }, { x: { keyFrames: true } })), ['start'], 'the preset’s keyFrames flag counts');
@@ -97,12 +97,14 @@ test('changes from Claude are described in plain words and undone exactly; the u
 });
 
 test('the first-run tour shows once, on a new project', () => {
-  const p = { revision: 2, createdAt: '2026-10-30T10:00:00Z', scene: { entities: [{}] } };
+  const p = { template: 'empty', revision: 2, createdAt: '2026-10-30T10:00:00Z', scene: { entities: [{}] } };
   const now = Date.parse('2026-10-30T12:00:00Z');
   assert.equal(core.shouldTour(p, null, now), true);
   assert.equal(core.shouldTour(p, '1', now), false, 'never again once dismissed');
   assert.equal(core.shouldTour({ ...p, revision: 40 }, null, now), false, 'an old, much-edited project is not new');
-  assert.equal(core.shouldTour({ ...p, revision: 40, createdAt: '2026-10-30T11:50:00Z' }, null, now), true, 'a starter opened minutes ago is');
+  assert.equal(core.shouldTour({ ...p, revision: 40, createdAt: '2026-10-30T11:50:00Z' }, null, now), true, 'a New scene opened minutes ago is');
+  assert.equal(core.shouldTour({ ...p, template: 'final-lap' }, null, now), false, 'starters are finished films: no coach marks over them');
+  assert.equal(core.shouldTour({ ...p, template: 'camera-moves', revision: 1 }, null, now), false, 'not even a blockout-only starter');
   assert.equal(core.shouldTour({ ...p, scene: { entities: [] } }, null, now), false, 'the empty stage has its own Start here card');
   assert.deepEqual(plain(core.TOUR.map(t => t.id)), ['block', 'cast', 'shoot', 'generate']);
 });
@@ -149,4 +151,19 @@ test('“Use this take” makes an earlier take the one in use, and undo restore
   const copy = plain(core.keyFrameCopy(s, s.references.find(r => r.id === 'm'), 'end'));
   assert.deepEqual(copy, { role: 'frame', note: 'key frame end', name: 'm · end (from 2s)' }, 'a mid-shot still copied as the end key frame keeps its own moment');
   assert.equal(core.stillTime(s, { note: 'key frame end' }), s.duration);
+});
+
+test('the landing hero reel: every pair ships its blockout, generated clip and both posters, and it advances only when free to', () => {
+  const ids = core.HERO_REEL.map(r => r.id);
+  assert.ok(ids.length >= 4, 'several shots');
+  assert.equal(new Set(ids).size, ids.length);
+  for (const r of core.HERO_REEL) {
+    const f = core.heroFiles(r.id);
+    for (const file of [f.before, f.after, ...f.posters]) assert.ok(existsSync(new URL(`../public/guide/${file}`, import.meta.url)), `${file} is in public/guide`);
+    assert.match(r.label, /^[^·]+ · .+$/, 'labelled “Starter · Shot”');
+  }
+  assert.equal(core.heroNext(0, 6, false, false), 1);
+  assert.equal(core.heroNext(5, 6, false, false), 0, 'wraps');
+  assert.equal(core.heroNext(2, 6, true, false), 2, 'held while hovered, dragged or focused');
+  assert.equal(core.heroNext(2, 6, false, true), 2, 'reduced motion never advances');
 });

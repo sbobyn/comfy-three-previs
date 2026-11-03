@@ -5,7 +5,7 @@ const BASE = import.meta.env.BASE_URL; // e.g. /comfy-three-previs/
 const DATA = BASE + 'demo-data/';
 const MEDIA = BASE + 'demo-media/';
 const REPO = 'https://github.com/sbobyn/comfy-three-previs';
-const READ_ONLY = 'This is a read-only demo — run Comfy Three Previs locally to edit and generate.';
+const READ_ONLY = 'This is a read-only demo — run Comfy Previs locally to edit and generate.';
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 const AGENT = { agent: { connected: false, waiting: false, lastSeen: null, name: null, runner: { available: false, model: '', busy: [], runs: {} } }, connect: null };
@@ -94,7 +94,7 @@ function banner(tries = 0) {
   // Phones: a short pill beside the view switch rather than over it.
   const narrow = innerWidth < 700;
   const link = document.createElement('a'); link.href = REPO; link.target = '_blank'; link.rel = 'noopener'; link.textContent = narrow ? 'Demo ↗' : 'Read-only demo · Run it locally ↗';
-  link.title = 'Read-only demo. Run Comfy Three Previs locally to edit and generate.';
+  link.title = 'Read-only demo. Run Comfy Previs locally to edit and generate.';
   link.style.cssText = 'color:#f2f2f5;text-decoration:none;font-weight:600';
   const close = document.createElement('button'); close.type = 'button'; close.textContent = '✕'; close.setAttribute('aria-label', 'Hide the demo notice');
   close.style.cssText = 'border:0;background:rgba(255,255,255,.14);color:#f2f2f5;border-radius:999px;width:22px;height:22px;cursor:pointer;font-size:11px';

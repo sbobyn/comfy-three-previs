@@ -49,7 +49,7 @@ async function handle(message) {
   if (message.method === 'tools/call') {
     const tool = tools.find(t => t.name === message.params?.name); if (!tool) throw Error('Unknown tool');
     try { return await call(tool, message.params.arguments || {}); }
-    catch { return { isError: true, content: [{ type: 'text', text: 'Previs server unavailable.' }] }; }
+    catch { return { isError: true, content: [{ type: 'text', text: 'Comfy Previs server unavailable.' }] }; }
   }
   throw Error('Unknown method');
 }

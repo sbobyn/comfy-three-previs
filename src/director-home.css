@@ -1,4 +1,4 @@
-/* Comfy Three Previs — home / launch page. Uses the Beret Labs tokens from director.css. */
+/* Comfy Previs — home / launch page. Uses the Beret Labs tokens from director.css. */
 
 .home-top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 16px; height: 56px; padding: 0 max(28px, calc((100% - 1180px) / 2)); background: color-mix(in srgb, var(--paper) 82%, transparent); backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid transparent; transition: border-color var(--t-base); }
 .home-top nav { margin-left: auto; display: flex; gap: 2px; align-items: center; }
@@ -76,6 +76,18 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
 .home-hero-cap { margin: 0; display: flex; gap: 6px; align-items: baseline; font-size: var(--fs-sm); color: var(--ink-3); }
 .home-hero-cap strong { color: var(--ink); font-weight: 600; }
 .home-hero-cap span { margin-left: auto; font: 500 var(--fs-2xs)/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-4); }
+/* The hero reel: pairs stacked in one 16:9 stage, cross-fading; dots and the shot's label under it. */
+.home-hero-stage { position: relative; aspect-ratio: 16 / 9; }
+.home-hero-stage > .ba { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity .45s var(--ease-in-out); }
+.home-hero-stage > .ba.is-entering, .home-hero-stage > .ba.is-leaving { opacity: 0; }
+.home-hero-stage > .ba.is-leaving { pointer-events: none; }
+.home-hero-cap .home-hero-dots { display: inline-flex; gap: 0; margin-left: auto; font: inherit; text-transform: none; }
+.home-hero-cap .home-hero-label { margin-left: 8px; min-width: 15ch; text-align: right; color: var(--ink-3); }
+.home-hero-dot { position: relative; width: 24px; height: 24px; padding: 0; border: 0; background: none; cursor: pointer; display: inline-grid; place-items: center; }
+.home-hero-dot i { display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-4); opacity: .45; transition: width .25s var(--ease-out), opacity .25s; }
+.home-hero-dot:hover i { opacity: .8; }
+.home-hero-dot.on i { width: 16px; border-radius: 3px; opacity: 1; background: var(--accent); }
+.home-hero-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 4px; }
 /* Starter cards: the seam shows only while scrubbing. */
 .home-seam-slot .ba.is-reveal { cursor: col-resize; }
 .home-seam-slot .ba.is-reveal .ba-seam { transition: opacity var(--t-fast, .15s) ease; }
@@ -167,6 +179,7 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
 .home-reel { animation-delay: 100ms; }
 .home-steps { animation-delay: 160ms; }
 .home-section { animation-delay: 220ms; }
+.home-hero-copy.is-shown > * { animation: none; }
 
 @keyframes home-rise { from { opacity: 0; transform: translateY(10px); } }
 @keyframes home-pop { from { opacity: 0; transform: translateY(-4px) scale(.98); } }
@@ -189,6 +202,6 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .home-hero-copy > *, .home-reel, .home-steps, .home-section, .home-menu, .home-status-pop { animation: none; }
-  .home-reel img, .home-frame img, .home-starter .home-frame, .home-project .home-frame, .home-step-art { transition: none; }
+  .home-hero-stage > .ba, .home-hero-dot i, .home-reel img, .home-frame img, .home-starter .home-frame, .home-project .home-frame, .home-step-art { transition: none; }
   .home-reel-tag i, .home-frame.is-loading::after { animation: none; }
 }

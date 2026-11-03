@@ -17,6 +17,7 @@ export function autoPromptText(project: DirectorProject, shot: Shot, kind?: 'vid
 export type SectionPolicy = 'inherit' | 'override' | 'lock';
 export type SectionRow = Segment & { autoText: string; fullText: string; policy: SectionPolicy; active: boolean; status: 'included' | 'shortened' | 'omitted' | 'removed' | 'orphan'; basedOn?: string; at?: string };
 export function sectionedSegments(project: DirectorProject, shot: Shot, kind?: 'video' | 'image', opts?: PromptOptions): SectionRow[];
+export function sectionsMedium(rows: { key: string; text: string; status?: string }[]): string;
 export function composedPromptText(project: DirectorProject, shot: Shot, kind?: 'video' | 'image', opts?: PromptOptions): string;
 export function shotPrompt(project: DirectorProject, shot: Shot, kind?: 'video' | 'image', opts?: PromptOptions): string;
 export function highlightRanges(text: string, segments: Segment[]): { start: number; end: number; seg: Segment }[];

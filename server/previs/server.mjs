@@ -18,6 +18,8 @@ import { videoRoutes } from './video-routes.mjs';
 import { generationRoutes } from './generation-routes.mjs';
 import { openDirector, directorRoutes } from './director.mjs';
 import { openBlenderImport } from './blender-import.mjs';
+import { openAssetImport, IMPORT_LIMITS } from './asset-import.mjs';
+import { convertToGlb } from './asset-convert.mjs';
 import { zipEntryNames } from './zip.mjs';
 import { LIMITS } from './library.mjs';
 import { openAgentRunner } from './agent-runner.mjs'; // [agent]
@@ -56,6 +58,7 @@ const generation = await generationRoutes(data,project,{ telemetry: progress.tel
 let refgen, agentRunner; // [agent]
 const director = await openDirector(data, { startersDir: process.env.PREVIS_STARTERS_DIR || undefined, engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
 const blenderImport = openBlenderImport({ data, director, previs: project });
+const assetImport = openAssetImport({ director, convert: convertToGlb });
 refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen'), budget, log: console.log });
 jobSources.generation = generation.trackerSource({ director }); jobSources.refgen = refgen.trackerSource();
 const takeGrader = openTakeGrader(data, director, { budget }); // paid take direction check (PREVIS_MATCH_GRADER=gemini)
@@ -93,7 +96,7 @@ const port = Number(process.env.PORT || 5190);
 agentRunner = await openAgentRunner({ root, dataDir: data, port, director }); // [agent] built-in Claude Code runner
 const headless = openHeadless({ port }), renderRoute = renderRoutes({ director, headless }); // [headless] C2 render routes
 const frameRoute = frameRoutes({ director, headless }); // [frames] A6 video/still frames and contact sheets for agents
-const batches = await openBatches(data, { ...(process.env.PREVIS_BATCH_FAKE === '1' ? fakeBackend({ log: console.log }) : { drivers: loopbackDrivers(`http://127.0.0.1:${port}`), jobs: loopbackJobs(`http://127.0.0.1:${port}`) }), loadProject: id => director.get(id), costs: () => ({ marginPct: budget.marginPct(), graderOn: refgen.graderOn() }), log: console.log }), batchRoute = batchRoutes(batches); // [batch]
+const batches = await openBatches(data, { ...(process.env.PREVIS_BATCH_FAKE === '1' ? fakeBackend({ log: console.log }) : { drivers: loopbackDrivers(`http://127.0.0.1:${port}`), jobs: loopbackJobs(`http://127.0.0.1:${port}`) }), loadProject: id => director.get(id), addVariants: (id, op) => director.edit(id, [op]), costs: () => ({ marginPct: budget.marginPct(), graderOn: refgen.graderOn() }), log: console.log }), batchRoute = batchRoutes(batches); // [batch]
 function fail(message, status = 400) { const e = Error(message); e.status = status; throw e; }
 async function body(req) {
   let text = ''; for await (const chunk of req) { text += chunk; if (text.length > 16 * 1024 * 1024) fail('Request too large', 413); }
@@ -143,6 +146,18 @@ const server = createServer(async (req, res) => {
       for await (const chunk of req) { size += chunk.length; if (size > 1024 ** 3) fail('Blender export is larger than 1 GB', 413); parts.push(chunk); }
       const q = url.searchParams;
       return send(await blenderImport.fromZip(Buffer.concat(parts), { projectId: q.get('projectId'), shotId: q.get('shotId'), title: q.get('title') }));
+    }
+    // 3D model import (docs/import.md): raw bytes from a drop or file picker (one file, a zip, or a multi-file bundle),
+    // or JSON { path | url } from Claude (previs_import_asset). Read here, before the JSON body limit applies.
+    if (req.method === 'POST' && url.pathname === '/api/director/import-asset') {
+      const q = url.searchParams, type = req.headers['content-type'] || '';
+      if (type.startsWith('application/json')) { const input = await body(req); return send(await (input.url ? assetImport.fromUrl(input) : assetImport.fromPath(input))); }
+      if (!/^application\/(zip|octet-stream|x-previs-files)/.test(type)) fail('Upload a model file, a zip, or JSON { path | url }', 415);
+      const parts = []; let size = 0;
+      for await (const chunk of req) { size += chunk.length; if (size > IMPORT_LIMITS.uploadBytes) fail(`Imports are at most ${IMPORT_LIMITS.uploadBytes / 1024 ** 2} MB`, 413); parts.push(chunk); }
+      const num = k => (q.get(k) === null || q.get(k) === '' ? NaN : Number(q.get(k)));
+      const position = ['x', 'y', 'z'].map(num);
+      return send(await assetImport.fromUpload(Buffer.concat(parts), { projectId: q.get('projectId'), file: q.get('name'), name: q.get('title'), bundle: type.startsWith('application/x-previs-files'), kind: q.get('kind'), height: num('height'), licence: q.get('licence') || '', attribution: q.get('attribution') || '', place: { ...(position.every(Number.isFinite) ? { position } : {}), ...(Number.isFinite(num('rotation')) ? { rotation: num('rotation') } : {}) } }));
     }
     if (req.method === 'POST' && url.pathname === '/api/director/import-blender') {
       if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);

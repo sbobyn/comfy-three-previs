@@ -3,21 +3,25 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createProjectDocument } from '../server/previs/director.mjs';
 import { loadStarters } from '../server/previs/starters.mjs';
+import { FINISHED_STARTERS, BLOCKOUT_STARTERS } from './helpers/starters.mjs';
 import { builtInPresets } from '../server/previs/presets.mjs';
 import { autoPromptText, autoPromptSegments, shotPrompt, shotStyle } from '../shared/prompt.mjs';
 import { compilePrompt, describeCamera, MOVES, referenceLegend, videoReferences, keyStills, blockoutStale, shotSignature } from '../shared/director.mjs';
 import { planBatch } from '../server/previs/batch.mjs';
 import { readFile } from 'node:fs/promises';
-import { CAMERA_LINES, cameraSourceOf, fitPrompt, motionInput, withCameraLine } from '../shared/camera-source.mjs';
+import { CAMERA_LINES, cameraLine, cameraSourceOf, fitPrompt, lookMedium, motionInput, withCameraLine } from '../shared/camera-source.mjs';
 
 const SOURCES = ['blockout', 'keyframes', 'still'];
 const count = (text, part) => text.split(part).length - 1;
 // Words the old camera sentence added: the move on its target, the lens class, the height/angle and the length.
+// The medium a prompt repaints the blockout in ('' = photoreal): the project style, or for the used prompt the shot's own
+// format and look sections where it overrides them (Look Lab's anime, claymation, 3D-animated and watercolour variants).
+const mediumOf = (p, shot, used) => lookMedium(used ? ['intro', 'style'].map(k => shot.promptSections?.video?.[k]?.text ?? (k === 'style' ? p.scene.environment.style : '')).join(' ') : p.scene.environment.style);
 const autoCamera = (shot, entities) => [describeCamera(shot, entities), ...Object.values(MOVES).map(m => `${m} on `), 'eye level', 'low angle', 'high angle', 'Follow the supplied camera motion', 'Preserve the supplied camera motion'];
 
 test('starter video prompts carry no camera move, one camera line for the input, and lens/filter hints', async () => {
   const starters = await loadStarters();
-  assert.deepEqual(starters.map(s => s.slug).sort(), ['breaking-news', 'final-lap', 'posterized', 'wingspan']);
+  assert.deepEqual(starters.map(s => s.slug).sort(), [...FINISHED_STARTERS, ...BLOCKOUT_STARTERS].sort());
   for (const st of starters) {
     const p = createProjectDocument({ template: st.slug }, undefined, starters);
     for (const shot of p.shots) {
@@ -29,7 +33,9 @@ test('starter video prompts carry no camera move, one camera line for the input,
           for (const bad of autoCamera(shot, p.scene.entities)) assert.ok(!text.replace(action, '').includes(bad), `${where} ${name} (${cameraSource}) still says “${bad}”`);
           // Movement and cut tags describe the move; they stay out unless the shot's own action says so.
           for (const term of [...style.movement, ...style.cuts]) assert.ok(!text.replace(action, '').includes(term), `${where} ${name} keeps the “${term}” tag`);
-          assert.equal(count(text, CAMERA_LINES[cameraSource]), 1, `${where} ${name} needs exactly one ${cameraSource} line`);
+          const medium = mediumOf(p, shot, name === 'used');
+          assert.equal(count(text, cameraLine(cameraSource, medium)), 1, `${where} ${name} needs exactly one ${cameraSource} line${medium ? ` in ${medium}` : ''}`);
+          if (medium && cameraSource === 'blockout') assert.doesNotMatch(text, /photoreal/i, `${where} ${name}: a ${medium} look is never repainted photoreal`);
           for (const other of SOURCES.filter(x => x !== cameraSource)) assert.equal(count(text, CAMERA_LINES[other]), 0);
           assert.match(text, /Lens: \d+mm/, `${where} ${name} keeps the lens hint`);
         }

@@ -1,6 +1,7 @@
 # Starter projects
 
-The home page's **Starters** row offers these four projects (plus **New scene** for an empty stage).
+The home page's **Starters** row offers these nine projects (plus **New scene** for an empty stage): four finished
+starters, then five blockout starters for testing cameras, devices, transitions and looks (below).
 Opening one creates a new project from its snapshot, so the starter itself never changes.
 
 ```
@@ -8,12 +9,120 @@ examples/starters/
   index.json                  # { "starters": [slug, …] } — home-page order
   <slug>/starter.json         # the snapshot
   <slug>/media/refs/<id>.webp # object looks, design-sheet views and boards, shot stills
+  <slug>/media/refs/<id>.glb  # imported models (the blockout starters' mannequin), copied byte for byte
   <slug>/media/assets/<id>.mp4  # each shot's blockout clip and chosen video
 ```
 
+## Blockout starters (2026-11-02)
+
+Five starters open with a blockout clip per shot and written Cast Cards, and no generated media: making the cast images,
+stills and videos is the test. Look Lab is the exception: it also ships a start still per variant and twelve videos (below). They were built through the MCP tools on a private server (paid work off) by
+`scripts/starters/author.mjs` and its scene modules in `scripts/starters/scenes/`; the bundles here remain the source of
+truth. Every object is original, nothing carries a brand, logo, sign or lettering (each project style says so, and every
+shot has the `no logos or lettering` filter tag, which a video prompt always keeps), every shot is 4–5 s with its camera
+keyed in the blockout, and descriptions give action, not a camera move.
+
+People are an **original procedural mannequin** (`scripts/starters/mannequin.mjs`, MIT): an imported, rigged GLB with
+Walk, Idle and Wave clips, a dark face visor and dark shoes so facing reads at any distance. They exercise model import,
+clips, poses, IK and the neutral stand-in. Buildings, rocks, chairs, tables, lamps and generic cars are the built-in proxy
+shapes; trees, terrain and the lake use the bundled meshes.
+
+| Starter | Shot | s | What it tests |
+|---|---|---:|---|
+| **Mountain Trail** | Ridge reveal | 5 | Aerial reveal: low behind a moraine, rising over it to the valley, the lake and the hiker. |
+| | Slope dive | 5 | FPV dive down the south slope's fall line, levelling off behind the hiker. |
+| | Trail track | 5 | Knee-high tracking shot beside the hiker on the dirt trail (Walk clip). |
+| | Valley wide | 5 | Locked-off 24 mm wide of the whole valley. |
+| **City Blocks** | Drone rise | 5 | Vertical rise between façades, holding on a commuter. |
+| | Car track | 5 | Street-level front three-quarter track with a generic red hatchback. |
+| | Rooftop orbit | 5 | 140° orbit around a figure at the edge of a 48 m tower (Idle clip). |
+| | Pedestrian follow | 5 | Over-the-shoulder follow as the commuter steps off the kerb onto a zebra crossing. |
+| **Lighthouse · Camera Moves** | Locked-off … Tilt up | 4 each | All 12 `MOVES` presets on the same four seconds (the keeper stands still), so only the camera differs. |
+| | Dolly zoom (vertigo) | 4 | Back 5 → 12 m while the lens goes 24 → 58 mm: the keeper holds size, the tower looms. |
+| | FPV fly-through | 4 | Low over the water, through a sea arch, up the cliff to the keeper. |
+| | Handheld | 4 | Deterministic few-centimetre operator wobble (64 keys). |
+| | Push-in + lens change | 4 | Push in with a 35 → 50 mm lens change. Focus is not modelled; "rack focus" is a lens note only. |
+| | Whip pan A · out / B · in | 4 + 4 | Whip-pan-to-whip-pan: A whips off the waving keeper, B lands mid-whip on the boat. |
+| | Match cut A · lantern / B · buoy | 4 + 4 | Match cut: A ends on the round lantern centred, B opens on the round buoy at the same place and size. |
+| | Cut on action A · wide / B · close | 4 + 4 | Cut on action: A cuts as the door swings; B overlaps 0.2 s and follows the keeper in. |
+| | Wipe A · foreground rock / B · reveal | 4 + 4 | In-camera foreground wipe: one constant-speed truck behind a rock, split at the moment it fills the frame. |
+| **Look Lab** | Summer day · base … Claymation (stronger) | 4 × 34 | One blockout, thirty-four looks (below). |
+| **Two-Hander** | Master; Over Ben · on Ada; Over Ada · on Ben | 5 each | Dialogue coverage on the 180° line: 32 mm master, 50 mm over-the-shoulders; sit pose plus keyed gestures. |
+| | Insert · cup | 4 | 70 mm insert; Ada's hand reaches her cup by IK. |
+| | Close-up · zoom on Ben | 4 | Lens change within the shot, 50 → 70 mm. The barista is sent to models as the neutral grey stand-in. |
+
+**Flying your own take.** Mountain Trail and City Blocks are laid out for **Fly camera** with a keyboard, gamepad (Drone RC
+Mode 2) or phone: the valley floor is about 200 m of open meadow with the hiker crossing it on a clear path, and the city
+has 12 m streets, a plaza and a 48 m roof. Open a shot, press **Fly camera** and record; at the default 6 m/s (×2.5 with RB)
+a 5 s take covers 30–75 m. Keep the take to replace the shot's camera keys.
+
+**Transitions.** The Cut joins shots with hard cuts only: film export concatenates them and the sequence player switches
+clips. A dissolve, a whip-pan blur, a wipe or any other transition effect is not supported. What a blockout *can* do is
+craft the transition into the shots themselves, as the pairs above do:
+
+| Transition | Craft in the blockout | In the Cut |
+|---|---|---|
+| Hard cut, cut on action, match cut | Yes: overlap the action across the pair; frame matching shapes at the same place and size | Hard cut (supported) |
+| Whip pan to whip pan | Yes: end A and start B mid-whip, both fast | Hard cut; no motion-blur bridge |
+| Foreground wipe | Yes: pass the camera behind a foreground object and split there | Hard cut on the covered frame |
+| Cross-dissolve, dip to black, graphic wipe | No | Not supported |
+
+The pairs' `cuts` style tags (`whip pan to whip pan`, `match cut`, `cut on action`, `in-camera foreground wipe`) note the
+intent; like all movement and cut tags they stay out of the prompts.
+
+**Look Lab variants.** Thirty-four shots share one camera, start, duration and scene, so they have the same blocking
+signature; the base variant and the twelve with videos ship a blockout clip, and generating any other variant makes its own (identical)
+blockout first. Each
+variant differs only in its prompt sections (Prompt sections in the shot, or `previs_director_set_prompt_section`), for
+both video and image prompts: the world (`world`, the season or time of day), the look (`style`), the walker's Cast Card
+text (`obj:<walker>`, clothing or a different person) and the format line (`intro`, for the stylised looks). The variants
+are summer day (base), night, spring, fall, winter, a yellow raincoat, a formal suit, a different person (an older man),
+anime, claymation, a stylised 3D animated feature and watercolour, then (v2) dawn, golden hour, blue hour, harsh noon, fog,
+heavy rain, a snowstorm, overcast, cherry blossom, peak autumn, an elderly woman, a teen, a cyclist walking a bike, a dog
+walker, a couple, a heavy-set South Asian man, 1950s, cyberpunk, workwear and formal evening wardrobe, and a stronger
+anime and claymation. Every v2 variant sets its own `style` ending in "No logos, badges, car emblems, signage or readable
+text." Every variant's video prompt fits the 600-character cap.
+For the anime, claymation, 3D animated and watercolour variants (and v2's stronger anime and claymation) the camera line repaints the blockout in that medium
+instead of photoreal (`lookMedium`, docs/director.md).
+
+**Look Lab media (paid hybrid, 2026-11-02).** Every variant ships one start still: GPT Image 2.5, made from the shared
+blockout frame and screened for no logos, brands or readable text, the blockout framing and the variant's look. Four
+variants also ship a Seedance 2.5 edit of their own blockout clip, in the cut: **Night**, **Winter**, **Anime**
+and **Claymation**. The other eight have a still only; a final-tier batch makes their end stills and videos. Cost
+at list prices was $9.15: 13 stills, $1.25, at $0.094 each (two at $0.111, sent the previous shot's still as well) and 5
+videos, $7.90, at $1.58 each. Billing settled at about $7.11 ($1.01 stills, $6.10 videos). Two takes were made and not
+used: a claymation still retake, which looked more 3D animated than clay, and the first anime video, which dropped the
+parked car and brought the walker to the lens far ahead of the blockout. The anime video still drops the parked car. A few
+cars carry a small generic grille emblem with no readable mark. Details per item are in
+`.evidence/LOOKLAB-QUOTE-20261102.md` (not in git).
+
+**Look Lab v2 media (2026-11-03).** The 22 v2 variants each ship one start still: GPT Image 2.5 for the twenty photoreal
+looks, Nano Banana 2.1 for the stronger anime (no style reference: with v1's anime still as a reference every model
+copied its semi-photoreal look) and the stronger claymation (with v1's clay still as a reference). Eight also ship an
+edit of their blockout clip: Kling O1 for **Golden hour**, **Blue hour**, **Snowstorm**, **Dog walker**,
+**Couple** and **Claymation (stronger)**, and Seedance 2.5 for **Heavy rain** and **ad · Wardrobe ·
+cyberpunk**. On the same shot (heavy rain), Seedance held the blockout's walker pace and size; Kling O1 kept the camera,
+car, lamp, bench and tree but brought the walker toward the lens ahead of the blockout, so the cyberpunk video was remade on
+Seedance for the same reason. Kling is about a third of the price. Five photoreal stills were remade to remove a car grille
+emblem (golden hour, heavy rain, peak autumn, cyclist, 1950s). List cost $10.13 (33 stills $2.94, 8 Kling videos $4.03, 2
+Seedance videos $3.16). The v2 prompt texts were trimmed slightly after the media was made, to fit the 600-character cap
+with the shipped still listed as a reference. Details per item are in `.evidence/LOOKLAB-V2-QUOTE-20261102.md` (not in
+git). Look Lab's copy is encoded smaller than the other starters' (540p video at about 1 Mbit/s, WebP stills at most
+1280 px), set by its `encode` in `scripts/export-starters.mjs`; the full-quality originals are in the source project.
+
+**Launch-film takes (2026-11-03).** Lighthouse · Camera Moves' **Orbit right** ships the storm take from the launch film (Seedance 2.5 edit of
+its own blockout clip, with its GPT Image 2.5 start still), and Look Lab gains **Cyberpunk city**, a world variant (neon city at night in rain)
+with its still and a Seedance 2.5 edit of the shared blockout. Both were already paid for; nothing new was generated. A starter now keeps
+every take of a shot (each with the blockout clip it was made from) and every still, not only the chosen ones, so a copy opens with all of
+them in Compare takes; the cut keeps the chosen take.
+
+The snapshot format keeps a shot's prompt-section overrides, saved models and settings and its direction flag
+(`promptSections`, `settings`, `motionCritical`); a copy re-keys `obj:<id>` sections to its own object ids. Prompt version
+history stays with the source project.
+
 ## What a starter opens with
 
-Each starter opens with bundled media, with no generation and no network:
+The four finished starters open with bundled media, with no generation and no network:
 
 - every cast member's primary image, and its design sheet (each view plus the composed board);
 - for each shot, the start and end stills, the blockout clip and the video made from them;
@@ -102,8 +211,9 @@ signature. `PREVIS_STARTERS_DIR` points the server at another starters folder (f
 
 ## Media size and why it is in git
 
-The four starters' media is about 35 MB (the export stops at 80 MB and then keeps only the hero shots'
-videos). It is committed with the code rather than downloaded from a release so that a fresh clone opens
+The starters' media is about 75 MB: 33 MB for the four finished starters and 42 MB for the five blockout starters
+(blockout clips, two 110 KB mannequin GLBs and Look Lab's 12 MB of stills and videos, encoded smaller), 17.5 MB of it Camera Moves' 24 shots (the export stops at 80 MB and then
+keeps only the hero shots' videos). It is committed with the code rather than downloaded from a release so that a fresh clone opens
 finished starters offline, with no publish step to keep in sync, and so `pnpm demo:build` can use the same
 files. Re-exporting only rewrites a file when its source changed, so history grows only when a starter's
 content really changes.

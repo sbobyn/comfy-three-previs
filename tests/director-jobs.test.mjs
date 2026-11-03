@@ -86,3 +86,10 @@ test('budget line: what is left of the tighter cap, amber from 50%, red from 95%
   assert.equal(budgetLine({ account: scope({ period: 'all', capUsd: 20, remainingUsd: 20 }), project: null, remainingUsd: 20, alert: null }).text, 'Budget: $20.00 left of $20.00');
   assert.equal(budgetLine({ account: scope({ period: 'all', capUsd: 20, remainingUsd: 20 }), project: null, remainingUsd: 20, alert: null }).tone, 'ok');
 });
+
+test('batch rows summarise only what changed; batches planned before per-node keys say nothing', () => {
+  const { regenSummary } = exports;
+  assert.equal(regenSummary({ regen: { remake: 4, total: 12, kept: 7, pinned: 1 } }), '4 of 12 need regenerating · 7 kept · 1 pinned');
+  assert.equal(regenSummary({ regen: { remake: 0, total: 6, kept: 6, pinned: 0 } }), '0 of 6 need regenerating · 6 kept');
+  assert.equal(regenSummary({}), '');
+});

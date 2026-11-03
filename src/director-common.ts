@@ -6,7 +6,7 @@ import { claudeExamples } from './director-design-core';
 export const DEMO = Boolean(import.meta.env.VITE_DEMO);
 export const REPO_URL = 'https://github.com/sbobyn/comfy-three-previs';
 /** In-page demo notice, in the page's own header (the demo shim's floating banner steps aside for it). */
-export const demoBadge = () => h('a', { class: 'demo-badge', href: REPO_URL, target: '_blank', rel: 'noopener', title: 'This is a read-only demo. Run Comfy Three Previs locally to edit and generate.' }, 'Read-only demo · Run it locally ↗');
+export const demoBadge = () => h('a', { class: 'demo-badge', href: REPO_URL, target: '_blank', rel: 'noopener', title: 'This is a read-only demo. Run Comfy Previs locally to edit and generate.' }, 'Read-only demo · Run it locally ↗');
 
 export type RunnerStatus = { available: boolean; model: string; busy: string[]; runs: Record<string, { messageId: string; startedAt: string; text: string; steps: string[] } | null> }; // [agent]
 export type AgentStatus = { connected: boolean; waiting: boolean; lastSeen: string | null; name: string | null; runner?: RunnerStatus | null };
@@ -141,7 +141,7 @@ const quote = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
 export function claudeDialog(connect: Connect, project?: DirectorProject) {
   document.getElementById('connect-dialog')?.remove();
   const opener = document.activeElement as HTMLElement | null;
-  const command = connect ? `claude mcp add comfy-previs -e ${quote(`PREVIS_URL=${location.origin}`)} -- ${quote(connect.command)} ${connect.args.map(quote).join(' ')}` : 'Start the Comfy Three Previs server to see the setup command.';
+  const command = connect ? `claude mcp add comfy-previs -e ${quote(`PREVIS_URL=${location.origin}`)} -- ${quote(connect.command)} ${connect.args.map(quote).join(' ')}` : 'Start the Comfy Previs server to see the setup command.';
   // Copy sits in each block's header row, never over the command itself.
   const code = (title: Node, text: string) => {
     const copy = h('button', { class: 'btn sm', type: 'button', 'aria-label': 'Copy the command' }, 'Copy');
@@ -151,12 +151,12 @@ export function claudeDialog(connect: Connect, project?: DirectorProject) {
   const dlg = h('dialog', { id: 'connect-dialog', class: 'claude-help', 'aria-labelledby': 'connect-title' },
     h('div', { class: 'dialog-head' }, h('h2', { id: 'connect-title' }, 'Direct with Claude'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
     h('div', { class: 'dialog-body' },
-      h('p', {}, 'Connect Claude Desktop or Claude Code to Comfy Three Previs. Ask Claude to build and direct your scene; edits appear here live and can be undone.'),
+      h('p', {}, 'Connect Claude Desktop or Claude Code to Comfy Previs. Ask Claude to build and direct your scene; edits appear here live, and object and camera edits can be undone.'),
       code(h('h3', {}, 'Claude Code'), command),
       connect ? h('details', {}, h('summary', {}, 'Claude Desktop configuration'), code(h('span', { class: 'muted' }, 'claude_desktop_config.json'), JSON.stringify({ mcpServers: { 'comfy-previs': { ...connect, env: { ...connect.env, PREVIS_URL: location.origin } } } }, null, 2))) : null,
       h('h3', {}, project ? `Try asking, in ${project.title.replace(/^Starter · /, '')}` : 'Try asking'),
       h('ul', { class: 'claude-asks' }, ...claudeExamples(project).map(t => h('li', {}, t))),
-      h('p', { class: 'note' }, 'Edits are free and can be undone here. Generating costs money: when this server is started with PREVIS_ALLOW_PAID=1, Claude approves its own Comfy Cloud runs up to the limit (maxCostUsd) it sets on each request, without showing you a quote here. A request estimated above its limit is refused; so is a model with no price estimate, unless you ask Claude to send it anyway. Cloud bills actual usage, so the limit is an allowance, not a hard cap.')));
+      h('p', { class: 'note' }, 'Edits are free; object and camera edits can be undone here. Generating costs money: when this server is started with PREVIS_ALLOW_PAID=1, Claude approves its own Comfy Cloud runs up to the limit (maxCostUsd) it sets on each request, without showing you a quote here. A request estimated above its limit is refused; so is a model with no price estimate, unless you ask Claude to send it anyway. Cloud bills actual usage, so the limit is an allowance, not a hard cap.')));
   dlg.addEventListener('keydown', ev => ev.stopPropagation());
   dlg.addEventListener('close', () => { dlg.remove(); if (opener?.isConnected) opener.focus(); });
   document.body.append(dlg); dlg.showModal();

@@ -1,4 +1,4 @@
-/* Comfy Three Previs — Setup (home dialog and /setup.html). Tokens from director.css. */
+/* Comfy Previs — Setup (home dialog and /setup.html). Tokens from director.css. */
 .setup { display: flex; flex-direction: column; gap: 22px; }
 .setup h3 { margin: 0 0 10px; font-size: var(--fs-xs); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-3); }
 .setup .note { margin: 8px 0 0; }
@@ -25,6 +25,11 @@
 .setup-opt dt span { font-size: var(--fs-xs); font-weight: 500; color: var(--ink-3); }
 .setup-opt dt span.ok { color: var(--ok); }
 .setup-opt dd { margin: 0; font-size: var(--fs-sm); color: var(--ink-2); }
+.setup-theme { margin: 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.setup-theme legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.setup-theme label { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--ink); cursor: pointer; }
+.setup-theme input { accent-color: var(--accent); margin: 0; }
+.setup-theme .note { flex-basis: 100%; margin: 0; }
 dialog.setup-dialog { width: min(720px, 94vw); max-height: 90vh; }
 dialog.setup-dialog .dialog-body { overflow-y: auto; max-height: calc(90vh - 64px); }
 /* Standalone /setup.html */

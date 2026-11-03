@@ -4,13 +4,16 @@
 // A node's estimate is its expected charge: list price + reference images + the paid still grader (shared/tiers.mjs
 // estimateBreakdown). Its reserve adds the budget's safety margin, and the batch cap counts reserves, so a batch can no longer
 // plan under its cap and bill over it. A node with an unknown price is never submitted. Nothing is resent after an uncertain outcome.
+import { effectiveLook, baseShotOf, variantLabel, variantModels, VARIANT_STILL_MODEL, VARIANT_VIDEO_MODELS } from '../../shared/look-presets.mjs';
+import { baseStill, addVariantShots } from '../../shared/look-variants.mjs';
 import { mkdir, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
 import { assertNoSecrets } from './workflows.mjs';
 import { builtInPresets } from './presets.mjs';
-import { blockoutStale, stillStale, castRows, lookSource, objectLooks } from '../../shared/director.mjs';
+import { stillStale, castRows, lookSource, objectLooks, shotSignature } from '../../shared/director.mjs';
+import { explainStale, videoVerdict } from '../../shared/regen.mjs';
 import { cameraSourceOf, CAMERA_SOURCE_LABELS } from '../../shared/camera-source.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
 import { savedClipSeconds } from '../../shared/model-params.mjs';
@@ -49,6 +52,14 @@ function hasStill(project, shot, at, { stale = false } = {}) {
   const notes = (shot.references || []).filter(r => r.role === 'frame' && stillStale(project, shot, r) === stale).map(r => r.note || '');
   return at === 'start' ? notes.some(n => n === 'key frame start' || !n) : at === 'end' ? notes.includes('key frame end') : notes.includes(`key frame @${at}s`);
 }
+// The kept key frame at a moment: any current (or pinned, or uploaded) take keeps it; else the newest take says why it is out of date.
+function stillVerdict(project, shot, at, model) {
+  const notes = at === 'start' ? ['key frame start', ''] : at === 'end' ? ['key frame end'] : [`key frame @${at}s`];
+  const takes = (shot.references || []).filter(r => r.role === 'frame' && notes.includes(r.note || ''));
+  if (!takes.length) return null;
+  const verdicts = takes.map(r => explainStale(project, { type: 'still', shotId: shot.id, at, refId: r.id }, { model }));
+  return verdicts.find(x => x.state === 'pinned') || verdicts.find(x => x.state === 'fresh' || x.state === 'uploaded') || verdicts.at(-1);
+}
 function videoNeeds(def) {
   if (!def) return null;
   return { keyFrames: def.task === 'first-frame' ? ['start', ...(def.inputs?.lastFrame ? ['end'] : [])] : [], references: def.task !== 'first-frame', local: def.id.startsWith('wan-') || VIDEO_PRICES[def.id]?.local === true, camera: cameraSourceOf(def) };
@@ -67,21 +78,38 @@ export function normalizeInput(input = {}) {
   if (input.maxCostUsd === null || input.maxCostUsd === '' || !Number.isFinite(maxCostUsd) || maxCostUsd < 0) fail('maxCostUsd is required (USD, 0 or more)');
   const stillsAt = input.stillsAt == null ? null : (Array.isArray(input.stillsAt) ? input.stillsAt : [input.stillsAt]).map(x => (x === 'start' || x === 'end' ? x : Number.isFinite(Number(x)) && x !== '' && x !== null && Number(x) >= 0 ? Math.round(Number(x) * 100) / 100 : fail('stillsAt takes start, end or seconds')));
   const tier = input.tier || 'draft';
-  return { steps: STEPS.filter(s => steps.includes(s)), tier, models: modelsFor(tier, input.models), maxCostUsd, shots: ids(input.shots, 'shots'), objects: ids(input.objects, 'objects'), stillsAt: stillsAt?.length ? [...new Set(stillsAt)] : null, dryRun: input.dryRun === true, retryWeakMatch: input.retryWeakMatch === true };
+  // force: true makes every node again; a list of node ids (e.g. "video:<shotId>", "still:<shotId>start", "look:<objectId>") makes those again.
+  const force = input.force === true ? true : input.force == null || input.force === false ? null : Array.isArray(input.force) && input.force.every(x => /^(look|sheet|still|video):[\w@.-]{1,80}$/.test(String(x))) ? [...new Set(input.force.map(String))].slice(0, 500) : fail('force takes true or node ids such as video:<shotId>, still:<shotId>start, look:<objectId>');
+  return { steps: STEPS.filter(s => steps.includes(s)), tier, models: modelsFor(tier, input.models), maxCostUsd, shots: ids(input.shots, 'shots'), objects: ids(input.objects, 'objects'), stillsAt: stillsAt?.length ? [...new Set(stillsAt)] : null, dryRun: input.dryRun === true, retryWeakMatch: input.retryWeakMatch === true, ...(force ? { force } : {}) };
 }
 
 // Image inputs a key-frame still is sent: the blockout guide, the cast's looks in frame and the previous shot's last still, up to
 // the model's limit (src/director.ts picks the real ones at dispatch; the whole cast is the upper bound for "in frame").
 // grades: one paid grade per still when the grader is on.
 function stillInputs(project, shot, model, castCount, costs) {
+  // A look variant sends the base still (image 1), the cast and an optional style reference, never the previous shot.
+  if (shot.variantOf) { const cap = maxRefsFor(model), style = variantModels(project, shot, effectiveLook(project, shot)).styleRef ? 1 : 0; return { refs: cap ? 1 + Math.min(cap - 1, castCount + style) : 0, grades: costs.graderOn ? 1 : 0 }; }
   const cap = maxRefsFor(model), prev = project.shots.indexOf(shot) > 0 ? 1 : 0;
   return { refs: cap ? 1 + Math.min(cap - 1, castCount + prev) : 0, grades: costs.graderOn ? 1 : 0 };
 }
 
+// ---------- Only what changed (docs/regeneration.md) ----------
+const FORCED = { code: 'forced', part: 'force', text: 'regenerate requested' };
+/** Node fields for an output verdict (shared/regen.mjs explainStale): skipped with a note, or planned with its reasons. */
+function verdictFields(x, { forced, kept, stale, legacyStale }) {
+  if (forced) return { reasons: [FORCED], ...(x?.output ? { replaces: x.output.id } : {}) };
+  if (!x || x.state === 'missing') return {};
+  if (x.state === 'pinned') return { status: 'skipped', pinned: true, keptId: x.output.id, note: 'Pinned: kept as is', ...(x.reasons.length ? { reasons: x.reasons } : {}) };
+  if (x.state === 'fresh' || x.state === 'uploaded') return { status: 'skipped', keptId: x.output.id, note: kept };
+  return { reasons: x.reasons, replaces: x.output.id, note: x.legacy ? legacyStale : stale };
+}
+
 /**
- * Plan nodes and deps for one project. Blockouts are planned for shots that need a video (skipped when already rendered),
- * looks for cast objects without an image, sheets per object (after the batch's stills), stills per shot at `stillsAt` (skipped when that key frame exists),
- * videos per shot (deps: blockout + key-frame stills for first-frame models, or optional looks for reference models).
+ * Plan nodes and deps for one project, ComfyUI-style: a node is made only when no kept output matches its current key
+ * (shared/regen.mjs), and then everything downstream of it is made too. Pinned outputs are kept. `force` overrides.
+ * Blockouts are planned for shots that need a video, looks for cast objects without a current image, sheets per object (after
+ * the batch's stills), stills per shot at `stillsAt`, videos per shot (deps: blockout + key-frame stills for first-frame
+ * models, or optional looks for reference models). Planned nodes carry `reasons` ([{ code, text, … }]); kept ones a note.
  */
 export function planBatch(project, raw, { definitions = builtInPresets, costs = DEFAULT_COSTS } = {}) {
   const input = normalizeInput(raw), { steps, models } = input, want = s => steps.includes(s);
@@ -104,15 +132,20 @@ export function planBatch(project, raw, { definitions = builtInPresets, costs = 
   const families = new Map();
   for (const e of project.scene.entities) { const k = familyKey(e); if (!families.has(k)) families.set(k, []); families.get(k).push(e); }
   const imaged = k => families.get(k).some(e => objectLooks(project, e.id).length);
+  const forced = id => input.force === true || (Array.isArray(input.force) && input.force.includes(id));
 
-  // Looks: one per family without any image yet.
-  const lookNode = new Map();
+  // Looks: one per family without a current image (none yet, or its Cast Card, prompt or model changed). Kept looks get no node.
+  const lookNode = new Map(), judgedFamily = new Set();
   if (want('looks')) {
     const pool = objects || shots.flatMap(cast);
     for (const e of pool) {
-      const k = familyKey(e); if (lookNode.has(k) || imaged(k)) continue;
-      const src = source(e), size = families.get(k).length;
-      lookNode.set(k, add({ id: `look:${src.id}`, type: 'look', label: `Look · ${src.name}${size > 1 && src.id === e.id && e.parent ? ` (shared by ${size})` : ''}`, target: { entityId: src.id, ...(size > 1 ? { family: families.get(k).map(x => x.id) } : {}) }, model: models.looks, ...nodeCost('look', models.looks, {}, costs) }));
+      const k = familyKey(e); if (lookNode.has(k) || judgedFamily.has(k)) continue;
+      judgedFamily.add(k);
+      const src = source(e), size = families.get(k).length, id = `look:${src.id}`;
+      const owner = objectLooks(project, src.id).length ? src : families.get(k).find(m => objectLooks(project, m.id).length);
+      const v = owner ? verdictFields(explainStale(project, { type: 'look', entityId: owner.id }, { model: models.looks }), { forced: forced(id), kept: 'Look is current', stale: 'Its description, prompt or model changed; made again', legacyStale: 'Made again' }) : {};
+      if (v.status === 'skipped') continue;
+      lookNode.set(k, add({ id, type: 'look', label: `Look · ${src.name}${size > 1 && src.id === e.id && e.parent ? ` (shared by ${size})` : ''}`, target: { entityId: src.id, ...(size > 1 ? { family: families.get(k).map(x => x.id) } : {}) }, model: models.looks, ...nodeCost('look', models.looks, {}, costs), ...v }));
     }
   }
   const looksFor = es => [...new Set(es.map(e => lookNode.get(familyKey(e))?.id).filter(Boolean))];
@@ -127,21 +160,28 @@ export function planBatch(project, raw, { definitions = builtInPresets, costs = 
   }
   for (const s of shots) {
     const name = shotName(project, s), castLooks = looksFor(cast(s));
-    // A stale blockout is made again: it is the camera the video follows.
-    const blockout = want('videos') ? add({ id: `blockout:${s.id}`, type: 'blockout', label: `${name} · blockout`, target: { shotId: s.id }, ...(s.render && !blockoutStale(project, s) ? { status: 'skipped', assetId: s.render.assetId, note: 'Already rendered' } : s.render ? { note: 'Scene changed since; made again' } : {}) }) : null;
+    // A stale blockout is made again: it is the camera the video follows. Only what its frames show counts (blockoutManifest).
+    const bx = want('videos') ? explainStale(project, { type: 'blockout', shotId: s.id }) : null;
+    const blockout = want('videos') ? add({ id: `blockout:${s.id}`, type: 'blockout', label: `${name} · blockout`, target: { shotId: s.id }, ...(bx.state === 'fresh' ? { status: 'skipped', assetId: s.render.assetId, note: 'Already rendered' } : bx.state === 'stale' ? { note: 'Scene changed since; made again', reasons: bx.reasons } : {}) }) : null;
     const still = new Map();
     if (want('stills')) for (const at of stillsAt) {
       if (typeof at === 'number' && at > s.duration) continue;
-      still.set(at, add({ id: `still:${s.id}${atKey(at)}`, type: 'still', label: `${name} · ${atLabel(at)} still`, target: { shotId: s.id, t: at }, model: models.stills, ...nodeCost('still', models.stills, stillInputs(project, s, models.stills, cast(s).length, costs), costs), deps: castLooks, optional: castLooks,
-        ...(hasStill(project, s, at) ? { status: 'skipped', note: 'Key frame already exists' } : hasStill(project, s, at, { stale: true }) ? { note: 'Blocking changed since its key frame; made again' } : {}) }));
+      const id = `still:${s.id}${atKey(at)}`;
+      still.set(at, add({ id, type: 'still', label: `${name} · ${atLabel(at)} still`, target: { shotId: s.id, t: at }, model: models.stills, ...nodeCost('still', models.stills, stillInputs(project, s, models.stills, cast(s).length, costs), costs), deps: castLooks, optional: castLooks,
+        ...verdictFields(stillVerdict(project, s, at, models.stills), { forced: forced(id), kept: 'Key frame already exists', stale: 'Its inputs changed since its key frame; made again', legacyStale: 'Blocking changed since its key frame; made again' }) }));
     }
     if (!want('videos')) continue;
     // Where the camera comes from: the blockout clip, start → end stills (approximate) or one still (approximate).
     const cameraSource = needs.camera === 'keyframes' && !still.has('end') && !hasStill(project, s, 'end') && FIRST_FRAME_FALLBACK[def.id] ? 'still' : needs.camera;
-    const n = add({ id: `video:${s.id}`, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, ...nodeCost('video', models.videos, { duration: savedClipSeconds(s, models.videos, VIDEO_PRICES[models.videos]?.durations) ?? s.duration }, costs), deps: [blockout.id], cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource] });
+    // The preset that will run: a start → end model without an end still animates the start still with its start-only sibling.
+    const runs = cameraSource === 'still' && FIRST_FRAME_FALLBACK[def.id] ? definitions.find(d => d.id === FIRST_FRAME_FALLBACK[def.id]) || def : def;
+    const vid = `video:${s.id}`;
+    const n = add({ id: vid, type: 'video', label: `${name} · video`, target: { shotId: s.id }, model: models.videos, ...nodeCost('video', models.videos, { duration: savedClipSeconds(s, models.videos, VIDEO_PRICES[models.videos]?.durations) ?? s.duration }, costs), deps: [blockout.id], cameraSource, camera: CAMERA_SOURCE_LABELS[cameraSource],
+      ...verdictFields(videoVerdict(project, s, { def, runs, cameraSource, definitions }), { forced: forced(vid), kept: 'Video is current', stale: 'Its inputs changed since it was made; made again', legacyStale: 'Blocking changed since it was made; made again' }) });
+    const planError = patch => { if (n.status === 'skipped') n.unlessKept = patch; else Object.assign(n, patch); }; // applied if an upstream remake un-skips it
     // A model that edits the blockout clip takes only clip lengths its provider accepts (Seedance edit: 4–30 s).
     const clip = needs.camera === 'blockout' ? def.constraints?.sourceVideo?.duration : null;
-    if (clip && (s.duration < clip.min || s.duration > clip.max)) Object.assign(n, { status: 'failed', planError: true, error: `${def.title.split(' · ')[0]} needs a ${clip.min}–${clip.max} s blockout clip; this shot is ${s.duration} s. Change the shot length or the model` });
+    if (clip && (s.duration < clip.min || s.duration > clip.max)) planError({ status: 'failed', planError: true, error: `${def.title.split(' · ')[0]} needs a ${clip.min}–${clip.max} s blockout clip; this shot is ${s.duration} s. Change the shot length or the model` });
     // A motion/direction-critical shot on a route that may lose the subject's direction gets advice (never a refusal).
     const advice = def ? fidelityAdvice(project, s, def, definitions) : null;
     if (advice && !advice.ok) n.directionAdvice = { message: advice.message, ...(advice.recommend ? { recommend: advice.recommend.id } : {}) };
@@ -152,9 +192,39 @@ export function planBatch(project, raw, { definitions = builtInPresets, costs = 
     const endOptional = Boolean(FIRST_FRAME_FALLBACK[def.id]);
     for (const at of needs.keyFrames) {
       if (still.has(at)) { n.deps.push(still.get(at).id); if (at === 'end' && endOptional) (n.optional ||= []).push(still.get(at).id); }
-      else if (!hasStill(project, s, at) && !(at === 'end' && endOptional)) Object.assign(n, { status: 'failed', planError: true, error: `Needs a ${at} key frame; add the stills step` });
+      else if (!hasStill(project, s, at) && !(at === 'end' && endOptional)) planError({ status: 'failed', planError: true, error: `Needs a ${at} key frame; add the stills step` });
     }
   }
+  // Look variants (shared/look-presets.mjs): a variant's still is an edit of its base's still at the same moment, so it waits for
+  // that still when this batch makes it, and cannot be made without one. Variant nodes say which attribute differs from the base.
+  for (const s of shots.filter(x => x.variantOf)) {
+    const base = baseShotOf(project, s); if (!base) continue;
+    const variant = { baseId: base.id, label: variantLabel(project, effectiveLook(project, base), effectiveLook(project, s)) };
+    for (const n of nodes.filter(x => x.target?.shotId === s.id)) n.variant = variant;
+    for (const n of nodes.filter(x => x.type === 'still' && x.target.shotId === s.id)) {
+      const up = byId.get(`still:${base.id}${atKey(n.target.t)}`);
+      if (up && up.status !== 'skipped') n.deps.push(up.id);
+      else if (!baseStill(project, s, n.target.t) && n.status !== 'skipped') Object.assign(n, { status: 'failed', planError: true, error: `Needs the base shot’s ${atLabel(n.target.t)} still: a variant is an edit of it. Add the base shot to the batch or make its still first` });
+    }
+    const blockout = byId.get(`blockout:${s.id}`);
+    if (blockout && shotSignature(project, base) === shotSignature(project, s)) blockout.note = blockout.status === 'skipped' ? 'Same blocking as the base: identical clip' : 'Same blocking as the base: the identical clip is rendered (free)';
+    const video = byId.get(`video:${s.id}`), lead = project.scene.entities.find(e => e.id === s.camera?.target);
+    if (video && video.model === VARIANT_VIDEO_MODELS.cheap && (s.motionCritical || lead?.kind === 'character')) video.timingAdvice = { message: `${lead?.name || 'The lead'} walks: Kling O1 edit rushed a walking character ahead of the blockout in testing; Seedance 2.5 edit kept its pace.`, recommend: VARIANT_VIDEO_MODELS.timing };
+  }
+  // Everything downstream of a node that is made again (it replaces an out-of-date output) is made again too, unless pinned.
+  // A first output (a look an object never had) fills a gap and leaves what was made without it alone.
+  const dependents = new Map();
+  for (const n of nodes) for (const d of n.deps) (dependents.get(d) || dependents.set(d, []).get(d)).push(n);
+  for (const queue = nodes.filter(n => n.status === 'waiting' && n.reasons?.length); queue.length;) {
+    const up = queue.shift();
+    for (const n of dependents.get(up.id) || []) {
+      if (n.status !== 'skipped' || n.pinned || n.cancelled) continue;
+      const { unlessKept } = n; delete n.unlessKept; delete n.keptId; if (n.type === 'blockout') delete n.assetId;
+      Object.assign(n, { status: 'waiting', note: `Made again: ${up.label} is made again`, reasons: [{ code: 'upstream', part: up.id, text: `${up.label} is made again` }] }, unlessKept || {});
+      if (n.status === 'waiting') queue.push(n);
+    }
+  }
+  for (const n of nodes) delete n.unlessKept;
   // Stills before design sheets: a sheet sends several images at once and would hold the cloud image slots the stills
   // (and so the videos after them) wait for. Sheets wait on the batch's stills as optional deps (a failed still never blocks).
   const stills = nodes.filter(n => n.type === 'still' && n.status === 'waiting').map(n => n.id);
@@ -347,20 +417,43 @@ export async function openBatches(root, options = {}) {
   }
 
   const prune = () => { for (const b of batches.values()) if (expiredPlan(b)) batches.delete(b.id); };
+  async function withVariants(project, raw) {
+    const v = raw.variants || {}, args = { axes: v.axes, combine: v.combine === true, looks: v.looks };
+    let r;
+    if (raw.dryRun) {
+      project = structuredClone(project);
+      try { const x = addVariantShots(project, v.shot, args, randomUUID); r = { base: x.base.id, ids: x.ids, existing: x.existing }; } catch (e) { fail(e.message); }
+    } else {
+      if (!options.addVariants) fail('Variants are not available on this server');
+      const res = await options.addVariants(project.id, { op: 'add_variants', shotId: v.shot, ...args });
+      r = res.results?.[0] || res; project = await loadProject(project.id);
+    }
+    const base = project.shots.find(s => s.id === r.base), rec = variantModels(project, base, effectiveLook(project, base));
+    const shots = [...(v.includeBase ? [base.id] : []), ...r.ids, ...r.existing];
+    return { project, variants: { base: base.id, preview: !!raw.dryRun, shots, ids: r.ids, existing: r.existing, why: rec.why },
+      raw: { ...raw, shots, steps: raw.steps || ['stills', 'videos'], stillsAt: raw.stillsAt || ['start'], models: { stills: VARIANT_STILL_MODEL, videos: rec.video, ...(raw.models || {}) } } };
+  }
   const get = id => { prune(); const b = batches.get(id); if (!b) fail('Unknown batch', 404); return b; };
   return {
     /** Begin ticking (after the HTTP server listens, so loopback drivers can reach it). Resumes running batches. */
     start() { started = true; for (const b of batches.values()) if (watching(b)) { if (b.status === 'running') event(b, 'Resumed after server start'); schedule(b.id, 0); } },
-    async create(raw) {
-      if (!uuid.test(raw?.projectId || '')) fail('Unknown project', 404);
-      const project = await loadProject(raw.projectId);
+    async create(raw0) {
+      if (!uuid.test(raw0?.projectId || '')) fail('Unknown project', 404);
+      let project = await loadProject(raw0.projectId), raw = raw0, variants = null;
+      // Look variants (shared/look-presets.mjs): fan one base shot out over preset looks, single-axis unless combine is asked for.
+      // A dry run plans them on a copy of the project (a preview: one quote, nothing saved, it cannot be resumed); a run adds the
+      // variant shots to the project first (options.addVariants, the `add_variants` edit op), then plans those shots.
+      if (raw0.variants) ({ project, raw, variants } = await withVariants(project, raw0));
       const costs = { ...DEFAULT_COSTS, ...(typeof options.costs === 'function' ? options.costs() : options.costs) };
       const { input, nodes } = planBatch(project, raw, { definitions: definitions(project), costs });
       const planned = nodes.filter(n => !['skipped', 'failed'].includes(n.status)), breakdown = sumBreakdowns(planned.map(n => n.breakdown));
+      // "Only what changed": how many nodes are made against how many the steps cover (kept, pinned or made).
+      const regen = { remake: planned.length, total: nodes.length, kept: nodes.filter(n => n.status === 'skipped' && !n.pinned).length, pinned: nodes.filter(n => n.pinned).length, paid: planned.filter(n => (n.estimateUsd ?? 1) > 0).length };
       const estimateUsd = round(planned.reduce((s, n) => s + (n.estimateUsd || 0), 0)), reserveUsd = round(planned.reduce((s, n) => s + (n.reserveUsd ?? n.estimateUsd ?? 0), 0));
       const t = iso(now()), b = { id: randomUUID(), projectId: project.id, status: input.dryRun ? 'planned' : 'running', createdAt: t, updatedAt: t, steps: input.steps, tier: input.tier, models: input.models,
-        maxCostUsd: input.maxCostUsd, estimateUsd, reserveUsd, breakdown: { ...breakdown, marginPct: costs.marginPct, graderOn: costs.graderOn }, costs, spentEstimateUsd: 0, budgetSkipped: 0, dryRun: input.dryRun, ...(input.retryWeakMatch ? { retryWeakMatch: true } : {}), ...(input.shots ? { shots: input.shots } : {}), ...(input.objects ? { objects: input.objects } : {}), nodes, events: [] };
-      event(b, `Planned ${nodes.length} nodes for “${project.title}”: ≈ ${usd(estimateUsd)} expected (${describeBreakdown({ ...breakdown, marginUsd: 0 })}${breakdown.marginUsd ? `; reserves ${usd(reserveUsd)} with the ${costs.marginPct}% margin` : ''}) (${input.tier}), cap ${usd(input.maxCostUsd)}${input.dryRun ? '; dry run, nothing submitted' : ''}`);
+        maxCostUsd: input.maxCostUsd, estimateUsd, reserveUsd, breakdown: { ...breakdown, marginPct: costs.marginPct, graderOn: costs.graderOn }, regen, ...(input.force ? { force: input.force } : {}), costs, spentEstimateUsd: 0, budgetSkipped: 0, dryRun: input.dryRun, ...(input.retryWeakMatch ? { retryWeakMatch: true } : {}), ...(input.shots ? { shots: input.shots } : {}), ...(input.objects ? { objects: input.objects } : {}), nodes, events: [] };
+      event(b, `Planned ${nodes.length} nodes for “${project.title}”: ${regen.remake} of ${regen.total} need regenerating${regen.pinned ? ` (${regen.pinned} pinned)` : ''}, ≈ ${usd(estimateUsd)} expected (${describeBreakdown({ ...breakdown, marginUsd: 0 })}${breakdown.marginUsd ? `; reserves ${usd(reserveUsd)} with the ${costs.marginPct}% margin` : ''}) (${input.tier}), cap ${usd(input.maxCostUsd)}${input.dryRun ? '; dry run, nothing submitted' : ''}`);
+      if (variants) b.variants = { ...variants, list: variants.shots.map(id => { const s = project.shots.find(x => x.id === id); return { shotId: id, title: s.title, label: s.variantOf ? variantLabel(project, effectiveLook(project, baseShotOf(project, s)), effectiveLook(project, s)) : 'Base', existing: variants.existing.includes(id) }; }) };
       if (!input.dryRun) resolve(b);
       batches.set(b.id, b); if (!input.dryRun) await persist(b);
       if (!input.dryRun) schedule(b.id, 0);
@@ -378,6 +471,7 @@ export async function openBatches(root, options = {}) {
     /** Resume a planned, paused, cancelled or finished batch: retry cancelled, blocked, over-budget and failed nodes — never uncertain ones. */
     async resume(id, { maxCostUsd } = {}) {
       const b = get(id);
+      if (b.variants?.preview) fail('This was a preview of variants that do not exist yet; run the batch again without dryRun to add and make them');
       if (b.status === 'running') return structuredClone(b);
       if (maxCostUsd != null) { const cap = Number(maxCostUsd); if (!Number.isFinite(cap) || cap < b.spentEstimateUsd) fail(`maxCostUsd must be at least the ${usd(b.spentEstimateUsd)} already committed`); b.maxCostUsd = cap; }
       for (const n of b.nodes) if (n.cancelled || n.status === 'budget' || (n.status === 'failed' && !n.uncertain && !n.recoveryRequired && !n.planError))

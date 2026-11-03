@@ -1,5 +1,5 @@
 # Copyright (c) 2026 Steven Bobyn. SPDX-License-Identifier: MIT
-"""previs_export.py: export one Blender shot for Comfy Three Previs (the "thin import").
+"""previs_export.py: export one Blender shot for Comfy Previs (the "thin import").
 
 Writes <out>/blender-previs.json (the sidecar, format "comfy-previs-blender-handoff" version 1) and
 <out>/frames/frame-000000.png ... (one 24 fps PNG per frame, rendered through the shot camera).

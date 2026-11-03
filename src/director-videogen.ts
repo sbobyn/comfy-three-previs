@@ -13,6 +13,7 @@ import { api } from './director-common';
 import { clipSecondsFor, FIRST_FRAME_FALLBACK } from '../shared/tiers.mjs';
 import { keyframePlan, maxMiddleFrames, middleKeys, withMiddleFrames } from '../shared/keyframes.mjs';
 import type { KeyframePlan } from '../shared/keyframes.mjs';
+import { videoKey, videoUses } from '../shared/regen.mjs';
 
 export type Def = { id: string; title: string; task: string; description?: string; pricing?: { ratePerSecond?: number }; parameters?: Record<string, { nodeId: string; input: string }>; graph?: any; inputs?: any; provenance?: { presetId?: string; referenceImages?: number; middleFrames?: number }; constraints?: any };
 export type GenState = { presets: Def[]; definitions: Def[]; jobs: any[]; paidExecutionEnabled?: boolean };
@@ -33,10 +34,9 @@ export function clipLengths(d: Def | null | undefined) {
   const ds: number[] | undefined = d?.task === 'first-frame' ? d.constraints?.durations : undefined;
   return ds?.length ? `${ds.length <= 3 ? ds.join('/') : `${ds[0]}–${ds[ds.length - 1]}`} s` : '';
 }
-/** Picker label: title · price per second · clip lengths. */
+/** Picker label: title · clip lengths. No price: a closed select cuts it mid-word; the estimate and the quote show it. */
 export function modelLabel(d: Def) {
-  const rate = d.pricing?.ratePerSecond;
-  return [d.title, rate ? `≈ $${rate.toFixed(2)}/s` : null, clipLengths(d) || null].filter(Boolean).join(' · ');
+  return [d.title, clipLengths(d) || null].filter(Boolean).join(' · ');
 }
 /** The start-only sibling a start → end model uses when the shot has no end still (same as the batch). */
 export const startOnlyFallback = (d: Def | null | undefined) => (d ? (FIRST_FRAME_FALLBACK as Record<string, string>)[d.provenance?.presetId || d.id] || null : null);
@@ -89,7 +89,9 @@ export async function prepareShotVideo(o: { project: DirectorProject; shot: Shot
   const cameraSource = cameraSourceOf(def);
   const plan = shotVideoPlan(project, s, def, refs, o.userPrompt, cameraSource), prompt = plan.text; // fitted: keeps the camera line and the reference legend
   const main = (await api('project')).project;
-  const bind = await api('generation/bind', { revision: main.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
+  // What this take is made from (shared/regen.mjs), recorded on the result so a later change says what it invalidates.
+  const regen = videoKey(project, s, { def: base, model: base?.provenance?.presetId || base?.id, cameraSource, uses: videoUses(base) });
+  const bind = await api('generation/bind', { revision: main.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true, regen });
   const backend = o.backend || (def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-') ? 'local' : 'cloud');
   const request = { requestId: crypto.randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: backend } };
   const job = (await api('generation/quote', request)).job;
@@ -122,7 +124,8 @@ async function prepareFirstFrame(o: Parameters<typeof prepareShotVideo>[0], base
   // Start → end stills stand in for the camera (they only approximate the move); one still leaves it to the model.
   const cameraSource: CameraSource = wantsLast ? 'keyframes' : 'still';
   const plan = shotVideoPlan(project, s, def, [], o.userPrompt, cameraSource), prompt = plan.text;
-  const bind = await api('generation/bind', { revision: (await api('project')).project.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings: { firstFrame: { renderId }, ...(wantsLast ? { lastFrame: { renderId: lastId } } : {}), ...Object.fromEntries(mids.map((x, i) => [`middleFrame${i + 1}`, { renderId: x.renderId }])) }, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true });
+  const regen = videoKey(project, s, { def: base, model: base.provenance?.presetId || base.id, cameraSource, uses: videoUses(base) });
+  const bind = await api('generation/bind', { revision: (await api('project')).project.revision, definitionId: def.id, shotId: r.previsShotId, assetBindings: { firstFrame: { renderId }, ...(wantsLast ? { lastFrame: { renderId: lastId } } : {}), ...Object.fromEntries(mids.map((x, i) => [`middleFrame${i + 1}`, { renderId: x.renderId }])) }, prompt, parameters, acceptTimingChange: o.acceptTimingChange ?? true, regen });
   const request = { requestId: crypto.randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: o.backend || 'cloud' } };
   const job = (await api('generation/quote', request)).job;
   const est = def.pricing?.ratePerSecond ? def.pricing.ratePerSecond * secs : null;

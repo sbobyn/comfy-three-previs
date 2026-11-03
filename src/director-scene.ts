@@ -1,6 +1,5 @@
-import { applyBlockoutPose } from '../shared/blockout-pose.mjs';
 import * as THREE from 'three';
-import { buildBlockoutModel, loadBlockoutModels, modelReady } from './director-models';
+import { buildBlockoutModel, loadBlockoutModels, modelReady, poseModel } from './director-models';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -335,7 +334,7 @@ export function renderStill(project: Pick<DirectorProject, 'scene'>, shot: Shot,
   for (const e of entitiesAt(project.scene.entities, (shot.start || 0) + t)) {
     const g = buildBlockoutModel(e) || buildShape(e.shape, e.color);
     g.position.set(...e.position); g.rotation.set(rad(e.pitch || 0), rad(e.rotation), rad(e.roll || 0), 'YXZ'); g.scale.set(...e.scale);
-    applyBlockoutPose(g, e.pose);
+    poseModel(g, e, (shot.start || 0) + t, e.pose);
     stage.scene.add(g); placed.push({ group: g, entity: project.scene.entities.find(x => x.id === e.id) || e });
   }
   fitSunShadow(stage.sun, casterBounds(placed), shadowFocus(shotPoses(shot, project.scene.entities)));
@@ -499,7 +498,7 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   const entityX = (e: Entity): XForm => ({ position: [...e.position] as Vec3, rotation: e.rotation, scale: [...e.scale] as Vec3 });
   const snapping = () => snapActive(snapPref, ctrlHeld);
 
-  function placeGroup(group: THREE.Group, e: Entity) { applyX(group, entityX(e)); group.rotation.order = 'YXZ'; group.rotation.x = rad(e.pitch || 0); group.rotation.z = rad(e.roll || 0); applyBlockoutPose(group, e.pose); }
+  function placeGroup(group: THREE.Group, e: Entity) { applyX(group, entityX(e)); group.rotation.order = 'YXZ'; group.rotation.x = rad(e.pitch || 0); group.rotation.z = rad(e.roll || 0); poseModel(group, e, sceneTime(), e.pose); }
   function attachGizmo() {
     const g = primary ? groups.get(primary)?.group : null;
     if (g && view === 'set' && !modal) gizmo.attach(g); else gizmo.detach();
@@ -601,11 +600,15 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
   /** Pose animated objects for scene time t (objects being edited keep their live pose). */
   function applyTime(t: number) {
     for (const [id, { group, entity }] of groups) {
-      if (!entity.path?.length || gizmoDrag?.starts.has(id) || modal?.starts.has(id)) continue;
-      const a = entityAt(entity, t); group.position.set(...a.position); group.rotation.set(rad(a.pitch), rad(a.rotation), rad(a.roll), 'YXZ'); group.scale.set(...a.scale); applyBlockoutPose(group, a.pose);
+      if (gizmoDrag?.starts.has(id) || modal?.starts.has(id)) continue;
+      const neutral = standIns && entity.standIn === 'neutral';
+      if (!entity.path?.length) { if (group.userData.rig) poseModel(group, entity, t, entity.pose, { neutral }); continue; }
+      const a = entityAt(entity, t); group.position.set(...a.position); group.rotation.set(rad(a.pitch), rad(a.rotation), rad(a.roll), 'YXZ'); group.scale.set(...a.scale); poseModel(group, entity, t, a.pose, { neutral });
     }
     markDirty();
   }
+  /** Image and video models get each object's stand-in (docs/import.md): true only while a capture renders. */
+  let standIns = false;
   /** Render without editor-only overlays (gizmo). */
   /** The shadow region of a shot (its whole camera move), plus a live pose flown over it. */
   const shotFocus = (s: Shot | null, extra: ScenePose | null = null) => shadowFocus([...(s ? shotPoses(s, entities) : []), ...(extra ? [extra] : [])]);
@@ -971,10 +974,12 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     if (entities.some(e => !modelReady(e))) throw Error('Blockout models are still loading. Try again in a moment.');
     capturer.setPixelRatio(1); capturer.setSize(width, height, false);
     const cam = shotCam.clone(); cam.aspect = width / height; const at = pose(t); poseCamera(cam, at);
-    applyTime(sceneTime(t));
-    const focus = shotFocus(shot, at);
-    if (opts.guide) withGuide(at.look, () => cleanRender(capturer, cam, true, focus)); else cleanRender(capturer, cam, true, focus);
-    applyTime(sceneTime());
+    standIns = true;
+    try {
+      applyTime(sceneTime(t));
+      const focus = shotFocus(shot, at);
+      if (opts.guide) withGuide(at.look, () => cleanRender(capturer, cam, true, focus)); else cleanRender(capturer, cam, true, focus);
+    } finally { standIns = false; applyTime(sceneTime()); }
     return captureCanvas.toDataURL(type, quality);
   }
   const thumbs = new Map<string, HTMLCanvasElement>();
@@ -1054,6 +1059,11 @@ export function createDirectorScene(canvas: HTMLCanvasElement, labelsEl: HTMLEle
     view: () => view,
     worldView(): { p: Vec3; look: Vec3; mm: number } { return { p: world.position.toArray() as Vec3, look: controls.target.toArray() as Vec3, mm: Math.round(persp.getFocalLength()) }; },
     orbitTarget: () => controls.target.toArray() as Vec3,
+    /** Where a screen point meets the ground (y = 0), or null above the horizon. */
+    groundAt(clientX: number, clientY: number): Vec3 | null {
+      const p = hit(clientX, clientY).ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), new THREE.Vector3());
+      return p && p.length() < 2000 ? [Math.round(p.x * 100) / 100, 0, Math.round(p.z * 100) / 100] : null;
+    },
     lookThrough() { const p = pose(); world.position.set(...p.p); controls.target.set(...p.look); markDirty(); },
     setLabelMode(m: LabelMode) { if (labelMode !== m) { labelMode = m; markDirty(); } },
     labelMode: () => labelMode,

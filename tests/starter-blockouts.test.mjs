@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadStarters, instantiateStarter } from '../server/previs/starters.mjs';
-import { entityAt, focusPoint, shotCameraAt, stillStale, videoStale } from '../shared/director.mjs';
+import { entityAt, focusPoint, shotCameraAt, stillStale, videoStale, shotSignature } from '../shared/director.mjs';
+import { BLOCKOUT_STARTERS } from './helpers/starters.mjs';
 import { frameLayout, shotProjector } from '../shared/still-match.mjs';
 import { terrainHeight } from '../shared/terrain.mjs';
 import { planBatch } from '../server/previs/batch.mjs';
@@ -9,12 +10,20 @@ import { builtInPresets } from '../server/previs/presets.mjs';
 
 const starters = await loadStarters();
 const named = (s, name) => s.scene.entities.find(e => e.name === name);
+// Shots whose move is to leave the subject: a whip pan sweeps off it (A) and lands on it mid-whip (B).
+const LEAD_LEAVES_FRAME = { 'camera-moves': ['Whip pan A · out', 'Whip pan B · in'] };
 
 test('starter shots fit Seedance edit and keep their lead readable throughout the camera move', () => {
   const minimum = builtInPresets.find(p => p.id === 'seedance-25-edit-v1').constraints.sourceVideo.duration.min;
   for (const s of starters) for (const sh of s.shots) {
     assert.ok(sh.duration >= minimum && sh.duration <= 5, `${s.slug}: ${sh.title} duration`);
     const lead = s.scene.entities.find(e => e.id === sh.camera.target);
+    if (LEAD_LEAVES_FRAME[s.slug]?.includes(sh.title)) {
+      // Even so, it opens (A) or settles (B) on the subject.
+      const t = sh.title.endsWith('out') ? 0 : sh.duration, pt = shotProjector(sh, s.scene.entities, t).project(focusPoint({ ...lead, ...entityAt(lead, sh.start + t) }));
+      assert.ok(pt.z > 0 && pt.x > 0.1 && pt.x < 0.9, `${s.slug}: ${sh.title} frames ${lead.name} at ${t}s`);
+      continue;
+    }
     for (let i = 0; i <= sh.duration * 24; i++) {
       const t = i / 24, pose = { ...lead, ...entityAt(lead, sh.start + t) };
       const point = shotProjector(sh, s.scene.entities, t).project(focusPoint(pose));
@@ -77,7 +86,7 @@ test('Posterized rises above the defender and sends the ball through the rim; Wi
 const EARLIER_MEDIA = {};
 
 test('starter copies open with current stills and videos, except the takes listed as made for the earlier animation', () => {
-  for (const s of starters) {
+  for (const s of starters.filter(x => !BLOCKOUT_STARTERS.includes(x.slug))) {
     const p = instantiateStarter(s);
     for (const sh of p.shots) {
       const earlier = EARLIER_MEDIA[s.slug]?.[sh.title] || [];
@@ -101,5 +110,30 @@ test('starter copies open with current stills and videos, except the takes liste
       assert.equal(n.status === 'skipped', !stale, `${s.slug} ${sh.title}: final-tier plan ${stale ? 'replaces the stale' : 'keeps the current'} ${n.target.t} still`);
     }
     assert.equal(plan.nodes.filter(x => x.type === 'still').length, p.shots.length * 2);
+  }
+});
+
+test('blockout starter copies open with current blockout clips, and a final-tier dry run plans every still and video', () => {
+  for (const s of starters.filter(x => BLOCKOUT_STARTERS.includes(x.slug))) {
+    const p = instantiateStarter(s);
+    for (const sh of p.shots) {
+      const renders = (p.assets || []).filter(a => a.shotId === sh.id && a.kind === 'camera-render');
+      assert.ok(renders.length <= 1, `${s.slug} ${sh.title}: at most one blockout clip`);
+      for (const r of renders) {
+        assert.equal(r.source.signature, shotSignature(p, sh), `${s.slug} ${sh.title}: the clip shows the current blocking`);
+        assert.equal(r.duration, sh.duration); assert.equal(r.frameCount, sh.duration * 24);
+      }
+      // Look Lab ships one start still per shot (examples/starters/README.md); it shows the current blocking.
+      if (s.slug === 'look-lab') { assert.equal(sh.references.length, 1, sh.title); assert.equal(stillStale(p, sh, sh.references[0]), false, `${sh.title}: the still is current`); }
+      // The others ship a start still only on a shot with a generated take (Lighthouse · Orbit right's storm), and it is current.
+      else if ((p.assets || []).some(a => a.shotId === sh.id && a.kind === 'workflow-result')) { assert.equal(sh.references.length, 1, `${s.slug} ${sh.title}`); assert.equal(stillStale(p, sh, sh.references[0]), false, `${s.slug} ${sh.title}: the still is current`); }
+      else assert.equal(sh.references.length, 0, `${s.slug} ${sh.title}: no stills yet`);
+    }
+    const plan = planBatch(p, { steps: ['stills', 'videos'], tier: 'final', dryRun: true, maxCostUsd: 100 });
+    // A shipped start still is current: the plan keeps it and makes only the end still.
+    const shipped = p.shots.filter(sh => sh.references.length).length;
+    assert.equal(plan.nodes.filter(x => x.type === 'still' && x.status === 'skipped' && x.target.t === 'start').length, shipped, `${s.slug}: shipped start stills are kept`);
+    assert.equal(plan.nodes.filter(x => x.type === 'still' && x.status !== 'skipped').length, p.shots.length * 2 - shipped, `${s.slug}: a start and an end still per shot`);
+    assert.equal(plan.nodes.filter(x => x.type === 'video' && x.status !== 'skipped').length, p.shots.length, `${s.slug}: a video per shot`);
   }
 });

@@ -73,7 +73,9 @@ function connect() {
   if (socket || detached) return;
   socket = new WebSocket(relayUrl("phone"));
   socket.onopen = () => {
-    link.textContent = "Linked · enable controls on Mac and phone";
+    link.textContent = (globalThis.location?.hash.length ?? 0) > 1
+      ? "Linked · enable controls on Mac and phone"
+      : "Not paired · open this page from the Phone… link on your computer";
     refresh();
   };
   socket.onmessage = (event) => {

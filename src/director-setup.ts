@@ -1,7 +1,8 @@
 // Setup: what works on this machine, what each key unlocks, and the .env settings.
 // Rendered in the home page's Setup dialog and on /setup.html.
 import './director-setup.css';
-import { api, h } from './director-common';
+import { DEMO, api, h } from './director-common';
+import { THEME_PREFS, readThemePref, setThemePref } from './theme';
 
 export type Check = { id: string; label: string; status: 'ok' | 'optional' | 'warn' | 'required'; detail: string; fix: string };
 export type Setup = { checks: Check[]; dataDir: string };
@@ -30,7 +31,7 @@ type Can = { what: string; needs: string; now: (ok: (id: string) => boolean, pho
 const CAN: Can[] = [
   { what: 'Build scenes, frame shots, make blockouts', needs: 'FFmpeg', now: ok => ok('ffmpeg') },
   { what: 'Cut the shots and export the film', needs: 'FFmpeg', now: ok => ok('ffmpeg') },
-  { what: 'Cast images and stills', needs: 'Comfy Cloud key or local ComfyUI', now: ok => ok('cloud') || ok('local') },
+  { what: 'Cast images and stills', needs: 'Comfy Cloud key and PREVIS_ALLOW_PAID=1, or local ComfyUI', now: ok => (ok('cloud') && ok('paid-on')) || ok('local') },
   { what: 'Generate video', needs: 'Comfy Cloud key, PREVIS_ALLOW_PAID=1', now: ok => ok('cloud') && ok('paid-on') },
   { what: 'Aim the shot camera with your phone', needs: 'Phone HTTPS settings', now: (_ok, phone) => phone },
 ];
@@ -41,14 +42,25 @@ const code = (text: string) => {
   return h('div', { class: 'code' }, text, b);
 };
 
+/** Theme: Dark (default), Light or System, saved in this browser and applied at once. */
+export function themeControl() {
+  const now = readThemePref();
+  return h('fieldset', { class: 'setup-theme' }, h('legend', {}, 'Theme'),
+    ...THEME_PREFS.map(t => h('label', {}, h('input', { type: 'radio', name: 'previs-theme', value: t.id, checked: t.id === now, onchange: () => setThemePref(t.id) }), t.label)),
+    h('span', { class: 'note' }, 'System follows your computer’s light or dark setting. Saved in this browser.'));
+}
+
 export function setupBody(s: Setup | null, phone: { available: boolean } | null) {
   const status = (id: string) => s?.checks.find(c => c.id === id)?.status;
   const ok = (id: string) => id === 'paid-on' ? status('paid') === 'warn' : status(id) === 'ok';
   const cloud = ok('cloud'), local = ok('local');
   return h('div', { class: 'setup' },
+    h('section', {}, h('h3', {}, 'Appearance'), themeControl()),
     h('section', {}, h('h3', {}, 'This machine'),
+      // The read-only web demo has no server to check: say so instead of an empty list and "Projects live in ."
+      DEMO ? h('p', { class: 'note' }, 'This is the read-only web demo, so there is nothing to check here. Run Comfy Previs on your computer to see what works there.') :
       s ? checkList(s.checks) : h('p', { class: 'note' }, 'Could not read the setup checks. Is the server running?'),
-      s ? h('p', { class: 'note' }, 'Projects live in ', h('code', {}, s.dataDir), '.') : null),
+      s && !DEMO ? h('p', { class: 'note' }, 'Projects live in ', h('code', {}, s.dataDir), '.') : null),
     h('section', {}, h('h3', {}, 'What you can do'),
       h('table', { class: 'setup-can' },
         h('thead', {}, h('tr', {}, h('th', {}, ''), h('th', {}, 'Needs'), h('th', {}, 'Now'))),
@@ -61,10 +73,10 @@ export function setupBody(s: Setup | null, phone: { available: boolean } | null)
         h('dt', {}, 'Local ComfyUI', h('span', { class: local ? 'ok' : '' }, local ? 'Reachable' : 'Not reachable')),
         h('dd', {}, 'Run ComfyUI (the desktop app or python main.py). Set PREVIS_COMFY_URL if it is not on port 8000.'),
         h('dt', {}, 'Phone camera over HTTPS', h('span', { class: phone?.available ? 'ok' : '' }, phone?.available ? 'Ready' : 'Not set up')),
-        h('dd', {}, 'Make a certificate once, then set the PREVIS_PHONE_* variables and restart. Pair the phone from the workspace’s Phone button.', code('node scripts/phone-certificate.mjs .evidence/phone-tls YOUR_MAC_LAN_IP')))),
+        h('dd', {}, 'Make a certificate once, then set the PREVIS_PHONE_* variables and restart. Pair the phone from the workspace’s Phone button.', code('node scripts/phone-certificate.mjs ./phone-cert YOUR_MAC_LAN_IP')))),
     h('section', {}, h('h3', {}, 'Settings (.env)'),
       h('table', { class: 'setup-env' }, h('tbody', {}, ...ENV.map(([k, v]) => h('tr', {}, h('th', { scope: 'row' }, h('code', {}, k)), h('td', {}, v))))),
-      h('p', { class: 'note' }, 'Shell variables override .env. Restart Comfy Three Previs after changes (pnpm start).')));
+      h('p', { class: 'note' }, 'Shell variables override .env. Restart Comfy Previs after changes (pnpm start).')));
 }
 
 export async function loadSetup() {

@@ -5,7 +5,9 @@ import './director-sequence.css';
 import type { DirectorProject, Shot, Asset, EditClip } from '../shared/director.mjs';
 import { progressSlot } from './director-progress'; // [live-progress]
 import { api, h, toast, announce, refocus } from './director-common';
-import { shotCast, objectLooks, shotObjects, starterBlockout, videoStale } from '../shared/director.mjs';
+import { shotCast, objectLooks, shotObjects, starterBlockout, videoStale, clipCurrent } from '../shared/director.mjs';
+import { explainStale, staleText, videoVerdict } from '../shared/regen.mjs';
+import type { StaleVerdict } from '../shared/regen.mjs';
 import { autoPromptSegments, KIND_COLORS } from '../shared/prompt.mjs';
 import { overlayCast, promptExcerpt, layoutChips, leaderFrom, compareBands, bandStops, sweepStops, moveStop } from './director-design-core';
 import type { Box, BandSource } from './director-design-core';
@@ -39,7 +41,7 @@ export type SequenceCtx = {
 export type RowParts = { s: Shot; i: number; count: number; on: boolean; inCut: boolean; thumb: HTMLCanvasElement; pick: HTMLInputElement; version: HTMLSelectElement; trimIn: HTMLInputElement; trimOut: HTMLInputElement; include: HTMLButtonElement; moveUp: HTMLButtonElement; moveDown: HTMLButtonElement; open: HTMLButtonElement; bState: string[]; gState: string[]; progress?: HTMLElement | null; takes?: HTMLButtonElement | null; select(): void; reorder(from: number, to: number): Promise<void> };
 
 type Job = { id: string; shotId: string; status: string; message?: string; definition?: { title?: string; task?: string } };
-type Quoted = { shot: Shot; est: number | null; ok: boolean; issue?: string; refs?: EngineRef[]; cameraSource?: CameraSource };
+type Quoted = { shot: Shot; est: number | null; ok: boolean; issue?: string; refs?: EngineRef[]; cameraSource?: CameraSource; verdict?: StaleVerdict };
 
 const DONE = ['completed', 'failed', 'uncertain', 'closed', 'invalidated', 'error'];
 const no = (p: DirectorProject, id: string) => String(p.shots.findIndex(s => s.id === id) + 1).padStart(2, '0');
@@ -81,9 +83,11 @@ export function createSequence(ctx: SequenceCtx) {
   };
   const camGlyph = (a: Asset | null | undefined) => {
     const cam = a && a.kind === 'workflow-result' ? cameraOf(a) : a ? 'blockout' as const : null;
-    return cam ? h('span', { class: `sq-camglyph c-${cam}`, title: a!.kind === 'workflow-result' ? CAMERA_SOURCE_LABELS[cam] : 'The blockout itself', 'aria-label': CAMERA_SOURCE_LABELS[cam] }, CAMERA_SOURCE_GLYPHS[cam]) : null;
+    return cam ? h('span', { class: `sq-camglyph c-${cam}`, role: 'img', title: a!.kind === 'workflow-result' ? CAMERA_SOURCE_LABELS[cam] : 'The blockout itself', 'aria-label': CAMERA_SOURCE_LABELS[cam] }, CAMERA_SOURCE_GLYPHS[cam]) : null;
   };
-  const fresh = (s: Shot) => !!s.render && (!s.render.signature || s.render.signature === ctx.signature(P(), s));
+  // Only what a blockout's frames show counts (shared/regen.mjs); a clip that recorded neither manifest nor signature is kept.
+  const fresh = (s: Shot) => !!s.render && clipCurrent(P(), s, s.render) !== false;
+  const why = (s: Shot, type: 'blockout' | 'video', assetId?: string) => staleText(explainStale(P(), { type, shotId: s.id, ...(assetId ? { assetId } : {}) }));
   const blockout = (s: Shot) => renders(s)[0] || null;
   const engineShots = (s: Shot) => new Set([s.render?.previsShotId, ...renders(s).map(a => a.source.engineShotId)].filter(Boolean) as string[]);
   const activeJob = (s: Shot) => { const ids = engineShots(s); return gen.jobs.filter(j => ids.has(j.shotId) && !DONE.includes(j.status) && j.status !== 'quoted').at(-1) || null; };
@@ -119,7 +123,8 @@ export function createSequence(ctx: SequenceCtx) {
   const batch = h('div', { class: 'sq-batch', hidden: true, role: 'region', 'aria-label': 'Quote', tabindex: -1 });
   const board = h('div', { class: 'sq-board', role: 'list', 'aria-label': 'Shots in order' });
   const banner = h('div', { class: 'sq-banner', hidden: true });
-  const video = h('video', { playsinline: true, controls: true, preload: 'metadata', 'aria-label': 'Cut preview' });
+  // Muted: the exported film carries no sound yet, so the preview does not promise any.
+  const video = h('video', { playsinline: true, controls: true, muted: true, preload: 'metadata', 'aria-label': 'Cut preview (muted: the exported film has no sound)' });
   // Compare: bands across one frame — blockout, start still, then each generated version — split by draggable seams.
   // `over` is the newest generated version (the first video band); `extra` holds older takes and other models.
   const over = h('video', { class: 'sq-over', playsinline: true, muted: true, preload: 'auto', hidden: true, 'aria-hidden': 'true' });
@@ -265,7 +270,7 @@ export function createSequence(ctx: SequenceCtx) {
         h('div', { class: 'sq-ctl' },
           h('div', { class: 'sq-vbar' }, abSeg, takesBtn, caption), comparisonInfo, comparisonPosition,
           h('div', { class: 'sq-vbar sq-playbar' }, playSeqBtn, totals),
-          h('div', { class: 'sq-export' }, h('div', { class: 'sq-vbar' }, exportBtn, h('span', { class: 'note' }, '1280×720 · 24 fps · H.264, in shot order')), exportStatus, exportsList))),
+          h('div', { class: 'sq-export' }, h('div', { class: 'sq-vbar' }, exportBtn, h('span', { class: 'note' }, '1280×720 · 24 fps · H.264, no sound, in shot order')), exportStatus, exportsList))),
       h('div', { class: 'sq-toolbar' },
         h('label', { class: 'sq-pickall' }, pickAll, 'All'),
         h('label', { class: 'sq-model' }, 'Video model', modelSel),
@@ -285,14 +290,18 @@ export function createSequence(ctx: SequenceCtx) {
     pick.onchange = () => { pick.checked ? picked.add(s.id) : picked.delete(s.id); syncPickAll(); };
     // A starter's bundled clip is not this shot's own blockout (generating makes that first), but it is not missing either.
     const bundled = !s.render && starterBlockout(p, s);
-    const bState = !s.render ? (bundled ? ['none', bundled.fresh === false ? 'Starter blockout · older' : 'Starter blockout'] : ['missing', 'No blockout']) : fresh(s) ? ['ok', 'Blockout ready'] : ['stale', 'Blockout changed'];
+    const bState = !s.render ? (bundled ? ['none', bundled.fresh === false ? 'Starter blockout · older' : 'Starter blockout'] : ['missing', 'No blockout']) : fresh(s) ? ['ok', 'Blockout ready'] : ['stale', 'Blockout changed', why(s, 'blockout')];
     const older = a?.kind === 'workflow-result' && videoStale(p, s, a);
-    const gState = job ? ['run', `Generating · ${job.status}`] : res.length ? (older ? ['stale', `${res.length} generated · older`] : ['ok', `${res.length} generated`]) : ['none', 'Not generated'];
+    const gState = job ? ['run', `Generating · ${job.status}`] : res.length ? (older ? ['stale', `${res.length} generated · older`, why(s, 'video', a!.id)] : ['ok', `${res.length} generated`]) : ['none', 'Not generated'];
     // Choosing a generated take makes it the shot's winner (the Take lab's choice too); a blockout is a cut-only choice.
     const win = winner(s), playing = c?.assetId || win?.id || '';
     const version = h('select', { class: 'field', 'aria-label': `Version of shot ${i + 1} in the cut`, title: 'The take the cut plays. Choosing a generated take makes it the shot’s winner (★); Newest follows the latest one.', disabled: !inCut },
       h('option', { value: '', selected: !playing }, 'Newest'),
-      ...res.map((x, k) => { const cam = cameraOf(x); return h('option', { value: x.id, selected: playing === x.id, title: cam ? CAMERA_SOURCE_LABELS[cam] : '' }, `${win?.id === x.id ? '★ ' : ''}${cam ? CAMERA_SOURCE_GLYPHS[cam] + ' ' : ''}Take ${res.length - k} · ${(x.source.workflow || '').split(' ·')[0]}`); }),
+      ...res.map((x, k) => {
+        // No camera glyph in the text (the badge beside the picker shows it, labelled); the full description is the label and tooltip.
+        const cam = cameraOf(x), model = (x.source.workflow || '').split(' ·')[0], said = [`Take ${res.length - k}`, model, win?.id === x.id ? 'winner' : '', cam ? CAMERA_SOURCE_LABELS[cam] : ''].filter(Boolean).join(' · ');
+        return h('option', { value: x.id, selected: playing === x.id, title: said, 'aria-label': said }, `${win?.id === x.id ? '★ ' : ''}Take ${res.length - k} · ${model}`);
+      }),
       ...renders(s).map(x => h('option', { value: x.id, selected: c?.assetId === x.id }, `Blockout v${x.version ?? 1}`)));
     version.onchange = () => {
       const v = version.value;
@@ -322,11 +331,11 @@ export function createSequence(ctx: SequenceCtx) {
       h('span', { class: 'sq-num mono' }, String(i + 1).padStart(2, '0')),
       thumb,
       h('div', { class: 'sq-title' }, h('strong', { title: s.title }, s.title), h('span', { class: 'muted', title: a ? `The cut uses the ${a.kind === 'workflow-result' ? 'generated video' : 'blockout'}` : '' }, `${s.duration}s${a ? ` · cut uses ${a.kind === 'workflow-result' ? 'generated' : 'blockout'}` : ''}`), castLine(s)),
-      h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${bState[0]}` }, bState[1]),
+      h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${bState[0]}`, ...(bState[2] ? { title: bState[2] } : {}) }, bState[1]),
         h('div', { class: 'sq-acts' },
           b ? h('button', { class: 'btn sm', type: 'button', 'aria-label': `Play the blockout of shot ${i + 1}`, title: 'Play the blockout', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'blockout'); } }, '▶') : null,
           h('button', { class: 'btn sm', type: 'button', disabled: busy, 'aria-label': `${s.render ? 'Remake' : 'Make'} blockout · shot ${i + 1}`, onclick: (ev: Event) => { ev.stopPropagation(); void renderShots([s]); } }, s.render ? 'Remake blockout' : 'Make blockout'))),
-      h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${gState[0]}` }, gState[1]), progress,
+      h('div', { class: 'sq-cell' }, h('span', { class: `sq-st ${gState[0]}`, ...(gState[2] ? { title: gState[2] } : {}) }, gState[1]), progress,
         h('div', { class: 'sq-acts' },
           res.length ? h('button', { class: 'btn sm', type: 'button', 'aria-label': `Play the generated video of shot ${i + 1}`, title: 'Play the generated video', onclick: (ev: Event) => { ev.stopPropagation(); select(s.id, 'generated'); } }, '▶') : null,
           h('button', { class: 'btn sm', type: 'button', disabled: busy || !!job, title: 'Generate this shot with the selected model', 'aria-label': `Generate shot ${i + 1}`, onclick: (ev: Event) => { ev.stopPropagation(); picked = new Set([s.id]); void quote(); } }, 'Generate'))),
@@ -458,9 +467,11 @@ export function createSequence(ctx: SequenceCtx) {
   function drawExports() {
     const p = P(), list = cutList(), total = list.reduce((t, x) => t + Math.max(0, (x.c.out ?? x.a.duration ?? 0) - (x.c.in || 0)), 0);
     const missing = p.shots.filter(s => clipFor(s) && !media(s)).length;
-    totals.textContent = `${list.length} of ${p.shots.length} shots · ${total.toFixed(2)}s${missing ? ` · ${missing} without a blockout` : ''}`;
+    // Shots with no generated video yet play (and export) their grey blockout: say so before the export, not after.
+    const grey = list.filter(x => x.a.kind !== 'workflow-result').length;
+    totals.textContent = `${list.length} of ${p.shots.length} shots · ${total.toFixed(2)}s${missing ? ` · ${missing} without a blockout` : ''}${grey ? ` · ${grey} not generated: ${grey === 1 ? 'exports as a blockout' : 'export as blockouts'}` : ''}`;
     exportBtn.disabled = busy || !list.length || missing > 0;
-    exportBtn.title = missing ? 'Make a blockout for every shot in the cut first' : '';
+    exportBtn.title = missing ? 'Make a blockout for every shot in the cut first' : grey ? `${grey} shot${grey === 1 ? ' has' : 's have'} no generated video yet and export${grey === 1 ? 's' : ''} as the grey blockout. The film has no sound.` : 'The film has no sound.';
     ctx.onExportState?.({ ok: !!list.length && !missing, busy, reason: !list.length ? 'Nothing in the cut yet' : missing ? `Make a blockout for every shot in the cut first (${missing} missing)` : '' });
     const edits = (p.assets || []).filter(a => a.kind === 'edit').sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     exportsList.replaceChildren(...(edits.length ? [h('span', { class: 'eyebrow' }, 'Exports')] : []), ...edits.slice(0, 4).map(a => h('div', { class: 'sq-exp' },
@@ -518,12 +529,14 @@ export function createSequence(ctx: SequenceCtx) {
     try {
       const id = modelSel.value, def = choice().find(d => d.id === id)!;
       quoted = [];
+      // Only what changed (shared/regen.mjs videoVerdict, as the batch decides): each row says whether a take already matches.
+      const verdictOf = (s: Shot) => videoVerdict(p, s, { def, definitions: [...gen.presets, ...gen.definitions] });
       for (const s of shots) {
         if (!s.render || !fresh(s)) { quoted.push({ shot: s, est: null, ok: false, issue: s.render ? 'Blockout changed — make it again first' : 'Make the blockout first' }); continue; }
         if (activeJob(s)) { quoted.push({ shot: s, est: null, ok: false, issue: 'Already generating' }); continue; }
         try {
           const { job, est, refs, cameraSource } = await bindAndQuote(s);
-          quoted.push({ shot: s, est, refs, cameraSource, ok: !!job.validation?.compatible, issue: job.validation?.compatible ? undefined : (job.validation?.issues || []).map((x: any) => x.message).slice(0, 2).join('; ') || 'Not compatible' });
+          quoted.push({ shot: s, est, refs, cameraSource, verdict: verdictOf(s), ok: !!job.validation?.compatible, issue: job.validation?.compatible ? undefined : (job.validation?.issues || []).map((x: any) => x.message).slice(0, 2).join('; ') || 'Not compatible' });
         } catch (e) {
           let msg = (e as Error).message; const lim = def.constraints?.sourceVideo?.duration;
           if (/duration/.test(msg) && lim) msg = `Needs a ${lim.min}–${Math.floor(lim.max)} s shot (this is ${s.duration} s)`;
@@ -557,7 +570,9 @@ export function createSequence(ctx: SequenceCtx) {
         h('td', { class: 'mono' }, no(P(), q.shot.id)), h('td', {}, q.shot.title), h('td', { class: 'mono' }, `${q.shot.render?.duration != null ? Number(q.shot.render.duration).toFixed(2) : q.shot.duration}s`),
         h('td', {}, refStrip(q.refs || [])),
         h('td', { class: 'sq-cam' + (q.cameraSource && q.cameraSource !== 'blockout' ? ' approx' : ''), title: 'Where this video’s camera motion comes from' }, q.cameraSource ? CAMERA_SOURCE_LABELS[q.cameraSource] : ''),
-        h('td', { class: 'mono' }, q.ok ? (q.est != null ? `≈ $${q.est.toFixed(3)}` : 'unknown') : ''), h('td', { class: q.ok ? 'ok' : 'muted' }, q.ok ? 'Ready' : `Skipped · ${q.issue}`))))),
+        h('td', { class: 'mono' }, q.ok ? (q.est != null ? `≈ $${q.est.toFixed(3)}` : 'unknown') : ''), h('td', { class: q.ok ? 'ok' : 'muted' }, q.ok ? 'Ready' : `Skipped · ${q.issue}`),
+        h('td', { class: 'sq-why muted', title: q.verdict ? staleText(q.verdict) : '' }, !q.verdict ? '' : q.verdict.state === 'missing' ? 'New' : q.verdict.state === 'stale' ? `Changed: ${q.verdict.reasons.slice(0, 2).map(r => r.text).join('; ')}${q.verdict.reasons.length > 2 ? '…' : ''}` : q.verdict.state === 'pinned' ? 'Pinned take: remade only because you ticked it' : 'Up to date: a take already matches'))))),
+      ...(quoted.some(q => q.verdict) ? [h('p', { class: 'note', style: 'margin:0' }, `${quoted.filter(q => q.verdict && (q.verdict.state === 'stale' || q.verdict.state === 'missing')).length} of ${quoted.length} need regenerating. `, quoted.some(q => q.ok && q.verdict && (q.verdict.state === 'fresh' || q.verdict.state === 'pinned')) ? h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { picked = new Set(quoted.filter(q => q.verdict && (q.verdict.state === 'stale' || q.verdict.state === 'missing')).map(q => q.shot.id)); batch.hidden = true; draw(); if (picked.size) void quote(); } }, 'Quote only what changed') : '')] : []),
       ready.length ? h('div', { class: 'sq-approve' },
         h('span', {}, `Estimated total `, h('b', { class: 'mono' }, unknownCost ? `≥ $${total.toFixed(2)}` : `≈ $${total.toFixed(2)}`), ' · Cloud totals are estimates'),
         h('label', {}, approve, 'I approve these requests, with an allowance of ', max, ' USD in total'),

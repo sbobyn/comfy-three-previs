@@ -2,10 +2,12 @@
 // Director scene model shared by the browser workspace, the server and MCP tools.
 // Units are metres. The stage faces +z: "front" is toward the default camera,
 // "left" is -x as seen from the default camera.
+import { LOOK_AXES, presetOf } from './look-presets.mjs';
 import { normalizePose, blendPose, keyEase } from './blockout-pose.mjs';
 import { blockoutModel, projectMesh } from './blockout-models.mjs';
 import { normalizeSheets } from './sheet-presets.mjs';
-import { cameraLine } from './camera-source.mjs';
+import { cameraLine, lookMedium } from './camera-source.mjs';
+import { normalizeSource, normalizePerform, normalizeStandIn } from './imported-asset.mjs';
 
 export const SHAPES = {
   person: { size: [0.5, 1.8, 0.35], kind: 'character', color: '#e8b04b' },
@@ -80,7 +82,15 @@ export function makeEntity(input, id) {
     parent: typeof input.parent === 'string' && input.parent !== id ? input.parent : null,
     ...sheetsOf(input.sheets),
     ...fromOf(input.from),
+    ...importedOf(input),
   };
+}
+// Imported meshes (docs/import.md): provenance and rig (never in a shot signature), the clip it plays, its stand-in.
+function importedOf(input) {
+  const source = projectMesh(input.model) ? normalizeSource(input.source) : undefined;
+  if (!source) return {};
+  const perform = normalizePerform(input.perform, source), standIn = normalizeStandIn(input.standIn);
+  return { source, ...(perform ? { perform } : {}), ...(standIn ? { standIn } : {}) };
 }
 // Design sheets (views generated from the primary look); stored only when present.
 function sheetsOf(v) { const sheets = normalizeSheets(v); return sheets ? { sheets } : {}; }
@@ -310,9 +320,157 @@ export function shotCast(project, shot, { samples = 12, aspect = 16 / 9, minCove
 /** Camera-truth hash: unposed bundled models keep the legacy fidelity-only policy.
  * Imported meshes and posed rigs determine the silhouette; their IDs and all pose keys invalidate earlier media.
  * Same text as src/director-capture.ts shotSignature (tests/headless.test.mjs). */
-export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, ...e }) => ({ ...e, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
-/** The shot's blockout clip no longer matches its camera, timing or scene (it is made again before a video uses it). */
-export const blockoutStale = (project, shot) => !!(shot.render && shot.render.signature && shot.render.signature !== shotSignature(project, shot));
+export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, source, ...e }) => ({ ...e, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+// ---------- Regeneration keys: the blocking (docs/regeneration.md) ----------
+// Every generated output records a manifest { v, type, key, parts } of what it was made from: one hash per input part, so a
+// later change says exactly what changed. This section owns the blocking parts (camera, timing, environment and each object
+// the blockout frames can show); shared/regen.mjs adds prompts, looks, models, params and seeds. Outputs that carry only
+// the older single shotSignature are judged by it, as before.
+/** 53-bit string hash (cyrb53) as 14 hex digits; the same in the browser and on the server. */
+export function hashText(text) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < text.length; i++) { const c = text.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');
+}
+// Numbers rounded to 0.1 mm / 0.001°, so float noise never reads as a change.
+const tidy = (k, v) => (typeof v === 'number' ? Math.round(v * 1e4) / 1e4 : v);
+export const hashValue = v => hashText(JSON.stringify(v ?? null, tidy));
+export const REGEN_VERSION = 1;
+/** A manifest's key: the hash of its type and every part (so equal keys ⇔ equal parts). */
+export const manifestKey = (type, parts) => hashValue([type, Object.keys(parts).sort().map(k => [k, parts[k]])]);
+/** The times (s, shot time) of the frames a blockout clip encodes: 24 fps, 2–120 frames (src/director-capture.ts). */
+export const blockoutFrameTimes = shot => Array.from({ length: Math.min(120, Math.max(2, Math.round(shot.duration * 24))) }, (_, i) => i / 24);
+// Fields that never change a blockout frame: names, Cast Card text, looks, sheets, library provenance and the hierarchy
+// (positions are world space). Everything else an object carries is hashed, including fields added later (imported meshes,
+// rig clips, splats): a new field invalidates by default. Bundled models keep the shotSignature policy (id only when it
+// shapes the silhouette: imported meshes and posed rigs).
+const MOTION = ['position', 'rotation', 'scale', 'pitch', 'roll', 'path', 'pose'];
+function formOf(e) {
+  const { look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, source, ...rest } = e;
+  for (const k of MOTION) delete rest[k];
+  return { ...rest, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) };
+}
+// Where an object is in each encoded frame (position, facing, scale, tilt, pose), so path keys outside the shot change nothing.
+function motionOf(e, start, times) {
+  const one = t => { const a = entityAt(e, start + t); return [a.position, a.rotation, a.scale, a.pitch, a.roll, a.pose ?? null]; };
+  return e.path?.length ? times.map(one) : [one(0)];
+}
+// The sun directions the stage lights use (src/director-scene.ts STUDIO and OUTDOOR); an object whose ground shadow can reach the frame counts as seen.
+const SUNS = [[9, 16, 11], [-14, 12, 5]].map(v => { const l = Math.hypot(...v); return v.map(x => x / l); });
+/**
+ * Every object a shot's blockout frames can show, as a Set of ids: any object whose bounding sphere (or its ground shadow)
+ * enters a frustum widened by `margin` in any encoded frame, at any size; the camera target; and the ancestors and
+ * descendants of each (a rig may carry what is parented to it). Conservative: an object that might be seen is included.
+ */
+export function blockoutObjects(project, shot, { margin = 0.15, aspect = 16 / 9 } = {}) {
+  const entities = project.scene.entities, start = shot.start || 0, seen = new Set();
+  for (const t of blockoutFrameTimes(shot)) {
+    const cam = shotCameraAt(shot, entities, t), f = unit(sub(cam.look, cam.p));
+    let r = cross(f, [0, 1, 0]); if (Math.hypot(...r) < 1e-6) r = [1, 0, 0]; r = unit(r);
+    const u = cross(r, f), tanV = ((35 / aspect) / 2 / Math.max(1, cam.mm)) * (1 + margin), tanH = tanV * aspect;
+    const inView = (c, radius) => {
+      const d = sub(c, cam.p), z = dot(d, f); if (z + radius <= 0.05) return false;
+      const zz = Math.max(z, 0.05);
+      return Math.abs(dot(d, r)) - radius <= zz * tanH && Math.abs(dot(d, u)) - radius <= zz * tanV;
+    };
+    for (const e of entities) {
+      if (e.shape === 'group' || seen.has(e.id)) continue;
+      const at = e.path?.length ? { ...e, ...entityAt(e, start + t) } : e;
+      const size = entitySize(at), radius = (Math.hypot(...size) / 2) * (1 + margin) + 0.25;
+      const c = [at.position[0], at.position[1] + size[1] / 2, at.position[2]], top = c[1] + radius;
+      // The shadow falls between the object's foot and where the sun projects its top onto the ground.
+      const shadow = d => { if (top <= 0) return false; const g = [c[0] - (d[0] * top) / d[1], 0, c[2] - (d[2] * top) / d[1]], foot = [c[0], 0, c[2]]; return inView(foot.map((v, i) => (v + g[i]) / 2), Math.hypot(...sub(g, foot)) / 2 + radius); };
+      if (inView(c, radius) || SUNS.some(shadow)) seen.add(e.id);
+    }
+  }
+  if (entities.some(e => e.id === shot.camera.target)) seen.add(shot.camera.target);
+  for (const id of [...seen]) {
+    for (const d of descendantsOf(entities, id)) seen.add(d.id);
+    let e = entities.find(x => x.id === id);
+    for (let i = 0; e?.parent && i < 32; i++) { seen.add(e.parent); e = entities.find(x => x.id === e.parent); }
+  }
+  return seen;
+}
+const blockoutMemo = new Map();
+/**
+ * The blocking a shot's blockout clip shows, as a manifest: camera (its pose in every encoded frame), timing, environment
+ * preset, and per seen object `move:<id>` (its place in every frame) and `form:<id>` (shape, size, colour, model…).
+ * Objects the frames cannot show are left out, so moving one changes nothing.
+ */
+export function blockoutManifest(project, shot) {
+  const entities = project.scene.entities, preset = project.scene.environment?.preset ?? null;
+  const memoKey = hashValue([shot.id, shot.camera, shot.duration, shot.start || 0, preset, entities.map(({ look, notes, name, styleNotes, sheets, from, source, ...e }) => e)]);
+  let m = blockoutMemo.get(memoKey);
+  if (!m) {
+    const ids = blockoutObjects(project, shot), times = blockoutFrameTimes(shot), start = shot.start || 0;
+    const parts = { camera: hashValue(times.map(t => { const c = shotCameraAt(shot, entities, t); return [c.p, c.look, c.mm]; })), timing: hashValue([shot.duration, start]), environment: hashValue(preset) };
+    for (const e of entities) if (ids.has(e.id)) { parts[`move:${e.id}`] = hashValue(motionOf(e, start, times)); parts[`form:${e.id}`] = hashValue(formOf(e)); }
+    m = { v: REGEN_VERSION, type: 'blockout', key: manifestKey('blockout', parts), parts };
+    if (blockoutMemo.size > 128) blockoutMemo.delete(blockoutMemo.keys().next().value);
+    blockoutMemo.set(memoKey, m);
+  }
+  return { ...m, parts: { ...m.parts } };
+}
+/** True when a part name is part of the blocking (what the blockout frames show). */
+export const isBlockingPart = k => k === 'camera' || k === 'timing' || k === 'environment' || k === 'moment' || k.startsWith('move:') || k.startsWith('form:');
+// Parts a caller may not know (no model chosen yet): an absent current value is not compared.
+const OPTIONAL_PARTS = new Set(['model', 'params', 'seed', 'refs', 'source']);
+const PART_TEXT = { camera: 'camera changed', timing: 'timing changed (length or start)', environment: 'environment changed', moment: 'moment changed', prompt: 'prompt changed', model: 'model changed', params: 'model settings changed', seed: 'seed changed', refs: 'reference images changed', source: 'camera source changed', card: 'description changed', blockout: 'blockout changed' };
+/**
+ * Why `recorded` no longer matches `current` (both manifest `parts`), as machine-readable reasons:
+ * [{ code, part, text, entityId?, from?, to? }]. codes: camera, timing, environment, moment, prompt, model, params, seed,
+ * refs, source, card (the description behind a cast image), object-moved, object-changed, object-entered, object-left, look-changed,
+ * cast-card-changed, still-changed. `only` limits the comparison to some part names (e.g. isBlockingPart).
+ */
+export function diffParts(project, recorded = {}, current = {}, { only = null } = {}) {
+  const name = id => project.scene.entities.find(e => e.id === id)?.name || null, out = [], objects = new Map();
+  const keys = [...new Set([...Object.keys(recorded), ...Object.keys(current)])].filter(k => !only || only(k));
+  for (const k of keys) {
+    const a = recorded[k], b = current[k];
+    if (a === b || (b === undefined && OPTIONAL_PARTS.has(k))) continue;
+    const p = /^preset:(subject:)?(.+)$/.exec(k);
+    if (p) { out.push(presetReason(project, k, p, a, b)); continue; }
+    if (k === 'base') { out.push({ code: 'base-still', part: k, text: 'base still changed', from: a ?? null, to: b ?? null }); continue; }
+    const m = /^(move|form|look|card|still):(.+)$/.exec(k);
+    if (m && (m[1] === 'move' || m[1] === 'form')) { const o = objects.get(m[2]) || {}; o[m[1]] = a === undefined ? 'entered' : b === undefined ? 'left' : 'changed'; objects.set(m[2], o); continue; }
+    if (m && m[1] === 'look') { const n = name(m[2]); if (a === undefined && b === 'none') continue; out.push({ code: 'look-changed', part: k, entityId: m[2], text: `cast image of ${n || 'a removed object'} changed`, from: a ?? null, to: b ?? null }); continue; }
+    if (m && m[1] === 'card') { if (a === undefined || b === undefined) continue; out.push({ code: 'cast-card-changed', part: k, entityId: m[2], text: `description of ${name(m[2]) || 'a removed object'} changed` }); continue; }
+    if (m && m[1] === 'still') { out.push({ code: 'still-changed', part: k, text: `${m[2]} still changed`, from: a ?? null, to: b ?? null }); continue; }
+    out.push({ code: k, part: k, text: PART_TEXT[k] || `${k} changed`, ...(['model', 'seed', 'source'].includes(k) ? { from: a ?? null, to: b ?? null } : {}) });
+    if (k === 'model' && a && b) out.at(-1).text = `model changed (${a} → ${b})`;
+  }
+  for (const [id, o] of objects) {
+    const n = name(id) || 'a removed object';
+    if (o.move === 'entered' || o.form === 'entered') out.push({ code: 'object-entered', part: `move:${id}`, entityId: id, text: `${n} is now in frame` });
+    else if (o.move === 'left' || o.form === 'left') out.push({ code: 'object-left', part: `move:${id}`, entityId: id, text: name(id) ? `${n} is no longer in frame` : 'an object in frame was removed' });
+    else {
+      if (o.move) out.push({ code: 'object-moved', part: `move:${id}`, entityId: id, text: `${n} moved` });
+      if (o.form) out.push({ code: 'object-changed', part: `form:${id}`, entityId: id, text: `${n} changed (shape, size, colour or model)` });
+    }
+  }
+  return out;
+}
+/** A look preset reason (shared/look-presets.mjs): "Time of day preset changed (night → dawn)" or "Eagle's subject swap changed". */
+function presetReason(project, k, [, subject, rest], a, b) {
+  if (subject) { const n = project.scene.entities.find(e => e.id === rest)?.name || 'an object'; return { code: 'look-preset', part: k, entityId: rest, text: `${n}'s subject swap ${a === undefined ? 'added' : b === undefined ? 'removed' : 'changed'}` }; }
+  const axis = LOOK_AXES.find(x => x.id === rest), name = id => (id === undefined ? 'none' : presetOf(rest, id)?.label || id);
+  return { code: 'look-preset', part: k, text: `${axis?.label || rest} preset changed (${name(a)} → ${name(b)})`, from: a ?? null, to: b ?? null };
+}
+const hasManifest = m => !!(m && typeof m === 'object' && m.parts && typeof m.parts === 'object' && m.v === REGEN_VERSION);
+/** What changed in the blocking since a manifest was recorded for this shot (blocking parts only; [] when it still matches). */
+export function blockingChanges(project, shot, recorded) {
+  return diffParts(project, Object.fromEntries(Object.entries(recorded.parts).filter(([k]) => isBlockingPart(k) && k !== 'moment')), blockoutManifest(project, shot).parts, { only: k => isBlockingPart(k) && k !== 'moment' });
+}
+/** A blockout clip asset (or shot.render) still shows the shot as it is now: its manifest, else its signature; null when it recorded neither. */
+export function clipCurrent(project, shot, rec) {
+  const m = rec?.regen || rec?.source?.regen, sig = rec?.signature || rec?.source?.signature;
+  if (hasManifest(m)) return m.key === blockoutManifest(project, shot).key || !blockingChanges(project, shot, m).length;
+  return sig ? sig === shotSignature(project, shot) : null;
+}
+/** The shot's blockout clip no longer matches its camera, timing or the objects it shows (it is made again before a video uses it). */
+export const blockoutStale = (project, shot) => !!shot.render && clipCurrent(project, shot, shot.render) === false;
 /** The shot's blockout clip is a Blender render (server/previs/blender-import.mjs) that still matches the shot, so its frames are the still guide. */
 export const blenderBlockout = (project, shot) => shot.render?.origin === 'blender' && !blockoutStale(project, shot);
 
@@ -322,7 +480,9 @@ export const blenderBlockout = (project, shot) => shot.render?.origin === 'blend
  * newer than it (blockouts are made again only when the shot changes). Uploaded frames are never stale.
  */
 export function stillStale(project, shot, ref) {
-  if (!ref?.generated) return false;
+  if (!ref?.generated || ref.pinned) return false;
+  // A still with a regeneration manifest is judged on what its frame shows (the objects in view), not the whole scene.
+  if (hasManifest(ref.generated.regen)) return blockingChanges(project, shot, ref.generated.regen).length > 0;
   const made = ref.generated.signature;
   if (made) return made !== shotSignature(project, shot);
   return !!(shot.render?.createdAt && ref.createdAt && ref.createdAt < shot.render.createdAt);
@@ -334,12 +494,13 @@ export function stillStale(project, shot, ref) {
  * is not judged.
  */
 export function videoStale(project, shot, video) {
-  if (video?.kind !== 'workflow-result') return false;
+  if (video?.kind !== 'workflow-result' || video.pinned) return false;
+  if (hasManifest(video.source?.regen)) return blockingChanges(project, shot, video.source.regen).length > 0;
   const assets = project.assets || [];
   const src = assets.find(a => a.id === video.source?.sourceAssetId && a.kind === 'camera-render');
   if (!src) return false;
-  const made = src.source?.signature || (shot.render?.assetId === src.id ? shot.render.signature : null);
-  if (made) return made !== shotSignature(project, shot);
+  const current = clipCurrent(project, shot, src.source?.regen || src.source?.signature ? src : shot.render?.assetId === src.id ? shot.render : null);
+  if (current !== null) return !current;
   return assets.some(a => a.kind === 'camera-render' && a.shotId === shot.id && a.id !== src.id && String(a.createdAt) > String(src.createdAt));
 }
 
@@ -352,8 +513,7 @@ export function starterBlockout(project, shot) {
   if (shot.render) return null;
   const clip = (project.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id && a.starter).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))[0];
   if (!clip) return null;
-  const made = clip.source?.signature;
-  return { asset: clip, fresh: made ? made === shotSignature(project, shot) : null };
+  return { asset: clip, fresh: clipCurrent(project, shot, clip) };
 }
 
 /**
@@ -443,7 +603,7 @@ export function compilePrompt(project, shot, refs = null, { cameraSource = 'bloc
   if (style.length) lines.push(refs ? (style.some(r => num(r.id)) ? `Style: match reference image ${style.map(r => num(r.id)).filter(Boolean).join(', ')}.` : '') : `Style: match ${style.map(r => `“${r.name}”`).join(', ')}.`);
   if (environment?.style) lines.push(`Visual style: ${environment.style}.`);
   if (refs?.length) lines.push(`Keep every object consistent with its reference image across the whole shot.`);
-  lines.push(cameraLine(cameraSource));
+  lines.push(cameraLine(cameraSource, lookMedium(environment?.style)));
   return lines.filter(Boolean).join('\n');
 }
 

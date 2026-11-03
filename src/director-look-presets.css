@@ -1,0 +1,24 @@
+/* Look presets block (src/director-look-presets.ts). */
+.lp .lp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 8px; }
+.lp .lp-axis { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; color: var(--muted, #6b6b6b); }
+.lp .lp-sel { font-size: 12.5px; padding: 3px 6px; }
+.lp .lp-scope { display: inline-flex; border: 1px solid var(--line, #d9d6cf); border-radius: 8px; overflow: hidden; align-self: flex-start; }
+.lp .lp-seg { border: 0; background: transparent; padding: 3px 10px; font-size: 12px; cursor: pointer; }
+.lp .lp-seg.on { background: var(--ink, #15130f); color: #fff; }
+.lp .lp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 3px 0; }
+.lp .lp-k { font-size: 11.5px; color: var(--muted, #6b6b6b); min-width: 92px; }
+.lp .lp-chip { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line, #d9d6cf); border-radius: 999px; padding: 2px 9px; font-size: 12px; background: #fff; cursor: pointer; }
+.lp .lp-chip.on { background: #2e2a6e; border-color: #2e2a6e; color: #fff; }
+.lp .lp-x { border: 0; background: transparent; color: inherit; cursor: pointer; padding: 0 0 0 2px; font-size: 13px; line-height: 1; }
+.lp .lp-variant { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.lp .lp-variant.warn .lp-note { color: #a6461f; font-size: 11.5px; }
+.lp .lp-swap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.lp .lp-swap .field { font-size: 12.5px; padding: 3px 6px; }
+.lp .lp-swap input.field { flex: 1 1 140px; min-width: 120px; }
+.lp .lp-neg { margin: 0; font-size: 11px; }
+.lp .lp-variants summary { cursor: pointer; font-size: 12.5px; font-weight: 600; }
+.lp .lp-variants .note { margin: 4px 0; }
+.lp .lp-combine { font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 4px 0; }
+.lp .lp-plan { border-top: 1px solid var(--line, #d9d6cf); margin-top: 6px; padding-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+.lp .lp-planrow { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; }
+.lp .lp-quote { color: #1f6b3a; }

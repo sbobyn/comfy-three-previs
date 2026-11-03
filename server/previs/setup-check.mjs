@@ -40,7 +40,7 @@ export async function setupChecks({ root, data, env = process.env, fetcher = fet
   }
   add('env', '.env file', await exists(join(root, '.env')) ? 'ok' : 'optional', await exists(join(root, '.env')) ? '.env present' : 'No .env (optional)', 'cp .env.example .env, then add keys you need.');
   add('cloud', 'Comfy Cloud key', env.COMFY_CLOUD_API_KEY ? 'ok' : 'optional', env.COMFY_CLOUD_API_KEY ? 'COMFY_CLOUD_API_KEY is set' : 'Not set — Cloud quotes and generation unavailable', 'Create a key at comfy.org and put it in .env as COMFY_CLOUD_API_KEY=… (never commit it).');
-  add('paid', 'Paid generation', env.PREVIS_ALLOW_PAID === '1' ? 'warn' : 'ok', env.PREVIS_ALLOW_PAID === '1' ? 'ENABLED — approved Cloud requests will be charged' : 'Off (quotes only). Set PREVIS_ALLOW_PAID=1 to allow approved paid runs.', '');
+  add('paid', 'Paid generation', env.PREVIS_ALLOW_PAID === '1' ? 'warn' : 'optional', env.PREVIS_ALLOW_PAID === '1' ? 'ENABLED — approved Cloud requests will be charged' : 'Off (quotes only). Set PREVIS_ALLOW_PAID=1 to allow approved paid runs.', '');
   const comfyUrl = env.PREVIS_COMFY_URL || 'http://127.0.0.1:8000';
   let local = null;
   try { const r = await fetcher(comfyUrl + '/system_stats', { signal: AbortSignal.timeout(1500) }); local = r.ok; } catch { local = false; }

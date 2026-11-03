@@ -91,7 +91,7 @@ export function createBackend(input, options = {}) {
   const retry = { ...BACKEND_RETRY, ...options.retry }, sleep = options.sleep || sleepFor;
   const inspectTtlMs = options.inspectTtlMs ?? (env.PREVIS_INSPECT_CACHE_MS !== undefined ? Number(env.PREVIS_INSPECT_CACHE_MS) : 0);
   async function request(path, init = {}, redirect = 'error', ms = timeouts.queue) {
-    if (cloud && !credential()) throw Error('Set COMFY_CLOUD_API_KEY in the server environment');
+    if (cloud && !credential()) throw Error('No Comfy Cloud key on this server. Add a Comfy Cloud key in Setup (COMFY_CLOUD_API_KEY in .env), or switch to Local ComfyUI. Nothing was sent.');
     let response;
     try {
       response = await fetcher(snapshot.url + prefix + path, { ...init, headers: { ...init.headers, ...(cloud ? { 'X-API-Key': credential() } : {}) }, redirect, signal: AbortSignal.timeout(ms) });

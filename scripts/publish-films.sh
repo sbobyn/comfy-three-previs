@@ -40,7 +40,7 @@ for pair in $FILES; do
   table+="| \`$name\` | $(wc -c <"$src" | tr -d ' ') | \`$(shasum -a 256 "$src" | cut -d' ' -f1)\` |"$'\n'
 done
 cat >"$TMP/notes.md" <<EOF
-The launch films for [Comfy Three Previs](https://github.com/$SLUG), trailer **$VERSION**. Not a software release.
+The launch films for [Comfy Previs](https://github.com/$SLUG), trailer **$VERSION**. Not a software release.
 
 They are kept here rather than in git so the repo stays small to clone. Each new cut replaces these files under the same names, so links stay valid.
 

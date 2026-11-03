@@ -3,8 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Comfy Three Previs · Director</title>
+    <title>Comfy Previs · Director</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <script>
+      /* Theme before first paint (src/theme.ts): Dark unless the user chose Light or System. */
+      (function () { var p = 'dark'; try { p = localStorage.getItem('previs.theme') || 'dark'; } catch (e) {} if (p !== 'light' && p !== 'system') p = 'dark'; var t = p === 'system' ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : p; var r = document.documentElement; r.dataset.theme = t; r.dataset.themePref = p; r.style.colorScheme = t; })();
+    </script>
   </head>
   <body>
     <div class="ws" id="app"></div>

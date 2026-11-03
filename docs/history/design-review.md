@@ -1,6 +1,6 @@
 # Previs workstation design review
 
-This bounded visual pass starts from the reviewed Tuesday release candidate `6915f88`. The first-use and earlier video checkpoints remain preserved. Exact integrated SHA, model identities, runtime ownership and verification logs are recorded in the operator-local [design checkpoint](../.evidence/design-20261024/checkpoint.json). The non-spending review build is **http://127.0.0.1:5199**; it uses a disposable full-library copy, not the original project.
+This bounded visual pass starts from the reviewed Tuesday release candidate `6915f88`. The first-use and earlier video checkpoints remain preserved. Exact integrated SHA, model identities, runtime ownership and verification logs are recorded in the operator-local [design checkpoint](../../.evidence/design-20261024/checkpoint.json). The non-spending review build is **http://127.0.0.1:5199**; it uses a disposable full-library copy, not the original project.
 
 ## Layout and scope
 
@@ -22,7 +22,7 @@ Sources: [shared brand reference](https://comfy.org/brand/) and [Comfy homepage]
 4. [Open the recorded Kling comparison](http://127.0.0.1:5199/generation.html?job=1c706a23-064a-4dcc-9f4e-2c6ec6ed8a3b&output=7416f999-83a6-40a7-916d-cb096b61415a). This opens existing media; no new generation occurs. Seek to 3.02 seconds. The source ends at 3 seconds while the 73-frame result continues to 3.041667 seconds. Notes and exact downloads belong to that saved request/output, not the current shot.
 5. Open Advanced only when needed. Imported graphs, authored model/LoRA values, declared outputs, full request identity and recovery acknowledgments remain inspectable. A missing source/output is refused; another candidate is never silently substituted.
 
-[Matched before/after screenshots](../.evidence/design-20261024/) · [short walkthrough](../.evidence/design-20261024/design-walkthrough.mp4). These are operator-local evidence, not bundled media or a fresh-generation demonstration.
+[Matched before/after screenshots](../../.evidence/design-20261024/) · [short walkthrough](../../.evidence/design-20261024/design-walkthrough.mp4). These are operator-local evidence, not bundled media or a fresh-generation demonstration.
 
 ## Evidence and limits
 
@@ -32,6 +32,6 @@ Connection loss, uncertain acceptance and recovery use clearly labelled disposab
 
 Responsive checks cover 1440×900, 1280×720 and 720×450 CSS pixels. The last checks reflow equivalent to the available space at 200% zoom, not actual browser zoom: native control permission was unavailable and the browser shortcut did not change zoom. Actual OS download completion also remains unqualified; exact source/result URLs and bytes are verified, with the earlier browser-tool timeout retained as a limitation.
 
-The retained framewise SD1.5 result remains quality-rejected. Local temporal qualification, its three missing pinned weights and separate download/execution approval are unchanged; see [local temporal test](local-temporal-test.md). Workspace-level billing of approximately $0.419934 is still not a proven final settled charge for the exact Kling job. Cloud retrieval compatibility and temporary support boundaries remain as documented in [Tuesday review](tuesday-review.md).
+The retained framewise SD1.5 result remains quality-rejected. Local temporal qualification, its three missing pinned weights and separate download/execution approval are unchanged; see [local temporal test](../local-temporal-test.md). Workspace-level billing of approximately $0.419934 is still not a proven final settled charge for the exact Kling job. Cloud retrieval compatibility and temporary support boundaries remain as documented in [Tuesday review](../tuesday-review.md).
 
 MIT covers original Previs contributions. Before distribution, Steven must confirm ownership of the 23 inherited three-vcam baseline paths or identify their upstream permissions. Git authorship is insufficient. No remote, visibility, publication or ownership decision was changed by this pass.

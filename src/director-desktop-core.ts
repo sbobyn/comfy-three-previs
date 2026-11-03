@@ -36,7 +36,8 @@ export function stepStatus(step: Step, p: DirectorProject, s: Shot, o: { stale: 
   }
   if (step === 'shoot') {
     const stills = s.references.filter(r => r.role === 'frame').length, blockout = s.render ? (o.stale ? 'blockout changed' : 'blockout ready') : o.bundled ? 'starter blockout' : 'no blockout';
-    return { parts: [`Shot ${String(p.shots.indexOf(s) + 1).padStart(2, '0')}`, s.title, blockout, n(stills, 'still'), o.videos ? n(o.videos, 'video') : 'no video'], short: blockout };
+    // No shot title: the shot list shows it, and it pushed the counts off the end of the top bar.
+    return { parts: [`Shot ${String(p.shots.indexOf(s) + 1).padStart(2, '0')}`, blockout, n(stills, 'still'), o.videos ? n(o.videos, 'video') : 'no video'], short: blockout };
   }
   const vids = new Set((p.assets || []).filter(a => a.kind === 'workflow-result').map(a => a.shotId)).size;
   return { parts: [n(p.shots.length, 'shot'), `${vids} of ${p.shots.length} with video`], short: `${vids}/${p.shots.length} video` };
@@ -161,7 +162,7 @@ export function externalChanges(before: DirectorProject, after: DirectorProject)
   for (const s of after.shots) {
     const old = bS.get(s.id); if (!old) continue;
     const keys = SHOT_KEYS.filter(k => !same(old[k], s[k]));
-    const prompts = !same(old.prompts, s.prompts) || !same(old.style, s.style) || !same(old.promptSections, s.promptSections) || !same(old.settings, s.settings);
+    const prompts = !same(old.prompts, s.prompts) || !same(old.style, s.style) || !same(old.promptSections, s.promptSections) || !same(old.settings, s.settings) || !same(old.look, s.look);
     if (!keys.length && !prompts) continue;
     text.push(`updated ${name(s)}`);
     if (prompts) ok = false;
@@ -185,12 +186,30 @@ export const TOUR = [
   { id: 'generate', title: 'Generate', body: 'Generate makes a still or the shot’s video. You see the cost first; nothing is charged without your approval.' },
 ] as const;
 export const TOUR_KEY = 'previs.tour.v1';
-/** Show the tour once per browser, on a project that is new (few edits) and not empty. */
-export function shouldTour(p: Pick<DirectorProject, 'revision' | 'scene' | 'createdAt'>, seen: string | null, now = Date.now()) {
-  if (seen === '1') return false;
+/** Show the tour once per browser, on a New scene project that is new (few edits) and not empty. Starters are finished films: no tour. */
+export function shouldTour(p: Pick<DirectorProject, 'revision' | 'scene' | 'createdAt' | 'template'>, seen: string | null, now = Date.now()) {
+  if (seen === '1' || p.template !== 'empty') return false;
   const fresh = p.revision <= 3 || now - Date.parse(p.createdAt) < 30 * 60_000;
   return fresh && p.scene.entities.length > 0;
 }
+
+// ---------- Home: the hero reel ----------
+/**
+ * The landing hero cycles these blockout → generated pairs (files under public/guide/hero/: `<id>-blockout.mp4`,
+ * `<id>-generated.mp4` and a `.webp` poster of each). Each pair is one camera: the generated clip is an edit of that blockout.
+ */
+export const HERO_REEL = [
+  { id: 'race', label: 'Final Lap · Finish line' },
+  { id: 'eagle', label: 'Wingspan · Alongside' },
+  { id: 'lighthouse', label: 'Lighthouse · Storm orbit' },
+  { id: 'street', label: 'Look Lab · Cyberpunk' },
+  { id: 'dunk', label: 'Posterized · The dunk' },
+  { id: 'product', label: 'Product ad · Studio' },
+] as const;
+export const HERO_SHOT_MS = 5600;
+export const heroFiles = (id: string) => ({ before: `hero/${id}-blockout.mp4`, after: `hero/${id}-generated.mp4`, posters: [`hero/${id}-blockout.webp`, `hero/${id}-generated.webp`] as [string, string] });
+/** The next shot in the reel: paused (dragging, hovering, focused) or reduced motion stays put. */
+export const heroNext = (i: number, n: number, paused: boolean, reduced: boolean) => (paused || reduced || n < 2 ? i : (i + 1) % n);
 
 // ---------- Home: the starter card's blockout → video seam ----------
 export type GuideEntryLite = { id: string; file: string; kind: 'video' | 'image'; label?: string };
