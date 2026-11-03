@@ -26,8 +26,8 @@
   },
   "eagle": {
     "shape": "bird",
-    "triangles": 446,
-    "bytes": 39032
+    "triangles": 1236,
+    "bytes": 85988
   },
   "elk": {
     "shape": "box",
