@@ -16,7 +16,7 @@ examples/starters/
 ## Blockout starters (2026-11-02)
 
 Five starters open with a blockout clip per shot and written Cast Cards, and no generated media: making the cast images,
-stills and videos is the test. They were built through the MCP tools on a private server (paid work off) by
+stills and videos is the test. Look Lab is the exception: it also ships a start still per variant and four videos (below). They were built through the MCP tools on a private server (paid work off) by
 `scripts/starters/author.mjs` and its scene modules in `scripts/starters/scenes/`; the bundles here remain the source of
 truth. Every object is original, nothing carries a brand, logo, sign or lettering (each project style says so, and every
 shot has the `no logos or lettering` filter tag, which a video prompt always keeps), every shot is 4–5 s with its camera
@@ -71,13 +71,26 @@ The pairs' `cuts` style tags (`whip pan to whip pan`, `match cut`, `cut on actio
 intent; like all movement and cut tags they stay out of the prompts.
 
 **Look Lab variants.** Twelve shots share one camera, start, duration and scene, so they have the same blocking signature;
-only the base variant ships a blockout clip, and generating any variant makes its own (identical) blockout first. Each
+the base variant and the four with videos ship a blockout clip, and generating any other variant makes its own (identical)
+blockout first. Each
 variant differs only in its prompt sections (Prompt sections in the shot, or `previs_director_set_prompt_section`), for
 both video and image prompts: the world (`world`, the season or time of day), the look (`style`), the walker's Cast Card
 text (`obj:<walker>`, clothing or a different person) and the format line (`intro`, for the stylised looks). The variants
 are summer day (base), night, spring, fall, winter, a yellow raincoat, a formal suit, a different person (an older man),
 anime, claymation, a stylised 3D animated feature and watercolour. Every variant's video prompt fits the 600-character cap.
-The quote for stills and edit videos of all twelve is in `.evidence/LOOKLAB-QUOTE-20261102.md`.
+For the anime, claymation, 3D animated and watercolour variants the camera line repaints the blockout in that medium
+instead of photoreal (`lookMedium`, docs/director.md).
+
+**Look Lab media (paid hybrid, 2026-11-02).** Every variant ships one start still: GPT Image 2.5, made from the shared
+blockout frame and screened for no logos, brands or readable text, the blockout framing and the variant's look. Four
+variants also ship a Seedance 2.5 edit of their own blockout clip, in the cut: **b · Night**, **e · Winter**, **i · Anime**
+and **j · Claymation**. The other eight have a still only; a final-tier batch makes their end stills and videos. Cost
+at list prices was $9.15: 13 stills, $1.25, at $0.094 each (two at $0.111, sent the previous shot's still as well) and 5
+videos, $7.90, at $1.58 each. Billing settled at about $7.11 ($1.01 stills, $6.10 videos). Two takes were made and not
+used: a claymation still retake, which looked more 3D animated than clay, and the first anime video, which dropped the
+parked car and brought the walker to the lens far ahead of the blockout. The anime video still drops the parked car. A few
+cars carry a small generic grille emblem with no readable mark. Details per item are in
+`.evidence/LOOKLAB-QUOTE-20261102.md` (not in git).
 
 The snapshot format keeps a shot's prompt-section overrides, saved models and settings and its direction flag
 (`promptSections`, `settings`, `motionCritical`); a copy re-keys `obj:<id>` sections to its own object ids. Prompt version
@@ -174,8 +187,8 @@ signature. `PREVIS_STARTERS_DIR` points the server at another starters folder (f
 
 ## Media size and why it is in git
 
-The starters' media is about 63 MB: 33 MB for the four finished starters and 30 MB of blockout clips (and two 110 KB
-mannequin GLBs) for the five blockout starters, 17.5 MB of it Camera Moves' 24 shots (the export stops at 80 MB and then
+The starters' media is about 71 MB: 33 MB for the four finished starters and 38 MB for the five blockout starters
+(blockout clips, two 110 KB mannequin GLBs and Look Lab's 9 MB of stills and videos), 17.5 MB of it Camera Moves' 24 shots (the export stops at 80 MB and then
 keeps only the hero shots' videos). It is committed with the code rather than downloaded from a release so that a fresh clone opens
 finished starters offline, with no publish step to keep in sync, and so `pnpm demo:build` can use the same
 files. Re-exporting only rewrites a file when its source changed, so history grows only when a starter's

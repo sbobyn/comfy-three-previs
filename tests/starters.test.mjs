@@ -9,7 +9,7 @@ import { createProjectDocument, openDirector } from '../server/previs/director.m
 import { loadStarters, starterSnapshot, instantiateStarter, attachStarterMedia, starterCard, MODEL_BASE } from '../server/previs/starters.mjs';
 import { shotSignature } from '../shared/director.mjs';
 import { projectMesh } from '../shared/blockout-models.mjs';
-import { FINISHED_STARTERS, BLOCKOUT_STARTERS } from './helpers/starters.mjs';
+import { FINISHED_STARTERS, BLOCKOUT_STARTERS, LOOK_LAB_VIDEOS } from './helpers/starters.mjs';
 
 test('starter snapshots load in launch-page order, carry no absolute paths, and list media that is present', async () => {
   const starters = await loadStarters();
@@ -32,14 +32,28 @@ test('starter snapshots load in launch-page order, carry no absolute paths, and 
     for (const e of s.scene.entities.filter(x => projectMesh(x.model))) { assert.ok(e.model.startsWith(MODEL_BASE), `${s.slug}: ${e.name}`); assert.ok(listed.has(`media/refs/${e.model.split('/').pop()}`), `${s.slug}: ${e.name} model file`); }
     if (BLOCKOUT_STARTERS.includes(s.slug)) {
       // A blockout starter: every shot has its blockout clip, or shares the exact blocking of a shot that has one (Look Lab's
-      // variants); no stills or videos; every shot's subject has a written Cast Card.
-      const clipped = new Set(s.assets.filter(a => a.kind === 'camera-render').map(a => a.shotId));
+      // variants); no stills or videos (Look Lab: one current start still per shot, videos for LOOK_LAB_VIDEOS only); every
+      // shot's subject has a written Cast Card.
+      const clipped = new Set(s.assets.filter(a => a.kind === 'camera-render').map(a => a.shotId)), lookLab = s.slug === 'look-lab';
       for (const shot of s.shots) {
         assert.ok(clipped.has(shot.id) || s.shots.some(o => clipped.has(o.id) && shotSignature(s, o) === shotSignature(s, shot)), `${s.slug} ${shot.title} has no blockout clip`);
-        assert.equal(shot.references.length, 0); assert.ok(shot.duration >= 4 && shot.duration <= 5);
+        assert.ok(shot.duration >= 4 && shot.duration <= 5);
         assert.ok((s.scene.entities.find(e => e.id === shot.camera.target)?.notes || '').trim(), `${s.slug} ${shot.title}: its subject has no Cast Card`);
+        if (!lookLab) { assert.equal(shot.references.length, 0); continue; }
+        assert.equal(shot.references.length, 1, `${shot.title}: one still`);
+        const [still] = shot.references;
+        assert.equal(still.role, 'frame'); assert.equal(still.note, 'key frame start');
+        assert.equal(still.generated?.signature, shotSignature(s, shot), `${shot.title}: the still shows the current blocking`);
+        assert.equal(still.generated?.presetId, 'gpt-image-25'); assert.equal(still.generated?.regen, undefined, `${shot.title}: no manifest ships`);
       }
-      assert.ok(!s.assets.some(a => a.kind === 'workflow-result') && !s.edit.clips.length, `${s.slug}: no generated media`);
+      const videos = s.assets.filter(a => a.kind === 'workflow-result');
+      if (!lookLab) assert.ok(!videos.length && !s.edit.clips.length, `${s.slug}: no generated media`);
+      else {
+        assert.deepEqual(videos.map(v => s.shots.find(x => x.id === v.shotId).title).sort(), LOOK_LAB_VIDEOS, 'Look Lab videos');
+        // Each video is in the cut and points at its own shot's blockout clip, which shows the current blocking.
+        assert.deepEqual(s.edit.clips.map(c => c.assetId).sort(), videos.map(v => v.id).sort());
+        for (const v of videos) { const b = s.assets.find(a => a.id === v.source.sourceAssetId); assert.equal(b?.kind, 'camera-render'); assert.equal(b.shotId, v.shotId); assert.equal(b.source.signature, shotSignature(s, s.shots.find(x => x.id === v.shotId))); }
+      }
       for (const e of s.scene.entities.filter(x => x.kind === 'character' && x.shape !== 'group')) assert.ok((e.notes || '').trim() || e.lookFrom, `${s.slug}: ${e.name} has no Cast Card`);
       continue;
     }

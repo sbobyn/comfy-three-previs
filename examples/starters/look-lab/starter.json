@@ -14,7 +14,7 @@
     },
     "entities": [
       {
-        "id": "75a1c49d-98f0-4f07-9498-ad2a904453f8",
+        "id": "ac692be3-b038-43b1-a6e4-0527d896783b",
         "name": "Hills",
         "kind": "environment",
         "shape": "terrain",
@@ -40,7 +40,7 @@
         "parent": null
       },
       {
-        "id": "c2d044ab-f2df-4763-8541-7ef604dd5df2",
+        "id": "0a362336-d64d-4aec-a440-3673f3e94198",
         "name": "Road north",
         "kind": "environment",
         "shape": "box",
@@ -62,10 +62,10 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "bf8d2e17-d434-4641-bd70-3ffb4cb22482",
+        "id": "b73e2115-dc0e-4d45-bcbb-b4d76d684622",
         "name": "Sidewalk east north",
         "kind": "environment",
         "shape": "box",
@@ -87,10 +87,10 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "06046080-8db6-4420-a7f3-4da0234e5cc2",
+        "id": "4a5f5628-f451-4ba6-9c3b-2ee5cc958a4b",
         "name": "Sidewalk west north",
         "kind": "environment",
         "shape": "box",
@@ -107,15 +107,15 @@
         ],
         "color": "#b3aea4",
         "notes": "",
-        "lookFrom": "bf8d2e17-d434-4641-bd70-3ffb4cb22482",
+        "lookFrom": "b73e2115-dc0e-4d45-bcbb-b4d76d684622",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "f1e04368-abfb-45c2-9129-7b6fcca0bcaf",
+        "id": "821ccd54-a578-4863-853f-31b4d60ad17e",
         "name": "Verge east north",
         "kind": "environment",
         "shape": "box",
@@ -137,10 +137,10 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "d553f75f-00fc-4d4b-b1e7-15c6184850d5",
+        "id": "a1f5fb40-d321-4c0e-86a7-5b144220bf27",
         "name": "Verge west north",
         "kind": "environment",
         "shape": "box",
@@ -157,15 +157,15 @@
         ],
         "color": "#6d8f4f",
         "notes": "",
-        "lookFrom": "f1e04368-abfb-45c2-9129-7b6fcca0bcaf",
+        "lookFrom": "821ccd54-a578-4863-853f-31b4d60ad17e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "e9bfb9e5-7ce6-4c66-87aa-39f00380790a",
+        "id": "642e5164-68b0-4aa0-921f-1bacfbb39877",
         "name": "Road south",
         "kind": "environment",
         "shape": "box",
@@ -182,15 +182,15 @@
         ],
         "color": "#45484d",
         "notes": "",
-        "lookFrom": "c2d044ab-f2df-4763-8541-7ef604dd5df2",
+        "lookFrom": "0a362336-d64d-4aec-a440-3673f3e94198",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "299c6635-f666-4b17-a394-41d059389ede",
+        "id": "9a46c967-1c52-4642-8a71-2aa9318acbcd",
         "name": "Sidewalk east south",
         "kind": "environment",
         "shape": "box",
@@ -207,15 +207,15 @@
         ],
         "color": "#b3aea4",
         "notes": "",
-        "lookFrom": "bf8d2e17-d434-4641-bd70-3ffb4cb22482",
+        "lookFrom": "b73e2115-dc0e-4d45-bcbb-b4d76d684622",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "f48e10a3-97a8-4087-8045-3a905fed4957",
+        "id": "c4c85dc2-fa5f-4269-8a58-74be3f696056",
         "name": "Sidewalk west south",
         "kind": "environment",
         "shape": "box",
@@ -232,15 +232,15 @@
         ],
         "color": "#b3aea4",
         "notes": "",
-        "lookFrom": "bf8d2e17-d434-4641-bd70-3ffb4cb22482",
+        "lookFrom": "b73e2115-dc0e-4d45-bcbb-b4d76d684622",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "06c06986-d2be-450e-becf-07828571d89f",
+        "id": "5ece684d-c6a7-4f33-9a0d-f8c976316a77",
         "name": "Verge east south",
         "kind": "environment",
         "shape": "box",
@@ -257,15 +257,15 @@
         ],
         "color": "#6d8f4f",
         "notes": "",
-        "lookFrom": "f1e04368-abfb-45c2-9129-7b6fcca0bcaf",
+        "lookFrom": "821ccd54-a578-4863-853f-31b4d60ad17e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "3efb09cb-672d-484c-889a-3d6f3fec1540",
+        "id": "78b7715a-1c91-4f58-ae25-02c7060cb465",
         "name": "Verge west south",
         "kind": "environment",
         "shape": "box",
@@ -282,15 +282,15 @@
         ],
         "color": "#6d8f4f",
         "notes": "",
-        "lookFrom": "f1e04368-abfb-45c2-9129-7b6fcca0bcaf",
+        "lookFrom": "821ccd54-a578-4863-853f-31b4d60ad17e",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "3c63129c-c706-42ed-96ea-52c00952f0d5"
+        "parent": "d6095b97-5941-4a23-9830-d63225384389"
       },
       {
-        "id": "3c63129c-c706-42ed-96ea-52c00952f0d5",
+        "id": "d6095b97-5941-4a23-9830-d63225384389",
         "name": "Street",
         "kind": "environment",
         "shape": "group",
@@ -315,7 +315,7 @@
         "parent": null
       },
       {
-        "id": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "id": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "name": "East shop 1",
         "kind": "environment",
         "shape": "building",
@@ -337,10 +337,10 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "daaa51e8-1e54-4c2f-85ca-63f02e7142bb",
+        "id": "b5b18a2c-3956-4c7d-a716-98129f400071",
         "name": "East shop 2",
         "kind": "environment",
         "shape": "building",
@@ -357,15 +357,15 @@
         ],
         "color": "#9fb4c0",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "d6c80bba-2314-4fe9-a672-2903cebfd3b0",
+        "id": "a3ac6f62-5d71-41c3-b763-0baada256be6",
         "name": "East shop 3",
         "kind": "environment",
         "shape": "building",
@@ -382,15 +382,15 @@
         ],
         "color": "#d7c9a7",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "e0d53a2f-5047-45b4-90eb-3a2442fb2812",
+        "id": "7d846424-ebd9-46a8-802a-262056d8d4bf",
         "name": "East shop 4",
         "kind": "environment",
         "shape": "building",
@@ -407,15 +407,15 @@
         ],
         "color": "#b87a6a",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "7c7fad0e-c084-4d34-a1bc-98198ce9191e",
+        "id": "58e3cd7b-1223-4cec-8dbc-c8a40cad3b67",
         "name": "East shop 5",
         "kind": "environment",
         "shape": "building",
@@ -432,15 +432,15 @@
         ],
         "color": "#a8b89a",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "05151dec-a69b-4149-8f0a-0b39b88d440c",
+        "id": "10cc5757-5abf-494e-926f-797894136b01",
         "name": "East shop 6",
         "kind": "environment",
         "shape": "building",
@@ -457,15 +457,15 @@
         ],
         "color": "#cdb6a0",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "006ff9ac-c147-4938-be21-6bdc0acefebc",
+        "id": "0eb3a630-a766-4389-b8e8-2ac45aa3a548",
         "name": "West shop 1",
         "kind": "environment",
         "shape": "building",
@@ -482,15 +482,15 @@
         ],
         "color": "#d7c9a7",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "247c746b-7c25-45e0-9f02-01035efa73b9",
+        "id": "d15f64f8-864d-439d-a900-da6fb01ff002",
         "name": "West shop 2",
         "kind": "environment",
         "shape": "building",
@@ -507,15 +507,15 @@
         ],
         "color": "#b87a6a",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "0fcb7b7d-13fe-4853-8b88-9f482c0ad638",
+        "id": "3c2c745a-ecd0-4068-85fe-aa9491a23956",
         "name": "West shop 3",
         "kind": "environment",
         "shape": "building",
@@ -532,15 +532,15 @@
         ],
         "color": "#a8b89a",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "875ab3e0-8457-4f2d-bd65-f5958262fafc",
+        "id": "c926d6d7-cd89-47f6-acfe-d0d30bed95d8",
         "name": "West shop 4",
         "kind": "environment",
         "shape": "building",
@@ -557,15 +557,15 @@
         ],
         "color": "#cdb6a0",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "92c9766b-2896-4911-a864-b383d68f7cc5",
+        "id": "8da33c48-db2a-491d-89b6-8020a853cf58",
         "name": "West shop 5",
         "kind": "environment",
         "shape": "building",
@@ -582,15 +582,15 @@
         ],
         "color": "#c9a27e",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "a5b9b771-c67a-4fe9-802b-b691afb2d372",
+        "id": "032da9e0-a214-4df9-986a-f9866fe6d088",
         "name": "West shop 6",
         "kind": "environment",
         "shape": "building",
@@ -607,15 +607,15 @@
         ],
         "color": "#9fb4c0",
         "notes": "",
-        "lookFrom": "d2356592-c72d-44e2-9bc0-256db43f21d4",
+        "lookFrom": "94e0c9e0-8948-46db-bfc4-16c1d07a34e9",
         "styleNotes": "",
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "bf6a3ed8-20a1-4720-8b9f-819388d78726"
+        "parent": "e10b233d-6804-4077-9644-5dd470c5c91d"
       },
       {
-        "id": "bf6a3ed8-20a1-4720-8b9f-819388d78726",
+        "id": "e10b233d-6804-4077-9644-5dd470c5c91d",
         "name": "Shops",
         "kind": "environment",
         "shape": "group",
@@ -640,7 +640,7 @@
         "parent": null
       },
       {
-        "id": "1a3db945-1dbf-427f-b8ce-ccb72b14a4b4",
+        "id": "6b1788d3-dbd0-425f-bea1-bf09217caf31",
         "name": "Tree trunk",
         "kind": "environment",
         "shape": "cylinder",
@@ -662,10 +662,10 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "d5f0fcfd-08fc-4304-a323-ecb2dbab61e3"
+        "parent": "ba6b4757-7ec0-45b6-97d7-6ce826fde379"
       },
       {
-        "id": "e11dab43-d9f7-4c5c-808a-f5702f6562dc",
+        "id": "912f3004-a5c5-4978-8a4a-53c2b0dc5401",
         "name": "Street tree",
         "kind": "environment",
         "shape": "sphere",
@@ -687,10 +687,10 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "d5f0fcfd-08fc-4304-a323-ecb2dbab61e3"
+        "parent": "ba6b4757-7ec0-45b6-97d7-6ce826fde379"
       },
       {
-        "id": "031bcebb-9957-4310-9da4-94291d2b640d",
+        "id": "a5669b87-9f83-4851-b44e-b01c2161248d",
         "name": "Bench",
         "kind": "prop",
         "shape": "box",
@@ -712,10 +712,10 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "d5f0fcfd-08fc-4304-a323-ecb2dbab61e3"
+        "parent": "ba6b4757-7ec0-45b6-97d7-6ce826fde379"
       },
       {
-        "id": "9f736029-bac7-4a22-a3f7-4c2e6923430a",
+        "id": "d31dd9f6-e019-43c7-8878-cc632a2fb862",
         "name": "Bench back",
         "kind": "prop",
         "shape": "box",
@@ -737,10 +737,10 @@
         "pitch": 0,
         "roll": 0,
         "path": null,
-        "parent": "d5f0fcfd-08fc-4304-a323-ecb2dbab61e3"
+        "parent": "ba6b4757-7ec0-45b6-97d7-6ce826fde379"
       },
       {
-        "id": "ff7917ec-7d53-40cd-867a-832b88a4090b",
+        "id": "62cb2790-7502-45cd-a8b6-a82d89487244",
         "name": "Lamp post",
         "kind": "prop",
         "shape": "lamp",
@@ -765,7 +765,7 @@
         "parent": null
       },
       {
-        "id": "f218c35e-f351-4e96-908f-abfe38eaa515",
+        "id": "fc90daf6-98cc-46d3-ab29-8119adf7c3c9",
         "name": "Parked car",
         "kind": "vehicle",
         "shape": "car",
@@ -790,7 +790,7 @@
         "parent": null
       },
       {
-        "id": "d5f0fcfd-08fc-4304-a323-ecb2dbab61e3",
+        "id": "ba6b4757-7ec0-45b6-97d7-6ce826fde379",
         "name": "Street furniture",
         "kind": "environment",
         "shape": "group",
@@ -815,7 +815,7 @@
         "parent": null
       },
       {
-        "id": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "id": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "name": "Walker",
         "kind": "character",
         "shape": "person",
@@ -1077,14 +1077,14 @@
   },
   "shots": [
     {
-      "id": "78de162d-493b-4de9-a446-fee6513494b0",
+      "id": "1fe43328-d6ec-4b05-b9be-74ab97ae88a1",
       "title": "a · Summer day (base)",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -1349,17 +1349,35 @@
           "no logos or lettering"
         ]
       },
-      "references": []
+      "references": [
+        {
+          "id": "90b12524-3341-5631-a931-2458186e33ba",
+          "name": "Shot 01 a · Summer day (base) · GPT Image 2.5 · 118848",
+          "file": "90b12524-3341-5631-a931-2458186e33ba.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:52:26.024Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 118848,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown. Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "407da0c7-4524-4fbc-88d4-f56099633ee9",
+      "id": "baa04c31-b6e7-4e8b-a195-40b716fc7560",
       "title": "b · Night",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -1654,17 +1672,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "d9e517ae-466b-5a87-aeac-71d3538ac6f9",
+          "name": "Shot 02 b · Night · GPT Image 2.5 · 43413",
+          "file": "d9e517ae-466b-5a87-aeac-71d3538ac6f9.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:52:27.723Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 43413,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: the same street at night, lamplight on the pavement, lit shop windows. Look: photoreal night, warm lamplight, cool moonlight. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "31e8ebfe-a2ea-4ad3-928a-9161f69f44ac",
+      "id": "a8cc6ee7-4e60-4779-9f34-4fb8d862c317",
       "title": "c · Spring",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -1943,7 +1979,7 @@
             "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
             "at": "2026-11-03T01:32:31.383Z"
           },
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, denim jacket, white T-shirt, beige chinos, white canvas shoes.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -1963,7 +1999,7 @@
             "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
             "at": "2026-11-03T01:32:31.680Z"
           },
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, denim jacket, white T-shirt, beige chinos, white canvas shoes.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -1971,17 +2007,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "ca272a39-8f89-5269-a4eb-da38748b43db",
+          "name": "Shot 03 c · Spring · GPT Image 2.5 · 244039",
+          "file": "ca272a39-8f89-5269-a4eb-da38748b43db.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:52:26.600Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 244039,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, denim jacket, white T-shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: the same street on a spring morning, the maple in pale new leaf, tulips in planters. Look: photoreal, soft fresh morning light. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "a240267e-eea5-4659-9772-10dfb5622e58",
+      "id": "96291fbb-61b3-42d0-9d6a-c9b47268d214",
       "title": "d · Fall",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -2260,7 +2314,7 @@
             "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
             "at": "2026-11-03T01:32:31.927Z"
           },
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, rust knit sweater, wool scarf, dark jeans, brown leather boots.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -2280,7 +2334,7 @@
             "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
             "at": "2026-11-03T01:32:32.217Z"
           },
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, rust knit sweater, wool scarf, dark jeans, brown leather boots.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -2288,17 +2342,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "1dcbf631-3c6f-5d8d-ab7c-4269f3e64bc2",
+          "name": "Shot 04 d · Fall · GPT Image 2.5 · 478134",
+          "file": "1dcbf631-3c6f-5d8d-ab7c-4269f3e64bc2.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:52:26.910Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 478134,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, rust knit sweater, wool scarf, dark jeans, brown leather boots. A black cast-iron street lamp post with a lantern head. Set: the same street on a crisp autumn afternoon, the maple orange and red, leaves on the pavement. Look: photoreal, low golden autumn sun. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "7c3376f3-6253-495c-8a7f-48f8764b44bc",
+      "id": "84a6b620-0f8e-4537-9109-b296fab7bb22",
       "title": "e · Winter",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -2577,7 +2649,7 @@
             "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
             "at": "2026-11-03T01:32:32.463Z"
           },
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, charcoal puffer coat, knitted hat, gloves, jeans, snow boots.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -2597,7 +2669,7 @@
             "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
             "at": "2026-11-03T01:32:32.756Z"
           },
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, charcoal puffer coat, knitted hat, gloves, jeans, snow boots.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -2605,17 +2677,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "16bb2499-8ea2-56bc-a751-cb4fab1e11cd",
+          "name": "Shot 05 e · Winter · GPT Image 2.5 · 730707",
+          "file": "16bb2499-8ea2-56bc-a751-cb4fab1e11cd.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:53:12.814Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 730707,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, charcoal puffer coat, knitted hat, gloves, jeans, snow boots. A black cast-iron street lamp post with a lantern head. Set: the same street on a snowy winter morning, snow on roofs and the bench, a bare maple. Look: photoreal, cold soft winter light. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nImage 2 is the previous shot: keep lighting, colour grade and designs continuous. Image 2 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "bf78aead-3b90-4cf2-a4de-6d4b03bc5019",
+      "id": "5ed3cd75-48df-4dcc-82f0-5e7af0018097",
       "title": "f · Clothing A · raincoat",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -2882,7 +2972,7 @@
       },
       "promptSections": {
         "video": {
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, bright yellow hooded raincoat, dark jeans, green rubber boots.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -2890,7 +2980,7 @@
           }
         },
         "image": {
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, bright yellow hooded raincoat, dark jeans, green rubber boots.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -2898,17 +2988,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "9b8ae3fc-24b7-5460-a8b7-7d9c0508301d",
+          "name": "Shot 06 f · Clothing A · raincoat · GPT Image 2.5 · 270695",
+          "file": "9b8ae3fc-24b7-5460-a8b7-7d9c0508301d.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:53:04.051Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 270695,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, bright yellow hooded raincoat, dark jeans, green rubber boots. A black cast-iron street lamp post with a lantern head. Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown. Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "57ac4b90-72b7-4409-910f-a673e079dc52",
+      "id": "59fcc7ee-d8ee-4932-af7f-e4df26301435",
       "title": "g · Clothing B · formal suit",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -3175,7 +3283,7 @@
       },
       "promptSections": {
         "video": {
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, tailored charcoal two-piece suit, white shirt, dark tie, black shoes.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -3183,7 +3291,7 @@
           }
         },
         "image": {
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Adult in their thirties, shoulder-length brown hair, tailored charcoal two-piece suit, white shirt, dark tie, black shoes.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -3191,17 +3299,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "1a831262-d105-5505-a09f-88b845c00af4",
+          "name": "Shot 07 g · Clothing B · formal suit · GPT Image 2.5 · 974044",
+          "file": "1a831262-d105-5505-a09f-88b845c00af4.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:53:07.803Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 974044,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, tailored charcoal two-piece suit, white shirt, dark tie, black shoes. A black cast-iron street lamp post with a lantern head. Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown. Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "852b88d9-a9a6-43ff-a115-626434683364",
+      "id": "3b1c7b94-6421-448c-92ea-682b0ba8610c",
       "title": "h · Different person",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -3468,7 +3594,7 @@
       },
       "promptSections": {
         "video": {
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Older man in his seventies, short white hair, neat white beard, slim build, light blue shirt, beige chinos, white canvas shoes.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -3476,7 +3602,7 @@
           }
         },
         "image": {
-          "obj:9ca3fae3-5d55-41e3-b6f1-b113928efa33": {
+          "obj:ae93896f-d43f-415b-8609-ff48a66e8dcf": {
             "mode": "override",
             "text": "Older man in his seventies, short white hair, neat white beard, slim build, light blue shirt, beige chinos, white canvas shoes.",
             "basedOn": "Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes.",
@@ -3484,17 +3610,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "b58a696d-60d7-5ed0-a2cf-a79055ff1513",
+          "name": "Shot 08 h · Different person · GPT Image 2.5 · 74255",
+          "file": "b58a696d-60d7-5ed0-a2cf-a79055ff1513.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:53:13.539Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 74255,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Older man in his seventies, short white hair, neat white beard, slim build, light blue shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown. Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "ba59ec0e-0ac1-4013-a91b-00c42908e47e",
+      "id": "34fe9d0f-2ce2-4b60-90df-71b8794055c5",
       "title": "i · Anime",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -3789,17 +3933,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "e83249fe-d7f6-53c6-adcc-1e75514d6030",
+          "name": "Shot 09 i · Anime · GPT Image 2.5 · 18926",
+          "file": "e83249fe-d7f6-53c6-adcc-1e75514d6030.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:53:45.542Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 18926,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nHand-drawn anime film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown. Look: hand-drawn anime, clean ink lines, flat cel shading, painted backgrounds, bright light. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single frame of anime; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "2959f40c-e935-499f-8944-825263dd5351",
+      "id": "36fe014a-6b86-4a73-80b7-038b5649f160",
       "title": "j · Claymation",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -4094,17 +4256,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "9a7b5e80-3320-545e-a43c-e9737a590f6d",
+          "name": "Shot 10 j · Claymation · GPT Image 2.5 · 349565",
+          "file": "9a7b5e80-3320-545e-a43c-e9737a590f6d.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:53:51.640Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 349565,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nStop-motion claymation film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown. Look: handmade plasticine stop-motion, fingerprinted clay texture, miniature set, soft studio light. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single frame of stop-motion claymation; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "dd828a82-f96f-4a49-8834-1d6301f3159e",
+      "id": "c267af85-5d44-427a-a9b9-f8ccc93b5625",
       "title": "k · Stylised 3D animated feature",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -4399,17 +4579,35 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "cc8a9eed-a16a-5787-af99-721299e6edf9",
+          "name": "Shot 11 k · Stylised 3D animated feature · GPT Image 2.5 · 910273",
+          "file": "cc8a9eed-a16a-5787-af99-721299e6edf9.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:53:58.855Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 910273,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nStylised 3D animated feature film still, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown. Look: stylised 3D animated feature, soft rounded shapes, expressive proportions, warm bounce light. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single frame of stylised 3D animation; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     },
     {
-      "id": "6b3a5087-fce7-42b6-ac15-622dee467709",
+      "id": "a271ed33-7629-4a6b-a8f9-8e0fdb22ab82",
       "title": "l · Watercolour",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
       "camera": {
         "move": "custom",
-        "target": "9ca3fae3-5d55-41e3-b6f1-b113928efa33",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
         "distance": 6,
         "height": 1.6,
         "angle": 0,
@@ -4704,7 +4902,25 @@
           }
         }
       },
-      "references": []
+      "references": [
+        {
+          "id": "bf958040-d68c-5af1-a715-1f0952fe6bad",
+          "name": "Shot 12 l · Watercolour · GPT Image 2.5 · 713833",
+          "file": "bf958040-d68c-5af1-a715-1f0952fe6bad.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T01:54:00.634Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 713833,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nWatercolour painting, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown. Look: loose watercolour in motion, soft bleeding washes, paper texture, light pencil lines. Framing: 40mm lens, match the supplied blockout frame's composition. Lens: 40mm. Filter: no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single frame of a watercolour painting; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
     }
   ],
   "media": [
@@ -4716,34 +4932,375 @@
       "sourceSha256": "6ca519b3e3dc9c1dba7a4881f75ab121865c0a2673bf7ef97d8f2c7fe879a845"
     },
     {
-      "path": "media/assets/0c505fb1-71f2-4119-afc9-491fabae7c65.mp4",
+      "path": "media/refs/90b12524-3341-5631-a931-2458186e33ba.webp",
+      "kind": "image",
+      "bytes": 203210,
+      "sha256": "a22fddb1b88f73f4c2117717c8c4314c421b90019929f74c3b40dad819129f31",
+      "sourceSha256": "1ba10ef37c4f929c1c9d70f8d02d9c19fe53c725fdaf9c5408cf14d1348951b5",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/f3e3498c-8f2c-40ff-8dd5-58c0872d9477.mp4",
       "kind": "video",
-      "bytes": 812811,
-      "sha256": "f71aa3b109995267999f9c14a87c6fa3f1fc919d7273010374b4bc9b5e03110a",
+      "bytes": 805539,
+      "sha256": "d12d3c3f1a90845375c3d94988d2441f0dd01c8f2d036c4a14f6589de3dd56f6",
+      "sourceSha256": "f71aa3b109995267999f9c14a87c6fa3f1fc919d7273010374b4bc9b5e03110a",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/refs/d9e517ae-466b-5a87-aeac-71d3538ac6f9.webp",
+      "kind": "image",
+      "bytes": 142550,
+      "sha256": "87d5389e47719c73add8ee898d5e4e427ca5557038f2c3506e36f21f3aa63003",
+      "sourceSha256": "84c59e0b33f6f56ae98fb0e533aa3fc97680248061065a905aced8ff081bb0e8",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/2385a396-4c89-4048-91eb-2bd93875d861.mp4",
+      "kind": "video",
+      "bytes": 802573,
+      "sha256": "0c87af903f44845b2c5d9fc07aee8cf2875424f7373ca5e5e5d34317afb3b731",
       "sourceSha256": "61bd7f1c2309bb405c571e15c9376c05b3b695b26c0a07c5307837972d052ff3",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 96,
       "duration": 4
+    },
+    {
+      "path": "media/assets/8533af99-eddf-5404-a7b8-52b66f97edcd.mp4",
+      "kind": "video",
+      "bytes": 749571,
+      "sha256": "062413beb9691fcd3672f9d4003aedb12609d5bc5f5bbc79800c0a55236ab0db",
+      "sourceSha256": "239bac495d257e5b0869eaad7b5b8282aa9f98687229febf1ee21bbeb52c220a",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 89,
+      "duration": 3.708
+    },
+    {
+      "path": "media/refs/ca272a39-8f89-5269-a4eb-da38748b43db.webp",
+      "kind": "image",
+      "bytes": 225526,
+      "sha256": "1aec8bf33ef2f55d9b73be3181cf8ab66c936d06b31cc8053c7186d209acb62f",
+      "sourceSha256": "b1c45063215b1158455d9c2b96853977b1e0c17758c607aaccb0a07a4d018e9f",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/1dcbf631-3c6f-5d8d-ab7c-4269f3e64bc2.webp",
+      "kind": "image",
+      "bytes": 258892,
+      "sha256": "c551efef484629c8a616ec19e068087caac1618708c91802e240ff8865d98088",
+      "sourceSha256": "d94763114b83b36f1ef59b2892351a6eed47583e37b0fa606cd753fceb6a02eb",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/16bb2499-8ea2-56bc-a751-cb4fab1e11cd.webp",
+      "kind": "image",
+      "bytes": 274454,
+      "sha256": "40f79e754b708e69a2dacb86471825e49e8dd10c0318e8c1373c1a9b6d862522",
+      "sourceSha256": "7e2a53800c83a57b7c1cf9c1f641e4acd0e95f89fa9437224c51371c07cc6d07",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/a428cdea-9f1e-4a7b-a069-9c0da69be7b4.mp4",
+      "kind": "video",
+      "bytes": 801733,
+      "sha256": "f955bb814e4d222da4c0496f26c7decc4410fc5b40933037d35c77b01a7d84fe",
+      "sourceSha256": "61bd7f1c2309bb405c571e15c9376c05b3b695b26c0a07c5307837972d052ff3",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/b0b576b1-b39a-53a2-ac6b-d8be1349d229.mp4",
+      "kind": "video",
+      "bytes": 720699,
+      "sha256": "52180d29096d0000f89210cb08fd12b0649ed6279a545b80ad13ca7f864e1935",
+      "sourceSha256": "67e039513eccd5a8856b1e3a2f278a09ee88813f69e352eb9398d766f8ecc346",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 89,
+      "duration": 3.708
+    },
+    {
+      "path": "media/refs/9b8ae3fc-24b7-5460-a8b7-7d9c0508301d.webp",
+      "kind": "image",
+      "bytes": 223812,
+      "sha256": "c038bf263851b36f2293adbe0fe6a3d0254b7442d33e70c021edf8c2362851fa",
+      "sourceSha256": "4dd70039f44ad6c44c83ab7678870b3999de7fd2ba7009478380393921bf4d69",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/1a831262-d105-5505-a09f-88b845c00af4.webp",
+      "kind": "image",
+      "bytes": 220902,
+      "sha256": "2ea529b5fbe3fbd5c3af5f53cfcf1162c5e76659b457e8b5e1cc219e173ce957",
+      "sourceSha256": "f175b1e7033ae0ba583fd91f3cec74c23a3e8e77194b758dd4934d4ca1e4cef8",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/b58a696d-60d7-5ed0-a2cf-a79055ff1513.webp",
+      "kind": "image",
+      "bytes": 194532,
+      "sha256": "50f9ac136c47ca8d31727d5ad3fb13de28cecb0fad8831de37e74644bb510395",
+      "sourceSha256": "8a87b1146557828c1ab7e2fa4cd2cacd21c9b469821880b99aea1cd60c5aeedc",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/e83249fe-d7f6-53c6-adcc-1e75514d6030.webp",
+      "kind": "image",
+      "bytes": 223122,
+      "sha256": "f4e61e0cbdb672fff23816496614fba13e333c2280f77dc783aefe7f1de51ac1",
+      "sourceSha256": "e1724ab263a7c22e1daacbcb31d966c47bd03213c8641e61de6381b65b7ccd81",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/d56f3c16-0dfb-4d25-896a-6e68bec13040.mp4",
+      "kind": "video",
+      "bytes": 812467,
+      "sha256": "43605cc2ee94be7afdc63b14a3dc2aced93ed9e05c9ba65fba7c35498e256b4f",
+      "sourceSha256": "61bd7f1c2309bb405c571e15c9376c05b3b695b26c0a07c5307837972d052ff3",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/ea85addc-b725-5d51-a38f-3a20c09ad8ce.mp4",
+      "kind": "video",
+      "bytes": 648180,
+      "sha256": "29ea3fdc2cd7b778dff1fbf336aaf6a717a173e2718530bec92722943d5819b5",
+      "sourceSha256": "88cdc3a2d2d7e874a1e46c2b8373a6faaf604339de9d24f6269d28d41404c864",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 89,
+      "duration": 3.708
+    },
+    {
+      "path": "media/refs/9a7b5e80-3320-545e-a43c-e9737a590f6d.webp",
+      "kind": "image",
+      "bytes": 141952,
+      "sha256": "f5bb593ccf6d2e0b1e53bac81fb95d3adef0c5d5ecd171c86200fc911c1cebb9",
+      "sourceSha256": "cf05dd6da7d03da29f86ef41da308c45d8b95cf3fb8f6915d5a1eba32f70be73",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/7a0d8d7d-39dd-44a4-bd22-01eccd30108d.mp4",
+      "kind": "video",
+      "bytes": 809345,
+      "sha256": "783b55b9c5e6c3ac95c9083694ee3010ce95d58374d790e30359c889040347ac",
+      "sourceSha256": "61bd7f1c2309bb405c571e15c9376c05b3b695b26c0a07c5307837972d052ff3",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/cc8bbb80-f046-5842-a96e-cbed7b469d78.mp4",
+      "kind": "video",
+      "bytes": 687318,
+      "sha256": "37c0702a38524fdac5f50eaa89bc4a924fd5c12044eaccb0ae5aaf9f6fe30e13",
+      "sourceSha256": "2818ff92c2ffefd11f86a00d6ae0bdbe7f0ac7f935e0117badce69054f7857f3",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 89,
+      "duration": 3.708
+    },
+    {
+      "path": "media/refs/cc8a9eed-a16a-5787-af99-721299e6edf9.webp",
+      "kind": "image",
+      "bytes": 151342,
+      "sha256": "e03b96a0701f44b93b3a055727cf8b20ecfe98b092ed81bf64ee3eaf8adab851",
+      "sourceSha256": "2f15799ba080759b71743f58eed2543d87464cdbe00b696baef2807a07d7719e",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/bf958040-d68c-5af1-a715-1f0952fe6bad.webp",
+      "kind": "image",
+      "bytes": 296118,
+      "sha256": "1a3f40a0299421afd68716a9ebffa10e188493d8932b2dba0c6f9d23a8e8c677",
+      "sourceSha256": "501fd93e6f509b1bd4bab32963ea25798e9e18007f74b07fca88641d88e0b2d3",
+      "width": 1600,
+      "height": 900
     }
   ],
   "assets": [
     {
-      "id": "0c505fb1-71f2-4119-afc9-491fabae7c65",
+      "id": "f3e3498c-8f2c-40ff-8dd5-58c0872d9477",
       "kind": "camera-render",
-      "shotId": "78de162d-493b-4de9-a446-fee6513494b0",
-      "file": "assets/0c505fb1-71f2-4119-afc9-491fabae7c65.mp4",
+      "shotId": "1fe43328-d6ec-4b05-b9be-74ab97ae88a1",
+      "file": "assets/f3e3498c-8f2c-40ff-8dd5-58c0872d9477.mp4",
       "mime": "video/mp4",
       "duration": 4,
       "createdAt": "2026-11-03T01:32:37.110Z",
       "source": {
         "engineShotId": null,
-        "signature": "fd690503"
+        "signature": "e235e5c5"
+      }
+    },
+    {
+      "id": "2385a396-4c89-4048-91eb-2bd93875d861",
+      "kind": "camera-render",
+      "shotId": "baa04c31-b6e7-4e8b-a195-40b716fc7560",
+      "file": "assets/2385a396-4c89-4048-91eb-2bd93875d861.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:56:57.847Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "e235e5c5"
+      }
+    },
+    {
+      "id": "8533af99-eddf-5404-a7b8-52b66f97edcd",
+      "kind": "workflow-result",
+      "shotId": "baa04c31-b6e7-4e8b-a195-40b716fc7560",
+      "file": "assets/8533af99-eddf-5404-a7b8-52b66f97edcd.mp4",
+      "mime": "video/mp4",
+      "duration": 3.708,
+      "createdAt": "2026-11-03T02:00:38.885Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 1 reference image",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: the same street at night, lamplight on the pavement, lit shop windows. Look: photoreal night, warm lamplight, cool moonlight. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 40mm. Filter: no logos or lettering.\nReference images: 1 = start still.",
+        "sourceAssetId": "2385a396-4c89-4048-91eb-2bd93875d861"
+      }
+    },
+    {
+      "id": "a428cdea-9f1e-4a7b-a069-9c0da69be7b4",
+      "kind": "camera-render",
+      "shotId": "84a6b620-0f8e-4537-9109-b296fab7bb22",
+      "file": "assets/a428cdea-9f1e-4a7b-a069-9c0da69be7b4.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:57:03.858Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "e235e5c5"
+      }
+    },
+    {
+      "id": "b0b576b1-b39a-53a2-ac6b-d8be1349d229",
+      "kind": "workflow-result",
+      "shotId": "84a6b620-0f8e-4537-9109-b296fab7bb22",
+      "file": "assets/b0b576b1-b39a-53a2-ac6b-d8be1349d229.mp4",
+      "mime": "video/mp4",
+      "duration": 3.708,
+      "createdAt": "2026-11-03T02:00:06.363Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 1 reference image",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, charcoal puffer coat, knitted hat, gloves, jeans, snow boots. A black cast-iron street lamp post with a lantern head. Set: the same street on a snowy winter morning, snow on roofs and the bench, a bare maple. Look: photoreal, cold soft winter light. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 40mm. Filter: no logos or lettering.\nReference images: 1 = start still.",
+        "sourceAssetId": "a428cdea-9f1e-4a7b-a069-9c0da69be7b4"
+      }
+    },
+    {
+      "id": "d56f3c16-0dfb-4d25-896a-6e68bec13040",
+      "kind": "camera-render",
+      "shotId": "34fe9d0f-2ce2-4b60-90df-71b8794055c5",
+      "file": "assets/d56f3c16-0dfb-4d25-896a-6e68bec13040.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:57:08.785Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "e235e5c5"
+      }
+    },
+    {
+      "id": "ea85addc-b725-5d51-a38f-3a20c09ad8ce",
+      "kind": "workflow-result",
+      "shotId": "34fe9d0f-2ce2-4b60-90df-71b8794055c5",
+      "file": "assets/ea85addc-b725-5d51-a38f-3a20c09ad8ce.mp4",
+      "mime": "video/mp4",
+      "duration": 3.708333,
+      "createdAt": "2026-11-03T02:09:48.210Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 1 reference image",
+        "backend": "cloud",
+        "prompt": "Hand-drawn anime shot. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line. Look: hand-drawn anime, clean ink lines, flat cel shading, painted backgrounds, bright light. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it as anime in the look of the still. Lens: 40mm. Filter: no logos or lettering.\nReference images: 1 = start still.",
+        "sourceAssetId": "d56f3c16-0dfb-4d25-896a-6e68bec13040"
+      }
+    },
+    {
+      "id": "7a0d8d7d-39dd-44a4-bd22-01eccd30108d",
+      "kind": "camera-render",
+      "shotId": "36fe014a-6b86-4a73-80b7-038b5649f160",
+      "file": "assets/7a0d8d7d-39dd-44a4-bd22-01eccd30108d.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:57:12.928Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "e235e5c5"
+      }
+    },
+    {
+      "id": "cc8bbb80-f046-5842-a96e-cbed7b469d78",
+      "kind": "workflow-result",
+      "shotId": "36fe014a-6b86-4a73-80b7-038b5649f160",
+      "file": "assets/cc8bbb80-f046-5842-a96e-cbed7b469d78.mp4",
+      "mime": "video/mp4",
+      "duration": 3.708,
+      "createdAt": "2026-11-03T02:03:11.989Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 1 reference image",
+        "backend": "cloud",
+        "prompt": "Stop-motion claymation shot. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line. Look: handmade plasticine stop-motion, fingerprinted clay texture, miniature set, soft studio light. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it as stop-motion claymation in the look of the still. Lens: 40mm. Filter: no logos or lettering.\nReference images: 1 = start still.",
+        "sourceAssetId": "7a0d8d7d-39dd-44a4-bd22-01eccd30108d"
       }
     }
   ],
   "edit": {
-    "clips": []
+    "clips": [
+      {
+        "shotId": "baa04c31-b6e7-4e8b-a195-40b716fc7560",
+        "assetId": "8533af99-eddf-5404-a7b8-52b66f97edcd",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "84a6b620-0f8e-4537-9109-b296fab7bb22",
+        "assetId": "b0b576b1-b39a-53a2-ac6b-d8be1349d229",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "34fe9d0f-2ce2-4b60-90df-71b8794055c5",
+        "assetId": "ea85addc-b725-5d51-a38f-3a20c09ad8ce",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "36fe014a-6b86-4a73-80b7-038b5649f160",
+        "assetId": "cc8bbb80-f046-5842-a96e-cbed7b469d78",
+        "in": 0,
+        "out": null
+      }
+    ]
   }
 }

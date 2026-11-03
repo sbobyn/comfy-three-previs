@@ -123,10 +123,15 @@ test('blockout starter copies open with current blockout clips, and a final-tier
         assert.equal(r.source.signature, shotSignature(p, sh), `${s.slug} ${sh.title}: the clip shows the current blocking`);
         assert.equal(r.duration, sh.duration); assert.equal(r.frameCount, sh.duration * 24);
       }
-      assert.equal(sh.references.length, 0, `${s.slug} ${sh.title}: no stills yet`);
+      // Look Lab ships one start still per shot (examples/starters/README.md); it shows the current blocking.
+      if (s.slug === 'look-lab') { assert.equal(sh.references.length, 1, sh.title); assert.equal(stillStale(p, sh, sh.references[0]), false, `${sh.title}: the still is current`); }
+      else assert.equal(sh.references.length, 0, `${s.slug} ${sh.title}: no stills yet`);
     }
     const plan = planBatch(p, { steps: ['stills', 'videos'], tier: 'final', dryRun: true, maxCostUsd: 100 });
-    assert.equal(plan.nodes.filter(x => x.type === 'still' && x.status !== 'skipped').length, p.shots.length * 2, `${s.slug}: a start and an end still per shot`);
+    // A shipped start still is current: the plan keeps it and makes only the end still.
+    const shipped = p.shots.filter(sh => sh.references.length).length;
+    assert.equal(plan.nodes.filter(x => x.type === 'still' && x.status === 'skipped' && x.target.t === 'start').length, shipped, `${s.slug}: shipped start stills are kept`);
+    assert.equal(plan.nodes.filter(x => x.type === 'still' && x.status !== 'skipped').length, p.shots.length * 2 - shipped, `${s.slug}: a start and an end still per shot`);
     assert.equal(plan.nodes.filter(x => x.type === 'video' && x.status !== 'skipped').length, p.shots.length, `${s.slug}: a video per shot`);
   }
 });
