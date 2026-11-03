@@ -980,7 +980,7 @@ function renderSteps() {
   const s = shot(), stale = blockoutOld(s);
   const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment'), castNeed = cast.filter(r => !objectLooks(project, r.entity.id).length).length;
   const st = stepStatus(step, project, s, { stale, videos: shotVideos(s.id).length, castNeed, castTotal: cast.length, bundled: !!starterBlockout(project, s) }), text = st.parts.join(' · ');
-  const tip = step === 'shoot' ? `${s.title} · ${text}` : text; // the title is off the strip, not the tooltip
+  const tip = step === 'shoot' ? [st.parts[0], s.title, ...st.parts.slice(1)].join(' · ') : text; // the title is off the strip, not the tooltip
   if (topStatus.title !== tip) { topStatus.title = tip; topStatus.replaceChildren(h('span', { class: 'ts-long' }, text), h('span', { class: 'ts-short', 'aria-hidden': 'true' }, st.short)); }
   const def = genCache ? shotModel(s) : null, slots = keyFrameSlots(def as any, VIDEO_PRICES), frames = s.references.filter(r => r.role === 'frame');
   const a = stepAction(step, { castNeed, keyFrames: slots.length ? (slots.includes('end') ? 'start+end' : 'start') : false, hasStart: frames.some(r => r.note === 'key frame start' || !r.note), hasEnd: frames.some(r => r.note === 'key frame end'), ...exportState });
