@@ -1,9 +1,9 @@
 {
-  "capturedAt": "2026-11-03T18:06:02.395Z",
+  "capturedAt": "2026-11-03T18:15:50.455Z",
   "source": "scripts/home-media.mjs",
   "entries": [
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-s2-blockout",
       "file": "breaking-news-s2-blockout.mp4",
       "kind": "video",
@@ -14,7 +14,7 @@
       "bytes": 58310
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-s2-blockout-poster",
       "file": "breaking-news-s2-blockout.webp",
       "kind": "image",
@@ -25,7 +25,7 @@
       "bytes": 3604
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-s2-generated",
       "file": "breaking-news-s2-generated.mp4",
       "kind": "video",
@@ -38,7 +38,7 @@
       "bytes": 290322
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-s2-generated-poster",
       "file": "breaking-news-s2-generated.webp",
       "kind": "image",
@@ -51,7 +51,7 @@
       "bytes": 27414
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-s2-still",
       "file": "breaking-news-s2-still.webp",
       "kind": "image",
@@ -62,7 +62,7 @@
       "bytes": 37170
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-s2-still-blockout",
       "file": "breaking-news-s2-still-blockout.webp",
       "kind": "image",
@@ -73,7 +73,7 @@
       "bytes": 3604
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-cast-1",
       "file": "breaking-news-cast-1.webp",
       "kind": "image",
@@ -83,7 +83,7 @@
       "bytes": 4612
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-cast-2",
       "file": "breaking-news-cast-2.webp",
       "kind": "image",
@@ -93,7 +93,7 @@
       "bytes": 1834
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-cast-3",
       "file": "breaking-news-cast-3.webp",
       "kind": "image",
@@ -103,7 +103,7 @@
       "bytes": 4826
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "breaking-news-cast-4",
       "file": "breaking-news-cast-4.webp",
       "kind": "image",
@@ -113,7 +113,7 @@
       "bytes": 2710
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-s4-blockout",
       "file": "final-lap-s4-blockout.mp4",
       "kind": "video",
@@ -124,7 +124,7 @@
       "bytes": 193738
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-s4-blockout-poster",
       "file": "final-lap-s4-blockout.webp",
       "kind": "image",
@@ -135,7 +135,7 @@
       "bytes": 15770
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-s4-generated",
       "file": "final-lap-s4-generated.mp4",
       "kind": "video",
@@ -148,7 +148,7 @@
       "bytes": 443107
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-s4-generated-poster",
       "file": "final-lap-s4-generated.webp",
       "kind": "image",
@@ -161,7 +161,7 @@
       "bytes": 32290
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-s4-still",
       "file": "final-lap-s4-still.webp",
       "kind": "image",
@@ -172,7 +172,7 @@
       "bytes": 58680
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-s4-still-blockout",
       "file": "final-lap-s4-still-blockout.webp",
       "kind": "image",
@@ -183,7 +183,7 @@
       "bytes": 15770
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-cast-1",
       "file": "final-lap-cast-1.webp",
       "kind": "image",
@@ -193,7 +193,7 @@
       "bytes": 4742
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-cast-2",
       "file": "final-lap-cast-2.webp",
       "kind": "image",
@@ -203,7 +203,7 @@
       "bytes": 4680
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-cast-3",
       "file": "final-lap-cast-3.webp",
       "kind": "image",
@@ -213,7 +213,7 @@
       "bytes": 4092
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "final-lap-cast-4",
       "file": "final-lap-cast-4.webp",
       "kind": "image",
@@ -223,7 +223,7 @@
       "bytes": 3210
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "wingspan-s3-blockout",
       "file": "wingspan-s3-blockout.mp4",
       "kind": "video",
@@ -234,7 +234,7 @@
       "bytes": 140236
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "wingspan-s3-blockout-poster",
       "file": "wingspan-s3-blockout.webp",
       "kind": "image",
@@ -245,7 +245,7 @@
       "bytes": 7446
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "wingspan-s3-generated",
       "file": "wingspan-s3-generated.mp4",
       "kind": "video",
@@ -258,7 +258,7 @@
       "bytes": 406821
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "wingspan-s3-generated-poster",
       "file": "wingspan-s3-generated.webp",
       "kind": "image",
@@ -271,7 +271,7 @@
       "bytes": 32076
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "wingspan-s3-still",
       "file": "wingspan-s3-still.webp",
       "kind": "image",
@@ -282,7 +282,7 @@
       "bytes": 49676
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "wingspan-s3-still-blockout",
       "file": "wingspan-s3-still-blockout.webp",
       "kind": "image",
@@ -293,7 +293,7 @@
       "bytes": 7446
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "wingspan-cast-1",
       "file": "wingspan-cast-1.webp",
       "kind": "image",
@@ -303,7 +303,7 @@
       "bytes": 7614
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "wingspan-cast-2",
       "file": "wingspan-cast-2.webp",
       "kind": "image",
@@ -313,7 +313,7 @@
       "bytes": 3508
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-s3-blockout",
       "file": "posterized-s3-blockout.mp4",
       "kind": "video",
@@ -324,7 +324,7 @@
       "bytes": 176810
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-s3-blockout-poster",
       "file": "posterized-s3-blockout.webp",
       "kind": "image",
@@ -335,7 +335,7 @@
       "bytes": 12280
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-s3-generated",
       "file": "posterized-s3-generated.mp4",
       "kind": "video",
@@ -348,7 +348,7 @@
       "bytes": 514378
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-s3-generated-poster",
       "file": "posterized-s3-generated.webp",
       "kind": "image",
@@ -361,7 +361,7 @@
       "bytes": 37796
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-s3-still",
       "file": "posterized-s3-still.webp",
       "kind": "image",
@@ -372,7 +372,7 @@
       "bytes": 41880
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-s3-still-blockout",
       "file": "posterized-s3-still-blockout.webp",
       "kind": "image",
@@ -383,7 +383,7 @@
       "bytes": 12280
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-cast-1",
       "file": "posterized-cast-1.webp",
       "kind": "image",
@@ -393,7 +393,7 @@
       "bytes": 3918
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-cast-2",
       "file": "posterized-cast-2.webp",
       "kind": "image",
@@ -403,7 +403,7 @@
       "bytes": 3794
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-cast-3",
       "file": "posterized-cast-3.webp",
       "kind": "image",
@@ -413,7 +413,7 @@
       "bytes": 2810
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "posterized-cast-4",
       "file": "posterized-cast-4.webp",
       "kind": "image",
@@ -423,7 +423,7 @@
       "bytes": 2912
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "camera-moves-s9-blockout",
       "file": "camera-moves-s9-blockout.mp4",
       "kind": "video",
@@ -434,7 +434,7 @@
       "bytes": 101450
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "camera-moves-s9-blockout-poster",
       "file": "camera-moves-s9-blockout.webp",
       "kind": "image",
@@ -445,7 +445,7 @@
       "bytes": 7030
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "camera-moves-s9-generated",
       "file": "camera-moves-s9-generated.mp4",
       "kind": "video",
@@ -458,7 +458,7 @@
       "bytes": 327139
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "camera-moves-s9-generated-poster",
       "file": "camera-moves-s9-generated.webp",
       "kind": "image",
@@ -471,7 +471,7 @@
       "bytes": 19600
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "camera-moves-s9-still",
       "file": "camera-moves-s9-still.webp",
       "kind": "image",
@@ -482,7 +482,7 @@
       "bytes": 48096
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "camera-moves-s9-still-blockout",
       "file": "camera-moves-s9-still-blockout.webp",
       "kind": "image",
@@ -493,7 +493,7 @@
       "bytes": 7030
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "look-lab-s35-blockout",
       "file": "look-lab-s35-blockout.mp4",
       "kind": "video",
@@ -504,7 +504,7 @@
       "bytes": 59363
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "look-lab-s35-blockout-poster",
       "file": "look-lab-s35-blockout.webp",
       "kind": "image",
@@ -515,7 +515,7 @@
       "bytes": 5374
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "look-lab-s35-generated",
       "file": "look-lab-s35-generated.mp4",
       "kind": "video",
@@ -528,7 +528,7 @@
       "bytes": 251823
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "look-lab-s35-generated-poster",
       "file": "look-lab-s35-generated.webp",
       "kind": "image",
@@ -541,7 +541,7 @@
       "bytes": 39498
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "look-lab-s35-still",
       "file": "look-lab-s35-still.webp",
       "kind": "image",
@@ -552,7 +552,7 @@
       "bytes": 56632
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "look-lab-s35-still-blockout",
       "file": "look-lab-s35-still-blockout.webp",
       "kind": "image",
@@ -563,7 +563,7 @@
       "bytes": 5374
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "mountain-trail-s1-blockout",
       "file": "mountain-trail-s1-blockout.mp4",
       "kind": "video",
@@ -571,10 +571,10 @@
       "project": "0f4ac7af-f078-5a9a-a9fb-e369b3e50d60",
       "shot": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
       "label": "Mountain Trail · Ridge reveal",
-      "bytes": 140039
+      "bytes": 140700
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "mountain-trail-s1-blockout-poster",
       "file": "mountain-trail-s1-blockout.webp",
       "kind": "image",
@@ -585,7 +585,7 @@
       "bytes": 6054
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "mountain-trail-s1-generated",
       "file": "mountain-trail-s1-generated.mp4",
       "kind": "video",
@@ -595,10 +595,10 @@
       "project": "0f4ac7af-f078-5a9a-a9fb-e369b3e50d60",
       "shot": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
       "label": "Mountain Trail · Ridge reveal",
-      "bytes": 544445
+      "bytes": 537824
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "mountain-trail-s1-generated-poster",
       "file": "mountain-trail-s1-generated.webp",
       "kind": "image",
@@ -611,7 +611,7 @@
       "bytes": 44964
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "mountain-trail-s1-still",
       "file": "mountain-trail-s1-still.webp",
       "kind": "image",
@@ -619,10 +619,10 @@
       "project": "0f4ac7af-f078-5a9a-a9fb-e369b3e50d60",
       "shot": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
       "label": "Mountain Trail · Ridge reveal",
-      "bytes": 76068
+      "bytes": 74862
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "mountain-trail-s1-still-blockout",
       "file": "mountain-trail-s1-still-blockout.webp",
       "kind": "image",
@@ -633,7 +633,7 @@
       "bytes": 6054
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "city-blocks-s1-blockout",
       "file": "city-blocks-s1-blockout.mp4",
       "kind": "video",
@@ -644,7 +644,7 @@
       "bytes": 143771
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "city-blocks-s1-blockout-poster",
       "file": "city-blocks-s1-blockout.webp",
       "kind": "image",
@@ -655,7 +655,7 @@
       "bytes": 4850
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "city-blocks-s1-generated",
       "file": "city-blocks-s1-generated.mp4",
       "kind": "video",
@@ -668,7 +668,7 @@
       "bytes": 431415
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "city-blocks-s1-generated-poster",
       "file": "city-blocks-s1-generated.webp",
       "kind": "image",
@@ -681,7 +681,7 @@
       "bytes": 26032
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "city-blocks-s1-still",
       "file": "city-blocks-s1-still.webp",
       "kind": "image",
@@ -692,7 +692,7 @@
       "bytes": 35908
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "city-blocks-s1-still-blockout",
       "file": "city-blocks-s1-still-blockout.webp",
       "kind": "image",
@@ -703,7 +703,7 @@
       "bytes": 4850
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "two-hander-s1-blockout",
       "file": "two-hander-s1-blockout.mp4",
       "kind": "video",
@@ -714,7 +714,7 @@
       "bytes": 79953
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "two-hander-s1-blockout-poster",
       "file": "two-hander-s1-blockout.webp",
       "kind": "image",
@@ -725,7 +725,7 @@
       "bytes": 7450
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "two-hander-s1-generated",
       "file": "two-hander-s1-generated.mp4",
       "kind": "video",
@@ -738,7 +738,7 @@
       "bytes": 174879
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "two-hander-s1-generated-poster",
       "file": "two-hander-s1-generated.webp",
       "kind": "image",
@@ -751,7 +751,7 @@
       "bytes": 21824
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "two-hander-s1-still",
       "file": "two-hander-s1-still.webp",
       "kind": "image",
@@ -762,7 +762,7 @@
       "bytes": 28862
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "two-hander-s1-still-blockout",
       "file": "two-hander-s1-still-blockout.webp",
       "kind": "image",
@@ -773,7 +773,7 @@
       "bytes": 7450
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "cast-before",
       "file": "breaking-news-s2-still-blockout.webp",
       "kind": "image",
@@ -784,7 +784,7 @@
       "bytes": 3604
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "cast-after",
       "file": "breaking-news-s2-still.webp",
       "kind": "image",
@@ -795,7 +795,7 @@
       "bytes": 37170
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "cast-image-1",
       "file": "breaking-news-cast-1.webp",
       "kind": "image",
@@ -805,7 +805,7 @@
       "bytes": 4612
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "cast-image-2",
       "file": "breaking-news-cast-2.webp",
       "kind": "image",
@@ -815,7 +815,7 @@
       "bytes": 1834
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "cast-image-3",
       "file": "breaking-news-cast-3.webp",
       "kind": "image",
@@ -825,7 +825,7 @@
       "bytes": 4826
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "cast-image-4",
       "file": "breaking-news-cast-4.webp",
       "kind": "image",
@@ -835,7 +835,7 @@
       "bytes": 2710
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "generate-before",
       "file": "final-lap-s4-blockout.mp4",
       "kind": "video",
@@ -846,7 +846,7 @@
       "bytes": 193738
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "generate-after",
       "file": "final-lap-s4-generated.mp4",
       "kind": "video",
@@ -859,7 +859,7 @@
       "bytes": 443107
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "generate-before-poster",
       "file": "final-lap-s4-blockout.webp",
       "kind": "image",
@@ -870,7 +870,7 @@
       "bytes": 15770
     },
     {
-      "capturedAt": "2026-11-03T18:06:02.395Z",
+      "capturedAt": "2026-11-03T18:15:50.455Z",
       "id": "generate-after-poster",
       "file": "final-lap-s4-generated.webp",
       "kind": "image",

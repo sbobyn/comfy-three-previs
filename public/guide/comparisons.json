@@ -169,16 +169,16 @@
         "poster": "mountain-trail-s1-blockout.webp",
         "asset": "2aee0ec1-93ed-48cb-8a31-eddfd3ca7683",
         "source": "examples/starters/mountain-trail/media/assets/2aee0ec1-93ed-48cb-8a31-eddfd3ca7683.mp4",
-        "sourceSha256": "52c2e71398cac6673018a42dbc4f4775cc0ef1301ad755843a18d06a3c841d8b",
-        "sha256": "26413678798c8d7b1f4e7ed6373713d41eb91a2da5a242870726cb7d275e9d31"
+        "sourceSha256": "0504e4de88d3fba4e99768bfc14cc8542922e26a4d13c0cb2f3eb4029fceb574",
+        "sha256": "d91c7f17e6f43f82a97a7e4c498766f0cc06781d6d1296ae83ed15ae34ef5073"
       },
       "generated": {
         "file": "mountain-trail-s1-generated.mp4",
         "poster": "mountain-trail-s1-generated.webp",
         "asset": "089144bc-51ac-54bc-ae1d-c74e276b1d50",
         "source": "examples/starters/mountain-trail/media/assets/089144bc-51ac-54bc-ae1d-c74e276b1d50.mp4",
-        "sourceSha256": "7eb336cd5afb864c928e3677532abe68a3b3c438a66a66b7f6c8f0ac715e80bc",
-        "sha256": "fbbf993750d3bf002c36bfb32b4d8dc488281044aaf681fef8735351a62a8bd5"
+        "sourceSha256": "87f4ac86aee101f755a7b3a4cc18574ab303c82d08189bc057139613c4e2c0c9",
+        "sha256": "f4e62af356ece08e925d4a766d058a6d107971a184b618079a7f2218852f39a0"
       }
     },
     {

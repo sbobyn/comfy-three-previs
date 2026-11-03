@@ -4533,80 +4533,108 @@
     {
       "path": "media/refs/5e0d9e0d-7abf-552b-a974-29f5937e8f18.webp",
       "kind": "image",
-      "bytes": 466102,
-      "sha256": "5dd4c8e81d695265455742bf08b72b88b8cf744663ad5ec33cc87aee38032fce",
+      "bytes": 252248,
+      "sha256": "3c58a352c71c3de71e84ba4a2118b6176dfbaf6b3502c67cfcf95581f92d6f9c",
       "sourceSha256": "c521aa0e8bd09b3c7c11d200e8951975382f1c203c18127ceb13dfa7b9c55187",
-      "width": 1600,
-      "height": 900
+      "width": 1280,
+      "height": 720,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
     },
     {
       "path": "media/refs/669f9e5c-ac2b-521b-a565-2e9005538ed0.webp",
       "kind": "image",
-      "bytes": 385080,
-      "sha256": "21d20dae52a663125ba996bd290313cc094bf25dd30f48dd2babf37feb03f6fb",
+      "bytes": 218152,
+      "sha256": "03859240ed65fd086bac7764d0eba484b20e532b186f66592f40dc3d98e945b8",
       "sourceSha256": "56a7fb57699f44ce65655392f2392c18155d747b235b145d83eec9a6dcfc2886",
-      "width": 1600,
-      "height": 900
+      "width": 1280,
+      "height": 720,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
     },
     {
       "path": "media/assets/2aee0ec1-93ed-48cb-8a31-eddfd3ca7683.mp4",
       "kind": "video",
-      "bytes": 1098424,
-      "sha256": "52c2e71398cac6673018a42dbc4f4775cc0ef1301ad755843a18d06a3c841d8b",
+      "bytes": 1095982,
+      "sha256": "0504e4de88d3fba4e99768bfc14cc8542922e26a4d13c0cb2f3eb4029fceb574",
       "sourceSha256": "cb45e9a96d20e2434a4134b8037f1215ab97b01b39442282a2dc7c0263658c5e",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 120,
-      "duration": 5
+      "duration": 5,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
     },
     {
       "path": "media/assets/089144bc-51ac-54bc-ae1d-c74e276b1d50.mp4",
       "kind": "video",
-      "bytes": 1068461,
-      "sha256": "7eb336cd5afb864c928e3677532abe68a3b3c438a66a66b7f6c8f0ac715e80bc",
+      "bytes": 1068155,
+      "sha256": "87f4ac86aee101f755a7b3a4cc18574ab303c82d08189bc057139613c4e2c0c9",
       "sourceSha256": "746fe55042cc8bf7a5a305465d9e75feea7465cf512068af81b06d47a2e169ef",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 113,
-      "duration": 4.708
+      "duration": 4.708,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
     },
     {
       "path": "media/assets/e99acbe7-2aa2-4cd6-81eb-67b820f0eeeb.mp4",
       "kind": "video",
-      "bytes": 1022282,
-      "sha256": "8a4a24ec58a56f870444a27b4dfb8530822099459320e4bb17cbb23bf3047839",
-      "sourceSha256": "39a00db30ee7d84d0e01099f8e0d5a63cfeeae15ccc3e682db69c2ddd767ad3c",
+      "bytes": 1009784,
+      "sha256": "a8cb2083225e57babba5e557dcaa190d02526994c48d8171c898b2f4e95dac29",
+      "sourceSha256": "8a4a24ec58a56f870444a27b4dfb8530822099459320e4bb17cbb23bf3047839",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 120,
-      "duration": 5
+      "duration": 5,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
     },
     {
       "path": "media/assets/e0bb6939-8cf0-4c4c-acb2-355bdec3b786.mp4",
       "kind": "video",
-      "bytes": 999560,
-      "sha256": "4a695da7a29bc9652c00b9e0f1b00cbca03930878b756cd2437fc3c2d95cdcc9",
-      "sourceSha256": "12a3b35e1855776539d9215425fcd4a39a0e59e2198fafdff27e7fd0d39942cf",
+      "bytes": 996719,
+      "sha256": "31d8149d53665434c97a55303b12dda74d2b11fa7b6bdb433950eb10935217e9",
+      "sourceSha256": "4a695da7a29bc9652c00b9e0f1b00cbca03930878b756cd2437fc3c2d95cdcc9",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 120,
-      "duration": 5
+      "duration": 5,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
     },
     {
       "path": "media/assets/0019a9b4-ee55-4efd-b043-662c3cb16d6b.mp4",
       "kind": "video",
-      "bytes": 118386,
-      "sha256": "8f1aec747c7de20ad946b2a176b02e3a7e2d6a960ce7768adb87ff0092da1be7",
-      "sourceSha256": "6410bc705daf6d0dabb4e4ffed5605a961802014312fe0531d4f6c7fb0f9fda1",
+      "bytes": 128196,
+      "sha256": "fe7851fc7b6ecbb218e560b09386b77db7e3fb054a24f77ac5ef9b3d1c21bc54",
+      "sourceSha256": "8f1aec747c7de20ad946b2a176b02e3a7e2d6a960ce7768adb87ff0092da1be7",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 120,
-      "duration": 5
+      "duration": 5,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
     }
   ],
   "assets": [

@@ -45,7 +45,7 @@ const SOURCE_DEFS = [
     hero: { shots: ['755f685b-a74e-4c80-8ffd-8dc9cbdfd450', '4feea365-12b8-456f-878e-80be456c4c27'] } },
   // Blockout starters (2026-11-02; authored with scripts/starters/author.mjs): blockout clips, no generated media; Look Lab
   // also ships a start still per variant and four videos (the paid hybrid, examples/starters/README.md).
-  { slug: 'mountain-trail', title: 'Mountain Trail', description: 'A hiker crosses an open alpine valley toward a lake and a cabin: room to fly a drone or phone camera, with a ridge reveal, a slope dive, a low track and a wide.', hero: { shots: [] } },
+  { slug: 'mountain-trail', title: 'Mountain Trail', encode: { imageMaxPx: 1280, imageQuality: 76 }, description: 'A hiker crosses an open alpine valley toward a lake and a cabin: room to fly a drone or phone camera, with a ridge reveal, a slope dive, a low track and a wide.', hero: { shots: [] } },
   { slug: 'city-blocks', title: 'City Blocks', description: 'A downtown grid with traffic and pedestrians: a drone rise between buildings, a street-level car track, a rooftop orbit and a pedestrian follow.', hero: { shots: [] } },
   { slug: 'camera-moves', title: 'Lighthouse · Camera Moves', description: 'The lighthouse from the launch film. A keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.', hero: { shots: [] } },
   // Look Lab ships many looks, so its copy is encoded smaller (540p video, lighter stills) to stay inside the 80 MB budget;
