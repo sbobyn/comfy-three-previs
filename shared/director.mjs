@@ -6,6 +6,7 @@ import { normalizePose, blendPose, keyEase } from './blockout-pose.mjs';
 import { blockoutModel, projectMesh } from './blockout-models.mjs';
 import { normalizeSheets } from './sheet-presets.mjs';
 import { cameraLine } from './camera-source.mjs';
+import { normalizeSource, normalizePerform, normalizeStandIn } from './imported-asset.mjs';
 
 export const SHAPES = {
   person: { size: [0.5, 1.8, 0.35], kind: 'character', color: '#e8b04b' },
@@ -80,7 +81,15 @@ export function makeEntity(input, id) {
     parent: typeof input.parent === 'string' && input.parent !== id ? input.parent : null,
     ...sheetsOf(input.sheets),
     ...fromOf(input.from),
+    ...importedOf(input),
   };
+}
+// Imported meshes (docs/import.md): provenance and rig (never in a shot signature), the clip it plays, its stand-in.
+function importedOf(input) {
+  const source = projectMesh(input.model) ? normalizeSource(input.source) : undefined;
+  if (!source) return {};
+  const perform = normalizePerform(input.perform, source), standIn = normalizeStandIn(input.standIn);
+  return { source, ...(perform ? { perform } : {}), ...(standIn ? { standIn } : {}) };
 }
 // Design sheets (views generated from the primary look); stored only when present.
 function sheetsOf(v) { const sheets = normalizeSheets(v); return sheets ? { sheets } : {}; }
@@ -310,7 +319,7 @@ export function shotCast(project, shot, { samples = 12, aspect = 16 / 9, minCove
 /** Camera-truth hash: unposed bundled models keep the legacy fidelity-only policy.
  * Imported meshes and posed rigs determine the silhouette; their IDs and all pose keys invalidate earlier media.
  * Same text as src/director-capture.ts shotSignature (tests/headless.test.mjs). */
-export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, ...e }) => ({ ...e, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+export const shotSignature = (p, s) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, source, ...e }) => ({ ...e, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 /** The shot's blockout clip no longer matches its camera, timing or scene (it is made again before a video uses it). */
 export const blockoutStale = (project, shot) => !!(shot.render && shot.render.signature && shot.render.signature !== shotSignature(project, shot));
 /** The shot's blockout clip is a Blender render (server/previs/blender-import.mjs) that still matches the shot, so its frames are the still guide. */
