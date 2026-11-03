@@ -185,22 +185,72 @@ def car():
 
     joint('body',(0,.55,0),[o for o in bpy.context.scene.objects if o.type == 'MESH' and not o.parent])
 
+def solid(verts, faces, material=BODY):
+    # A closed faceted mesh with outward normals (wings and tail have thickness, so they shade like feathered surfaces).
+    o = mesh(verts, faces, material)
+    import bmesh
+    bm = bmesh.new(); bm.from_mesh(o.data); bmesh.ops.recalc_face_normals(bm, faces=bm.faces); bm.to_mesh(o.data); bm.free(); o.data.update()
+    return o
+
+def strip(stations, material=BODY):
+    # Lofted aerofoil: each station is (x, y, leading z, trailing z, thickness); a thick rounded leading edge, a thin trailing edge.
+    v, f = [], []
+    for x, y, zl, zt, t in stations:
+        c = zl - zt
+        v += [(x, y + t, zl - .10*c), (x, y - t*.45, zl - .04*c), (x, y + t*.55, zt + .45*c), (x, y - .004, zt)]
+    n = len(stations)
+    for i in range(n-1):
+        a, b = 4*i, 4*i+4
+        f += [(a, b, b+2, a+2), (a+2, b+2, b+3, a+3), (a+3, b+3, b+1, a+1), (a+1, b+1, b, a)]
+    f += [(0, 2, 3, 1), (4*n-4, 4*n-3, 4*n-1, 4*n-2)]
+    return solid(v, f, material)
+
 def eagle():
-    ellipsoid((0,.25,0),(.16,.18,.36))
-    ellipsoid((0,.35,.34),(.125,.14,.14),WHITE)
-    rod((0,.34,.43),(0,.29,.55),.065,GOLD,r2=.015,sides=6)
+    # Soaring glide at rest: broad arm wings set high on the body with a slight dihedral, a hand of six splayed, up-curled
+    # primaries ("fingers"), a fanned white tail and talons tucked under it. Joints: wing at the shoulder, tip at the wrist,
+    # tail at its base. The proxy is 2.4 x 0.5 x 1.1 m, so the curl and the tucked talons fill its height instead of a
+    # vertical stretch (which would steepen every wing angle).
+    ellipsoid((0,.20,0),(.12,.10,.34),BODY,16,8)
+    ellipsoid((0,.232,.27),(.10,.092,.15),WHITE,12,6)
+    ellipsoid((0,.262,.375),(.08,.08,.115),WHITE,12,6)
+    rod((0,.262,.46),(0,.242,.56),.038,GOLD,r2=.012,sides=6)
+    rod((0,.248,.553),(0,.222,.566),.013,GOLD,r2=.004,sides=6)
     for side in (-1,1):
+        L = 'L' if side < 0 else 'R'
+        ellipsoid((side*.058,.287,.415),(.013,.014,.012),DARK,8,4)
+        ellipsoid((side*.06,.14,-.12),(.045,.045,.10),BODY,10,5)
+        rod((side*.055,.112,-.17),(side*.05,.10,-.285),.02,GOLD,r2=.012,sides=6)
         before=set(bpy.context.scene.objects)
-        mesh([(side*.08,.28,.20),(side*.65,.34,.16),(side*1.12,.28,.02),(side*1.17,.25,-.25),(side*.58,.26,-.22),(side*.10,.23,-.20)],[(0,1,4),(1,2,3,4),(0,4,5)])
+        dh = math.tan(math.radians(5))
+        arm = [(.07,.17,-.23),(.20,.20,-.31),(.34,.20,-.35),(.48,.19,-.355),(.62,.17,-.33)]
+        strip([(side*x, .27 + (x-.07)*dh, zl, zt, .03 - .013*(x-.07)/.55) for x, zl, zt in arm])
+        wy = .27 + .55*dh
         feathers=set(bpy.context.scene.objects)
-        for i in range(6):
-            x=.65+i*.09
-            mesh([(side*x,.275,-.06),(side*(x+.10),.27,-.07),(side*(x+.06),.22,-(.29+(i%3)*.045)),(side*(x-.015),.23,-.27)],[(0,1,2,3)],DARK)
-        tip=joint('tip'+('L' if side < 0 else 'R'),(side*.65,.27,0),set(bpy.context.scene.objects)-feathers)
-        joint('wing'+('L' if side < 0 else 'R'),(side*.10,.27,0),[o for o in set(bpy.context.scene.objects)-before if not o.parent])
-        ellipsoid((side*.09,.39,.418),(.015,.018,.012),DARK,8,4)
-        rod((side*.07,.16,-.02),(side*.07,.10,.06),.025,GOLD)
-    joint('tail',(0,.23,-.24),[mesh([(-.10,.23,-.24),(.10,.23,-.24),(.20,.18,-.55),(-.20,.18,-.55)],[(0,1,2,3)],WHITE)])
+        hand = [(.62,.17,-.33),(.75,.145,-.32),(.86,.10,-.29)]
+        strip([(side*x, wy + (x-.62)*.08, zl, zt, .017 - .007*(x-.62)/.24) for x, zl, zt in hand], DARK)
+        hy = wy + .24*.08
+        # Primaries fan from the leading (most outward, slightly forward) to the trailing one, each a little lower than the
+        # one in front, and bend upward toward their tips as they carry the load.
+        for i,(ang,length) in enumerate([(13,.20),(5,.26),(-3,.29),(-11,.29),(-20,.26),(-30,.21)]):
+            a = math.radians(ang); root = (.83 - .006*i, hy - .006*i, .07 - .062*i)
+            ux, uz = math.cos(a), math.sin(a); nx, nz = -uz, ux
+            w = .036 - .001*i
+            def at(u, half, lift):
+                return (side*(root[0] + ux*u*length + nx*half), root[1] + lift, root[2] + uz*u*length + nz*half)
+            curl = lambda u: length*(.10*u + .30*u*u)
+            v = [at(0, w, 0), at(0, -w, 0), at(.55, -w*.85, curl(.55)), at(.9, -w*.45, curl(.9)), at(1, 0, curl(1)), at(.9, w*.45, curl(.9)), at(.55, w*.85, curl(.55))]
+            v += [(x, y-.006, z) for x, y, z in v]
+            f = [(0,1,2,3,4,5,6), (13,12,11,10,9,8,7)] + [(k, (k+1)%7, (k+1)%7+7, k+7) for k in range(7)]
+            solid(v, f, DARK)
+        tip=joint('tip'+L,(side*.62,wy,.0),set(bpy.context.scene.objects)-feathers)
+        joint('wing'+L,(side*.08,.27,.0),[o for o in set(bpy.context.scene.objects)-before if not o.parent])
+    # Rounded fan: twelve rectrices read as one white wedge, slightly spread for the glide.
+    arc = [(math.sin(math.radians(a))*.30, -.24 - math.cos(math.radians(a))*.30) for a in range(-28, 29, 8)]
+    top = [(-.06,.215,-.22),(.06,.215,-.22)] + [(x, .205 - .01*abs(x), z) for x, z in reversed(arc)]
+    v = top + [(x, y-.016, z) for x, y, z in top]
+    n = len(top)
+    f = [tuple(range(n)), tuple(range(2*n-1, n-1, -1))] + [(k, (k+1)%n, (k+1)%n+n, k+n) for k in range(n)]
+    joint('tail',(0,.21,-.22),[solid(v, f, WHITE)])
 
 def elk():
     ellipsoid((0,.51,-.08),(.26,.24,.35))

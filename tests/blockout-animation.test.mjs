@@ -82,3 +82,21 @@ test('all starter video prompt plans fit each model cap with action, lead identi
     assert.ok(plan.sections.filter(r=>!r.system).every(r=>!r.cameraWords?.length),where);
   }
 });
+
+test('the eagle soars: near-level wings with a slight dihedral, six fingered primaries per hand, mirrored wings and a tail', async () => {
+  const rig = await loadRig('eagle'); rig.updateMatrixWorld(true);
+  const at = name => rig.getObjectByName(name).getWorldPosition(new Vector3());
+  for (const side of ['L', 'R']) {
+    const shoulder = at(`joint_wing${side}`), wrist = at(`joint_tip${side}`);
+    const dihedral = Math.atan2(wrist.y - shoulder.y, Math.abs(wrist.x - shoulder.x)) * 180 / Math.PI;
+    assert.ok(dihedral > 2 && dihedral < 10, `${side}: shoulder-to-wrist dihedral ${dihedral.toFixed(1)}° is a soaring glide, not a V`);
+    const tip = rig.getObjectByName(`joint_tip${side}`), meshes = []; tip.traverse(o => { if (o.isMesh) meshes.push(o); });
+    assert.ok(meshes.length >= 7, `${side}: the hand and six separate primaries`);
+  }
+  const l = at('joint_tipL'), r = at('joint_tipR');
+  assert.ok(Math.abs(l.x + r.x) < 1e-6 && Math.abs(l.y - r.y) < 1e-6 && Math.abs(l.z - r.z) < 1e-6, 'wings mirror each other');
+  assert.ok(rig.getObjectByName('joint_tail'), 'tail pivot');
+  // Every wing part sits in the outer half of the proxy span: the wings, not the body, set the silhouette's width.
+  const wing = new Box3().setFromObject(rig.getObjectByName('joint_wingR'), true);
+  assert.ok(wing.max.x > 1.15 && wing.min.x < 0.15, 'right wing spans from the body to the proxy edge');
+});
