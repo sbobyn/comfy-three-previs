@@ -123,7 +123,8 @@ export function createSequence(ctx: SequenceCtx) {
   const batch = h('div', { class: 'sq-batch', hidden: true, role: 'region', 'aria-label': 'Quote', tabindex: -1 });
   const board = h('div', { class: 'sq-board', role: 'list', 'aria-label': 'Shots in order' });
   const banner = h('div', { class: 'sq-banner', hidden: true });
-  const video = h('video', { playsinline: true, controls: true, preload: 'metadata', 'aria-label': 'Cut preview' });
+  // Muted: the exported film carries no sound yet, so the preview does not promise any.
+  const video = h('video', { playsinline: true, controls: true, muted: true, preload: 'metadata', 'aria-label': 'Cut preview (muted: the exported film has no sound)' });
   // Compare: bands across one frame — blockout, start still, then each generated version — split by draggable seams.
   // `over` is the newest generated version (the first video band); `extra` holds older takes and other models.
   const over = h('video', { class: 'sq-over', playsinline: true, muted: true, preload: 'auto', hidden: true, 'aria-hidden': 'true' });
@@ -269,7 +270,7 @@ export function createSequence(ctx: SequenceCtx) {
         h('div', { class: 'sq-ctl' },
           h('div', { class: 'sq-vbar' }, abSeg, takesBtn, caption), comparisonInfo, comparisonPosition,
           h('div', { class: 'sq-vbar sq-playbar' }, playSeqBtn, totals),
-          h('div', { class: 'sq-export' }, h('div', { class: 'sq-vbar' }, exportBtn, h('span', { class: 'note' }, '1280×720 · 24 fps · H.264, in shot order')), exportStatus, exportsList))),
+          h('div', { class: 'sq-export' }, h('div', { class: 'sq-vbar' }, exportBtn, h('span', { class: 'note' }, '1280×720 · 24 fps · H.264, no sound, in shot order')), exportStatus, exportsList))),
       h('div', { class: 'sq-toolbar' },
         h('label', { class: 'sq-pickall' }, pickAll, 'All'),
         h('label', { class: 'sq-model' }, 'Video model', modelSel),
@@ -462,9 +463,11 @@ export function createSequence(ctx: SequenceCtx) {
   function drawExports() {
     const p = P(), list = cutList(), total = list.reduce((t, x) => t + Math.max(0, (x.c.out ?? x.a.duration ?? 0) - (x.c.in || 0)), 0);
     const missing = p.shots.filter(s => clipFor(s) && !media(s)).length;
-    totals.textContent = `${list.length} of ${p.shots.length} shots · ${total.toFixed(2)}s${missing ? ` · ${missing} without a blockout` : ''}`;
+    // Shots with no generated video yet play (and export) their grey blockout: say so before the export, not after.
+    const grey = list.filter(x => x.a.kind !== 'workflow-result').length;
+    totals.textContent = `${list.length} of ${p.shots.length} shots · ${total.toFixed(2)}s${missing ? ` · ${missing} without a blockout` : ''}${grey ? ` · ${grey} not generated: ${grey === 1 ? 'exports as a blockout' : 'export as blockouts'}` : ''}`;
     exportBtn.disabled = busy || !list.length || missing > 0;
-    exportBtn.title = missing ? 'Make a blockout for every shot in the cut first' : '';
+    exportBtn.title = missing ? 'Make a blockout for every shot in the cut first' : grey ? `${grey} shot${grey === 1 ? ' has' : 's have'} no generated video yet and export${grey === 1 ? 's' : ''} as the grey blockout. The film has no sound.` : 'The film has no sound.';
     ctx.onExportState?.({ ok: !!list.length && !missing, busy, reason: !list.length ? 'Nothing in the cut yet' : missing ? `Make a blockout for every shot in the cut first (${missing} missing)` : '' });
     const edits = (p.assets || []).filter(a => a.kind === 'edit').sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     exportsList.replaceChildren(...(edits.length ? [h('span', { class: 'eyebrow' }, 'Exports')] : []), ...edits.slice(0, 4).map(a => h('div', { class: 'sq-exp' },

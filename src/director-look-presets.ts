@@ -25,6 +25,10 @@ let combine = false, quoting = false;
 let quote: { shotId: string; key: string; estimateUsd: number; reserveUsd: number; rows: { label: string; existing?: boolean }[]; why?: string } | null = null;
 
 const NO_KEY_TITLE = 'Add a Comfy Cloud key first';
+// Axes whose preset brings its own look line: in a prompt it stands in for the project style the user typed (shared/look-presets.mjs).
+const STYLE_AXES = ['time', 'weather', 'season', 'mood', 'style'];
+const replacesStyle = (l: Look) => STYLE_AXES.some(k => { const v = (l as Record<string, unknown>)[k]; return !!v && v !== 'none'; });
+const clip = (t: string, n = 48) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
 const money = (x: number) => `$${x.toFixed(2)}`;
 const round = (x: number) => Math.round(x * 100) / 100;
 
@@ -41,6 +45,7 @@ function variantPrice(p: DirectorProject, s: Shot, look: Look) {
 export function lookPresetsBlock(s: Shot, ctx: LookCtx) {
   const p = ctx.project(), base = baseShotOf(p, s), eff = effectiveLook(p, s);
   const own = normalizeLook(scope === 'shot' ? s.look : p.look), def = normalizeLook(p.look);
+  const typed = (p.scene.environment?.style || '').trim();
   const setLook = (next: Look, label: string) => {
     const clean = normalizeLook(next);
     if (scope === 'project') void ctx.runEntry({ label, redo: [{ op: 'set_project', patch: { look: clean } }], undo: [{ op: 'set_project', patch: { look: normalizeLook(p.look) } }] });
@@ -62,7 +67,11 @@ export function lookPresetsBlock(s: Shot, ctx: LookCtx) {
       h('option', { value: '', selected: value === '' }, scope === 'shot' ? `—${inherited}` : '—'),
       ...(scope === 'shot' && def[a.id] ? [h('option', { value: 'none', selected: value === 'none' }, 'None on this shot')] : []),
       ...a.presets.map(x => h('option', { value: x.id, selected: value === x.id }, x.label))) as HTMLSelectElement;
-    sel.onchange = () => { const next: Look = { ...own }; if (sel.value) (next as Record<string, string>)[a.id] = sel.value; else delete (next as Record<string, string>)[a.id]; setLook(next, `${a.label}: ${sel.value ? presetOf(a.id, sel.value)?.label || 'none' : 'default'}`); };
+    sel.onchange = () => {
+      // Never drop the typed project style silently: ask the first time a preset would stand in for it.
+      if (typed && STYLE_AXES.includes(a.id) && sel.value && sel.value !== 'none' && !replacesStyle(eff)
+        && !confirm(`${presetOf(a.id, sel.value)?.label || 'This preset'} brings its own look, so ${scope === 'shot' ? 'this shot’s' : 'every shot’s'} prompts use it instead of your project style “${clip(typed)}”. Undo puts it back. Continue?`)) { sel.value = value; return; }
+      const next: Look = { ...own }; if (sel.value) (next as Record<string, string>)[a.id] = sel.value; else delete (next as Record<string, string>)[a.id]; setLook(next, `${a.label}: ${sel.value ? presetOf(a.id, sel.value)?.label || 'none' : 'default'}`); };
     return h('label', { class: 'lp-axis' }, h('span', {}, a.label), sel);
   });
 
@@ -129,6 +138,7 @@ export function lookPresetsBlock(s: Shot, ctx: LookCtx) {
     h('div', { class: 'lp-scope', role: 'group', 'aria-label': 'Apply presets to' },
       ...(['shot', 'project'] as const).map(k => h('button', { type: 'button', class: 'lp-seg' + (scope === k ? ' on' : ''), 'aria-pressed': String(scope === k), onclick: () => { scope = k; ctx.refresh(); } }, k === 'shot' ? 'This shot' : 'Project default'))),
     h('div', { class: 'lp-grid' }, ...selects),
+    typed && replacesStyle(eff) ? h('p', { class: 'note', role: 'note' }, `This shot’s prompts use the preset look instead of your project style “${clip(typed)}”. Set these to — to use your style again.`) : null,
     swapRow,
     h('p', { class: 'note lp-neg', title: 'Added to every preset look' }, NO_BRANDS_NEGATIVE),
     variantsBox);
