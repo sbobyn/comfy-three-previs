@@ -18,7 +18,7 @@ const presetOf = def => def?.provenance?.presetId || def?.id || '';
 const SEED_NOTE = 'The same seed with the same inputs usually repeats a take on this model. Seeds are not comparable across models.';
 const FIXED = {
   resolution: v => `Priced at ${v}. Other resolutions change the price and are not priced yet.`,
-  audio: () => 'Off. Generated sound changes the price and is not priced yet.',
+  audio: () => 'Off until the price is known.',
   keepSound: () => 'Off. The blockout clip has no sound to keep.',
   model: v => `The model version this preset is priced and checked for (${v}).`,
   frames: () => 'Follows the shot length and the workflow; changing it changes the timing.',
