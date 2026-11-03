@@ -42,7 +42,7 @@ test('the status strip names the step’s state, with a short form for narrow wi
   const s = shot([frame('a', 'key frame start')], { render: { previsShotId: 'x' } });
   const p = { scene: { entities: [{ shape: 'person' }, { shape: 'group' }] }, shots: [s], assets: [{ kind: 'workflow-result', shotId: 's1' }] };
   assert.deepEqual(plain(core.stepStatus('build', p, s, { stale: false, videos: 0, castNeed: 1, castTotal: 3 })), { parts: ['1 object', '1 of 3 cast need images'], short: '1 need images' });
-  assert.deepEqual(plain(core.stepStatus('shoot', p, s, { stale: true, videos: 1, castNeed: 0, castTotal: 0 })), { parts: ['Shot 01', 'The dive', 'blockout changed', '1 still', '1 video'], short: 'blockout changed' });
+  assert.deepEqual(plain(core.stepStatus('shoot', p, s, { stale: true, videos: 1, castNeed: 0, castTotal: 0 })), { parts: ['Shot 01', 'blockout changed', '1 still', '1 video'], short: 'blockout changed' });
   assert.deepEqual(plain(core.stepStatus('cut', p, s, { stale: false, videos: 1, castNeed: 0, castTotal: 0 }).short), '1/1 video');
   assert.deepEqual(plain(core.keyFrameSlots({ id: 'ltx-25-flf-v1', task: 'first-frame', inputs: { lastFrame: {} } })), ['start', 'end']);
   assert.deepEqual(plain(core.keyFrameSlots({ id: 'x', task: 'transform-video' }, { x: { keyFrames: true } })), ['start'], 'the preset’s keyFrames flag counts');

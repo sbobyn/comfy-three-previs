@@ -36,7 +36,8 @@ export function stepStatus(step: Step, p: DirectorProject, s: Shot, o: { stale: 
   }
   if (step === 'shoot') {
     const stills = s.references.filter(r => r.role === 'frame').length, blockout = s.render ? (o.stale ? 'blockout changed' : 'blockout ready') : o.bundled ? 'starter blockout' : 'no blockout';
-    return { parts: [`Shot ${String(p.shots.indexOf(s) + 1).padStart(2, '0')}`, s.title, blockout, n(stills, 'still'), o.videos ? n(o.videos, 'video') : 'no video'], short: blockout };
+    // No shot title: the shot list shows it, and it pushed the counts off the end of the top bar.
+    return { parts: [`Shot ${String(p.shots.indexOf(s) + 1).padStart(2, '0')}`, blockout, n(stills, 'still'), o.videos ? n(o.videos, 'video') : 'no video'], short: blockout };
   }
   const vids = new Set((p.assets || []).filter(a => a.kind === 'workflow-result').map(a => a.shotId)).size;
   return { parts: [n(p.shots.length, 'shot'), `${vids} of ${p.shots.length} with video`], short: `${vids}/${p.shots.length} video` };
