@@ -15,6 +15,8 @@ export type LookCtx = {
   edit: (ops: unknown[]) => Promise<unknown>;
   refresh: () => void;
   selectShot: (id: string) => void;
+  /** False when the server has no Comfy Cloud key: quoting and making variants cannot run. */
+  cloudKey?: () => boolean;
 };
 
 let scope: 'shot' | 'project' = 'shot';
@@ -22,6 +24,7 @@ const picks = new Map<string, Partial<Record<LookAxisId, string[]>>>();
 let combine = false, quoting = false;
 let quote: { shotId: string; key: string; estimateUsd: number; reserveUsd: number; rows: { label: string; existing?: boolean }[]; why?: string } | null = null;
 
+const NO_KEY_TITLE = 'Add a Comfy Cloud key first';
 const money = (x: number) => `$${x.toFixed(2)}`;
 const round = (x: number) => Math.round(x * 100) / 100;
 
@@ -103,7 +106,7 @@ export function lookPresetsBlock(s: Shot, ctx: LookCtx) {
     ctx.refresh();
   };
   const addOnly = async () => { try { await ctx.edit([{ op: 'add_variants', shotId: root.id, axes: mine, combine }]); picks.delete(root.id); quote = null; ctx.refresh(); } catch (e) { toast((e as Error).message); } };
-  const fresh = quote && quote.key === key;
+  const fresh = quote && quote.key === key, noKey = ctx.cloudKey?.() === false;
   const variantsBox = h('details', { class: 'lp-variants', open: looks.length > 0 || undefined },
     h('summary', {}, `Variants of ${base ? 'the base' : 'this shot'}`, h('span', { class: 'muted' }, looks.length ? ` · ${looks.length} · ≈ ${money(stillUsd + videoUsd)}` : ' · one change each')),
     h('p', { class: 'note' }, 'Each value makes one variant that changes only that attribute; the still is an edit of the base still, the video follows the same blockout.'),
@@ -112,9 +115,10 @@ export function lookPresetsBlock(s: Shot, ctx: LookCtx) {
     looks.length ? h('div', { class: 'lp-plan' },
       ...looks.map((l, i) => h('div', { class: 'lp-planrow' }, h('span', {}, variantLabel(p, effectiveLook(p, root), l)), h('span', { class: 'muted' }, `still ${money(prices[i].still)} · video ${money(prices[i].video)}`))),
       h('p', { class: 'note' }, prices[0]?.models.why || ''),
+      noKey ? h('p', { class: 'note', role: 'note' }, 'Add a Comfy Cloud key in Setup to make variants. Add shots only works without one.') : null,
       h('div', { class: 'ap-actions' },
-        h('button', { class: 'btn sm', type: 'button', disabled: quoting, onclick: () => void doQuote() }, quoting ? 'Quoting…' : `Quote ${looks.length}`),
-        h('button', { class: 'btn sm primary', type: 'button', disabled: !fresh, title: fresh ? '' : 'Quote first', onclick: () => void doMake() }, fresh ? `Add & make · ≈ ${money(quote!.estimateUsd)}` : 'Add & make'),
+        h('button', { class: 'btn sm', type: 'button', disabled: quoting || noKey, title: noKey ? NO_KEY_TITLE : '', onclick: () => void doQuote() }, quoting ? 'Quoting…' : `Quote ${looks.length}`),
+        h('button', { class: 'btn sm primary', type: 'button', disabled: !fresh || noKey, title: noKey ? NO_KEY_TITLE : fresh ? '' : 'Quote first', onclick: () => void doMake() }, fresh && !noKey ? `Add & make · ≈ ${money(quote!.estimateUsd)}` : 'Add & make'),
         h('button', { class: 'btn sm ghost', type: 'button', onclick: () => void addOnly(), title: 'Add the variant shots without generating anything' }, 'Add shots only'))) : null,
     fresh ? h('p', { class: 'note lp-quote' }, `Quote: ${quote!.rows.map(r => r.label + (r.existing ? ' (exists)' : '')).join(', ')} · ≈ ${money(quote!.estimateUsd)} expected, ${money(quote!.reserveUsd)} reserved.`) : null);
 

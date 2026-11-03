@@ -140,7 +140,7 @@ export function openPhonePairing() {
       pairArea.replaceChildren(
         h('p', { class: 'note' }, ready.error || 'Phone HTTPS is not available.'),
         h('p', { class: 'muted', style: 'margin:0' }, 'The phone needs its own HTTPS address on your Wi‑Fi. One-time setup on this Mac (creates new local files only, changes no trust settings):'),
-        codeBox('node scripts/phone-certificate.mjs .evidence/phone-tls YOUR_MAC_LAN_IP'),
+        codeBox('node scripts/phone-certificate.mjs ./phone-cert YOUR_MAC_LAN_IP'),
         h('p', { class: 'muted', style: 'margin:0' }, 'Then add these to .env and restart Comfy Previs:'),
         codeBox('PREVIS_PHONE_HOST=YOUR_MAC_LAN_IP\nPREVIS_PHONE_PORT=5443\nPREVIS_PHONE_CERT=/abs/path/server.crt\nPREVIS_PHONE_KEY=/abs/path/server.key\nPREVIS_PHONE_CA=/abs/path/ca.crt'),
         h('p', { class: 'muted', style: 'margin:0' }, 'Step by step: ', h('a', { href: PHONE_DOC, target: '_blank', rel: 'noreferrer' }, 'Phone camera guide ↗')));

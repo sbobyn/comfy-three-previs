@@ -124,7 +124,7 @@ export function openLooksBoard(ctx: LooksCtx) {
     const noKey = ctx.refgen().presets?.find(p => p.id === presetId)?.backend === 'cloud' && !ctx.refgen().cloudCredential;
     for (const e of P().scene.entities.filter(x => picked.has(x.id))) {
       if (e.lookFrom) { plan.push({ e, job: null, issue: `uses ${lookSource(P(), e.id)?.name}’s image` }); continue; }
-      if (noKey) { plan.push({ e, job: null, issue: 'Add a Comfy Cloud key (COMFY_CLOUD_API_KEY in .env) to get quotes. Nothing was sent.' }); continue; }
+      if (noKey) { plan.push({ e, job: null, issue: 'Add a Comfy Cloud key in Setup (COMFY_CLOUD_API_KEY in .env), or switch to Local ComfyUI. Nothing was sent.' }); continue; }
       const view = views[e.id] || Object.keys(lookViews(e))[0];
       try {
         const r = await api('director/refgen/prepare', { projectId: P().id, entityId: e.id, presetId, prompt: lookPrompt(P(), e, view), aspect: aspectFor(e, view), count, seed: Math.floor(Math.random() * 1e6) });

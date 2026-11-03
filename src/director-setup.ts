@@ -30,7 +30,7 @@ type Can = { what: string; needs: string; now: (ok: (id: string) => boolean, pho
 const CAN: Can[] = [
   { what: 'Build scenes, frame shots, make blockouts', needs: 'FFmpeg', now: ok => ok('ffmpeg') },
   { what: 'Cut the shots and export the film', needs: 'FFmpeg', now: ok => ok('ffmpeg') },
-  { what: 'Cast images and stills', needs: 'Comfy Cloud key or local ComfyUI', now: ok => ok('cloud') || ok('local') },
+  { what: 'Cast images and stills', needs: 'Comfy Cloud key and PREVIS_ALLOW_PAID=1, or local ComfyUI', now: ok => (ok('cloud') && ok('paid-on')) || ok('local') },
   { what: 'Generate video', needs: 'Comfy Cloud key, PREVIS_ALLOW_PAID=1', now: ok => ok('cloud') && ok('paid-on') },
   { what: 'Aim the shot camera with your phone', needs: 'Phone HTTPS settings', now: (_ok, phone) => phone },
 ];
@@ -61,7 +61,7 @@ export function setupBody(s: Setup | null, phone: { available: boolean } | null)
         h('dt', {}, 'Local ComfyUI', h('span', { class: local ? 'ok' : '' }, local ? 'Reachable' : 'Not reachable')),
         h('dd', {}, 'Run ComfyUI (the desktop app or python main.py). Set PREVIS_COMFY_URL if it is not on port 8000.'),
         h('dt', {}, 'Phone camera over HTTPS', h('span', { class: phone?.available ? 'ok' : '' }, phone?.available ? 'Ready' : 'Not set up')),
-        h('dd', {}, 'Make a certificate once, then set the PREVIS_PHONE_* variables and restart. Pair the phone from the workspace’s Phone button.', code('node scripts/phone-certificate.mjs .evidence/phone-tls YOUR_MAC_LAN_IP')))),
+        h('dd', {}, 'Make a certificate once, then set the PREVIS_PHONE_* variables and restart. Pair the phone from the workspace’s Phone button.', code('node scripts/phone-certificate.mjs ./phone-cert YOUR_MAC_LAN_IP')))),
     h('section', {}, h('h3', {}, 'Settings (.env)'),
       h('table', { class: 'setup-env' }, h('tbody', {}, ...ENV.map(([k, v]) => h('tr', {}, h('th', { scope: 'row' }, h('code', {}, k)), h('td', {}, v))))),
       h('p', { class: 'note' }, 'Shell variables override .env. Restart Comfy Previs after changes (pnpm start).')));

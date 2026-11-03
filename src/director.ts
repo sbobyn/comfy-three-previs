@@ -7,6 +7,7 @@ import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../s
 import { starterBlockout, starterMediaStatus, videoStale, keyStillState, blenderBlockout, blockoutStale, clipCurrent } from '../shared/director.mjs';
 import { explainStale, staleText, dependentsOf } from '../shared/regen.mjs';
 import { api, h, toast, announce, refocus, SR_ONLY, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge, REPO_URL } from './director-common';
+import { openSetup } from './director-setup';
 import { expectedUsd, isFree, submitImage, suggestedCap } from './director-spend';
 import type { Connect } from './director-common';
 import { createDirectorScene } from './director-scene';
@@ -59,6 +60,11 @@ let shotId = params.get('shot') || '';
 let selected: string | null = null;
 type Preset = { id: string; title: string; backend: 'cloud' | 'local'; note: string; maxRefs?: number; followsGuide?: 'strong' | 'weak'; pricing: { status: string; usdPerImage: number | null; creditsPerImage: number | null; rate?: string; source: string | null } };
 let refgen: { presets: Preset[]; jobs: any[]; paidExecutionEnabled: boolean; cloudCredential: boolean } = { presets: [], jobs: [], paidExecutionEnabled: false, cloudCredential: false };
+let refgenLoaded = false;
+/** The server has no Comfy Cloud key (known once the image list loads): cloud models show this guidance instead of a price. */
+const noCloudKey = () => refgenLoaded && !refgen.cloudCredential && !DEMO;
+const NO_KEY = 'Add a Comfy Cloud key in Setup, or switch to Local ComfyUI.';
+const isLocalModel = (id?: string) => !!id?.startsWith('wan-');
 // Storyboard stills: cloud models that take the blockout guide, the ones that follow it best first.
 let stillPresets: Preset[] = [];
 const genForm: Record<string, { prompt: string; presetId: string; aspect: string; count: number; seed: number; checkpoint: string; view: string; edited: boolean; open?: boolean }> = {};
@@ -311,7 +317,9 @@ function setStep(k: Step) {
   mobile?.onStep(k);
   for (const [key, b] of Object.entries(stepBtns)) { b.classList.toggle('on', key === k); b.setAttribute('aria-selected', String(key === k)); b.tabIndex = key === k ? 0 : -1; }
   wsBody.classList.toggle('shooting', k === 'shoot');
-  top.dataset.step = k; renderSteps(); renderCamHero(); if (tourAt >= 0) requestAnimationFrame(placeTour);
+  top.dataset.step = k; renderSteps(); renderCamHero();
+  // The tour points at the Build workspace; leaving it ends the tour rather than leaving the card pinned over Shoot or the Cut.
+  if (tourAt >= 0) { if (k === 'build') requestAnimationFrame(placeTour); else endTour(); }
   skipStage.hidden = skipSide.hidden = k === 'cut';
   if (k === 'shoot') {
     setView('camera');
@@ -873,8 +881,10 @@ function modelBlock(s: Shot) {
   const sent = new Set(refs.map(r => r.entityId));
   const slot = (ok: boolean | null, label: string, detail: Node | string, k?: string) => h('div', { class: 'vm-slot' + (ok === false ? ' warn' : ok ? ' ok' : ''), style: k ? `--k:${k}` : '' },
     h('span', { class: 'vm-dot' }, ok === false ? '!' : ok ? '✓' : '–'), h('span', { class: 'vm-label' }, label), h('span', { class: 'vm-detail' }, detail));
+  const keyless = noCloudKey() && !isLocalModel(def.id);
   return h('div', { class: 'block vm' },
-    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted', style: 'font-size:11.5px' }, rate ? `≈ $${(rate * secs).toFixed(2)} for ${secs}s` : 'Cost shown at quote')),
+    h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Video model'), h('span', { class: 'muted', style: 'font-size:11.5px' }, keyless ? 'no Cloud key' : rate ? `≈ $${(rate * secs).toFixed(2)} for ${secs}s` : 'Cost shown at quote')),
+    keyless ? h('p', { class: 'note', role: 'note', style: 'margin:0' }, NO_KEY, ' ', h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openSetup() }, 'Setup')) : null,
     pick,
     fidelity,
     h('div', { class: 'vm-camsrc' + (cam === 'blockout' ? ' ok' : ' warn'), title: cam === 'blockout' ? 'The model follows the blockout clip: your camera move is the camera.' : cam === 'keyframes' ? 'The model moves between the start and end stills made from the blockout’s first and last frames; the move in between is its guess.' : 'The model animates one still; it never sees your camera move.' }, CAMERA_SOURCE_LABELS[cam]),
@@ -947,9 +957,9 @@ function renderActionBar() {
   const s = shot(); if (!s) return;
   const idx = project.shots.indexOf(s), stale = blockoutOld(s);
   if (!genCache) loadGen();
-  const model: any = genCache ? shotModel(s) : null, rate = model?.pricing?.ratePerSecond as number | undefined, secs = clipSeconds(model, s);
+  const model: any = genCache ? shotModel(s) : null, keyless = !!model && noCloudKey() && !isLocalModel(model.id), rate = keyless ? undefined : model?.pricing?.ratePerSecond as number | undefined, secs = clipSeconds(model, s);
   const state = s.render ? (stale ? 'blockout changed' : 'blockout ready') : starterBlockout(project, s) ? 'starter blockout' : 'no blockout yet';
-  actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}`, ...(stale ? { title: blockoutWhy(s) } : {}) }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * secs).toFixed(2)}`)] : []));
+  actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}`, ...(stale ? { title: blockoutWhy(s) } : {}) }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * secs).toFixed(2)}`)] : keyless ? [h('span', { class: 'act-cost', title: NO_KEY }, 'no Cloud key')] : []));
   actHint.title = `${s.title} · ${s.duration}s · ${state}${rate ? ` · about $${(rate * secs).toFixed(2)} to generate (${secs}s clip)` : ''}`;
   const ready = !!s.render && !stale;
   renderBtn.textContent = ready ? 'Generate video ▸' : s.render ? 'Remake blockout…' : 'Make blockout…';
@@ -1065,7 +1075,7 @@ function renderShotPane() {
       operateBlock(s)), // [operate]
     section('video', 'Video', shotVideos(s.id).length ? h('span', { class: 'fm-ok' }, `${shotVideos(s.id).length} ready`) : null,
       ...resultsBlock(s),
-      lookPresetsBlock(s, { project: () => project, runEntry: (e: any) => runEntry(e as any), edit: ops => edit(ops as any), refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); }, selectShot }), // [look-presets]
+      lookPresetsBlock(s, { project: () => project, runEntry: (e: any) => runEntry(e as any), edit: ops => edit(ops as any), refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); }, selectShot, cloudKey: () => !noCloudKey() }), // [look-presets]
       modelBlock(s),
       modelSettingsBlock(s, settingsCtx), // [prompts]
       promptBlock(s, ctx),
@@ -1338,7 +1348,7 @@ function openLooks() {
 }
 async function loadRefgen() {
   try {
-    refgen = await api(`director/refgen?projectId=${projectId}`);
+    refgen = await api(`director/refgen?projectId=${projectId}`); refgenLoaded = true;
     stillPresets = refgen.presets.filter(p => p.backend === 'cloud' && (p.maxRefs ?? 0) > 0).sort((a, b) => (a.id === STRONG_GUIDE_MODEL ? -1 : b.id === STRONG_GUIDE_MODEL ? 1 : 0) || (a.followsGuide === 'strong' ? 0 : 1) - (b.followsGuide === 'strong' ? 0 : 1));
     // Cloud image models (FLUX 3 first); local checkpoints stay in the Looks board's own flow.
     refgen.presets = refgen.presets.filter(p => p.backend === 'cloud').sort((a, b) => (a.id === 'flux-3' ? -1 : b.id === 'flux-3' ? 1 : 0));
@@ -1553,7 +1563,7 @@ function renderObjectPane() {
       h('div', { class: 'block-head' }, h('span', { class: 'eyebrow' }, 'Image request'), editedTag, h('button', { class: 'btn ghost sm', type: 'button', disabled: !form.edited, onclick: () => { form.edited = false; rerender(); } }, 'Reset')),
       viewChips, prompt,
       h('div', { class: 'grid2' }, h('label', {}, 'Model', presetSel), h('label', {}, 'Images', count)),
-      preset ? h('p', { class: 'note', style: 'margin:0' }, preset.note, preset.backend === 'cloud' && !refgen.cloudCredential && !DEMO ? ' Cloud key not configured on this server — quoting will fail.' : '') : null,
+      preset ? h('p', { class: 'note', style: 'margin:0' }, preset.note, preset.backend === 'cloud' && !refgen.cloudCredential && !DEMO ? ' No Comfy Cloud key on this server: add one in Setup, or switch to Local ComfyUI.' : '') : null,
       h('label', { style: 'display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted)' }, 'Aspect', aspect),
       h('details', { class: 'ob-more' }, h('summary', {}, 'Seed', preset?.backend === 'local' ? ' & checkpoint' : ''), h('div', { class: 'grid2' }, h('label', {}, 'Seed', seed), preset?.backend === 'local' ? h('label', {}, 'Checkpoint', ckpt) : h('span'))),
       h('div', { style: 'display:flex;gap:8px;align-items:center' }, quoteBtn),
@@ -2069,7 +2079,7 @@ function openRender() {
   const step2 = h('div', { class: 'step' }, h('span', { class: 'n' }, '2'), h('div', {}, h('h3', {}, 'Prompt & images'), h('p', {}, 'Composed from the story, cast and camera. Edit freely.'), prompt,
     refs.length ? h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:8px' }, ...refs.map(({ ref: r, names }) => h('div', { style: 'display:flex;gap:8px;align-items:center;font-size:12px' }, h('img', { src: refUrl(r), alt: '', style: 'width:34px;height:34px;flex:none;object-fit:cover;border-radius:6px' }), h('div', { style: 'flex:1;min-width:0;overflow-wrap:anywhere' }, h('div', {}, r.name), h('small', { class: 'muted', title: [...names].join(', ') }, names.size > 1 ? `× ${names.size} objects` : [...names][0] || (r.role === 'style' ? 'Style' : 'Shot image')))))) : h('p', { class: 'note', style: 'margin-top:8px' }, 'No images for this shot.'),
     h('p', { class: 'note', style: 'margin-top:8px' }, 'Cast images are named in the prompt and sent to models that take images.')));
-  const gen = h('div', { class: 'gen-box' }, h('p', { class: 'note', style: 'margin:0' }, 'Make the blockout first.'));
+  const gen = h('div', { class: 'gen-box' }, noCloudKey() && !isLocalModel(shotModel(s)?.id) ? h('p', { class: 'status-line err', role: 'note' }, NO_KEY) : null, h('p', { class: 'note', style: 'margin:0' }, 'Make the blockout first.'));
   const step3 = h('div', { class: 'step' }, h('span', { class: 'n' }, '3'), h('div', {}, h('h3', {}, 'Generate the video'), h('p', { style: 'margin:0 0 8px' }, 'Run the chosen video model on this shot. You see the quote, camera source and final prompt first; nothing runs until you approve it.'), gen));
   const setOpen = (previsShotId: string, assetId: string) => renderGenerate(gen, s, previsShotId, assetId, () => prompt.value, { wf: hWf, backendSel: hBackend });
   prompt.oninput = () => { if (s.render && blockoutCurrent(s)) setOpen(s.render.previsShotId, s.render.assetId); };
@@ -2127,6 +2137,8 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   const previous = st.jobs.filter(j => j.shotId === previsShotId && (j.sources?.sourceVideo?.id === assetId || j.sources?.controlVideo?.id === assetId)).at(-1);
   if (previous && choices.some(d => d.id === previous.definition?.id)) wf.value = previous.definition.id;
   const note = h('p', { class: 'note', style: 'margin:0' });
+  const keyNote = h('p', { class: 'status-line err', role: 'note', hidden: true }, NO_KEY, ' ', h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openSetup() }, 'Setup'));
+  const showKey = () => { const off = noCloudKey() && backendSel.value === 'cloud'; keyNote.hidden = !off; quoteBtn.disabled = off; quoteBtn.title = off ? 'Add a Comfy Cloud key first' : ''; };
   const showNote = () => { const d = choices.find(c => c.id === wf.value); note.textContent = d?.description || ''; backendSel.value = d?.id?.startsWith('wan-') ? 'local' : 'cloud'; };
   const useRefs = h('input', { type: 'checkbox', checked: localStorage.getItem('previs.seq.refs') !== '0' });
   const refsBox = h('div', { class: 'gen-refs' });
@@ -2147,11 +2159,12 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
     startOnlyText.textContent = alt ? `No current End still: animate the start still alone with ${alt.title.split(' ·')[0]} (the camera then comes from one still, approximate).` : '';
   };
   startOnly.onchange = () => out.replaceChildren();
-  wf.onchange = () => { showNote(); showRefs(); showStartOnly(); out.replaceChildren(); timing.checked = false; }; showNote(); showRefs(); showStartOnly();
-  backendSel.onchange = () => out.replaceChildren();
+  wf.onchange = () => { showNote(); showKey(); showRefs(); showStartOnly(); out.replaceChildren(); timing.checked = false; }; showNote(); showRefs(); showStartOnly();
+  backendSel.onchange = () => { out.replaceChildren(); showKey(); };
   const timing = h('input', { type: 'checkbox' });
   timing.onchange = () => out.replaceChildren();
   const quoteBtn = h('button', { class: 'btn camera gen-quote', type: 'button' }, 'Review request & quote');
+  showKey();
   const out = h('div', { class: 'gen-out' });
   const jobsBox = h('div', { class: 'gen-jobs' });
   quoteBtn.onclick = async () => {
@@ -2180,7 +2193,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
     jobsBox.replaceChildren(...mine.map(j => h('div', { class: 'gen-job' }, h('b', { class: `st-${j.status}` }, j.status), h('span', {}, `${j.definition?.title?.split(' ·')[0] || 'Model'} · ${j.backend?.kind}`), h('small', { class: 'muted' }, j.message || ''))));
   };
   drawJobs();
-  box.replaceChildren(note,
+  box.replaceChildren(keyNote, note,
     h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, useRefs, 'Send the cast’s images with the request'), refsBox, startOnlyRow,
     h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, timing, 'I have reviewed that output timing/resolution may differ from the source; originals will not be fitted or replaced.'),
     h('div', {}, quoteBtn), out, jobsBox);
@@ -2314,7 +2327,7 @@ function showTour(i: number) {
   next.focus({ preventScroll: true });
 }
 tourEl.addEventListener('keydown', ev => { if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); endTour(); } });
-function maybeTour() { if (tourAt < 0 && !mobile?.active() && firstRun.hidden && shouldTour(project, localStorage.getItem(TOUR_KEY))) showTour(0); }
+function maybeTour() { if (tourAt < 0 && step === 'build' && !mobile?.active() && firstRun.hidden && shouldTour(project, localStorage.getItem(TOUR_KEY))) showTour(0); }
 async function poll() { await pollNow(); setTimeout(poll, 1200); }
 
 /** Once per project: say plainly when a starter's media is missing from this checkout or was made for an earlier blocking. */

@@ -460,7 +460,7 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .inspector.collapsed > :not(.head) { display: none !important; }
 /* Controls & shortcuts card: paper card; key list scrolls, viewport settings stay pinned */
 /* First-run tour: one coach card at a time, pointing at the part of the workspace it explains. */
-.tour { position: fixed; z-index: 55; width: min(300px, calc(100vw - 16px)); display: flex; flex-direction: column; gap: 6px; padding: 12px 14px 12px; border-radius: var(--r-lg); background: var(--card); color: var(--ink-2); box-shadow: var(--sh-3); font-size: var(--fs-sm); animation: hero-in var(--t-reveal) var(--ease-out) both; }
+.tour { position: fixed; z-index: 35; width: min(300px, calc(100vw - 16px)); display: flex; flex-direction: column; gap: 6px; padding: 12px 14px 12px; border-radius: var(--r-lg); background: var(--card); color: var(--ink-2); box-shadow: var(--sh-3); font-size: var(--fs-sm); animation: hero-in var(--t-reveal) var(--ease-out) both; }
 .tour::before { content: ''; position: absolute; left: var(--arrow, 24px); width: 12px; height: 12px; margin-left: -6px; background: var(--card); transform: rotate(45deg); box-shadow: -1px -1px 0 rgba(21,19,15,.06); }
 .tour[data-side=below]::before { top: -6px; }
 .tour[data-side=above]::before { bottom: -6px; box-shadow: 1px 1px 0 rgba(21,19,15,.06); }

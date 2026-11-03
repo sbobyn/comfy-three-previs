@@ -8,7 +8,7 @@ reachable from the network — never project APIs or assets.
 
 ## One-time setup (Mac)
 
-1. `node scripts/phone-certificate.mjs .evidence/phone-tls YOUR_MAC_LAN_IP`
+1. `node scripts/phone-certificate.mjs ./phone-cert YOUR_MAC_LAN_IP`
    (new local files only; changes no trust settings).
 2. Set in `.env` and restart Previs:
    `PREVIS_PHONE_HOST=YOUR_MAC_LAN_IP`, `PREVIS_PHONE_PORT=5443`,

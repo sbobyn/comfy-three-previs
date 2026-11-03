@@ -185,9 +185,9 @@ export const TOUR = [
   { id: 'generate', title: 'Generate', body: 'Generate makes a still or the shot’s video. You see the cost first; nothing is charged without your approval.' },
 ] as const;
 export const TOUR_KEY = 'previs.tour.v1';
-/** Show the tour once per browser, on a project that is new (few edits) and not empty. */
-export function shouldTour(p: Pick<DirectorProject, 'revision' | 'scene' | 'createdAt'>, seen: string | null, now = Date.now()) {
-  if (seen === '1') return false;
+/** Show the tour once per browser, on a New scene project that is new (few edits) and not empty. Starters are finished films: no tour. */
+export function shouldTour(p: Pick<DirectorProject, 'revision' | 'scene' | 'createdAt' | 'template'>, seen: string | null, now = Date.now()) {
+  if (seen === '1' || p.template !== 'empty') return false;
   const fresh = p.revision <= 3 || now - Date.parse(p.createdAt) < 30 * 60_000;
   return fresh && p.scene.entities.length > 0;
 }

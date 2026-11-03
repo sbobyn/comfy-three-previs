@@ -97,12 +97,14 @@ test('changes from Claude are described in plain words and undone exactly; the u
 });
 
 test('the first-run tour shows once, on a new project', () => {
-  const p = { revision: 2, createdAt: '2026-10-30T10:00:00Z', scene: { entities: [{}] } };
+  const p = { template: 'empty', revision: 2, createdAt: '2026-10-30T10:00:00Z', scene: { entities: [{}] } };
   const now = Date.parse('2026-10-30T12:00:00Z');
   assert.equal(core.shouldTour(p, null, now), true);
   assert.equal(core.shouldTour(p, '1', now), false, 'never again once dismissed');
   assert.equal(core.shouldTour({ ...p, revision: 40 }, null, now), false, 'an old, much-edited project is not new');
-  assert.equal(core.shouldTour({ ...p, revision: 40, createdAt: '2026-10-30T11:50:00Z' }, null, now), true, 'a starter opened minutes ago is');
+  assert.equal(core.shouldTour({ ...p, revision: 40, createdAt: '2026-10-30T11:50:00Z' }, null, now), true, 'a New scene opened minutes ago is');
+  assert.equal(core.shouldTour({ ...p, template: 'final-lap' }, null, now), false, 'starters are finished films: no coach marks over them');
+  assert.equal(core.shouldTour({ ...p, template: 'camera-moves', revision: 1 }, null, now), false, 'not even a blockout-only starter');
   assert.equal(core.shouldTour({ ...p, scene: { entities: [] } }, null, now), false, 'the empty stage has its own Start here card');
   assert.deepEqual(plain(core.TOUR.map(t => t.id)), ['block', 'cast', 'shoot', 'generate']);
 });
