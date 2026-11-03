@@ -1,4 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 300" role="img" aria-label="Comfy Previs">
-  <g transform="translate(34 26) scale(.27)"><g transform="translate(-64 -64)"><path fill="#C8401F" fill-rule="evenodd" d="M185 240 L518 119 L875 270 L625 425Z M118 256 L609 462 L610 919 L118 713Z M650 456 L898 304 L898 721 L650 905Z M185 361 L536 506 L536 814 L185 669Z"/></g></g>
+  <g transform="translate(34 26) scale(.29)"><g transform="translate(-96 -96)"><path fill="#8D877E" d="M181 318 512 128 654 210 329 790 181 706Z"/>
+<path fill="#C8401F" d="M696 234 843 318 843 706 512 896 371 814Z"/>
+<path fill="#E66C52" d="M696 234 843 318 682 411 618 373Z"/>
+<path fill="#D94B2D" d="M618 373 682 411 554 486Z"/>
+<path fill="#AD2F19" d="M682 411 843 318 843 706 682 614Z"/>
+<path fill="#9B2514" d="M448 675 512 713 682 614 843 706 512 896 371 814Z"/></g></g>
   <text x="330" y="191" fill="#15130F" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', system-ui, sans-serif" font-size="140" font-weight="600" letter-spacing="-3">Comfy Previs</text>
 </svg>
