@@ -181,3 +181,54 @@ test('starter comparisons never combine different shots, source clips or posters
   assert.equal(pair.kind, 'video'); assert.equal(pair.posters, undefined, 'posters from another shot cannot masquerade as frame zero');
   assert.equal(core.starterMedia('wingspan', [e('wingspan-s1-still-blockout'), e('wingspan-s2-still')]).kind, 'still');
 });
+
+
+test('starter cards use saved standalone posters without pairing another shot or asset', () => {
+  const clip = { id: 'demo-s1-generated', kind: 'video', file: 'take.mp4', project: 'p', shot: 's1', asset: 'v1' };
+  const poster = { id: 'demo-s1-generated-poster', kind: 'image', file: 'take.webp', project: 'p', shot: 's1', asset: 'v1' };
+  assert.equal(core.starterMedia('demo', [poster]).poster, 'take.webp');
+  assert.equal(core.starterMedia('demo', [clip, poster]).poster, 'take.webp');
+  assert.equal(core.starterMedia('demo', [clip, { ...poster, shot: 's2' }]).poster, undefined);
+  assert.equal(core.starterMedia('demo', [clip, { ...poster, asset: 'v2' }]).poster, undefined);
+  const block = { id: 'demo-s1-blockout', kind: 'video', file: 'source.mp4', project: 'p', shot: 's1', asset: 'b1' };
+  const blockPoster = { id: 'demo-s1-blockout-poster', kind: 'image', file: 'source.webp', project: 'p', shot: 's1', asset: 'b1' };
+  assert.equal(core.starterMedia('demo', [block, blockPoster]).poster, 'source.webp');
+  const paired = core.starterMedia('demo', [block, blockPoster, clip, { ...poster, asset: 'v2' }]);
+  assert.equal(paired.kind, 'video'); assert.equal(paired.posters, undefined);
+});
+
+test('shot coverage counts saved same-shot media once, excluding cast references and absent files', () => {
+  const shots = [shot([frame('s', 'key frame start'), frame('e', 'key frame end')]), shot([], { id: 's2' }), shot([], { id: 's3' })];
+  shots[0].references.forEach(r => { r.mime = 'image/png'; });
+  shots[1].references = [{ ...frame('cast', ''), role: 'look', mime: 'image/png' }, { ...frame('missing', ''), file: '', mime: 'image/png' }];
+  const asset = (id, kind, shotId = 's1', file = id + '.mp4', mime = 'video/mp4') => ({ id, kind, shotId, file, mime });
+  const assets = [asset('take1', 'workflow-result'), asset('take2', 'workflow-result'), asset('block', 'camera-render'),
+    asset('unknown', 'workflow-result', null), asset('empty', 'workflow-result', 's2', ''), asset('image', 'workflow-result', 's2', 'out.png', 'image/png'), asset('s3-block', 'camera-render', 's3')];
+  const coverage = plain(core.projectMediaCoverage({ shots, assets }));
+  assert.deepEqual([coverage.total, coverage.video, coverage.still, coverage.blockout], [3, 1, 1, 2]);
+  assert.deepEqual(coverage.shots.map(s => [s.video, s.still, s.blockout]), [[true, true, true], [false, false, false], [false, false, true]]);
+  assert.equal(core.projectMediaCoverage({ shots }).video, 0, 'older projects may have no asset list');
+});
+
+test('demo coverage is derived from every bundled shot independently of render receipts', () => {
+  const slugs = JSON.parse(readFileSync(new URL('../examples/starters/index.json', import.meta.url))).starters;
+  const expected = { 'breaking-news': [3, 3, 3, 3], wingspan: [3, 3, 3, 3], 'final-lap': [4, 4, 4, 4], posterized: [3, 3, 3, 3], 'mountain-trail': [4, 1, 1, 4], 'city-blocks': [4, 1, 1, 4], 'camera-moves': [24, 1, 1, 24], 'look-lab': [35, 13, 35, 14], 'two-hander': [5, 1, 1, 5] };
+  for (const slug of slugs) {
+    const bundle = JSON.parse(readFileSync(new URL(`../examples/starters/${slug}/starter.json`, import.meta.url)));
+    const c = core.projectMediaCoverage(bundle);
+    assert.deepEqual([c.total, c.video, c.still, c.blockout], expected[slug], slug);
+    const withoutReceipts = { ...bundle, shots: bundle.shots.map(s => ({ ...s, render: null })) };
+    assert.deepEqual(plain(core.projectMediaCoverage(withoutReceipts)), plain(c), 'saved media counts do not depend on engine render receipts');
+  }
+});
+
+
+test('all nine gallery comparisons retain their matching saved posters', () => {
+  const manifest = JSON.parse(readFileSync(new URL('../public/guide/manifest.json', import.meta.url)));
+  const slugs = JSON.parse(readFileSync(new URL('../examples/starters/index.json', import.meta.url))).starters;
+  for (const slug of slugs) {
+    const media = core.starterMedia(slug, manifest.entries);
+    assert.equal(media.kind, 'video', slug);
+    assert.equal(media.posters?.length, 2, `${slug}: saved frame-zero poster pair`);
+  }
+});

@@ -1183,3 +1183,4 @@ body[data-mstep=build]:is(.m-compact, .m-medium) .viewport:not(.camview) .demo-n
 /* Library badges and Take lab tags. */
 [data-theme="dark"] .asset .badge.render { color: var(--accent); }
 [data-theme="dark"] .tk-tag.ref { color: var(--on-ink); }
+.report-dialog .report-preview { min-height: 180px; max-height: 40vh; overflow: auto; box-sizing: border-box; }

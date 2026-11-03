@@ -23,6 +23,8 @@ import { regenTools, shotRegen } from './agent-regen.mjs';
 import { blockoutFidelity, fidelityAdvice, defaultForShot } from '../../shared/blockout-fidelity.mjs';
 import { setsFor, planSlots, slotAspect, viewPrompt, EXPRESSION_PACKS, INTENSITIES, MAX_SHEET_SLOTS } from '../../shared/sheet-presets.mjs';
 import { readFileSync } from 'node:fs';
+import { homedir, platform, release, arch } from 'node:os';
+import { diagnosticsText, issueBody, issueUrl } from '../../shared/report-issue.mjs';
 const VERSION = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).version;
 // This is a stdio MCP server, so without a flag it waits silently for JSON-RPC on stdin.
 if (process.argv.includes('--version')) { console.log(VERSION); process.exit(0); }
@@ -163,8 +165,23 @@ const tools = [
   // Takes: list a shot's takes with what made each, and pick the winner (server/previs/agent-takes.mjs).
   ...takeTools({ get, post, project, shotOf }),
   ...regenTools({ post, project, shotOf, entityOf }),
+  { name: 'previs_report_issue', description: 'Help the user report a Comfy Previs bug: returns a prefilled GitHub new-issue URL and the sanitized diagnostics in it (version, OS, Node, which PREVIS_* settings are set, setup check status). Nothing is sent; give the user the URL to review and submit. Free.', inputSchema: { type: 'object', properties: { summary: { type: 'string', maxLength: 300, description: 'One line: what went wrong' } }, additionalProperties: false },
+    run: async a => reportIssue(a) },
 ];
 // ---------- helpers for composite tools ----------
+/** previs_report_issue: server-side diagnostics (setting names only, never values) and the prefilled issue URL. */
+async function reportIssue(a) {
+  const flags = Object.keys(process.env).filter(k => /^(PREVIS|COMFY)_/.test(k)).sort().join(', ') || 'none';
+  const checks = await fetch(base + '/api/director/setup', { signal: AbortSignal.timeout(3000) }).then(async response => {
+    if (!response.ok) throw new Error('setup unavailable');
+    const setup = await response.json();
+    return setup.checks.map(check => `${check.id} ${check.status}`).join(', ');
+  }).catch(() => 'app not reachable');
+  const diagnostics = diagnosticsText({ App: `Comfy Previs ${VERSION} · local (via MCP)`, OS: `${platform()} ${release()} ${arch()}`, Node: process.version, Settings: flags, Setup: checks }, [], { home: homedir() });
+  const summary = String(a.summary || '').trim();
+  const body = issueBody(diagnostics, summary);
+  return { url: issueUrl(summary ? `Bug: ${summary.slice(0, 90)}` : 'Bug: ', body), diagnostics, next: 'Nothing was sent. Give the user the URL: they review the text on GitHub and submit it themselves. No GitHub account: they can paste the diagnostics in Discord or an email.' };
+}
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const httpError = (r, j) => Object.assign(Error(j.error || `HTTP ${r.status}`), { status: r.status, code: j.code, retryAfterSeconds: j.retryAfterSeconds });
 async function get(path) { const r = await fetch(base + path); const j = await r.json().catch(() => ({})); if (!r.ok) throw httpError(r, j); return j; }
@@ -477,7 +494,7 @@ async function jobsDashboard() {
   if (!jobs.length) lines.push('', 'No jobs yet.');
   return [{ type: 'text', text: lines.join('\n') }];
 }
-const offered = legacyTools ? tools : tools.filter(t => /^previs_(director|library)_/.test(t.name) || t.name === 'previs_import_asset');
+const offered = legacyTools ? tools : tools.filter(t => /^previs_(director|library)_/.test(t.name) || t.name === 'previs_import_asset' || t.name === 'previs_report_issue');
 async function handle(message) {
   if (message.method === 'initialize') return { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: 'comfy-previs', version: VERSION }, instructions: 'Comfy Previs director. The user directs you here in chat while the Comfy Previs workspace (http://127.0.0.1:<port>/director.html?project=<id>) is open beside you; every edit appears there live; object, shot and camera edits can be undone there (prompt, look and model edits cannot). Find the project with previs_director_projects (or create one with previs_director_create_project), read it with previs_director_get before every change, then build and direct with previs_director_edit (objects, Cast Card descriptions in notes/styleNotes, world and style, shots and cameras) and previs_director_animate (keyframed motion). Keep blockouts simple and readable: a few clear objects, named for what they are, each with a concrete appearance description. Never put two surfaces on the same plane (they z-fight: flickering stripes in every blockout frame, which image and video models copy): lift a line, decal, rug or sign at least 2 mm off the surface under it along its normal (on a floor whose top is at y, put its bottom at y + 0.002), and do not overlap the faces of two objects flush; when a result has warnings, fix what they name (docs/blockout-modeling-rules.md). Reply with a short plain summary of what changed. Workflow: build the scene (objects with Cast Card descriptions, grouped where sensible), give each character/vehicle/prop an image (previs_director_generate_image, then set the best as primary), write shots and cameras, check and refine each shot prompt (previs_director_get_prompt / set_prompt / set_camera_style; previs_director_prompt_sections shows the exact final prompt by section, previs_director_set_prompt_section overrides or locks one section, previs_director_prompt_history diffs versions and takes), choose a model and its settings (previs_director_model_settings), choose a video model (previs_director_models, previs_director_shot_inputs), render the blockout yourself (previs_director_render_blockout, free, server GPU; or bring a Blender shot in as the blockout with previs_director_import_blender, see previs_director_blender_helper), make storyboard stills (previs_director_generate_still at start/end or any moment; start→end video models use them; previs_director_keyframe works by exact 24 fps blockout frame: see a frame’s guide, make a still there and pin it as the start, end or a timed in-between key frame), compose design sheets (previs_director_generate_sheet compose:true), then generate video (previs_director_generate_video; when the subject’s motion or facing matters, use the model directionAdvice recommends in previs_director_shot_inputs, and check each take with previs_director_grade_take before picking a winner). For a whole project use previs_director_batch_generate (dryRun first, then run within one budget; follow it with previs_director_batch_status). You can see the work: previs_director_view_shot returns an image of the blockout, a still or a generated video frame at any moment, or a small contact sheet; look before and after every paid step. previs_director_jobs_dashboard lists every running job; never retry stuck or uncertain jobs. Reusable cast and set pieces live in the library: previs_library_list to see them, previs_library_place to put one in the scene (@handle in the user’s words means a library asset when no object in the scene has that handle), previs_library_save to keep one for other projects. Always state the estimated cost before paid generation and keep maxCostUsd tight. previs_director_wait_for_direction is only for messages typed inside the workspace and is not needed when the user talks to you directly.' };
   if (message.method === 'ping') return {};

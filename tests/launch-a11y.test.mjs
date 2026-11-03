@@ -10,14 +10,14 @@ import { startApp, skipReason as skip, SIZES } from './fixtures/a11y-app.mjs';
 
 const read = f => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 
-test('demo home: finished scenes open their projects, Run locally explains the install, no "Your projects"', () => {
+test('demo home: demo scenes open their projects, Run locally explains the install, no "Your projects"', () => {
   const home = read('src/director-home.ts');
-  assert.match(home, /'Explore a finished scene'/);
+  assert.match(home, /'Explore a demo scene'/);
   assert.match(home, /'Run locally'/);
   assert.match(home, /git clone --depth 1 --single-branch https:\/\/github\.com\/sbobyn\/comfy-three-previs\.git/, 'the README’s Quick start');
   assert.match(home, /DEMO \? h\('p', \{ class: 'home-demo-note', role: 'note' \}/, 'read-only is said before any action');
   assert.match(home, /DEMO \? null : h\('section', \{ class: 'home-section', 'aria-labelledby': 'projects-title' \}/, 'the demo has no Your projects');
-  assert.match(home, /'Finished scenes'/);
+  assert.match(home, /'Explore the demo scenes'/);
   // First use (fewer than 3 projects) leads with a starter; New scene leads after that.
   assert.match(home, /isNew \? \[openStarter\('primary'\), newScene\('New scene', ''\)\] : \[newScene\('New scene'\), openStarter\(\)\]/);
   assert.match(read('src/demo-shim.ts'), /case 'director\/starters': return file\('starters\.json'/);

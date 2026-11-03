@@ -212,8 +212,8 @@ export const heroNext = (i: number, n: number, paused: boolean, reduced: boolean
 
 // ---------- Home: the starter card's blockout → video seam ----------
 export type GuideEntryLite = { id: string; file: string; kind: 'video' | 'image'; label?: string; project?: string; shot?: string; asset?: string; sourceAssetId?: string };
-export type StarterMedia = { kind: 'video' | 'image' | 'still'; before?: string; after?: string; posters?: [string, string]; label?: string; cast: { file: string; label: string }[] };
-/** The starter's hero shot media from public/guide/manifest.json: blockout ↔ generated video, else a still pair, else nothing (draw the blockout still). */
+export type StarterMedia = { kind: 'video' | 'image' | 'still'; before?: string; after?: string; posters?: [string, string]; poster?: string; label?: string; cast: { file: string; label: string }[] };
+/** Saved comparisons and posters first; a card without saved media can lazily render its own blockout. */
 export function starterMedia(slug: string, entries: GuideEntryLite[]): StarterMedia {
   const own = new RegExp(`^${slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-(s\\d+-(blockout|generated|still)(-poster|-blockout)?|cast-\\d+|sheet)$`);
   const mine = entries.filter(e => own.test(e.id));
@@ -223,13 +223,32 @@ export function starterMedia(slug: string, entries: GuideEntryLite[]): StarterMe
     const tag = bv.id.slice(0, -'-blockout'.length), gv = mine.find(e => e.id === `${tag}-generated` && e.kind === 'video');
     if (!gv || !sameShot(bv, gv) || (gv.sourceAssetId && bv.asset && gv.sourceAssetId !== bv.asset)) continue;
     const bp = mine.find(e => e.id === `${tag}-blockout-poster`), gp = mine.find(e => e.id === `${tag}-generated-poster`);
-    return { kind: 'video', before: bv.file, after: gv.file, posters: bp && gp && sameShot(bv, bp) && sameShot(gv, gp) ? [bp.file, gp.file] : undefined, label: gv.label, cast };
+    return { kind: 'video', before: bv.file, after: gv.file, posters: bp && gp && bp.kind === 'image' && gp.kind === 'image' && sameShot(bv, bp) && sameShot(gv, gp) && (!bp.asset || !bv.asset || bp.asset === bv.asset) && (!gp.asset || !gv.asset || gp.asset === gv.asset) ? [bp.file, gp.file] : undefined, label: gv.label, cast };
   }
   for (const bs of mine.filter(e => /-s\d+-still-blockout$/.test(e.id))) {
     const gs = mine.find(e => e.id === bs.id.slice(0, -'-blockout'.length));
     if (gs && sameShot(bs, gs)) return { kind: 'image', before: bs.file, after: gs.file, label: gs.label, cast };
   }
-  return { kind: 'still', cast };
+  const saved = mine.filter(e => {
+    if (e.kind !== 'image' || !e.file) return false;
+    const clip = e.id.endsWith('-poster') ? mine.find(c => c.id === e.id.slice(0, -'-poster'.length)) : undefined;
+    return !clip || (sameShot(clip, e) && (!clip.asset || !e.asset || clip.asset === e.asset));
+  });
+  const poster = saved.find(e => /-s\d+-(generated-poster|still)$/.test(e.id))
+    || saved.find(e => /-s\d+-(blockout-poster|still-blockout)$/.test(e.id));
+  return { kind: 'still', ...(poster ? { poster: poster.file, label: poster.label } : {}), cast };
+}
+
+/** Availability per shot, not approval/freshness. Multiple takes or start/end stills count once. */
+export function projectMediaCoverage(project: Pick<DirectorProject, 'shots' | 'assets'>) {
+  const shots = project.shots.map(shot => {
+    const assets = (project.assets || []).filter(a => a.shotId === shot.id && !!a.file && a.mime?.startsWith('video/'));
+    return { id: shot.id, title: shot.title,
+      video: assets.some(a => a.kind === 'workflow-result'),
+      still: shot.references.some(r => r.role === 'frame' && !!r.file && r.mime?.startsWith('image/')),
+      blockout: assets.some(a => a.kind === 'camera-render') };
+  });
+  return { total: shots.length, video: shots.filter(s => s.video).length, still: shots.filter(s => s.still).length, blockout: shots.filter(s => s.blockout).length, shots };
 }
 /** Keyboard on a seam (0–100): arrows step 5 (Shift 20), Home/End jump; null when the key is not the seam's. */
 export function seamKey(x: number, key: string, shift = false): number | null {

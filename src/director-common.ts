@@ -4,7 +4,8 @@ import { claudeExamples } from './director-design-core';
 
 /** The read-only GitHub Pages demo (built with VITE_DEMO=1): no Cloud status, no generation. */
 export const DEMO = Boolean(import.meta.env.VITE_DEMO);
-export const REPO_URL = 'https://github.com/sbobyn/comfy-three-previs';
+export { REPO_URL } from '../shared/report-issue.mjs';
+import { REPO_URL } from '../shared/report-issue.mjs';
 /** In-page demo notice, in the page's own header (the demo shim's floating banner steps aside for it). */
 export const demoBadge = () => h('a', { class: 'demo-badge', href: REPO_URL, target: '_blank', rel: 'noopener', title: 'This is a read-only demo. Run Comfy Previs locally to edit and generate.' }, 'Read-only demo · Run it locally ↗');
 
@@ -65,6 +66,8 @@ export function refocus(el: HTMLElement | null | undefined) {
 /** A short status line at the bottom. With an action (e.g. Undo) it stays a little longer and carries one button. Also announced politely. */
 export function toast(text: string, error = false, action?: { label: string; run: () => void }) {
   const t = h('div', { class: 'toast' + (error ? ' err' : '') }, text);
+  // An error with no action of its own offers to report it (src/director-report.ts: a preview first, nothing is sent).
+  if (error && !action) action = { label: 'Report this', run: () => void import('./director-report').then(m => m.openReport(text)) };
   if (action) t.append(h('button', { class: 'btn', type: 'button', onclick: () => { t.remove(); action.run(); } }, action.label));
   liveHost().append(t);
   announce(error ? `Error: ${text}` : text);

@@ -1,3 +1,4 @@
+import './director-report'; // first: its error buffer starts at boot
 import './director.css';
 import { applyTheme, watchTheme } from './theme';
 import { h } from './director-common';
