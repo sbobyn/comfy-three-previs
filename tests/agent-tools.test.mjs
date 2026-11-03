@@ -384,8 +384,8 @@ test('tools/list: the director and library tools by default; legacy engine, Blen
     assert.equal(director.length, 27 + GROUPS.length, `${director.length} director tools: 27 plus the ${BLENDER_TOOLS.length} Blender import, ${KEYFRAME_TOOLS.length} keyframe, ${TAKE_TOOLS.length} take, ${PROMPT_TOOLS.length} prompt, ${PERFORM_TOOLS.length} perform, ${REGEN_TOOLS.length} regeneration and ${LOOK_TOOLS.length} look tools`);
     for (const name of GROUPS) assert.ok(director.includes(name), name);
     assert.deepEqual(library, LIBRARY_TOOLS, 'the asset library tools, as one group');
-    assert.equal(names.length, 27 + GROUPS.length + LIBRARY_TOOLS.length + 1, 'director (with Blender import, keyframe, take, prompt, perform, regeneration and look tools), library tools and previs_import_asset');
-    assert.deepEqual(names.filter(n => !director.includes(n) && !library.includes(n)), ['previs_import_asset']);
+    assert.equal(names.length, 27 + GROUPS.length + LIBRARY_TOOLS.length + 2, 'director (with Blender import, keyframe, take, prompt, perform, regeneration and look tools), library tools, previs_import_asset and previs_report_issue');
+    assert.deepEqual(names.filter(n => !director.includes(n) && !library.includes(n)), ['previs_import_asset', 'previs_report_issue']);
     assert.match(tools.find(t => t.name === 'previs_director_edit').description, /\{op:"use_take",shotId,referenceId\}/);
     const refused = await rpc('tools/call', { name: 'previs_render_animation', arguments: {} });
     assert.match(refused.error.message, /Unknown tool/);

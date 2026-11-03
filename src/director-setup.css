@@ -40,3 +40,5 @@ dialog.setup-dialog .dialog-body { overflow-y: auto; max-height: calc(90vh - 64p
 .setup-page > header .brand { color: var(--ink); font-weight: 600; margin-right: auto; }
 .setup-page > main { width: min(760px, 100% - 56px); margin: 0 auto; padding: 12px 0 56px; }
 .setup-page h1 { margin: 0 0 22px; font-family: var(--serif); font-weight: 500; font-size: 34px; letter-spacing: -.02em; }
+.setup-foot { border-top: 1px solid var(--line); padding-top: 12px; }
+.setup-report { border: 0; background: none; padding: 0; color: var(--ink); font: inherit; text-decoration: underline; cursor: pointer; }

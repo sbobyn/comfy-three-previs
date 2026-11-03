@@ -7,6 +7,7 @@ import type { DirectorProject, Shot } from '../shared/director.mjs';
 import { KIND_COLORS } from '../shared/prompt.mjs';
 import { renderStill } from './director-scene';
 import { api, h, ago, claudeDialog, toast, DEMO, demoBadge, REPO_URL } from './director-common';
+import { reportLink } from './director-report';
 import type { AgentStatus, Connect } from './director-common';
 import { openJourney } from './director-guide';
 import { checkList, openSetup } from './director-setup';
@@ -393,7 +394,8 @@ async function render() {
           fileInput, h('button', { class: 'home-link', type: 'button', title: 'A project (.previs.zip) or a shared asset (.previs-asset.zip)', onclick: () => fileInput.click() }, 'Import…'),
           DEMO ? null : blenderInput, DEMO ? null : h('button', { class: 'home-link', type: 'button', title: 'A zip of the folder scripts/blender/previs_export.py wrote: Blender’s camera, objects and frames become a new project', onclick: () => blenderInput.click() }, 'Import Blender shot…'),
           archivedCount ? h('button', { class: 'home-link home-archived', type: 'button', 'aria-pressed': String(showArchived), onclick: () => { showArchived = !showArchived; void render(); } }, showArchived ? 'Hide archived' : `Archived · ${archivedCount}`) : null),
-        list, archivedList)));
+        list, archivedList)),
+    h('footer', { class: 'home-foot' }, h('a', { class: 'home-link', href: REPO_URL, target: '_blank', rel: 'noopener' }, 'GitHub ↗'), reportLink()));
 }
 
 const heroHead = () => [

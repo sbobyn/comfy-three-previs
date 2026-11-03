@@ -1,3 +1,4 @@
+import { openReport } from './director-report'; // first: its error buffer starts at boot
 import { projectMesh } from '../shared/blockout-models.mjs';
 import { importModels, importSummary, importedSection, isModelDrop, MODEL_ACCEPT } from './director-import';
 import { loadBlockoutModels } from './director-models';
@@ -163,6 +164,7 @@ helpMenu.append(
   menuItem('Controls & shortcuts', 'Viewport, keys and grid · ?', () => { renderHelp(); helpCard.hidden = false; }),
   menuItem('Show tips again', 'The first-run hints and tour', () => showTipsAgain()),
   menuItem('Setup & theme', 'Dark, light or system · what this machine can do', () => openSetup()),
+  menuItem('Report a problem', 'Open a GitHub issue with diagnostics you review first', () => openReport()),
   // The read-only demo has no server to build the file.
   ...(DEMO ? [] : [h('div', { class: 'menu-sep' }), menuItem('Export project (.zip)', 'Everything in this project, in one file', () => { location.href = `/api/director/export?id=${projectId}`; })]));
 // Status strip: what the current step is working on, Claude's presence and the jobs pip (mounted below).

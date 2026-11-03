@@ -1,0 +1,10 @@
+export const REPO_URL: string;
+export const NEW_ISSUE_URL: string;
+export const MAX_ISSUE_URL: number;
+export const MAX_DIAGNOSTICS: number;
+export const ISSUE_TEMPLATE: string;
+export function sanitize(text: unknown, opts?: { home?: string }): string;
+export function pathOnly(url: string): string;
+export function diagnosticsText(fields: Record<string, string | number | null | undefined>, errors?: string[], opts?: { home?: string }): string;
+export function issueBody(diagnostics: string, summary?: string): string;
+export function issueUrl(title: string, body: string, max?: number): string;

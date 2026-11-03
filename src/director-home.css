@@ -208,3 +208,4 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
   .home-hero-stage > .ba, .home-hero-dot i, .home-reel img, .home-frame img, .home-starter .home-frame, .home-project .home-frame, .home-step-art { transition: none; }
   .home-reel-tag i, .home-frame.is-loading::after { animation: none; }
 }
+.home-foot { display: flex; justify-content: center; gap: 4px; padding: 24px 28px 40px; border-top: 1px solid var(--line); }
