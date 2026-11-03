@@ -40,7 +40,7 @@ Pick a shot, frame its subject and preview the camera move.
 
 ![Shoot: shot camera and settings](../public/guide/shoot.webp)
 
-See [device controls](device-controls.md) for gamepad layouts and [phone setup](director-phone.md) for pairing over local HTTPS. The guide includes keyboard, gamepad and phone diagrams.
+See [gamepad](gamepad.md) for the gamepad layouts and [phone setup](director-phone.md) for pairing over local HTTPS. The guide includes keyboard, gamepad and phone diagrams.
 
 ## 4. Generate
 

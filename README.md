@@ -18,7 +18,7 @@ Block out a scene in 3D in your browser, give every character and prop a consist
 - **AI video on Comfy Cloud** — LTX 2.5 from your key frames, Seedance 2.5 and Kling O1 edits of the blockout clip, and Wan VACE on your own ComfyUI, with a model-input card showing exactly what each model receives and how faithfully it keeps the blockout's motion and direction. Shots whose subject's direction matters are recommended a route that edits the blockout clip, and a paid direction check ($0.01 a take) flags takes where the subject faces or travels the wrong way. See [What models work today](#what-models-work-today) and [the guide](docs/director.md#shots-where-the-subjects-direction-matters).
 - **Live camera** — keyboard, gamepad "drone" flying, or an iPhone as a handheld camera over local HTTPS.
 - **Sequence, Compare & export** — play shots in order, compare versions side by side, export projects as portable `.previs.zip` files.
-- **Claude connector (MCP)** — `server/previs/agent.mjs` lets you direct scenes from Claude Desktop or Claude Code; every edit shows up live in the app and can be undone.
+- **Claude connector (MCP)** — `server/previs/agent.mjs` lets you direct scenes from Claude Desktop or Claude Code; every edit shows up live in the app, and object and camera edits can be undone.
 
 ## Quick start
 
@@ -73,7 +73,9 @@ Claude does the same with `previs_director_batch_generate` and `dryRun: true`.
 
 ## Direct scenes from Claude (MCP)
 
-With the app running, add the MCP server to Claude Desktop (`claude_desktop_config.json`):
+With the app running, open **⋯ More → Direct with Claude** in the workspace and copy the command or the Claude Desktop configuration it shows: it already has the right `node` path and this checkout's path.
+
+To write it by hand instead, add the MCP server to Claude Desktop (`claude_desktop_config.json`), replacing `/path/to/` with where you cloned the repo:
 
 ```json
 {
@@ -125,7 +127,7 @@ Your phone streams its orientation to the app over HTTPS on your local network.
    PREVIS_PHONE_CA=/path/to/phone-cert/ca.crt
    ```
 
-3. Install `ca.crt` on the phone, then pair from the camera panel. Details: [device controls](docs/device-controls.md).
+3. Install `ca.crt` on the phone, then pair from the camera panel. Details: [phone camera](docs/director-phone.md) and [gamepad](docs/gamepad.md).
 
 ## Starters
 

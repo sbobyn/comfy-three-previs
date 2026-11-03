@@ -51,7 +51,7 @@ One name per thing, used the same way in the app, the docs and the film. When a 
 
 | Term | Meaning |
 |---|---|
-| **Generate** | Make a still or a video. Always shows a **quote** first; nothing runs until you **approve** it. |
+| **Generate** | Make a still or a video. In the app it always shows a **quote** first; nothing runs until you **approve** it. Claude approves its own runs up to the `maxCostUsd` it sets (see README). |
 | **Estimate** | Rate × length, shown before the quote ("≈ $0.69"). Cloud bills actual usage, so an estimate and an allowance are not a hard cap. |
 | **Allowance** | The most you approve for one request or batch. Claude sets one per request (`maxCostUsd`); paid runs need the server started with `PREVIS_ALLOW_PAID=1`. |
 | **Budget** | The server's caps across all requests: `PREVIS_BUDGET_CAP_USD` (account, per month by default) and `PREVIS_BUDGET_PROJECT_CAP_USD` (per project). Each paid run reserves its estimate (list price + reference images + the paid grader, plus a `PREVIS_BUDGET_MARGIN` safety margin, 10% by default) first and is refused if that would pass a cap; the refusal lists those parts. Unpriced models are refused unless `PREVIS_ALLOW_UNKNOWN_COST=1`. The Jobs panel shows what is left, settled and reserved. |
