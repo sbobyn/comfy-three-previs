@@ -4,10 +4,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { autoPromptSegments, autoPromptText, sentence, VIDEO_PROMPT_CAP } from '../shared/prompt.mjs';
 import { objectNotes } from '../shared/director.mjs';
+import { loadStarters } from '../server/previs/starters.mjs';
+import { createProjectDocument } from '../server/previs/director.mjs';
+import { BLOCKOUT_STARTERS } from './helpers/starters.mjs';
 
 const load = slug => JSON.parse(readFileSync(new URL(`./fixtures/starter-projects/${slug}.json`, import.meta.url), 'utf8'));
 const SLUGS = ['breaking-news', 'wingspan', 'final-lap', 'posterized'];
 const projects = Object.fromEntries(SLUGS.map(s => [s, load(s)]));
+// The blockout starters are checked as a user's copy of their bundle.
+const bundles = await loadStarters();
+for (const slug of BLOCKOUT_STARTERS) projects[slug] = createProjectDocument({ template: slug }, undefined, bundles);
 const shot = (slug, title) => projects[slug].shots.find(s => s.title === title);
 const sentences = text => text.split(/(?<=[.!?])\s+/).map(x => x.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()).filter(Boolean);
 const PART = { intro: 0, action: 1, obj: 2, world: 3, style: 4, camera: 5, cam: 6 };
@@ -27,7 +33,7 @@ test('shared descriptions join without ".;" (objectNotes)', () => {
   assert.equal(objectNotes(p, stretch), 'Mown infield grass with painted logo-free surface; Banked asphalt racing surface, white lane lines, tyre rubber marks');
 });
 
-for (const slug of SLUGS) {
+for (const slug of [...SLUGS, ...BLOCKOUT_STARTERS]) {
   test(`${slug}: prompts are clean, ordered, deduplicated and capped`, () => {
     const p = projects[slug];
     for (const s of p.shots) for (const kind of ['video', 'image']) {

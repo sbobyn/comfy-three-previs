@@ -4,6 +4,9 @@
 // primary look and design sheet, each shot's chosen still, its blockout clip and its chosen video,
 // and the cut. Media files live in <slug>/media/ and are listed in "media". Creating a project from
 // a starter deep-copies the snapshot with fresh ids and copies whichever media files are present.
+// Imported models (docs/import.md) travel as media/refs/<id>.glb, copied byte for byte; in the snapshot their
+// `model` points at a placeholder project (MODEL_BASE) and each copy points it at its own project folder.
+import { normalizeLook } from '../../shared/look-presets.mjs';
 import { readFile, copyFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -11,10 +14,40 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID, createHash } from 'node:crypto';
 import { makeEntity, makeShot, shotSignature } from '../../shared/director.mjs';
 import { normalizePrompts, normalizeStyle } from '../../shared/prompt.mjs';
+import { normalizePromptSections } from '../../shared/prompt-sections.mjs';
+import { normalizeShotSettings } from '../../shared/model-params.mjs';
+import { projectMesh } from '../../shared/blockout-models.mjs';
 
 export const STARTER_FORMAT = 'comfy-previs-starter';
 export const STARTER_VERSION = 2;
 export const STARTERS_DIR = fileURLToPath(new URL('../../examples/starters/', import.meta.url));
+/** Where an imported model points inside a snapshot: no real project, so a snapshot never names its source project. */
+export const MODEL_BASE = '/director-refs/00000000-0000-0000-0000-000000000000/';
+const meshFile = e => projectMesh(e.model)?.split('/').pop() || null;
+
+/**
+ * Shot fields beyond makeShot that a starter keeps, in the bundle's key order (so a source project re-exports to the
+ * same bytes): style and prompt edits, per-section prompt overrides, saved models and settings, the direction flag.
+ * `re` maps an entity id to the copy's (section keys `obj:<id>` name an object).
+ */
+function shotExtras(shot, x, re = id => id) {
+  for (const k of Object.keys(x)) {
+    if (k === 'prompts' && x.prompts) shot.prompts = normalizePrompts(x.prompts);
+    if (k === 'style' && x.style) shot.style = normalizeStyle(x.style);
+    if (k === 'promptSections' && x.promptSections) {
+      const v = normalizePromptSections(Object.fromEntries(Object.entries(x.promptSections).map(([kind, m]) => [kind, Object.fromEntries(Object.entries(m || {}).flatMap(([key, o]) => {
+        if (!key.startsWith('obj:')) return [[key, o]];
+        const id = re(key.slice(4)); return id ? [[`obj:${id}`, o]] : [];
+      }))])));
+      if (Object.keys(v).length) shot.promptSections = v;
+    }
+    if (k === 'settings' && x.settings) { const v = normalizeShotSettings(x.settings); if (Object.keys(v).length) shot.settings = v; }
+    if (k === 'motionCritical' && x.motionCritical === true) shot.motionCritical = true;
+    // Look presets: subject swaps name objects (re-keyed like sections); variantOf is re-keyed to the copy's shot ids afterwards.
+    if (k === 'look' && x.look) { const v = normalizeLook({ ...x.look, subjects: Object.fromEntries(Object.entries(x.look.subjects || {}).map(([id, t]) => [re(id), t]).filter(([id]) => id)) }); if (Object.keys(v).length) shot.look = v; }
+    if (k === 'variantOf' && typeof x.variantOf === 'string') shot.variantOf = x.variantOf;
+  }
+}
 
 // `signature` is the blocking a still was made for; instantiateStarter rewrites it for the copy's ids.
 const GENERATED_KEEP = ['presetId', 'model', 'seed', 'prompt', 'signature'];
@@ -84,9 +117,12 @@ export function starterSnapshot(project, { slug, title, description, order = 0, 
   const refById = new Map((project.scene.references || []).map(r => [r.id, r]));
   const sceneRefs = [];
   const entities = project.scene.entities.map(e => {
-    if (media) return snapshotEntity(project, e, r => sceneRefs.push(takeRef(r)), refById);
-    const out = structuredClone(e);
-    delete out.look; delete out.sheets;
+    const out = media ? snapshotEntity(project, e, r => sceneRefs.push(takeRef(r)), refById) : structuredClone(e);
+    if (!media) { delete out.look; delete out.sheets; }
+    // An imported model is the object's mesh: it travels with the media (a version 1 snapshot shows the proxy shape).
+    const file = meshFile(e);
+    if (file && media) { files.push({ path: `media/refs/${file}`, from: `refs/${file}`, kind: 'model' }); out.model = `${MODEL_BASE}${file}`; }
+    else if (file) { delete out.model; delete out.source; delete out.perform; delete out.standIn; }
     return out;
   });
   const ids = new Set(entities.map(e => e.id));
@@ -103,7 +139,8 @@ export function starterSnapshot(project, { slug, title, description, order = 0, 
   };
   const shots = project.shots.map((s, i) => {
     const out = structuredClone(s);
-    delete out.render; delete out.references;
+    // The prompt version log is the source project's history, not part of what a starter opens with.
+    delete out.render; delete out.references; delete out.promptVersions;
     if (out.cast) out.cast = { include: out.cast.include.filter(id => ids.has(id)), exclude: out.cast.exclude.filter(id => ids.has(id)) };
     if (out.camera?.target && !ids.has(out.camera.target)) out.camera.target = null;
     if (!media) { delete out.id; return out; }
@@ -149,7 +186,9 @@ export async function loadStarters(dir = STARTERS_DIR) {
 
 /** What the launch page needs: title, description and enough of shot 1 to draw a thumbnail. */
 export function starterCard(s) {
-  return { slug: s.slug, title: s.title, description: s.description, shots: s.shots.length, entities: s.scene.entities.length, scene: { ...s.scene, references: undefined }, shot: { ...s.shots[0], references: undefined }, media: (s.media || []).length };
+  // Imported models live in the starter's media, not at a URL the launch page can load: its thumbnail draws their proxy shape.
+  const entities = s.scene.entities.map(e => { if (!meshFile(e)) return e; const { model, source, perform, standIn, ...rest } = e; return rest; });
+  return { slug: s.slug, title: s.title, description: s.description, shots: s.shots.length, entities: s.scene.entities.length, scene: { ...s.scene, entities, references: undefined }, shot: { ...s.shots[0], references: undefined }, media: (s.media || []).length };
 }
 
 /**
@@ -158,7 +197,7 @@ export function starterCard(s) {
  * images and videos whose file is missing are left out. `files` lists the copies to make: { from, to }; `media` counts
  * the listed files and the missing ones.
  */
-export function instantiateStarter(s, { has = () => true } = {}) {
+export function instantiateStarter(s, { has = () => true, projectId = MODEL_BASE.split('/')[2] } = {}) {
   const map = new Map(s.scene.entities.map(e => [e.id, randomUUID()]));
   const re = id => (typeof id === 'string' && map.has(id) ? map.get(id) : null);
   const files = [];
@@ -172,21 +211,28 @@ export function instantiateStarter(s, { has = () => true } = {}) {
     return { ...structuredClone(r), id, file: `${id}.webp`, entityId: r.entityId ? re(r.entityId) : null };
   };
   const references = (s.scene.references || []).map(copyRef).filter(Boolean).filter(r => r.entityId);
+  // An imported model keeps its file name in the copy's folder; without its file the object shows its proxy shape.
+  const model = e => {
+    const file = meshFile(e); if (!file) return e.model;
+    if (!mediaOk(`media/refs/${file}`)) return undefined;
+    if (!files.some(f => f.to === `refs/${file}`)) files.push({ from: `media/refs/${file}`, to: `refs/${file}` });
+    return `/director-refs/${projectId}/${file}`;
+  };
   const entities = s.scene.entities.map(e => {
     const sheets = (e.sheets || []).map(sh => ({ ...structuredClone(sh), slots: sh.slots.map(x => ({ ...structuredClone(x), attempts: x.attempts.map(a => ({ ...a, referenceId: refMap.get(a.referenceId) || null })) })) }))
       .filter(sh => sh.slots.every(x => x.attempts.some(a => a.referenceId)));
-    return makeEntity({ ...structuredClone(e), parent: re(e.parent), lookFrom: re(e.lookFrom), look: refMap.get(e.look) || null, sheets: sheets.length ? sheets : undefined }, map.get(e.id));
+    return makeEntity({ ...structuredClone(e), model: model(e), parent: re(e.parent), lookFrom: re(e.lookFrom), look: refMap.get(e.look) || null, sheets: sheets.length ? sheets : undefined }, map.get(e.id));
   });
   const shotMap = new Map();
   const shots = s.shots.map((x, i) => {
     const src = structuredClone(x);
     const shot = makeShot({ ...src, camera: { ...src.camera, target: re(src.camera?.target) }, cast: { include: (src.cast?.include || []).map(re).filter(Boolean), exclude: (src.cast?.exclude || []).map(re).filter(Boolean) } }, randomUUID(), i + 1, entities);
     if (src.id) shotMap.set(src.id, shot.id);
-    if (src.prompts) shot.prompts = normalizePrompts(src.prompts);
-    if (src.style) shot.style = normalizeStyle(src.style);
+    shotExtras(shot, src, re);
     shot.references = (src.references || []).map(copyRef).filter(Boolean);
     return shot;
   });
+  for (const shot of shots) if (shot.variantOf) { const id = shotMap.get(shot.variantOf); if (id) shot.variantOf = id; else delete shot.variantOf; }
   const assetMap = new Map();
   const assets = (s.assets || []).flatMap(a => {
     const path = `media/${a.file}`, shotId = shotMap.get(a.shotId);
@@ -230,14 +276,14 @@ export function starterSourceId(slug) {
 export function starterSourceProject(s, { id = starterSourceId(s.slug) } = {}) {
   const files = [];
   const copyRef = r => { files.push({ from: `media/refs/${r.file}`, to: `refs/${r.file}` }); return structuredClone(r); };
-  const entities = s.scene.entities.map(e => makeEntity(structuredClone(e), e.id));
+  const entities = s.scene.entities.map(e => {
+    const file = meshFile(e);
+    if (file && !files.some(f => f.to === `refs/${file}`)) files.push({ from: `media/refs/${file}`, to: `refs/${file}` });
+    return makeEntity({ ...structuredClone(e), ...(file ? { model: `/director-refs/${id}/${file}` } : {}) }, e.id);
+  });
   const shots = s.shots.map((x, i) => {
     const shot = makeShot(structuredClone(x), x.id, i + 1, entities);
-    // style and prompts keep the bundle's key order, so the document re-exports to the same bytes.
-    for (const k of Object.keys(x)) {
-      if (k === 'prompts' && x.prompts) shot.prompts = normalizePrompts(x.prompts);
-      if (k === 'style' && x.style) shot.style = normalizeStyle(x.style);
-    }
+    shotExtras(shot, x);
     shot.references = (x.references || []).map(copyRef);
     return shot;
   });

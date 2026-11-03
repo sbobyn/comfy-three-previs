@@ -18,6 +18,8 @@ export type JobsSnapshot = { jobs: JobRow[]; limits: Record<string, { limit: num
 export type BatchSummary = {
   id: string; projectId: string; status: string; createdAt: string; updatedAt: string; steps: string[]; tier?: string;
   maxCostUsd: number; estimateUsd: number; spentEstimateUsd: number; budgetSkipped?: number;
+  /** Only what changed (docs/regeneration.md): nodes made against nodes the steps cover. */
+  regen?: { remake: number; total: number; kept: number; pinned: number; paid?: number };
   counts?: Record<string, number>; nodes?: { status: string }[]; lastEvent?: { at: string; text: string } | null;
 };
 type Api = <T = any>(path: string, body?: unknown) => Promise<T>;
@@ -84,6 +86,11 @@ export function budgetLine(b?: Budget | null): { tone: 'ok' | 'warn' | 'bad' | '
   const tone = !b.alert ? 'ok' : b.alert >= 95 ? 'bad' : 'warn';
   return { tone, text: `Budget: ${$(tight.remainingUsd ?? 0)} left of ${$(tight.capUsd ?? 0)}${tight.where}${split(tight) ? ` · ${split(tight)}` : ''}` };
 }
+/** "4 of 12 need regenerating · 7 kept · 1 pinned", or '' for batches planned before per-node keys. */
+export function regenSummary(b: BatchSummary) {
+  const r = b.regen; if (!r) return '';
+  return [`${r.remake} of ${r.total} need regenerating`, r.kept ? `${r.kept} kept` : '', r.pinned ? `${r.pinned} pinned` : ''].filter(Boolean).join(' · ');
+}
 // ---- end pure helpers ----
 
 const KIND_ICON: Record<string, string> = {
@@ -104,6 +111,8 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
   let batches: BatchSummary[] = [];
   let jobsOk = true, batchesOk = true, lastBusy = 0, timer = 0, hideTimer = 0, inflight = false, fetchedAt = Date.now(), lastTone = '';
   const reconcileOpen = new Set<string>(), recChecks = new Map<string, { idle: boolean; hist: boolean }>(), busy = new Set<string>(), watched = new Set<string>();
+  // Batch plans opened in the sheet ("what is remade and why"), fetched once per open: GET /api/director/batch.
+  const planOpen = new Set<string>(), plans = new Map<string, { id: string; label: string; status: string; note?: string; reasons?: { text: string }[]; pinned?: boolean }[]>();
 
   const sheet = h('dialog', { class: 'jobs-sheet', 'aria-labelledby': 'jobs-title' });
   sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
@@ -285,9 +294,27 @@ export function mountJobsPip(host: HTMLElement, { projectId, api, onOpenShot, sh
         h('div', { class: 'jb-bar', role: 'img', 'aria-label': `${c.done} of ${c.total} steps done` },
           h('i', { class: 'd', style: `width:${pct(c.done)}%` }), h('i', { class: 'r', style: `width:${pct(c.running)}%` }), h('i', { class: 'f', style: `width:${pct(c.failed)}%` }), h('i', { class: 's', style: `width:${pct(c.skipped)}%` })),
         b.lastEvent ? h('div', { class: 'jr-meta faint' }, `${b.lastEvent.text} · ${since(b.lastEvent.at, fetchedAt)}`) : null,
+        b.regen ? planDetails(b) : null,
         canCancel || canResume ? h('div', { class: 'jr-act' },
           canResume ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `resume:${b.id}`, disabled: rb, onclick: () => void batchCall(b, 'resume') }, rb ? 'Resuming…' : 'Resume') : null,
           canCancel ? h('button', { class: 'btn ghost sm', type: 'button', 'data-k': `cancel:${b.id}`, disabled: cb, onclick: () => void batchCall(b, 'cancel') }, cb ? 'Cancelling…' : 'Cancel') : null) : null));
+  }
+
+  /** What the batch makes again and why, and what it keeps (shared/regen.mjs reasons on each node). */
+  function planDetails(b: BatchSummary) {
+    const nodes = plans.get(b.id);
+    const made = (nodes || []).filter(n => n.status !== 'skipped'), kept = (nodes || []).filter(n => n.status === 'skipped');
+    const d = h('details', { class: 'jb-plan', open: planOpen.has(b.id) },
+      h('summary', {}, regenSummary(b)),
+      !nodes ? h('p', { class: 'jr-meta' }, 'Loading…') : h('ul', { class: 'jb-why' },
+        ...made.map(n => h('li', {}, h('b', {}, n.label), n.reasons?.length ? ` — ${n.reasons.map(r => r.text).filter((t, i, a) => a.indexOf(t) === i).slice(0, 4).join('; ')}` : n.note ? ` — ${n.note}` : ' — not made yet')),
+        kept.length ? h('li', { class: 'faint' }, `Kept: ${kept.map(n => `${n.label}${n.pinned ? ' (pinned)' : ''}`).join(', ')}`) : null));
+    d.addEventListener('toggle', () => {
+      if (!d.open) { planOpen.delete(b.id); return; }
+      planOpen.add(b.id);
+      if (!plans.has(b.id)) void api<{ batch: { nodes: any[] } }>(`director/batch?id=${encodeURIComponent(b.id)}`).then(r => { plans.set(b.id, r.batch.nodes); renderSheet(); }).catch(() => {});
+    });
+    return d;
   }
 
   function section(title: string, cls: string, rows: HTMLElement[], empty?: string) {

@@ -574,6 +574,11 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
      * handle makes the next version; an unchanged save is a no-op.
      */
     async save(project, entity, input = {}, readRef, { source = 'project' } = {}) {
+      // Imported models (docs/import.md) carry their own file and rights; bundles hold blockout meshes only, for now.
+      const inside = new Set([entity.id]);
+      for (let grew = true; grew;) { grew = false; for (const e of project.scene.entities) if (e.parent && inside.has(e.parent) && !inside.has(e.id)) { inside.add(e.id); grew = true; } }
+      const imported = project.scene.entities.find(e => inside.has(e.id) && e.source);
+      if (imported) fail(`${imported.name} is an imported model; the library does not hold imported models yet. Import its file into each project instead`);
       const { assets } = await scan();
       const { manifest: base, takes } = assetSnapshot(project, entity, { name: input.name, tags: input.tags, description: input.description, limits, source });
       const blobs = [];

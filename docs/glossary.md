@@ -24,6 +24,11 @@ One name per thing, used the same way in the app, the docs and the film. When a 
 | **Project style** | The look of the whole film ("35 mm anamorphic, teal-and-orange grade"). | Style board |
 | **Shared asset** | An object saved to this computer's library with its description, cast images and design sheets, ready to **Place** in any project. **Save to library** makes one; **Export** writes it as one `.previs-asset.zip`. | Library asset (code: asset), Prefab, Template |
 | **@handle** | The short name an object or shared asset answers to (`@red-racecar`), made from its name. In the scene first, then the library. | Tag, Slug |
+| **Imported model** | An object whose mesh came from a 3D file (GLB, glTF, FBX, OBJ, STL, PLY, USDZ) by drop, **Import model…** or Claude. Its Cast Card keeps the file, **Licence** and **Credit**. See [Import a 3D model](import.md). | Asset (that is a shared asset), Upload |
+| **Backdrop card** | An image standing in the scene as an upright, unlit card (a sky, a location photo). Shift-drop an image or **+ Add ▾ → Backdrop card…**. | Billboard, Plate (that is a background video) |
+| **Clip** | An animation stored in an imported model's file (Walk, Wave). An object plays one at a time, with an offset and speed, and can switch clips from a shot's start. | Action, Animation, Take |
+| **Pose** | Joint angles of a figure: the bundled people and birds, or an imported humanoid. **Stand**, **walk**, **run**, **sit**, **jump**, **point** and **wave** are library poses. | Posture, Keyframe |
+| **Stand-in** | What image and video models see of an imported figure: *posed, as shown*, or a *neutral grey stand-in* in the stand pose. | Proxy (that is the plain shape of an object without a mesh), Mannequin |
 
 "Cast Card" is the old name for an object's description plus its cast images. It survives only in code and in the auto-prompt's source labels; do not use it in new UI.
 
@@ -38,6 +43,9 @@ One name per thing, used the same way in the app, the docs and the film. When a 
 | **Auto-prompt** | The prompt the app writes from the story, cast, world and camera. You can edit it. | Generated prompt |
 | **Video model** | The model that makes the shot's video (LTX, Seedance, Kling …). **Runs on** says where: Comfy Cloud or local ComfyUI. | Workflow (code only), Preset |
 | **Version** | One generated video of a shot. The cut uses one version per shot ("Newest" by default). Repeated runs of the same model are **takes** ("LTX 2.5 Fast · take 2"). | Result, Output |
+| **Out of date** | An output whose inputs changed since it was made: the camera or timing, an object its blockout frames can show, its prompt, a cast image, its model or its seed. Hover the badge for what changed. Moving an object no frame shows changes nothing. **Inputs changed** means the still is still sent to video models but a batch makes it again. | Stale (code only), Dirty |
+| **Pin** | Accept a still, video take or cast image as it is: it is never out of date and a batch keeps it. **Pinned** to undo. | Lock, Freeze |
+| **Only what changed** | How batches run: an output is made again only when its inputs changed (or something it is made from is made again). `force` remakes anyway. See docs/regeneration.md. | Incremental, Cache |
 
 ## Generating and spending
 

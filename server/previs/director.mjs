@@ -9,6 +9,8 @@ import { renderEdit, withTemp, imageToPng } from './edit.mjs';
 import { normalizePrompts, normalizeStyle } from '../../shared/prompt.mjs';
 import { mergePromptSections, appendPromptVersion } from '../../shared/prompt-sections.mjs';
 import { normalizeShotSettings } from '../../shared/model-params.mjs';
+import { normalizeLook } from '../../shared/look-presets.mjs';
+import { addVariantShots } from '../../shared/look-variants.mjs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { recoveryId, saveResultBytes } from './result-recovery.mjs';
@@ -16,7 +18,8 @@ import { atomicJson } from './atomic.mjs';
 import { interpret } from './director-parse.mjs';
 import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
 import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
-import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, keyStills, stillStale, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
+import { cleanManifest } from '../../shared/regen.mjs';
+import { blockoutManifest, shotSignature, TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, keyStills, stillStale, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
 import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { applyKeyframeOp, keyframeState } from '../../shared/keyframes.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
@@ -26,6 +29,9 @@ import { cutAsset } from '../../shared/takes.mjs';
 import { openLibrary, libraryDir, placeAsset } from './library.mjs';
 import { meshLoader, fixCoplanar, sceneAfterOps, geometryOf, changedIds, coplanarWarnings } from './coplanar.mjs';
 import { parseGlb } from '../../shared/blockout-lint.mjs';
+import { readGlb } from './glb.mjs';
+import { validateGlb } from './asset-import.mjs';
+import { planPerform } from './asset-perform.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
@@ -60,7 +66,7 @@ export function createProjectDocument({ title, template = 'street' } = {}, id = 
   const at = now();
   if (starter) {
     // A starter's media (looks, sheets, stills, blockout and chosen videos) comes along when its files are present.
-    const { scene, shots, assets, edit, files, media: counts } = instantiateStarter(starter, { has: path => !!starter.dir && existsSync(join(starter.dir, path)) });
+    const { scene, shots, assets, edit, files, media: counts } = instantiateStarter(starter, { has: path => !!starter.dir && existsSync(join(starter.dir, path)), projectId: id });
     const media = files.length && starter.dir ? { dir: starter.dir, files } : null;
     return { version: 1, id, title: String(title || starter.title).slice(0, 120), template: t, createdAt: at, updatedAt: at, revision: 1, scene, shots, ...(assets ? { assets } : {}), ...(edit ? { edit } : {}), starterFiles: counts, ...(media ? { starterMedia: media } : {}), messages: [{ id: randomUUID(), shotId: null, role: 'system', text: `Started from the “${starter.title}” starter. Change anything — describe edits to your agent or drag things in the viewport.`, attachments: [], status: 'handled', createdAt: at }] };
   }
@@ -97,6 +103,8 @@ export function applyOps(p, ops) {
       case 'update_entity': {
         const e = resolveEntity(p, op.id); if (!e) fail(`Unknown object ${op.id}`);
         const patch = op.patch || {};
+        // An imported model's file facts and rig are fixed at import; only its rights and link can be edited.
+        if (patch.source !== undefined) patch.source = e.source && patch.source ? { ...e.source, ...Object.fromEntries(['licence', 'attribution', 'url'].filter(k => typeof patch.source[k] === 'string').map(k => [k, patch.source[k]])) } : e.source;
         if (patch.lookFrom) {
           const src = resolveEntity(p, patch.lookFrom); if (!src) fail(`Unknown object ${patch.lookFrom}`);
           if (src.id === e.id) fail('An object cannot share its own look');
@@ -114,6 +122,7 @@ export function applyOps(p, ops) {
         Object.assign(e, next);
         if (!next.pose) delete e.pose;
         if (!next.model) delete e.model; // changing proxy shape clears an incompatible display mesh
+        for (const k of ['source', 'perform', 'standIn']) if (!next[k]) delete e[k];
         if (!next.sheets) delete e.sheets; // `sheets: []` clears them (makeEntity omits an empty list)
         // Children follow their parent rigidly, unless this batch already places them (the editor sends every moved object).
         if (['position', 'rotation', 'scale'].some(k => patch[k] !== undefined)) {
@@ -187,6 +196,9 @@ export function applyOps(p, ops) {
         // Model and settings per kind (shared/model-params.mjs): { video|image: { model, params } | null } replaces that kind.
         // Motion/direction-critical (shared/blockout-fidelity.mjs): video advice recommends a route that edits the blockout clip.
         if (patch.motionCritical !== undefined) { if (patch.motionCritical === true) s.motionCritical = true; else delete s.motionCritical; }
+        // Look presets (shared/look-presets.mjs): the shot's own look on top of the project default; null or {} clears it.
+        if (patch.look !== undefined) { const v = normalizeLook(patch.look); if (Object.keys(v).length) s.look = v; else delete s.look; }
+        if (patch.variantOf !== undefined) { const b = patch.variantOf === null ? null : resolveShot(p, patch.variantOf); if (patch.variantOf !== null && (!b || b.id === s.id)) fail('variantOf must name another shot'); if (b) s.variantOf = b.id; else delete s.variantOf; }
         if (patch.settings !== undefined) { const v = normalizeShotSettings(patch.settings === null ? {} : { ...(s.settings || {}), ...Object.fromEntries(Object.entries(patch.settings).filter(([, x]) => x !== null)) }); for (const [k, x] of Object.entries(patch.settings || {})) if (x === null) delete v[k]; if (Object.keys(v).length) s.settings = v; else delete s.settings; }
         if (patch.cast !== undefined) {
           const known = id => resolveEntity(p, id)?.id || fail(`Unknown object ${id}`);
@@ -272,6 +284,15 @@ export function applyOps(p, ops) {
         else fail('That take is not a generated video of this shot');
         results.push({ op: op.op, id: s.id }); break;
       }
+      case 'pin_output': {
+        // Accept a still, video or look as it is: pinned outputs are never out of date and a batch keeps them (docs/regeneration.md).
+        const pinned = op.pinned !== false;
+        const ref = [...(p.scene.references || []), ...p.shots.flatMap(s => s.references)].find(r => r.id === op.id);
+        const asset = ref ? null : (p.assets || []).find(a => a.id === op.id && a.kind === 'workflow-result');
+        const target = ref || asset; if (!target) fail('Pin a still, a look or a generated video of this project');
+        if (pinned) target.pinned = true; else delete target.pinned;
+        results.push({ op: op.op, id: op.id, pinned }); break;
+      }
       case 'set_edit': {
         if (!Array.isArray(op.clips) || op.clips.length > 60) fail('clips must be an array of at most 60');
         p.edit = { clips: op.clips.map(c => {
@@ -283,8 +304,16 @@ export function applyOps(p, ops) {
         }), updatedAt: now() };
         results.push({ op: op.op, clips: p.edit.clips.length }); break;
       }
+      case 'add_variants': {
+        // Variants of a base shot (shared/look-presets.mjs): copies with the same camera, timing and blocking whose look differs
+        // on one axis each (or every combination, only with combine: true). An identical variant that exists is reused.
+        let r; try { r = addVariantShots(p, resolveShot(p, op.shotId)?.id, { axes: op.axes, combine: op.combine === true, looks: op.looks }, randomUUID); } catch (e) { fail(e.message); }
+        results.push({ op: op.op, ids: r.ids, existing: r.existing, base: r.base.id }); break;
+      }
       case 'set_project': {
         if (op.patch?.title !== undefined) p.title = String(op.patch.title).slice(0, 120) || p.title;
+        // The project's default look (shared/look-presets.mjs); null or {} clears it.
+        if (op.patch?.look !== undefined) { const v = normalizeLook(op.patch.look); if (Object.keys(v).length) p.look = v; else delete p.look; }
         results.push({ op: op.op }); break;
       }
       case 'set_middle_keys': case 'use_as_key_still': results.push(applyKeyframeOp(p, op, { resolveShot, newId: randomUUID, now })); break; // shared/keyframes.mjs
@@ -491,6 +520,14 @@ export async function openDirector(root, options = {}) {
       await mkdir(join(dir, projectId, 'refs'), { recursive: true });
       await writeFile(join(dir, projectId, 'refs', file), bytes, { flag: 'wx', mode: 0o600 });
     },
+    /** An imported model (server/previs/asset-import.mjs), already converted, fitted and checked. */
+    async storeAsset(projectId, file, bytes) {
+      await load(projectId);
+      if (!/^[a-f0-9-]{36}\.glb$/.test(file)) fail('Invalid model file');
+      const { json, bin } = readGlb(bytes); validateGlb(json, bin);
+      await mkdir(join(dir, projectId, 'refs'), { recursive: true });
+      await writeFile(join(dir, projectId, 'refs', file), bytes, { flag: 'wx', mode: 0o600 });
+    },
     async refFile(projectId, file) {
       if (!uuid.test(projectId) || !/^[a-f0-9-]{36}\.(png|jpg|webp|glb)$/.test(file)) fail('Not found', 404);
       return join(dir, projectId, 'refs', file);
@@ -606,7 +643,7 @@ export async function openDirector(root, options = {}) {
           const file = `assets/${r.id}.${EXT[r.mime]}`;
           await mkdir(join(dir, p.id, 'assets'), { recursive: true });
           await saveResultBytes(join(dir, p.id, file), bytes);
-          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, cameraSource: job.cameraSource || cameraSourceOf(job.definition, job.binding?.assetBindings), prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null, ...takeSettings(job) } });
+          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, cameraSource: job.cameraSource || cameraSourceOf(job.definition, job.binding?.assetBindings), prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null, ...takeSettings(job), ...(cleanManifest(job.binding?.regen) ? { regen: cleanManifest(job.binding.regen) } : {}) } });
           known.add(r.id); added++;
         }
       }
@@ -635,9 +672,12 @@ export async function openDirector(root, options = {}) {
       let p; try { p = JSON.parse(files.get('project.json').toString('utf8')); } catch { fail('Export project.json is invalid'); }
       if (p.version !== 1 || !p.scene || !Array.isArray(p.shots) || !p.shots.length) fail('Unsupported project version');
       const oldId = p.id; p.id = randomUUID(); p.title = String(p.title || 'Imported project').slice(0, 110) + ' (imported)'; p.importedFrom = { projectId: oldId, exportedAt: manifest.exportedAt };
+      // Blender meshes are small static GLBs; imported models (docs/import.md) are checked as whole glTF assets.
+      const imported = new Set(p.scene.entities.filter(e => projectMesh(e.model) && e.source).map(e => `refs/${e.model.split('/').pop()}`));
+      const checkGlb = (name, data) => { if (imported.has(name)) { const { json, bin } = readGlb(data || Buffer.alloc(0)); validateGlb(json, bin); } else validateMesh(data); };
       for (const e of p.scene.entities) if (projectMesh(e.model)) {
         const file = e.model.split('/').pop();
-        validateMesh(files.get(`refs/${file}`));
+        checkGlb(`refs/${file}`, files.get(`refs/${file}`));
         e.model = `/director-refs/${p.id}/${file}`;
       }
       // Camera renders keep their files, but workflow hand-off needs this workspace's render engine: render again to use them.
@@ -649,7 +689,7 @@ export async function openDirector(root, options = {}) {
         if (f.name === 'project.json') continue;
         if (!/^(refs|assets|refgen)\/[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json|glb)$/.test(f.name)) fail(`Unexpected file in export: ${f.name}`);
         let data = files.get(f.name);
-        if (f.name.endsWith('.glb')) validateMesh(data);
+        if (f.name.endsWith('.glb')) checkGlb(f.name, data);
         if (f.name.startsWith('refgen/')) { const job = JSON.parse(data.toString('utf8')); job.projectId = p.id; if (job.status === 'quoted') { job.status = 'expired'; job.message = 'Imported quote; get a new quote here.'; } job.imported = true; data = Buffer.from(JSON.stringify(job, null, 2)); }
         await mkdir(join(dir, p.id, f.name.split('/')[0]), { recursive: true });
         await writeFile(join(dir, p.id, f.name), data, { flag: 'wx', mode: 0o600 });
@@ -721,8 +761,11 @@ export async function openDirector(root, options = {}) {
       await mkdir(join(dir, p.id, 'assets'), { recursive: true });
       const file = `assets/${asset.id}.mp4`;
       try { await writeFile(join(dir, p.id, file), bytes, { flag: 'wx', mode: 0o600 }); } catch (e) { if (e.code !== 'EEXIST') throw e; }
-      (p.assets ||= []).push({ id: asset.id, kind: 'camera-render', shotId: shot.id, file, mime: 'video/mp4', sha256: asset.sha256, width: asset.width, height: asset.height, fps: asset.fps, frameCount: asset.frameCount, duration: asset.duration, version: (p.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id).length + 1, createdAt: now(), source: { engineShotId: input.previsShotId, engineAssetId: asset.id, prompt: String(input.prompt || '').slice(0, 8000), signature: String(input.signature || '').slice(0, 64), ...origin } });
-      shot.render = { previsShotId: input.previsShotId, assetId: asset.id, prompt: String(input.prompt || compilePrompt(p, shot)).slice(0, 8000), frameCount: asset.frameCount, duration: asset.duration, width: asset.width, height: asset.height, signature: String(input.signature || '').slice(0, 64), createdAt: now(), ...origin };
+      // The regeneration manifest (shared/director.mjs blockoutManifest) is computed here from the saved project, so it is recorded only
+      // when the capture saw the same blocking (its signature matches); otherwise the signature alone marks the clip out of date.
+      const signature = String(input.signature || '').slice(0, 64), regen = !signature || signature === shotSignature(p, shot) ? { regen: blockoutManifest(p, shot) } : {};
+      (p.assets ||= []).push({ id: asset.id, kind: 'camera-render', shotId: shot.id, file, mime: 'video/mp4', sha256: asset.sha256, width: asset.width, height: asset.height, fps: asset.fps, frameCount: asset.frameCount, duration: asset.duration, version: (p.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id).length + 1, createdAt: now(), source: { engineShotId: input.previsShotId, engineAssetId: asset.id, prompt: String(input.prompt || '').slice(0, 8000), signature, ...regen, ...origin } });
+      shot.render = { previsShotId: input.previsShotId, assetId: asset.id, prompt: String(input.prompt || compilePrompt(p, shot)).slice(0, 8000), frameCount: asset.frameCount, duration: asset.duration, width: asset.width, height: asset.height, signature, ...regen, createdAt: now(), ...origin };
       return { project: await save(p) };
     }),
   };
@@ -747,6 +790,7 @@ export function summarizeOps(ops, project) {
     else if (o.op === 'clear_animation') out.push(`Cleared animation on ${name(o.id)}`);
     else if (o.op === 'set_scene') out.push('Updated the scene setting');
     else if (o.op === 'update_reference') out.push('Linked a reference');
+    else if (o.op === 'pin_output') out.push(o.pinned === false ? 'Unpinned an output' : 'Pinned an output (kept even when out of date)');
     else if (o.op === 'set_winner') out.push(o.assetId ? `Picked the winning take of shot ${shot(o.shotId)}` : `Cleared the winning take of shot ${shot(o.shotId)}`);
     else if (o.op === 'use_take') out.push(`Picked the still take in use for shot ${shot(o.shotId)}`);
   }
@@ -829,6 +873,7 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
         return r;
       }
       case '/api/director/agent/progress': return director.progress(input.projectId, input);
+      case '/api/director/perform': { const plan = planPerform(await director.get(input.projectId), input); const r = await director.edit(input.projectId, plan.ops); return { project: r.project, entityId: plan.entityId, text: plan.summary }; }
       case '/api/director/library/save': return director.library.save(input.projectId, input);
       case '/api/director/library/import': return director.library.importPath(input);
       case '/api/director/library/place': {

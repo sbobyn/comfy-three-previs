@@ -10,7 +10,7 @@ Block out a scene in 3D in your browser, give every character and prop a consist
 
 ## Features
 
-- **3D blockout editor** — place, name, group and animate simple objects; keyframed camera moves per shot.
+- **3D blockout editor** — place, name, group and animate simple objects, or drop in 3D models (GLB, FBX, OBJ…) with posable rigged characters; keyframed camera moves per shot.
 - **Cast Cards** — a description and reference images for every character, vehicle and prop. Generate images with AI, including design sheets (turnarounds and expressions), and pick a primary look.
 - **Auto-prompts** — each shot prompt is written from the scene, with every object's words colour-linked to the object in the viewport.
 - **Prompt inspector** — see the exact prompt each still and video model receives, section by section with where every part comes from (cast, shot description, style, camera rules, model-specific additions), what was left out to fit, and override, lock or leave out any section per shot. Versions of the final prompt and every take's prompt can be diffed. Model settings (seed, clip length and the like, from each model's registry entry) are saved on the shot with their estimate.
@@ -97,6 +97,8 @@ Then ask Claude to build a scene. It can create projects, edit objects and Cast 
 
 To bring a shot in from Blender (camera, tagged objects and rendered frames as the shot's blockout), Claude uses `previs_director_blender_helper` and `previs_director_import_blender`; see [Import a Blender shot](docs/blender-import.md).
 
+To bring in a 3D model (GLB, glTF, FBX, OBJ, STL, PLY or USDZ), drop it on the viewport, choose **+ Add ▾ → Import model…**, or have Claude call `previs_import_asset`. Rigged humanoids (Mixamo, Unreal, Rigify, VRM) play their clips and take poses through `previs_director_perform`; see [Import a 3D model](docs/import.md).
+
 When building blockouts, Claude and people follow the [blockout modelling rules](docs/blockout-modeling-rules.md): never put two surfaces on the same plane, and lift decals and lines 2 mm along the normal. Edits that break the rule come back with warnings, and imports lift thin objects automatically. Overlapping surfaces z-fight in every blockout frame, and image and video models copy it.
 
 Claude reads and edits the same prompt sections and model settings as the workspace: `previs_director_prompt_sections` returns the exact final prompt by section, `previs_director_set_prompt_section` overrides, locks or resets one section, `previs_director_prompt_history` diffs versions and takes, and `previs_director_model_settings` reads or saves the shot's model and parameters.
@@ -127,7 +129,9 @@ Your phone streams its orientation to the app over HTTPS on your local network.
 
 ## Starters
 
-Open one from the home page and make it yours: **Breaking News** (a news anchor breaks the story of this launch), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage. Each opens with every cast member's image and design sheet, stills, a blockout clip and a generated video for each shot, and a cut. The media is in the repo (about 35 MB, see [examples/starters](examples/starters/README.md)), so nothing is downloaded or generated.
+Open one from the home page and make it yours: **Breaking News** (a news anchor breaks the story of this launch), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage. Each opens with every cast member's image and design sheet, stills, a blockout clip and a generated video for each shot, and a cut.
+
+Five blockout starters open with a blockout clip per shot and written Cast Cards, ready to generate: **Mountain Trail** and **City Blocks** (open sets for Fly camera, drone and phone takes), **Camera Moves & Transitions** (every camera preset, custom-key showcases and transitions crafted as shot pairs), **Look Lab** (one blockout in thirty-four looks, with a still for each look and videos of twelve) and **Two-Hander** (seated dialogue coverage). Their people are an original rigged mannequin with walk, idle and wave clips. The media is in the repo (about 75 MB, see [examples/starters](examples/starters/README.md)), so nothing is downloaded or generated.
 
 When a starter's blocking has changed since its stills and videos were made, it says so when you open it and marks those videos "older"; generating makes matching ones. If its media files are not in your checkout, it opens as a blockout and says that instead. A starter's blockout clip is for watching: generating first makes the shot's own blockout (free, in the browser).
 

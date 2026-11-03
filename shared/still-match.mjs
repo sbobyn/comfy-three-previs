@@ -5,6 +5,7 @@
 // guide frame is rendered with. Also: the one still-prompt builder (workspace, batch and agent share it), which
 // models follow a guide, and a free check of how well a still kept its guide's layout.
 import { MOVES, entitySize, entitiesAt, shotCameraAt, videoReferences, handleOf } from './director.mjs';
+import { lookMedium, lookText } from './camera-source.mjs';
 
 const rad = d => (d * Math.PI) / 180, deg = r => (r * 180) / Math.PI;
 const sub = (a, b) => a.map((v, i) => v - b[i]);
@@ -251,15 +252,19 @@ export function stillPrompt(o) {
  * refs (which image each cast member looks like) and rules (what not to copy). Each part: { key, text, full? } where
  * `full` is the body before it was shortened. The prompt inspector shows these same parts.
  */
-export function stillPromptParts({ project, shot, t = 0, text = '', presetId = '', looks = [], prevImage = null, frame = null, max = 2500, markers = true }) {
+// medium: the look's non-photoreal medium (shared/camera-source.mjs lookMedium); by default what the text's look parts name.
+// Photoreal (no medium) keeps the photoreal guide and rules; a medium replaces every photoreal word with it.
+export function stillPromptParts({ project, shot, t = 0, text = '', presetId = '', looks = [], prevImage = null, frame = null, max = 2500, markers = true, medium = lookMedium(lookText(text)) }) {
   const f = frame || describeFrame(project, shot, t);
+  const keep = "Keep image 1's camera position, lens, framing, horizon and every object's position, size, heading and pose exactly;";
   const head = editsGuide(presetId)
-    ? "Edit image 1: repaint this grey 3D blockout as one photoreal film frame. Keep image 1's camera position, lens, framing, horizon and every object's position, size, heading and pose exactly; only replace the grey shapes, ground and sky with the real things described below."
+    ? medium ? `Edit image 1: repaint this grey 3D blockout as ${medium}, one single frame. ${keep} only replace the grey shapes, ground and sky with the things described below, in that medium.`
+      : `Edit image 1: repaint this grey 3D blockout as one photoreal film frame. ${keep} only replace the grey shapes, ground and sky with the real things described below.`
     : "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.";
   const last = looks.length + 1 + (prevImage ? 1 : 0);
   const ids = [...looks.map((l, i) => `The ${l.label} looks exactly like image ${i + 2}.`), prevImage ? `Image ${prevImage} is the previous shot: keep lighting, colour grade and designs continuous.` : '',
     last > 1 ? `Image${last > 2 ? `s 2–${last}` : ' 2'} show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.` : ''].filter(Boolean).join(' ');
-  const tail = (markers ? "Reading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. " : "Do not copy image 1's flat untextured colours or plain sky. ") + "One single photographic frame; no text, captions, labels, split panels or watermarks.";
+  const tail = (markers ? "Reading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. " : "Do not copy image 1's flat untextured colours or plain sky. ") + (medium ? `One single frame of ${medium}` : 'One single photographic frame') + '; no text, captions, labels, split panels or watermarks.';
   const moment = momentLine(shot, t);
   const fixed = [head, f.text, moment, ids, tail].filter(Boolean);
   const room = max - fixed.join('\n').length - 2;

@@ -206,6 +206,9 @@ test('video: a blockout-driven model binds the blockout clip, leads the referenc
     assert.match(bind.prompt, /Follow the camera motion and framing of the blockout video exactly; it is the camera\./);
     assert.ok(!/Custom keys|eye level|FPV drone chase/.test(bind.prompt), 'no camera move in the prompt');
     assert.equal(ctx.node.cameraSource, 'blockout');
+    // The bind carries what the take is made from (shared/regen.mjs), so the result can say later what invalidates it.
+    assert.deepEqual([bind.regen.type, bind.regen.parts.model, bind.regen.parts.source, bind.regen.ctx.uses], ['video', 'kling-o1-edit-v1', 'blockout', { stills: ['start', 'end'], looks: true }]);
+    assert.ok(Object.keys(bind.regen.parts).some(k => k.startsWith('move:')) && 'prompt' in bind.regen.parts && 'seed' in bind.regen.parts);
 
     // A blockout older than the shot is never sent: nothing is bound.
     const stale = await mockServer(), before = stale.project.shots.find(s => s.id === dive.id);
