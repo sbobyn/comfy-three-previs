@@ -50,6 +50,7 @@ Make the grey blockout, then ask a video model to turn it into the shot.
 - Choose a video model. Some models follow a clip; others animate from one or two stills and do not see the full camera move.
 - Review the inputs, where the model runs and the estimated cost. Paid work needs explicit approval; opening the guide never approves anything.
 - Inspect the result against the blockout. A still is typically a few cents and a five-second video about a dollar, but the estimate for your selected model is the one to check.
+- Change things freely: an output goes out of date only when something it is made from changes (the camera, timing, an object its frames can show, its prompt, a cast image, its model or seed). Hover a badge for why; **Pin** a take in the Take lab to keep it; a batch makes only what changed ([regeneration](regeneration.md)).
 - Set a budget so a busy day cannot run away: `PREVIS_BUDGET_CAP_USD` (account, per month) and `PREVIS_BUDGET_PROJECT_CAP_USD` (per project). Paid work over a cap is refused before it is sent, the Jobs panel shows what is left, `pnpm usage:report` shows what was actually billed and `pnpm usage:settle` compares it with the ledger (README, Configuration). Estimates include reference images and the paid grader, and reservations add `PREVIS_BUDGET_MARGIN` (10% by default); a dry-run batch shows each part.
 
 [Watch the blockout](../public/guide/final-lap-s2-blockout.mp4) · [Watch the generated shot](../public/guide/final-lap-s2-generated.mp4)
@@ -192,4 +193,4 @@ An outgoing key's `ease: "linear"` gives constant segment speed; `"smoothstep"` 
 overshooting. Omit it to keep the existing position spline. Pose, rotation and scale default to linear blending.
 Use linear keys for a moving car or the middle of a jump, and smoothstep for a hand settling onto the desk.
 The viewport, thumbnail stills, browser video capture and headless renderer evaluate the same pose. Pose keys
-and the posed model ID change the blocking signature, so earlier stills/videos become out of date.
+and the posed model ID change the blocking signature, so earlier stills/videos of shots that show the posed object become out of date ([regeneration](regeneration.md)).

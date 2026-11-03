@@ -38,6 +38,9 @@ One name per thing, used the same way in the app, the docs and the film. When a 
 | **Auto-prompt** | The prompt the app writes from the story, cast, world and camera. You can edit it. | Generated prompt |
 | **Video model** | The model that makes the shot's video (LTX, Seedance, Kling …). **Runs on** says where: Comfy Cloud or local ComfyUI. | Workflow (code only), Preset |
 | **Version** | One generated video of a shot. The cut uses one version per shot ("Newest" by default). Repeated runs of the same model are **takes** ("LTX 2.5 Fast · take 2"). | Result, Output |
+| **Out of date** | An output whose inputs changed since it was made: the camera or timing, an object its blockout frames can show, its prompt, a cast image, its model or its seed. Hover the badge for what changed. Moving an object no frame shows changes nothing. **Inputs changed** means the still is still sent to video models but a batch makes it again. | Stale (code only), Dirty |
+| **Pin** | Accept a still, video take or cast image as it is: it is never out of date and a batch keeps it. **Pinned** to undo. | Lock, Freeze |
+| **Only what changed** | How batches run: an output is made again only when its inputs changed (or something it is made from is made again). `force` remakes anyway. See docs/regeneration.md. | Incremental, Cache |
 
 ## Generating and spending
 
