@@ -1148,11 +1148,12 @@ body[data-mstep=build]:is(.m-compact, .m-medium) .viewport:not(.camview) .demo-n
 [data-theme="dark"] .side-act { box-shadow: 0 -1px 0 rgba(255, 250, 240, .05) inset, 0 -12px 26px -18px rgba(0, 0, 0, .7); }
 [data-theme="dark"] .shot .shot-vid, [data-theme="dark"] .ds-status, [data-theme="dark"] .ds-badge.n, [data-theme="dark"] .m-cc-tick svg { background: rgba(32, 30, 27, .92); color: var(--ink-2); }
 /* Kind and field colours come from shared/prompt.mjs (tuned for paper): as text on dark they are lifted toward the ink. */
-[data-theme="dark"] :is(.cast-row .cast-ph, .cast-row.open .cast-chev, .cast-family .cast-x, .cast-family[open] > summary .cast-chev, .sq-chip-t b, .ch-opt.is-current .ch-opt-t::after) { color: color-mix(in srgb, var(--c) 55%, var(--ink)); }
-[data-theme="dark"] .ds-slot.is-running .ds-ph { color: color-mix(in srgb, var(--kind) 55%, var(--ink)); }
-[data-theme="dark"] :is(body.m-compact, body.m-medium) .m-sheet .outline .group { color: color-mix(in srgb, var(--k, var(--ink-3)) 55%, var(--ink)); }
-[data-theme="dark"] .sem-back mark { color: color-mix(in srgb, var(--k) 50%, var(--ink)); }
-[data-theme="dark"] .vm-n { color: color-mix(in srgb, var(--k) 50%, var(--ink)); }
+[data-theme="dark"] :is(.cast-row .cast-ph, .cast-row.open .cast-chev, .cast-family .cast-x, .cast-family[open] > summary .cast-chev, .sq-chip-t b, .ch-opt.is-current .ch-opt-t::after) { color: color-mix(in srgb, var(--c) 40%, var(--ink)); }
+[data-theme="dark"] .ds-slot.is-running .ds-ph { color: color-mix(in srgb, var(--kind) 40%, var(--ink)); }
+[data-theme="dark"] :is(body.m-compact, body.m-medium) .m-sheet .outline .group { color: color-mix(in srgb, var(--k, var(--ink-3)) 40%, var(--ink)); }
+[data-theme="dark"] .sem-back mark { color: color-mix(in srgb, var(--k) 40%, var(--ink)); }
+[data-theme="dark"] :is(.outline .group, .sb-in figcaption b) { color: color-mix(in srgb, var(--k, var(--ink-3)) 40%, var(--ink)); }
+[data-theme="dark"] .vm-n { color: color-mix(in srgb, var(--k) 40%, var(--ink)); }
 [data-theme="dark"] :is(.ap-chip i, .ap-sname i, .pi-dot) { box-shadow: 0 0 0 1px var(--line-2); }
 /* White text on a filled accent or status colour: the dark theme's fills are light, so their text is dark. */
 [data-theme="dark"] :is(.an-legend i, .ds-badge.ok, .ds-noid, .ds-att i, .m-btn.m-danger, .op-actions .btn.rec, .ds-tab.busy small, .ds-set.on .ds-n) { color: var(--on-ink); }
@@ -1172,3 +1173,6 @@ body[data-mstep=build]:is(.m-compact, .m-medium) .viewport:not(.camview) .demo-n
 /* Illustrations (camera help, guide diagrams) stay paper-toned like pictures, set in a hairline frame. */
 [data-theme="dark"] :is(.ch-stage, .ex-stage) { box-shadow: inset 0 0 0 1px var(--line-2); }
 /* Design-sheet canvases are images of a white sheet: keep them white. */
+/* Library badges and Take lab tags. */
+[data-theme="dark"] .asset .badge.render { color: var(--accent); }
+[data-theme="dark"] .tk-tag.ref { color: var(--on-ink); }
