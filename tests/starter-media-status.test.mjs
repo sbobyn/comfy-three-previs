@@ -18,6 +18,8 @@ test('each starter ships the blockout clip of its video, current except where th
     assert.deepEqual(p.starterFiles, { listed: s.media.length, missing: 0 }, `${s.slug}: every listed file is in the checkout`);
     for (const sh of p.shots) {
       const b = starterBlockout(p, sh), earlier = (EARLIER_CLIPS[s.slug] || []).includes(sh.title);
+      // Look Lab's variants share one blocking: a shot without its own clip has the signature of one that has it.
+      if (!b && !p.edit?.clips?.some(c => c.shotId === sh.id)) { assert.ok(p.shots.some(o => starterBlockout(p, o)?.fresh && shotSignature(p, o) === shotSignature(p, sh)), `${s.slug} ${sh.title}: no clip and no shared blocking`); continue; }
       assert.ok(b, `${s.slug} ${sh.title}: bundled blockout clip`);
       assert.equal(b.fresh, !earlier, `${s.slug} ${sh.title}: the bundled clip ${earlier ? 'predates' : 'shows'} the posed animation`);
     }
@@ -99,8 +101,9 @@ test('media made for a snapshot’s current blocking stays current in every copy
     const p = createProjectDocument({ template: s.slug }, undefined, [snap]);
     for (const sh of p.shots) assert.ok(sh.references.filter(r => r.generated).every(r => !stillStale(p, sh, r)), `${s.slug} ${sh.title}: current still judged stale`);
     assert.equal(starterMediaStatus(p), null, `${s.slug}: nothing to report`);
-    // Moving an object afterwards makes them out of date again.
+    // Moving an object afterwards makes them out of date again (a blockout starter has only its clips to go stale).
     p.scene.entities[0].position = [p.scene.entities[0].position[0] + 1, ...p.scene.entities[0].position.slice(1)];
-    assert.ok(starterMediaStatus(p)?.staleShots.length > 0);
+    if (p.edit?.clips?.length) assert.ok(starterMediaStatus(p)?.staleShots.length > 0);
+    else assert.ok(p.shots.some(sh => starterBlockout(p, sh)?.fresh === false), `${s.slug}: a moved object leaves the bundled clips stale`);
   }
 });

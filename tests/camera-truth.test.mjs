@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createProjectDocument } from '../server/previs/director.mjs';
 import { loadStarters } from '../server/previs/starters.mjs';
+import { FINISHED_STARTERS, BLOCKOUT_STARTERS } from './helpers/starters.mjs';
 import { builtInPresets } from '../server/previs/presets.mjs';
 import { autoPromptText, autoPromptSegments, shotPrompt, shotStyle } from '../shared/prompt.mjs';
 import { compilePrompt, describeCamera, MOVES, referenceLegend, videoReferences, keyStills, blockoutStale, shotSignature } from '../shared/director.mjs';
@@ -17,7 +18,7 @@ const autoCamera = (shot, entities) => [describeCamera(shot, entities), ...Objec
 
 test('starter video prompts carry no camera move, one camera line for the input, and lens/filter hints', async () => {
   const starters = await loadStarters();
-  assert.deepEqual(starters.map(s => s.slug).sort(), ['breaking-news', 'final-lap', 'posterized', 'wingspan']);
+  assert.deepEqual(starters.map(s => s.slug).sort(), [...FINISHED_STARTERS, ...BLOCKOUT_STARTERS].sort());
   for (const st of starters) {
     const p = createProjectDocument({ template: st.slug }, undefined, starters);
     for (const shot of p.shots) {
