@@ -76,6 +76,18 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
 .home-hero-cap { margin: 0; display: flex; gap: 6px; align-items: baseline; font-size: var(--fs-sm); color: var(--ink-3); }
 .home-hero-cap strong { color: var(--ink); font-weight: 600; }
 .home-hero-cap span { margin-left: auto; font: 500 var(--fs-2xs)/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-4); }
+/* The hero reel: pairs stacked in one 16:9 stage, cross-fading; dots and the shot's label under it. */
+.home-hero-stage { position: relative; aspect-ratio: 16 / 9; }
+.home-hero-stage > .ba { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity .45s var(--ease-in-out); }
+.home-hero-stage > .ba.is-entering, .home-hero-stage > .ba.is-leaving { opacity: 0; }
+.home-hero-stage > .ba.is-leaving { pointer-events: none; }
+.home-hero-cap .home-hero-dots { display: inline-flex; gap: 2px; margin-left: auto; font: inherit; text-transform: none; }
+.home-hero-cap .home-hero-label { margin-left: 8px; min-width: 15ch; text-align: right; color: var(--ink-3); }
+.home-hero-dot { position: relative; width: 20px; height: 20px; padding: 0; border: 0; background: none; cursor: pointer; display: inline-grid; place-items: center; }
+.home-hero-dot i { display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-4); opacity: .45; transition: width .25s var(--ease-out), opacity .25s; }
+.home-hero-dot:hover i { opacity: .8; }
+.home-hero-dot.on i { width: 16px; border-radius: 3px; opacity: 1; background: var(--accent); }
+.home-hero-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 4px; }
 /* Starter cards: the seam shows only while scrubbing. */
 .home-seam-slot .ba.is-reveal { cursor: col-resize; }
 .home-seam-slot .ba.is-reveal .ba-seam { transition: opacity var(--t-fast, .15s) ease; }
@@ -189,6 +201,6 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .home-hero-copy > *, .home-reel, .home-steps, .home-section, .home-menu, .home-status-pop { animation: none; }
-  .home-reel img, .home-frame img, .home-starter .home-frame, .home-project .home-frame, .home-step-art { transition: none; }
+  .home-hero-stage > .ba, .home-hero-dot i, .home-reel img, .home-frame img, .home-starter .home-frame, .home-project .home-frame, .home-step-art { transition: none; }
   .home-reel-tag i, .home-frame.is-loading::after { animation: none; }
 }
