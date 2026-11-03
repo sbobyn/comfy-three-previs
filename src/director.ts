@@ -966,6 +966,7 @@ function renderActionBar() {
   actHint.title = `${s.title} · ${s.duration}s · ${state}${rate ? ` · about $${(rate * secs).toFixed(2)} to generate (${secs}s clip)` : ''}`;
   const ready = !!s.render && !stale;
   renderBtn.textContent = ready ? 'Generate video ▸' : s.render ? 'Remake blockout…' : 'Make blockout…';
+  renderBtn.classList.toggle('cta', ready); // Generate is the one primary; making a blockout is a secondary step
   renderBtn.title = ready ? 'Generate this shot’s video from its blockout' : `${s.render ? 'Remake' : 'Make'} the camera blockout, then generate this shot’s video`;
   renderSteps();
 }
