@@ -2295,12 +2295,12 @@ function announceChanges(before: DirectorProject, after: DirectorProject) {
 function renderFirstRun() {
   const key = `previs.firstrun.${project.id}`;
   const objs = project.scene.entities.filter(e => e.shape !== 'group');
-  if (objs.length || localStorage.getItem(key) === '1') { firstRun.hidden = true; if (project.revision > 0 && tourAt < 0 && objs.length) setTimeout(maybeTour, 0); return; }
+  if (objs.length || localStorage.getItem(key) === '1') { firstRun.hidden = true; coach.classList.remove('held'); if (project.revision > 0 && tourAt < 0 && objs.length) setTimeout(maybeTour, 0); return; }
   const hasImages = objs.some(e => objectLooks(project, e.id).length), hasVideo = (project.assets || []).some(a => a.kind === 'workflow-result');
   const stepEl = (n: number, done: boolean, title: string, body: string, action: Node | null) => h('li', { class: done ? 'done' : '' }, h('span', { class: 'fr-n' }, done ? '✓' : String(n)), h('div', {}, h('strong', {}, title), h('p', {}, body), action));
-  firstRun.hidden = false;
+  firstRun.hidden = false; coach.classList.add('held'); // one onboarding layer at a time: the viewport hint waits for this card
   firstRun.replaceChildren(h('div', { class: 'fr-card' },
-    h('div', { class: 'fr-head' }, h('span', { class: 'eyebrow' }, 'Start here'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Dismiss', onclick: () => { localStorage.setItem(key, '1'); firstRun.hidden = true; } }, '✕')),
+    h('div', { class: 'fr-head' }, h('span', { class: 'eyebrow' }, 'Start here'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Dismiss', onclick: () => { localStorage.setItem(key, '1'); firstRun.hidden = true; coach.classList.remove('held'); } }, '✕')),
     h('h2', {}, 'From an empty stage to a shot in three steps'),
     h('ol', {},
       stepEl(1, !!objs.length, 'Describe your scene to Claude, or add objects', 'Claude builds it here live. Or place characters, vehicles and props yourself.', h('div', { class: 'fr-actions' }, h('button', { class: 'btn sm primary', type: 'button', onclick: () => claudeDialog() }, '✳ Direct with Claude'), h('button', { class: 'btn sm', type: 'button', onclick: () => { const r = viewport.getBoundingClientRect(); openAddPopup(r.left + r.width / 2 - 90, r.top + 80); } }, '+ Add object'))),

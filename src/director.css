@@ -487,6 +487,7 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .coach .btn { flex: none; border-radius: var(--r-full); }
 .coach > span:nth-child(2) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 @keyframes coach-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.coach.held { display: none; } /* waits until the first-run card is gone */
 .first-run { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; padding: 20px; background: radial-gradient(ellipse at center, rgba(18,17,16,.35), rgba(18,17,16,.7)); pointer-events: none; }
 .fr-card { pointer-events: auto; width: min(460px, 100%); background: var(--card); color: var(--ink); border-radius: var(--r-lg); padding: 18px 20px 20px; box-shadow: var(--sh-3); animation: pop-in var(--t-reveal) var(--ease-out); }
 .fr-head { display: flex; align-items: center; justify-content: space-between; }
