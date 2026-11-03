@@ -536,7 +536,7 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .cam-guide .help-explain { min-height: 0; }
 .cam-guide .ex-diagram { margin: 0; }
 .cam-guide-act { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.help-card { position: absolute; top: 52px; left: 10px; z-index: 6; width: min(660px, calc(100% - 20px)); max-height: calc(100% - 64px); display: flex; flex-direction: column; overflow: hidden; background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sh-pop); }
+.help-card { position: absolute; top: 52px; left: 10px; z-index: 7; /* above the first-run card it is opened over */ width: min(660px, calc(100% - 20px)); max-height: calc(100% - 64px); display: flex; flex-direction: column; overflow: hidden; background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sh-pop); }
 .help-head { flex: none; display: flex; gap: 10px; align-items: baseline; padding: 10px 10px 8px 16px; border-bottom: 1px solid var(--line); }
 .help-head strong { font-size: var(--fs-md); font-weight: 650; }
 .help-head .btn { margin-left: auto; }
