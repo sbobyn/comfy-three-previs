@@ -18,8 +18,17 @@
   .home-head h2 { font-size: 24px; }
   .home-head > span { font-size: 13px; }
   /* Starters: horizontal snap row */
-  .home-starters, .home-starters[data-count] { display: flex; grid-template-columns: none; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 -24px; padding: 0 24px 6px; scroll-padding: 0 24px; overscroll-behavior-x: contain; }
+  .home-starters, .home-starters[data-count] { display: flex; grid-template-columns: none; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 -24px; padding: 6px 24px 12px; scroll-padding: 0 24px; overscroll-behavior-x: contain; }
   .home-starters::-webkit-scrollbar { display: none; }
+  .home-starter-nav { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 0 8px; margin-top: 4px; color: var(--ink-3); font-size: var(--fs-sm); }
+  .home-starter-scroll { grid-column: 1 / -1; width: 100%; height: 44px; margin: 0; padding: 0; appearance: none; background: transparent; cursor: ew-resize; }
+  .home-starter-scroll::-webkit-slider-runnable-track { height: 6px; background: var(--ink-4); border-radius: 3px; }
+  .home-starter-scroll::-webkit-slider-thumb { appearance: none; width: 44px; height: 12px; margin-top: -3px; border-radius: 6px; background: var(--accent); }
+  .home-starter-scroll::-moz-range-track { height: 6px; background: var(--ink-4); border-radius: 3px; }
+  .home-starter-scroll::-moz-range-thumb { width: 44px; height: 12px; border: 0; border-radius: 6px; background: var(--accent); }
+  .home-starter-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-sm); }
+  .home-starter-nav button { min-width: 44px; min-height: 44px; }
+  .home-starter-nav button:disabled { opacity: .35; cursor: default; }
   .home-starter { flex: none; width: 300px; scroll-snap-align: start; gap: 8px; }
   .home-starter-meta strong { font-size: 15px; }
   .home-starter-meta > span { font-size: 13px; }
@@ -45,7 +54,7 @@
   .home-meta > * { min-height: 44px; display: flex; align-items: center; }
   .home-status > summary { min-height: 44px; }
   .home-status-pop { left: 0; width: calc(100vw - 32px); }
-  .home-starters, .home-starters[data-count] { margin: 0 -16px; padding: 0 16px 6px; scroll-padding: 0 16px; }
+  .home-starters, .home-starters[data-count] { margin: 0 -16px; padding: 6px 16px 12px; scroll-padding: 0 16px; }
   .home-starter { width: 244px; }
   .home-projects { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

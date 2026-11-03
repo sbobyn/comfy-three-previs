@@ -89,7 +89,8 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
 .home-hero-dot.on i { width: 16px; border-radius: 3px; opacity: 1; background: var(--accent); }
 .home-hero-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 4px; }
 /* Starter cards: the seam shows only while scrubbing. */
-.home-seam-slot .ba.is-reveal { cursor: col-resize; }
+.home-seam-slot .ba.is-reveal { cursor: pointer; }
+.home-seam-slot .ba-seam { cursor: col-resize; }
 .home-seam-slot .ba.is-reveal .ba-seam { transition: opacity var(--t-fast, .15s) ease; }
 .home-seam-slot .ba.is-reveal:not(:hover):not(:focus-within) .ba-seam { opacity: 0; }
 .home-reel.is-empty { background: radial-gradient(120% 90% at 50% 100%, var(--stage-2), var(--stage)); }
@@ -119,14 +120,16 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
 .home-frame.is-loading::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,250,240,.06) 50%, transparent 70%) -100% 0 / 200% 100%; animation: home-shimmer 1.4s linear infinite; }
 
 /* Starters */
+.home-starter-nav { display: none; }
 .home-starters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
 .home-starters[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .home-starters[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.home-starter { display: flex; flex-direction: column; gap: 10px; min-width: 0; color: inherit; border-radius: var(--r-md); }
+.home-starter { display: flex; flex-direction: column; gap: 10px; min-width: 0; color: inherit; border-radius: var(--r-md); cursor: pointer; outline: 2px solid transparent; outline-offset: 4px; }
+.home-starter:hover, .home-starter:focus-within { outline-color: var(--accent); }
 .home-seam-slot, .home-starter-open { display: block; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; color: inherit; font: inherit; border-radius: var(--r-md); }
 .home-starter-open:focus-visible { outline: none; box-shadow: var(--focus); }
 /* Blockout → generated seam on the starter's hero shot (director-media beforeAfter). */
-.home-seam-slot.has-seam { cursor: default; }
+.home-seam-slot.has-seam { cursor: pointer; }
 .home-seam-slot .ba { border-radius: var(--r-md); box-shadow: 0 0 0 1px rgba(21,19,15,.08), var(--sh-2); transition: box-shadow var(--t-slow) var(--ease-out); }
 .home-starter:hover .home-seam-slot .ba { box-shadow: 0 0 0 1px rgba(21,19,15,.1), var(--sh-3); }
 /* The starter's cast images, as the shot uses them. */
