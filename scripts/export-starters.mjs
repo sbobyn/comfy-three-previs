@@ -13,7 +13,8 @@
 // Each starter is written to examples/starters/<slug>/starter.json plus a media/ folder: every object's
 // primary look and design sheet, each shot's chosen still, its blockout clip and its chosen video
 // (see starterPicks in server/previs/starters.mjs). Images become WebP no larger than 1600 px; videos become
-// 720p H.264 at up to 2.5 Mbit/s with no audio (needs ffmpeg and ffprobe on PATH). A file whose source
+// 720p H.264 at up to 2.5 Mbit/s with no audio (needs ffmpeg and ffprobe on PATH); imported models (GLB) are copied
+// unchanged. A file whose source
 // has not changed is not re-encoded, so re-exports leave unchanged media byte-identical.
 //
 // Options: --check; --<slug> <project-id> overrides a source project; --only <slug>; --no-media writes the
@@ -179,6 +180,12 @@ async function encodeMedia(snap, dir, prev, read) {
     const old = prev?.media?.find(m => m.path === f.path && (m.sourceSha256 === sourceSha256 || m.sha256 === sourceSha256));
     if (old && existsSync(dest) && sha(await readFile(dest)) === old.sha256) { out.push(old); continue; }
     if (old && old.sha256 === sourceSha256) { await mkdir(dirname(dest), { recursive: true }); await writeFile(dest, bytes); out.push(old); continue; }
+    // An imported model (GLB) is copied as it is: it is already the checked, self-contained file the app stores.
+    if (f.kind === 'model') {
+      await mkdir(dirname(dest), { recursive: true }); await writeFile(dest, bytes);
+      out.push({ path: f.path, kind: f.kind, bytes: bytes.length, sha256: sourceSha256, sourceSha256 });
+      continue;
+    }
     const input = join(tmp, `in-${sourceSha256.slice(0, 16)}`);
     await writeFile(input, bytes);
     await mkdir(dirname(dest), { recursive: true });

@@ -63,7 +63,7 @@ export function createProjectDocument({ title, template = 'street' } = {}, id = 
   const at = now();
   if (starter) {
     // A starter's media (looks, sheets, stills, blockout and chosen videos) comes along when its files are present.
-    const { scene, shots, assets, edit, files, media: counts } = instantiateStarter(starter, { has: path => !!starter.dir && existsSync(join(starter.dir, path)) });
+    const { scene, shots, assets, edit, files, media: counts } = instantiateStarter(starter, { has: path => !!starter.dir && existsSync(join(starter.dir, path)), projectId: id });
     const media = files.length && starter.dir ? { dir: starter.dir, files } : null;
     return { version: 1, id, title: String(title || starter.title).slice(0, 120), template: t, createdAt: at, updatedAt: at, revision: 1, scene, shots, ...(assets ? { assets } : {}), ...(edit ? { edit } : {}), starterFiles: counts, ...(media ? { starterMedia: media } : {}), messages: [{ id: randomUUID(), shotId: null, role: 'system', text: `Started from the “${starter.title}” starter. Change anything — describe edits to your agent or drag things in the viewport.`, attachments: [], status: 'handled', createdAt: at }] };
   }
