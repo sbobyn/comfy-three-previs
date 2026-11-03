@@ -40,11 +40,11 @@ The demo is read-only: explore the scenes and watch their existing media. Instal
 - **Bring your own agent.** The local MCP server exposes scene, cast, camera, prompt and generation tools to MCP clients such as Claude Code and Claude Desktop. Agent edits appear live in the workspace. [Connect an agent](#direct-with-an-agent-mcp)
 - **Cut and share.** Sequence shots, choose takes, compare results and export a film, or share an editable project as a portable `.previs.zip`. Film exports currently have no sound.
 
-### Masked edits — in preview
+### Masked edits — fixed region (Cloud)
 
-[Watch the masked-edit prototype in the launch film](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film.mp4).
+[Watch a masked edit in the launch film](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film.mp4).
 
-The launch film previews a tested masked-edit prototype: regenerate a selected region and composite it into the original shot. The wardrobe example cost about **$0.15 versus $1.52** for full regeneration; costs depend on the model, crop and retries. **This experimental pipeline is not yet included in the app.**
+From an eligible video take in the Take lab, **Edit region…** paints a fixed mask, quotes a trusted Cloud estimate, regenerates only that crop (Wan 2.1 VACE 14B on Comfy Cloud), then composites locally so outside-mask pixels stay exact before encode. First shipping limits: silent **1280×720 / 24 fps / 81-frame** takes, one fixed mask (not tracked), no chained edits, and the cut does not switch to the edit unless you mark it. The quote is a historical GPU planning envelope — not a provider bill cap — and needs `PREVIS_ALLOW_PAID=1` plus a Comfy Cloud key. The wardrobe example still landed near **$0.15 versus $1.52** for full regeneration; your crop size and Cloud runtime decide the real charge.
 
 ## Quick start
 

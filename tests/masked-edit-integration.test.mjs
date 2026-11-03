@@ -147,9 +147,11 @@ test('mocked submit path: trusted estimate reserves; paid disabled refuses befor
   );
   const expected = estimateMaskedVaceCost({ width: 640, height: 480, frames: 81 });
   assert.equal(fromSources.estimate, expected.estimate);
-  // Ensure README experimental claim untouched.
+  // README documents the shipped fixed-region path (post Cloud qualification).
   const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
-  assert.match(readme, /experimental pipeline is not yet included in the app/i);
+  assert.match(readme, /Edit region/i);
+  assert.match(readme, /1280×720/);
+  assert.doesNotMatch(readme, /experimental pipeline is not yet included in the app/i);
   void png;
 });
 

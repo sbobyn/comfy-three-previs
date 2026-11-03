@@ -104,6 +104,11 @@ or seed is still sent: the badge reads **inputs changed**, and a batch makes it 
 Nothing is deleted. A remake adds a new take; earlier takes stay in the Take lab. A cast image that is made again
 becomes the primary image, and the old one stays.
 
+**Masked region edits** are a separate path: they derive from a parent video take (fixed mask + crop + edit prompt),
+not from the current shot’s ordinary video key. An accepted edit inherits the parent’s blocking staleness as “Edited
+from an older take” and is never chosen as the implicit newest cut; mark it winner or set the clip deliberately. A
+batch does not retry a masked edit with the ordinary shot-video preset.
+
 ## Where you see it
 
 - **Badges.** Hover a badge to see what changed and what it affects. That covers **Blockout changed** (shot card,

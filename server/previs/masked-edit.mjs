@@ -551,7 +551,8 @@ export function openMaskedEdit(dataRoot, director, { log = () => {}, generation 
     assertUuid(projectId, 'projectId');
     const receipt = await loadReceipt(editId);
     if (receipt.projectId !== projectId) fail('Edit belongs to another project', 404);
-    if (!['prepared', 'compositing', 'verifying', 'ready-for-review'].includes(receipt.state) && receipt.state !== 'failed-local') {
+    // `submitted` is the post-Cloud path: patch bytes are ready for local composite.
+    if (!['prepared', 'submitted', 'compositing', 'verifying', 'ready-for-review'].includes(receipt.state) && receipt.state !== 'failed-local') {
       fail(`Cannot composite from state ${receipt.state}`);
     }
     const dir = editDir(editId);

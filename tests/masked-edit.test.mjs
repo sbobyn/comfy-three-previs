@@ -185,6 +185,20 @@ test('local compositeFromFrames quarantines a candidate with exact outside prese
   assert.match(ready.candidateSha256, /^[a-f0-9]{64}$/);
   assert.equal(ready.preservation.outsideExact, true);
 
+  // Post-Cloud path: receipt stays `submitted` until local composite runs.
+  const submittedId = randomUUID();
+  const submittedDir = api.editDir(submittedId);
+  await mkdir(submittedDir, { recursive: true });
+  await writeFile(join(submittedDir, 'mask.bin'), Buffer.from(mask.alpha));
+  await writeFile(join(submittedDir, 'receipt.json'), JSON.stringify({
+    ...receipt, editId: submittedId, state: 'submitted', jobId: randomUUID(), providerDispatch: true,
+  }, null, 2));
+  const fromSubmitted = await api.compositeFromFrames({
+    editId: submittedId, projectId, sourceFrames, patchFrames,
+  });
+  assert.equal(fromSubmitted.state, 'ready-for-review');
+  assert.equal(fromSubmitted.preservation.outsideExact, true);
+
   const reviewed = await api.review({
     projectId, editId, candidateSha256: ready.candidateSha256, sourceSha256: receipt.sourceSha256,
     fingerprint: receipt.inputKey, reviewedScope: true,
