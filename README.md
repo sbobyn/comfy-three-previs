@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/readme-header-dark.svg" />
-    <img src="assets/brand/readme-header.svg" alt="Comfy Previs" width="600" />
-  </picture>
+  <img src="assets/brand/readme-header-dark.svg" alt="Comfy Previs" width="600" />
 </p>
 
 # Comfy Previs
