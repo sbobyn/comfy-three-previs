@@ -1,5 +1,5 @@
 // Look Lab: one small-town street, one 4 s blockout (a walker passes a tree, a bench and a lamp post toward the lens
-// on a slow push), duplicated into twelve variant shots with the same camera, timing and scene, so every variant has
+// on a slow push), duplicated into thirty-four variant shots (twelve, then 22 more in v2) with the same camera, timing and scene, so every variant has
 // the same blocking signature and the same blockout. Variants differ only in prompt sections: the world (season, time),
 // the look (style), the walker's Cast Card text (clothing, person) and the format line. Sized for Kling O1 edit and
 // Seedance 2.5 edit (4 s).
@@ -7,6 +7,9 @@ import { NO_BRANDS, NO_BRANDS_TAG, walkKeys, cameraKeys, focusAt, lerp, smooth, 
 
 const KERB = 0.15, WALK_X = 6;
 const PERSON = 'Adult in their thirties, shoulder-length brown hair';
+const BASE_LOOK = 'Look: photoreal, warm afternoon sun, soft shadows, natural colour.';
+/** A variant's look with the explicit negative (v2): no logos, badges, car emblems, signage or readable text. */
+const look = text => `${text} No logos, badges, car emblems or readable text.`;
 // key → [title, { world, style, walker, intro: [video, image] }]; only the parts given are overridden.
 export const VARIANTS = [
   ['a · Summer day (base)', {}],
@@ -21,6 +24,31 @@ export const VARIANTS = [
   ['j · Claymation', { intro: ['Stop-motion claymation shot.', 'Stop-motion claymation film still, single frame.'], style: 'Look: handmade plasticine stop-motion, fingerprinted clay texture, miniature set, soft studio light.' }],
   ['k · Stylised 3D animated feature', { intro: ['Stylised 3D animated feature shot.', 'Stylised 3D animated feature film still, single frame.'], style: 'Look: stylised 3D animated feature, soft rounded shapes, expressive proportions, warm bounce light.' }],
   ['l · Watercolour', { intro: ['Animated watercolour painting.', 'Watercolour painting, single frame.'], style: 'Look: loose watercolour in motion, soft bleeding washes, paper texture, light pencil lines.' }],
+  // v2 (2026-11-02): time of day, weather, more seasons, people, wardrobe and a stronger anime and claymation. Each sets its
+  // own style, ending in the explicit negative (no car emblems either), so the rule is in every image and video prompt. Trimmed to fit
+  // the 600-character cap once the shipped still is listed as a reference (the stills and videos were made with slightly longer text).
+  ['m · Dawn', { world: 'Set: the same street at dawn, first pink light, lamps still on.', style: look('Look: photoreal, soft pink and blue dawn light, long faint shadows.') }],
+  ['n · Golden hour', { world: 'Set: the same street at golden hour, a low warm sun raking across the shopfronts.', style: look('Look: photoreal golden hour, warm amber light, long shadows.') }],
+  ['o · Blue hour', { world: 'Set: the same street at blue hour after sunset, lamps and shop windows just lit.', style: look('Look: photoreal, deep blue twilight sky, warm lamp glow.') }],
+  ['p · Harsh noon', { world: 'Set: the same street at noon in high summer, the sun straight overhead.', style: look('Look: photoreal, harsh overhead sun, short hard shadows.') }],
+  ['q · Fog', { world: 'Set: the same street in thick morning fog, far shops lost in grey.', style: look('Look: photoreal, dense soft fog, muted grey palette, diffuse light.') }],
+  ['r · Heavy rain', { world: 'Set: the same street in heavy rain, puddles, wet glossy road and pavement reflecting the shops.', style: look('Look: photoreal, dark storm light, falling rain, wet reflections.'), walker: `${PERSON}, dark rain jacket, jeans, wet sneakers.` }],
+  ['s · Snowstorm', { world: 'Set: the same street in a heavy snowstorm, snow piling on roofs, the bench and the car.', style: look('Look: photoreal blizzard, driving snow, white-grey haze, cold light.'), walker: `${PERSON}, hooded parka, scarf, gloves, snow boots.` }],
+  ['t · Overcast', { world: 'Set: the same street on a flat overcast day, damp pavement.', style: look('Look: photoreal, flat soft grey light, no hard shadows, muted colour.') }],
+  ['u · Cherry blossom', { world: 'Set: the same street in spring, the tree a cherry in full pink blossom, petals on the pavement.', style: look('Look: photoreal, soft spring light, pastel colour.'), walker: `${PERSON}, light trench coat, jeans, white sneakers.` }],
+  ['v · Peak autumn', { world: 'Set: the same street at peak autumn, the maple blazing red and gold, fallen leaves.', style: look('Look: photoreal, crisp clear autumn light, rich warm colour.'), walker: `${PERSON}, camel wool coat, plaid scarf, dark jeans, ankle boots.` }],
+  ['w · Elderly woman', { style: look(BASE_LOOK), walker: 'Elderly woman in her eighties, short silver hair, glasses, lavender cardigan, grey slacks, flat shoes.' }],
+  ['x · Teen', { style: look(BASE_LOOK), walker: 'Teenager about fifteen, messy dark hair, plain oversized hoodie, baggy jeans, chunky sneakers, backpack.' }],
+  ['y · Cyclist', { style: look(BASE_LOOK), walker: 'Cyclist in their twenties walking a road bike at their side, plain helmet, plain fitted cycling jersey, black shorts.' }],
+  ['z · Dog walker', { style: look(BASE_LOOK), walker: `${PERSON}, walking a golden retriever on a lead at their side, green fleece, jeans, trail shoes.` }],
+  ['aa · Couple', { style: look(BASE_LOOK), walker: 'A couple in their thirties walking side by side, holding hands: a woman in a red summer dress and a man in a navy shirt and chinos.' }],
+  ['ab · Different ethnicity and build', { style: look(BASE_LOOK), walker: 'Heavy-set South Asian man in his forties, broad build, short black hair, trimmed beard, olive polo shirt, grey trousers, brown shoes.' }],
+  ['ac · Wardrobe · 1950s', { style: look('Look: photoreal, warm period colour, soft afternoon sun.'), walker: 'Adult in their thirties dressed in 1950s style: brown hair in neat waves, fitted grey jacket, high-waisted trousers, two-tone shoes.' }],
+  ['ad · Wardrobe · cyberpunk', { style: look(BASE_LOOK), walker: 'Adult in their thirties in cyberpunk clothes: asymmetric dark hair with a neon blue streak, black tech jacket with glowing piping, cargo trousers, platform boots.' }],
+  ['ae · Wardrobe · workwear', { style: look(BASE_LOOK), walker: `${PERSON}, plain navy work uniform, sturdy work trousers, high-visibility vest, steel-toe boots, no patches or insignia.` }],
+  ['af · Wardrobe · formal evening', { style: look(BASE_LOOK), walker: `${PERSON} in formal evening wear: long black satin gown, hair pinned up, silver earrings, black heels.` }],
+  ['ag · Anime (stronger)', { intro: ['2D cel anime shot.', '2D cel anime key frame, hand-drawn, single frame.'], style: look('Look: 2D hand-drawn TV anime: bold clean ink outlines, flat two-tone cel shading, painted sky, no photo texture.') }],
+  ['ah · Claymation (stronger)', { intro: ['Stop-motion claymation shot.', 'Stop-motion claymation frame, single frame.'], style: look('Look: all plasticine: chunky clay shops, road and tree, tabletop set, soft studio light.') }],
 ];
 
 export default {
