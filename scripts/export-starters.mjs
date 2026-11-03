@@ -12,7 +12,7 @@
 //
 // Each starter is written to examples/starters/<slug>/starter.json plus a media/ folder: every object's
 // primary look and design sheet, each shot's chosen still, its blockout clip and its chosen video
-// (see starterPicks in server/previs/starters.mjs). Images become WebP no larger than 1600 px; videos become
+// (see starterPicks in server/previs/starters.mjs). Images become WebP no larger than 1600 px (a starter may set a smaller `encode`); videos become
 // 720p H.264 at up to 2.5 Mbit/s with no audio (needs ffmpeg and ffprobe on PATH); imported models (GLB) are copied
 // unchanged. A file whose source
 // has not changed is not re-encoded, so re-exports leave unchanged media byte-identical.
@@ -48,13 +48,17 @@ const SOURCE_DEFS = [
   { slug: 'mountain-trail', title: 'Mountain Trail', description: 'A hiker crosses an open alpine valley toward a lake and a cabin: room to fly a drone or phone camera, with a ridge reveal, a slope dive, a low track and a wide.', hero: { shots: [] } },
   { slug: 'city-blocks', title: 'City Blocks', description: 'A downtown grid with traffic and pedestrians: a drone rise between buildings, a street-level car track, a rooftop orbit and a pedestrian follow.', hero: { shots: [] } },
   { slug: 'camera-moves', title: 'Camera Moves & Transitions', description: 'A lighthouse keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.', hero: { shots: [] } },
-  { slug: 'look-lab', title: 'Look Lab', description: 'One small-town street blockout in twelve looks: seasons, night, wardrobe, a different person, anime, claymation, 3D animated and watercolour, all sharing one camera and one blocking.', hero: { shots: [] } },
+  // Look Lab ships many looks, so its copy is encoded smaller (540p video, lighter stills) to stay inside the 80 MB budget;
+  // the full-quality originals stay in the source project. A media entry records a non-default encode, so changing it re-encodes.
+  { slug: 'look-lab', title: 'Look Lab', description: 'One small-town street blockout in thirty-four looks: time of day, weather, seasons, people, wardrobe, anime, claymation, 3D animated and watercolour, all sharing one camera and one blocking.', hero: { shots: [] },
+    encode: { imageMaxPx: 1280, imageQuality: 72, videoHeight: 540, videoKbps: 900, videoMaxKbps: 1200 } },
   { slug: 'two-hander', title: 'Two-Hander', description: 'A café conversation in coverage: a master, two over-the-shoulders, an insert of a reach for a cup and a zooming close-up, with seated, posed figures.', hero: { shots: [] } },
 ];
 
 export const SOURCES = SOURCE_DEFS.map(d => ({ ...d, id: starterSourceId(d.slug) }));
 
 const IMAGE_MAX_PX = 1600, VIDEO_HEIGHT = 720, VIDEO_KBPS = 2000, VIDEO_MAX_KBPS = 2500;
+const DEFAULT_ENCODE = { imageMaxPx: IMAGE_MAX_PX, imageQuality: 82, videoHeight: VIDEO_HEIGHT, videoKbps: VIDEO_KBPS, videoMaxKbps: VIDEO_MAX_KBPS };
 
 async function main(args) {
   const opt = name => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : undefined; };
@@ -116,7 +120,7 @@ export async function exportStarters({ server, dataDir, out: outDir, only, media
       await mkdir(dir, { recursive: true });
       let prev = null; try { prev = JSON.parse(await readFile(join(dir, 'starter.json'), 'utf8')); } catch {}
       const snap = starterSnapshot(p, { slug: src.slug, title: src.title, description: src.description, order, media, hero: src.hero });
-      if (media) await encodeMedia(snap, dir, prev, rel => source(p.id, rel));
+      if (media) await encodeMedia(snap, dir, prev, rel => source(p.id, rel), src.encode);
       totals.push({ slug: src.slug, snap, dir, hero: src.hero });
       written.push(src.slug);
     }
@@ -176,7 +180,8 @@ const mb = n => `${(n / 1024 / 1024).toFixed(1)} MB`;
 const sha = b => createHash('sha256').update(b).digest('hex');
 
 /** Encode every listed file into <dir>/<path>, reusing the previous export's file when its source is unchanged. */
-async function encodeMedia(snap, dir, prev, read) {
+async function encodeMedia(snap, dir, prev, read, encode = null) {
+  const e = { ...DEFAULT_ENCODE, ...(encode || {}) }, tag = encode ? JSON.stringify(encode) : null;
   const tmp = join(tmpdir(), `starter-media-${process.pid}`);
   await mkdir(tmp, { recursive: true });
   const out = [];
@@ -184,7 +189,7 @@ async function encodeMedia(snap, dir, prev, read) {
     const bytes = await read(f.from);
     const sourceSha256 = sha(bytes), dest = join(dir, f.path);
     // A source that is the bundled file itself (an imported source project) or whose source is unchanged is not re-encoded.
-    const old = prev?.media?.find(m => m.path === f.path && (m.sourceSha256 === sourceSha256 || m.sha256 === sourceSha256));
+    const old = prev?.media?.find(m => m.path === f.path && (m.sourceSha256 === sourceSha256 || m.sha256 === sourceSha256) && (f.kind === 'model' || (m.encode ? JSON.stringify(m.encode) : null) === tag));
     if (old && existsSync(dest) && sha(await readFile(dest)) === old.sha256) { out.push(old); continue; }
     if (old && old.sha256 === sourceSha256) { await mkdir(dirname(dest), { recursive: true }); await writeFile(dest, bytes); out.push(old); continue; }
     // An imported model (GLB) is copied as it is: it is already the checked, self-contained file the app stores.
@@ -197,13 +202,13 @@ async function encodeMedia(snap, dir, prev, read) {
     await writeFile(input, bytes);
     await mkdir(dirname(dest), { recursive: true });
     if (f.kind === 'image') {
-      await run('ffmpeg', ['-v', 'error', '-y', '-i', input, '-vf', `scale='min(${IMAGE_MAX_PX},iw)':'min(${IMAGE_MAX_PX},ih)':force_original_aspect_ratio=decrease`, '-c:v', 'libwebp', '-quality', '82', '-map_metadata', '-1', dest]);
+      await run('ffmpeg', ['-v', 'error', '-y', '-i', input, '-vf', `scale='min(${e.imageMaxPx},iw)':'min(${e.imageMaxPx},ih)':force_original_aspect_ratio=decrease`, '-c:v', 'libwebp', '-quality', String(e.imageQuality), '-map_metadata', '-1', dest]);
     } else {
-      await run('ffmpeg', ['-v', 'error', '-y', '-i', input, '-vf', `scale=-2:'min(${VIDEO_HEIGHT},ih)'`, '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-pix_fmt', 'yuv420p',
-        '-b:v', `${VIDEO_KBPS}k`, '-maxrate', `${VIDEO_MAX_KBPS}k`, '-bufsize', `${VIDEO_MAX_KBPS * 2}k`, '-an', '-map_metadata', '-1', '-fflags', '+bitexact', '-flags:v', '+bitexact', '-movflags', '+faststart', dest]);
+      await run('ffmpeg', ['-v', 'error', '-y', '-i', input, '-vf', `scale=-2:'min(${e.videoHeight},ih)'`, '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-pix_fmt', 'yuv420p',
+        '-b:v', `${e.videoKbps}k`, '-maxrate', `${e.videoMaxKbps}k`, '-bufsize', `${e.videoMaxKbps * 2}k`, '-an', '-map_metadata', '-1', '-fflags', '+bitexact', '-flags:v', '+bitexact', '-movflags', '+faststart', dest]);
     }
     const data = await readFile(dest);
-    const entry = { path: f.path, kind: f.kind, bytes: data.length, sha256: sha(data), sourceSha256, ...(await probe(dest, f.kind)) };
+    const entry = { path: f.path, kind: f.kind, bytes: data.length, sha256: sha(data), sourceSha256, ...(await probe(dest, f.kind)), ...(encode ? { encode } : {}) };
     out.push(entry);
     await rm(input, { force: true });
   }

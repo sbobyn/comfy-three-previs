@@ -9,7 +9,7 @@ import { createProjectDocument, openDirector } from '../server/previs/director.m
 import { loadStarters, starterSnapshot, instantiateStarter, attachStarterMedia, starterCard, MODEL_BASE } from '../server/previs/starters.mjs';
 import { shotSignature } from '../shared/director.mjs';
 import { projectMesh } from '../shared/blockout-models.mjs';
-import { FINISHED_STARTERS, BLOCKOUT_STARTERS, LOOK_LAB_VIDEOS } from './helpers/starters.mjs';
+import { FINISHED_STARTERS, BLOCKOUT_STARTERS, LOOK_LAB_VIDEOS, LOOK_LAB_STILL_MODELS } from './helpers/starters.mjs';
 
 test('starter snapshots load in launch-page order, carry no absolute paths, and list media that is present', async () => {
   const starters = await loadStarters();
@@ -44,7 +44,7 @@ test('starter snapshots load in launch-page order, carry no absolute paths, and 
         const [still] = shot.references;
         assert.equal(still.role, 'frame'); assert.equal(still.note, 'key frame start');
         assert.equal(still.generated?.signature, shotSignature(s, shot), `${shot.title}: the still shows the current blocking`);
-        assert.equal(still.generated?.presetId, 'gpt-image-25'); assert.equal(still.generated?.regen, undefined, `${shot.title}: no manifest ships`);
+        assert.equal(still.generated?.presetId, LOOK_LAB_STILL_MODELS[shot.title] || 'gpt-image-25', shot.title); assert.equal(still.generated?.regen, undefined, `${shot.title}: no manifest ships`);
       }
       const videos = s.assets.filter(a => a.kind === 'workflow-result');
       if (!lookLab) assert.ok(!videos.length && !s.edit.clips.length, `${s.slug}: no generated media`);

@@ -16,7 +16,7 @@ examples/starters/
 ## Blockout starters (2026-11-02)
 
 Five starters open with a blockout clip per shot and written Cast Cards, and no generated media: making the cast images,
-stills and videos is the test. Look Lab is the exception: it also ships a start still per variant and four videos (below). They were built through the MCP tools on a private server (paid work off) by
+stills and videos is the test. Look Lab is the exception: it also ships a start still per variant and twelve videos (below). They were built through the MCP tools on a private server (paid work off) by
 `scripts/starters/author.mjs` and its scene modules in `scripts/starters/scenes/`; the bundles here remain the source of
 truth. Every object is original, nothing carries a brand, logo, sign or lettering (each project style says so, and every
 shot has the `no logos or lettering` filter tag, which a video prompt always keeps), every shot is 4–5 s with its camera
@@ -46,7 +46,7 @@ shapes; trees, terrain and the lake use the bundled meshes.
 | | Match cut A · lantern / B · buoy | 4 + 4 | Match cut: A ends on the round lantern centred, B opens on the round buoy at the same place and size. |
 | | Cut on action A · wide / B · close | 4 + 4 | Cut on action: A cuts as the door swings; B overlaps 0.2 s and follows the keeper in. |
 | | Wipe A · foreground rock / B · reveal | 4 + 4 | In-camera foreground wipe: one constant-speed truck behind a rock, split at the moment it fills the frame. |
-| **Look Lab** | a · Summer day (base) … l · Watercolour | 4 × 12 | One blockout, twelve looks (below). |
+| **Look Lab** | a · Summer day (base) … ah · Claymation (stronger) | 4 × 34 | One blockout, thirty-four looks (below). |
 | **Two-Hander** | Master; Over Ben · on Ada; Over Ada · on Ben | 5 each | Dialogue coverage on the 180° line: 32 mm master, 50 mm over-the-shoulders; sit pose plus keyed gestures. |
 | | Insert · cup | 4 | 70 mm insert; Ada's hand reaches her cup by IK. |
 | | Close-up · zoom on Ben | 4 | Lens change within the shot, 50 → 70 mm. The barista is sent to models as the neutral grey stand-in. |
@@ -70,15 +70,19 @@ craft the transition into the shots themselves, as the pairs above do:
 The pairs' `cuts` style tags (`whip pan to whip pan`, `match cut`, `cut on action`, `in-camera foreground wipe`) note the
 intent; like all movement and cut tags they stay out of the prompts.
 
-**Look Lab variants.** Twelve shots share one camera, start, duration and scene, so they have the same blocking signature;
-the base variant and the four with videos ship a blockout clip, and generating any other variant makes its own (identical)
+**Look Lab variants.** Thirty-four shots share one camera, start, duration and scene, so they have the same blocking
+signature; the base variant and the twelve with videos ship a blockout clip, and generating any other variant makes its own (identical)
 blockout first. Each
 variant differs only in its prompt sections (Prompt sections in the shot, or `previs_director_set_prompt_section`), for
 both video and image prompts: the world (`world`, the season or time of day), the look (`style`), the walker's Cast Card
 text (`obj:<walker>`, clothing or a different person) and the format line (`intro`, for the stylised looks). The variants
 are summer day (base), night, spring, fall, winter, a yellow raincoat, a formal suit, a different person (an older man),
-anime, claymation, a stylised 3D animated feature and watercolour. Every variant's video prompt fits the 600-character cap.
-For the anime, claymation, 3D animated and watercolour variants the camera line repaints the blockout in that medium
+anime, claymation, a stylised 3D animated feature and watercolour, then (v2) dawn, golden hour, blue hour, harsh noon, fog,
+heavy rain, a snowstorm, overcast, cherry blossom, peak autumn, an elderly woman, a teen, a cyclist walking a bike, a dog
+walker, a couple, a heavy-set South Asian man, 1950s, cyberpunk, workwear and formal evening wardrobe, and a stronger
+anime and claymation. Every v2 variant sets its own `style` ending in "No logos, badges, car emblems, signage or readable
+text." Every variant's video prompt fits the 600-character cap.
+For the anime, claymation, 3D animated and watercolour variants (and v2's stronger anime and claymation) the camera line repaints the blockout in that medium
 instead of photoreal (`lookMedium`, docs/director.md).
 
 **Look Lab media (paid hybrid, 2026-11-02).** Every variant ships one start still: GPT Image 2.5, made from the shared
@@ -91,6 +95,20 @@ used: a claymation still retake, which looked more 3D animated than clay, and th
 parked car and brought the walker to the lens far ahead of the blockout. The anime video still drops the parked car. A few
 cars carry a small generic grille emblem with no readable mark. Details per item are in
 `.evidence/LOOKLAB-QUOTE-20261102.md` (not in git).
+
+**Look Lab v2 media (2026-11-03).** The 22 v2 variants each ship one start still: GPT Image 2.5 for the twenty photoreal
+looks, Nano Banana 2.1 for the stronger anime (no style reference: with v1's anime still as a reference every model
+copied its semi-photoreal look) and the stronger claymation (with v1's clay still as a reference). Eight also ship an
+edit of their blockout clip: Kling O1 for **n · Golden hour**, **o · Blue hour**, **s · Snowstorm**, **z · Dog walker**,
+**aa · Couple** and **ah · Claymation (stronger)**, and Seedance 2.5 for **r · Heavy rain** and **ad · Wardrobe ·
+cyberpunk**. On the same shot (heavy rain), Seedance held the blockout's walker pace and size; Kling O1 kept the camera,
+car, lamp, bench and tree but brought the walker toward the lens ahead of the blockout, so the cyberpunk video was remade on
+Seedance for the same reason. Kling is about a third of the price. Five photoreal stills were remade to remove a car grille
+emblem (golden hour, heavy rain, peak autumn, cyclist, 1950s). List cost $10.13 (33 stills $2.94, 8 Kling videos $4.03, 2
+Seedance videos $3.16). The v2 prompt texts were trimmed slightly after the media was made, to fit the 600-character cap
+with the shipped still listed as a reference. Details per item are in `.evidence/LOOKLAB-V2-QUOTE-20261102.md` (not in
+git). Look Lab's copy is encoded smaller than the other starters' (540p video at about 1 Mbit/s, WebP stills at most
+1280 px), set by its `encode` in `scripts/export-starters.mjs`; the full-quality originals are in the source project.
 
 The snapshot format keeps a shot's prompt-section overrides, saved models and settings and its direction flag
 (`promptSections`, `settings`, `motionCritical`); a copy re-keys `obj:<id>` sections to its own object ids. Prompt version
@@ -187,8 +205,8 @@ signature. `PREVIS_STARTERS_DIR` points the server at another starters folder (f
 
 ## Media size and why it is in git
 
-The starters' media is about 71 MB: 33 MB for the four finished starters and 38 MB for the five blockout starters
-(blockout clips, two 110 KB mannequin GLBs and Look Lab's 9 MB of stills and videos), 17.5 MB of it Camera Moves' 24 shots (the export stops at 80 MB and then
+The starters' media is about 75 MB: 33 MB for the four finished starters and 42 MB for the five blockout starters
+(blockout clips, two 110 KB mannequin GLBs and Look Lab's 12 MB of stills and videos, encoded smaller), 17.5 MB of it Camera Moves' 24 shots (the export stops at 80 MB and then
 keeps only the hero shots' videos). It is committed with the code rather than downloaded from a release so that a fresh clone opens
 finished starters offline, with no publish step to keep in sync, and so `pnpm demo:build` can use the same
 files. Re-exporting only rewrites a file when its source changed, so history grows only when a starter's
