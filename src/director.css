@@ -551,6 +551,7 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .help-settings > strong { flex-basis: 100%; }
 .help-settings label { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--ink-2); cursor: pointer; }
 .help-settings .help-row { display: inline-flex; gap: 8px; }
+.help-settings select.field { width: auto; height: 28px; padding-right: 28px; }
 @container vp (max-width: 560px) { .help-cols { grid-template-columns: minmax(0, 1fr); } }
 /* Right-click add popup */
 .add-popup { position: absolute; z-index: 7; width: 180px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 4px; box-shadow: var(--sh-pop); display: flex; flex-direction: column; }

@@ -1910,7 +1910,7 @@ function renderHelp() {
   helpExplainers.forEach(x => x.dispose()); helpExplainers = [];
   const grid = h('input', { type: 'checkbox', checked: gridVisible }); grid.onchange = () => { gridVisible = grid.checked; localStorage.setItem('previs.grid.v2', gridVisible ? '1' : '0'); scene.setGridVisible(gridVisible); };
   const snapBox = h('input', { type: 'checkbox', checked: snapPref }); snapBox.onchange = () => setSnap(snapBox.checked);
-  const labelMode = h('select', { 'aria-label': 'Object labels' }, ...['auto', 'all', 'none'].map(value => h('option', { value, selected: value === (localStorage.getItem('previs.labels') || 'auto') }, value === 'auto' ? 'Automatic' : value === 'all' ? 'All' : 'None')));
+  const labelMode = h('select', { class: 'field sm', 'aria-label': 'Object labels' }, ...['auto', 'all', 'none'].map(value => h('option', { value, selected: value === (localStorage.getItem('previs.labels') || 'auto') }, value === 'auto' ? 'Automatic' : value === 'all' ? 'All' : 'None')));
   labelMode.onchange = () => { localStorage.setItem('previs.labels', labelMode.value); scene.setLabelMode(labelMode.value as 'auto' | 'all' | 'none'); };
   helpCard.replaceChildren(
     h('div', { class: 'help-head' }, h('strong', {}, 'Controls'), h('span', { class: 'muted' }, 'Viewport and shortcuts'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => { helpCard.hidden = true; } }, '✕')),
