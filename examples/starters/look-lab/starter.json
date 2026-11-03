@@ -12353,13 +12353,13 @@
         "video": {
           "world": {
             "mode": "override",
-            "text": "Set: the same street as a neon cyberpunk city at night in light rain: dark sci-fi facades with abstract magenta and cyan neon strips, a hazy skyline of towers, wet pavement reflecting the neon.",
+            "text": "Set: the same street as a neon cyberpunk city at night, in light rain.",
             "basedOn": "Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown.",
             "at": "2026-11-03T01:32:30.904Z"
           },
           "style": {
             "mode": "override",
-            "text": "Look: photoreal cinematic night, neon reflections, drifting haze. No logos, badges, car emblems, signage or readable text.",
+            "text": "Look: photoreal night, magenta and cyan neon, wet reflections. No logos, signage or readable text.",
             "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
             "at": "2026-11-03T01:32:31.022Z"
           }
@@ -12367,13 +12367,13 @@
         "image": {
           "world": {
             "mode": "override",
-            "text": "Set: the same street as a neon cyberpunk city at night in light rain: dark sci-fi facades with abstract magenta and cyan neon strips, a hazy skyline of towers, wet pavement reflecting the neon.",
+            "text": "Set: the same street as a neon cyberpunk city at night, in light rain.",
             "basedOn": "Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown.",
             "at": "2026-11-03T01:32:31.135Z"
           },
           "style": {
             "mode": "override",
-            "text": "Look: photoreal cinematic night, neon reflections, drifting haze. No logos, badges, car emblems, signage or readable text.",
+            "text": "Look: photoreal night, magenta and cyan neon, wet reflections. No logos, signage or readable text.",
             "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
             "at": "2026-11-03T01:32:31.205Z"
           }
