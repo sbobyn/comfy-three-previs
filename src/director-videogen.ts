@@ -34,10 +34,9 @@ export function clipLengths(d: Def | null | undefined) {
   const ds: number[] | undefined = d?.task === 'first-frame' ? d.constraints?.durations : undefined;
   return ds?.length ? `${ds.length <= 3 ? ds.join('/') : `${ds[0]}–${ds[ds.length - 1]}`} s` : '';
 }
-/** Picker label: title · price per second · clip lengths. */
+/** Picker label: title · clip lengths. No price: a closed select cuts it mid-word; the estimate and the quote show it. */
 export function modelLabel(d: Def) {
-  const rate = d.pricing?.ratePerSecond;
-  return [d.title, rate ? `≈ $${rate.toFixed(2)}/s` : null, clipLengths(d) || null].filter(Boolean).join(' · ');
+  return [d.title, clipLengths(d) || null].filter(Boolean).join(' · ');
 }
 /** The start-only sibling a start → end model uses when the shot has no end still (same as the batch). */
 export const startOnlyFallback = (d: Def | null | undefined) => (d ? (FIRST_FRAME_FALLBACK as Record<string, string>)[d.provenance?.presetId || d.id] || null : null);

@@ -1177,7 +1177,7 @@ function keyFrameBlock(s: Shot) {
   moment.oninput = () => { f.moment = moment.value; };
   const prompt = h('textarea', { class: 'field sb-prompt', rows: 5, 'aria-label': 'Still prompt' }, f.prompt ?? shotPrompt(project, s, 'image'));
   prompt.oninput = () => { f.prompt = prompt.value; };
-  const model = h('select', { class: 'field', 'aria-label': 'Image model' }, ...stillPresets.map(p => h('option', { value: p.id, selected: p.id === f.presetId }, `${p.title}${p.pricing?.usdPerImage ? ` · ≈ $${p.pricing.usdPerImage.toFixed(2)}/image` : ''}${p.id === STRONG_GUIDE_MODEL ? ' · matches the blockout best' : p.followsGuide === 'strong' ? ' · follows the blockout' : ''}`)));
+  const model = h('select', { class: 'field', 'aria-label': 'Image model' }, ...stillPresets.map(p => h('option', { value: p.id, selected: p.id === f.presetId }, `${p.title}${p.id === STRONG_GUIDE_MODEL ? ' · matches the blockout best' : p.followsGuide === 'strong' ? ' · follows the blockout' : ''}`)));
   // The model is saved on the shot too (Model settings), so the next still, Claude and the batch start from it.
   model.onchange = () => { f.presetId = model.value; const before = s.settings?.image ?? null; void runEntry({ label: 'Still model', redo: [{ op: 'update_shot', id: s.id, patch: { settings: { image: { model: model.value } } } }], undo: [{ op: 'update_shot', id: s.id, patch: { settings: { image: before } } }] }).then(() => { shotPane.dataset.shot = ''; renderShotPane(); }); };
   const count = h('select', { class: 'field', 'aria-label': 'Takes' }, ...[1, 2, 3, 4].map(n => h('option', { value: n, selected: n === f.count }, `${n} take${n > 1 ? 's' : ''}`)));
