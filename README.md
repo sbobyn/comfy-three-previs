@@ -15,6 +15,20 @@ AI video takes a prompt. Comfy Previs takes direction. Block out a scene, cast y
 
 The demo is read-only: explore the scenes and watch their existing media. Install locally to edit and generate.
 
+[![Comfy Previs workspace: direct a scene in 3D](docs/media/workspace.png)](https://sbobyn.github.io/comfy-three-previs/)
+
+### Your blockout becomes the shot
+
+![The same camera and composition, from 3D blockout to generated video](docs/media/blockout-to-result.gif)
+
+### Direct the camera, explore the look
+
+![Phone camera direction applied across racing, basketball and different visual styles](docs/media/camera-controls.gif)
+
+| Build and direct | Inspect inputs and costs |
+| --- | --- |
+| ![Scene editor with object and camera controls](docs/media/workspace.png) | ![Generation settings and model input controls](docs/media/generation-settings.png) |
+
 ## From blockout to finished shot
 
 **Build → Cast → Shoot → Generate → Cut.**
@@ -29,7 +43,11 @@ The demo is read-only: explore the scenes and watch their existing media. Instal
 - **Bring your own agent.** The local MCP server exposes scene, cast, camera, prompt and generation tools to MCP clients such as Claude Code and Claude Desktop. Agent edits appear live in the workspace. [Connect an agent](#direct-with-an-agent-mcp)
 - **Cut and share.** Sequence shots, choose takes, compare results and export a film, or share an editable project as a portable `.previs.zip`. Film exports currently have no sound.
 
-**Layer edits — In preview.** Layer editing is not included in this checkout.
+### Masked edits — in preview
+
+![Prototype: scene-derived mask, cropped regeneration and compositing](docs/media/masked-edit-preview.gif)
+
+The launch film previews a tested masked-edit prototype: regenerate a selected region and composite it into the original shot. The wardrobe example cost about **$0.15 versus $1.52** for full regeneration; costs depend on the model, crop and retries. **This experimental pipeline is not yet included in the app.**
 
 ## Quick start
 
