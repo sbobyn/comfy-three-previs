@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 // Pure desktop helpers, transpiled and run without a browser (same harness as director-mobile.test.mjs).
@@ -151,4 +151,19 @@ test('“Use this take” makes an earlier take the one in use, and undo restore
   const copy = plain(core.keyFrameCopy(s, s.references.find(r => r.id === 'm'), 'end'));
   assert.deepEqual(copy, { role: 'frame', note: 'key frame end', name: 'm · end (from 2s)' }, 'a mid-shot still copied as the end key frame keeps its own moment');
   assert.equal(core.stillTime(s, { note: 'key frame end' }), s.duration);
+});
+
+test('the landing hero reel: every pair ships its blockout, generated clip and both posters, and it advances only when free to', () => {
+  const ids = core.HERO_REEL.map(r => r.id);
+  assert.ok(ids.length >= 4, 'several shots');
+  assert.equal(new Set(ids).size, ids.length);
+  for (const r of core.HERO_REEL) {
+    const f = core.heroFiles(r.id);
+    for (const file of [f.before, f.after, ...f.posters]) assert.ok(existsSync(new URL(`../public/guide/${file}`, import.meta.url)), `${file} is in public/guide`);
+    assert.match(r.label, /^[^·]+ · .+$/, 'labelled “Starter · Shot”');
+  }
+  assert.equal(core.heroNext(0, 6, false, false), 1);
+  assert.equal(core.heroNext(5, 6, false, false), 0, 'wraps');
+  assert.equal(core.heroNext(2, 6, true, false), 2, 'held while hovered, dragged or focused');
+  assert.equal(core.heroNext(2, 6, false, true), 2, 'reduced motion never advances');
 });

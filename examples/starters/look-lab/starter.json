@@ -1078,7 +1078,7 @@
   "shots": [
     {
       "id": "1fe43328-d6ec-4b05-b9be-74ab97ae88a1",
-      "title": "a · Summer day (base)",
+      "title": "Summer day · base",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -1371,7 +1371,7 @@
     },
     {
       "id": "baa04c31-b6e7-4e8b-a195-40b716fc7560",
-      "title": "b · Night",
+      "title": "Night",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -1694,7 +1694,7 @@
     },
     {
       "id": "a8cc6ee7-4e60-4779-9f34-4fb8d862c317",
-      "title": "c · Spring",
+      "title": "Spring",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -2029,7 +2029,7 @@
     },
     {
       "id": "96291fbb-61b3-42d0-9d6a-c9b47268d214",
-      "title": "d · Fall",
+      "title": "Fall",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -2364,7 +2364,7 @@
     },
     {
       "id": "84a6b620-0f8e-4537-9109-b296fab7bb22",
-      "title": "e · Winter",
+      "title": "Winter",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -2699,7 +2699,7 @@
     },
     {
       "id": "5ed3cd75-48df-4dcc-82f0-5e7af0018097",
-      "title": "f · Clothing A · raincoat",
+      "title": "Clothing · raincoat",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -3010,7 +3010,7 @@
     },
     {
       "id": "59fcc7ee-d8ee-4932-af7f-e4df26301435",
-      "title": "g · Clothing B · formal suit",
+      "title": "Clothing · formal suit",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -3321,7 +3321,7 @@
     },
     {
       "id": "3b1c7b94-6421-448c-92ea-682b0ba8610c",
-      "title": "h · Different person",
+      "title": "Different person",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -3632,7 +3632,7 @@
     },
     {
       "id": "34fe9d0f-2ce2-4b60-90df-71b8794055c5",
-      "title": "i · Anime",
+      "title": "Anime",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -3955,7 +3955,7 @@
     },
     {
       "id": "36fe014a-6b86-4a73-80b7-038b5649f160",
-      "title": "j · Claymation",
+      "title": "Claymation",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -4278,7 +4278,7 @@
     },
     {
       "id": "c267af85-5d44-427a-a9b9-f8ccc93b5625",
-      "title": "k · Stylised 3D animated feature",
+      "title": "Stylised 3D animated feature",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -4601,7 +4601,7 @@
     },
     {
       "id": "a271ed33-7629-4a6b-a8f9-8e0fdb22ab82",
-      "title": "l · Watercolour",
+      "title": "Watercolour",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -4924,7 +4924,7 @@
     },
     {
       "id": "a70ed067-1140-413c-a277-99d66b060c72",
-      "title": "m · Dawn",
+      "title": "Dawn",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -5247,7 +5247,7 @@
     },
     {
       "id": "baac0e30-0cc8-4fb0-a691-18a6c6afb029",
-      "title": "n · Golden hour",
+      "title": "Golden hour",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -5570,7 +5570,7 @@
     },
     {
       "id": "b1e6141c-ccd0-4309-9100-289d3d3fa432",
-      "title": "o · Blue hour",
+      "title": "Blue hour",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -5893,7 +5893,7 @@
     },
     {
       "id": "ba05c54c-19c9-47d3-b349-b915333c0863",
-      "title": "p · Harsh noon",
+      "title": "Harsh noon",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -6216,7 +6216,7 @@
     },
     {
       "id": "80043d9b-822e-4df2-80b0-739a9c546c3f",
-      "title": "q · Fog",
+      "title": "Fog",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -6539,7 +6539,7 @@
     },
     {
       "id": "b0af8922-ef58-4577-914f-90d0f7b72405",
-      "title": "r · Heavy rain",
+      "title": "Heavy rain",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -6874,7 +6874,7 @@
     },
     {
       "id": "255dc3ff-5ca9-465d-8e45-1cac1080c5c6",
-      "title": "s · Snowstorm",
+      "title": "Snowstorm",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -7209,7 +7209,7 @@
     },
     {
       "id": "e5479109-423b-44d0-a5b9-384eaccf0be5",
-      "title": "t · Overcast",
+      "title": "Overcast",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -7532,7 +7532,7 @@
     },
     {
       "id": "3ca314a9-07f1-4a40-a8de-3e6ae20e010c",
-      "title": "u · Cherry blossom",
+      "title": "Cherry blossom",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -7867,7 +7867,7 @@
     },
     {
       "id": "98268cc3-0a8e-4dc2-9e96-d55ddf63c27c",
-      "title": "v · Peak autumn",
+      "title": "Peak autumn",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -8202,7 +8202,7 @@
     },
     {
       "id": "34389543-6a8f-4462-bca1-c7f9cc16e82e",
-      "title": "w · Elderly woman",
+      "title": "Elderly woman",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -8525,7 +8525,7 @@
     },
     {
       "id": "54c91281-ce9a-4bc8-8f74-851fa4f17deb",
-      "title": "x · Teen",
+      "title": "Teen",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -8848,7 +8848,7 @@
     },
     {
       "id": "8d8ad939-bdd0-4a13-b4d8-324ca1f38964",
-      "title": "y · Cyclist",
+      "title": "Cyclist",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -9171,7 +9171,7 @@
     },
     {
       "id": "43400922-7dfc-4cd6-8484-f82e1dd4382e",
-      "title": "z · Dog walker",
+      "title": "Dog walker",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -9494,7 +9494,7 @@
     },
     {
       "id": "72218a6e-d0e9-4207-9b8b-b6406e129302",
-      "title": "aa · Couple",
+      "title": "Couple",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -9817,7 +9817,7 @@
     },
     {
       "id": "e6a668f3-0c57-4fe6-be56-721e48bc145b",
-      "title": "ab · Different ethnicity and build",
+      "title": "Different ethnicity and build",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -10140,7 +10140,7 @@
     },
     {
       "id": "2464d246-8a46-4887-a5e0-0e6061cf594c",
-      "title": "ac · Wardrobe · 1950s",
+      "title": "Wardrobe · 1950s",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -10463,7 +10463,7 @@
     },
     {
       "id": "cdaf87bb-0f5a-48d2-9cd0-42992d78bf6d",
-      "title": "ad · Wardrobe · cyberpunk",
+      "title": "Wardrobe · cyberpunk",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -10786,7 +10786,7 @@
     },
     {
       "id": "347d1195-83b0-4509-9ce0-ecf68b676b7d",
-      "title": "ae · Wardrobe · workwear",
+      "title": "Wardrobe · workwear",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -11109,7 +11109,7 @@
     },
     {
       "id": "62e2eb63-5cb8-4c1d-8bb7-14afcb279e92",
-      "title": "af · Wardrobe · formal evening",
+      "title": "Wardrobe · formal evening",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -11432,7 +11432,7 @@
     },
     {
       "id": "ef91b48a-05ae-4670-b2b7-6efbe63db535",
-      "title": "ag · Anime (stronger)",
+      "title": "Anime (stronger)",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -11755,7 +11755,7 @@
     },
     {
       "id": "e81c6103-bca5-4308-8e12-b48a673a87c5",
-      "title": "ah · Claymation (stronger)",
+      "title": "Claymation (stronger)",
       "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
       "duration": 4,
       "start": 0,
@@ -12071,6 +12071,329 @@
             "model": "Nano Banana 2.1 (Gemini)",
             "seed": 292441,
             "prompt": "Edit image 1: repaint this grey 3D blockout as stop-motion claymation, one single frame. Keep image 1's camera position, lens, framing, horizon and every object's position, size, heading and pose exactly; only replace the grey shapes, ground and sky with the things described below, in that medium.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; wide shot, Walker small in frame; camera 1.6 m high, just below Walker's eye line and 17.1 m from Walker, level; we see Walker from straight in front; horizon across the middle.\nIn frame: Lamp post: left of frame, about three-quarters of the frame height tall, in front of Walker to the left. Parked car: left of frame, a small part of the frame height tall, behind Walker to the left, nose pointing toward the camera, same direction as Walker. Walker: centre of frame, about a quarter of the frame height tall, facing the camera. Bench: right of frame, a small part of the frame height tall, in front of Walker to the right. Bench back: right of frame, a small part of the frame height tall, in front of Walker to the right.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nStop-motion claymation frame, single frame. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. A black cast-iron street lamp post with a lantern head. Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and…\nImage 2 is the previous shot: keep lighting, colour grade and designs continuous. Image 2 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single frame of stop-motion claymation; no text, captions, labels, split panels or watermarks.",
+            "signature": "e235e5c5"
+          }
+        }
+      ]
+    },
+    {
+      "id": "267508f3-8fff-4143-a7d3-beb7fbb361b8",
+      "title": "Cyberpunk city",
+      "description": "@walker strolls along the sidewalk toward us, past @street-tree, @bench and @lamp-post.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "ae93896f-d43f-415b-8609-ff48a66e8dcf",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 40,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              4.7,
+              1.55,
+              2.6
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -14.5
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.0625,
+            "p": [
+              4.699,
+              1.55,
+              2.583
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -14.183
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.125,
+            "p": [
+              4.696,
+              1.55,
+              2.536
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -13.865
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.1875,
+            "p": [
+              4.691,
+              1.55,
+              2.462
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -13.547
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.25,
+            "p": [
+              4.684,
+              1.55,
+              2.366
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -13.23
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3125,
+            "p": [
+              4.677,
+              1.55,
+              2.252
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -12.913
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.375,
+            "p": [
+              4.668,
+              1.55,
+              2.125
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -12.595
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4375,
+            "p": [
+              4.659,
+              1.55,
+              1.99
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -12.277
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5,
+            "p": [
+              4.65,
+              1.55,
+              1.85
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -11.96
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5625,
+            "p": [
+              4.641,
+              1.55,
+              1.71
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -11.642
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.625,
+            "p": [
+              4.632,
+              1.55,
+              1.575
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -11.325
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6875,
+            "p": [
+              4.623,
+              1.55,
+              1.448
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -11.007
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.75,
+            "p": [
+              4.616,
+              1.55,
+              1.334
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -10.69
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.8125,
+            "p": [
+              4.609,
+              1.55,
+              1.238
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -10.372
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.875,
+            "p": [
+              4.604,
+              1.55,
+              1.164
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -10.055
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9375,
+            "p": [
+              4.601,
+              1.55,
+              1.117
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -9.737
+            ],
+            "mm": 40
+          },
+          {
+            "t": 1,
+            "p": [
+              4.6,
+              1.55,
+              1.1
+            ],
+            "look": [
+              5.85,
+              1.607,
+              -9.42
+            ],
+            "mm": 40
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "slow push-in"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "40mm"
+        ],
+        "filter": [
+          "no logos or lettering"
+        ]
+      },
+      "promptSections": {
+        "video": {
+          "world": {
+            "mode": "override",
+            "text": "Set: the same street as a neon cyberpunk city at night, in light rain.",
+            "basedOn": "Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown.",
+            "at": "2026-11-03T01:32:30.904Z"
+          },
+          "style": {
+            "mode": "override",
+            "text": "Look: photoreal night, magenta and cyan neon, wet reflections. No logos, signage or readable text.",
+            "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
+            "at": "2026-11-03T01:32:31.022Z"
+          }
+        },
+        "image": {
+          "world": {
+            "mode": "override",
+            "text": "Set: the same street as a neon cyberpunk city at night, in light rain.",
+            "basedOn": "Set: A quiet small-town main street on a sunny summer afternoon: painted shopfronts, a leafy maple and hills beyond; Rolling green hills beyond the town; A two-lane asphalt street with a faded centre line; Pale concrete sidewalks with a low kerb; Neat grass verges behind the shops; Two-storey small-town shopfronts in painted brick and clapboard, large plain windows and fabric awnings with no lettering; A mature maple street tree with a full rounded crown.",
+            "at": "2026-11-03T01:32:31.135Z"
+          },
+          "style": {
+            "mode": "override",
+            "text": "Look: photoreal night, magenta and cyan neon, wet reflections. No logos, signage or readable text.",
+            "basedOn": "Look: Photoreal, warm afternoon sun, soft shadows, natural colour. No logos, brand names, badges, signage or lettering anywhere.",
+            "at": "2026-11-03T01:32:31.205Z"
+          }
+        }
+      },
+      "references": [
+        {
+          "id": "37074753-daaa-5a23-a64a-8939c26ceec1",
+          "name": "Shot 35 H-ll · Cyberpunk city · GPT Image 2.5 · 866984",
+          "file": "37074753-daaa-5a23-a64a-8939c26ceec1.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T09:37:15.147Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 866984,
+            "prompt": "No brands, logos, readable text, letters, numbers, kanji, signage or lettering anywhere in the frame; every neon element is an abstract shape only.\nEdit this photograph: transform the whole scene into a neon cyberpunk sci-fi city at night in light rain. Keep the exact layout, camera position, lens and framing, and keep every object in the same place, at the same size: the walker on the sidewalk in the same pose, position, size and clothing; the street tree, the bench and the lamp post on the sidewalk; the parked car on the road; the road, the kerb and the sidewalk edges; the row of shopfronts on the right.\nRestyle only the world: the shopfronts become dark sci-fi facades with abstract glowing neon light strips, geometric light panels and soft holographic glow; the lamp post becomes a slim futuristic light pole with a cool glow; the parked sedan becomes a sleek futuristic car of the same size, footprint and position; the distant hills become a hazy skyline of tall towers with abstract lights. Wet, reflective street and sidewalk mirroring magenta and cyan neon, fine rain and drifting haze, deep blue night sky. The walker is rim-lit by the neon.\nPhotoreal cinematic night photograph, 40mm lens, natural film grain. Change nothing else about the composition.\nNegative: no text, no letters, no numbers, no kanji, no logos, no signs or screens with writing, no brand marks, no extra people, no extra cars, no change to the layout or framing.",
             "signature": "e235e5c5"
           }
         }
@@ -13103,6 +13426,60 @@
         "videoKbps": 900,
         "videoMaxKbps": 1200
       }
+    },
+    {
+      "path": "media/refs/37074753-daaa-5a23-a64a-8939c26ceec1.webp",
+      "kind": "image",
+      "bytes": 143150,
+      "sha256": "cb3200fd9025c650fd60ab7b73f3b2be3c5d4201c9324e191b2a1ca40bc21f95",
+      "sourceSha256": "6325e07bcff27c967391e2be4ced29eeee53af7ff9736b040cd875921cb7e94b",
+      "width": 1280,
+      "height": 720,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 72,
+        "videoHeight": 540,
+        "videoKbps": 900,
+        "videoMaxKbps": 1200
+      }
+    },
+    {
+      "path": "media/assets/2ad69aaf-6a00-4f9d-831f-17041e5f45c0.mp4",
+      "kind": "video",
+      "bytes": 395876,
+      "sha256": "ca075a01af1a95a0d6806d2997a4035841550796393fc4cf9c6af11a220ad231",
+      "sourceSha256": "61bd7f1c2309bb405c571e15c9376c05b3b695b26c0a07c5307837972d052ff3",
+      "width": 960,
+      "height": 540,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 72,
+        "videoHeight": 540,
+        "videoKbps": 900,
+        "videoMaxKbps": 1200
+      }
+    },
+    {
+      "path": "media/assets/61177788-4041-58f7-a7fe-0e9e2e8011fe.mp4",
+      "kind": "video",
+      "bytes": 325549,
+      "sha256": "d070aef4f4b6c8755372fe3d0b0827bdc56b5add94db55008c61152ec55ebefa",
+      "sourceSha256": "6e58c8cef91dd26a4bb2f80e456e55a239d5ebd7065c6a8eede2ab776155e124",
+      "width": 960,
+      "height": 540,
+      "fps": 24,
+      "frameCount": 89,
+      "duration": 3.708,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 72,
+        "videoHeight": 540,
+        "videoKbps": 900,
+        "videoMaxKbps": 1200
+      }
     }
   ],
   "assets": [
@@ -13454,6 +13831,34 @@
         "prompt": "Stop-motion claymation shot. Walker strolls along the sidewalk toward us, past Street tree, Bench and Lamp post. Adult in their thirties, shoulder-length brown hair, light blue cotton shirt, beige chinos, white canvas shoes. Look: everything sculpted from plasticine: chunky clay shops, road and tree, thumbprints, tabletop set, soft studio light. No logos, badges, car emblems, signage or readable text. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it as stop-motion claymation in the look of the still. Lens: 40mm. Filter: no logos or lettering.\nReference images: 1 = start still.",
         "sourceAssetId": "3ab0f8d7-bf97-4bdf-97dc-acecc8351d48"
       }
+    },
+    {
+      "id": "2ad69aaf-6a00-4f9d-831f-17041e5f45c0",
+      "kind": "camera-render",
+      "shotId": "267508f3-8fff-4143-a7d3-beb7fbb361b8",
+      "file": "assets/2ad69aaf-6a00-4f9d-831f-17041e5f45c0.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T09:35:09.979Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "e235e5c5"
+      }
+    },
+    {
+      "id": "61177788-4041-58f7-a7fe-0e9e2e8011fe",
+      "kind": "workflow-result",
+      "shotId": "267508f3-8fff-4143-a7d3-beb7fbb361b8",
+      "file": "assets/61177788-4041-58f7-a7fe-0e9e2e8011fe.mp4",
+      "mime": "video/mp4",
+      "duration": 3.708333,
+      "createdAt": "2026-11-03T09:42:18.639Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 1 reference image",
+        "backend": "cloud",
+        "prompt": "No brands, logos, readable text, letters, numbers, kanji, signage or lettering anywhere in the frame; every neon element is an abstract shape only.\nA neon cyberpunk sci-fi city street at night in light rain. The walker strolls along the wet sidewalk toward us, past the street tree, the bench and the slim futuristic light pole, with natural, relaxed walking motion. A sleek futuristic car stays parked at the kerb. Dark sci-fi facades glow with abstract magenta and cyan neon strips and soft holographic light; a hazy skyline of towers with abstract lights fills the distance. The wet street and sidewalk reflect the neon, rain falls through drifting haze, puddles ripple. The reference video is rehearsal footage: take from it only the camera path and framing, the timing of every action and each subject's place in frame, path and size; give every subject its true proportions and natural motion. The supplied key frame shows the look of the world and the walker. Photoreal cinematic night footage, 40mm, natural film grain.\nNegative: no text, no letters, no numbers, no kanji, no logos, no signs or screens with writing, no brand marks, no extra people, no extra cars, no cuts.\nFollow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still.\nReference images: 1 = start still.",
+        "sourceAssetId": "2ad69aaf-6a00-4f9d-831f-17041e5f45c0"
+      }
     }
   ],
   "edit": {
@@ -13527,6 +13932,12 @@
       {
         "shotId": "e81c6103-bca5-4308-8e12-b48a673a87c5",
         "assetId": "04de7387-8530-5560-a777-4a5529825e1b",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "267508f3-8fff-4143-a7d3-beb7fbb361b8",
+        "assetId": "61177788-4041-58f7-a7fe-0e9e2e8011fe",
         "in": 0,
         "out": null
       }

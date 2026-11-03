@@ -18,7 +18,7 @@
 // has not changed is not re-encoded, so re-exports leave unchanged media byte-identical.
 //
 // Options: --check; --<slug> <project-id> overrides a source project; --only <slug>; --no-media writes the
-// version 1 snapshot (no media); --max-mb <n> (default 80) keeps only the hero shots' videos when over.
+// version 1 snapshot (no media); --max-mb <n> (default 200) keeps only the hero shots' videos when over.
 import { readFile, writeFile, mkdir, readdir, rm, cp, mkdtemp } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
@@ -47,7 +47,7 @@ const SOURCE_DEFS = [
   // also ships a start still per variant and four videos (the paid hybrid, examples/starters/README.md).
   { slug: 'mountain-trail', title: 'Mountain Trail', description: 'A hiker crosses an open alpine valley toward a lake and a cabin: room to fly a drone or phone camera, with a ridge reveal, a slope dive, a low track and a wide.', hero: { shots: [] } },
   { slug: 'city-blocks', title: 'City Blocks', description: 'A downtown grid with traffic and pedestrians: a drone rise between buildings, a street-level car track, a rooftop orbit and a pedestrian follow.', hero: { shots: [] } },
-  { slug: 'camera-moves', title: 'Camera Moves & Transitions', description: 'A lighthouse keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.', hero: { shots: [] } },
+  { slug: 'camera-moves', title: 'Lighthouse · Camera Moves', description: 'The lighthouse from the launch film. A keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.', hero: { shots: [] } },
   // Look Lab ships many looks, so its copy is encoded smaller (540p video, lighter stills) to stay inside the 80 MB budget;
   // the full-quality originals stay in the source project. A media entry records a non-default encode, so changing it re-encodes.
   { slug: 'look-lab', title: 'Look Lab', description: 'One small-town street blockout in thirty-four looks: time of day, weather, seasons, people, wardrobe, anime, claymation, 3D animated and watercolour, all sharing one camera and one blocking.', hero: { shots: [] },
@@ -64,11 +64,11 @@ async function main(args) {
   const opt = name => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : undefined; };
   const server = opt('server'), dataDir = opt('data-dir') || process.env.PREVIS_DATA_DIR;
   if (!server && !dataDir) {
-    console.error('Usage: node scripts/export-starters.mjs (--server <url> | --data-dir <dir>) [--check] [--out <dir>] [--only <slug>] [--no-media] [--max-mb 80] [--<slug> <project-id>]');
+    console.error('Usage: node scripts/export-starters.mjs (--server <url> | --data-dir <dir>) [--check] [--out <dir>] [--only <slug>] [--no-media] [--max-mb 200] [--<slug> <project-id>]');
     process.exit(2);
   }
   const ids = Object.fromEntries(SOURCES.map(s => [s.slug, opt(s.slug)]).filter(([, id]) => id));
-  const { failed, diffs } = await exportStarters({ server, dataDir, out: opt('out'), only: opt('only'), media: !args.includes('--no-media'), maxMb: Number(opt('max-mb') || 80), check: args.includes('--check'), ids });
+  const { failed, diffs } = await exportStarters({ server, dataDir, out: opt('out'), only: opt('only'), media: !args.includes('--no-media'), maxMb: Number(opt('max-mb') || 200), check: args.includes('--check'), ids });
   if (failed) process.exitCode = 1;
   if (args.includes('--check')) {
     if (diffs.length) {
@@ -85,7 +85,7 @@ async function main(args) {
  * instead and return what differs from `out` (`diffs`: { path, change: 'changed' | 'added' | 'removed' }); `out` is never written.
  * `ids` overrides a source project per slug. `failed` counts starters whose project could not be read.
  */
-export async function exportStarters({ server, dataDir, out: outDir, only, media = true, maxMb = 80, check = false, ids = {}, log = console.log } = {}) {
+export async function exportStarters({ server, dataDir, out: outDir, only, media = true, maxMb = 200, check = false, ids = {}, log = console.log } = {}) {
   const target = outDir || STARTERS_DIR, maxBytes = maxMb * 1024 * 1024;
   const scratch = check ? await mkdtemp(join(tmpdir(), 'starters-check-')) : null;
   const out = scratch || target;

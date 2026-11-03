@@ -710,6 +710,70 @@
       "kind": "image",
       "label": "Phone camera page (J9)",
       "bytes": 10030
+    },
+    {
+      "capturedAt": "2026-11-03T14:00:00.000Z",
+      "id": "camera-moves-s9-blockout",
+      "file": "hero/lighthouse-blockout.mp4",
+      "kind": "video",
+      "label": "Lighthouse · Storm orbit",
+      "bytes": 125218
+    },
+    {
+      "capturedAt": "2026-11-03T14:00:00.000Z",
+      "id": "camera-moves-s9-generated",
+      "file": "hero/lighthouse-generated.mp4",
+      "kind": "video",
+      "label": "Lighthouse · Storm orbit",
+      "bytes": 429573
+    },
+    {
+      "capturedAt": "2026-11-03T14:00:00.000Z",
+      "id": "camera-moves-s9-blockout-poster",
+      "file": "hero/lighthouse-blockout.webp",
+      "kind": "image",
+      "label": "Lighthouse · Storm orbit",
+      "bytes": 8634
+    },
+    {
+      "capturedAt": "2026-11-03T14:00:00.000Z",
+      "id": "camera-moves-s9-generated-poster",
+      "file": "hero/lighthouse-generated.webp",
+      "kind": "image",
+      "label": "Lighthouse · Storm orbit",
+      "bytes": 24180
+    },
+    {
+      "capturedAt": "2026-11-03T14:00:00.000Z",
+      "id": "look-lab-s1-blockout",
+      "file": "hero/street-blockout.mp4",
+      "kind": "video",
+      "label": "Look Lab · Cyberpunk",
+      "bytes": 78159
+    },
+    {
+      "capturedAt": "2026-11-03T14:00:00.000Z",
+      "id": "look-lab-s1-generated",
+      "file": "hero/street-generated.mp4",
+      "kind": "video",
+      "label": "Look Lab · Cyberpunk",
+      "bytes": 350602
+    },
+    {
+      "capturedAt": "2026-11-03T14:00:00.000Z",
+      "id": "look-lab-s1-blockout-poster",
+      "file": "hero/street-blockout.webp",
+      "kind": "image",
+      "label": "Look Lab · Cyberpunk",
+      "bytes": 6946
+    },
+    {
+      "capturedAt": "2026-11-03T14:00:00.000Z",
+      "id": "look-lab-s1-generated-poster",
+      "file": "hero/street-generated.webp",
+      "kind": "image",
+      "label": "Look Lab · Cyberpunk",
+      "bytes": 54190
     }
   ],
   "missing": [

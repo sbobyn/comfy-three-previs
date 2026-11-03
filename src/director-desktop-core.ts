@@ -193,6 +193,24 @@ export function shouldTour(p: Pick<DirectorProject, 'revision' | 'scene' | 'crea
   return fresh && p.scene.entities.length > 0;
 }
 
+// ---------- Home: the hero reel ----------
+/**
+ * The landing hero cycles these blockout → generated pairs (files under public/guide/hero/: `<id>-blockout.mp4`,
+ * `<id>-generated.mp4` and a `.webp` poster of each). Each pair is one camera: the generated clip is an edit of that blockout.
+ */
+export const HERO_REEL = [
+  { id: 'race', label: 'Final Lap · Finish line' },
+  { id: 'eagle', label: 'Wingspan · Alongside' },
+  { id: 'lighthouse', label: 'Lighthouse · Storm orbit' },
+  { id: 'street', label: 'Look Lab · Cyberpunk' },
+  { id: 'dunk', label: 'Posterized · The dunk' },
+  { id: 'product', label: 'Product ad · Studio' },
+] as const;
+export const HERO_SHOT_MS = 5600;
+export const heroFiles = (id: string) => ({ before: `hero/${id}-blockout.mp4`, after: `hero/${id}-generated.mp4`, posters: [`hero/${id}-blockout.webp`, `hero/${id}-generated.webp`] as [string, string] });
+/** The next shot in the reel: paused (dragging, hovering, focused) or reduced motion stays put. */
+export const heroNext = (i: number, n: number, paused: boolean, reduced: boolean) => (paused || reduced || n < 2 ? i : (i + 1) % n);
+
 // ---------- Home: the starter card's blockout → video seam ----------
 export type GuideEntryLite = { id: string; file: string; kind: 'video' | 'image'; label?: string };
 export type StarterMedia = { kind: 'video' | 'image' | 'still'; before?: string; after?: string; posters?: [string, string]; label?: string; cast: { file: string; label: string }[] };

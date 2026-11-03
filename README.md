@@ -68,7 +68,7 @@ Open a starter from the home page to make an editable copy. The [starter index](
 | **Posterized** | A dunk in a packed arena. |
 | **Mountain Trail** | An open valley for tracking, drone and phone-camera takes. |
 | **City Blocks** | Street-level and rooftop camera moves. |
-| **Camera Moves & Transitions** | Camera presets, custom keys and transitions composed across shot pairs. |
+| **Lighthouse · Camera Moves** | A lighthouse headland with every camera preset, custom keys and transitions composed across shot pairs. |
 | **Look Lab** | One blockout in thirty-four looks, with stills and selected videos. |
 | **Two-Hander** | Seated dialogue coverage, gestures and an insert. |
 

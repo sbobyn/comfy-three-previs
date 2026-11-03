@@ -37,7 +37,7 @@ shapes; trees, terrain and the lake use the bundled meshes.
 | | Car track | 5 | Street-level front three-quarter track with a generic red hatchback. |
 | | Rooftop orbit | 5 | 140° orbit around a figure at the edge of a 48 m tower (Idle clip). |
 | | Pedestrian follow | 5 | Over-the-shoulder follow as the commuter steps off the kerb onto a zebra crossing. |
-| **Camera Moves & Transitions** | Locked-off … Tilt up | 4 each | All 12 `MOVES` presets on the same four seconds (the keeper stands still), so only the camera differs. |
+| **Lighthouse · Camera Moves** | Locked-off … Tilt up | 4 each | All 12 `MOVES` presets on the same four seconds (the keeper stands still), so only the camera differs. |
 | | Dolly zoom (vertigo) | 4 | Back 5 → 12 m while the lens goes 24 → 58 mm: the keeper holds size, the tower looms. |
 | | FPV fly-through | 4 | Low over the water, through a sea arch, up the cliff to the keeper. |
 | | Handheld | 4 | Deterministic few-centimetre operator wobble (64 keys). |
@@ -46,7 +46,7 @@ shapes; trees, terrain and the lake use the bundled meshes.
 | | Match cut A · lantern / B · buoy | 4 + 4 | Match cut: A ends on the round lantern centred, B opens on the round buoy at the same place and size. |
 | | Cut on action A · wide / B · close | 4 + 4 | Cut on action: A cuts as the door swings; B overlaps 0.2 s and follows the keeper in. |
 | | Wipe A · foreground rock / B · reveal | 4 + 4 | In-camera foreground wipe: one constant-speed truck behind a rock, split at the moment it fills the frame. |
-| **Look Lab** | a · Summer day (base) … ah · Claymation (stronger) | 4 × 34 | One blockout, thirty-four looks (below). |
+| **Look Lab** | Summer day · base … Claymation (stronger) | 4 × 34 | One blockout, thirty-four looks (below). |
 | **Two-Hander** | Master; Over Ben · on Ada; Over Ada · on Ben | 5 each | Dialogue coverage on the 180° line: 32 mm master, 50 mm over-the-shoulders; sit pose plus keyed gestures. |
 | | Insert · cup | 4 | 70 mm insert; Ada's hand reaches her cup by IK. |
 | | Close-up · zoom on Ben | 4 | Lens change within the shot, 50 → 70 mm. The barista is sent to models as the neutral grey stand-in. |
@@ -87,8 +87,8 @@ instead of photoreal (`lookMedium`, docs/director.md).
 
 **Look Lab media (paid hybrid, 2026-11-02).** Every variant ships one start still: GPT Image 2.5, made from the shared
 blockout frame and screened for no logos, brands or readable text, the blockout framing and the variant's look. Four
-variants also ship a Seedance 2.5 edit of their own blockout clip, in the cut: **b · Night**, **e · Winter**, **i · Anime**
-and **j · Claymation**. The other eight have a still only; a final-tier batch makes their end stills and videos. Cost
+variants also ship a Seedance 2.5 edit of their own blockout clip, in the cut: **Night**, **Winter**, **Anime**
+and **Claymation**. The other eight have a still only; a final-tier batch makes their end stills and videos. Cost
 at list prices was $9.15: 13 stills, $1.25, at $0.094 each (two at $0.111, sent the previous shot's still as well) and 5
 videos, $7.90, at $1.58 each. Billing settled at about $7.11 ($1.01 stills, $6.10 videos). Two takes were made and not
 used: a claymation still retake, which looked more 3D animated than clay, and the first anime video, which dropped the
@@ -99,8 +99,8 @@ cars carry a small generic grille emblem with no readable mark. Details per item
 **Look Lab v2 media (2026-11-03).** The 22 v2 variants each ship one start still: GPT Image 2.5 for the twenty photoreal
 looks, Nano Banana 2.1 for the stronger anime (no style reference: with v1's anime still as a reference every model
 copied its semi-photoreal look) and the stronger claymation (with v1's clay still as a reference). Eight also ship an
-edit of their blockout clip: Kling O1 for **n · Golden hour**, **o · Blue hour**, **s · Snowstorm**, **z · Dog walker**,
-**aa · Couple** and **ah · Claymation (stronger)**, and Seedance 2.5 for **r · Heavy rain** and **ad · Wardrobe ·
+edit of their blockout clip: Kling O1 for **Golden hour**, **Blue hour**, **Snowstorm**, **Dog walker**,
+**Couple** and **Claymation (stronger)**, and Seedance 2.5 for **Heavy rain** and **ad · Wardrobe ·
 cyberpunk**. On the same shot (heavy rain), Seedance held the blockout's walker pace and size; Kling O1 kept the camera,
 car, lamp, bench and tree but brought the walker toward the lens ahead of the blockout, so the cyberpunk video was remade on
 Seedance for the same reason. Kling is about a third of the price. Five photoreal stills were remade to remove a car grille
@@ -109,6 +109,12 @@ Seedance videos $3.16). The v2 prompt texts were trimmed slightly after the medi
 with the shipped still listed as a reference. Details per item are in `.evidence/LOOKLAB-V2-QUOTE-20261102.md` (not in
 git). Look Lab's copy is encoded smaller than the other starters' (540p video at about 1 Mbit/s, WebP stills at most
 1280 px), set by its `encode` in `scripts/export-starters.mjs`; the full-quality originals are in the source project.
+
+**Launch-film takes (2026-11-03).** Lighthouse · Camera Moves' **Orbit right** ships the storm take from the launch film (Seedance 2.5 edit of
+its own blockout clip, with its GPT Image 2.5 start still), and Look Lab gains **Cyberpunk city**, a world variant (neon city at night in rain)
+with its still and a Seedance 2.5 edit of the shared blockout. Both were already paid for; nothing new was generated. A starter now keeps
+every take of a shot (each with the blockout clip it was made from) and every still, not only the chosen ones, so a copy opens with all of
+them in Compare takes; the cut keeps the chosen take.
 
 The snapshot format keeps a shot's prompt-section overrides, saved models and settings and its direction flag
 (`promptSections`, `settings`, `motionCritical`); a copy re-keys `obj:<id>` sections to its own object ids. Prompt version

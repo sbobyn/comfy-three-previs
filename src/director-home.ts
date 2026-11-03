@@ -12,7 +12,7 @@ import { openJourney } from './director-guide';
 import { checkList, openSetup } from './director-setup';
 import type { Check } from './director-setup';
 import { beforeAfter, guideManifest, guideUrl } from './director-media';
-import { starterMedia } from './director-desktop-core';
+import { starterMedia, HERO_REEL, HERO_SHOT_MS, heroFiles, heroNext } from './director-desktop-core';
 import { mountJobsPip } from './director-jobs'; // [jobs] the only place with a count across every project
 
 type Summary = { id: string; title: string; template: string; updatedAt: string; shots: number; entities: number; references: number; renders: number; assets: number; sceneName: string };
@@ -136,18 +136,64 @@ function claudeHint() {
 }
 
 /**
- * Hero: The draft (Final Lap) as one frame — blockout ↔ generated, the same camera — sweeping once on load,
- * then the seam follows a drag. Falls back to the starters' blockout frames when the example media is missing.
+ * Hero: a reel of blockout ↔ generated pairs (HERO_REEL), each the same camera, sweeping once as it arrives, then the
+ * next every few seconds. It holds while the pointer is over it, a finger or the seam is on it, or it has focus; reduced
+ * motion shows one pair, and the dots switch. Posters show first; a clip loads only for the pair on screen. Falls back to
+ * Final Lap's seam when the reel's files are missing, then to the starters' blockout frames.
  */
 function heroSeam(starters: Starter[]) {
   const slot = h('div', { class: 'home-hero-seam' }, heroReel(starters));
-  void guideManifest().then(map => {
+  const first = heroFiles(HERO_REEL[0].id).posters[1];
+  const probe = new Image();
+  probe.onload = () => { if (slot.isConnected) heroCycle(slot); };
+  probe.onerror = () => { void guideManifest().then(map => {
     const m = starterMedia('final-lap', [...map.values()]);
     if (m.kind !== 'video' || !slot.isConnected) return;
     const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: 'video', posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: 'once', alt: `${m.label || 'The draft'}: the blockout on the left and the generated video on the right, the same camera. Drag the seam or use the arrow keys.` });
     slot.replaceChildren(seam, h('p', { class: 'home-hero-cap' }, h('strong', {}, 'Same camera.'), ' Drag the seam.', h('span', {}, m.label || 'Final Lap · The draft')));
-  });
+  }); };
+  probe.src = guideUrl(first);
   return slot;
+}
+function heroCycle(slot: HTMLElement) {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stage = h('div', { class: 'home-hero-stage' });
+  const label = h('span', { class: 'home-hero-label', 'aria-live': 'polite' });
+  const dots = HERO_REEL.map((r, i) => h('button', { class: 'home-hero-dot', type: 'button', 'aria-label': `Show ${r.label}`, onclick: () => { show(i); restart(); } }, h('i')));
+  let i = -1, seam: (HTMLElement & { dispose(): void }) | null = null, hold = 0, timer = 0, t0 = 0;
+  // Warm the next pair's posters so the switch never shows an empty frame.
+  const warm = (k: number) => { for (const p of heroFiles(HERO_REEL[k]!.id).posters) { const im = new Image(); im.src = guideUrl(p); } };
+  function show(k: number) {
+    if (k === i) return;
+    i = k; const r = HERO_REEL[k]!, f = heroFiles(r.id);
+    const next = beforeAfter({ before: guideUrl(f.before), after: guideUrl(f.after), kind: 'video', posters: f.posters.map(guideUrl) as [string, string], sweep: reduced ? false : 'once',
+      alt: `${r.label}: the blockout on the left and the generated video on the right, the same camera. Drag the seam or use the arrow keys.` });
+    next.classList.add('is-entering');
+    const old = seam; seam = next; stage.append(next);
+    requestAnimationFrame(() => requestAnimationFrame(() => next.classList.remove('is-entering')));
+    if (old) { old.classList.add('is-leaving'); setTimeout(() => { old.dispose(); old.remove(); }, 450); }
+    label.textContent = r.label;
+    dots.forEach((d, j) => { d.classList.toggle('on', j === k); d.setAttribute('aria-current', j === k ? 'true' : 'false'); });
+    warm(heroNext(k, HERO_REEL.length, false, false));
+  }
+  const tick = () => {
+    timer = 0;
+    if (!slot.isConnected) return;
+    if (!hold && !document.hidden && performance.now() - t0 >= HERO_SHOT_MS - 40) { show(heroNext(i, HERO_REEL.length, false, reduced)); t0 = performance.now(); }
+    timer = window.setTimeout(tick, Math.max(120, HERO_SHOT_MS - (performance.now() - t0)));
+  };
+  const restart = () => { t0 = performance.now(); if (!reduced && !timer) timer = window.setTimeout(tick, HERO_SHOT_MS); };
+  const pause = (on: boolean, why: number) => { hold = on ? hold | why : hold & ~why; slot.classList.toggle('is-held', !!hold); if (!hold) restart(); };
+  stage.addEventListener('pointerenter', ev => { if (ev.pointerType === 'mouse') pause(true, 1); });
+  stage.addEventListener('pointerleave', ev => { if (ev.pointerType === 'mouse') pause(false, 1); });
+  stage.addEventListener('pointerdown', () => pause(true, 2));
+  window.addEventListener('pointerup', () => { if (hold & 2) pause(false, 2); });
+  slot.addEventListener('focusin', () => pause(true, 4));
+  slot.addEventListener('focusout', ev => { if (!slot.contains(ev.relatedTarget as Node)) pause(false, 4); });
+  slot.replaceChildren(stage, h('p', { class: 'home-hero-cap' }, h('strong', {}, 'Same camera.'), ' Drag the seam.',
+    h('span', { class: 'home-hero-dots', role: 'group', 'aria-label': 'Hero shots' }, ...dots), label));
+  slot.classList.add('is-cycling'); if (reduced) slot.classList.add('is-still');
+  show(0); restart();
 }
 // Fallback hero: the starters' first frames, cross-fading like a monitor.
 function heroReel(starters: Starter[]) {
@@ -302,10 +348,8 @@ async function render() {
     // Phones list projects before starters, except for someone new (fewer than 3 projects): starters first.
     h('main', { class: 'home' + (projects.length < 3 ? ' is-new' : '') },
       h('section', { class: 'home-hero' },
-        h('div', { class: 'home-hero-copy' },
-          h('p', { class: 'home-eyebrow' }, 'Previsualization for AI video'),
-          h('h1', {}, 'Block out the scene.', h('br'), h('span', {}, 'Generate the shot you meant.')),
-          h('p', { class: 'home-lede' }, 'Arrange a scene in 3D, direct the camera, and Comfy turns it into video.'),
+        h('div', { class: 'home-hero-copy' + (shellShown ? ' is-shown' : '') },
+          ...heroHead(),
           h('div', { class: 'home-actions' }, ...actions),
           // Said up front, before anyone tries to change something.
           DEMO ? h('p', { class: 'home-demo-note', role: 'note' }, h('strong', {}, 'Read-only demo.'), ' Open any scene and look around: camera, cast, stills and videos. Editing and generating run on your own machine.') : null,
@@ -322,7 +366,22 @@ async function render() {
         list, archivedList)));
 }
 
+const heroHead = () => [
+  h('p', { class: 'home-eyebrow' }, 'Previsualization for AI video'),
+  h('h1', {}, 'Block out the scene.', h('br'), h('span', {}, 'Generate the shot you meant.')),
+  h('p', { class: 'home-lede' }, 'Arrange a scene in 3D, direct the camera, and Comfy turns it into video.')];
+// The headline paints at once, before the projects, starters and their models load; the full page then keeps it in place (no second fade).
+let shellShown = false;
+function shell() {
+  if (app.childElementCount) return;
+  shellShown = true;
+  app.replaceChildren(
+    h('header', { class: 'home-top' }, h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Previs')),
+    h('main', { class: 'home is-new' }, h('section', { class: 'home-hero' }, h('div', { class: 'home-hero-copy is-shown' }, ...heroHead()), h('div', { class: 'home-hero-seam' }, h('div', { class: 'home-reel is-empty' })))));
+}
+
 export function renderHome() {
+  shell();
   document.addEventListener('click', ev => {
     document.querySelectorAll('.home-menu').forEach(m => { (m as HTMLElement).hidden = true; m.previousElementSibling?.setAttribute('aria-expanded', 'false'); });
     const status = document.querySelector<HTMLDetailsElement>('.home-status[open]');

@@ -13,8 +13,8 @@ import { videoKey } from '../shared/regen.mjs';
 const starters = await loadStarters();
 const lookLab = () => createProjectDocument({ template: 'look-lab' }, undefined, starters);
 const count = (text, part) => text.split(part).length - 1;
-const MEDIA = { 'i · Anime': 'anime', 'j · Claymation': 'stop-motion claymation', 'k · Stylised 3D animated feature': 'stylised 3D animation', 'l · Watercolour': 'a watercolour painting',
-  'ag · Anime (stronger)': 'anime', 'ah · Claymation (stronger)': 'stop-motion claymation' };
+const MEDIA = { 'Anime': 'anime', 'Claymation': 'stop-motion claymation', 'Stylised 3D animated feature': 'stylised 3D animation', 'Watercolour': 'a watercolour painting',
+  'Anime (stronger)': 'anime', 'Claymation (stronger)': 'stop-motion claymation' };
 
 test('lookMedium names a non-photoreal medium and leaves photoreal looks to the default', () => {
   assert.equal(lookMedium('Look: hand-drawn anime, clean ink lines, flat cel shading.'), 'anime');

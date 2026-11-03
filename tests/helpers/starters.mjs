@@ -5,6 +5,8 @@ export const BLOCKOUT_STARTERS = ['mountain-trail', 'city-blocks', 'camera-moves
 // Look Lab (paid hybrid, 2026-11-02; v2 the same day) also ships one start still per variant (GPT Image 2.5, except the
 // stronger anime and claymation from Nano Banana 2.1) and an edit video for these twelve (Seedance 2.5 for v1's four and
 // v2's heavy rain, Kling O1 for v2's other seven); every other blockout starter ships no stills or videos.
-export const LOOK_LAB_VIDEOS = ['b · Night', 'e · Winter', 'i · Anime', 'j · Claymation', 'n · Golden hour', 'o · Blue hour', 'r · Heavy rain', 's · Snowstorm',
-  'z · Dog walker', 'aa · Couple', 'ad · Wardrobe · cyberpunk', 'ah · Claymation (stronger)'].sort();
-export const LOOK_LAB_STILL_MODELS = { 'ag · Anime (stronger)': 'nano-banana-2-1', 'ah · Claymation (stronger)': 'nano-banana-2-1' };
+export const LOOK_LAB_VIDEOS = ['Night', 'Winter', 'Anime', 'Claymation', 'Golden hour', 'Blue hour', 'Heavy rain', 'Snowstorm',
+  'Dog walker', 'Couple', 'Wardrobe · cyberpunk', 'Claymation (stronger)', 'Cyberpunk city'].sort();
+// Launch-film takes (2026-11-03) on other blockout starters: one current start still and a Seedance edit of the shot's own blockout clip.
+export const BLOCKOUT_TAKES = { 'camera-moves': ['Orbit right'] };
+export const LOOK_LAB_STILL_MODELS = { 'Anime (stronger)': 'nano-banana-2-1', 'Claymation (stronger)': 'nano-banana-2-1' };

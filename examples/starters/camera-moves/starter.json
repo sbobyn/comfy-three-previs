@@ -3,8 +3,8 @@
   "version": 2,
   "slug": "camera-moves",
   "order": 6,
-  "title": "Camera Moves & Transitions",
-  "description": "A lighthouse keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.",
+  "title": "Lighthouse · Camera Moves",
+  "description": "The lighthouse from the launch film. A keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.",
   "scene": {
     "name": "Lighthouse point",
     "environment": {
@@ -2546,7 +2546,25 @@
           "no logos or lettering"
         ]
       },
-      "references": []
+      "references": [
+        {
+          "id": "64e7ab23-ae05-5bb1-a8bd-6da4f4b34114",
+          "name": "Shot 09 Orbit right · GPT Image 2.5 · 940566",
+          "file": "64e7ab23-ae05-5bb1-a8bd-6da4f4b34114.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T14:35:30.922Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 940566,
+            "prompt": "No brands, logos, badges, emblems, readable text, numbers or signage anywhere in the frame.\nPhotoreal cinematic still of a coastal headland with a tall white lighthouse tower, a low stone keeper's hut and a figure in a dark yellow storm coat on the grass path, in a violent storm at dusk. The guide gives only the camera angle and where the tower, hut, path, rock and figure are. Change only the weather: a towering black-grey storm sky with rolling clouds, pouring slanted rain streaking across the frame, wind-flattened grass, the sea beyond whipped into white foam, huge waves crashing and exploding in white spray over the dark rocks below the headland, and a single bright jagged lightning bolt striking the top of the lighthouse tower, lighting the scene a cold blue-white. The lighthouse lamp glows warm. Wet reflective surfaces, dramatic cinematic contrast, 35 mm film grain.\nNegative: no text, no logos, no signage, no numbers, no watermark, no extra buildings, no change to the framing.",
+            "signature": "bf6ef9fc"
+          }
+        }
+      ]
     },
     {
       "id": "0decb706-72c3-417a-a242-f1001492ef37",
@@ -7996,6 +8014,15 @@
       "duration": 4
     },
     {
+      "path": "media/refs/64e7ab23-ae05-5bb1-a8bd-6da4f4b34114.webp",
+      "kind": "image",
+      "bytes": 246400,
+      "sha256": "c283c7e86cd6b841deb1b54c5ce2811f8bc0b79f61e13c909c11fe2ea7474c4f",
+      "sourceSha256": "06aeba8b2c7d8e0dcd0f3db1a19727d8e42c03946a3b0661907668f11a8448d4",
+      "width": 1600,
+      "height": 900
+    },
+    {
       "path": "media/assets/c6c0d34d-a8b4-4bd7-8e9c-919c0bdc97f3.mp4",
       "kind": "video",
       "bytes": 805193,
@@ -8006,6 +8033,18 @@
       "fps": 24,
       "frameCount": 96,
       "duration": 4
+    },
+    {
+      "path": "media/assets/d0d0fa25-1b53-5df0-a679-3cbca9cfd01a.mp4",
+      "kind": "video",
+      "bytes": 962053,
+      "sha256": "4b2fb6be7a6fe0b9f851bbcbea2c63786a7c25b56cae7e950ec93ea8cd62036c",
+      "sourceSha256": "dece381e2a205875e8cfec0c95bec45eb5a2d30f06b5340ae72de0d403b3ca96",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 89,
+      "duration": 3.708
     },
     {
       "path": "media/assets/5db704a5-0b66-4a70-817b-77268a7b71b6.mp4",
@@ -8307,6 +8346,21 @@
       }
     },
     {
+      "id": "d0d0fa25-1b53-5df0-a679-3cbca9cfd01a",
+      "kind": "workflow-result",
+      "shotId": "92d7eef9-22b0-426f-bc11-4d0aeb3adac3",
+      "file": "assets/d0d0fa25-1b53-5df0-a679-3cbca9cfd01a.mp4",
+      "mime": "video/mp4",
+      "duration": 3.708333,
+      "createdAt": "2026-11-03T14:50:32.301Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 1 reference image",
+        "backend": "cloud",
+        "prompt": "No brands, logos, badges, emblems, readable text, numbers or signage anywhere in the frame.\nPhotoreal live-action film of a coastal headland with a tall white lighthouse tower, a low stone keeper's hut and a figure in a dark yellow storm coat standing on the grass path, in a violent storm at dusk. Change only the weather: a black-grey storm sky with fast rolling clouds, heavy rain pouring and slanting in the wind, the grass whipping, the sea whipped into white foam, huge waves crashing and exploding in white spray over the dark rocks below the headland again and again. In the middle of the shot one bright jagged lightning bolt cracks down from the clouds and strikes the top of the lighthouse tower, a clear visible strike that flashes the whole scene blue-white, then the lamp keeps glowing warm. The figure's coat flaps in the wind.\nThe reference video is rehearsal footage: simple stand-ins went through the scene so the camera path, framing and timing could be locked. Take from it only the camera path and framing and each object's place in frame and size. None of its shapes or surfaces belong in the final frame. The supplied key frame shows the set and the light.\nNegative: no text, no logos, no signage, no numbers, no watermark, no extra buildings, no cuts.\nFollow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still.\nReference images: 1 = start still.",
+        "sourceAssetId": "c6c0d34d-a8b4-4bd7-8e9c-919c0bdc97f3"
+      }
+    },
+    {
       "id": "5db704a5-0b66-4a70-817b-77268a7b71b6",
       "kind": "camera-render",
       "shotId": "0decb706-72c3-417a-a242-f1001492ef37",
@@ -8503,6 +8557,13 @@
     }
   ],
   "edit": {
-    "clips": []
+    "clips": [
+      {
+        "shotId": "92d7eef9-22b0-426f-bc11-4d0aeb3adac3",
+        "assetId": "d0d0fa25-1b53-5df0-a679-3cbca9cfd01a",
+        "in": 0,
+        "out": null
+      }
+    ]
   }
 }
