@@ -1,28 +1,28 @@
 {
   "player": {
     "shape": "person",
-    "triangles": 824,
-    "bytes": 59392
+    "triangles": 1032,
+    "bytes": 83956
   },
   "anchor": {
     "shape": "person",
-    "triangles": 789,
-    "bytes": 56580
+    "triangles": 1076,
+    "bytes": 88164
   },
   "operator": {
     "shape": "person",
-    "triangles": 776,
-    "bytes": 54228
+    "triangles": 1122,
+    "bytes": 90504
   },
   "fan": {
     "shape": "person",
-    "triangles": 820,
-    "bytes": 56840
+    "triangles": 1116,
+    "bytes": 90084
   },
   "race-car": {
     "shape": "car",
     "triangles": 826,
-    "bytes": 68748
+    "bytes": 68752
   },
   "eagle": {
     "shape": "bird",
