@@ -377,11 +377,12 @@ test('tools/list: the director and library tools by default; legacy engine, Blen
     const tools = (await rpc('tools/list', {})).result.tools; names = tools.map(t => t.name);
     const director = names.filter(n => n.startsWith('previs_director_')), library = names.filter(n => n.startsWith('previs_library_'));
     const PROMPT_TOOLS = ['previs_director_prompt_sections', 'previs_director_set_prompt_section', 'previs_director_prompt_history', 'previs_director_model_settings'];
-    const GROUPS = [...BLENDER_TOOLS, ...KEYFRAME_TOOLS, ...TAKE_TOOLS, ...PROMPT_TOOLS];
-    assert.equal(director.length, 27 + GROUPS.length, `${director.length} director tools: 27 plus the ${BLENDER_TOOLS.length} Blender import, ${KEYFRAME_TOOLS.length} keyframe, ${TAKE_TOOLS.length} take and ${PROMPT_TOOLS.length} prompt tools`);
+    const REGEN_TOOLS = ['previs_director_regen_status', 'previs_director_pin_output'];
+    const GROUPS = [...BLENDER_TOOLS, ...KEYFRAME_TOOLS, ...TAKE_TOOLS, ...PROMPT_TOOLS, ...REGEN_TOOLS];
+    assert.equal(director.length, 27 + GROUPS.length, `${director.length} director tools: 27 plus the ${BLENDER_TOOLS.length} Blender import, ${KEYFRAME_TOOLS.length} keyframe, ${TAKE_TOOLS.length} take, ${PROMPT_TOOLS.length} prompt and ${REGEN_TOOLS.length} regeneration tools`);
     for (const name of GROUPS) assert.ok(director.includes(name), name);
     assert.deepEqual(library, LIBRARY_TOOLS, 'the asset library tools, as one group');
-    assert.equal(names.length, 27 + GROUPS.length + LIBRARY_TOOLS.length, 'director (with Blender import, keyframe, take and prompt tools) and library tools');
+    assert.equal(names.length, 27 + GROUPS.length + LIBRARY_TOOLS.length, 'director (with Blender import, keyframe, take, prompt and regeneration tools) and library tools');
     assert.deepEqual(names.filter(n => !director.includes(n) && !library.includes(n)), []);
     assert.match(tools.find(t => t.name === 'previs_director_edit').description, /\{op:"use_take",shotId,referenceId\}/);
     const refused = await rpc('tools/call', { name: 'previs_render_animation', arguments: {} });
