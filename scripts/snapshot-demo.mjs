@@ -309,6 +309,11 @@ export async function snapshotDemo({ get, data, out, ids = DEFAULT_PROJECTS, sta
     const starter = starterFor(slim, bundles);
     const drift = starter ? starterDrift(slim, starter) : [];
     if (drift.length) throw new Error(`Demo project ${pid} (“${slim.title}”) differs from its bundled starter examples/starters/${starter.slug}:\n  ${[...drift.slice(0, 25), ...(drift.length > 25 ? [`… and ${drift.length - 25} more`] : [])].join('\n  ')}\nThe bundle is the source of truth: snapshot its source project (pnpm starters:import --data-dir <server data dir> --force, with the server stopped).`);
+    // Imported scene meshes are inputs too, even when they have no Cast Card image.
+    for (const entity of slim.scene.entities) {
+      const model = /^\/director-refs\/([^/]+)\/([^/]+\.glb)$/.exec(entity.model || '');
+      if (model) await save(`director/${model[1]}/refs/${model[2]}`, entity.model.slice(1));
+    }
     const assetURLs = new Map();
     for (const asset of slim.assets) {
       const record = await save(`director/${pid}/${asset.file}`, `director-assets/${pid}/${asset.file.replace(/^assets\//, '')}`);

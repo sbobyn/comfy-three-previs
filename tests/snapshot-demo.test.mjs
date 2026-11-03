@@ -224,3 +224,21 @@ test('the snapshot is built from the imported bundle and refuses a starter proje
     await assert.rejects(snapshotDemo({ get, data, out: join(root, 'missing'), starters }), /Requested projects missing.*pnpm starters:import/s);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+
+
+test('snapshot includes imported scene meshes that are not image references', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'demo-mesh-')), data = join(root, 'data'), out = join(root, 'out');
+  try {
+    const bytes = Buffer.from('disposable-mesh-fixture');
+    const project = { id: 'p', scene: { entities: [{ id: 'subject', model: '/director-refs/p/subject.glb' }], references: [] }, shots: [], assets: [] };
+    await mkdir(join(data, 'director/p/refs'), { recursive: true });
+    await writeFile(join(data, 'director/p/refs/subject.glb'), bytes);
+    const get = async path => path === 'director/projects' ? { projects: [{ id: 'p' }] } : path === 'director/archived' ? { projects: [] } : path.startsWith('director/project?') ? { project } : { jobs: [] };
+    const result = await snapshotDemo({ get, data, out, ids: ['p'], starters: [] });
+    assert.deepEqual(await readFile(join(out, 'demo-media/director-refs/p/subject.glb')), bytes);
+    assert.ok(result.media.some(m => m.path === 'director-refs/p/subject.glb'));
+    assert.equal(JSON.parse(await readFile(join(out, 'demo-data/project-p.json'))).project.scene.entities[0].model, project.scene.entities[0].model);
+    await rm(join(data, 'director/p/refs/subject.glb'));
+    await assert.rejects(snapshotDemo({ get, data, out: join(root, 'missing'), ids: ['p'], starters: [] }), /ENOENT/);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
