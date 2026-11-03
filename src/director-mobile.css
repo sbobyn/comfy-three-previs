@@ -64,7 +64,7 @@ body.m-medium[data-mstep=shoot] .m-shootbody { grid-column: 2; grid-row: 1 / spa
 :is(body.m-compact, body.m-medium) .vp-view button { height: 38px; padding: 0 14px; border-radius: 999px; color: var(--on-stage-2); font: 600 var(--m-fs-sm)/1 var(--font); }
 :is(body.m-compact, body.m-medium) .vp-view button::before { content: ''; position: absolute; inset: -3px 0; }
 :is(body.m-compact, body.m-medium) .vp-view button { position: relative; }
-:is(body.m-compact, body.m-medium) .vp-view button.on { background: var(--on-stage); color: var(--ink); }
+:is(body.m-compact, body.m-medium) .vp-view button.on { background: var(--on-stage); color: var(--stage-ink); }
 .m-vpside { position: absolute; right: 12px; bottom: 12px; flex-direction: column; gap: 10px; z-index: 3; }
 .m-fab { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--glass-line); background: var(--glass); backdrop-filter: blur(10px); color: var(--on-stage); display: grid; place-items: center; box-shadow: 0 10px 30px -10px rgba(0,0,0,.7); cursor: pointer; padding: 0; }
 .m-vpside .m-fab { display: grid; }
@@ -76,9 +76,9 @@ body.m-has-sel[data-mstep=build]:is(.m-compact, .m-medium) .m-modebar { display:
 :is(body.m-compact, body.m-medium) .m-modebar .seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: var(--glass); border: 1px solid var(--glass-line); backdrop-filter: blur(10px); }
 :is(body.m-compact, body.m-medium) .m-modebar .seg button { position: relative; height: 38px; padding: 0 16px; border-radius: 999px; color: var(--on-stage-2); font: 600 var(--m-fs-sm)/1 var(--font); background: transparent; }
 :is(body.m-compact, body.m-medium) .m-modebar .seg button::before { content: ''; position: absolute; inset: -3px 0; }
-:is(body.m-compact, body.m-medium) .m-modebar .seg button.on { background: var(--on-stage); color: var(--ink); }
+:is(body.m-compact, body.m-medium) .m-modebar .seg button.on { background: var(--on-stage); color: var(--stage-ink); }
 :is(body.m-compact, body.m-medium) .m-modebar .btn { height: 44px; border-radius: 999px; background: var(--glass); border-color: var(--glass-line); color: var(--on-stage); }
-:is(body.m-compact, body.m-medium) .m-modebar .btn.on { background: var(--on-stage); color: var(--ink); }
+:is(body.m-compact, body.m-medium) .m-modebar .btn.on { background: var(--on-stage); color: var(--stage-ink); }
 :is(body.m-compact, body.m-medium) .labels .label { flex-direction: row; white-space: nowrap; pointer-events: auto; cursor: pointer; padding: 4px 10px 4px 4px; font-size: 12.5px; font-weight: 600; min-height: 30px; gap: 6px; background: var(--glass); color: var(--on-stage); border: 1px solid color-mix(in srgb, var(--k, #fff) 55%, transparent); backdrop-filter: blur(10px); }
 :is(body.m-compact, body.m-medium) .labels .label img { width: 22px; height: 22px; }
 :is(body.m-compact, body.m-medium) .labels .label.m-cap { display: none !important; }

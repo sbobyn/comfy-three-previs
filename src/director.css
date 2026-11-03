@@ -37,6 +37,7 @@
   --glass-line: rgba(255, 250, 240, .12);
   --on-stage:   #EDE8DF;
   --on-stage-2: #A8A196;
+  --stage-ink:  #15130F;   /* text on light chips over the stage: the same in both themes */
   --stage-frame: 0 0 0 1px var(--ink), inset 0 0 0 1px rgba(255,250,240,.06), 0 18px 48px -24px rgba(21,19,15,.55);
   /* Prompt provenance (auto-prompt chips + spans), always paired with a text label */
   --pv-action:   #15130F;
@@ -74,6 +75,53 @@
   --bg: var(--paper); --panel: var(--paper-2); --panel-2: var(--card); --raise: var(--paper-3);
   --text: var(--ink); --muted: var(--ink-3); --faint: var(--ink-4);
   --camera: var(--accent); --radius: var(--r-md);
+}
+
+/* Dark theme (the default; src/theme.ts sets data-theme before first paint). Same roles, warm near-black surfaces, paper-coloured
+   ink and the same tally-red accent lifted for contrast. Every text pair is WCAG AA (ink-4 5.2:1 on paper-3, accent 4.8:1). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:      #151412;
+  --paper-2:    #1C1A17;
+  --paper-3:    #262420;
+  --card:       #201E1B;
+  --line:       #2F2C28;
+  --line-2:     #46423B;
+  --scrim:      rgba(0, 0, 0, .62);
+  --ink:        #F2EDE4;
+  --ink-2:      #D8D2C7;
+  --ink-3:      #B0A99D;
+  --ink-4:      #9C958A;
+  --on-ink:     #15130F;
+  --accent:     #E8694B;
+  --accent-ink: #15130F;
+  --cta-hover:  #FFFFFF;
+  --accent-soft:#3A2019;
+  --accent-line:#8A3D29;
+  --ok:         #7FC89C;  --ok-soft:   #1B2A21;
+  --warn:       #E2B254;  --warn-soft: #2D2514;
+  --bad:        #F0806A;  --bad-soft:  #3A1F18;
+  --info:       #94AEEA;  --info-soft: #1C2334;
+  --stage:      #0E0D0C;
+  --stage-2:    #171614;
+  --stage-line: #2A2723;
+  --stage-frame: 0 0 0 1px var(--line-2), inset 0 0 0 1px rgba(255,250,240,.06), 0 18px 48px -24px rgba(0,0,0,.8);
+  --pv-action:   #F2EDE4;
+  --pv-world:    #6CC79C;
+  --pv-style:    #C79AE8;
+  --pv-camera:   #E8694B;
+  --pv-movement: #E39A5A;
+  --pv-cuts:     #E68AB4;
+  --pv-lens:     #7FB0EC;
+  --pv-filter:   #AFA2EE;
+  --pv-cast-1:   #94AEEA;  --pv-cast-2: #EE8AA6; --pv-cast-3: #62C3CE; --pv-cast-4: #DDB04E;
+  --pv-cast-5:   #94C96E;  --pv-cast-6: #EE9A5C; --pv-cast-7: #B79BF0; --pv-cast-8: #76C99A;
+  --sh-1: 0 1px 2px rgba(0,0,0,.35), 0 0 0 1px rgba(255,250,240,.04);
+  --sh-2: 0 4px 14px -4px rgba(0,0,0,.5), 0 0 0 1px rgba(255,250,240,.05);
+  --sh-3: 0 20px 48px -16px rgba(0,0,0,.7), 0 0 0 1px rgba(255,250,240,.07);
+  --sh-pop: 0 10px 30px -8px rgba(0,0,0,.6), 0 0 0 1px rgba(255,250,240,.08);
+  --sh-sheet: 0 -8px 40px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(255,250,240,.06);
+  --m-k-character: #EE8AA6; --m-k-vehicle: #8FB0F0; --m-k-prop: #DDB04E; --m-k-environment: #76C99A;
 }
 
 /* ---------- Base ---------- */
@@ -121,7 +169,7 @@ code, .mono { font-family: var(--mono); font-size: .95em; font-variant-numeric: 
 .btn.primary .k, .btn.accent .k, .btn.cta .k, .btn.camera .k { color: inherit; opacity: .75; }
 .btn.on-stage { background: var(--glass); border-color: var(--glass-line); color: var(--on-stage); box-shadow: none; backdrop-filter: blur(10px); }
 .btn.on-stage:hover { background: rgba(40,37,32,.85); }
-.btn.on-stage.on { background: var(--on-stage); color: var(--ink); border-color: var(--on-stage); }
+.btn.on-stage.on { background: var(--on-stage); color: var(--stage-ink); border-color: var(--on-stage); }
 .btn.cta { background: var(--cta); border-color: var(--cta); color: var(--cta-ink); font-weight: 600; padding: 0 16px; border-radius: var(--r-full); box-shadow: 0 1px 2px rgba(21,19,15,.2), 0 6px 16px -8px rgba(21,19,15,.5); }
 .btn.cta:hover { background: var(--cta-hover); border-color: var(--cta-hover); }
 .linklike { all: unset; cursor: pointer; color: var(--ink); font-weight: 600; font-size: inherit; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; background: none; border: 0; padding: 0; }
@@ -133,7 +181,7 @@ code, .mono { font-family: var(--mono); font-size: .95em; font-variant-numeric: 
 .seg button.on, .seg a.on { background: var(--card); color: var(--ink); box-shadow: var(--sh-1); }
 .seg.on-stage { background: var(--glass); border-color: var(--glass-line); backdrop-filter: blur(10px); }
 .seg.on-stage button { color: var(--on-stage-2); }
-.seg.on-stage button.on { background: var(--on-stage); color: var(--ink); box-shadow: none; }
+.seg.on-stage button.on { background: var(--on-stage); color: var(--stage-ink); box-shadow: none; }
 
 /* ---------- Fields ---------- */
 .field { width: 100%; background: var(--card); border: 1px solid var(--line-2); border-radius: var(--r-sm); padding: 7px 10px; outline: none; color: var(--ink); min-height: 34px; transition: border-color var(--t-fast), box-shadow var(--t-fast); }
@@ -411,7 +459,7 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .vp-tools { position: absolute; top: 10px; left: 216px; z-index: 3; display: flex; flex-wrap: nowrap; gap: 6px; align-items: center; max-width: calc(100% - 226px - min(36%, 420px) - 16px); overflow-x: auto; scrollbar-width: none; padding: 4px; border-radius: 12px; background: rgba(21, 19, 15, .55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease); }
 .vp-tools::-webkit-scrollbar { display: none; }
 .vp-tools > * { flex: none; }
-.vp-tools .btn.on { background: var(--on-stage); color: var(--ink); border-color: var(--on-stage); }
+.vp-tools .btn.on { background: var(--on-stage); color: var(--stage-ink); border-color: var(--on-stage); }
 .viewport.has-sel:not(.camview) .vp-tools { opacity: 1; transform: none; pointer-events: auto; }
 .viewport.mon-closed .vp-tools { max-width: calc(100% - 236px); }
 .monitor { position: absolute; top: 10px; right: 10px; z-index: 2; width: min(36%, 420px); border-radius: 10px; overflow: hidden; border: 0; box-shadow: 0 0 0 1px rgba(255,250,240,.18), 0 20px 50px -20px rgba(0,0,0,.9); background: var(--stage); cursor: pointer; transition: width .2s ease; }
@@ -1089,3 +1137,38 @@ dialog.confirm { width: min(380px, 92vw); }
 :is(body.m-compact, body.m-medium) .coach.demo-note > span:nth-child(2) { flex: 1 1 calc(100% - 24px); }
 body[data-mstep=build]:is(.m-compact, .m-medium) .viewport:not(.camview) .demo-note ~ .m-vpside { bottom: 132px; }
 @media (max-width: 1100px) { .ws-top .demo-badge { font-size: 0; padding: 0 8px; } .ws-top .demo-badge::before { content: 'Demo ↗'; font-size: var(--fs-2xs); } }
+
+/* ---------- Dark theme: the few component colours that are not tokens ---------- */
+/* Hover borders, pips and amber dots that were fixed light-theme values. */
+[data-theme="dark"] .btn:hover, [data-theme="dark"] .field:hover { border-color: #5A554D; }
+[data-theme="dark"] .btn.accent:hover { background: #F07E62; border-color: #F07E62; }
+[data-theme="dark"] .fly-device { background: #C24A2B; color: #FFF8F2; }
+/* Light glass pills over the viewport become dark glass. */
+[data-theme="dark"] :is(.coach, .cam-hero) { background: rgba(32, 30, 27, .94); color: var(--ink-2); }
+[data-theme="dark"] .side-act { box-shadow: 0 -1px 0 rgba(255, 250, 240, .05) inset, 0 -12px 26px -18px rgba(0, 0, 0, .7); }
+[data-theme="dark"] .shot .shot-vid, [data-theme="dark"] .ds-status, [data-theme="dark"] .ds-badge.n, [data-theme="dark"] .m-cc-tick svg { background: rgba(32, 30, 27, .92); color: var(--ink-2); }
+/* Kind and field colours come from shared/prompt.mjs (tuned for paper): as text on dark they are lifted toward the ink. */
+[data-theme="dark"] :is(.cast-row .cast-ph, .cast-row.open .cast-chev, .cast-family .cast-x, .cast-family[open] > summary .cast-chev, .sq-chip-t b, .ch-opt.is-current .ch-opt-t::after) { color: color-mix(in srgb, var(--c) 55%, var(--ink)); }
+[data-theme="dark"] .ds-slot.is-running .ds-ph { color: color-mix(in srgb, var(--kind) 55%, var(--ink)); }
+[data-theme="dark"] :is(body.m-compact, body.m-medium) .m-sheet .outline .group { color: color-mix(in srgb, var(--k, var(--ink-3)) 55%, var(--ink)); }
+[data-theme="dark"] .sem-back mark { color: color-mix(in srgb, var(--k) 50%, var(--ink)); }
+[data-theme="dark"] .vm-n { color: color-mix(in srgb, var(--k) 50%, var(--ink)); }
+[data-theme="dark"] :is(.ap-chip i, .ap-sname i, .pi-dot) { box-shadow: 0 0 0 1px var(--line-2); }
+/* White text on a filled accent or status colour: the dark theme's fills are light, so their text is dark. */
+[data-theme="dark"] :is(.an-legend i, .ds-badge.ok, .ds-noid, .ds-att i, .m-btn.m-danger, .op-actions .btn.rec, .ds-tab.busy small, .ds-set.on .ds-n) { color: var(--on-ink); }
+[data-theme="dark"] :is(body.m-compact, body.m-medium) .m-shotstrip .shot-vid { color: var(--on-ink); }
+[data-theme="dark"] .ex-svg .cast + text { fill: var(--on-ink); }
+/* Selected segments and chips that paired an ink fill with white text. */
+[data-theme="dark"] .lp .lp-seg.on { color: var(--on-ink); }
+[data-theme="dark"] .lp .lp-chip.on { background: #3B3880; border-color: #5450A8; color: #F2EDE4; }
+[data-theme="dark"] .lp .lp-variant.warn .lp-note { color: var(--warn); }
+[data-theme="dark"] .lp .lp-quote { color: var(--ok); }
+[data-theme="dark"] .ds-badge.star { color: #8A6400; }
+/* Cut: camera-source glyphs and labels. */
+[data-theme="dark"] .sq-camglyph.c-blockout { background: var(--ok-soft); color: var(--ok); }
+[data-theme="dark"] :is(.sq-camglyph.c-still, .sq-camglyph.c-keyframes) { background: var(--warn-soft); color: var(--warn); }
+[data-theme="dark"] .sq-cam { color: var(--ok); }
+[data-theme="dark"] .sq-cam.approx { color: var(--warn); }
+/* Illustrations (camera help, guide diagrams) stay paper-toned like pictures, set in a hairline frame. */
+[data-theme="dark"] :is(.ch-stage, .ex-stage) { box-shadow: inset 0 0 0 1px var(--line-2); }
+/* Design-sheet canvases are images of a white sheet: keep them white. */

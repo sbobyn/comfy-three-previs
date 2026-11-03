@@ -2,6 +2,7 @@ import { projectMesh } from '../shared/blockout-models.mjs';
 import { importModels, importSummary, importedSection, isModelDrop, MODEL_ACCEPT } from './director-import';
 import { loadBlockoutModels } from './director-models';
 import './director.css';
+import { applyTheme, watchTheme } from './theme';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf, keyStills } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
 import { starterBlockout, starterMediaStatus, videoStale, keyStillState, blenderBlockout, blockoutStale, clipCurrent } from '../shared/director.mjs';
@@ -51,6 +52,7 @@ import type { ShotPips } from './director-desktop-core';
 import { VIDEO_PRICES } from '../shared/tiers.mjs';
 import { cameraSourceOf, cameraMotionWarning, CAMERA_SOURCE_LABELS } from '../shared/camera-source.mjs';
 import { blockoutFidelity, fidelityAdvice, defaultForShot } from '../shared/blockout-fidelity.mjs';
+applyTheme(); watchTheme(); // keep the theme the <head> script applied in step with the setting and the OS
 
 const params = new URLSearchParams(location.search);
 const projectId = params.get('project') || '';
@@ -160,6 +162,7 @@ helpMenu.append(
   menuItem('Guide', 'The whole journey, scene to film', () => showJourney()),
   menuItem('Controls & shortcuts', 'Viewport, keys and grid · ?', () => { renderHelp(); helpCard.hidden = false; }),
   menuItem('Show tips again', 'The first-run hints and tour', () => showTipsAgain()),
+  menuItem('Setup & theme', 'Dark, light or system · what this machine can do', () => openSetup()),
   // The read-only demo has no server to build the file.
   ...(DEMO ? [] : [h('div', { class: 'menu-sep' }), menuItem('Export project (.zip)', 'Everything in this project, in one file', () => { location.href = `/api/director/export?id=${projectId}`; })]));
 // Status strip: what the current step is working on, Claude's presence and the jobs pip (mounted below).

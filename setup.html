@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Comfy Previs · Setup</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      /* Theme before first paint (src/theme.ts): Dark unless the user chose Light or System. */
+      (function () { var p = 'dark'; try { p = localStorage.getItem('previs.theme') || 'dark'; } catch (e) {} if (p !== 'light' && p !== 'system') p = 'dark'; var t = p === 'system' ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : p; var r = document.documentElement; r.dataset.theme = t; r.dataset.themePref = p; r.style.colorScheme = t; })();
+    </script>
   </head>
   <body>
     <div class="setup-page" id="app"></div>

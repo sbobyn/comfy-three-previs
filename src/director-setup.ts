@@ -2,6 +2,7 @@
 // Rendered in the home page's Setup dialog and on /setup.html.
 import './director-setup.css';
 import { api, h } from './director-common';
+import { THEME_PREFS, readThemePref, setThemePref } from './theme';
 
 export type Check = { id: string; label: string; status: 'ok' | 'optional' | 'warn' | 'required'; detail: string; fix: string };
 export type Setup = { checks: Check[]; dataDir: string };
@@ -41,11 +42,20 @@ const code = (text: string) => {
   return h('div', { class: 'code' }, text, b);
 };
 
+/** Theme: Dark (default), Light or System, saved in this browser and applied at once. */
+export function themeControl() {
+  const now = readThemePref();
+  return h('fieldset', { class: 'setup-theme' }, h('legend', {}, 'Theme'),
+    ...THEME_PREFS.map(t => h('label', {}, h('input', { type: 'radio', name: 'previs-theme', value: t.id, checked: t.id === now, onchange: () => setThemePref(t.id) }), t.label)),
+    h('span', { class: 'note' }, 'System follows your computer’s light or dark setting. Saved in this browser.'));
+}
+
 export function setupBody(s: Setup | null, phone: { available: boolean } | null) {
   const status = (id: string) => s?.checks.find(c => c.id === id)?.status;
   const ok = (id: string) => id === 'paid-on' ? status('paid') === 'warn' : status(id) === 'ok';
   const cloud = ok('cloud'), local = ok('local');
   return h('div', { class: 'setup' },
+    h('section', {}, h('h3', {}, 'Appearance'), themeControl()),
     h('section', {}, h('h3', {}, 'This machine'),
       s ? checkList(s.checks) : h('p', { class: 'note' }, 'Could not read the setup checks. Is the server running?'),
       s ? h('p', { class: 'note' }, 'Projects live in ', h('code', {}, s.dataDir), '.') : null),
