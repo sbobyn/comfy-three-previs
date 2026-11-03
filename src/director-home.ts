@@ -76,7 +76,18 @@ export function starterCards(starters: Starter[], onPick: (key: string) => void)
     const cast = h('div', { class: 'home-cast', hidden: true });
     const open = card(h('button', { class: 'home-starter-open', type: 'button', onclick: () => onPick(s.key) }), null, s.title, s.description,
       h('span', { class: 'home-open', 'aria-hidden': 'true' }, s.shots && s.shots > 1 ? `${s.shots} shots` : 'Open', ' →'));
-    return { s, slot, cast, el: h('div', { class: 'home-starter', 'data-template': s.key }, slot, cast, open) };
+    const el = h('div', { class: 'home-starter', 'data-template': s.key }, slot, cast, open);
+    // The comparison captures pointers while dragging; a plain thumbnail/cast click still opens the scene.
+    let origin: { x: number; y: number } | null = null, dragged = false;
+    el.addEventListener('pointerdown', ev => { origin = { x: ev.clientX, y: ev.clientY }; dragged = false; });
+    el.addEventListener('pointermove', ev => { if (origin && Math.hypot(ev.clientX - origin.x, ev.clientY - origin.y) > 6) dragged = true; });
+    el.addEventListener('pointerup', () => { origin = null; });
+    el.addEventListener('pointercancel', () => { origin = null; dragged = true; });
+    el.addEventListener('click', ev => {
+      if ((dragged && ev.detail > 0) || (ev.target as HTMLElement).closest('button, a, input, [role="slider"]')) return;
+      onPick(s.key);
+    });
+    return { s, slot, cast, el };
   });
   void guideManifest().then(map => {
     const entries = [...map.values()];
@@ -84,13 +95,32 @@ export function starterCards(starters: Starter[], onPick: (key: string) => void)
       const m = starterMedia(c.s.key, entries);
       if (m.kind !== 'still' && c.slot.isConnected) {
         // The generated loop fills the card; hovering (or dragging on touch) scrubs the blockout in from the left.
-        const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: m.kind, posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: false, reveal: true, alt: `${m.label || c.s.title}: the generated ${m.kind === 'video' ? 'video' : 'still'}. Move across it, or use the arrow keys, to reveal the blockout it was made from.` });
+        const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: m.kind, posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: false, reveal: true, alt: `${m.label || c.s.title}: the generated ${m.kind === 'video' ? 'video' : 'still'}. Click to open the scene. Drag across it, or use the comparison slider’s arrow keys, to reveal the blockout it was made from.` });
         c.slot.replaceWith(h('div', { class: 'home-seam-slot has-seam' }, seam));
       }
       if (m.cast.length) { c.cast.hidden = false; c.cast.replaceChildren(h('span', { class: 'home-cast-label' }, 'Cast'), ...m.cast.slice(0, 5).map(x => h('img', { src: guideUrl(x.file), alt: x.label, title: x.label, loading: 'lazy', decoding: 'async' }))); }
     }
   });
-  return h('div', { class: 'home-starters', 'data-count': String(Math.min(starters.length, 4)) }, ...cards.map(c => c.el));
+  const rail = h('div', { class: 'home-starters', 'data-count': String(Math.min(starters.length, 4)) }, ...cards.map(c => c.el));
+  const move = (direction: number) => rail.scrollBy({ left: direction * Math.max(1, rail.clientWidth - 48), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  const previous = h('button', { class: 'home-btn ghost sm', type: 'button', 'aria-label': 'Previous scenes', disabled: true, onclick: () => move(-1) }, '←');
+  const next = h('button', { class: 'home-btn ghost sm', type: 'button', 'aria-label': 'Next scenes', onclick: () => move(1) }, '→');
+  const scrollbar = h('input', { class: 'home-starter-scroll', type: 'range', min: 0, max: 100, step: .1, value: 0, 'aria-label': 'Scroll through scenes',
+    oninput: () => { rail.style.scrollSnapType = 'none'; rail.scrollLeft = Number(scrollbar.value) / 100 * (rail.scrollWidth - rail.clientWidth); },
+    onchange: () => rail.style.removeProperty('scroll-snap-type') });
+  const update = () => {
+    const max = rail.scrollWidth - rail.clientWidth;
+    scrollbar.value = String(max > 0 ? rail.scrollLeft / max * 100 : 0);
+    scrollbar.disabled = max <= 1;
+    scrollbar.setAttribute('aria-valuetext', `${Math.round(Number(scrollbar.value))}% through ${starters.length} scenes`);
+    previous.disabled = rail.scrollLeft <= 1;
+    next.disabled = rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 1;
+  };
+  rail.addEventListener('scroll', update, { passive: true });
+  const resize = new ResizeObserver(() => { if (!rail.isConnected) { resize.disconnect(); return; } update(); });
+  resize.observe(rail);
+  return h('div', { class: 'home-starter-gallery' }, rail,
+    h('div', { class: 'home-starter-nav' }, scrollbar, h('span', {}, `${starters.length} scenes · Scroll to explore`), previous, next));
 }
 
 const ICONS = {
