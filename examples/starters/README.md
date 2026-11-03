@@ -37,7 +37,7 @@ shapes; trees, terrain and the lake use the bundled meshes.
 | | Car track | 5 | Street-level front three-quarter track with a generic red hatchback. |
 | | Rooftop orbit | 5 | 140° orbit around a figure at the edge of a 48 m tower (Idle clip). |
 | | Pedestrian follow | 5 | Over-the-shoulder follow as the commuter steps off the kerb onto a zebra crossing. |
-| **Camera Moves & Transitions** | Locked-off … Tilt up | 4 each | All 12 `MOVES` presets on the same four seconds (the keeper stands still), so only the camera differs. |
+| **Lighthouse · Camera Moves** | Locked-off … Tilt up | 4 each | All 12 `MOVES` presets on the same four seconds (the keeper stands still), so only the camera differs. |
 | | Dolly zoom (vertigo) | 4 | Back 5 → 12 m while the lens goes 24 → 58 mm: the keeper holds size, the tower looms. |
 | | FPV fly-through | 4 | Low over the water, through a sea arch, up the cliff to the keeper. |
 | | Handheld | 4 | Deterministic few-centimetre operator wobble (64 keys). |

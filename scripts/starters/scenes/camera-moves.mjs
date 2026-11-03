@@ -1,4 +1,4 @@
-// Camera Moves & Transitions: a lighthouse on a rocky headland, its keeper and a fishing boat. Every MOVES preset on
+// Lighthouse · Camera Moves: a lighthouse on a rocky headland, its keeper and a fishing boat. Every MOVES preset on
 // the same four seconds (the keeper stands still, so only the camera differs), custom-key showcases, and shot pairs that
 // craft transitions in the blockout (whip to whip, match cut, cut on action, foreground wipe) for the Cut's hard cuts.
 import { NO_BRANDS, NO_BRANDS_TAG, walkKeys, cameraKeys, focusAt, lerp, smooth, r3 } from '../kit.mjs';
@@ -16,7 +16,7 @@ const BOAT = [[0, -40, 48], [4, -32, 47], [8, -24, 45], [12, -16, 42], [16, -8, 
 
 export default {
   slug: 'camera-moves',
-  title: 'Camera Moves & Transitions',
+  title: 'Lighthouse · Camera Moves',
   leaveFrame: ['Whip pan A · out', 'Whip pan B · in'],
   async build(h) {
     h.op({ op: 'set_scene', patch: { name: 'Lighthouse point', environment: { preset: 'stage', description: 'A rocky headland in a sheltered bay on a bright breezy morning: a white lighthouse with a red cap, a small stone cottage, a high stone pier, a rock arch in the sea and green hills around the bay', style: `Photoreal coastal film. Clear morning sun, deep blue water with gentle swell, crisp natural colour. ${NO_BRANDS}` } } });

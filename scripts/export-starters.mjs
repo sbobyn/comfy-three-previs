@@ -47,7 +47,7 @@ const SOURCE_DEFS = [
   // also ships a start still per variant and four videos (the paid hybrid, examples/starters/README.md).
   { slug: 'mountain-trail', title: 'Mountain Trail', description: 'A hiker crosses an open alpine valley toward a lake and a cabin: room to fly a drone or phone camera, with a ridge reveal, a slope dive, a low track and a wide.', hero: { shots: [] } },
   { slug: 'city-blocks', title: 'City Blocks', description: 'A downtown grid with traffic and pedestrians: a drone rise between buildings, a street-level car track, a rooftop orbit and a pedestrian follow.', hero: { shots: [] } },
-  { slug: 'camera-moves', title: 'Camera Moves & Transitions', description: 'A lighthouse keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.', hero: { shots: [] } },
+  { slug: 'camera-moves', title: 'Lighthouse · Camera Moves', description: 'The lighthouse from the launch film. A keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.', hero: { shots: [] } },
   // Look Lab ships many looks, so its copy is encoded smaller (540p video, lighter stills) to stay inside the 80 MB budget;
   // the full-quality originals stay in the source project. A media entry records a non-default encode, so changing it re-encodes.
   { slug: 'look-lab', title: 'Look Lab', description: 'One small-town street blockout in thirty-four looks: time of day, weather, seasons, people, wardrobe, anime, claymation, 3D animated and watercolour, all sharing one camera and one blocking.', hero: { shots: [] },

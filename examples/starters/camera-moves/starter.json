@@ -3,8 +3,8 @@
   "version": 2,
   "slug": "camera-moves",
   "order": 6,
-  "title": "Camera Moves & Transitions",
-  "description": "A lighthouse keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.",
+  "title": "Lighthouse · Camera Moves",
+  "description": "The lighthouse from the launch film. A keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.",
   "scene": {
     "name": "Lighthouse point",
     "environment": {
