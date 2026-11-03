@@ -83,7 +83,11 @@ test('Posterized rises above the defender and sends the ball through the rim; Wi
 // Animation changes intentionally stale the earlier paid takes; no generation is performed in this pass.
 // Media made before the animation pass that the 2026-11-01 regenerations did not replace (see examples/starters/README.md).
 // None is left: every shot of every starter carries the current blocking. List a shot here if a later pass keeps an older take.
-const EARLIER_MEDIA = {};
+// The 2026-11-03 stand correction keeps these earlier takes and their original source signatures.
+const EARLIER_MEDIA = {
+  'final-lap': Object.fromEntries(['Final lap', 'The draft', 'From the stands', 'Checkered flag'].map(title => [title, ['stills', 'video']])),
+  posterized: Object.fromEntries(['Fast break', 'The drive', 'Posterized'].map(title => [title, ['stills', 'video']])),
+};
 
 test('starter copies open with current stills and videos, except the takes listed as made for the earlier animation', () => {
   for (const s of starters.filter(x => !BLOCKOUT_STARTERS.includes(x.slug))) {

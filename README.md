@@ -19,15 +19,15 @@ The demo is read-only: explore the scenes and watch their existing media. Instal
 
 ### Your blockout becomes the shot
 
-![The same camera and composition, from 3D blockout to generated video](docs/media/blockout-to-result.gif)
+![Current Cut workspace comparing the blockout, start still and generated video](docs/media/blockout-to-result.gif)
 
-### Direct the camera, explore the look
+### Preview your camera move
 
-![Phone camera direction applied across racing, basketball and different visual styles](docs/media/camera-controls.gif)
+![Current Shoot workspace playing the Mountain Trail camera reveal](docs/media/camera-controls.gif)
 
-| Build and direct | Inspect inputs and costs |
+| Preview the camera | Inspect generation inputs |
 | --- | --- |
-| ![Scene editor with object and camera controls](docs/media/workspace.png) | ![Generation settings and model input controls](docs/media/generation-settings.png) |
+| ![Shoot workspace with camera controls and a live 3D preview](docs/media/shoot.png) | ![Generation settings and model input controls](docs/media/generation-settings.png) |
 
 ## From blockout to finished shot
 
@@ -45,7 +45,7 @@ The demo is read-only: explore the scenes and watch their existing media. Instal
 
 ### Masked edits — in preview
 
-![Prototype: scene-derived mask, cropped regeneration and compositing](docs/media/masked-edit-preview.gif)
+[Watch the masked-edit prototype in the launch film](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film.mp4).
 
 The launch film previews a tested masked-edit prototype: regenerate a selected region and composite it into the original shot. The wardrobe example cost about **$0.15 versus $1.52** for full regeneration; costs depend on the model, crop and retries. **This experimental pipeline is not yet included in the app.**
 
