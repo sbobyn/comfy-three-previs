@@ -67,7 +67,7 @@ const cap1 = x => x.charAt(0).toUpperCase() + x.slice(1);
  * a second named cast member (shortened to their first sentence when needed) and the lens and filter hints, then
  * adds the rest by priority while it fits `cap`: format, look, set, more named cast, other cast, set pieces.
  */
-export function autoPromptSegments(project, shot, kind = 'video', { cap = kind === 'video' ? VIDEO_PROMPT_CAP : Infinity, cameraSource = 'blockout' } = {}) {
+export function autoPromptSegments(project, shot, kind = 'video', { cap = kind === 'video' ? VIDEO_PROMPT_CAP : Infinity, cameraSource = 'blockout', sent = null } = {}) {
   const { entities, environment } = project.scene;
   const items = []; // { order, priority, seg } or set pieces { order: 3, priority, piece, ids }
   const seen = new Set();
@@ -128,13 +128,18 @@ export function autoPromptSegments(project, shot, kind = 'video', { cap = kind =
     }
     return out;
   };
-  const length = segs => segs.reduce((a, s) => a + s.text.length + 1, -1);
-  const byPriority = [...items].sort((a, b) => a.priority - b.priority);
+  // `sent` (sectionedSegments): the texts that replace sections in what is sent, your overrides and the camera line. Those
+  // sections are always sent, so they are budgeted as required, at the length of what is sent.
+  const sentText = g => (sent?.[g.key] ? sent[g.key].text : g.text), overridden = x => !!sent?.[x.seg ? x.seg.key : 'world'];
+  const length = segs => segs.reduce((a, s) => a + sentText(s).length + 1, -1);
+  const byPriority = [...items].sort((a, b) => a.priority - b.priority), required = x => x.priority <= 1 || overridden(x);
   // Required parts first; over the cap, named cast after the lead shrink to their first sentence, then the lead.
-  const chosen = byPriority.filter(x => x.priority <= 1);
+  const chosen = byPriority.filter(required);
   const castReq = chosen.filter(x => x.short).sort((a, b) => b.sub - a.sub);
   for (const x of castReq) { if (length(render(chosen)) <= cap) break; chosen[chosen.indexOf(x)] = { ...x, seg: x.short }; }
-  for (const x of byPriority.filter(y => y.priority > 1)) {
+  // Still over with your overrides in: named cast after the lead (that you did not override) yield, last first; the lead stays.
+  if (sent) for (const x of chosen.filter(y => y.order === 2 && y.sub > 0 && !overridden(y)).sort((a, b) => b.sub - a.sub)) { if (length(render(chosen)) <= cap) break; chosen.splice(chosen.indexOf(x), 1); }
+  for (const x of byPriority.filter(y => !required(y))) {
     if (length(render([...chosen, x])) <= cap) chosen.push(x);
     else if (x.short && length(render([...chosen, { ...x, seg: x.short }])) <= cap) chosen.push({ ...x, seg: x.short });
   }
@@ -164,13 +169,16 @@ export const autoPromptText = (project, shot, kind = 'video', opts) => autoPromp
  * applySections): one row per candidate section, in prompt order, with its policy and whether it is sent.
  */
 export function sectionedSegments(project, shot, kind = 'video', opts = {}) {
-  const capped = autoPromptSegments(project, shot, kind, opts);
-  const overrides = shot.promptSections?.[kind];
-  const full = kind === 'image' && opts.cap === undefined ? capped : autoPromptSegments(project, shot, kind, { ...opts, cap: Infinity });
-  const rows = applySections(capped, full, overrides || {});
-  // A video's camera line follows the shot's chosen look (its format and look sections, overrides included).
+  const overrides = shot.promptSections?.[kind] || {}, source = opts.cameraSource || 'blockout';
+  const full = kind === 'image' && opts.cap === undefined ? null : autoPromptSegments(project, shot, kind, { ...opts, cap: Infinity });
+  // A video's camera line follows the shot's chosen look: its format and look sections, overrides included.
+  const line = rows => cameraLine(source, sectionsMedium(rows));
+  // Overridden sections are always sent as your text; the length cap is budgeted for that text and that camera line.
+  const sent = kind === 'video' && Object.keys(overrides).length ? { ...overrides, camera: { text: line(applySections(full, full, overrides)) } } : null;
+  const capped = autoPromptSegments(project, shot, kind, { ...opts, ...(sent ? { sent } : {}) });
+  const rows = applySections(capped, full || capped, overrides);
   const camera = kind === 'video' && rows.find(r => r.key === 'camera');
-  if (camera) camera.text = camera.autoText = camera.fullText = cameraLine(opts.cameraSource || 'blockout', sectionsMedium(rows));
+  if (camera) camera.text = camera.autoText = camera.fullText = line(rows);
   return rows;
 }
 /**

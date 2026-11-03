@@ -217,3 +217,15 @@ test('auto-prompt cap: per-preset data, 600 for every built-in model today, so n
   assert.ok(omitted.length, 'the starter shot is long enough to leave sections out at 600');
   for (const r of omitted) assert.match(r.why, /about 600 characters, a rule of thumb/);
 });
+
+test('overridden sections are budgeted at their own length: the composed prompt keeps to the cap with a reference legend', () => {
+  // Look Lab's Fall variant overrides its world, look and walker; with a start still the legend takes room too.
+  const p = project('look-lab'), s = p.shots.find(x => x.title === 'd · Fall'), plain = p.shots[0];
+  const refs = [{ ref: { id: 'start-still' }, entityId: null, role: 'frame', label: 'start still' }];
+  const plan = videoPromptPlan(p, s, { cameraSource: 'blockout', refs, cap: VIDEO_PROMPT_CAP, maxLength: 2500 });
+  assert.ok(plan.length <= VIDEO_PROMPT_CAP, `${plan.length}`);
+  for (const key of ['action', 'camera', `obj:${s.camera.target}`, 'world', 'style']) assert.ok(plan.sections.some(r => r.key === key && r.status === 'included'), key);
+  assert.ok(plan.text.endsWith('\nReference images: 1 = start still.'));
+  // A shot without overrides composes exactly its auto-prompt, as before.
+  assert.equal(shotPrompt(p, plain, 'video'), autoPromptText(p, plain, 'video'));
+});
