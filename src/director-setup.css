@@ -1,4 +1,4 @@
-/* Comfy Three Previs — Setup (home dialog and /setup.html). Tokens from director.css. */
+/* Comfy Previs — Setup (home dialog and /setup.html). Tokens from director.css. */
 .setup { display: flex; flex-direction: column; gap: 22px; }
 .setup h3 { margin: 0 0 10px; font-size: var(--fs-xs); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-3); }
 .setup .note { margin: 8px 0 0; }

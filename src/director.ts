@@ -154,7 +154,7 @@ const claudeChip = h('button', { class: 'top-claude', type: 'button', hidden: tr
 const topGo = h('button', { class: 'btn cta top-go', type: 'button' });
 const top = h('header', { class: 'ws-top' },
   h('div', { class: 'top-left' },
-    h('a', { class: 'brand', href: '/', title: 'Comfy Three Previs · all projects', 'aria-label': 'Comfy Three Previs · all projects' }, h('span', { class: 'brand-mark' })),
+    h('a', { class: 'brand', href: '/', title: 'Comfy Previs · all projects', 'aria-label': 'Comfy Previs · all projects' }, h('span', { class: 'brand-mark' })),
     h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput),
     h('div', { class: 'undo-group' }, undoBtn, redoBtn)),
   modeSwitch,
@@ -454,7 +454,7 @@ function apply(next: DirectorProject) {
   selection.retain(new Set(project.scene.entities.map(e => e.id)));
   if (document.activeElement !== titleInput) titleInput.value = project.title;
   titleInput.title = project.title;
-  document.title = `${project.title} · Comfy Three Previs`;
+  document.title = `${project.title} · Comfy Previs`;
   scrub.max = String(shot().duration);
   if (playhead > shot().duration) playhead = shot().duration;
   scene.sync(project, shot());

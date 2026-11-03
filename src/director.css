@@ -1,4 +1,4 @@
-/* Comfy Three Previs — workspace and home styles (Beret Labs theme: warm paper + ink).
+/* Comfy Previs — workspace and home styles (Beret Labs theme: warm paper + ink).
    Order: tokens · base · controls · dialogs · home · top bar · rail · viewport · transport · side panel · dialogs · reduced motion.
    Responsive rules sit at the end of the component they adjust. */
 :root {

@@ -64,7 +64,7 @@ export function setupBody(s: Setup | null, phone: { available: boolean } | null)
         h('dd', {}, 'Make a certificate once, then set the PREVIS_PHONE_* variables and restart. Pair the phone from the workspace’s Phone button.', code('node scripts/phone-certificate.mjs .evidence/phone-tls YOUR_MAC_LAN_IP')))),
     h('section', {}, h('h3', {}, 'Settings (.env)'),
       h('table', { class: 'setup-env' }, h('tbody', {}, ...ENV.map(([k, v]) => h('tr', {}, h('th', { scope: 'row' }, h('code', {}, k)), h('td', {}, v))))),
-      h('p', { class: 'note' }, 'Shell variables override .env. Restart Comfy Three Previs after changes (pnpm start).')));
+      h('p', { class: 'note' }, 'Shell variables override .env. Restart Comfy Previs after changes (pnpm start).')));
 }
 
 export async function loadSetup() {

@@ -1,5 +1,5 @@
 import { loadBlockoutModels } from './director-models';
-// Home / launch page: what Comfy Three Previs does, how it works in three steps, starters, and your projects.
+// Home / launch page: what Comfy Previs does, how it works in three steps, starters, and your projects.
 import './director-home.css';
 import './director-home-mobile.css'; // [mobile]
 import { TEMPLATES, makeEntity, makeShot } from '../shared/director.mjs';
@@ -213,7 +213,7 @@ function runLocally() {
   const done = h('button', { class: 'btn primary', type: 'submit' }, 'Done');
   const dlg = h('dialog', { class: 'confirm home-run', 'aria-labelledby': 'run-title' },
     h('form', { class: 'dialog-body', method: 'dialog' },
-      h('h2', { id: 'run-title', style: 'margin:0;font-size:15px' }, 'Run Comfy Three Previs locally'),
+      h('h2', { id: 'run-title', style: 'margin:0;font-size:15px' }, 'Run Comfy Previs locally'),
       h('p', { class: 'muted', style: 'margin:0' }, 'Free and open source. You need Node.js 22.12+ and pnpm 10 (', h('code', {}, 'corepack enable'), '), and FFmpeg to export videos.'),
       h('pre', { class: 'home-run-code', tabindex: 0, 'aria-label': 'Install commands' }, h('code', {}, commands)),
       h('p', { class: 'muted', style: 'margin:0' }, 'Scenes, blockouts and the cut work without an account. To generate stills and video, add a Comfy Cloud API key to ', h('code', {}, '.env'), ' as the README explains.'),
@@ -295,7 +295,7 @@ async function render() {
 
   app.replaceChildren(
     h('header', { class: 'home-top' },
-      h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Three Previs'),
+      h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Previs'),
       h('nav', {}, DEMO ? demoBadge() : null, jobsHost,
         h('button', { class: 'home-link', type: 'button', onclick: () => openJourney() }, 'Guide'),
         h('button', { class: 'home-link', type: 'button', onclick: () => openSetup() }, 'Setup'))),

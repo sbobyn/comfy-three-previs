@@ -1,4 +1,4 @@
-# Comfy Three Previs guide
+# Comfy Previs guide
 
 Build → Cast → Shoot → Generate → Cut. Open a starter on the home page to explore a finished example (cast images, design sheets, stills, a video per shot and a cut, all already made; if the blocking changed after they were made, the starter says so and marks those videos "older"), or create an empty scene. The in-app **Guide** has interactive examples; opening it never edits a project or starts a generation.
 

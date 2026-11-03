@@ -1,4 +1,4 @@
-/* Comfy Three Previs — home / launch page. Uses the Beret Labs tokens from director.css. */
+/* Comfy Previs — home / launch page. Uses the Beret Labs tokens from director.css. */
 
 .home-top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 16px; height: 56px; padding: 0 max(28px, calc((100% - 1180px) / 2)); background: color-mix(in srgb, var(--paper) 82%, transparent); backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid transparent; transition: border-color var(--t-base); }
 .home-top nav { margin-left: auto; display: flex; gap: 2px; align-items: center; }

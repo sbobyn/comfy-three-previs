@@ -82,7 +82,7 @@ test('watchdogs: hold while paused, stop aiming when silent or the phone leaves'
   assert.equal(aim.motion(t+2500),'silent');assert.equal(aim.orientation(t+2500),null);
   stream(aim,camQ(0,5,0),t+3000,100);assert.equal(aim.motion(t+3100),'streaming');
   aim.receive(msg({t:'presence',controller:false}),t+3200);assert.equal(aim.orientation(t+3200),null);assert.equal(aim.connected(),false);assert.match(aim.status(t+3200),/No phone/);
-  const other=phone();other.receive(msg({t:'presence',controller:true,owner:false}),0);assert.match(other.status(0),/Another Comfy Three Previs window/);
+  const other=phone();other.receive(msg({t:'presence',controller:true,owner:false}),0);assert.match(other.status(0),/Another Comfy Previs window/);
   other.disconnected();assert.match(other.status(0),/offline/);
 });
 

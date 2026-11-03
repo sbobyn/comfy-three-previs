@@ -217,8 +217,8 @@ export class PhoneAim {
   }
 
   status(now: number): string {
-    if (!this.socketOpen) return "Desktop link offline — is Comfy Three Previs running?";
-    if (this.owner === false) return "Another Comfy Three Previs window is using the phone";
+    if (!this.socketOpen) return "Desktop link offline — is Comfy Previs running?";
+    if (this.owner === false) return "Another Comfy Previs window is using the phone";
     if (!this.phonePresent) return "No phone connected";
     const motion = this.motion(now);
     if (motion === "none") return "Phone connected — tap Enable motion on the phone";

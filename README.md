@@ -1,4 +1,4 @@
-# Comfy Three Previs
+# Comfy Previs
 
 **Open-source AI previs: 3D blockouts, consistent cast images, gamepad & phone camera, AI video.**
 

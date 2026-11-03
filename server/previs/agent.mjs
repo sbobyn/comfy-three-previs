@@ -23,7 +23,7 @@ const VERSION = JSON.parse(readFileSync(new URL('../../package.json', import.met
 // This is a stdio MCP server, so without a flag it waits silently for JSON-RPC on stdin.
 if (process.argv.includes('--version')) { console.log(VERSION); process.exit(0); }
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
-  console.log(`comfy-previs ${VERSION}: MCP server (stdio) for directing Comfy Three Previs from Claude.
+  console.log(`comfy-previs ${VERSION}: MCP server (stdio) for directing Comfy Previs from Claude.
 It talks JSON-RPC on stdin/stdout, so run it from an MCP client, not by hand. The app must be running (pnpm start).
 
   PREVIS_URL   the app's address, loopback only (default http://127.0.0.1:5190)
