@@ -6,11 +6,14 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { createProjectDocument, openDirector } from '../server/previs/director.mjs';
-import { loadStarters, starterSnapshot, instantiateStarter, attachStarterMedia } from '../server/previs/starters.mjs';
+import { loadStarters, starterSnapshot, instantiateStarter, attachStarterMedia, starterCard, MODEL_BASE } from '../server/previs/starters.mjs';
+import { shotSignature } from '../shared/director.mjs';
+import { projectMesh } from '../shared/blockout-models.mjs';
+import { FINISHED_STARTERS, BLOCKOUT_STARTERS } from './helpers/starters.mjs';
 
 test('starter snapshots load in launch-page order, carry no absolute paths, and list media that is present', async () => {
   const starters = await loadStarters();
-  assert.deepEqual(starters.map(s => s.slug), ['breaking-news', 'wingspan', 'final-lap', 'posterized']);
+  assert.deepEqual(starters.map(s => s.slug), [...FINISHED_STARTERS, ...BLOCKOUT_STARTERS]);
   for (const s of starters) {
     const text = JSON.stringify(s);
     assert.ok(!/"\/(Users|home)\//.test(text), `${s.slug} has an absolute path`);
@@ -18,13 +21,28 @@ test('starter snapshots load in launch-page order, carry no absolute paths, and 
     for (const shot of s.shots) assert.equal(shot.render, undefined, `${s.slug} shot keeps render`);
     // Every listed file is on disk with the recorded hash, and every image or clip the snapshot uses is listed.
     for (const m of s.media) {
-      assert.match(m.path, /^media\/(refs\/[a-f0-9-]{36}\.webp|assets\/[a-f0-9-]{36}\.mp4)$/);
+      assert.match(m.path, /^media\/(refs\/[a-f0-9-]{36}\.(webp|glb)|assets\/[a-f0-9-]{36}\.mp4)$/);
       assert.equal(m.from, undefined);
       assert.equal(createHash('sha256').update(readFileSync(join(s.dir, m.path))).digest('hex'), m.sha256, `${s.slug} ${m.path}`);
     }
     const listed = new Set(s.media.map(m => m.path));
     for (const r of [...s.scene.references, ...s.shots.flatMap(x => x.references)]) assert.ok(listed.has(`media/refs/${r.file}`), `${s.slug} ${r.name}`);
     for (const a of s.assets) assert.ok(listed.has(`media/${a.file}`), `${s.slug} ${a.id}`);
+    // An imported model ships its GLB and points at the placeholder project, never at a real one.
+    for (const e of s.scene.entities.filter(x => projectMesh(x.model))) { assert.ok(e.model.startsWith(MODEL_BASE), `${s.slug}: ${e.name}`); assert.ok(listed.has(`media/refs/${e.model.split('/').pop()}`), `${s.slug}: ${e.name} model file`); }
+    if (BLOCKOUT_STARTERS.includes(s.slug)) {
+      // A blockout starter: every shot has its blockout clip, or shares the exact blocking of a shot that has one (Look Lab's
+      // variants); no stills or videos; every shot's subject has a written Cast Card.
+      const clipped = new Set(s.assets.filter(a => a.kind === 'camera-render').map(a => a.shotId));
+      for (const shot of s.shots) {
+        assert.ok(clipped.has(shot.id) || s.shots.some(o => clipped.has(o.id) && shotSignature(s, o) === shotSignature(s, shot)), `${s.slug} ${shot.title} has no blockout clip`);
+        assert.equal(shot.references.length, 0); assert.ok(shot.duration >= 4 && shot.duration <= 5);
+        assert.ok((s.scene.entities.find(e => e.id === shot.camera.target)?.notes || '').trim(), `${s.slug} ${shot.title}: its subject has no Cast Card`);
+      }
+      assert.ok(!s.assets.some(a => a.kind === 'workflow-result') && !s.edit.clips.length, `${s.slug}: no generated media`);
+      for (const e of s.scene.entities.filter(x => x.kind === 'character' && x.shape !== 'group')) assert.ok((e.notes || '').trim() || e.lookFrom, `${s.slug}: ${e.name} has no Cast Card`);
+      continue;
+    }
     // Each shot opens finished: a still, a blockout clip and a chosen video in the cut.
     for (const shot of s.shots) {
       assert.ok(shot.references.some(r => r.role === 'frame'), `${s.slug} ${shot.title} has no still`);
@@ -65,6 +83,34 @@ test('a project from a starter gets its media copied in, with fresh ids, and cop
     const files = [...p.scene.references.map(r => ({ to: `refs/${r.file}` }))].map(f => ({ ...f, from: 'missing-on-purpose' }));
     assert.equal(await attachStarterMedia(snap.dir, join(root, 'director', p.id), files), 0);
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('a starter with an imported model copies its GLB into the new project and points the object at it', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'starter-model-'));
+  try {
+    const director = await openDirector(root);
+    const p = await director.create({ template: 'mountain-trail' });
+    const hiker = p.scene.entities.find(e => e.name === 'Hiker'), file = hiker.model.split('/').pop();
+    assert.equal(hiker.model, `/director-refs/${p.id}/${file}`);
+    assert.ok(existsSync(join(root, 'director', p.id, 'refs', file)), 'the GLB is in the project folder');
+    assert.equal(hiker.perform.clip, 'Walk'); assert.ok(hiker.source.rig?.humanoid, 'rig and clips survive');
+    // Without its media the object falls back to its proxy shape (no dangling model URL).
+    const bare = instantiateStarter((await loadStarters()).find(s => s.slug === 'mountain-trail'), { has: () => false, projectId: p.id });
+    assert.equal(bare.scene.entities.find(e => e.name === 'Hiker').model, undefined);
+    // The launch page cannot load bundle files: its thumbnail draws the proxy.
+    assert.ok(starterCard((await loadStarters()).find(s => s.slug === 'mountain-trail')).scene.entities.every(e => !projectMesh(e.model)));
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('Look Lab variants keep their prompt sections in every copy, keyed to the copy’s walker', async () => {
+  const snap = (await loadStarters()).find(s => s.slug === 'look-lab'), copy = instantiateStarter(snap);
+  const walker = copy.scene.entities.find(e => e.name === 'Walker');
+  assert.equal(new Set(copy.shots.map(s => shotSignature(copy, s))).size, 1, 'one blocking for every variant');
+  for (const [i, sh] of copy.shots.entries()) {
+    assert.deepEqual(Object.keys(sh.promptSections?.video || {}).sort(), Object.keys(sh.promptSections?.image || {}).sort(), sh.title);
+    for (const key of Object.keys(sh.promptSections?.video || {})) if (key.startsWith('obj:')) assert.equal(key, `obj:${walker.id}`);
+    assert.equal(!!sh.promptSections, i > 0, `${sh.title}: only the base variant inherits everything`);
+  }
 });
 
 test('a starter whose media is missing still opens, without the missing images or videos', async () => {

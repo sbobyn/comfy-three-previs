@@ -56,9 +56,12 @@ export class RigRuntime {
     if (this.current && this.current !== action) { this.current.stop(); this.current = null; }
     if (action && perf) {
       const d = action.getClip().duration || 1;
-      action.play(); action.enabled = true; action.setEffectiveWeight(1);
+      action.play(); action.enabled = true;
       action.time = perf.loop ? ((perf.time % d) + d) % d : Math.max(0, Math.min(d - 1e-4, perf.time));
-      this.mixer.update(0); this.current = action;
+      // The mixer writes a bone only when its value differs from its previous update, but every call starts from the rest
+      // pose: settle it on the rest pose first (weight 0), so applying the same moment twice still poses the figure.
+      action.setEffectiveWeight(0); this.mixer.update(0);
+      action.setEffectiveWeight(1); this.mixer.update(0); this.current = action;
       // In place: the clip may bob and sway the hips, but the object's own path moves it across the set.
       const hips = this.joints.get('body'), r = hips && this.rest.get(hips);
       if (perf.inPlace && hips && r) { hips.position.x = r[0].x; hips.position.z = r[0].z; }

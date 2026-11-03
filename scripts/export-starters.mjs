@@ -13,7 +13,8 @@
 // Each starter is written to examples/starters/<slug>/starter.json plus a media/ folder: every object's
 // primary look and design sheet, each shot's chosen still, its blockout clip and its chosen video
 // (see starterPicks in server/previs/starters.mjs). Images become WebP no larger than 1600 px; videos become
-// 720p H.264 at up to 2.5 Mbit/s with no audio (needs ffmpeg and ffprobe on PATH). A file whose source
+// 720p H.264 at up to 2.5 Mbit/s with no audio (needs ffmpeg and ffprobe on PATH); imported models (GLB) are copied
+// unchanged. A file whose source
 // has not changed is not re-encoded, so re-exports leave unchanged media byte-identical.
 //
 // Options: --check; --<slug> <project-id> overrides a source project; --only <slug>; --no-media writes the
@@ -42,6 +43,12 @@ const SOURCE_DEFS = [
     hero: { shots: ['95a7f87c-6236-4628-a4e9-88bcea6dc6aa'] } },
   { slug: 'posterized', legacyId: '5e9f88cf-0638-43aa-bba5-2eb9fa4cd7d6', title: 'Posterized', description: 'A fast break, a drive into the lane, then the Comfy guard rising above the defender to finish at the rim.',
     hero: { shots: ['755f685b-a74e-4c80-8ffd-8dc9cbdfd450', '4feea365-12b8-456f-878e-80be456c4c27'] } },
+  // Blockout starters (2026-11-02; authored with scripts/starters/author.mjs): blockout clips, no generated media.
+  { slug: 'mountain-trail', title: 'Mountain Trail', description: 'A hiker crosses an open alpine valley toward a lake and a cabin: room to fly a drone or phone camera, with a ridge reveal, a slope dive, a low track and a wide.', hero: { shots: [] } },
+  { slug: 'city-blocks', title: 'City Blocks', description: 'A downtown grid with traffic and pedestrians: a drone rise between buildings, a street-level car track, a rooftop orbit and a pedestrian follow.', hero: { shots: [] } },
+  { slug: 'camera-moves', title: 'Camera Moves & Transitions', description: 'A lighthouse keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.', hero: { shots: [] } },
+  { slug: 'look-lab', title: 'Look Lab', description: 'One small-town street blockout in twelve looks: seasons, night, wardrobe, a different person, anime, claymation, 3D animated and watercolour, all sharing one camera and one blocking.', hero: { shots: [] } },
+  { slug: 'two-hander', title: 'Two-Hander', description: 'A café conversation in coverage: a master, two over-the-shoulders, an insert of a reach for a cup and a zooming close-up, with seated, posed figures.', hero: { shots: [] } },
 ];
 
 export const SOURCES = SOURCE_DEFS.map(d => ({ ...d, id: starterSourceId(d.slug) }));
@@ -179,6 +186,12 @@ async function encodeMedia(snap, dir, prev, read) {
     const old = prev?.media?.find(m => m.path === f.path && (m.sourceSha256 === sourceSha256 || m.sha256 === sourceSha256));
     if (old && existsSync(dest) && sha(await readFile(dest)) === old.sha256) { out.push(old); continue; }
     if (old && old.sha256 === sourceSha256) { await mkdir(dirname(dest), { recursive: true }); await writeFile(dest, bytes); out.push(old); continue; }
+    // An imported model (GLB) is copied as it is: it is already the checked, self-contained file the app stores.
+    if (f.kind === 'model') {
+      await mkdir(dirname(dest), { recursive: true }); await writeFile(dest, bytes);
+      out.push({ path: f.path, kind: f.kind, bytes: bytes.length, sha256: sourceSha256, sourceSha256 });
+      continue;
+    }
     const input = join(tmp, `in-${sourceSha256.slice(0, 16)}`);
     await writeFile(input, bytes);
     await mkdir(dirname(dest), { recursive: true });

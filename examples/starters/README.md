@@ -1,6 +1,7 @@
 # Starter projects
 
-The home page's **Starters** row offers these four projects (plus **New scene** for an empty stage).
+The home page's **Starters** row offers these nine projects (plus **New scene** for an empty stage): four finished
+starters, then five blockout starters for testing cameras, devices, transitions and looks (below).
 Opening one creates a new project from its snapshot, so the starter itself never changes.
 
 ```
@@ -8,12 +9,83 @@ examples/starters/
   index.json                  # { "starters": [slug, …] } — home-page order
   <slug>/starter.json         # the snapshot
   <slug>/media/refs/<id>.webp # object looks, design-sheet views and boards, shot stills
+  <slug>/media/refs/<id>.glb  # imported models (the blockout starters' mannequin), copied byte for byte
   <slug>/media/assets/<id>.mp4  # each shot's blockout clip and chosen video
 ```
 
+## Blockout starters (2026-11-02)
+
+Five starters open with a blockout clip per shot and written Cast Cards, and no generated media: making the cast images,
+stills and videos is the test. They were built through the MCP tools on a private server (paid work off) by
+`scripts/starters/author.mjs` and its scene modules in `scripts/starters/scenes/`; the bundles here remain the source of
+truth. Every object is original, nothing carries a brand, logo, sign or lettering (each project style says so, and every
+shot has the `no logos or lettering` filter tag, which a video prompt always keeps), every shot is 4–5 s with its camera
+keyed in the blockout, and descriptions give action, not a camera move.
+
+People are an **original procedural mannequin** (`scripts/starters/mannequin.mjs`, MIT): an imported, rigged GLB with
+Walk, Idle and Wave clips, a dark face visor and dark shoes so facing reads at any distance. They exercise model import,
+clips, poses, IK and the neutral stand-in. Buildings, rocks, chairs, tables, lamps and generic cars are the built-in proxy
+shapes; trees, terrain and the lake use the bundled meshes.
+
+| Starter | Shot | s | What it tests |
+|---|---|---:|---|
+| **Mountain Trail** | Ridge reveal | 5 | Aerial reveal: low behind a moraine, rising over it to the valley, the lake and the hiker. |
+| | Slope dive | 5 | FPV dive down the south slope's fall line, levelling off behind the hiker. |
+| | Trail track | 5 | Knee-high tracking shot beside the hiker on the dirt trail (Walk clip). |
+| | Valley wide | 5 | Locked-off 24 mm wide of the whole valley. |
+| **City Blocks** | Drone rise | 5 | Vertical rise between façades, holding on a commuter. |
+| | Car track | 5 | Street-level front three-quarter track with a generic red hatchback. |
+| | Rooftop orbit | 5 | 140° orbit around a figure at the edge of a 48 m tower (Idle clip). |
+| | Pedestrian follow | 5 | Over-the-shoulder follow as the commuter steps off the kerb onto a zebra crossing. |
+| **Camera Moves & Transitions** | Locked-off … Tilt up | 4 each | All 12 `MOVES` presets on the same four seconds (the keeper stands still), so only the camera differs. |
+| | Dolly zoom (vertigo) | 4 | Back 5 → 12 m while the lens goes 24 → 58 mm: the keeper holds size, the tower looms. |
+| | FPV fly-through | 4 | Low over the water, through a sea arch, up the cliff to the keeper. |
+| | Handheld | 4 | Deterministic few-centimetre operator wobble (64 keys). |
+| | Push-in + lens change | 4 | Push in with a 35 → 50 mm lens change. Focus is not modelled; "rack focus" is a lens note only. |
+| | Whip pan A · out / B · in | 4 + 4 | Whip-pan-to-whip-pan: A whips off the waving keeper, B lands mid-whip on the boat. |
+| | Match cut A · lantern / B · buoy | 4 + 4 | Match cut: A ends on the round lantern centred, B opens on the round buoy at the same place and size. |
+| | Cut on action A · wide / B · close | 4 + 4 | Cut on action: A cuts as the door swings; B overlaps 0.2 s and follows the keeper in. |
+| | Wipe A · foreground rock / B · reveal | 4 + 4 | In-camera foreground wipe: one constant-speed truck behind a rock, split at the moment it fills the frame. |
+| **Look Lab** | a · Summer day (base) … l · Watercolour | 4 × 12 | One blockout, twelve looks (below). |
+| **Two-Hander** | Master; Over Ben · on Ada; Over Ada · on Ben | 5 each | Dialogue coverage on the 180° line: 32 mm master, 50 mm over-the-shoulders; sit pose plus keyed gestures. |
+| | Insert · cup | 4 | 70 mm insert; Ada's hand reaches her cup by IK. |
+| | Close-up · zoom on Ben | 4 | Lens change within the shot, 50 → 70 mm. The barista is sent to models as the neutral grey stand-in. |
+
+**Flying your own take.** Mountain Trail and City Blocks are laid out for **Fly camera** with a keyboard, gamepad (Drone RC
+Mode 2) or phone: the valley floor is about 200 m of open meadow with the hiker crossing it on a clear path, and the city
+has 12 m streets, a plaza and a 48 m roof. Open a shot, press **Fly camera** and record; at the default 6 m/s (×2.5 with RB)
+a 5 s take covers 30–75 m. Keep the take to replace the shot's camera keys.
+
+**Transitions.** The Cut joins shots with hard cuts only: film export concatenates them and the sequence player switches
+clips. A dissolve, a whip-pan blur, a wipe or any other transition effect is not supported. What a blockout *can* do is
+craft the transition into the shots themselves, as the pairs above do:
+
+| Transition | Craft in the blockout | In the Cut |
+|---|---|---|
+| Hard cut, cut on action, match cut | Yes: overlap the action across the pair; frame matching shapes at the same place and size | Hard cut (supported) |
+| Whip pan to whip pan | Yes: end A and start B mid-whip, both fast | Hard cut; no motion-blur bridge |
+| Foreground wipe | Yes: pass the camera behind a foreground object and split there | Hard cut on the covered frame |
+| Cross-dissolve, dip to black, graphic wipe | No | Not supported |
+
+The pairs' `cuts` style tags (`whip pan to whip pan`, `match cut`, `cut on action`, `in-camera foreground wipe`) note the
+intent; like all movement and cut tags they stay out of the prompts.
+
+**Look Lab variants.** Twelve shots share one camera, start, duration and scene, so they have the same blocking signature;
+only the base variant ships a blockout clip, and generating any variant makes its own (identical) blockout first. Each
+variant differs only in its prompt sections (Prompt sections in the shot, or `previs_director_set_prompt_section`), for
+both video and image prompts: the world (`world`, the season or time of day), the look (`style`), the walker's Cast Card
+text (`obj:<walker>`, clothing or a different person) and the format line (`intro`, for the stylised looks). The variants
+are summer day (base), night, spring, fall, winter, a yellow raincoat, a formal suit, a different person (an older man),
+anime, claymation, a stylised 3D animated feature and watercolour. Every variant's video prompt fits the 600-character cap.
+The quote for stills and edit videos of all twelve is in `.evidence/LOOKLAB-QUOTE-20261102.md`.
+
+The snapshot format keeps a shot's prompt-section overrides, saved models and settings and its direction flag
+(`promptSections`, `settings`, `motionCritical`); a copy re-keys `obj:<id>` sections to its own object ids. Prompt version
+history stays with the source project.
+
 ## What a starter opens with
 
-Each starter opens with bundled media, with no generation and no network:
+The four finished starters open with bundled media, with no generation and no network:
 
 - every cast member's primary image, and its design sheet (each view plus the composed board);
 - for each shot, the start and end stills, the blockout clip and the video made from them;
@@ -102,8 +174,9 @@ signature. `PREVIS_STARTERS_DIR` points the server at another starters folder (f
 
 ## Media size and why it is in git
 
-The four starters' media is about 35 MB (the export stops at 80 MB and then keeps only the hero shots'
-videos). It is committed with the code rather than downloaded from a release so that a fresh clone opens
+The starters' media is about 63 MB: 33 MB for the four finished starters and 30 MB of blockout clips (and two 110 KB
+mannequin GLBs) for the five blockout starters, 17.5 MB of it Camera Moves' 24 shots (the export stops at 80 MB and then
+keeps only the hero shots' videos). It is committed with the code rather than downloaded from a release so that a fresh clone opens
 finished starters offline, with no publish step to keep in sync, and so `pnpm demo:build` can use the same
 files. Re-exporting only rewrites a file when its source changed, so history grows only when a starter's
 content really changes.

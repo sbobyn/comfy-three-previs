@@ -1,0 +1,8508 @@
+{
+  "format": "comfy-previs-starter",
+  "version": 2,
+  "slug": "camera-moves",
+  "order": 6,
+  "title": "Camera Moves & Transitions",
+  "description": "A lighthouse keeper and a fishing boat: every camera move preset on the same four seconds, custom-key showcases, and shot pairs that craft whip, match, action and wipe transitions.",
+  "scene": {
+    "name": "Lighthouse point",
+    "environment": {
+      "preset": "stage",
+      "description": "A rocky headland in a sheltered bay on a bright breezy morning: a white lighthouse with a red cap, a small stone cottage, a high stone pier, a rock arch in the sea and green hills around the bay",
+      "style": "Photoreal coastal film. Clear morning sun, deep blue water with gentle swell, crisp natural colour. No logos, brand names, badges, signage or lettering anywhere"
+    },
+    "entities": [
+      {
+        "id": "2dbd0a4f-ff3b-427a-91cd-c0909d75da5a",
+        "name": "Bay hills",
+        "kind": "environment",
+        "shape": "terrain",
+        "model": "terrain",
+        "position": [
+          0,
+          -2,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1.3,
+          0.35,
+          1.3
+        ],
+        "color": "#6f8f4e",
+        "notes": "Green hills and pale cliffs ringing the bay",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "name": "Sea 1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -100,
+          -0.1,
+          -100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "Calm deep blue-green sea with a gentle swell",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "05ec765c-b374-482c-b6d8-cd8f4b75061d",
+        "name": "Sea 2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -100,
+          -0.1,
+          -50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "37923b83-a7ef-4702-aa43-f73a5299739c",
+        "name": "Sea 3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -100,
+          -0.1,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "ea74c705-f0f5-4075-8b4f-161fe8dae841",
+        "name": "Sea 4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -100,
+          -0.1,
+          50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "2232d575-c2b1-4a43-8f70-a33bb7bc6502",
+        "name": "Sea 5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -100,
+          -0.1,
+          100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "fa14c162-fd42-476b-beb0-64f41aa71796",
+        "name": "Sea 6",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -50,
+          -0.1,
+          -100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "eb6d7894-ac14-4b30-84ed-0cde96cc8427",
+        "name": "Sea 7",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -50,
+          -0.1,
+          -50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "f8b4da14-37a9-43b3-bd3a-10eca389367b",
+        "name": "Sea 8",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -50,
+          -0.1,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "fc525829-2f08-46a8-9f4e-5af71b4d5b0f",
+        "name": "Sea 9",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -50,
+          -0.1,
+          50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "489a6bc4-b71a-4dbe-8e95-d23d0caa27e6",
+        "name": "Sea 10",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -50,
+          -0.1,
+          100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "cea7728c-b024-4ecc-a97a-3561635c0639",
+        "name": "Sea 11",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          -0.1,
+          -100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "4f4c867f-87b3-4c31-993e-d421c9b78bef",
+        "name": "Sea 12",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          -0.1,
+          -50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "03a41dd9-a9a5-42e2-8142-806d445e4af3",
+        "name": "Sea 13",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          -0.1,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "35aecc71-0e01-4c61-8c09-ab21ba532c7f",
+        "name": "Sea 14",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          -0.1,
+          50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "605655be-a2ee-4455-b03c-592d26bb81c9",
+        "name": "Sea 15",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          -0.1,
+          100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "e701f4f4-1f4a-4b8b-9c84-0e0b36a30e66",
+        "name": "Sea 16",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          50,
+          -0.1,
+          -100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "053a89f7-ca73-4688-8bd5-3a4e981d50c7",
+        "name": "Sea 17",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          50,
+          -0.1,
+          -50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "f50de55d-9b8c-401f-b31b-9d116c6f6e7c",
+        "name": "Sea 18",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          50,
+          -0.1,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "8479c297-962c-4f46-9d25-4586df702ed9",
+        "name": "Sea 19",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          50,
+          -0.1,
+          50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "4c097ecb-e852-4fe4-9e45-d7577f22af06",
+        "name": "Sea 20",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          50,
+          -0.1,
+          100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "e9e89811-31f5-4098-990e-2fe733eeff8f",
+        "name": "Sea 21",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          100,
+          -0.1,
+          -100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "19c66126-7ebf-47f2-9242-06ce624f6122",
+        "name": "Sea 22",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          100,
+          -0.1,
+          -50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "a8f4968a-4be3-4d96-8cca-b74c0be89561",
+        "name": "Sea 23",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          100,
+          -0.1,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "25fe335f-718f-45a9-aa4c-ba2d2a876c44",
+        "name": "Sea 24",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          100,
+          -0.1,
+          50
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "11802c9d-b9fe-43de-8371-77ac22e9634c",
+        "name": "Sea 25",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          100,
+          -0.1,
+          100
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.1,
+          50
+        ],
+        "color": "#2e6a86",
+        "notes": "",
+        "lookFrom": "17d9b814-cda3-4fac-b831-769c777785ab",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4c7bc037-3c32-411c-9e73-0e5f4354227f"
+      },
+      {
+        "id": "4c7bc037-3c32-411c-9e73-0e5f4354227f",
+        "name": "Sea",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "ccf449e5-15f4-4d77-9787-baf2780641e0",
+        "name": "Headland",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          26,
+          3,
+          18
+        ],
+        "color": "#857d70",
+        "notes": "A blunt granite headland with weathered grey cliffs",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "b50392e0-82d3-462e-b12b-9de7a9720a32",
+        "name": "Headland grass",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          3,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          25.6,
+          0.1,
+          17.6
+        ],
+        "color": "#6f9a4e",
+        "notes": "Short wind-flattened grass on the clifftop",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "461e18eb-c381-423b-882d-f883a52c9dad",
+        "name": "Path",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -4.5,
+          3.102,
+          2.6
+        ],
+        "rotation": 115,
+        "scale": [
+          1.2,
+          0.05,
+          9.5
+        ],
+        "color": "#a89f8c",
+        "notes": "A worn gravel footpath",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "06e38eaa-202f-4c90-95b2-acd0e5334396",
+        "name": "Cliff rock 1",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -14,
+          -0.6,
+          6
+        ],
+        "rotation": 0,
+        "scale": [
+          3.2,
+          3,
+          3
+        ],
+        "color": "#7a7368",
+        "notes": "Dark wet granite boulders at the waterline",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "accb4a4c-7d1e-4906-98d2-a434fc97e94a",
+        "name": "Cliff rock 2",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -13,
+          -0.6,
+          -5
+        ],
+        "rotation": 47,
+        "scale": [
+          2.8,
+          2.6,
+          3.4
+        ],
+        "color": "#7a7368",
+        "notes": "",
+        "lookFrom": "06e38eaa-202f-4c90-95b2-acd0e5334396",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "65c18e2f-3432-4932-b14c-3ff806bd186f",
+        "name": "Cliff rock 3",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          12,
+          -0.6,
+          -7
+        ],
+        "rotation": 94,
+        "scale": [
+          3,
+          2.8,
+          3
+        ],
+        "color": "#7a7368",
+        "notes": "",
+        "lookFrom": "06e38eaa-202f-4c90-95b2-acd0e5334396",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "fd20e3f4-3069-480c-92f4-78cc63893487",
+        "name": "Cliff rock 4",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          14,
+          -0.6,
+          3
+        ],
+        "rotation": 141,
+        "scale": [
+          2.6,
+          2.4,
+          2.8
+        ],
+        "color": "#7a7368",
+        "notes": "",
+        "lookFrom": "06e38eaa-202f-4c90-95b2-acd0e5334396",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "1348f0ab-7e86-4e77-a2b4-9da5b571f54e",
+        "name": "Cliff rock 5",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -5,
+          -0.6,
+          10.5
+        ],
+        "rotation": 188,
+        "scale": [
+          3.4,
+          1.6,
+          2.4
+        ],
+        "color": "#7a7368",
+        "notes": "",
+        "lookFrom": "06e38eaa-202f-4c90-95b2-acd0e5334396",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "286bf8a2-92e1-4a86-adc6-aa0e10a67599",
+        "name": "Cliff rock 6",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          9,
+          -0.6,
+          10
+        ],
+        "rotation": 235,
+        "scale": [
+          2,
+          1.4,
+          2
+        ],
+        "color": "#7a7368",
+        "notes": "",
+        "lookFrom": "06e38eaa-202f-4c90-95b2-acd0e5334396",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "122fdd9a-b172-48d7-9777-a4227db022f2",
+        "name": "Arch pillar west",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -9.5,
+          -0.5,
+          22
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          6.3,
+          2.2
+        ],
+        "color": "#7a7368",
+        "notes": "",
+        "lookFrom": "06e38eaa-202f-4c90-95b2-acd0e5334396",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "6a668690-3c78-4956-a97b-e4fcc624b4e2"
+      },
+      {
+        "id": "33f86d68-62e0-40a0-a6fb-e4207b71ef28",
+        "name": "Arch pillar east",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -2.5,
+          -0.5,
+          22
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          6.3,
+          2.2
+        ],
+        "color": "#7a7368",
+        "notes": "",
+        "lookFrom": "06e38eaa-202f-4c90-95b2-acd0e5334396",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "6a668690-3c78-4956-a97b-e4fcc624b4e2"
+      },
+      {
+        "id": "d2523f3e-744a-41f1-a5dd-a747ec3470f7",
+        "name": "Arch top",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -6,
+          5.6,
+          22
+        ],
+        "rotation": 0,
+        "scale": [
+          6.6,
+          1.5,
+          2.2
+        ],
+        "color": "#7a7368",
+        "notes": "A natural sea arch of dark granite",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "6a668690-3c78-4956-a97b-e4fcc624b4e2"
+      },
+      {
+        "id": "6a668690-3c78-4956-a97b-e4fcc624b4e2",
+        "name": "Sea arch",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          -6,
+          0,
+          22
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "155fc49b-d94a-4d9a-8c16-ca83a7697f45",
+        "name": "Pier",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          6,
+          2.7,
+          16
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          0.4,
+          14
+        ],
+        "color": "#8f877a",
+        "notes": "A narrow high stone pier",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "b3fd11fa-2296-4598-b15e-d20601d04cf1",
+        "name": "Wipe rock",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          4.536,
+          3.1,
+          7.001
+        ],
+        "rotation": 20,
+        "scale": [
+          2.4,
+          2.6,
+          2.2
+        ],
+        "color": "#7a7368",
+        "notes": "",
+        "lookFrom": "06e38eaa-202f-4c90-95b2-acd0e5334396",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713"
+      },
+      {
+        "id": "f94fb92d-d4e3-41a6-b411-d2c4b12c5713",
+        "name": "Headland set",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          0.8214545454545455,
+          0,
+          3.9182727272727274
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "ee7a1b20-af79-493b-a5ac-272d8aa766bd",
+        "name": "Lighthouse",
+        "kind": "environment",
+        "shape": "cylinder",
+        "position": [
+          0,
+          3.1,
+          -2
+        ],
+        "rotation": 0,
+        "scale": [
+          5,
+          10,
+          5
+        ],
+        "color": "#eceae4",
+        "notes": "A tall white-painted round stone lighthouse tower",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "1402b857-71ee-4351-bd70-784271563adf"
+      },
+      {
+        "id": "6b2a496d-51e5-4370-951b-5ac685055174",
+        "name": "Gallery",
+        "kind": "environment",
+        "shape": "cylinder",
+        "position": [
+          0,
+          15.1,
+          -2
+        ],
+        "rotation": 0,
+        "scale": [
+          7,
+          0.2,
+          7
+        ],
+        "color": "#2f3336",
+        "notes": "A black iron gallery with a railing",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "1402b857-71ee-4351-bd70-784271563adf"
+      },
+      {
+        "id": "22f5c8f1-2d8b-42d5-8ee5-3db6dea777b0",
+        "name": "Lantern",
+        "kind": "prop",
+        "shape": "cylinder",
+        "position": [
+          0,
+          15.34,
+          -2
+        ],
+        "rotation": 0,
+        "scale": [
+          4,
+          1.8,
+          4
+        ],
+        "color": "#3c4a50",
+        "notes": "The round glass lantern room of the lighthouse, a bright lamp glowing behind the panes",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "1402b857-71ee-4351-bd70-784271563adf"
+      },
+      {
+        "id": "17e9f6e8-996c-44ec-9795-eaddb7075e9f",
+        "name": "Lighthouse cap",
+        "kind": "environment",
+        "shape": "cylinder",
+        "position": [
+          0,
+          17.5,
+          -2
+        ],
+        "rotation": 0,
+        "scale": [
+          4.6,
+          0.5,
+          4.6
+        ],
+        "color": "#b5322c",
+        "notes": "A red domed lighthouse cap",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "1402b857-71ee-4351-bd70-784271563adf"
+      },
+      {
+        "id": "af412d32-759c-461f-88ac-0f8a72fd5db3",
+        "name": "Doorway",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          3.1,
+          0.004
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1,
+          2.1,
+          0.06
+        ],
+        "color": "#141414",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "1402b857-71ee-4351-bd70-784271563adf"
+      },
+      {
+        "id": "5d13bcf8-2c24-4667-a139-dd4d34376fdf",
+        "name": "Lighthouse door",
+        "kind": "prop",
+        "shape": "box",
+        "position": [
+          0,
+          3.1,
+          0.12
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1,
+          2.1,
+          0.08
+        ],
+        "color": "#2d5a7a",
+        "notes": "A heavy painted blue wooden door with iron hinges",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 26.2,
+            "p": [
+              0,
+              3.1,
+              0.12
+            ],
+            "r": 0,
+            "ease": "smoothstep"
+          },
+          {
+            "t": 26.55,
+            "p": [
+              -0.052,
+              3.1,
+              0.352
+            ],
+            "r": 335,
+            "ease": "smoothstep"
+          },
+          {
+            "t": 26.9,
+            "p": [
+              -0.196,
+              3.1,
+              0.541
+            ],
+            "r": 310,
+            "ease": "smoothstep"
+          },
+          {
+            "t": 27.25,
+            "p": [
+              -0.408,
+              3.1,
+              0.651
+            ],
+            "r": 285,
+            "ease": "smoothstep"
+          },
+          {
+            "t": 27.6,
+            "p": [
+              -0.646,
+              3.1,
+              0.662
+            ],
+            "r": 260,
+            "ease": "smoothstep"
+          }
+        ],
+        "parent": "1402b857-71ee-4351-bd70-784271563adf"
+      },
+      {
+        "id": "1402b857-71ee-4351-bd70-784271563adf",
+        "name": "Lighthouse set",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          0,
+          0,
+          -1.3126666666666666
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "2c185e20-77ea-43f7-bfb4-93cc81ac6bd8",
+        "name": "Cottage",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -8.5,
+          3.1,
+          -3.5
+        ],
+        "rotation": 0,
+        "scale": [
+          6,
+          2.8,
+          4.5
+        ],
+        "color": "#d8d2c4",
+        "notes": "A small whitewashed stone cottage with a slate roof",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "d6b95aff-d706-4aa5-a1b3-839807749d25"
+      },
+      {
+        "id": "e602ca3f-5a2a-49cd-ac5d-c8859a5964c8",
+        "name": "Cottage roof south",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -8.5,
+          5.95,
+          -2.3
+        ],
+        "rotation": 0,
+        "scale": [
+          6.6,
+          0.16,
+          2.9
+        ],
+        "color": "#4a5058",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": -30,
+        "roll": 0,
+        "path": null,
+        "parent": "d6b95aff-d706-4aa5-a1b3-839807749d25"
+      },
+      {
+        "id": "aca9b7f1-dbdb-42d4-ac0a-f3be5d9e350b",
+        "name": "Cottage roof north",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -8.5,
+          5.95,
+          -4.7
+        ],
+        "rotation": 0,
+        "scale": [
+          6.6,
+          0.16,
+          2.9
+        ],
+        "color": "#4a5058",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 30,
+        "roll": 0,
+        "path": null,
+        "parent": "d6b95aff-d706-4aa5-a1b3-839807749d25"
+      },
+      {
+        "id": "d6b95aff-d706-4aa5-a1b3-839807749d25",
+        "name": "Cottage set",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          -8.5,
+          0,
+          -3.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "70399d52-5961-45d8-b283-f9277e52d5e0",
+        "name": "Fishing boat",
+        "kind": "vehicle",
+        "shape": "box",
+        "position": [
+          -40,
+          -0.35,
+          48
+        ],
+        "rotation": 0,
+        "scale": [
+          2.6,
+          1.1,
+          7
+        ],
+        "color": "#b8432a",
+        "notes": "A small wooden fishing boat with a red hull, a white wheelhouse and a short mast; no name, numbers or lettering",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -40,
+              -0.35,
+              48
+            ]
+          },
+          {
+            "t": 4,
+            "p": [
+              -32,
+              -0.35,
+              47
+            ]
+          },
+          {
+            "t": 8,
+            "p": [
+              -24,
+              -0.35,
+              45
+            ]
+          },
+          {
+            "t": 12,
+            "p": [
+              -16,
+              -0.35,
+              42
+            ]
+          },
+          {
+            "t": 16,
+            "p": [
+              -8,
+              -0.35,
+              38
+            ]
+          },
+          {
+            "t": 20,
+            "p": [
+              0,
+              -0.35,
+              34
+            ]
+          },
+          {
+            "t": 24,
+            "p": [
+              6,
+              -0.35,
+              30
+            ]
+          },
+          {
+            "t": 28,
+            "p": [
+              10,
+              -0.35,
+              25.5
+            ]
+          },
+          {
+            "t": 32,
+            "p": [
+              10.2,
+              -0.35,
+              21.5
+            ]
+          },
+          {
+            "t": 35,
+            "p": [
+              8.4,
+              -0.35,
+              19
+            ]
+          },
+          {
+            "t": 39,
+            "p": [
+              8.4,
+              -0.35,
+              18.6
+            ]
+          }
+        ],
+        "parent": "8747efbd-ee5d-477e-a9f1-bb20d2faa911"
+      },
+      {
+        "id": "80bf1715-8797-444c-babb-544416be923c",
+        "name": "Wheelhouse",
+        "kind": "vehicle",
+        "shape": "box",
+        "position": [
+          -40,
+          0.75,
+          48
+        ],
+        "rotation": 0,
+        "scale": [
+          1.8,
+          1.4,
+          2
+        ],
+        "color": "#efeee8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -40,
+              0.75,
+              48
+            ]
+          },
+          {
+            "t": 4,
+            "p": [
+              -32,
+              0.75,
+              47
+            ]
+          },
+          {
+            "t": 8,
+            "p": [
+              -24,
+              0.75,
+              45
+            ]
+          },
+          {
+            "t": 12,
+            "p": [
+              -16,
+              0.75,
+              42
+            ]
+          },
+          {
+            "t": 16,
+            "p": [
+              -8,
+              0.75,
+              38
+            ]
+          },
+          {
+            "t": 20,
+            "p": [
+              0,
+              0.75,
+              34
+            ]
+          },
+          {
+            "t": 24,
+            "p": [
+              6,
+              0.75,
+              30
+            ]
+          },
+          {
+            "t": 28,
+            "p": [
+              10,
+              0.75,
+              25.5
+            ]
+          },
+          {
+            "t": 32,
+            "p": [
+              10.2,
+              0.75,
+              21.5
+            ]
+          },
+          {
+            "t": 35,
+            "p": [
+              8.4,
+              0.75,
+              19
+            ]
+          },
+          {
+            "t": 39,
+            "p": [
+              8.4,
+              0.75,
+              18.6
+            ]
+          }
+        ],
+        "parent": "8747efbd-ee5d-477e-a9f1-bb20d2faa911"
+      },
+      {
+        "id": "038a116a-8fc6-4acb-9652-cabbd8885ee3",
+        "name": "Mast",
+        "kind": "vehicle",
+        "shape": "cylinder",
+        "position": [
+          -40,
+          2.15,
+          48
+        ],
+        "rotation": 0,
+        "scale": [
+          0.19,
+          2.6,
+          0.19
+        ],
+        "color": "#5a4630",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -40,
+              2.15,
+              48
+            ]
+          },
+          {
+            "t": 4,
+            "p": [
+              -32,
+              2.15,
+              47
+            ]
+          },
+          {
+            "t": 8,
+            "p": [
+              -24,
+              2.15,
+              45
+            ]
+          },
+          {
+            "t": 12,
+            "p": [
+              -16,
+              2.15,
+              42
+            ]
+          },
+          {
+            "t": 16,
+            "p": [
+              -8,
+              2.15,
+              38
+            ]
+          },
+          {
+            "t": 20,
+            "p": [
+              0,
+              2.15,
+              34
+            ]
+          },
+          {
+            "t": 24,
+            "p": [
+              6,
+              2.15,
+              30
+            ]
+          },
+          {
+            "t": 28,
+            "p": [
+              10,
+              2.15,
+              25.5
+            ]
+          },
+          {
+            "t": 32,
+            "p": [
+              10.2,
+              2.15,
+              21.5
+            ]
+          },
+          {
+            "t": 35,
+            "p": [
+              8.4,
+              2.15,
+              19
+            ]
+          },
+          {
+            "t": 39,
+            "p": [
+              8.4,
+              2.15,
+              18.6
+            ]
+          }
+        ],
+        "parent": "8747efbd-ee5d-477e-a9f1-bb20d2faa911"
+      },
+      {
+        "id": "8747efbd-ee5d-477e-a9f1-bb20d2faa911",
+        "name": "Boat",
+        "kind": "vehicle",
+        "shape": "group",
+        "position": [
+          -40,
+          0,
+          48
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "9020dec9-cd71-4d54-8168-60cfd558d979",
+        "name": "Buoy",
+        "kind": "prop",
+        "shape": "sphere",
+        "position": [
+          -1,
+          -0.3,
+          29
+        ],
+        "rotation": 0,
+        "scale": [
+          1.4,
+          1.4,
+          1.4
+        ],
+        "color": "#c8352c",
+        "notes": "A round red-and-white mooring buoy",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "name": "Keeper",
+        "kind": "character",
+        "shape": "person",
+        "model": "/director-refs/00000000-0000-0000-0000-000000000000/5061bddd-8ad4-42f7-a076-74fd05911e7b.glb",
+        "position": [
+          -6,
+          3.1,
+          6
+        ],
+        "rotation": 0,
+        "scale": [
+          1.0639999999999998,
+          1.0014444584647815,
+          0.9142856938498362
+        ],
+        "color": "#c8ccd4",
+        "notes": "A lighthouse keeper in a navy wool sweater, dark oilskin trousers, black rubber boots and a grey knit cap; weathered face, short grey beard",
+        "lookFrom": null,
+        "styleNotes": "Plain workwear without logos or lettering",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -6,
+              3.1,
+              6
+            ],
+            "r": 0
+          },
+          {
+            "t": 4.5,
+            "p": [
+              -6,
+              3.1,
+              6
+            ],
+            "r": 0
+          },
+          {
+            "t": 7,
+            "p": [
+              -6,
+              3.1,
+              6
+            ],
+            "r": 340
+          },
+          {
+            "t": 20.7,
+            "p": [
+              -6,
+              3.1,
+              6
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 21.23,
+            "p": [
+              -5.381,
+              3.1,
+              5.735
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 21.76,
+            "p": [
+              -4.763,
+              3.1,
+              5.47
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 22.29,
+            "p": [
+              -4.144,
+              3.1,
+              5.205
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 22.82,
+            "p": [
+              -3.525,
+              3.1,
+              4.939
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 23.35,
+            "p": [
+              -2.907,
+              3.1,
+              4.674
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 23.88,
+            "p": [
+              -2.349,
+              3.1,
+              4.325
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 24.41,
+            "p": [
+              -1.91,
+              3.1,
+              3.815
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 24.94,
+            "p": [
+              -1.47,
+              3.1,
+              3.306
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 25.47,
+            "p": [
+              -1.031,
+              3.1,
+              2.796
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 26,
+            "p": [
+              -0.591,
+              3.1,
+              2.286
+            ],
+            "r": 126,
+            "ease": "linear"
+          },
+          {
+            "t": 27.8,
+            "p": [
+              0,
+              3.1,
+              1.6
+            ],
+            "r": 180
+          },
+          {
+            "t": 28.4,
+            "p": [
+              0,
+              3.1,
+              0.838
+            ],
+            "r": 180,
+            "ease": "linear"
+          },
+          {
+            "t": 29,
+            "p": [
+              0,
+              3.1,
+              0.076
+            ],
+            "r": 180,
+            "ease": "linear"
+          },
+          {
+            "t": 29.6,
+            "p": [
+              0,
+              3.1,
+              -0.686
+            ],
+            "r": 180,
+            "ease": "linear"
+          },
+          {
+            "t": 30.2,
+            "p": [
+              0,
+              3.1,
+              -1.448
+            ],
+            "r": 180,
+            "ease": "linear"
+          }
+        ],
+        "parent": null,
+        "source": {
+          "file": "mannequin-slate.glb",
+          "format": "glb",
+          "licence": "MIT — original procedural mannequin (scripts/starters/mannequin.mjs)",
+          "attribution": "Comfy Previs starters",
+          "triangles": 1992,
+          "bytes": 112384,
+          "units": "glTF metres",
+          "clips": [
+            {
+              "name": "Walk",
+              "duration": 1.1
+            },
+            {
+              "name": "Idle",
+              "duration": 3
+            },
+            {
+              "name": "Wave",
+              "duration": 2
+            }
+          ],
+          "skinned": true,
+          "rig": {
+            "humanoid": true,
+            "joints": {
+              "body": 1,
+              "spine": 2,
+              "neck": 4,
+              "head": 5,
+              "armL": 8,
+              "forearmL": 9,
+              "handL": 10,
+              "armR": 13,
+              "forearmR": 14,
+              "handR": 15,
+              "thighL": 17,
+              "shinL": 18,
+              "footL": 19,
+              "thighR": 21,
+              "shinR": 22,
+              "footR": 23
+            },
+            "parents": {
+              "body": null,
+              "spine": "body",
+              "neck": "spine",
+              "head": "neck",
+              "armL": "spine",
+              "forearmL": "armL",
+              "handL": "forearmL",
+              "armR": "spine",
+              "forearmR": "armR",
+              "handR": "forearmR",
+              "thighL": "body",
+              "shinL": "thighL",
+              "footL": "shinL",
+              "thighR": "body",
+              "shinR": "thighR",
+              "footR": "shinR"
+            },
+            "rest": {
+              "body": [
+                0,
+                0.54366,
+                -0.09375
+              ],
+              "spine": [
+                0,
+                0.61023,
+                -0.09375
+              ],
+              "neck": [
+                0,
+                0.83213,
+                -0.09375
+              ],
+              "head": [
+                0,
+                0.87651,
+                -0.09375
+              ],
+              "armL": [
+                0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmL": [
+                0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handL": [
+                1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "armR": [
+                -0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmR": [
+                -0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handR": [
+                -1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "thighL": [
+                0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinL": [
+                0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footL": [
+                0.18797,
+                0.04438,
+                -0.09375
+              ],
+              "thighR": [
+                -0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinR": [
+                -0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footR": [
+                -0.18797,
+                0.04438,
+                -0.09375
+              ]
+            }
+          }
+        },
+        "perform": {
+          "clip": "Idle",
+          "offset": 0,
+          "speed": 1,
+          "keys": [
+            {
+              "t": 4.5,
+              "clip": "Wave",
+              "offset": 0,
+              "speed": 1
+            },
+            {
+              "t": 7.6,
+              "clip": "Idle",
+              "offset": 0,
+              "speed": 1
+            },
+            {
+              "t": 20.7,
+              "clip": "Walk",
+              "offset": 0,
+              "speed": 1
+            },
+            {
+              "t": 26,
+              "clip": "Idle",
+              "offset": 0,
+              "speed": 1
+            },
+            {
+              "t": 27.8,
+              "clip": "Walk",
+              "offset": 0,
+              "speed": 1
+            }
+          ]
+        }
+      }
+    ],
+    "references": []
+  },
+  "shots": [
+    {
+      "id": "436df388-80c7-4394-b756-328d6564cf36",
+      "title": "Locked-off",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "static",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 7,
+        "height": 4.4,
+        "angle": -10,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "static locked-off shot"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "405f8680-b9d1-406e-87e0-70e724411ed2",
+      "title": "Dolly in",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "dolly-in",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 8,
+        "height": 4.5,
+        "angle": -20,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "slow push-in"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "cc20e7d5-f2ce-425f-9027-6da7f6408364",
+      "title": "Dolly out",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "dolly-out",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 8,
+        "height": 4.5,
+        "angle": -45,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "slow pull-out"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "527796d0-a65a-489f-8ffe-0f052b98b803",
+      "title": "Truck left",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "truck-left",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 7,
+        "height": 4.5,
+        "angle": -30,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "tracking shot"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "2a72757e-8996-45d5-a883-970d3b7d0973",
+      "title": "Truck right",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "truck-right",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 7,
+        "height": 4.5,
+        "angle": -30,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "tracking shot"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "78df4352-51d5-4933-bf86-87a6c8ccddbc",
+      "title": "Pan left",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "pan-left",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 7,
+        "height": 4.5,
+        "angle": 0,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "slow pan"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "ad3002fb-a174-40d3-9bb5-9df72465de85",
+      "title": "Pan right",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "pan-right",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 7,
+        "height": 4.5,
+        "angle": -60,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "slow pan"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "1fe6a179-b595-47b1-a90d-a70e63ed6f61",
+      "title": "Orbit left",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "orbit-left",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 7,
+        "height": 4.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "orbit around the subject"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "92d7eef9-22b0-426f-bc11-4d0aeb3adac3",
+      "title": "Orbit right",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "orbit-right",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 7,
+        "height": 4.6,
+        "angle": -60,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "orbit around the subject"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "0decb706-72c3-417a-a242-f1001492ef37",
+      "title": "Crane up",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "crane-up",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 8,
+        "height": 4.2,
+        "angle": -20,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "crane up"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "8b86b751-ba3f-453d-bf43-407e9a75773b",
+      "title": "Crane down",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "crane-down",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 8,
+        "height": 4.2,
+        "angle": -20,
+        "mm": 35,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "crane down"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "a18eaf4b-db76-4dad-ac81-b20d69a4e3fa",
+      "title": "Tilt up",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "tilt-up",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 12,
+        "height": 3.6,
+        "angle": 0,
+        "mm": 24,
+        "keys": null
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "tilt up"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "24mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "641939eb-1e57-40c8-bd55-091d0cc0883f",
+      "title": "Dolly zoom (vertigo)",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -9,
+              4.6,
+              10
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 24
+          },
+          {
+            "t": 0.0313,
+            "p": [
+              -9.012,
+              4.6,
+              10.016
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 24.1
+          },
+          {
+            "t": 0.0625,
+            "p": [
+              -9.047,
+              4.6,
+              10.063
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 24.4
+          },
+          {
+            "t": 0.0938,
+            "p": [
+              -9.104,
+              4.6,
+              10.138
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 24.8
+          },
+          {
+            "t": 0.125,
+            "p": [
+              -9.18,
+              4.6,
+              10.241
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 25.4
+          },
+          {
+            "t": 0.1563,
+            "p": [
+              -9.276,
+              4.6,
+              10.367
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 26.2
+          },
+          {
+            "t": 0.1875,
+            "p": [
+              -9.388,
+              4.6,
+              10.517
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 27.1
+          },
+          {
+            "t": 0.2188,
+            "p": [
+              -9.515,
+              4.6,
+              10.687
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 28.1
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -9.656,
+              4.6,
+              10.875
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 29.3
+          },
+          {
+            "t": 0.2813,
+            "p": [
+              -9.81,
+              4.6,
+              11.08
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 30.5
+          },
+          {
+            "t": 0.3125,
+            "p": [
+              -9.974,
+              4.6,
+              11.299
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 31.8
+          },
+          {
+            "t": 0.3438,
+            "p": [
+              -10.148,
+              4.6,
+              11.53
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 33.2
+          },
+          {
+            "t": 0.375,
+            "p": [
+              -10.329,
+              4.6,
+              11.772
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 34.6
+          },
+          {
+            "t": 0.4063,
+            "p": [
+              -10.516,
+              4.6,
+              12.022
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 36.1
+          },
+          {
+            "t": 0.4375,
+            "p": [
+              -10.708,
+              4.6,
+              12.278
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 37.7
+          },
+          {
+            "t": 0.4688,
+            "p": [
+              -10.903,
+              4.6,
+              12.538
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 39.2
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -11.1,
+              4.6,
+              12.8
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 40.8
+          },
+          {
+            "t": 0.5313,
+            "p": [
+              -11.297,
+              4.6,
+              13.062
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 42.4
+          },
+          {
+            "t": 0.5625,
+            "p": [
+              -11.492,
+              4.6,
+              13.322
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 43.9
+          },
+          {
+            "t": 0.5938,
+            "p": [
+              -11.684,
+              4.6,
+              13.578
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 45.5
+          },
+          {
+            "t": 0.625,
+            "p": [
+              -11.871,
+              4.6,
+              13.828
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 47
+          },
+          {
+            "t": 0.6563,
+            "p": [
+              -12.052,
+              4.6,
+              14.07
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 48.4
+          },
+          {
+            "t": 0.6875,
+            "p": [
+              -12.226,
+              4.6,
+              14.301
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 49.8
+          },
+          {
+            "t": 0.7188,
+            "p": [
+              -12.39,
+              4.6,
+              14.52
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 51.1
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -12.544,
+              4.6,
+              14.725
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 52.4
+          },
+          {
+            "t": 0.7813,
+            "p": [
+              -12.685,
+              4.6,
+              14.913
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 53.5
+          },
+          {
+            "t": 0.8125,
+            "p": [
+              -12.812,
+              4.6,
+              15.083
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 54.5
+          },
+          {
+            "t": 0.8438,
+            "p": [
+              -12.924,
+              4.6,
+              15.233
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 55.4
+          },
+          {
+            "t": 0.875,
+            "p": [
+              -13.02,
+              4.6,
+              15.359
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 56.2
+          },
+          {
+            "t": 0.9063,
+            "p": [
+              -13.096,
+              4.6,
+              15.462
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 56.8
+          },
+          {
+            "t": 0.9375,
+            "p": [
+              -13.153,
+              4.6,
+              15.537
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 57.2
+          },
+          {
+            "t": 0.9688,
+            "p": [
+              -13.188,
+              4.6,
+              15.584
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 57.5
+          },
+          {
+            "t": 1,
+            "p": [
+              -13.2,
+              4.6,
+              15.6
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 57.6
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "dolly zoom"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "24mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "845b55d2-7244-4f35-80e9-161165c4194d",
+      "title": "FPV fly-through",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -6,
+              1.6,
+              46
+            ],
+            "look": [
+              -6,
+              2.5,
+              0
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.025,
+            "p": [
+              -5.925,
+              1.62,
+              45.497
+            ],
+            "look": [
+              -6,
+              2.575,
+              0.21
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.05,
+            "p": [
+              -5.852,
+              1.645,
+              44.883
+            ],
+            "look": [
+              -6,
+              2.649,
+              0.42
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.075,
+            "p": [
+              -5.78,
+              1.671,
+              44.22
+            ],
+            "look": [
+              -6,
+              2.724,
+              0.63
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.1,
+            "p": [
+              -5.712,
+              1.699,
+              43.522
+            ],
+            "look": [
+              -6,
+              2.799,
+              0.84
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.125,
+            "p": [
+              -5.649,
+              1.728,
+              42.797
+            ],
+            "look": [
+              -6,
+              2.873,
+              1.05
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.15,
+            "p": [
+              -5.591,
+              1.758,
+              42.05
+            ],
+            "look": [
+              -6,
+              2.948,
+              1.26
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.175,
+            "p": [
+              -5.539,
+              1.789,
+              41.284
+            ],
+            "look": [
+              -6,
+              3.022,
+              1.47
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.2,
+            "p": [
+              -5.495,
+              1.82,
+              40.501
+            ],
+            "look": [
+              -6,
+              3.097,
+              1.68
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.225,
+            "p": [
+              -5.459,
+              1.852,
+              39.704
+            ],
+            "look": [
+              -6,
+              3.172,
+              1.89
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -5.431,
+              1.884,
+              38.893
+            ],
+            "look": [
+              -6,
+              3.246,
+              2.1
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.275,
+            "p": [
+              -5.411,
+              1.917,
+              38.069
+            ],
+            "look": [
+              -6,
+              3.321,
+              2.31
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.3,
+            "p": [
+              -5.402,
+              1.951,
+              37.235
+            ],
+            "look": [
+              -6,
+              3.396,
+              2.52
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.325,
+            "p": [
+              -5.401,
+              1.984,
+              36.39
+            ],
+            "look": [
+              -6,
+              3.47,
+              2.73
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.35,
+            "p": [
+              -5.41,
+              2.019,
+              35.535
+            ],
+            "look": [
+              -6,
+              3.545,
+              2.94
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.375,
+            "p": [
+              -5.428,
+              2.053,
+              34.671
+            ],
+            "look": [
+              -6,
+              3.619,
+              3.15
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.4,
+            "p": [
+              -5.454,
+              2.088,
+              33.798
+            ],
+            "look": [
+              -6,
+              3.694,
+              3.36
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.425,
+            "p": [
+              -5.49,
+              2.123,
+              32.917
+            ],
+            "look": [
+              -6,
+              3.769,
+              3.57
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.45,
+            "p": [
+              -5.533,
+              2.159,
+              32.028
+            ],
+            "look": [
+              -6,
+              3.843,
+              3.78
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.475,
+            "p": [
+              -5.584,
+              2.195,
+              31.132
+            ],
+            "look": [
+              -6,
+              3.918,
+              3.99
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -5.641,
+              2.231,
+              30.228
+            ],
+            "look": [
+              -6,
+              3.993,
+              4.2
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.525,
+            "p": [
+              -5.704,
+              2.267,
+              29.318
+            ],
+            "look": [
+              -6,
+              4.067,
+              4.41
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.55,
+            "p": [
+              -5.771,
+              2.304,
+              28.401
+            ],
+            "look": [
+              -6,
+              4.142,
+              4.62
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.575,
+            "p": [
+              -5.842,
+              2.341,
+              27.478
+            ],
+            "look": [
+              -6,
+              4.216,
+              4.83
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.6,
+            "p": [
+              -5.915,
+              2.378,
+              26.549
+            ],
+            "look": [
+              -6,
+              4.291,
+              5.04
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.625,
+            "p": [
+              -5.99,
+              2.415,
+              25.614
+            ],
+            "look": [
+              -6,
+              4.366,
+              5.25
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.65,
+            "p": [
+              -6.065,
+              2.453,
+              24.674
+            ],
+            "look": [
+              -6,
+              4.44,
+              5.46
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.675,
+            "p": [
+              -6.139,
+              2.491,
+              23.728
+            ],
+            "look": [
+              -6,
+              4.515,
+              5.67
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.7,
+            "p": [
+              -6.21,
+              2.529,
+              22.776
+            ],
+            "look": [
+              -6,
+              4.59,
+              5.88
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.725,
+            "p": [
+              -6.279,
+              2.567,
+              21.82
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -6.343,
+              2.606,
+              20.859
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.775,
+            "p": [
+              -6.402,
+              2.645,
+              19.893
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.8,
+            "p": [
+              -6.454,
+              3.053,
+              18.922
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.825,
+            "p": [
+              -6.499,
+              3.463,
+              17.946
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.85,
+            "p": [
+              -6.537,
+              3.874,
+              16.966
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.875,
+            "p": [
+              -6.566,
+              4.287,
+              15.982
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.9,
+            "p": [
+              -6.587,
+              4.703,
+              14.994
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.925,
+            "p": [
+              -6.598,
+              5.119,
+              14.001
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.95,
+            "p": [
+              -6.6,
+              5.538,
+              13.005
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.975,
+            "p": [
+              -6.592,
+              5.958,
+              12.004
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 1,
+            "p": [
+              -6.575,
+              6.38,
+              11
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 20
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "FPV drone chase"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "20mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "90e03026-2296-4432-9a42-1f55968c2fad",
+      "title": "Handheld",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -4.786,
+              4.564,
+              10.214
+            ],
+            "look": [
+              -5.972,
+              4.66,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.0159,
+            "p": [
+              -4.779,
+              4.573,
+              10.221
+            ],
+            "look": [
+              -5.952,
+              4.676,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.0317,
+            "p": [
+              -4.777,
+              4.572,
+              10.223
+            ],
+            "look": [
+              -5.953,
+              4.666,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.0476,
+            "p": [
+              -4.782,
+              4.565,
+              10.221
+            ],
+            "look": [
+              -5.968,
+              4.646,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.0635,
+            "p": [
+              -4.789,
+              4.557,
+              10.216
+            ],
+            "look": [
+              -5.982,
+              4.637,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.0794,
+            "p": [
+              -4.795,
+              4.554,
+              10.21
+            ],
+            "look": [
+              -5.985,
+              4.647,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.0952,
+            "p": [
+              -4.796,
+              4.557,
+              10.206
+            ],
+            "look": [
+              -5.98,
+              4.662,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.1111,
+            "p": [
+              -4.793,
+              4.563,
+              10.204
+            ],
+            "look": [
+              -5.98,
+              4.669,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.127,
+            "p": [
+              -4.788,
+              4.568,
+              10.206
+            ],
+            "look": [
+              -5.989,
+              4.669,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.1429,
+            "p": [
+              -4.783,
+              4.568,
+              10.21
+            ],
+            "look": [
+              -6.001,
+              4.674,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.1587,
+            "p": [
+              -4.781,
+              4.564,
+              10.214
+            ],
+            "look": [
+              -6.006,
+              4.683,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.1746,
+            "p": [
+              -4.782,
+              4.559,
+              10.217
+            ],
+            "look": [
+              -6.001,
+              4.683,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.1905,
+            "p": [
+              -4.784,
+              4.554,
+              10.217
+            ],
+            "look": [
+              -5.997,
+              4.66,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.2063,
+            "p": [
+              -4.785,
+              4.55,
+              10.216
+            ],
+            "look": [
+              -6.006,
+              4.622,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.2222,
+            "p": [
+              -4.784,
+              4.543,
+              10.215
+            ],
+            "look": [
+              -6.028,
+              4.594,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.2381,
+            "p": [
+              -4.784,
+              4.533,
+              10.214
+            ],
+            "look": [
+              -6.052,
+              4.589,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.254,
+            "p": [
+              -4.787,
+              4.521,
+              10.214
+            ],
+            "look": [
+              -6.06,
+              4.601,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.2698,
+            "p": [
+              -4.795,
+              4.514,
+              10.215
+            ],
+            "look": [
+              -6.049,
+              4.609,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.2857,
+            "p": [
+              -4.808,
+              4.515,
+              10.214
+            ],
+            "look": [
+              -6.027,
+              4.607,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3016,
+            "p": [
+              -4.821,
+              4.527,
+              10.211
+            ],
+            "look": [
+              -6.007,
+              4.604,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3175,
+            "p": [
+              -4.831,
+              4.542,
+              10.205
+            ],
+            "look": [
+              -5.993,
+              4.609,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3333,
+            "p": [
+              -4.834,
+              4.555,
+              10.195
+            ],
+            "look": [
+              -5.978,
+              4.615,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3492,
+            "p": [
+              -4.831,
+              4.56,
+              10.183
+            ],
+            "look": [
+              -5.958,
+              4.608,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3651,
+            "p": [
+              -4.823,
+              4.559,
+              10.173
+            ],
+            "look": [
+              -5.936,
+              4.589,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.381,
+            "p": [
+              -4.816,
+              4.556,
+              10.166
+            ],
+            "look": [
+              -5.927,
+              4.575,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3968,
+            "p": [
+              -4.811,
+              4.555,
+              10.165
+            ],
+            "look": [
+              -5.94,
+              4.585,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4127,
+            "p": [
+              -4.809,
+              4.558,
+              10.168
+            ],
+            "look": [
+              -5.971,
+              4.617,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4286,
+            "p": [
+              -4.809,
+              4.562,
+              10.174
+            ],
+            "look": [
+              -6.004,
+              4.649,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4444,
+            "p": [
+              -4.808,
+              4.563,
+              10.181
+            ],
+            "look": [
+              -6.022,
+              4.665,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4603,
+            "p": [
+              -4.805,
+              4.563,
+              10.186
+            ],
+            "look": [
+              -6.027,
+              4.667,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4762,
+            "p": [
+              -4.801,
+              4.562,
+              10.19
+            ],
+            "look": [
+              -6.027,
+              4.67,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4921,
+            "p": [
+              -4.799,
+              4.565,
+              10.191
+            ],
+            "look": [
+              -6.031,
+              4.677,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5079,
+            "p": [
+              -4.799,
+              4.569,
+              10.192
+            ],
+            "look": [
+              -6.038,
+              4.676,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5238,
+            "p": [
+              -4.802,
+              4.572,
+              10.194
+            ],
+            "look": [
+              -6.037,
+              4.66,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5397,
+            "p": [
+              -4.805,
+              4.569,
+              10.198
+            ],
+            "look": [
+              -6.023,
+              4.641,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5556,
+            "p": [
+              -4.805,
+              4.557,
+              10.202
+            ],
+            "look": [
+              -6.005,
+              4.638,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5714,
+            "p": [
+              -4.801,
+              4.54,
+              10.206
+            ],
+            "look": [
+              -5.996,
+              4.656,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5873,
+            "p": [
+              -4.791,
+              4.525,
+              10.207
+            ],
+            "look": [
+              -6.002,
+              4.678,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6032,
+            "p": [
+              -4.779,
+              4.517,
+              10.207
+            ],
+            "look": [
+              -6.014,
+              4.681,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.619,
+            "p": [
+              -4.769,
+              4.519,
+              10.204
+            ],
+            "look": [
+              -6.018,
+              4.663,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6349,
+            "p": [
+              -4.765,
+              4.526,
+              10.2
+            ],
+            "look": [
+              -6.005,
+              4.639,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6508,
+            "p": [
+              -4.767,
+              4.535,
+              10.197
+            ],
+            "look": [
+              -5.982,
+              4.623,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6667,
+            "p": [
+              -4.773,
+              4.54,
+              10.198
+            ],
+            "look": [
+              -5.964,
+              4.612,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6825,
+            "p": [
+              -4.781,
+              4.543,
+              10.203
+            ],
+            "look": [
+              -5.958,
+              4.596,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6984,
+            "p": [
+              -4.788,
+              4.546,
+              10.212
+            ],
+            "look": [
+              -5.96,
+              4.576,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.7143,
+            "p": [
+              -4.792,
+              4.55,
+              10.221
+            ],
+            "look": [
+              -5.961,
+              4.569,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.7302,
+            "p": [
+              -4.796,
+              4.556,
+              10.229
+            ],
+            "look": [
+              -5.959,
+              4.585,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.746,
+            "p": [
+              -4.801,
+              4.559,
+              10.233
+            ],
+            "look": [
+              -5.963,
+              4.612,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.7619,
+            "p": [
+              -4.808,
+              4.557,
+              10.233
+            ],
+            "look": [
+              -5.984,
+              4.629,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.7778,
+            "p": [
+              -4.815,
+              4.553,
+              10.229
+            ],
+            "look": [
+              -6.019,
+              4.622,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.7937,
+            "p": [
+              -4.82,
+              4.552,
+              10.223
+            ],
+            "look": [
+              -6.053,
+              4.605,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.8095,
+            "p": [
+              -4.82,
+              4.557,
+              10.216
+            ],
+            "look": [
+              -6.069,
+              4.598,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.8254,
+            "p": [
+              -4.815,
+              4.567,
+              10.211
+            ],
+            "look": [
+              -6.064,
+              4.606,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.8413,
+            "p": [
+              -4.808,
+              4.578,
+              10.207
+            ],
+            "look": [
+              -6.046,
+              4.616,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.8571,
+            "p": [
+              -4.802,
+              4.583,
+              10.203
+            ],
+            "look": [
+              -6.031,
+              4.621,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.873,
+            "p": [
+              -4.802,
+              4.578,
+              10.198
+            ],
+            "look": [
+              -6.02,
+              4.628,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.8889,
+            "p": [
+              -4.807,
+              4.566,
+              10.192
+            ],
+            "look": [
+              -6.008,
+              4.649,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9048,
+            "p": [
+              -4.815,
+              4.551,
+              10.185
+            ],
+            "look": [
+              -5.987,
+              4.681,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9206,
+            "p": [
+              -4.823,
+              4.54,
+              10.178
+            ],
+            "look": [
+              -5.964,
+              4.702,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9365,
+            "p": [
+              -4.826,
+              4.534,
+              10.173
+            ],
+            "look": [
+              -5.95,
+              4.698,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9524,
+            "p": [
+              -4.825,
+              4.531,
+              10.172
+            ],
+            "look": [
+              -5.956,
+              4.673,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9683,
+            "p": [
+              -4.819,
+              4.528,
+              10.175
+            ],
+            "look": [
+              -5.975,
+              4.651,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9841,
+            "p": [
+              -4.813,
+              4.526,
+              10.182
+            ],
+            "look": [
+              -5.992,
+              4.646,
+              6
+            ],
+            "mm": 40
+          },
+          {
+            "t": 1,
+            "p": [
+              -4.808,
+              4.526,
+              10.189
+            ],
+            "look": [
+              -5.995,
+              4.65,
+              6
+            ],
+            "mm": 40
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "handheld"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "40mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "346f0e82-12f8-4192-816d-342df4d3930a",
+      "title": "Push-in + lens change",
+      "description": "@keeper stands at the cliff edge in the breeze, watching the sea, then glances along the coast; the white lighthouse stands behind.",
+      "duration": 4,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -2,
+              4.5,
+              12.96
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.0625,
+            "p": [
+              -2.02,
+              4.5,
+              12.926
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35.2
+          },
+          {
+            "t": 0.125,
+            "p": [
+              -2.075,
+              4.5,
+              12.829
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35.6
+          },
+          {
+            "t": 0.1875,
+            "p": [
+              -2.161,
+              4.5,
+              12.679
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 36.4
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -2.273,
+              4.5,
+              12.484
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 37.3
+          },
+          {
+            "t": 0.3125,
+            "p": [
+              -2.406,
+              4.5,
+              12.254
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 38.5
+          },
+          {
+            "t": 0.375,
+            "p": [
+              -2.554,
+              4.5,
+              11.997
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 39.7
+          },
+          {
+            "t": 0.4375,
+            "p": [
+              -2.712,
+              4.5,
+              11.721
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 41.1
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -2.875,
+              4.5,
+              11.438
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 42.5
+          },
+          {
+            "t": 0.5625,
+            "p": [
+              -3.038,
+              4.5,
+              11.154
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 43.9
+          },
+          {
+            "t": 0.625,
+            "p": [
+              -3.196,
+              4.5,
+              10.878
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 45.3
+          },
+          {
+            "t": 0.6875,
+            "p": [
+              -3.344,
+              4.5,
+              10.621
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 46.5
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -3.477,
+              4.5,
+              10.391
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 47.7
+          },
+          {
+            "t": 0.8125,
+            "p": [
+              -3.589,
+              4.5,
+              10.196
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 48.6
+          },
+          {
+            "t": 0.875,
+            "p": [
+              -3.675,
+              4.5,
+              10.046
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 49.4
+          },
+          {
+            "t": 0.9375,
+            "p": [
+              -3.73,
+              4.5,
+              9.949
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 49.8
+          },
+          {
+            "t": 1,
+            "p": [
+              -3.75,
+              4.5,
+              9.915
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 50
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "slow push-in"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm",
+          "rack focus",
+          "shallow depth of field"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "8e454fe7-bf48-4ba9-90fc-fcb582ef1a5d",
+      "title": "Whip pan A · out",
+      "description": "@keeper spots @fishing-boat out in the bay and waves an arm high in greeting.",
+      "duration": 4,
+      "start": 4,
+      "camera": {
+        "move": "custom",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.025,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.05,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.075,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.1,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.125,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.15,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.175,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.225,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.275,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.3,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.325,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.35,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.375,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.425,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.45,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.475,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.525,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.55,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.575,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.6,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.625,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.65,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.675,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.725,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6,
+              4.632,
+              6
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.775,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6.045,
+              4.058,
+              6.063
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.8,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6.214,
+              4.066,
+              6.21
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.825,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6.487,
+              4.08,
+              6.466
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.85,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -6.847,
+              4.099,
+              6.846
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.875,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -7.271,
+              4.123,
+              7.369
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -7.726,
+              4.153,
+              8.055
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.925,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -8.167,
+              4.189,
+              8.923
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.95,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -8.536,
+              4.229,
+              9.982
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.975,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -8.766,
+              4.276,
+              11.234
+            ],
+            "mm": 35
+          },
+          {
+            "t": 1,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -8.778,
+              4.327,
+              12.656
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "whip pan"
+        ],
+        "cuts": [
+          "hard cut",
+          "whip pan to whip pan"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "2c64584e-3e5c-40a4-b284-ef3397b38328",
+      "title": "Whip pan B · in",
+      "description": "@fishing-boat motors slowly across the bay toward the headland, a low wake curling behind it.",
+      "duration": 4,
+      "start": 8,
+      "camera": {
+        "move": "custom",
+        "target": "70399d52-5961-45d8-b283-f9277e52d5e0",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -30.876,
+              3.553,
+              14.512
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.025,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -29.067,
+              3.233,
+              22.506
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.05,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -26.014,
+              2.972,
+              28.481
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.075,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -22.763,
+              2.769,
+              32.567
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.1,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -20.031,
+              2.623,
+              35.107
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.125,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -18.247,
+              2.536,
+              36.46
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.15,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -22.8,
+              0.255,
+              44.614
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.175,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -22.6,
+              0.255,
+              44.547
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -22.4,
+              0.255,
+              44.48
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.225,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -22.2,
+              0.255,
+              44.412
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -22,
+              0.255,
+              44.344
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.275,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -21.8,
+              0.255,
+              44.275
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.3,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -21.6,
+              0.255,
+              44.205
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.325,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -21.4,
+              0.255,
+              44.135
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.35,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -21.2,
+              0.255,
+              44.064
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.375,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -21,
+              0.255,
+              43.992
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -20.8,
+              0.255,
+              43.92
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.425,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -20.6,
+              0.255,
+              43.847
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.45,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -20.4,
+              0.255,
+              43.774
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.475,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -20.2,
+              0.255,
+              43.7
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -20,
+              0.255,
+              43.625
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.525,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -19.8,
+              0.255,
+              43.55
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.55,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -19.6,
+              0.255,
+              43.474
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.575,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -19.4,
+              0.255,
+              43.397
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.6,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -19.2,
+              0.255,
+              43.32
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.625,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -19,
+              0.255,
+              43.242
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.65,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -18.8,
+              0.255,
+              43.164
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.675,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -18.6,
+              0.255,
+              43.085
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -18.4,
+              0.255,
+              43.005
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.725,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -18.2,
+              0.255,
+              42.925
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -18,
+              0.255,
+              42.844
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.775,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -17.8,
+              0.255,
+              42.762
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.8,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -17.6,
+              0.255,
+              42.68
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.825,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -17.4,
+              0.255,
+              42.597
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.85,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -17.2,
+              0.255,
+              42.514
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.875,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -17,
+              0.255,
+              42.43
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -16.8,
+              0.255,
+              42.345
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.925,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -16.6,
+              0.255,
+              42.26
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.95,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -16.4,
+              0.255,
+              42.174
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.975,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -16.2,
+              0.255,
+              42.087
+            ],
+            "mm": 35
+          },
+          {
+            "t": 1,
+            "p": [
+              -1,
+              4.6,
+              12
+            ],
+            "look": [
+              -16,
+              0.255,
+              42
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "70399d52-5961-45d8-b283-f9277e52d5e0"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "whip pan"
+        ],
+        "cuts": [
+          "hard cut",
+          "whip pan to whip pan"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "98dfc4d9-b24d-40d3-9df7-9605d8da6bae",
+      "title": "Match cut A · lantern",
+      "description": "@lantern glows behind its panes at the top of the tower; gulls wheel past the gallery.",
+      "duration": 4,
+      "start": 12,
+      "camera": {
+        "move": "custom",
+        "target": "22f5c8f1-2d8b-42d5-8ee5-3db6dea777b0",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              9,
+              12,
+              22
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.0625,
+            "p": [
+              8.948,
+              12.038,
+              21.879
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.125,
+            "p": [
+              8.802,
+              12.146,
+              21.536
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.1875,
+            "p": [
+              8.575,
+              12.314,
+              21.003
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.25,
+            "p": [
+              8.281,
+              12.531,
+              20.313
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.3125,
+            "p": [
+              7.933,
+              12.789,
+              19.495
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.375,
+            "p": [
+              7.545,
+              13.076,
+              18.583
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.4375,
+            "p": [
+              7.129,
+              13.383,
+              17.607
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.5,
+            "p": [
+              6.7,
+              13.7,
+              16.6
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.5625,
+            "p": [
+              6.271,
+              14.017,
+              15.593
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.625,
+            "p": [
+              5.855,
+              14.324,
+              14.617
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.6875,
+            "p": [
+              5.467,
+              14.611,
+              13.705
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.75,
+            "p": [
+              5.119,
+              14.869,
+              12.888
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.8125,
+            "p": [
+              4.825,
+              15.086,
+              12.197
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.875,
+            "p": [
+              4.598,
+              15.254,
+              11.664
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.9375,
+            "p": [
+              4.452,
+              15.362,
+              11.321
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          },
+          {
+            "t": 1,
+            "p": [
+              4.4,
+              15.4,
+              11.2
+            ],
+            "look": [
+              0,
+              16.528,
+              -2
+            ],
+            "mm": 50
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "22f5c8f1-2d8b-42d5-8ee5-3db6dea777b0"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "slow push-in"
+        ],
+        "cuts": [
+          "match cut"
+        ],
+        "lens": [
+          "50mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "701219e8-1e39-4ecc-a158-150ffd83baa1",
+      "title": "Match cut B · buoy",
+      "description": "@buoy rides the swell while @fishing-boat passes beyond it, heading in toward the headland.",
+      "duration": 4,
+      "start": 16,
+      "camera": {
+        "move": "custom",
+        "target": "9020dec9-cd71-4d54-8168-60cfd558d979",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              2.276,
+              1.57,
+              21.272
+            ],
+            "look": [
+              -1,
+              0.47,
+              29
+            ],
+            "mm": 50
+          },
+          {
+            "t": 0.0625,
+            "p": [
+              2.302,
+              1.584,
+              21.21
+            ],
+            "look": [
+              -1.013,
+              0.473,
+              29.034
+            ],
+            "mm": 49.8
+          },
+          {
+            "t": 0.125,
+            "p": [
+              2.377,
+              1.626,
+              21.035
+            ],
+            "look": [
+              -1.052,
+              0.483,
+              29.129
+            ],
+            "mm": 49.4
+          },
+          {
+            "t": 0.1875,
+            "p": [
+              2.492,
+              1.694,
+              20.763
+            ],
+            "look": [
+              -1.111,
+              0.498,
+              29.277
+            ],
+            "mm": 48.6
+          },
+          {
+            "t": 0.25,
+            "p": [
+              2.642,
+              1.789,
+              20.41
+            ],
+            "look": [
+              -1.187,
+              0.517,
+              29.469
+            ],
+            "mm": 47.7
+          },
+          {
+            "t": 0.3125,
+            "p": [
+              2.819,
+              1.911,
+              19.992
+            ],
+            "look": [
+              -1.278,
+              0.54,
+              29.696
+            ],
+            "mm": 46.5
+          },
+          {
+            "t": 0.375,
+            "p": [
+              3.016,
+              2.059,
+              19.525
+            ],
+            "look": [
+              -1.38,
+              0.565,
+              29.949
+            ],
+            "mm": 45.3
+          },
+          {
+            "t": 0.4375,
+            "p": [
+              3.228,
+              2.231,
+              19.027
+            ],
+            "look": [
+              -1.488,
+              0.592,
+              30.22
+            ],
+            "mm": 43.9
+          },
+          {
+            "t": 0.5,
+            "p": [
+              3.446,
+              2.425,
+              18.512
+            ],
+            "look": [
+              -1.6,
+              0.62,
+              30.5
+            ],
+            "mm": 42.5
+          },
+          {
+            "t": 0.5625,
+            "p": [
+              3.664,
+              2.634,
+              17.997
+            ],
+            "look": [
+              -1.712,
+              0.648,
+              30.78
+            ],
+            "mm": 41.1
+          },
+          {
+            "t": 0.625,
+            "p": [
+              3.876,
+              2.852,
+              17.499
+            ],
+            "look": [
+              -1.82,
+              0.675,
+              31.051
+            ],
+            "mm": 39.7
+          },
+          {
+            "t": 0.6875,
+            "p": [
+              4.073,
+              3.069,
+              17.032
+            ],
+            "look": [
+              -1.922,
+              0.7,
+              31.304
+            ],
+            "mm": 38.5
+          },
+          {
+            "t": 0.75,
+            "p": [
+              4.25,
+              3.274,
+              16.615
+            ],
+            "look": [
+              -2.013,
+              0.723,
+              31.531
+            ],
+            "mm": 37.3
+          },
+          {
+            "t": 0.8125,
+            "p": [
+              4.4,
+              3.455,
+              16.261
+            ],
+            "look": [
+              -2.089,
+              0.742,
+              31.723
+            ],
+            "mm": 36.4
+          },
+          {
+            "t": 0.875,
+            "p": [
+              4.515,
+              3.6,
+              15.989
+            ],
+            "look": [
+              -2.148,
+              0.757,
+              31.871
+            ],
+            "mm": 35.6
+          },
+          {
+            "t": 0.9375,
+            "p": [
+              4.59,
+              3.696,
+              15.814
+            ],
+            "look": [
+              -2.187,
+              0.767,
+              31.966
+            ],
+            "mm": 35.2
+          },
+          {
+            "t": 1,
+            "p": [
+              4.616,
+              3.73,
+              15.752
+            ],
+            "look": [
+              -2.2,
+              0.77,
+              32
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "9020dec9-cd71-4d54-8168-60cfd558d979"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "slow pull-out"
+        ],
+        "cuts": [
+          "match cut"
+        ],
+        "lens": [
+          "50mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "ea0dbbfc-ea7c-4db4-a182-a267e6c7e5f6",
+      "title": "Cut on action A · wide",
+      "description": "@keeper walks up the gravel path to the lighthouse and hauls open @lighthouse-door.",
+      "duration": 4,
+      "start": 23,
+      "camera": {
+        "move": "custom",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -9.6,
+              5.4,
+              10.6
+            ],
+            "look": [
+              -2.155,
+              4.551,
+              3.502
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.125,
+            "p": [
+              -9.562,
+              5.4,
+              10.6
+            ],
+            "look": [
+              -1.787,
+              4.551,
+              3.324
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -9.525,
+              5.4,
+              10.6
+            ],
+            "look": [
+              -1.462,
+              4.551,
+              3.086
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.375,
+            "p": [
+              -9.487,
+              5.4,
+              10.6
+            ],
+            "look": [
+              -1.193,
+              4.551,
+              2.774
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -9.45,
+              5.4,
+              10.6
+            ],
+            "look": [
+              -0.923,
+              4.551,
+              2.461
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.625,
+            "p": [
+              -9.412,
+              5.4,
+              10.6
+            ],
+            "look": [
+              -0.654,
+              4.551,
+              2.149
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -9.375,
+              5.4,
+              10.6
+            ],
+            "look": [
+              -0.384,
+              4.551,
+              1.836
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.875,
+            "p": [
+              -9.337,
+              5.4,
+              10.6
+            ],
+            "look": [
+              -0.277,
+              4.551,
+              1.712
+            ],
+            "mm": 35
+          },
+          {
+            "t": 1,
+            "p": [
+              -9.3,
+              5.4,
+              10.6
+            ],
+            "look": [
+              -0.171,
+              4.551,
+              1.588
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "cut on action"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "890d9052-3d59-4171-9c8c-7a3ab2afa920",
+      "title": "Cut on action B · close",
+      "description": "@lighthouse-door swings wide and @keeper steps through the dark doorway into the tower.",
+      "duration": 4,
+      "start": 26.8,
+      "camera": {
+        "move": "custom",
+        "target": "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              4.2,
+              4.6,
+              4.4
+            ],
+            "look": [
+              -0.164,
+              4.466,
+              1.391
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.125,
+            "p": [
+              4.163,
+              4.6,
+              4.4
+            ],
+            "look": [
+              -0.082,
+              4.466,
+              1.295
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.25,
+            "p": [
+              4.125,
+              4.6,
+              4.4
+            ],
+            "look": [
+              0,
+              4.466,
+              1.2
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.375,
+            "p": [
+              4.088,
+              4.6,
+              4.4
+            ],
+            "look": [
+              0.003,
+              4.466,
+              0.883
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5,
+            "p": [
+              4.05,
+              4.6,
+              4.4
+            ],
+            "look": [
+              0,
+              4.466,
+              0.565
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.625,
+            "p": [
+              4.013,
+              4.6,
+              4.4
+            ],
+            "look": [
+              0,
+              4.466,
+              0.248
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.75,
+            "p": [
+              3.975,
+              4.6,
+              4.4
+            ],
+            "look": [
+              0,
+              4.466,
+              -0.07
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.875,
+            "p": [
+              3.938,
+              4.6,
+              4.4
+            ],
+            "look": [
+              0,
+              4.466,
+              -0.324
+            ],
+            "mm": 40
+          },
+          {
+            "t": 1,
+            "p": [
+              3.9,
+              4.6,
+              4.4
+            ],
+            "look": [
+              0,
+              4.466,
+              -0.324
+            ],
+            "mm": 40
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "c5ef16d1-bfb1-4c3b-a6cf-3a75aa700f11"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "cut on action"
+        ],
+        "lens": [
+          "40mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "70ef6e70-805a-4f84-8030-4c22cefa775c",
+      "title": "Wipe A · foreground rock",
+      "description": "@fishing-boat glides in toward the stone pier, slowing as it nears the cliff.",
+      "duration": 4,
+      "start": 31,
+      "camera": {
+        "move": "custom",
+        "target": "70399d52-5961-45d8-b283-f9277e52d5e0",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -0.203,
+              4.6,
+              7.207
+            ],
+            "look": [
+              10.38,
+              0.255,
+              22.383
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.0417,
+            "p": [
+              -0.028,
+              4.6,
+              7.14
+            ],
+            "look": [
+              10.354,
+              0.255,
+              22.227
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.0833,
+            "p": [
+              0.147,
+              4.6,
+              7.073
+            ],
+            "look": [
+              10.326,
+              0.255,
+              22.074
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.125,
+            "p": [
+              0.322,
+              4.6,
+              7.006
+            ],
+            "look": [
+              10.297,
+              0.255,
+              21.925
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.1667,
+            "p": [
+              0.497,
+              4.6,
+              6.939
+            ],
+            "look": [
+              10.265,
+              0.255,
+              21.779
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2083,
+            "p": [
+              0.673,
+              4.6,
+              6.872
+            ],
+            "look": [
+              10.233,
+              0.255,
+              21.638
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.25,
+            "p": [
+              0.848,
+              4.6,
+              6.805
+            ],
+            "look": [
+              10.2,
+              0.255,
+              21.5
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2917,
+            "p": [
+              1.023,
+              4.6,
+              6.738
+            ],
+            "look": [
+              10.147,
+              0.255,
+              21.321
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.3333,
+            "p": [
+              1.198,
+              4.6,
+              6.671
+            ],
+            "look": [
+              10.078,
+              0.255,
+              21.145
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.375,
+            "p": [
+              1.373,
+              4.6,
+              6.604
+            ],
+            "look": [
+              9.995,
+              0.255,
+              20.972
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4167,
+            "p": [
+              1.548,
+              4.6,
+              6.537
+            ],
+            "look": [
+              9.9,
+              0.255,
+              20.803
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4583,
+            "p": [
+              1.723,
+              4.6,
+              6.47
+            ],
+            "look": [
+              9.795,
+              0.255,
+              20.638
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5,
+            "p": [
+              1.898,
+              4.6,
+              6.403
+            ],
+            "look": [
+              9.681,
+              0.255,
+              20.478
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5417,
+            "p": [
+              2.074,
+              4.6,
+              6.336
+            ],
+            "look": [
+              9.562,
+              0.255,
+              20.322
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5833,
+            "p": [
+              2.249,
+              4.6,
+              6.269
+            ],
+            "look": [
+              9.438,
+              0.255,
+              20.171
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.625,
+            "p": [
+              2.424,
+              4.6,
+              6.202
+            ],
+            "look": [
+              9.312,
+              0.255,
+              20.025
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.6667,
+            "p": [
+              2.599,
+              4.6,
+              6.135
+            ],
+            "look": [
+              9.186,
+              0.255,
+              19.885
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7083,
+            "p": [
+              2.774,
+              4.6,
+              6.069
+            ],
+            "look": [
+              9.062,
+              0.255,
+              19.75
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.75,
+            "p": [
+              2.949,
+              4.6,
+              6.002
+            ],
+            "look": [
+              8.941,
+              0.255,
+              19.622
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7917,
+            "p": [
+              3.124,
+              4.6,
+              5.935
+            ],
+            "look": [
+              8.825,
+              0.255,
+              19.501
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.8333,
+            "p": [
+              3.3,
+              4.6,
+              5.868
+            ],
+            "look": [
+              8.717,
+              0.255,
+              19.386
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.875,
+            "p": [
+              3.475,
+              4.6,
+              5.801
+            ],
+            "look": [
+              8.619,
+              0.255,
+              19.278
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9167,
+            "p": [
+              3.65,
+              4.6,
+              5.734
+            ],
+            "look": [
+              8.532,
+              0.255,
+              19.177
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9583,
+            "p": [
+              3.825,
+              4.6,
+              5.667
+            ],
+            "look": [
+              8.458,
+              0.255,
+              19.085
+            ],
+            "mm": 35
+          },
+          {
+            "t": 1,
+            "p": [
+              4,
+              4.6,
+              5.6
+            ],
+            "look": [
+              8.4,
+              0.255,
+              19
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "70399d52-5961-45d8-b283-f9277e52d5e0"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "tracking shot"
+        ],
+        "cuts": [
+          "hard cut",
+          "in-camera foreground wipe"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "34ac6deb-773f-41d1-9b40-2329575c25ae",
+      "title": "Wipe B · reveal",
+      "description": "@fishing-boat comes to rest alongside the stone pier below the lighthouse, rocking gently.",
+      "duration": 4,
+      "start": 35,
+      "camera": {
+        "move": "custom",
+        "target": "70399d52-5961-45d8-b283-f9277e52d5e0",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              4,
+              4.6,
+              5.6
+            ],
+            "look": [
+              8.4,
+              0.255,
+              19
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.0417,
+            "p": [
+              4.175,
+              4.6,
+              5.533
+            ],
+            "look": [
+              8.366,
+              0.255,
+              18.943
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.0833,
+            "p": [
+              4.35,
+              4.6,
+              5.466
+            ],
+            "look": [
+              8.337,
+              0.255,
+              18.892
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.125,
+            "p": [
+              4.525,
+              4.6,
+              5.399
+            ],
+            "look": [
+              8.314,
+              0.255,
+              18.847
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.1667,
+            "p": [
+              4.701,
+              4.6,
+              5.332
+            ],
+            "look": [
+              8.296,
+              0.255,
+              18.807
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2083,
+            "p": [
+              4.876,
+              4.6,
+              5.265
+            ],
+            "look": [
+              8.282,
+              0.255,
+              18.773
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.25,
+            "p": [
+              5.051,
+              4.6,
+              5.198
+            ],
+            "look": [
+              8.273,
+              0.255,
+              18.743
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2917,
+            "p": [
+              5.226,
+              4.6,
+              5.131
+            ],
+            "look": [
+              8.268,
+              0.255,
+              18.718
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.3333,
+            "p": [
+              5.401,
+              4.6,
+              5.065
+            ],
+            "look": [
+              8.267,
+              0.255,
+              18.696
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.375,
+            "p": [
+              5.576,
+              4.6,
+              4.998
+            ],
+            "look": [
+              8.268,
+              0.255,
+              18.679
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4167,
+            "p": [
+              5.751,
+              4.6,
+              4.931
+            ],
+            "look": [
+              8.272,
+              0.255,
+              18.664
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4583,
+            "p": [
+              5.926,
+              4.6,
+              4.864
+            ],
+            "look": [
+              8.279,
+              0.255,
+              18.653
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5,
+            "p": [
+              6.102,
+              4.6,
+              4.797
+            ],
+            "look": [
+              8.288,
+              0.255,
+              18.644
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5417,
+            "p": [
+              6.277,
+              4.6,
+              4.73
+            ],
+            "look": [
+              8.298,
+              0.255,
+              18.637
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5833,
+            "p": [
+              6.452,
+              4.6,
+              4.663
+            ],
+            "look": [
+              8.309,
+              0.255,
+              18.632
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.625,
+            "p": [
+              6.627,
+              4.6,
+              4.596
+            ],
+            "look": [
+              8.321,
+              0.255,
+              18.628
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.6667,
+            "p": [
+              6.802,
+              4.6,
+              4.529
+            ],
+            "look": [
+              8.333,
+              0.255,
+              18.626
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7083,
+            "p": [
+              6.977,
+              4.6,
+              4.462
+            ],
+            "look": [
+              8.346,
+              0.255,
+              18.624
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.75,
+            "p": [
+              7.152,
+              4.6,
+              4.395
+            ],
+            "look": [
+              8.358,
+              0.255,
+              18.623
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7917,
+            "p": [
+              7.327,
+              4.6,
+              4.328
+            ],
+            "look": [
+              8.369,
+              0.255,
+              18.621
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.8333,
+            "p": [
+              7.503,
+              4.6,
+              4.261
+            ],
+            "look": [
+              8.379,
+              0.255,
+              18.619
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.875,
+            "p": [
+              7.678,
+              4.6,
+              4.194
+            ],
+            "look": [
+              8.388,
+              0.255,
+              18.617
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9167,
+            "p": [
+              7.853,
+              4.6,
+              4.127
+            ],
+            "look": [
+              8.394,
+              0.255,
+              18.613
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9583,
+            "p": [
+              8.028,
+              4.6,
+              4.06
+            ],
+            "look": [
+              8.399,
+              0.255,
+              18.607
+            ],
+            "mm": 35
+          },
+          {
+            "t": 1,
+            "p": [
+              8.203,
+              4.6,
+              3.993
+            ],
+            "look": [
+              8.4,
+              0.255,
+              18.6
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "70399d52-5961-45d8-b283-f9277e52d5e0"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "tracking shot"
+        ],
+        "cuts": [
+          "hard cut",
+          "in-camera foreground wipe"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "deep focus",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    }
+  ],
+  "media": [
+    {
+      "path": "media/refs/5061bddd-8ad4-42f7-a076-74fd05911e7b.glb",
+      "kind": "model",
+      "bytes": 112384,
+      "sha256": "6c04e355a8b06ee0c05bb84d9ac3b34e5ab2c55cc011aa7d3d4ab51298a90f57",
+      "sourceSha256": "6c04e355a8b06ee0c05bb84d9ac3b34e5ab2c55cc011aa7d3d4ab51298a90f57"
+    },
+    {
+      "path": "media/assets/6d3c215b-bf62-4d88-8de0-0882b87eccc1.mp4",
+      "kind": "video",
+      "bytes": 271906,
+      "sha256": "554853a71fd00b5e70bb6634a5678ae832b1d0f434120aadaa76405f4d1694d5",
+      "sourceSha256": "42ef23770ae1095a18134c501abd574a593f019092a66ced5028c7da6b7c141b",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/7a6d6581-6e0f-40da-be30-6d233c737f0c.mp4",
+      "kind": "video",
+      "bytes": 886542,
+      "sha256": "d98db1ad2bb3cae8191da13faac95f74d403db3771949f202dc7c10fbbe87a7d",
+      "sourceSha256": "4caa052c49358d042dec0528d1c0d7f7437495f32d2b9734966617180c22bb60",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/e00f72d9-37bc-416a-936c-da2d53771838.mp4",
+      "kind": "video",
+      "bytes": 719520,
+      "sha256": "dea6bb2c1c4b91789ee6a6e60a80df5cdb970e5e40180d5eda2f42f61932cf4a",
+      "sourceSha256": "bb7261a97fa135ae1cd4a5dd3cd232aadf053e7fbc6cec729337a49252356c90",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/8b73f382-a867-4b8e-9355-9327c41faed1.mp4",
+      "kind": "video",
+      "bytes": 730829,
+      "sha256": "49bf78196f08c21d5d7f13af96053370f9665ad380f169569c8db550cec0b3ac",
+      "sourceSha256": "0661f98cb8f057ea7df4e570a15dc89b6813ec2d86c1eb1d0effee986f192cec",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/dbdfd500-bce4-4f6d-92ef-4e04a0a227b4.mp4",
+      "kind": "video",
+      "bytes": 764009,
+      "sha256": "f8c5c529c51aad8dca2939124993dc110cdac3772bc8c43d0aa6ee5d33a1e04f",
+      "sourceSha256": "29ff777c385ec8450833850199a8073adee0d21b43cc787b2d3d53e88b99bd6b",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/6f66e8f3-d9e7-492d-ac94-a0abc6ed3120.mp4",
+      "kind": "video",
+      "bytes": 839251,
+      "sha256": "0f1f52fc1d949d136b5f483380de179960182a6c06436917d8aaf087e3d799af",
+      "sourceSha256": "bf8417f8cd80ad2a7d363b093d4dee6fcfb8bee3346841b26d61e77f325095d2",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/d9e75a52-8d45-415d-a7bc-9813643dc21c.mp4",
+      "kind": "video",
+      "bytes": 794245,
+      "sha256": "058f97afe824a4bace429536230619684090b87ce032c25d233dc8494bb0e080",
+      "sourceSha256": "d2513e7533e2f61389bf119905797fcd06e42bc23622345710512503046181cf",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/f67ab184-89eb-4c3f-86ac-4bad26ffd886.mp4",
+      "kind": "video",
+      "bytes": 925051,
+      "sha256": "ee31f7e675efc1d565b1939145c0cca9ade7991161cfdd1147f3e352c207007a",
+      "sourceSha256": "074c82f8cd4837e10fae04cdf5539ef552ae34128ed0426e40e557282d66e1e1",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/c6c0d34d-a8b4-4bd7-8e9c-919c0bdc97f3.mp4",
+      "kind": "video",
+      "bytes": 805193,
+      "sha256": "ea4f05ba8ec6c360de34fa1a4c43820417b7648499dc13b5bf9f43e023356951",
+      "sourceSha256": "38328f9e61cffefe6c53b72b2173a6228f663cce484faae4e6c5a9b25c8f42f3",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/5db704a5-0b66-4a70-817b-77268a7b71b6.mp4",
+      "kind": "video",
+      "bytes": 657559,
+      "sha256": "3ef9fccc6b40a79aac0fd7110c2bd62dcc6bd15e4195fc9e82cf1b9c9495fcb0",
+      "sourceSha256": "cf33c090041c6c55100a1d26c609f81332329c631ae5e02375879174ac57372f",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/53f5b7c1-ba3b-455f-9ab5-18a44775f8ad.mp4",
+      "kind": "video",
+      "bytes": 868936,
+      "sha256": "4c6392c9be5361889b7965be76cbf56b5e25e2a32853e526a31e9103045bd07f",
+      "sourceSha256": "97681c920a53d363b31269836ab6a5521199aa43cd2d3b0bcc26507ed4971140",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/870614c1-5155-4be7-bac9-5d6fd76943e0.mp4",
+      "kind": "video",
+      "bytes": 886916,
+      "sha256": "d44478123685013fef953a32142d846b09c1ba4a4d1b6643dc6900a7b4ca9f07",
+      "sourceSha256": "b6c9889b50ca621463f110432cdcc1be221c8df1e4f6c9cab298afd54be2996b",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/719d5c0c-6df7-4b3a-befa-07400e35b263.mp4",
+      "kind": "video",
+      "bytes": 769601,
+      "sha256": "fd4f38217df4456817f77eb1226902c023d9dc21a85388d718d2a35f4b932450",
+      "sourceSha256": "8731cfcd49bc56e88346640b6a6b0e74884b50ba3b50ceb6c818cff562ae8c78",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/f4f57269-4e28-4cf5-a4ed-e7f2a551c252.mp4",
+      "kind": "video",
+      "bytes": 900798,
+      "sha256": "c82ec2070b301b4d3fffb763069ad829ab37e835a0a762a9b10e52f5cf6a925b",
+      "sourceSha256": "3bcb0fb9e63001e0f8aab179b9d32ca6cfb130bef1ec8aa000ce4df12be3460b",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/f390e2fc-b987-47c0-affd-442cf81e6922.mp4",
+      "kind": "video",
+      "bytes": 851005,
+      "sha256": "6b256a057c8d184b801b91d8adeb75b6c4075810587f3cca2245c80b18917038",
+      "sourceSha256": "796004d2751c6c4e528d3a074ccbf622262ed119c0d57800b495dd5956670752",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/a199333e-67ff-41b3-ab5d-d7272c9994d0.mp4",
+      "kind": "video",
+      "bytes": 793138,
+      "sha256": "3117f1aa37eb118b23fbf797a86e38d323610990221e6b553ed0ff2f7e00c828",
+      "sourceSha256": "243f2731ca0fbbaef5734b8e69e1d11052920dede4bd6fee3ff570a2cc5912d3",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/6297170e-f421-4e88-9ea2-a552401e68b2.mp4",
+      "kind": "video",
+      "bytes": 696632,
+      "sha256": "d30340d27a77b6e8651564fde4394c65c1c799b30f919c08a23a61e9a1ac4c52",
+      "sourceSha256": "057605d2d33619d60bde45cb6148f4d2b30e8f2528d8ad1265c76a4fbc27de0f",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/c3b994e4-df76-4f23-bec7-2862cf19ae39.mp4",
+      "kind": "video",
+      "bytes": 718558,
+      "sha256": "4e497f132b9e006c581618f81acc6705686a1d42316b5cc39e849e2696dfa097",
+      "sourceSha256": "c225c14864025734fd6220d0e839f4f71fea2ce62c0f5b90bc691f553b4b840f",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/d161e481-e5bb-4fa5-ba49-de5f4f01ce69.mp4",
+      "kind": "video",
+      "bytes": 917866,
+      "sha256": "2b4c981f198ca41c3083b7f125cc2722b4635572b8eedae4710c3074b2d37a36",
+      "sourceSha256": "303656bce459026267b89a55baae74764a17ba84f407ff2febfbf54acd30f1bb",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/7244e065-dd42-4273-8fe5-114a4f1f5966.mp4",
+      "kind": "video",
+      "bytes": 770559,
+      "sha256": "6af4f69c9b18a89d04ffa84936f432d711e7ce2984d7d716b54e0d38876b0abc",
+      "sourceSha256": "b8869de1f1257b24462661c780c0e8d622395ce3d1f6bccad6104b14c5970e36",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/82d62ddf-d75c-45ad-8b82-b985c2235cb5.mp4",
+      "kind": "video",
+      "bytes": 721431,
+      "sha256": "88ce331c90521f215e7dcbe69310ed76ba05277f1a2729ad44e6580ade617de1",
+      "sourceSha256": "f498e504d51b3bd33046b3766a82e9c7992810fa891ee79595b3ad541b879dcd",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/ccbfd04b-fb1b-4d79-84c1-05d53e091bc0.mp4",
+      "kind": "video",
+      "bytes": 583757,
+      "sha256": "6254dae05634d7978517a8174eeb6824fb7130f4627b43e9037c0a7da5faa181",
+      "sourceSha256": "2e3aac94faf738b4e75f0830d678f9cebf37b4fe69db41106cb0bf60e931f100",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/11fdd2a3-63ff-4958-a61a-29dd13576f7c.mp4",
+      "kind": "video",
+      "bytes": 504879,
+      "sha256": "d4c22509236bc2f88cbb1f143c413790a0e4865fa78f9f70361a42cff3659a6a",
+      "sourceSha256": "70b2c943984cec8cd2b81b06d6c3a1ab098493b414fe0ff046220cf6c39e5d43",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    },
+    {
+      "path": "media/assets/f8a488aa-37a6-41e3-9d34-89effc8791f0.mp4",
+      "kind": "video",
+      "bytes": 871542,
+      "sha256": "5de8018910a8f34454a2f2714c01d6ff4d5295e6cde48cdc39080b2484bd1267",
+      "sourceSha256": "7f4d2586348619edb9ef0620ec0bf92ba436e5ed00da3e94630a3c01cfa981ac",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 96,
+      "duration": 4
+    }
+  ],
+  "assets": [
+    {
+      "id": "6d3c215b-bf62-4d88-8de0-0882b87eccc1",
+      "kind": "camera-render",
+      "shotId": "436df388-80c7-4394-b756-328d6564cf36",
+      "file": "assets/6d3c215b-bf62-4d88-8de0-0882b87eccc1.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:39.623Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "82f22b6"
+      }
+    },
+    {
+      "id": "7a6d6581-6e0f-40da-be30-6d233c737f0c",
+      "kind": "camera-render",
+      "shotId": "405f8680-b9d1-406e-87e0-70e724411ed2",
+      "file": "assets/7a6d6581-6e0f-40da-be30-6d233c737f0c.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:41.747Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "8291ce23"
+      }
+    },
+    {
+      "id": "e00f72d9-37bc-416a-936c-da2d53771838",
+      "kind": "camera-render",
+      "shotId": "cc20e7d5-f2ce-425f-9027-6da7f6408364",
+      "file": "assets/e00f72d9-37bc-416a-936c-da2d53771838.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:43.943Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "9799492c"
+      }
+    },
+    {
+      "id": "8b73f382-a867-4b8e-9355-9327c41faed1",
+      "kind": "camera-render",
+      "shotId": "527796d0-a65a-489f-8ffe-0f052b98b803",
+      "file": "assets/8b73f382-a867-4b8e-9355-9327c41faed1.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:46.117Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "9f3e4947"
+      }
+    },
+    {
+      "id": "dbdfd500-bce4-4f6d-92ef-4e04a0a227b4",
+      "kind": "camera-render",
+      "shotId": "2a72757e-8996-45d5-a883-970d3b7d0973",
+      "file": "assets/dbdfd500-bce4-4f6d-92ef-4e04a0a227b4.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:48.255Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "c14fea87"
+      }
+    },
+    {
+      "id": "6f66e8f3-d9e7-492d-ac94-a0abc6ed3120",
+      "kind": "camera-render",
+      "shotId": "78df4352-51d5-4933-bf86-87a6c8ccddbc",
+      "file": "assets/6f66e8f3-d9e7-492d-ac94-a0abc6ed3120.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:50.341Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "d9d8b36b"
+      }
+    },
+    {
+      "id": "d9e75a52-8d45-415d-a7bc-9813643dc21c",
+      "kind": "camera-render",
+      "shotId": "ad3002fb-a174-40d3-9bb5-9df72465de85",
+      "file": "assets/d9e75a52-8d45-415d-a7bc-9813643dc21c.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:52.504Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "7b071196"
+      }
+    },
+    {
+      "id": "f67ab184-89eb-4c3f-86ac-4bad26ffd886",
+      "kind": "camera-render",
+      "shotId": "1fe6a179-b595-47b1-a90d-a70e63ed6f61",
+      "file": "assets/f67ab184-89eb-4c3f-86ac-4bad26ffd886.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:54.760Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "1b79e21c"
+      }
+    },
+    {
+      "id": "c6c0d34d-a8b4-4bd7-8e9c-919c0bdc97f3",
+      "kind": "camera-render",
+      "shotId": "92d7eef9-22b0-426f-bc11-4d0aeb3adac3",
+      "file": "assets/c6c0d34d-a8b4-4bd7-8e9c-919c0bdc97f3.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:57.076Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "bf6ef9fc"
+      }
+    },
+    {
+      "id": "5db704a5-0b66-4a70-817b-77268a7b71b6",
+      "kind": "camera-render",
+      "shotId": "0decb706-72c3-417a-a242-f1001492ef37",
+      "file": "assets/5db704a5-0b66-4a70-817b-77268a7b71b6.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:31:59.273Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "6fc4586"
+      }
+    },
+    {
+      "id": "53f5b7c1-ba3b-455f-9ab5-18a44775f8ad",
+      "kind": "camera-render",
+      "shotId": "8b86b751-ba3f-453d-bf43-407e9a75773b",
+      "file": "assets/53f5b7c1-ba3b-455f-9ab5-18a44775f8ad.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:01.360Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "e15fc306"
+      }
+    },
+    {
+      "id": "870614c1-5155-4be7-bac9-5d6fd76943e0",
+      "kind": "camera-render",
+      "shotId": "a18eaf4b-db76-4dad-ac81-b20d69a4e3fa",
+      "file": "assets/870614c1-5155-4be7-bac9-5d6fd76943e0.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:03.565Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "1fc8140c"
+      }
+    },
+    {
+      "id": "719d5c0c-6df7-4b3a-befa-07400e35b263",
+      "kind": "camera-render",
+      "shotId": "641939eb-1e57-40c8-bd55-091d0cc0883f",
+      "file": "assets/719d5c0c-6df7-4b3a-befa-07400e35b263.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:05.843Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "8b52e8fd"
+      }
+    },
+    {
+      "id": "f4f57269-4e28-4cf5-a4ed-e7f2a551c252",
+      "kind": "camera-render",
+      "shotId": "845b55d2-7244-4f35-80e9-161165c4194d",
+      "file": "assets/f4f57269-4e28-4cf5-a4ed-e7f2a551c252.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:08.304Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "6d91d6c1"
+      }
+    },
+    {
+      "id": "f390e2fc-b987-47c0-affd-442cf81e6922",
+      "kind": "camera-render",
+      "shotId": "90e03026-2296-4432-9a42-1f55968c2fad",
+      "file": "assets/f390e2fc-b987-47c0-affd-442cf81e6922.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:10.465Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "6539599b"
+      }
+    },
+    {
+      "id": "a199333e-67ff-41b3-ab5d-d7272c9994d0",
+      "kind": "camera-render",
+      "shotId": "346f0e82-12f8-4192-816d-342df4d3930a",
+      "file": "assets/a199333e-67ff-41b3-ab5d-d7272c9994d0.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:12.812Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "b8e3a38a"
+      }
+    },
+    {
+      "id": "6297170e-f421-4e88-9ea2-a552401e68b2",
+      "kind": "camera-render",
+      "shotId": "8e454fe7-bf48-4ba9-90fc-fcb582ef1a5d",
+      "file": "assets/6297170e-f421-4e88-9ea2-a552401e68b2.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:15.111Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "2f736fb8"
+      }
+    },
+    {
+      "id": "c3b994e4-df76-4f23-bec7-2862cf19ae39",
+      "kind": "camera-render",
+      "shotId": "2c64584e-3e5c-40a4-b284-ef3397b38328",
+      "file": "assets/c3b994e4-df76-4f23-bec7-2862cf19ae39.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:17.638Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "bdb86423"
+      }
+    },
+    {
+      "id": "d161e481-e5bb-4fa5-ba49-de5f4f01ce69",
+      "kind": "camera-render",
+      "shotId": "98dfc4d9-b24d-40d3-9df7-9605d8da6bae",
+      "file": "assets/d161e481-e5bb-4fa5-ba49-de5f4f01ce69.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:19.924Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "d9b5a90e"
+      }
+    },
+    {
+      "id": "7244e065-dd42-4273-8fe5-114a4f1f5966",
+      "kind": "camera-render",
+      "shotId": "701219e8-1e39-4ecc-a158-150ffd83baa1",
+      "file": "assets/7244e065-dd42-4273-8fe5-114a4f1f5966.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:22.237Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "3de360fa"
+      }
+    },
+    {
+      "id": "82d62ddf-d75c-45ad-8b82-b985c2235cb5",
+      "kind": "camera-render",
+      "shotId": "ea0dbbfc-ea7c-4db4-a182-a267e6c7e5f6",
+      "file": "assets/82d62ddf-d75c-45ad-8b82-b985c2235cb5.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:24.575Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "909ee67a"
+      }
+    },
+    {
+      "id": "ccbfd04b-fb1b-4d79-84c1-05d53e091bc0",
+      "kind": "camera-render",
+      "shotId": "890d9052-3d59-4171-9c8c-7a3ab2afa920",
+      "file": "assets/ccbfd04b-fb1b-4d79-84c1-05d53e091bc0.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:26.722Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "7307ad84"
+      }
+    },
+    {
+      "id": "11fdd2a3-63ff-4958-a61a-29dd13576f7c",
+      "kind": "camera-render",
+      "shotId": "70ef6e70-805a-4f84-8030-4c22cefa775c",
+      "file": "assets/11fdd2a3-63ff-4958-a61a-29dd13576f7c.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:28.681Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "365ee2a3"
+      }
+    },
+    {
+      "id": "f8a488aa-37a6-41e3-9d34-89effc8791f0",
+      "kind": "camera-render",
+      "shotId": "34ac6deb-773f-41d1-9b40-2329575c25ae",
+      "file": "assets/f8a488aa-37a6-41e3-9d34-89effc8791f0.mp4",
+      "mime": "video/mp4",
+      "duration": 4,
+      "createdAt": "2026-11-03T01:32:30.734Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "a969ba5b"
+      }
+    }
+  ],
+  "edit": {
+    "clips": []
+  }
+}

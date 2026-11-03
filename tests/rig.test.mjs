@@ -123,3 +123,21 @@ test('regeneration keys: clip, pose and stand-in change an in-frame rig\u2019s b
     assert.equal(key(base, makeEntity({ ...away, ...change }, 'e2')), key(base), `off screen: ${JSON.stringify(change)}`);
   }
 });
+
+test('runtime: posing the same moment twice still shows the clip (a capture at the playhead, frame 0 of a blockout)', async () => {
+  const THREE = await import('three'), ts = (await import('typescript')).default, { runInNewContext } = await import('node:vm');
+  const { readFile } = await import('node:fs/promises'), rig = await import('../shared/rig.mjs');
+  const { mannequin } = await import('../scripts/starters/mannequin.mjs');
+  const source = await readFile(new URL('../src/director-rig.ts', import.meta.url), 'utf8'), exports = {};
+  runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, { exports, require: name => (name === 'three' ? THREE : rig) });
+  const { root: model, animations } = mannequin(); model.animations = animations;
+  const e = { perform: { clip: 'Walk', offset: 0, speed: 1 }, source: { clips: animations.map(c => ({ name: c.name, duration: c.duration })) } };
+  const runtime = new exports.RigRuntime(model, e), holder = new THREE.Group(); holder.add(model);
+  const arm = model.getObjectByName('upper_arm_L'), rest = arm.quaternion.clone();
+  for (const t of [0, 0, 1.1, 1.1, 0.4, 0]) {
+    runtime.apply(holder, e, t, undefined);
+    assert.ok(arm.quaternion.angleTo(rest) > 1, `t=${t}: the arm hangs down as the Walk clip has it, not in the bind T-pose`);
+  }
+  runtime.apply(holder, e, 0, undefined, { neutral: true });
+  assert.ok(arm.quaternion.angleTo(rest) < 1e-6, 'the neutral stand-in plays no clip');
+});
