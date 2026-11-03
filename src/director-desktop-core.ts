@@ -196,15 +196,14 @@ export function shouldTour(p: Pick<DirectorProject, 'revision' | 'scene' | 'crea
 // ---------- Home: the hero reel ----------
 /**
  * The landing hero cycles these blockout → generated pairs (files under public/guide/hero/: `<id>-blockout.mp4`,
- * `<id>-generated.mp4` and a `.webp` poster of each). Each pair is one camera: the generated clip is an edit of that blockout.
+ * `<id>-generated.mp4` and a `.webp` poster of each). Each pair uses the chosen take and its recorded source blockout; image-to-video models may change the camera.
  */
 export const HERO_REEL = [
-  { id: 'race', label: 'Final Lap · Finish line' },
-  { id: 'eagle', label: 'Wingspan · Alongside' },
-  { id: 'lighthouse', label: 'Lighthouse · Storm orbit' },
-  { id: 'street', label: 'Look Lab · Cyberpunk' },
-  { id: 'dunk', label: 'Posterized · The dunk' },
-  { id: 'product', label: 'Product ad · Studio' },
+  { id: 'race', label: 'Final Lap · Checkered flag' },
+  { id: 'eagle', label: 'Wingspan · The glide' },
+  { id: 'lighthouse', label: 'Lighthouse · Orbit right' },
+  { id: 'street', label: 'Look Lab · Cyberpunk city' },
+  { id: 'dunk', label: 'Posterized · Posterized' },
 ] as const;
 export const HERO_SHOT_MS = 5600;
 export const heroFiles = (id: string) => ({ before: `hero/${id}-blockout.mp4`, after: `hero/${id}-generated.mp4`, posters: [`hero/${id}-blockout.webp`, `hero/${id}-generated.webp`] as [string, string] });
@@ -212,21 +211,24 @@ export const heroFiles = (id: string) => ({ before: `hero/${id}-blockout.mp4`, a
 export const heroNext = (i: number, n: number, paused: boolean, reduced: boolean) => (paused || reduced || n < 2 ? i : (i + 1) % n);
 
 // ---------- Home: the starter card's blockout → video seam ----------
-export type GuideEntryLite = { id: string; file: string; kind: 'video' | 'image'; label?: string };
+export type GuideEntryLite = { id: string; file: string; kind: 'video' | 'image'; label?: string; project?: string; shot?: string; asset?: string; sourceAssetId?: string };
 export type StarterMedia = { kind: 'video' | 'image' | 'still'; before?: string; after?: string; posters?: [string, string]; label?: string; cast: { file: string; label: string }[] };
 /** The starter's hero shot media from public/guide/manifest.json: blockout ↔ generated video, else a still pair, else nothing (draw the blockout still). */
 export function starterMedia(slug: string, entries: GuideEntryLite[]): StarterMedia {
   const own = new RegExp(`^${slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-(s\\d+-(blockout|generated|still)(-poster|-blockout)?|cast-\\d+|sheet)$`);
   const mine = entries.filter(e => own.test(e.id));
   const cast = mine.filter(e => /-cast-\d+$/.test(e.id)).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true })).map(e => ({ file: e.file, label: e.label || '' }));
-  const pick = (re: RegExp) => mine.find(e => re.test(e.id));
-  const bv = pick(/-s\d+-blockout$/), gv = pick(/-s\d+-generated$/);
-  if (bv && gv && bv.kind === 'video' && gv.kind === 'video') {
-    const bp = pick(/-s\d+-blockout-poster$/), gp = pick(/-s\d+-generated-poster$/);
-    return { kind: 'video', before: bv.file, after: gv.file, posters: bp && gp ? [bp.file, gp.file] : undefined, label: gv.label, cast };
+  const sameShot = (a: GuideEntryLite, b: GuideEntryLite) => (!a.project || !b.project || a.project === b.project) && (!a.shot || !b.shot || a.shot === b.shot);
+  for (const bv of mine.filter(e => /-s\d+-blockout$/.test(e.id) && e.kind === 'video')) {
+    const tag = bv.id.slice(0, -'-blockout'.length), gv = mine.find(e => e.id === `${tag}-generated` && e.kind === 'video');
+    if (!gv || !sameShot(bv, gv) || (gv.sourceAssetId && bv.asset && gv.sourceAssetId !== bv.asset)) continue;
+    const bp = mine.find(e => e.id === `${tag}-blockout-poster`), gp = mine.find(e => e.id === `${tag}-generated-poster`);
+    return { kind: 'video', before: bv.file, after: gv.file, posters: bp && gp && sameShot(bv, bp) && sameShot(gv, gp) ? [bp.file, gp.file] : undefined, label: gv.label, cast };
   }
-  const bs = pick(/-s\d+-still-blockout$/), gs = pick(/-s\d+-still$/);
-  if (bs && gs) return { kind: 'image', before: bs.file, after: gs.file, label: gs.label, cast };
+  for (const bs of mine.filter(e => /-s\d+-still-blockout$/.test(e.id))) {
+    const gs = mine.find(e => e.id === bs.id.slice(0, -'-blockout'.length));
+    if (gs && sameShot(bs, gs)) return { kind: 'image', before: bs.file, after: gs.file, label: gs.label, cast };
+  }
   return { kind: 'still', cast };
 }
 /** Keyboard on a seam (0–100): arrows step 5 (Shift 20), Home/End jump; null when the key is not the seam's. */

@@ -117,7 +117,7 @@ test('starter copies open with current stills and videos, except the takes liste
   }
 });
 
-test('blockout starter copies open with current blockout clips, and a final-tier dry run plans every still and video', () => {
+test('blockout starter copies keep current keys and plan their missing stills and final videos', () => {
   for (const s of starters.filter(x => BLOCKOUT_STARTERS.includes(x.slug))) {
     const p = instantiateStarter(s);
     for (const sh of p.shots) {
@@ -129,15 +129,20 @@ test('blockout starter copies open with current blockout clips, and a final-tier
       }
       // Look Lab ships one start still per shot (examples/starters/README.md); it shows the current blocking.
       if (s.slug === 'look-lab') { assert.equal(sh.references.length, 1, sh.title); assert.equal(stillStale(p, sh, sh.references[0]), false, `${sh.title}: the still is current`); }
-      // The others ship a start still only on a shot with a generated take (Lighthouse · Orbit right's storm), and it is current.
-      else if ((p.assets || []).some(a => a.shotId === sh.id && a.kind === 'workflow-result')) { assert.equal(sh.references.length, 1, `${s.slug} ${sh.title}`); assert.equal(stillStale(p, sh, sh.references[0]), false, `${s.slug} ${sh.title}: the still is current`); }
+      // Lighthouse carries its start still; the three new showcases carry both source key frames.
+      else if ((p.assets || []).some(a => a.shotId === sh.id && a.kind === 'workflow-result')) {
+        const twoKeys = ['mountain-trail', 'city-blocks', 'two-hander'].includes(s.slug);
+        assert.equal(sh.references.length, twoKeys ? 2 : 1, `${s.slug} ${sh.title}`);
+        if (twoKeys) assert.deepEqual(sh.references.map(r => r.note).sort(), ['key frame end', 'key frame start']);
+        for (const r of sh.references) assert.equal(stillStale(p, sh, r), false, `${s.slug} ${sh.title}: both key frames are current`);
+      }
       else assert.equal(sh.references.length, 0, `${s.slug} ${sh.title}: no stills yet`);
     }
     const plan = planBatch(p, { steps: ['stills', 'videos'], tier: 'final', dryRun: true, maxCostUsd: 100 });
-    // A shipped start still is current: the plan keeps it and makes only the end still.
+    // Current keys are kept: most shots have a start key; the three new showcases also have an end key.
     const shipped = p.shots.filter(sh => sh.references.length).length;
     assert.equal(plan.nodes.filter(x => x.type === 'still' && x.status === 'skipped' && x.target.t === 'start').length, shipped, `${s.slug}: shipped start stills are kept`);
-    assert.equal(plan.nodes.filter(x => x.type === 'still' && x.status !== 'skipped').length, p.shots.length * 2 - shipped, `${s.slug}: a start and an end still per shot`);
+    assert.equal(plan.nodes.filter(x => x.type === 'still' && x.status !== 'skipped').length, p.shots.length * 2 - p.shots.reduce((n, sh) => n + sh.references.length, 0), `${s.slug}: make only the missing start and end stills`);
     assert.equal(plan.nodes.filter(x => x.type === 'video' && x.status !== 'skipped').length, p.shots.length, `${s.slug}: a video per shot`);
   }
 });

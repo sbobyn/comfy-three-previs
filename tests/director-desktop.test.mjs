@@ -167,3 +167,17 @@ test('the landing hero reel: every pair ships its blockout, generated clip and b
   assert.equal(core.heroNext(2, 6, true, false), 2, 'held while hovered, dragged or focused');
   assert.equal(core.heroNext(2, 6, false, true), 2, 'reduced motion never advances');
 });
+
+test('starter comparisons never combine different shots, source clips or posters', () => {
+  const e = (id, extra = {}) => ({ id, file: id, kind: 'video', ...extra });
+  const block = e('final-lap-s1-blockout', { project: 'p', shot: 'one', asset: 'clip-one' });
+  const wrongShot = e('final-lap-s2-generated', { project: 'p', shot: 'two', sourceAssetId: 'clip-two' });
+  assert.equal(core.starterMedia('final-lap', [block, wrongShot]).kind, 'still');
+  const wrongSource = e('final-lap-s1-generated', { project: 'p', shot: 'one', sourceAssetId: 'clip-two' });
+  assert.equal(core.starterMedia('final-lap', [block, wrongSource]).kind, 'still');
+  assert.equal(core.starterMedia('final-lap', [block, { ...wrongSource, sourceAssetId: 'clip-one', project: 'other' }]).kind, 'still');
+  const correct = { ...wrongSource, sourceAssetId: 'clip-one' };
+  const pair = core.starterMedia('final-lap', [block, correct, e('final-lap-s2-blockout-poster'), e('final-lap-s2-generated-poster')]);
+  assert.equal(pair.kind, 'video'); assert.equal(pair.posters, undefined, 'posters from another shot cannot masquerade as frame zero');
+  assert.equal(core.starterMedia('wingspan', [e('wingspan-s1-still-blockout'), e('wingspan-s2-still')]).kind, 'still');
+});

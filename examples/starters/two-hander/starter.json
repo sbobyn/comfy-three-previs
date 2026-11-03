@@ -2402,7 +2402,42 @@
           "no logos or lettering"
         ]
       },
-      "references": []
+      "references": [
+        {
+          "id": "1e1be52d-d1a1-5f2d-a32a-8da00fdac9ba",
+          "name": "Shot 01 Master · GPT Image 2.5 · 129172",
+          "file": "1e1be52d-d1a1-5f2d-a32a-8da00fdac9ba.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-03T17:58:22.946Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 129172,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 32mm normal lens; medium long shot, Ada from the knees up; camera 1.3 m high, just below Ada's eye line and 2.8 m from Ada, looking slightly down; we see Ada side-on, from its right side (a side profile, not a three-quarter or chase view).\nIn frame: Ada: left of frame, the full frame height tall, cut off by the top and bottom edges, facing screen-right (profile). Ben: right of frame, the full frame height tall, cut off by the top and bottom edges, beside Ada to the right, facing screen-left (profile). Café table: lower centre of frame, about half the frame height tall, cut off by the bottom edge, beside Ada to the right. Ada’s chair: lower far left of frame, about half the frame height tall, cut off by the bottom edge, beside Ada to the left, front facing screen-right: a flat side profile, back at the left end, front at the right end, same direction as Ada. Ben’s chair: lower far right of frame, about half the frame height tall, cut off by the bottom edge, beside Ada to the right, front facing screen-left: a flat side profile, back at the right end, front at the left end.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Ada leans in and explains something with an open hand; Ben listens and nods slowly. A woman in her forties with a short dark bob and round tortoiseshell glasses, a mustard cardigan over a cream blouse. Plain clothing without logos or lettering. A man in his late twenties with close-cropped curly black hair and light stubble, a forest-green bomber jacket over a grey T-shirt. A small round wooden café table. Bentwood café chairs in dark wood. Set: A small neighbourhood café in the late afternoon: warm wood floor, a sage-green back wall with a tall window, a counter with a coffee machine, a pendant lamp over a round table; Warm oak floorboards; A sage-green painted plaster wall; A…\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e95c8bd7"
+          }
+        },
+        {
+          "id": "39f5b056-a215-5782-a76f-081558374497",
+          "name": "Shot 01 Master · GPT Image 2.5 · 493493",
+          "file": "39f5b056-a215-5782-a76f-081558374497.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T17:58:20.593Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 493493,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 32mm normal lens; medium long shot, Ada from the knees up; camera 1.3 m high, just below Ada's eye line and 3 m from Ada, looking slightly down; we see Ada side-on, from its right side (a side profile, not a three-quarter or chase view).\nIn frame: Ada: left of frame, the full frame height tall, cut off by the top and bottom edges, facing screen-right (profile). Café table: lower centre of frame, about half the frame height tall, cut off by the bottom edge, beside Ada to the right. Ben: right of frame, the full frame height tall, cut off by the top and bottom edges, beside Ada to the right, facing screen-left (profile). Ada’s chair: lower far left of frame, about half the frame height tall, cut off by the bottom edge, beside Ada to the left, front facing screen-right: a flat side profile, back at the left end, front at the right end, same direction as Ada. Ben’s chair: lower far right of frame, about half the frame height tall, cut off by the bottom edge, beside Ada to the right, front facing screen-left: a flat side profile, back at the right end, front at the left end.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Ada leans in and explains something with an open hand; Ben listens and nods slowly. A woman in her forties with a short dark bob and round tortoiseshell glasses, a mustard cardigan over a cream blouse. Plain clothing without logos or lettering. A man in his late twenties with close-cropped curly black hair and light stubble, a forest-green bomber jacket over a grey T-shirt. A small round wooden café table. Bentwood café chairs in dark wood. Set: A small neighbourhood café in the late afternoon: warm wood floor, a sage-green back wall with a tall window, a counter with a coffee machine, a pendant lamp over a round table; Warm oak floorboards; A sage-green painted…\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "e95c8bd7"
+          }
+        }
+      ]
     },
     {
       "id": "3ce1f247-51b5-4ab5-a5ae-8eec6e444a13",
@@ -3244,16 +3279,46 @@
       "sourceSha256": "6ca519b3e3dc9c1dba7a4881f75ab121865c0a2673bf7ef97d8f2c7fe879a845"
     },
     {
-      "path": "media/assets/da3dbd5c-ec50-430a-844d-67496ddf9d48.mp4",
+      "path": "media/refs/1e1be52d-d1a1-5f2d-a32a-8da00fdac9ba.webp",
+      "kind": "image",
+      "bytes": 101346,
+      "sha256": "486ba215748a04945dc6537087d6cf1c563bdb62c1bf0ee4b25b8a2dae2ddafb",
+      "sourceSha256": "e988ff465c26c44e5ea22ad527c7b75bbffb957a5bd74f5e66e23eaafb4fa7d2",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/39f5b056-a215-5782-a76f-081558374497.webp",
+      "kind": "image",
+      "bytes": 105322,
+      "sha256": "c50d7eda5520efea7eb393c28319c0c07f70d90bfe2b47fcf80943e3638e2c20",
+      "sourceSha256": "a3c22954f8c85e8e65b45726d26cf6e2ca9b281731992c880dbb82335f3c1c91",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/bc0e02b8-0b57-4e4d-bbcd-b016dff94de0.mp4",
       "kind": "video",
-      "bytes": 1111740,
-      "sha256": "f4cc4cbf3e6db3fa6e2950ad94da683454e1ceb4ad9f14890fe09673c56515a7",
+      "bytes": 1111714,
+      "sha256": "5cda6d129be62d692cbabb7f740244a52ba56731b0f75d3373ae12130f14b603",
       "sourceSha256": "d7da9a4866767792610fe8934fda277dda764bc9d3037974fb3f5b427dc3217e",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 120,
       "duration": 5
+    },
+    {
+      "path": "media/assets/9c325193-195b-532b-ac03-7059d921e0dd.mp4",
+      "kind": "video",
+      "bytes": 964786,
+      "sha256": "de5e444099188bb0bb77a111f2c586bde8278871e3f653a4cbfb4f86e7b81377",
+      "sourceSha256": "109df6ed3f441ed3b0f1fbca730f536dc86585192947f5260b1d4ccd4a82e9e4",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708
     },
     {
       "path": "media/assets/ae526eca-0aa8-4824-9ee3-f101c1fc0b8c.mp4",
@@ -3306,16 +3371,31 @@
   ],
   "assets": [
     {
-      "id": "da3dbd5c-ec50-430a-844d-67496ddf9d48",
+      "id": "bc0e02b8-0b57-4e4d-bbcd-b016dff94de0",
       "kind": "camera-render",
       "shotId": "d1c91695-cac9-4893-9812-8b9e813434b0",
-      "file": "assets/da3dbd5c-ec50-430a-844d-67496ddf9d48.mp4",
+      "file": "assets/bc0e02b8-0b57-4e4d-bbcd-b016dff94de0.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-11-03T01:32:40.235Z",
+      "createdAt": "2026-11-03T17:57:09.003Z",
       "source": {
         "engineShotId": null,
         "signature": "e95c8bd7"
+      }
+    },
+    {
+      "id": "9c325193-195b-532b-ac03-7059d921e0dd",
+      "kind": "workflow-result",
+      "shotId": "d1c91695-cac9-4893-9812-8b9e813434b0",
+      "file": "assets/9c325193-195b-532b-ac03-7059d921e0dd.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-11-03T18:04:25.631Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 2 reference images",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Ada leans in and explains something with an open hand; Ben listens and nods slowly. A woman in her forties with a short dark bob and round tortoiseshell glasses, a mustard cardigan over a cream blouse. A man in his late twenties with close-cropped curly black hair and light stubble, a forest-green bomber jacket over a grey T-shirt. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 32mm. Filter: no logos or lettering.\nReference images: 1 = start still; 2 = end still.",
+        "sourceAssetId": "bc0e02b8-0b57-4e4d-bbcd-b016dff94de0"
       }
     },
     {
@@ -3372,6 +3452,13 @@
     }
   ],
   "edit": {
-    "clips": []
+    "clips": [
+      {
+        "shotId": "d1c91695-cac9-4893-9812-8b9e813434b0",
+        "assetId": "9c325193-195b-532b-ac03-7059d921e0dd",
+        "in": 0,
+        "out": null
+      }
+    ]
   }
 }

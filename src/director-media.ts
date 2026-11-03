@@ -10,7 +10,9 @@ export type Callout = { label: string; x: number; y: number; w: number; h: numbe
 export type GuideEntry = { id: string; file: string; kind: 'video' | 'image'; label?: string; project?: string; shot?: string; asset?: string; capturedAt?: string; callouts?: Callout[] };
 
 /** URL of a file in public/guide under the deploy base. */
-export const guideUrl = (file: string) => `${import.meta.env.BASE_URL}guide/${file}`;
+// The demo CDN caches static media: refresh the key when replacing its captured examples.
+const mediaVersion = '20261103-source-pairs';
+export const guideUrl = (file: string) => `${import.meta.env.BASE_URL}guide/${file}?v=${mediaVersion}`;
 
 let manifest: Promise<Map<string, GuideEntry>> | null = null;
 /** public/guide/manifest.json by id (empty when it is missing). */
@@ -78,8 +80,9 @@ export function beforeAfter(o: { before: string; after: string; kind: 'image' | 
     const paint = () => { toggle.textContent = playing ? '❚❚' : '▶'; toggle.setAttribute('aria-label', playing ? 'Pause both videos' : 'Play both videos'); };
     const apply = () => {
       for (const v of [va, vb]) if (visible && !v.src && v.dataset.src) { v.src = v.dataset.src; v.preload = 'auto'; }
-      if (playing && visible && !document.hidden) { void va.play().catch(() => {}); void vb.play().catch(() => {}); } else { va.pause(); vb.pause(); }
+      if (playing && visible && !document.hidden && va.readyState >= 2 && vb.readyState >= 2) { void va.play().catch(() => {}); void vb.play().catch(() => {}); } else { va.pause(); vb.pause(); }
     };
+    va.addEventListener('loadeddata', apply); vb.addEventListener('loadeddata', apply);
     toggle.onclick = () => { playing = !playing; paint(); apply(); };
     va.addEventListener('timeupdate', () => { if (Math.abs(vb.currentTime - va.currentTime) > 0.12) vb.currentTime = va.currentTime; });
     va.addEventListener('play', () => { vb.currentTime = va.currentTime; });

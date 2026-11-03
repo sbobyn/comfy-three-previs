@@ -18,12 +18,11 @@ examples/starters/
 Final Lap and Posterized now place every grandstand with its low/front row facing the track or court.
 The existing shot stills, blockout clips and generated videos are preserved with their original source signatures;
 the app marks these seven shots as made for earlier blocking. Newly opened starter copies use the corrected scenes.
-Existing user projects are not modified.
+Existing user projects are not modified. When the new showcase render replaces a bundled blockout file, the preceding clip is preserved under that starter’s `archive/` directory.
 
 ## Blockout starters (2026-11-02)
 
-Five starters open with a blockout clip per shot and written Cast Cards, and no generated media: making the cast images,
-stills and videos is the test. Look Lab is the exception: it also ships a start still per variant and twelve videos (below). They were built through the MCP tools on a private server (paid work off) by
+Five starters open with a blockout clip per shot and written Cast Cards. Mountain Trail, City Blocks and Two-Hander each include start/end stills and a generated video for their first showcase shot; their other shots remain blockouts for trying the workflow. Lighthouse includes a generated Orbit right showcase. Look Lab also ships a start still per variant and thirteen videos (below). They were built through the MCP tools on a private server (paid work off) by
 `scripts/starters/author.mjs` and its scene modules in `scripts/starters/scenes/`; the bundles here remain the source of
 truth. Every object is original, nothing carries a brand, logo, sign or lettering (each project style says so, and every
 shot has the `no logos or lettering` filter tag, which a video prompt always keeps), every shot is 4–5 s with its camera

@@ -64,7 +64,7 @@ export const LOOK_AXES = [
     { id: 'anime', label: 'Anime', intro: ['2D cel anime shot.', '2D cel anime key frame, hand-drawn, single frame.'], look: '2D hand-drawn TV anime: bold clean ink outlines, flat two-tone cel shading, painted sky, no photo texture', edit: 'redraw the whole frame as 2D hand-drawn anime: bold clean ink outlines, flat two-tone cel shading, painted sky, no photographic texture', model: { still: 'nano-banana-2-1', styleRef: false } },
     // Claymation: Nano Banana 2.1 with a clay still as a style reference.
     { id: 'claymation', label: 'Claymation', intro: ['Stop-motion claymation shot.', 'Stop-motion claymation frame, single frame.'], look: 'all plasticine: chunky clay forms, tabletop set, soft studio light', edit: 'remake the whole frame in plasticine as a stop-motion claymation set: chunky clay forms, a tabletop miniature, soft studio light', model: { still: 'nano-banana-2-1', styleRef: true } },
-    { id: '3d-animated', label: '3D animated', intro: ['Stylised 3D animated feature shot.', 'Stylised 3D animated feature film still, single frame.'], look: 'stylised 3D animated feature, soft rounded shapes, warm bounce light', edit: 'redraw the whole frame as a stylised 3D animated feature: soft rounded shapes, warm bounce light', model: { still: 'nano-banana-2-1', styleRef: false } },
+    { id: '3d-animated', label: '3D animated', short: '3D animation', intro: ['Stylised 3D animated feature shot.', 'Stylised 3D animated feature film still, single frame.'], look: 'stylised 3D animated feature, soft rounded shapes, warm bounce light', edit: 'redraw the whole frame as a stylised 3D animated feature: soft rounded shapes, warm bounce light', model: { still: 'nano-banana-2-1', styleRef: false } },
     { id: 'watercolour', label: 'Watercolour', intro: ['Animated watercolour painting.', 'Watercolour painting, single frame.'], look: 'loose watercolour, soft bleeding washes, paper texture', edit: 'repaint the whole frame as a loose watercolour: soft bleeding washes, paper texture', model: { still: 'nano-banana-2-1', styleRef: false } },
   ] },
 ];
@@ -145,7 +145,7 @@ export function lookSectionTexts(project, shot, kind, look, { groups = [], compa
   if (compact === 'minimal') {
     delete out.intro; delete out.world;
     const first = ['time', 'weather', 'season'].map(a => pick(a, 'world').split(',')[0]).find(Boolean) || light[0] || '';
-    const mediumWord = style && style.id !== 'photoreal' ? style.look.split(/[,:]/)[0] : own ? '' : 'photoreal';
+    const mediumWord = style && style.id !== 'photoreal' ? style.short || style.look.split(/[,:]/)[0] : own ? '' : 'photoreal';
     out.style = `Look: ${[mediumWord, first].filter(Boolean).join(', ') || projectStyle.split(/[,.]/)[0] || 'photoreal'}. ${NO_BRANDS_SHORT}`;
   }
   // Wardrobe dresses a character lead only (an eagle or a car has no clothes).
