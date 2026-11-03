@@ -16,7 +16,8 @@ import { atomicJson } from './atomic.mjs';
 import { interpret } from './director-parse.mjs';
 import { planProposal, sceneView } from './agent-proposal.mjs'; // [agent]
 import { autoPromptText, shotPrompt } from '../../shared/prompt.mjs'; // [agent]
-import { TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, keyStills, stillStale, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
+import { cleanManifest } from '../../shared/regen.mjs';
+import { blockoutManifest, shotSignature, TEMPLATES, ROLES, makeEntity, makeShot, normalizeCamera, clampDuration, clampStart, uniqueName, handleOf, compilePrompt, setKeyframes, removeKeys, videoReferences, keyStills, stillStale, normalizeCast, descendantsOf, withDescendants } from '../../shared/director.mjs';
 import { cameraSourceOf } from '../../shared/camera-source.mjs';
 import { applyKeyframeOp, keyframeState } from '../../shared/keyframes.mjs';
 import { rigidApply } from '../../shared/editor-controls.mjs';
@@ -277,6 +278,15 @@ export function applyOps(p, ops) {
         else if ((p.assets || []).some(a => a.id === op.assetId && a.shotId === s.id && a.kind === 'workflow-result' && a.mime?.startsWith('video/'))) s.winner = op.assetId;
         else fail('That take is not a generated video of this shot');
         results.push({ op: op.op, id: s.id }); break;
+      }
+      case 'pin_output': {
+        // Accept a still, video or look as it is: pinned outputs are never out of date and a batch keeps them (docs/regeneration.md).
+        const pinned = op.pinned !== false;
+        const ref = [...(p.scene.references || []), ...p.shots.flatMap(s => s.references)].find(r => r.id === op.id);
+        const asset = ref ? null : (p.assets || []).find(a => a.id === op.id && a.kind === 'workflow-result');
+        const target = ref || asset; if (!target) fail('Pin a still, a look or a generated video of this project');
+        if (pinned) target.pinned = true; else delete target.pinned;
+        results.push({ op: op.op, id: op.id, pinned }); break;
       }
       case 'set_edit': {
         if (!Array.isArray(op.clips) || op.clips.length > 60) fail('clips must be an array of at most 60');
@@ -620,7 +630,7 @@ export async function openDirector(root, options = {}) {
           const file = `assets/${r.id}.${EXT[r.mime]}`;
           await mkdir(join(dir, p.id, 'assets'), { recursive: true });
           await saveResultBytes(join(dir, p.id, file), bytes);
-          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, cameraSource: job.cameraSource || cameraSourceOf(job.definition, job.binding?.assetBindings), prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null, ...takeSettings(job) } });
+          (p.assets ||= []).push({ id: r.id, kind: 'workflow-result', shotId: render.shotId, file, mime: r.mime, sha256: sha(bytes), width: r.width, height: r.height, fps: r.fps ?? null, frameCount: r.frameCount ?? null, duration: r.duration ?? null, createdAt: now(), source: { engineShotId: job.shotId, sourceAssetId: render.id, jobId: job.id, resultId: r.id, workflow: job.definition?.title || job.definition?.id || 'Workflow', backend: job.backend?.kind || null, cameraSource: job.cameraSource || cameraSourceOf(job.definition, job.binding?.assetBindings), prompt: String(job.binding?.prompt || '').slice(0, 8000), quote: job.quote ? { status: job.quote.status, amount: job.quote.amount ?? null, currency: job.quote.currency || 'USD' } : null, ...takeSettings(job), ...(cleanManifest(job.binding?.regen) ? { regen: cleanManifest(job.binding.regen) } : {}) } });
           known.add(r.id); added++;
         }
       }
@@ -738,8 +748,11 @@ export async function openDirector(root, options = {}) {
       await mkdir(join(dir, p.id, 'assets'), { recursive: true });
       const file = `assets/${asset.id}.mp4`;
       try { await writeFile(join(dir, p.id, file), bytes, { flag: 'wx', mode: 0o600 }); } catch (e) { if (e.code !== 'EEXIST') throw e; }
-      (p.assets ||= []).push({ id: asset.id, kind: 'camera-render', shotId: shot.id, file, mime: 'video/mp4', sha256: asset.sha256, width: asset.width, height: asset.height, fps: asset.fps, frameCount: asset.frameCount, duration: asset.duration, version: (p.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id).length + 1, createdAt: now(), source: { engineShotId: input.previsShotId, engineAssetId: asset.id, prompt: String(input.prompt || '').slice(0, 8000), signature: String(input.signature || '').slice(0, 64), ...origin } });
-      shot.render = { previsShotId: input.previsShotId, assetId: asset.id, prompt: String(input.prompt || compilePrompt(p, shot)).slice(0, 8000), frameCount: asset.frameCount, duration: asset.duration, width: asset.width, height: asset.height, signature: String(input.signature || '').slice(0, 64), createdAt: now(), ...origin };
+      // The regeneration manifest (shared/director.mjs blockoutManifest) is computed here from the saved project, so it is recorded only
+      // when the capture saw the same blocking (its signature matches); otherwise the signature alone marks the clip out of date.
+      const signature = String(input.signature || '').slice(0, 64), regen = !signature || signature === shotSignature(p, shot) ? { regen: blockoutManifest(p, shot) } : {};
+      (p.assets ||= []).push({ id: asset.id, kind: 'camera-render', shotId: shot.id, file, mime: 'video/mp4', sha256: asset.sha256, width: asset.width, height: asset.height, fps: asset.fps, frameCount: asset.frameCount, duration: asset.duration, version: (p.assets || []).filter(a => a.kind === 'camera-render' && a.shotId === shot.id).length + 1, createdAt: now(), source: { engineShotId: input.previsShotId, engineAssetId: asset.id, prompt: String(input.prompt || '').slice(0, 8000), signature, ...regen, ...origin } });
+      shot.render = { previsShotId: input.previsShotId, assetId: asset.id, prompt: String(input.prompt || compilePrompt(p, shot)).slice(0, 8000), frameCount: asset.frameCount, duration: asset.duration, width: asset.width, height: asset.height, signature, ...regen, createdAt: now(), ...origin };
       return { project: await save(p) };
     }),
   };
@@ -764,6 +777,7 @@ export function summarizeOps(ops, project) {
     else if (o.op === 'clear_animation') out.push(`Cleared animation on ${name(o.id)}`);
     else if (o.op === 'set_scene') out.push('Updated the scene setting');
     else if (o.op === 'update_reference') out.push('Linked a reference');
+    else if (o.op === 'pin_output') out.push(o.pinned === false ? 'Unpinned an output' : 'Pinned an output (kept even when out of date)');
     else if (o.op === 'set_winner') out.push(o.assetId ? `Picked the winning take of shot ${shot(o.shotId)}` : `Cleared the winning take of shot ${shot(o.shotId)}`);
     else if (o.op === 'use_take') out.push(`Picked the still take in use for shot ${shot(o.shotId)}`);
   }

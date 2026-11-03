@@ -8,6 +8,7 @@ import { api, h, toast } from './director-common';
 import { shotTakes, winnerOps, blockoutClips, takeDifferences } from '../shared/takes.mjs';
 import type { Take, VideoTake, StillTake, TakeOptions, Grade, TakeGrades } from '../shared/takes.mjs';
 import { CAMERA_SOURCE_LABELS } from '../shared/camera-source.mjs';
+import { explainStale, staleText } from '../shared/regen.mjs';
 import { GRADER_PRICES } from '../shared/tiers.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
 import { defaultPicks, togglePick, MAX_LANES, FPS, stepFrame, laneTime, gridColumns, timecode, costText, settingParts, gradeText, directionText, duration } from './director-takes-core';
@@ -144,6 +145,13 @@ export async function openTakeLab(ctx: TakeLabCtx, shotId: string, initial?: 'vi
     }
     draw();
   }
+  /** Pin (accept as it is) or unpin a take: pinned takes are never out of date and a batch keeps them (docs/regeneration.md). */
+  async function togglePin(tk: Take, pinned: boolean) {
+    const s = shot()!;
+    if (await ctx.runEntry({ label: `${pinned ? 'Pin' : 'Unpin'} ${tk.label} · shot ${no(P(), s)}`, redo: [{ op: 'pin_output', id: tk.id, pinned }], undo: [{ op: 'pin_output', id: tk.id, pinned: !pinned }] }) === false) return;
+    say(pinned ? `${tk.label} is pinned: kept as it is, even when its inputs change.` : `${tk.label} is unpinned: judged by its inputs again.`);
+    draw();
+  }
   clearBtn.onclick = async () => {
     const s = shot()!, { redo, undo } = winnerOps(P(), s, null);
     if (await ctx.runEntry({ label: `Clear winner · shot ${no(P(), s)}`, redo, undo }) === false) return;
@@ -199,6 +207,13 @@ export async function openTakeLab(ctx: TakeLabCtx, shotId: string, initial?: 'vi
     const winText = tk.winner ? (isVideo ? 'Winner' : 'In use') : isVideo ? 'Mark winner' : 'Use this still';
     const win = h('button', { class: `btn sm tk-win${tk.winner ? ' on' : ''}`, type: 'button', 'aria-pressed': String(tk.winner), disabled: tk.winner, 'aria-label': `${winText}: ${name}` }, tk.winner ? `★ ${winText}` : winText);
     win.onclick = () => void pickWinner(tk);
+    // What made this take and whether it is current (shared/regen.mjs); a pin accepts it as it is.
+    const rec = isVideo ? P().assets?.find(a => a.id === tk.id) : s.references.find(r => r.id === tk.id);
+    const verdict = rec ? explainStale(P(), isVideo ? { type: 'video', shotId: s.id, assetId: tk.id } : { type: 'still', shotId: s.id, refId: tk.id }) : null;
+    const isPinned = !!rec?.pinned;
+    const pin = h('button', { class: `btn sm tk-pin${isPinned ? ' on' : ''}`, type: 'button', 'aria-pressed': String(isPinned), title: `${staleText(verdict)} ${isPinned ? 'Unpin to judge it by its inputs again.' : 'Pin to keep it as it is: a batch will not make it again.'}`, 'aria-label': `${isPinned ? 'Pinned' : 'Pin'}: ${name}` }, isPinned ? 'Pinned' : 'Pin');
+    pin.onclick = () => void togglePin(tk, !isPinned);
+    if (verdict?.state === 'stale' && !tk.stale) badges.push(h('span', { class: 'tk-badge warn', title: staleText(verdict) }, 'Inputs changed'));
     return h('section', { class: 'tk-lane', 'aria-label': name },
       h('div', { class: 'tk-media' }, media, h('span', { class: 'tk-tag' }, tk.label), ended),
       h('div', { class: 'tk-card' },
@@ -213,7 +228,7 @@ export async function openTakeLab(ctx: TakeLabCtx, shotId: string, initial?: 'vi
           fact('Made', `${when(tk.createdAt)}${tk.elapsedSeconds != null ? ` · ran ${duration(tk.elapsedSeconds)}` : ''}`)),
         gradeList(tk.grades, tk),
         tk.prompt && (!onlyDiff || diffs.has('prompt')) ? h('details', { class: `tk-prompt${diffs.has('prompt') ? ' diff' : ''}` }, h('summary', {}, `Prompt · ${tk.promptLength} characters`), h('p', {}, tk.prompt)) : null,
-        win));
+        h('div', { class: 'tk-acts' }, win, pin)));
   }
   /** The blockout as a reference lane: the clip the takes were made from, or (stills) its frame at the moment. */
   function refLane(takes: Take[]) {

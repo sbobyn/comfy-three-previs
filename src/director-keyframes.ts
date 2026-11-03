@@ -7,6 +7,7 @@ import { FPS, frameTime, keyframePlan, keyframeState, maxMiddleFrames, middleKey
 import type { KeyRow, KeyframePlan } from '../shared/keyframes.mjs';
 import type { DirectorProject, Shot, Reference } from '../shared/director.mjs';
 import { stillStale } from '../shared/director.mjs';
+import { explainStale, staleText } from '../shared/regen.mjs';
 
 type Def = { id?: string; title?: string; task?: string; inputs?: Record<string, unknown>; graph?: any } | null;
 const STATE_WORD = { ready: 'ready', stale: 'out of date', missing: 'no still' } as const;
@@ -73,10 +74,14 @@ export function momentKeyActions(project: DirectorProject, s: Shot, used: Refere
 /** Frame tag for a moment card: "frame 60", and "out of date" when its take was made for an earlier blocking. */
 export function momentTags(project: DirectorProject, s: Shot, used: Reference): Node[] {
   const f = stillFrame(project, s, used), stale = stillStale(project, s, used), pinned = f ? middleKeys(s).includes(f.index) : false;
+  // Beyond the blocking: a still whose prompt, cast looks, model or seed changed is still sent, but a batch makes it again.
+  const x = used.generated ? explainStale(project, { type: 'still', shotId: s.id, refId: used.id }) : null;
   return [
     f ? h('span', { class: 'kf-frame', title: f.exact ? `Blockout frame ${f.index} of the shot (${FPS} fps)` : `Made at ${f.t}s, not on an encoded frame; the nearest is frame ${f.index}` }, `${f.exact ? '' : '≈'}frame ${f.index}`) : null,
     pinned ? h('span', { class: 'kf-pin' }, 'In-between key') : null,
-    stale ? h('span', { class: 'kf-stale', title: 'Made before the shot’s camera, timing or scene changed. Video models are never sent it; make a new take.' }, 'out of date') : null,
+    stale ? h('span', { class: 'kf-stale', title: `${staleText(x)} Video models are never sent it; make a new take or pin it.` }, 'out of date')
+      : x?.state === 'stale' ? h('span', { class: 'kf-stale soft', title: `${staleText(x)} Video models still get it; a batch makes it again unless you pin it.` }, 'inputs changed')
+      : x?.state === 'pinned' ? h('span', { class: 'kf-pin', title: staleText(x) }, 'pinned') : null,
   ].filter(Boolean) as Node[];
 }
 

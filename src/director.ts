@@ -4,7 +4,8 @@ import { loadBlockoutModels } from './director-models';
 import './director.css';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf, keyStills } from '../shared/director.mjs';
 import type { DirectorProject, Shot, Entity, Reference, Vec3, Asset } from '../shared/director.mjs';
-import { starterBlockout, starterMediaStatus, videoStale, keyStillState, blenderBlockout } from '../shared/director.mjs';
+import { starterBlockout, starterMediaStatus, videoStale, keyStillState, blenderBlockout, blockoutStale, clipCurrent } from '../shared/director.mjs';
+import { explainStale, staleText, dependentsOf } from '../shared/regen.mjs';
 import { api, h, toast, announce, refocus, SR_ONLY, claudeDialog as showClaudeDialog, shapeIcon, readFileBase64, DEMO, demoBadge, REPO_URL } from './director-common';
 import { expectedUsd, isFree, submitImage, suggestedCap } from './director-spend';
 import type { Connect } from './director-common';
@@ -69,6 +70,11 @@ const assetUrl = (a: Asset) => `/director-assets/${project.id}/${a.file.replace(
 const allRefs = () => project.shots.flatMap(s => s.references);
 const fmt = (t: number) => `${t.toFixed(2)}s`;
 const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, source, ...e }) => ({ ...e, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+
+// Regeneration keys (shared/regen.mjs): a blockout is out of date only when what its frames show changed; the tooltip says what.
+const blockoutOld = (s: Shot) => blockoutStale(project, s);
+const blockoutCurrent = (s: Shot) => !!s.render && clipCurrent(project, s, s.render) === true;
+const blockoutWhy = (s: Shot) => (s.render ? staleText(explainStale(project, { type: 'blockout', shotId: s.id })) : '');
 
 let editsInFlight = 0; // while our own edit is on its way, a poll can't tell our change from someone else's
 async function edit(ops: unknown[], quiet = false) {
@@ -489,7 +495,7 @@ function shotRunning(s: Shot) {
   return { still, video };
 }
 function pipsFor(s: Shot) {
-  const stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s)), run = shotRunning(s);
+  const stale = blockoutOld(s), run = shotRunning(s);
   return shotPips(s, { stale, videos: shotVideos(s.id).length, stillRunning: run.still, videoRunning: run.video, bundled: !!starterBlockout(project, s) });
 }
 function pipEls(p: ShotPips) {
@@ -859,7 +865,7 @@ function modelBlock(s: Shot) {
   const stillNote = (k: 'start' | 'end') => { const st = k === 'start' ? ks.startState : ks.endState, K = k === 'start' ? 'Start' : 'End'; return st === 'ready' ? `${K} still ready (Storyboard)` : st === 'stale' ? `${K} still is out of date: the camera, timing or scene changed since it was made. Make a new one in the Storyboard below` : `Add ${k === 'start' ? 'a Start' : 'an End'} still in the Storyboard below`; };
   const videoText = shotPrompt(project, s, 'video', { cameraSource: cameraSourceOf(def) }), cameraWords = cameraMotionWarning(videoText, cam);
   const maxLen = def.constraints?.promptMaxLength as number | undefined, promptLen = videoText.length;
-  const stale = s.render && s.render.signature && s.render.signature !== signature(project, s);
+  const stale = blockoutOld(s);
   const rate = def.pricing?.ratePerSecond as number | undefined, secs = clipSeconds(def, s), lengths = clipLengths(def);
   const fallback = twoFrames ? choices.find((d: any) => d.id === startOnlyFallback(def)) : null;
   const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
@@ -874,7 +880,7 @@ function modelBlock(s: Shot) {
     def.description ? h('p', { class: 'note vm-desc', title: def.description }, def.description) : null,
     // What goes in, in order: the camera (blockout clip, or the stills standing in for it), the look, then the cast.
     h('div', { class: 'vm-row', role: 'list', 'aria-label': 'Model inputs' },
-      h('div', { class: 'vm-in' + (cam === 'blockout' ? (s.render && !stale ? ' ok' : ' warn') : ' off'), role: 'listitem', title: cam === 'blockout' ? (s.render ? (stale ? 'The scene changed since; a new blockout is made when you generate' : 'Your camera move, sent as the video input') : 'Made from your camera when you generate') : 'Not used by this model' },
+      h('div', { class: 'vm-in' + (cam === 'blockout' ? (s.render && !stale ? ' ok' : ' warn') : ' off'), role: 'listitem', title: cam === 'blockout' ? (s.render ? (stale ? `${blockoutWhy(s)} A new blockout is made when you generate.` : 'Your camera move, sent as the video input') : 'Made from your camera when you generate') : 'Not used by this model' },
         cam === 'blockout' && s.render ? h('video', { src: `/assets/${s.render.assetId}.mp4#t=0.1`, muted: true, playsinline: true, preload: 'metadata', 'aria-hidden': 'true' }) : h('span', { class: 'vm-ph' }),
         h('small', {}, cam === 'blockout' ? 'Camera · blockout' : 'Blockout · not used')),
       ...([['start', ks.start, hasStart], ['end', ks.end, hasEnd]] as const).filter(([k, r]) => r || k === 'start' || twoFrames).map(([k, r, ok]) => h('div', { class: 'vm-in' + (ok ? ' ok' : ' warn'), role: 'listitem', title: r ? `${k === 'start' ? 'Start' : 'End'} still: ${r.name}${ok ? '' : ' · out of date, not sent'}` : `No ${k} still yet: add one in the Storyboard` },
@@ -920,7 +926,7 @@ function goSection(key: string) { if (collapsed.side) setCollapsed('side', false
 /** Readiness strip: Blockout · Cast · Prompt · Video for the current shot. */
 function renderReadiness() {
   const s = shot(); if (!s) return;
-  const stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
+  const stale = blockoutOld(s);
   const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const need = cast.filter(r => !objectLooks(project, r.entity.id).length).length;
   const edited = !!(s.prompts?.video?.edited && s.prompts.video.text);
@@ -928,7 +934,7 @@ function renderReadiness() {
   const bundled = starterBlockout(project, s);
   const item = (key: string, state: 'ok' | 'warn' | 'none', label: string, value: Node | string, tip: string) => h('button', { type: 'button', class: `rd ${state}`, title: tip, onclick: () => goSection(key) }, h('span', { class: 'rd-label' }, label), h('span', { class: 'rd-val' }, value));
   readiness.replaceChildren(
-    item('camera', s.render ? (stale ? 'warn' : 'ok') : 'none', 'Blockout', s.render ? (stale ? 'changed' : '✓') : bundled ? 'starter' : '–', s.render ? (stale ? (fromBlender(s) ? BLENDER_STALE : 'The scene or camera changed since the blockout') : fromBlender(s) ? 'Blockout is the Blender import, up to date' : 'Blockout is up to date') : bundled ? `The starter’s blockout clip${bundled.fresh === false ? ' shows an earlier blocking' : ''}; watch it in Cut. Generating makes this shot’s own blockout first (free, in this browser).` : 'No blockout yet: the grey camera clip is made when you generate'),
+    item('camera', s.render ? (stale ? 'warn' : 'ok') : 'none', 'Blockout', s.render ? (stale ? 'changed' : '✓') : bundled ? 'starter' : '–', s.render ? (stale ? (fromBlender(s) ? BLENDER_STALE : blockoutWhy(s)) : fromBlender(s) ? 'Blockout is the Blender import, up to date' : 'Blockout is up to date') : bundled ? `The starter’s blockout clip${bundled.fresh === false ? ' shows an earlier blocking' : ''}; watch it in Cut. Generating makes this shot’s own blockout first (free, in this browser).` : 'No blockout yet: the grey camera clip is made when you generate'),
     item('cast', need ? 'warn' : cast.length ? 'ok' : 'none', 'Cast', h('span', { class: 'rd-cast' }, ...cast.slice(0, 5).map(r => h('i', { style: `background:${KIND_COLORS[r.entity.kind]}`, title: r.entity.name })), `${cast.length}${need ? ` · ${need} need image${need === 1 ? '' : 's'}` : ''}`), need ? `${need} of ${cast.length} cast members have no image yet` : 'Every cast member has an image'),
     item('video', edited ? 'warn' : 'ok', 'Prompt', edited ? 'edited' : 'auto', edited ? 'You edited this shot’s prompt; your text is used' : 'The prompt is composed from the cast, camera and story'),
     item('video', vids ? (older === vids ? 'warn' : 'ok') : 'none', 'Video', vids ? (older === vids ? 'older' : `✓${vids > 1 ? ` ${vids}` : ''}`) : '–', vids ? `${vids} generated video${vids === 1 ? '' : 's'}${older ? `; ${older === vids ? (vids === 1 ? 'it was' : 'all were') : `${older} were`} made for an earlier blocking and do not match the blockout` : ''}` : 'No video yet: Generate video (bottom of this panel)'));
@@ -938,11 +944,11 @@ function renderReadiness() {
 /** Action bar: shot number, blockout state and cost on the left; Preview and Generate on the right. */
 function renderActionBar() {
   const s = shot(); if (!s) return;
-  const idx = project.shots.indexOf(s), stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
+  const idx = project.shots.indexOf(s), stale = blockoutOld(s);
   if (!genCache) loadGen();
   const model: any = genCache ? shotModel(s) : null, rate = model?.pricing?.ratePerSecond as number | undefined, secs = clipSeconds(model, s);
   const state = s.render ? (stale ? 'blockout changed' : 'blockout ready') : starterBlockout(project, s) ? 'starter blockout' : 'no blockout yet';
-  actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}` }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * secs).toFixed(2)}`)] : []));
+  actHint.replaceChildren(h('strong', {}, `Shot ${String(idx + 1).padStart(2, '0')}`), h('span', { class: `act-state ${s.render ? (stale ? 'warn' : 'ok') : 'none'}`, ...(stale ? { title: blockoutWhy(s) } : {}) }, state), ...(rate ? [h('span', { class: 'act-cost' }, `≈ $${(rate * secs).toFixed(2)}`)] : []));
   actHint.title = `${s.title} · ${s.duration}s · ${state}${rate ? ` · about $${(rate * secs).toFixed(2)} to generate (${secs}s clip)` : ''}`;
   const ready = !!s.render && !stale;
   renderBtn.textContent = ready ? 'Generate video ▸' : s.render ? 'Remake blockout…' : 'Make blockout…';
@@ -956,7 +962,7 @@ function renderSteps() {
   stepBtns.build.querySelector('.st-count')!.textContent = `${n} object${n === 1 ? '' : 's'}`;
   stepBtns.shoot.querySelector('.st-count')!.textContent = `${shots} shot${shots === 1 ? '' : 's'}`;
   stepBtns.cut.querySelector('.st-count')!.textContent = `${vids} video${vids === 1 ? '' : 's'}`;
-  const s = shot(), stale = !!(s.render && s.render.signature && s.render.signature !== signature(project, s));
+  const s = shot(), stale = blockoutOld(s);
   const cast = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment'), castNeed = cast.filter(r => !objectLooks(project, r.entity.id).length).length;
   const st = stepStatus(step, project, s, { stale, videos: shotVideos(s.id).length, castNeed, castTotal: cast.length, bundled: !!starterBlockout(project, s) }), text = st.parts.join(' · ');
   if (topStatus.title !== text) { topStatus.title = text; topStatus.replaceChildren(h('span', { class: 'ts-long' }, text), h('span', { class: 'ts-short', 'aria-hidden': 'true' }, st.short)); }
@@ -1022,7 +1028,7 @@ function renderShotPane() {
     void edit([{ op: 'update_shot', id: s.id, patch: { camera: { move: 'custom', keys: next, timing: 'ease' } } }]).then(() => toast(`Camera ${which} set from the set view`));
   };
   const rendered = s.render;
-  const stale = rendered && rendered.signature && rendered.signature !== signature(project, s);
+  const stale = !!rendered && blockoutOld(s);
   const refsGrid = h('div', { class: 'refs' }, ...s.references.map(r => refCard(s, r)));
   const drop = h('label', { class: 'dropzone' }, h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: (ev: Event) => { const files = Array.from((ev.target as HTMLInputElement).files || []); void uploadRefs(files, null); } }), 'Drop images here or click to add references for this shot');
   dropTarget(drop, files => uploadRefs(files, null));
@@ -1031,7 +1037,7 @@ function renderShotPane() {
     videoDef: x => (genCache ? (shotModel(x) as any) : (loadGen(), null)), stillPresets: () => stillPresets, stillModel: stillModelOf, stillRefs: (x, id) => stillLooks(project, x, 0, id).looks.length };
   const rows = castRows(project, s).filter(r => r.inCast && r.entity.kind !== 'environment');
   const blockoutInfo = rendered ? h('details', { class: 'facts-more' },
-    h('summary', {}, h('span', { class: 'info-i', 'aria-hidden': 'true' }, 'i'), fromBlender(s) ? 'Blender clip' : 'Blockout clip', stale ? h('span', { class: 'fm-warn' }, fromBlender(s) ? ' · edited since the import' : ' · scene changed since') : h('span', { class: 'fm-ok' }, ' · up to date')),
+    h('summary', {}, h('span', { class: 'info-i', 'aria-hidden': 'true' }, 'i'), fromBlender(s) ? 'Blender clip' : 'Blockout clip', stale ? h('span', { class: 'fm-warn', title: blockoutWhy(s) }, fromBlender(s) ? ' · edited since the import' : ' · scene changed since') : h('span', { class: 'fm-ok' }, ' · up to date')),
     !!stale && fromBlender(s) ? h('p', { class: 'note', style: 'margin:0' }, BLENDER_STALE) : null,
     h('video', { 'aria-label': 'Blockout video', src: `/assets/${rendered.assetId}.mp4`, controls: true, muted: true, loop: true, playsinline: true, preload: 'metadata', style: 'width:100%;border-radius:8px;border:1px solid var(--line)' }),
     h('div', { class: 'facts' }, 'Frames', h('b', {}, `${rendered.frameCount} @ 24 fps`), 'Duration', h('b', {}, `${Number(rendered.duration).toFixed(2)}s`), 'Size', h('b', {}, `${rendered.width}×${rendered.height}`))) : null;
@@ -1444,6 +1450,13 @@ function linkPicker(e: Entity) {
   return h('details', { class: 'cc-link' }, h('summary', {}, 'Add from project images'),
     h('div', { class: 'cc-grid' }, ...list.slice(0, 40).map(r => h('button', { type: 'button', title: `${r.name}${r.entityId ? ` · ${entity(r.entityId)?.name}` : ''}`, onclick: () => void edit([{ op: 'link_look', entityId: e.id, referenceId: r.id }]).then(() => toast(`Added to ${e.name}’s cast images`)).catch(() => {}) }, h('img', { src: refUrl(r), alt: r.name, loading: 'lazy' })))));
 }
+/** What depends on an object (shared/regen.mjs dependentsOf): what moving it, or changing its cast image or description, makes out of date. */
+function dependsOn(e: Entity) {
+  const d = dependentsOf(project, e.id), n = (x: number, w: string) => `${x} ${w}${x === 1 ? '' : 's'}`;
+  const part = (x: { shots: string[]; stills: number; videos: number }) => x.shots.length ? `${n(x.shots.length, 'shot')} (${n(x.stills, 'still')}, ${n(x.videos, 'video')})` : 'nothing made yet';
+  return h('p', { class: 'note ob-depends', style: 'margin:0', title: 'Only shots whose blockout frames can show this object count for moving it. A batch remakes just these (pin a take to keep it).' },
+    h('strong', {}, 'What depends on this: '), `moving it affects ${part(d.object)}; its cast image or description feeds ${part(d.look)}.`);
+}
 function renderObjectPane() {
   if (objectPane.contains(document.activeElement) && objectPane.dataset.id === (selected || '')) return;
   objectPane.dataset.id = selected || '';
@@ -1530,7 +1543,8 @@ function renderObjectPane() {
       h('label', { class: 'cc-field' }, h('span', {}, shared ? 'Description · extra notes for this one' : 'Description'), shared ? h('p', { class: 'note', style: 'margin:0' }, `From ${shared.name}’s description: ${shared.notes || '—'}`) : null, notes),
       h('label', { class: 'cc-field' }, h('span', {}, 'Style notes'), styleNotes),
       h('div', { class: 'ob-style' }, h('span', { class: 'muted' }, 'Project style: '), styleText ? h('span', {}, styleText) : h('span', { class: 'muted' }, 'not set'), h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openLooks() }, styleText ? 'Edit' : 'Set style')),
-      h('p', { class: 'note', style: 'margin:0' }, 'Description and style go into this object’s images and every shot it appears in. Its primary image is sent with those shots’ videos.')),
+      h('p', { class: 'note', style: 'margin:0' }, 'Description and style go into this object’s images and every shot it appears in. Its primary image is sent with those shots’ videos.'),
+      dependsOn(e)),
     shared ? null : sheetSection(e), // [designsheet]
     shared ? null : h('details', { class: 'block object-generate', open: form.open, ontoggle: (ev: Event) => { form.open = (ev.currentTarget as HTMLDetailsElement).open; } },
       h('summary', {}, 'Generate an image for ', e.name),
@@ -2056,9 +2070,8 @@ function openRender() {
   const gen = h('div', { class: 'gen-box' }, h('p', { class: 'note', style: 'margin:0' }, 'Make the blockout first.'));
   const step3 = h('div', { class: 'step' }, h('span', { class: 'n' }, '3'), h('div', {}, h('h3', {}, 'Generate the video'), h('p', { style: 'margin:0 0 8px' }, 'Run the chosen video model on this shot. You see the quote, camera source and final prompt first; nothing runs until you approve it.'), gen));
   const setOpen = (previsShotId: string, assetId: string) => renderGenerate(gen, s, previsShotId, assetId, () => prompt.value, { wf: hWf, backendSel: hBackend });
-  prompt.oninput = () => { if (s.render && s.render.signature === signature(project, s)) setOpen(s.render.previsShotId, s.render.assetId); };
-  const sig = signature(project, s);
-  if (s.render && s.render.signature === sig) {
+  prompt.oninput = () => { if (s.render && blockoutCurrent(s)) setOpen(s.render.previsShotId, s.render.assetId); };
+  if (s.render && blockoutCurrent(s)) {
     if (!seam) media.replaceChildren(h('video', { 'aria-label': 'Blockout video', src: `/assets/${s.render.assetId}.mp4`, controls: true, autoplay: true, muted: true, loop: true, playsinline: true }));
     step1.className = 'step done'; status.textContent = `Up to date: ${s.render.frameCount} frames · ${Number(s.render.duration).toFixed(2)}s · ${s.render.width}×${s.render.height}. Remake blockout to replace it.`;
     step2.className = 'step active'; setOpen(s.render.previsShotId, s.render.assetId);
@@ -2084,7 +2097,7 @@ function openRender() {
   hGo.onclick = async () => {
     hGo.disabled = true;
     try {
-      if (!(s.render && s.render.signature === signature(project, s))) await (capture.onclick as () => Promise<void>)();
+      if (!s.render || !blockoutCurrent(s)) await (capture.onclick as () => Promise<void>)();
       else if (!gen.querySelector('.gen-quote')) await setOpen(s.render.previsShotId, s.render.assetId);
       const q = gen.querySelector<HTMLButtonElement>('.gen-quote');
       if (q) { q.click(); step3.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }

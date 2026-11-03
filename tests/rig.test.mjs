@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mapHumanoid, boneWords, poseJoints, solveLimb, groundDrop, RIG_POSES, POSE_NAMES, performanceAt, qEuler, eulerOf, jointRotation, qRotate } from '../shared/rig.mjs';
 import { normalizeSource, normalizePerform } from '../shared/imported-asset.mjs';
-import { makeEntity, shotSignature, makeShot } from '../shared/director.mjs';
+import { makeEntity, shotSignature, makeShot, blockoutManifest } from '../shared/director.mjs';
 
 const chain = (names, parentOf = {}) => names.map((name, i) => ({ id: i, name, parent: parentOf[name] !== undefined ? names.indexOf(parentOf[name]) : null }));
 function skeleton(names) {
@@ -109,4 +109,17 @@ test('signature: clip, pose and stand-in invalidate the blockout; licence and cr
   const s = makeShot({}, 's1', 1, [base]), sig = e => shotSignature(p(e), s);
   assert.equal(sig(makeEntity({ ...base, source: { ...base.source, licence: 'CC0', attribution: 'Someone' } }, 'e1')), sig(base));
   for (const change of [{ perform: { clip: 'Run' } }, { pose: RIG_POSES.sit }, { standIn: 'neutral' }]) assert.notEqual(sig(makeEntity({ ...base, ...change }, 'e1')), sig(base), JSON.stringify(change));
+});
+
+test('regeneration keys: clip, pose and stand-in change an in-frame rig\u2019s blockout key; licence does not; off-screen rigs change nothing', () => {
+  const model = '/director-refs/00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111.glb';
+  const base = makeEntity({ name: 'Runner', shape: 'person', model, position: [0, 0, 0], source: { format: 'fbx', file: 'runner.fbx', clips: [{ name: 'Run', duration: 1 }], rig: RIG } }, 'e1');
+  const away = makeEntity({ ...base, name: 'Far runner', position: [0, 0, 500] }, 'e2');
+  const shot = makeShot({ camera: { move: 'static', target: 'e1', distance: 6, height: 1.6, angle: 0, mm: 35 }, duration: 2 }, 's1', 1, [base, away]);
+  const key = (e1, e2 = away) => blockoutManifest({ scene: { entities: [e1, e2], environment: { preset: 'stage' } } }, shot).key;
+  assert.equal(key(makeEntity({ ...base, source: { ...base.source, licence: 'CC0', attribution: 'Someone' } }, 'e1')), key(base));
+  for (const change of [{ perform: { clip: 'Run' } }, { pose: RIG_POSES.sit }, { standIn: 'neutral' }]) {
+    assert.notEqual(key(makeEntity({ ...base, ...change }, 'e1')), key(base), `in frame: ${JSON.stringify(change)}`);
+    assert.equal(key(base, makeEntity({ ...away, ...change }, 'e2')), key(base), `off screen: ${JSON.stringify(change)}`);
+  }
 });

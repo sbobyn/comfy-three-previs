@@ -86,5 +86,8 @@ dialog.jobs-sheet::backdrop { background: rgba(21, 19, 15, .14); backdrop-filter
 .jr-rec-go { display: flex; justify-content: flex-end; }
 .jr-close:not(:disabled) { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
 .jb-bar { display: flex; height: 6px; border-radius: var(--r-full); background: var(--paper-3); overflow: hidden; margin-top: 2px; }
+.jb-plan summary { font-size: var(--fs-2xs); color: var(--ink-3); cursor: pointer; }
+.jb-why { margin: 4px 0 0; padding-left: 16px; font-size: var(--fs-2xs); color: var(--ink-3); line-height: var(--lh); }
+.jb-why .faint { color: var(--ink-4); }
 .jb-bar i { display: block; height: 100%; transition: width var(--t-reveal) var(--ease); }
 .jb-bar .d { background: var(--ink); } .jb-bar .r { background: #D9962B; } .jb-bar .f { background: var(--accent); } .jb-bar .s { background: var(--line-2); }
