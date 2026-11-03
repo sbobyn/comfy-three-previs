@@ -7,9 +7,12 @@ export type Entity = { id: string; name: string; kind: Kind; shape: string; mode
 export type PathKey = { t: number; p: Vec3; r?: number; s?: Vec3; pitch?: number; roll?: number; pose?: Pose; ease?: 'linear' | 'smoothstep' };
 export type CameraKey = { t: number; p: Vec3; look: Vec3; mm: number };
 export type ShotCamera = { move: string; target: string | null; distance: number; height: number; angle: number; mm: number; keys: CameraKey[] | null; timing?: 'linear' | 'ease' };
-export type Generated = { requestId: string; presetId: string; model: string; prompt: string; seed: number; backend: string; promptId: string; guideMatch?: import("./still-match.mjs").GuideMatch; frame?: { index: number; fps: number; count: number; t: number }; guideSha?: string; signature?: string; copyOf?: string };
-export type Reference = { id: string; name: string; file: string; mime: string; role: Role; entityId: string | null; note: string; createdAt: string; generated?: Generated; keyOverride?: { role: 'start' | 'end'; from: string; frame: number | null; t?: number; exact?: boolean } };
-export type ShotRender = { previsShotId: string; assetId: string; prompt: string; frameCount: number; duration: number; width: number; height: number; createdAt: string; signature?: string; origin?: 'blender' };
+/** A regeneration manifest (shared/regen.mjs): what an output was made from, one hash or id per input part. */
+export type RegenManifest = { v: 1; type: 'blockout' | 'look' | 'still' | 'video'; key: string; parts: Record<string, string | number>; ctx?: { at?: 'start' | 'end' | number; view?: string; custom?: boolean; cameraSource?: string; uses?: { stills: string[]; looks: boolean } } };
+export type RegenReason = { code: string; part: string; text: string; entityId?: string; from?: string | number | null; to?: string | number | null };
+export type Generated = { regen?: RegenManifest; requestId: string; presetId: string; model: string; prompt: string; seed: number; backend: string; promptId: string; guideMatch?: import("./still-match.mjs").GuideMatch; frame?: { index: number; fps: number; count: number; t: number }; guideSha?: string; signature?: string; copyOf?: string };
+export type Reference = { pinned?: boolean; id: string; name: string; file: string; mime: string; role: Role; entityId: string | null; note: string; createdAt: string; generated?: Generated; keyOverride?: { role: 'start' | 'end'; from: string; frame: number | null; t?: number; exact?: boolean } };
+export type ShotRender = { regen?: RegenManifest; previsShotId: string; assetId: string; prompt: string; frameCount: number; duration: number; width: number; height: number; createdAt: string; signature?: string; origin?: 'blender' };
 export type Shot = { id: string; title: string; description: string; duration: number; start?: number; camera: ShotCamera; references: Reference[]; render: ShotRender | null; cast?: { include: string[]; exclude: string[] }; prompts?: Partial<Record<'video' | 'image', { text: string; edited: true; basedOn: string; editedAt: string }>>; style?: { movement: string[]; cuts: string[]; lens: string[]; filter: string[] }; promptSections?: Partial<Record<'video' | 'image', Record<string, PromptSectionPolicy>>>; promptVersions?: Partial<Record<'video' | 'image', PromptVersion[]>>; settings?: ShotModelSettings; middleKeys?: number[]; motionCritical?: boolean };
 export type PromptSectionPolicy = { mode: 'override' | 'lock'; text: string; basedOn: string; at: string };
 export type PromptVersion = { id: string; at: string; text: string; model: string; reason: string; by: 'you' | 'claude' | 'batch'; note: string; sections: { key: string; policy: 'inherit' | 'override' | 'lock' }[] };
@@ -19,7 +22,7 @@ export type Message = { id: string; shotId: string | null; role: 'user' | 'agent
 export type Proposal = { ops: unknown[]; undo: unknown[]; summary: { kind: string; text: string }[]; small: boolean; status: 'pending' | 'applied' | 'discarded' | 'undone'; decidedAt?: string };
 export type TakeDirectionCheck = { verdict: 'pass' | 'warn' | 'fail'; why: string; frames: { t: number; blockout: { facing: string | null; travel: string | null; from: 'scene' | 'grader' }; take: { facing: string; travel: string }; facing: string; travel: string }[]; grader: string; subject: string | null; measured: boolean; blockoutAssetId: string; method: string; reservationId: string; promptId: string | null; gradedAt: string };
 export type EditClip = { id: string; shotId: string; assetId: string | null; in: number; out: number | null };
-export type Asset = { id: string; kind: 'camera-render' | 'workflow-result' | 'edit'; shotId: string | null; file: string; mime: string; sha256: string; width: number; height: number; fps: number | null; frameCount: number | null; duration: number | null; version?: number; createdAt: string; imported?: boolean; starter?: string; checks?: { direction?: TakeDirectionCheck }; source: { clips?: { assetId: string; in: number; out: number }[]; engineShotId?: string; engineAssetId?: string; sourceAssetId?: string; jobId?: string; resultId?: string; workflow?: string; backend?: string | null; prompt?: string; signature?: string; origin?: 'blender'; quote?: { status: string; amount: number | null; currency: string } | null } };
+export type Asset = { pinned?: boolean; id: string; kind: 'camera-render' | 'workflow-result' | 'edit'; shotId: string | null; file: string; mime: string; sha256: string; width: number; height: number; fps: number | null; frameCount: number | null; duration: number | null; version?: number; createdAt: string; imported?: boolean; starter?: string; checks?: { direction?: TakeDirectionCheck }; source: { regen?: RegenManifest; clips?: { assetId: string; in: number; out: number }[]; engineShotId?: string; engineAssetId?: string; sourceAssetId?: string; jobId?: string; resultId?: string; workflow?: string; backend?: string | null; prompt?: string; signature?: string; origin?: 'blender'; quote?: { status: string; amount: number | null; currency: string } | null } };
 export type DirectorProject = {
   version: 1; id: string; title: string; template: string; createdAt: string; updatedAt: string; revision: number;
   scene: { name: string; environment: { preset: string; description: string; style?: string }; entities: Entity[]; references?: Reference[] };
@@ -52,6 +55,17 @@ export function keyStills(shot: Shot): { start: Reference | null; end: Reference
 export type StillState = 'missing' | 'stale' | 'ready';
 export function keyStillState(project: DirectorProject, shot: Shot): { start: Reference | null; end: Reference | null; startState: StillState; endState: StillState };
 export function shotSignature(project: DirectorProject, shot: Shot): string;
+export function hashText(text: string): string;
+export function hashValue(v: unknown): string;
+export const REGEN_VERSION: 1;
+export function manifestKey(type: string, parts: Record<string, string | number>): string;
+export function blockoutFrameTimes(shot: Shot): number[];
+export function blockoutObjects(project: DirectorProject, shot: Shot, opts?: { margin?: number; aspect?: number }): Set<string>;
+export function blockoutManifest(project: DirectorProject, shot: Shot): RegenManifest;
+export function isBlockingPart(part: string): boolean;
+export function diffParts(project: DirectorProject, recorded?: Record<string, string | number>, current?: Record<string, string | number>, opts?: { only?: ((part: string) => boolean) | null }): RegenReason[];
+export function blockingChanges(project: DirectorProject, shot: Shot, recorded: RegenManifest): RegenReason[];
+export function clipCurrent(project: DirectorProject, shot: Shot, rec: unknown): boolean | null;
 export function blockoutStale(project: DirectorProject, shot: Shot): boolean;
 export function blenderBlockout(project: DirectorProject, shot: Shot): boolean;
 export function stillStale(project: DirectorProject, shot: Shot, ref: Reference | null | undefined): boolean;

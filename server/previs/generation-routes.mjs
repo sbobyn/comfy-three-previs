@@ -4,6 +4,7 @@ import { validateWorkflowDefinition, assertNoSecrets, validateGraph } from './wo
 import { inspectOutputVideo } from './media-inspect.mjs';
 import { builtInPresets } from './presets.mjs';
 import { compactAsset, compactAssets } from './provenance.mjs';
+import { cleanManifest } from '../../shared/regen.mjs';
 
 export async function generationRoutes(data, project, options = {}) {
   // A legacy result is attached when every one of its results is already in the engine library.
@@ -74,7 +75,7 @@ export async function generationRoutes(data, project, options = {}) {
           const asset=b.assetId?p.assets?.find(a=>a.id===b.assetId):p.renders.find(r=>r.id===b.renderId);
           if(!asset||asset.shotId!==input.shotId)throw Error('The primary input must belong to the originating shot');
         }
-        p.workflowBindings.push({id,definitionId:definition.id,shotId:input.shotId,assetBindings:input.assetBindings || {},prompt:String(input.prompt || ''),parameters:input.parameters || {},acceptTimingChange:input.acceptTimingChange===true,createdAt:new Date().toISOString()});
+        p.workflowBindings.push({id,definitionId:definition.id,shotId:input.shotId,assetBindings:input.assetBindings || {},prompt:String(input.prompt || ''),parameters:input.parameters || {},acceptTimingChange:input.acceptTimingChange===true,...(cleanManifest(input.regen)?{regen:cleanManifest(input.regen)}:{}),createdAt:new Date().toISOString()});
       });return {project:saved,workflowBindingId:id};
     }
     if(path==='/api/generation/prepare')return {job:await generation.prepare(input)};

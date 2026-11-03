@@ -10,6 +10,8 @@ import { planSlots, setsFor, slotAspect, viewPrompt } from '../../shared/sheet-p
 import { withReferenceImages, maxReferences } from '../../shared/video-refs.mjs';
 import { clipSecondsFor, FIRST_FRAME_FALLBACK } from '../../shared/tiers.mjs';
 import { keyframePlan, maxMiddleFrames, middleKeys, resolveFrame, withMiddleFrames } from '../../shared/keyframes.mjs';
+import { lookAspect, videoKey, videoUses } from '../../shared/regen.mjs';
+import { resolveImageParams } from '../../shared/model-params.mjs';
 
 const SECONDS = { look: 20, sheet: 30, still: 20, video: 90 };
 const busyError = (pool, retryAfterSeconds) => Object.assign(Error(`Backend busy: fake ${pool} slots in use; retry when a job finishes`), { status: 409, apiCode: 'busy', retryAfterSeconds });
@@ -75,7 +77,6 @@ const randomSeed = () => Math.floor(Math.random() * 1e6);
 const shotOf = (p, id) => p.shots.find(s => s.id === id) || fail(`Unknown shot ${id}`);
 const entityOf = (p, id) => p.scene.entities.find(e => e.id === id) || fail(`Unknown object ${id}`);
 function fail(message) { throw notSent(message); }
-const lookAspect = e => (e.kind === 'character' ? '3:4' : e.kind === 'environment' ? '16:9' : '4:3'); // src/director-looks.ts aspectFor, default view
 
 /**
  * A shot's final video prompt for a model, as the browser builds it (src/director-videogen.ts shotVideoPlan): the one
@@ -161,13 +162,15 @@ export function videoPreparer({ get, post }) {
     const plan = videoPromptPlan(p, s, { cameraSource: cameraFor, refs: planRefs, maxLength: def.constraints?.promptMaxLength, cap: autoPromptCap(def), model: base.title?.split(' · ')[0] || base.id });
     prompt = plan.text;
     const local = def.id.startsWith('wan-') || def.provenance?.presetId?.startsWith('wan-');
+    // What this take is made from (shared/regen.mjs), recorded on the result so a later change says what it invalidates.
+    const regen = videoKey(p, s, { def: base, model: base.provenance?.presetId || base.id, cameraSource: cameraFor, uses: videoUses(base) });
     // Bind and quote are both revision-checked; concurrent batches can move the revision in between, so retry them together.
     return withRevision(async revision => {
-      const bind = await post('/api/generation/bind', { revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: true });
+      const bind = await post('/api/generation/bind', { revision, definitionId: def.id, shotId: r.previsShotId, assetBindings, prompt, parameters, acceptTimingChange: true, regen });
       const request = { requestId: randomUUID(), revision: bind.project.revision, workflowBindingId: bind.workflowBindingId, backend: { kind: local ? 'local' : 'cloud' } };
       const job = (await post('/api/generation/quote', request)).job;
       const cameraSource = job.cameraSource || cameraSourceOf(def, assetBindings);
-      return { request, job, def, modelUsed: base.id, cameraSource, prompt, plan, refs: registered, seconds, ...(keyframes ? { keyframes } : {}), promptWarning: plan.cameraWarning };
+      return { request, job, def, modelUsed: base.id, cameraSource, prompt, plan, refs: registered, seconds, regen, ...(keyframes ? { keyframes } : {}), promptWarning: plan.cameraWarning };
     });
   }
   return { definitionFor, prepare };
@@ -241,12 +244,14 @@ export function loopbackDrivers(base) {
         return refgen(ctx, p.id, async () => ({ projectId: p.id, entityId: e.id, presetId: ctx.node.model, prompt: lookPrompt(p, e), aspect: lookAspect(e), count: 1, seed: randomSeed() }));
       },
       // Family members (same-shape siblings) share the new look instead of each getting their own.
-      async finish(ctx) {
-        const family = ctx.node.target.family; if (!family?.length) return null;
-        const p = await ctx.project(), src = ctx.node.target.entityId;
-        const ops = family.filter(id => id !== src && p.scene.entities.some(e => e.id === id) && lookSource(p, id)?.id !== src).map(id => ({ op: 'update_entity', id, patch: { lookFrom: src } }));
+      async finish(ctx, list) {
+        const p = await ctx.project(), src = ctx.node.target.entityId, family = ctx.node.target.family || [];
+        // A look made again (its Cast Card, prompt or model changed) becomes the primary image; the older one stays as a version.
+        const made = list?.flatMap(j => j.results || []).find(r => r.id)?.id, e = p.scene.entities.find(x => x.id === src);
+        const primary = made && e && objectLooks(p, src)[0]?.id !== made && (p.scene.references || []).some(r => r.id === made && r.entityId === src) ? [{ op: 'set_look', entityId: src, referenceId: made }] : [];
+        const ops = [...primary, ...family.filter(id => id !== src && p.scene.entities.some(e => e.id === id) && lookSource(p, id)?.id !== src).map(id => ({ op: 'update_entity', id, patch: { lookFrom: src } }))];
         if (ops.length) await post('/api/director/edit', { projectId: p.id, ops });
-        return { linked: ops.length };
+        return family.length || primary.length ? { linked: ops.length - primary.length, ...(primary.length ? { primary: made } : {}) } : null;
       },
     },
     still: {
@@ -263,7 +268,7 @@ export function loopbackDrivers(base) {
           const frame = await post('/api/director/frame', { projectId: p.id, shotId: s.id, t, guide: true });
           // A Blender guide (blender-import) has no proxy markers, so the prompt does not explain them.
           const prompt = stillPromptPlan({ project: p, shot: s, t, presetId: ctx.node.model, looks: looks.slice(0, refIds.length), prevImage: prev && refIds.includes(prev.id) ? refIds.indexOf(prev.id) + 2 : null, markers: frame.source !== 'blender' }).text;
-          return { projectId: p.id, target: 'shot', shotId: s.id, frameAt: f.frameAt, frame: f.index, presetId: ctx.node.model, prompt, aspect: '16:9', count: 1, seed: randomSeed(), referenceIds: refIds, guide: frame.data };
+          return { projectId: p.id, target: 'shot', shotId: s.id, frameAt: f.frameAt, frame: f.index, presetId: ctx.node.model, prompt, aspect: '16:9', count: 1, seed: resolveImageParams(ctx.node.model, s).seed ?? randomSeed(), referenceIds: refIds, guide: frame.data };
         });
       },
     },
