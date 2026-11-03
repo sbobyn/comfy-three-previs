@@ -137,10 +137,52 @@ test('mocked submit path: trusted estimate reserves; paid disabled refuses befor
   // Paid gate (generation submit) still refuses without PREVIS_ALLOW_PAID / allowPaid.
   const generation = await openGeneration(root, project, { allowPaid: false, budget });
   assert.ok(generation.listForSync);
+  // Estimator prefers bound crop media over preset placeholder graph dims.
+  const preset = builtInPresets.find(p => p.id === 'wan-vace-14b-masked-v1');
+  const fromSources = applyTrustedMaskedEstimate(
+    { status: 'unknown', amount: null },
+    preset,
+    { sourceVideo: { width: 640, height: 480, frameCount: 81 } },
+    { marginPct: 10 },
+  );
+  const expected = estimateMaskedVaceCost({ width: 640, height: 480, frames: 81 });
+  assert.equal(fromSources.estimate, expected.estimate);
   // Ensure README experimental claim untouched.
   const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
   assert.match(readme, /experimental pipeline is not yet included in the app/i);
   void png;
+});
+
+test('masked-edit submit refuses without generation wiring and bad fingerprints', async () => {
+  const { openMaskedEdit } = await import('../server/previs/masked-edit.mjs');
+  const root = await mkdtemp(join(tmpdir(), 'previs-masked-sub2-'));
+  const projectId = randomUUID(), shotId = randomUUID(), editId = randomUUID();
+  const director = {
+    get: async () => ({ id: projectId, revision: 1, shots: [{ id: shotId }], assets: [] }),
+  };
+  const api = openMaskedEdit(root, director, { log: () => {} });
+  await assert.rejects(
+    () => api.submit({
+      projectId, editId, draftRevision: 1, requestId: randomUUID(), fingerprint: 'x',
+      maxCostUsd: 1, approval: { approved: true, fingerprint: 'x', allowance: { currency: 'USD', maxAmount: 1, allowUnknownCharges: true } },
+    }),
+    /generation authority/i,
+  );
+  // With a stub generation, missing receipt still 404s before any dispatch.
+  const calls = [];
+  const wired = openMaskedEdit(root, director, {
+    log: () => {},
+    engineProject: { get: () => ({ revision: 0, shots: [], assets: [], workflowDefinitions: [] }), append: async () => ({}) },
+    generation: { route: async (path, input) => { calls.push({ path, input }); return {}; } },
+  });
+  await assert.rejects(
+    () => wired.submit({
+      projectId, editId, draftRevision: 1, requestId: randomUUID(), fingerprint: 'deadbeef',
+      maxCostUsd: 1, approval: { approved: true, fingerprint: 'deadbeef', allowance: { currency: 'USD', maxAmount: 1, allowUnknownCharges: true } },
+    }),
+    /Unknown edit/i,
+  );
+  assert.equal(calls.length, 0);
 });
 
 test('UI helpers: eligibility, crop envelope, client estimate mirrors server', () => {

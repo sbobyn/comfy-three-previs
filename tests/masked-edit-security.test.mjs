@@ -26,7 +26,7 @@ test('safeEditPath rejects traversal, absolute paths and non-allowlisted names',
   await rm(data, { recursive: true, force: true });
 });
 
-test('prepare / review / accept / status never dispatch a provider; submit is refused', async () => {
+test('prepare / review / accept / status without generation; submit refuses when authority missing', async () => {
   const data = await mkdtemp(join(tmpdir(), 'previs-me-sec-'));
   let providerCalls = 0;
   const projectId = randomUUID(), shotId = randomUUID(), sourceAssetId = randomUUID();
@@ -45,7 +45,7 @@ test('prepare / review / accept / status never dispatch a provider; submit is re
   const api = openMaskedEdit(data, director, { log: () => { providerCalls++; } });
 
   const url = (path, q = '') => new URL(`http://127.0.0.1:5190/api/director/masked-edit${path}${q}`);
-  await assert.rejects(() => api.routes('POST', url('/submit'), { projectId, editId: randomUUID() }), /not available|submit/i);
+  await assert.rejects(() => api.routes('POST', url('/submit'), { projectId, editId: randomUUID() }), /generation authority|requires the generation/i);
 
   // Status of unknown edit → 404, still no provider.
   await assert.rejects(() => api.routes('GET', url('/status', `?projectId=${projectId}&editId=${randomUUID()}`), {}), /Unknown edit/);
@@ -59,11 +59,10 @@ test('prepare / review / accept / status never dispatch a provider; submit is re
   }));
   await assert.rejects(() => api.status({ projectId, editId }), /another project/i);
 
-  assert.ok(providerCalls >= 0); // log may fire; no cloud client exists on this module
-  // The module surface has no comfy / generation / upload hooks.
-  assert.equal('submit' in api, false);
+  assert.ok(providerCalls >= 0); // log may fire; no cloud client exists without generation wiring
   assert.equal('dispatch' in api, false);
   assert.equal('upload' in api, false);
+  assert.equal(typeof api.submit, 'function');
   await rm(data, { recursive: true, force: true });
 });
 

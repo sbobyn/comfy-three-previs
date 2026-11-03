@@ -56,8 +56,10 @@ export function applyTrustedMaskedEstimate(quote, definition, sources, { marginP
   const allowlisted = definition?.id === MASKED_VACE_CALIBRATION.definitionId
     || definition?.provenance?.presetId === MASKED_VACE_CALIBRATION.definitionId;
   if (!isMaskedEditDefinition(definition) || !allowlisted) return quote;
-  const w = Number(definition.graph?.['13']?.inputs?.width), h = Number(definition.graph?.['13']?.inputs?.height);
-  const frames = Number(definition.graph?.['13']?.inputs?.length) || sources?.sourceVideo?.frameCount;
+  // Prefer the bound crop media (actual submit dimensions) over the preset's placeholder graph values.
+  const w = Number(sources?.sourceVideo?.width) || Number(definition.graph?.['13']?.inputs?.width);
+  const h = Number(sources?.sourceVideo?.height) || Number(definition.graph?.['13']?.inputs?.height);
+  const frames = Number(sources?.sourceVideo?.frameCount) || Number(definition.graph?.['13']?.inputs?.length);
   const steps = Number(definition.graph?.['15']?.inputs?.steps) || 20;
   const unet = definition.graph?.['8']?.inputs?.unet_name || MASKED_VACE_CALIBRATION.unet;
   const trusted = estimateMaskedVaceCost({ width: w, height: h, frames, steps, unet, marginPct });

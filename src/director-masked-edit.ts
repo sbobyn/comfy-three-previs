@@ -244,16 +244,18 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
     say('Generating one edit… Original and cut are unchanged.');
     draw();
     try {
-      await api('director/masked-edit/submit', {
+      const submitted = await api('director/masked-edit/submit', {
         projectId: P().id, editId, draftRevision: 1, requestId: crypto.randomUUID(), fingerprint,
         maxCostUsd: allowance,
         approval: { approved: true, fingerprint, allowance: { currency: 'USD', maxAmount: allowance, allowUnknownCharges: true } },
       });
-      say('Generating one edit… Check Jobs for progress. Original and cut are unchanged.');
+      say(submitted?.jobId
+        ? `Generating one edit (job ${String(submitted.jobId).slice(0, 8)}…). Check Jobs for progress. Original and cut are unchanged.`
+        : 'Generating one edit… Check Jobs for progress. Original and cut are unchanged.');
     } catch (e) {
       const msg = (e as Error).message || '';
-      if (/Unknown|404|not found|masked-edit|Paid and unknown/i.test(msg)) {
-        say('Submit path refused or not mounted (offline/experimental). Draft kept; nothing was billed here.');
+      if (/Paid and unknown|disabled at this checkpoint|generation authority|PREVIS_ALLOW_PAID/i.test(msg)) {
+        say('Paid Cloud submit is disabled here (needs PREVIS_ALLOW_PAID=1 and an approved budget). Draft kept; nothing was billed.');
         phase = 'quote';
       } else { say(msg); toast(msg); phase = 'quote'; }
       draw();

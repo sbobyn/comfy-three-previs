@@ -59,7 +59,7 @@ const generation = await generationRoutes(data,project,{ telemetry: progress.tel
 let refgen, agentRunner; // [agent]
 // listForSync omits quarantined masked-edit patches so syncResults never auto-promotes them as takes.
 const director = await openDirector(data, { startersDir: process.env.PREVIS_STARTERS_DIR || undefined, engineJobs: () => generation.listForSync(), onImported: id => refgen?.load(id), runner: () => agentRunner });
-const maskedEdit = openMaskedEdit(data, director, { log: console.log }); // offline foundation: prepare/status/review/accept only
+const maskedEdit = openMaskedEdit(data, director, { log: console.log, generation, engineProject: project });
 const blenderImport = openBlenderImport({ data, director, previs: project });
 const assetImport = openAssetImport({ director, convert: convertToGlb });
 refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen'), budget, log: console.log });

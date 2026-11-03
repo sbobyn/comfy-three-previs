@@ -361,11 +361,13 @@ export function offlineQuoteEnvelope({ frameCount, crop, steps = 20 } = {}) {
   const gpuEstimate = calibGpuS * (cropPixels / calibPixels) * ((frameCount || calibFrames) / calibFrames);
   const creditsPerS = 0.266, creditsPerUsd = 211;
   const estimate = round((gpuEstimate * creditsPerS) / creditsPerUsd, 4);
+  const reservationRequiredUsd = round(estimate * 1.1, 4);
   return {
     currency: 'USD',
     status: 'unknown',
     amount: null,
     estimate,
+    reservationRequiredUsd,
     providerEnforcedCap: false,
     basis: {
       gpuSecondsEstimate: round(gpuEstimate, 2),

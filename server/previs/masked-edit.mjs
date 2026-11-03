@@ -1,5 +1,5 @@
-// Masked-edit offline foundation: prepare / status / review / accept, local mask·crop·composite·quarantine.
-// ZERO provider dispatch. Paid submit/upload is owned elsewhere (generation path).
+// Masked-edit: prepare / status / review / accept (local) + submit (generation authority).
+// Submit builds crop/mask support media and delegates paid dispatch to generation; no parallel dispatcher.
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, readFile, writeFile, access, copyFile } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
@@ -7,6 +7,8 @@ import { deflateSync } from 'node:zlib';
 import { spawn } from 'node:child_process';
 import { atomicJson } from './atomic.mjs';
 import { inspectOutputVideo } from './media-inspect.mjs';
+import { builtInPresets } from './presets.mjs';
+import { validateWorkflowDefinition } from './workflows.mjs';
 import {
   MASKED_EDIT_VERSION, MASKED_EDIT_WORKFLOW, MASK_ALGORITHM_VERSION, COMPOSITE_VERSION,
   ELIGIBLE_WIDTH, ELIGIBLE_HEIGHT, assertUuid, sourceEligible, normalizeMask, rasterizeFixedMask,
@@ -17,8 +19,10 @@ import {
 import { cameraSourceForMaskedEdit } from '../../shared/camera-source.mjs';
 
 const UUID = /^[a-f0-9-]{36}$/i;
+const MASKED_PRESET_ID = 'wan-vace-14b-masked-v1';
 const ALLOWED_FILES = new Set([
   'receipt.json', 'mask.bin', 'mask.png', 'support.bin', 'crop.json',
+  'crop.mp4', 'mask.mp4', 'mask-frame.png',
   'candidate.mp4', 'candidate.sha256', 'preservation.json', 'patch.rgb', 'composite.rgb',
 ]);
 
@@ -97,9 +101,10 @@ export function safeEditPath(editRoot, name) {
   return full;
 }
 
-export function openMaskedEdit(dataRoot, director, { log = () => {} } = {}) {
+export function openMaskedEdit(dataRoot, director, { log = () => {}, generation = null, engineProject = null } = {}) {
   const root = resolve(dataRoot);
   const editsRoot = join(root, 'masked-edits');
+  const genRoute = generation?.route ? (op, input) => generation.route(`/api/generation/${op}`, input) : null;
 
   const editDir = editId => {
     assertUuid(editId, 'editId');
@@ -273,6 +278,13 @@ export function openMaskedEdit(dataRoot, director, { log = () => {} } = {}) {
     const receipt = await loadReceipt(editId);
     if (receipt.projectId !== projectId) fail('Edit belongs to another project', 404);
     await director.get(projectId);
+    let job = null;
+    if (receipt.jobId && generation?.listForSync) {
+      try {
+        const listed = generation.state?.()?.jobs || [];
+        job = listed.find(j => j.id === receipt.jobId) || null;
+      } catch { /* status is best-effort */ }
+    }
     return {
       editId: receipt.editId,
       state: receipt.state,
@@ -289,8 +301,245 @@ export function openMaskedEdit(dataRoot, director, { log = () => {} } = {}) {
       quote: receipt.quote,
       quoteFingerprint: receipt.quoteFingerprint,
       inputKey: receipt.inputKey,
-      providerDispatch: false,
-      job: null,
+      providerDispatch: Boolean(receipt.jobId),
+      jobId: receipt.jobId || null,
+      job,
+    };
+  }
+
+  /** Build crop plate + mask video for Cloud upload; register as engine support assets (not takes). */
+  async function materializeSupportMedia(receipt) {
+    if (!engineProject) fail('Engine project is not configured for masked-edit submit', 500);
+    const dir = editDir(receipt.editId);
+    const crop = receipt.cropRect;
+    const frames = receipt.sourceTiming.frameCount;
+    const fps = receipt.sourceTiming.fps || 24;
+    const resolved = await resolveSource(receipt.projectId, receipt.shotId, receipt.sourceAssetId, receipt.sourceSha256);
+    const cropPath = safeEditPath(dir, 'crop.mp4');
+    const maskPath = safeEditPath(dir, 'mask.mp4');
+    const maskFrame = safeEditPath(dir, 'mask-frame.png');
+    // Crop the full take to the approved rectangle.
+    await run('ffmpeg', [
+      '-hide_banner', '-loglevel', 'error', '-y',
+      '-i', resolved.file,
+      '-vf', `crop=${crop.w}:${crop.h}:${crop.x}:${crop.y}`,
+      '-frames:v', String(frames),
+      '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p',
+      '-movflags', '+faststart', cropPath,
+    ]);
+    // Authoritative alpha → single PNG → N-frame mask video (red channel = alpha).
+    const alpha = new Uint8Array(await readFile(safeEditPath(dir, 'mask.bin')));
+    const croppedAlpha = Buffer.alloc(crop.w * crop.h);
+    for (let y = 0; y < crop.h; y++) {
+      for (let x = 0; x < crop.w; x++) {
+        croppedAlpha[y * crop.w + x] = alpha[(crop.y + y) * ELIGIBLE_WIDTH + (crop.x + x)];
+      }
+    }
+    await writeFile(maskFrame, grayPng(crop.w, crop.h, croppedAlpha), { mode: 0o600 });
+    await run('ffmpeg', [
+      '-hide_banner', '-loglevel', 'error', '-y',
+      '-loop', '1', '-i', maskFrame,
+      '-frames:v', String(frames), '-r', String(fps),
+      '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p',
+      '-movflags', '+faststart', maskPath,
+    ]);
+    const cropBytes = await readFile(cropPath);
+    const maskBytes = await readFile(maskPath);
+    let cropMeta, maskMeta;
+    try {
+      cropMeta = await inspectOutputVideo(cropBytes, { mime: 'video/mp4' });
+      maskMeta = await inspectOutputVideo(maskBytes, { mime: 'video/mp4' });
+    } catch (e) { fail(`Support media inspect failed: ${e.message}`); }
+    if (cropMeta.frameCount !== frames || maskMeta.frameCount !== frames) fail('Support media frame count mismatch', 422, 'timing');
+    if (cropMeta.width !== crop.w || cropMeta.height !== crop.h || maskMeta.width !== crop.w || maskMeta.height !== crop.h) {
+      fail('Support media dimensions mismatch crop', 422, 'timing');
+    }
+    if (cropMeta.fps !== maskMeta.fps) fail('Support media fps mismatch', 422, 'timing');
+
+    const engineShotId = await ensureEngineShot(receipt, frames, fps);
+    const binding = {
+      source: 'director-masked-edit', scene: 'masked-edit-support', camera: 'crop',
+      start: 1, end: frames, frame: 1, fps,
+    };
+    const cropAsset = await registerEngineVideo({
+      bytes: cropBytes, meta: cropMeta, shotId: engineShotId, binding,
+      role: 'masked-edit-crop', editId: receipt.editId,
+    });
+    const maskAsset = await registerEngineVideo({
+      bytes: maskBytes, meta: maskMeta, shotId: engineShotId, binding,
+      role: 'masked-edit-mask', editId: receipt.editId,
+    });
+    return { cropAsset, maskAsset, engineShotId, cropMeta, maskMeta };
+  }
+
+  async function ensureEngineShot(receipt, frames, fps) {
+    if (!engineProject) fail('Engine project is not configured', 500);
+    const existing = engineProject.get().shots?.find(s => s.browser?.director?.projectId === receipt.projectId && s.browser?.director?.shotId === receipt.shotId && s.browser?.director?.maskedEdit === true);
+    if (existing) return existing.id;
+    const id = randomUUID();
+    await engineProject.append(p => {
+      const again = p.shots?.find(s => s.browser?.director?.projectId === receipt.projectId && s.browser?.director?.shotId === receipt.shotId && s.browser?.director?.maskedEdit === true);
+      if (again) return false;
+      (p.shots ||= []).push({
+        id,
+        title: `Masked edit · ${receipt.shotId.slice(0, 8)}`,
+        binding: { source: 'director-masked-edit', start: 1, end: frames, frame: 1, fps },
+        browser: { director: { projectId: receipt.projectId, shotId: receipt.shotId, maskedEdit: true, editId: receipt.editId } },
+        renders: [],
+      });
+    });
+    const shot = engineProject.get().shots.find(s => s.browser?.director?.projectId === receipt.projectId && s.browser?.director?.shotId === receipt.shotId && s.browser?.director?.maskedEdit === true);
+    if (!shot) fail('Failed to create engine shot context for masked edit', 500);
+    return shot.id;
+  }
+
+  async function registerEngineVideo({ bytes, meta, shotId, binding, role, editId }) {
+    const id = randomUUID();
+    const filename = `${id}.mp4`;
+    const assetPath = join(root, 'assets', filename);
+    await mkdir(join(root, 'assets'), { recursive: true });
+    await writeFile(assetPath, bytes, { flag: 'wx', mode: 0o600 });
+    const asset = {
+      id,
+      kind: 'video',
+      pass: 'beauty',
+      version: 1,
+      shotId,
+      source: 'director-masked-edit',
+      binding: structuredClone(binding),
+      width: meta.width,
+      height: meta.height,
+      fps: meta.fps,
+      frameCount: meta.frameCount,
+      duration: meta.duration,
+      mime: 'video/mp4',
+      mimeType: 'video/mp4',
+      filename,
+      url: `/assets/${filename}`,
+      sha256: sha(bytes),
+      provenance: { role, editId, supportMedia: true },
+      createdAt: now(),
+    };
+    await engineProject.append(p => {
+      if (!p.shots.some(s => s.id === shotId)) throw Object.assign(Error('Engine shot missing'), { status: 409 });
+      (p.assets ||= []).push(asset);
+    });
+    return asset;
+  }
+
+  async function ensureMaskedDefinition() {
+    const preset = builtInPresets.find(p => p.id === MASKED_PRESET_ID);
+    if (!preset) fail('Masked VACE preset is missing from built-ins', 500);
+    const existing = engineProject.get().workflowDefinitions?.find(d => d.id === MASKED_PRESET_ID || d.provenance?.presetId === MASKED_PRESET_ID);
+    if (existing) return existing;
+    const definition = validateWorkflowDefinition({ ...structuredClone(preset), id: MASKED_PRESET_ID, verification: { status: 'imported' } });
+    await engineProject.append(p => {
+      if ((p.workflowDefinitions || []).some(d => d.id === MASKED_PRESET_ID)) return false;
+      (p.workflowDefinitions ||= []).push(definition);
+    });
+    return engineProject.get().workflowDefinitions.find(d => d.id === MASKED_PRESET_ID);
+  }
+
+  /**
+   * Paid boundary: materialize crop/mask, quote via generation, submit with explicit approval.
+   * Reuses generation's reservation/dedup/dispatch — no parallel Cloud client.
+   */
+  async function submit(input = {}) {
+    if (!genRoute || !engineProject) fail('Masked-edit submit requires the generation authority', 503, 'no-submit');
+    const editId = assertUuid(input.editId, 'editId');
+    const projectId = assertUuid(input.projectId, 'projectId');
+    const requestId = assertUuid(input.requestId || randomUUID(), 'requestId');
+    const draftRevision = Number(input.draftRevision);
+    if (!Number.isInteger(draftRevision) || draftRevision < 1) fail('draftRevision must be a positive integer');
+    const fingerprint = String(input.fingerprint || '');
+    if (!fingerprint) fail('fingerprint is required');
+    const maxCostUsd = Number(input.maxCostUsd);
+    if (!Number.isFinite(maxCostUsd) || maxCostUsd < 0) fail('maxCostUsd must be a non-negative number');
+    const approval = input.approval;
+    if (!approval?.approved || approval.allowance?.allowUnknownCharges !== true) {
+      fail('Explicit approval with allowUnknownCharges is required', 400);
+    }
+
+    const receipt = await loadReceipt(editId);
+    if (receipt.projectId !== projectId) fail('Edit belongs to another project', 404);
+    if (receipt.draftRevision !== draftRevision) fail('draftRevision does not match the prepared edit', 409);
+    if (receipt.state !== 'prepared' && receipt.state !== 'submitted') {
+      fail(`Cannot submit from state ${receipt.state}`, 409);
+    }
+    // Idempotent replay of the same request UUID.
+    if (receipt.jobId && receipt.submitRequestId === requestId) {
+      return { ok: true, replay: true, editId, jobId: receipt.jobId, state: receipt.state };
+    }
+    if (fingerprint !== receipt.quoteFingerprint && fingerprint !== receipt.inputKey) {
+      fail('fingerprint does not match the prepared edit', 409);
+    }
+    if (Number.isFinite(receipt.quote?.estimate) && maxCostUsd + 1e-9 < (receipt.quote.reservationRequiredUsd ?? receipt.quote.estimate * 1.1)) {
+      fail('maxCostUsd is below the required reservation', 400);
+    }
+
+    const support = await materializeSupportMedia(receipt);
+    const definition = await ensureMaskedDefinition();
+    const parameters = {
+      width: support.cropMeta.width,
+      height: support.cropMeta.height,
+      frames: support.cropMeta.frameCount,
+      seed: receipt.seed,
+      steps: 20,
+      fps: 24,
+      model: 'wan2.1_vace_14B_fp16.safetensors',
+    };
+    const bound = await genRoute('bind', {
+      revision: engineProject.get().revision,
+      definitionId: definition.id,
+      shotId: support.engineShotId,
+      assetBindings: {
+        sourceVideo: { assetId: support.cropAsset.id },
+        maskVideo: { assetId: support.maskAsset.id },
+      },
+      prompt: receipt.prompt,
+      parameters,
+      acceptTimingChange: true,
+    });
+    const genInput = {
+      requestId,
+      revision: bound.project.revision,
+      workflowBindingId: bound.workflowBindingId,
+      backend: { kind: 'cloud' },
+    };
+    const { job: quoted } = await genRoute('quote', genInput);
+    if (!quoted?.fingerprint) fail('Generation quote did not return a fingerprint', 500);
+    if (!Number.isFinite(quoted.quote?.estimate)) fail(quoted.quote?.estimateRefused || 'No reliable estimate is available. Nothing submitted.');
+    const reservation = quoted.quote.reservationRequiredUsd ?? quoted.quote.estimate * 1.1;
+    if (maxCostUsd + 1e-9 < reservation) fail('Run allowance is below the required reservation. Nothing submitted.');
+    const genApproval = {
+      approved: true,
+      fingerprint: quoted.fingerprint,
+      allowance: {
+        currency: 'USD',
+        maxAmount: maxCostUsd,
+        allowUnknownCharges: true,
+      },
+    };
+    const { job } = await genRoute('submit', { ...genInput, approval: genApproval });
+    receipt.state = 'submitted';
+    receipt.jobId = job.id;
+    receipt.submitRequestId = requestId;
+    receipt.workflowBindingId = bound.workflowBindingId;
+    receipt.supportAssets = { cropAssetId: support.cropAsset.id, maskAssetId: support.maskAsset.id };
+    receipt.generationFingerprint = quoted.fingerprint;
+    receipt.updatedAt = now();
+    receipt.providerDispatch = true;
+    await saveReceipt(receipt);
+    log(`[masked-edit] submitted ${editId} → job ${job.id}`);
+    return {
+      ok: true,
+      replay: false,
+      editId,
+      jobId: job.id,
+      job,
+      quote: quoted.quote,
+      fingerprint: quoted.fingerprint,
+      state: receipt.state,
     };
   }
 
@@ -562,12 +811,11 @@ export function openMaskedEdit(dataRoot, director, { log = () => {} } = {}) {
     }
     if (method !== 'POST') fail('Method not allowed', 405);
     if (sub === '/prepare' || sub === 'prepare') return prepare(input);
+    if (sub === '/submit' || sub === 'submit') return submit(input);
     if (sub === '/review' || sub === 'review') return review(input);
     if (sub === '/accept' || sub === 'accept') return accept(input);
-    // Deliberately no /submit here — paid dispatch is out of foundation scope.
-    if (sub === '/submit' || sub === 'submit') fail('Masked-edit submit is not available on the offline foundation path', 404, 'no-submit');
     fail('Unknown masked-edit route', 404);
   }
 
-  return { prepare, status, review, accept, compositeFromFrames, routes, editDir, loadReceipt, grayPng };
+  return { prepare, submit, status, review, accept, compositeFromFrames, routes, editDir, loadReceipt, grayPng };
 }
