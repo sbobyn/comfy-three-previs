@@ -206,7 +206,8 @@ export function primitiveTriangles(shape) {
  * or project mesh path) or null when it is not available, in which case the primitive proxy stands in.
  */
 export function entityTriangles(e, { meshOf = () => null } = {}) {
-  if (e.shape === 'group') return [];
+  // Imported models (docs/import.md) are whole assets, not blockout surfaces: never linted, never lifted.
+  if (e.shape === 'group' || e.source) return [];
   const m = entityMatrix(e), id = blockoutModel(e), parts = id ? meshOf(id) : null;
   const out = [], tint = e.color || SHAPES[e.shape]?.color || '#ffffff';
   if (parts) {

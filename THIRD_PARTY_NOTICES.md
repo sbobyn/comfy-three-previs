@@ -38,7 +38,7 @@ The original README is retained in docs/three-vcam-history.md with the same prov
 
 Dependencies retain their own licenses. Installed package license text is preserved in dependencies and selected shipped runtime notices are copied into third-party-licenses/. Keep notices with redistributed bundles. The lockfile records exact resolved dependency versions.
 
-- Three.js 0.185.1, including examples/OrbitControls: MIT, three.js authors.
+- Three.js 0.187.0, including examples/OrbitControls, and for 3D model import (docs/import.md) the GLTF, FBX, OBJ/MTL, STL, PLY and USD loaders, GLTFExporter and SkeletonUtils, which the server also runs: MIT, three.js authors. FBX and USDZ decoding uses the fflate 0.8.3 copy three.js ships in examples/jsm/libs: MIT, Arjun Barrett.
 - ws 8.21.3: MIT, Einar Otto Stangvik and contributors.
 - TypeScript: Apache-2.0; Vite: MIT; @types packages: MIT; Prettier: MIT. Build-only dependencies retain upstream notices when redistributed.
 - Blender MCP: ahujasid/mcp-for-blender 2.2.2, pinned 5a3618fccb2d982d0dd61e7a1879912c3100073b, MIT. External process; retain upstream license if bundled.

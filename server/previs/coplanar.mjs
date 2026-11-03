@@ -26,7 +26,7 @@ export async function meshLoader(entities, { refFile = null, parsed = new Map() 
   const parts = new Map(parsed);
   for (const e of entities) {
     const url = projectMesh(e.model);
-    if (!url || parts.has(url)) continue;
+    if (!url || parts.has(url) || e.source) continue; // imported models are not linted (shared/blockout-lint.mjs)
     const [, , projectId, file] = url.split('/');
     try { parts.set(url, refFile ? parseGlb(await readFile(await refFile(projectId, file))) : null); } catch { parts.set(url, null); }
   }

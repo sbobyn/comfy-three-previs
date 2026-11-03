@@ -26,6 +26,9 @@ import { cutAsset } from '../../shared/takes.mjs';
 import { openLibrary, libraryDir, placeAsset } from './library.mjs';
 import { meshLoader, fixCoplanar, sceneAfterOps, geometryOf, changedIds, coplanarWarnings } from './coplanar.mjs';
 import { parseGlb } from '../../shared/blockout-lint.mjs';
+import { readGlb } from './glb.mjs';
+import { validateGlb } from './asset-import.mjs';
+import { planPerform } from './asset-perform.mjs';
 
 const uuid = /^[a-f0-9-]{36}$/;
 const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
@@ -97,6 +100,8 @@ export function applyOps(p, ops) {
       case 'update_entity': {
         const e = resolveEntity(p, op.id); if (!e) fail(`Unknown object ${op.id}`);
         const patch = op.patch || {};
+        // An imported model's file facts and rig are fixed at import; only its rights and link can be edited.
+        if (patch.source !== undefined) patch.source = e.source && patch.source ? { ...e.source, ...Object.fromEntries(['licence', 'attribution', 'url'].filter(k => typeof patch.source[k] === 'string').map(k => [k, patch.source[k]])) } : e.source;
         if (patch.lookFrom) {
           const src = resolveEntity(p, patch.lookFrom); if (!src) fail(`Unknown object ${patch.lookFrom}`);
           if (src.id === e.id) fail('An object cannot share its own look');
@@ -114,6 +119,7 @@ export function applyOps(p, ops) {
         Object.assign(e, next);
         if (!next.pose) delete e.pose;
         if (!next.model) delete e.model; // changing proxy shape clears an incompatible display mesh
+        for (const k of ['source', 'perform', 'standIn']) if (!next[k]) delete e[k];
         if (!next.sheets) delete e.sheets; // `sheets: []` clears them (makeEntity omits an empty list)
         // Children follow their parent rigidly, unless this batch already places them (the editor sends every moved object).
         if (['position', 'rotation', 'scale'].some(k => patch[k] !== undefined)) {
@@ -491,6 +497,14 @@ export async function openDirector(root, options = {}) {
       await mkdir(join(dir, projectId, 'refs'), { recursive: true });
       await writeFile(join(dir, projectId, 'refs', file), bytes, { flag: 'wx', mode: 0o600 });
     },
+    /** An imported model (server/previs/asset-import.mjs), already converted, fitted and checked. */
+    async storeAsset(projectId, file, bytes) {
+      await load(projectId);
+      if (!/^[a-f0-9-]{36}\.glb$/.test(file)) fail('Invalid model file');
+      const { json, bin } = readGlb(bytes); validateGlb(json, bin);
+      await mkdir(join(dir, projectId, 'refs'), { recursive: true });
+      await writeFile(join(dir, projectId, 'refs', file), bytes, { flag: 'wx', mode: 0o600 });
+    },
     async refFile(projectId, file) {
       if (!uuid.test(projectId) || !/^[a-f0-9-]{36}\.(png|jpg|webp|glb)$/.test(file)) fail('Not found', 404);
       return join(dir, projectId, 'refs', file);
@@ -635,9 +649,12 @@ export async function openDirector(root, options = {}) {
       let p; try { p = JSON.parse(files.get('project.json').toString('utf8')); } catch { fail('Export project.json is invalid'); }
       if (p.version !== 1 || !p.scene || !Array.isArray(p.shots) || !p.shots.length) fail('Unsupported project version');
       const oldId = p.id; p.id = randomUUID(); p.title = String(p.title || 'Imported project').slice(0, 110) + ' (imported)'; p.importedFrom = { projectId: oldId, exportedAt: manifest.exportedAt };
+      // Blender meshes are small static GLBs; imported models (docs/import.md) are checked as whole glTF assets.
+      const imported = new Set(p.scene.entities.filter(e => projectMesh(e.model) && e.source).map(e => `refs/${e.model.split('/').pop()}`));
+      const checkGlb = (name, data) => { if (imported.has(name)) { const { json, bin } = readGlb(data || Buffer.alloc(0)); validateGlb(json, bin); } else validateMesh(data); };
       for (const e of p.scene.entities) if (projectMesh(e.model)) {
         const file = e.model.split('/').pop();
-        validateMesh(files.get(`refs/${file}`));
+        checkGlb(`refs/${file}`, files.get(`refs/${file}`));
         e.model = `/director-refs/${p.id}/${file}`;
       }
       // Camera renders keep their files, but workflow hand-off needs this workspace's render engine: render again to use them.
@@ -649,7 +666,7 @@ export async function openDirector(root, options = {}) {
         if (f.name === 'project.json') continue;
         if (!/^(refs|assets|refgen)\/[a-f0-9-]{36}\.(png|jpg|webp|mp4|webm|mov|json|glb)$/.test(f.name)) fail(`Unexpected file in export: ${f.name}`);
         let data = files.get(f.name);
-        if (f.name.endsWith('.glb')) validateMesh(data);
+        if (f.name.endsWith('.glb')) checkGlb(f.name, data);
         if (f.name.startsWith('refgen/')) { const job = JSON.parse(data.toString('utf8')); job.projectId = p.id; if (job.status === 'quoted') { job.status = 'expired'; job.message = 'Imported quote; get a new quote here.'; } job.imported = true; data = Buffer.from(JSON.stringify(job, null, 2)); }
         await mkdir(join(dir, p.id, f.name.split('/')[0]), { recursive: true });
         await writeFile(join(dir, p.id, f.name), data, { flag: 'wx', mode: 0o600 });
@@ -829,6 +846,7 @@ export function directorRoutes(director, previs, connect = () => null, runner = 
         return r;
       }
       case '/api/director/agent/progress': return director.progress(input.projectId, input);
+      case '/api/director/perform': { const plan = planPerform(await director.get(input.projectId), input); const r = await director.edit(input.projectId, plan.ops); return { project: r.project, entityId: plan.entityId, text: plan.summary }; }
       case '/api/director/library/save': return director.library.save(input.projectId, input);
       case '/api/director/library/import': return director.library.importPath(input);
       case '/api/director/library/place': {

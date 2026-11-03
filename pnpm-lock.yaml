@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      three:
+        specifier: 0.187.0
+        version: 0.187.0
       ws:
         specifier: ^8.21.3
         version: 8.21.3
@@ -27,9 +30,6 @@ importers:
       prettier:
         specifier: 3.6.2
         version: 3.6.2
-      three:
-        specifier: 0.187.0
-        version: 0.187.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
