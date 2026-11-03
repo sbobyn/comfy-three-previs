@@ -1,6 +1,6 @@
 # Standalone Comfy Previs — setup and architecture
 
-This topic branch extends the existing three-vcam application from `b37ebb01d1232165f48a718673f9d6b4cf2836be`. It does not use Otter's server, editor, library, assistant, account, or launcher. Keep this branch private. Our code is now MIT licensed; inherited provenance caveats are listed in THIRD_PARTY_NOTICES.md.
+This topic branch extends the existing three-vcam application from `b37ebb01d1232165f48a718673f9d6b4cf2836be`. It does not use Otter's server, editor, library, assistant, account, or launcher. The code, including the inherited three-vcam baseline, is MIT licensed (see THIRD_PARTY_NOTICES.md).
 
 ## Run
 
@@ -61,7 +61,7 @@ Start the app and point any stdio MCP client at `node <checkout>/server/previs/a
 
 ## Inventory and licensing
 
-- three-vcam: existing independent Three.js/Vite/TypeScript/ws camera prototype; no tracked inherited source license. Original Previs code is MIT under Steven’s explicit instruction; inherited ownership exceptions remain in THIRD_PARTY_NOTICES.md.
+- three-vcam: existing independent Three.js/Vite/TypeScript/ws camera prototype; no tracked inherited source license. Steven owns it and it is MIT licensed with the rest of Previs.
 - Story Studio: already independently extracted, MIT (Steven Bobyn). Its storage/MCP patterns informed the boundary; no Story Studio files were copied and its active worktree was untouched.
 - Otter: FSL-1.1-ALv2; no editor/render source copied. Prior branch and evidence retained on hold.
 - Blender MCP: MIT, external pinned dependency; retain its license if redistributed.
