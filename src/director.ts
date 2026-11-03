@@ -169,7 +169,9 @@ const addMenu = h('div', { class: 'add-menu', role: 'menu', hidden: true });
 for (const shape of Object.keys(SHAPES).filter(x => x !== 'group')) addMenu.append(h('button', { type: 'button', role: 'menuitem', title: `Add ${shape}`, onclick: () => addObject(shape) }, shapeIcon(shape), shape));
 // Import a 3D model (docs/import.md): the same importer as a drop on the viewport.
 const modelPicker = h('input', { type: 'file', accept: MODEL_ACCEPT, multiple: true, hidden: true, onchange: () => { const files = Array.from(modelPicker.files || []); modelPicker.value = ''; addMenu.hidden = true; void importDropped(files, null); } });
-addMenu.append(h('button', { type: 'button', role: 'menuitem', title: 'Import a 3D model: GLB, glTF, FBX, OBJ, STL, PLY, USDZ or a zip', onclick: () => modelPicker.click() }, shapeIcon('box'), 'Import model…'), modelPicker);
+const cardPicker = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: true, hidden: true, onchange: () => { const files = Array.from(cardPicker.files || []); cardPicker.value = ''; addMenu.hidden = true; void importCards(files, null); } });
+addMenu.append(h('button', { type: 'button', role: 'menuitem', title: 'Import a 3D model: GLB, glTF, FBX, OBJ, STL, PLY, USDZ or a zip', onclick: () => modelPicker.click() }, shapeIcon('box'), 'Import model…'), modelPicker,
+  h('button', { type: 'button', role: 'menuitem', title: 'Place an image as an upright backdrop card (Shift-drop an image on the viewport)', onclick: () => cardPicker.click() }, shapeIcon('wall'), 'Backdrop card…'), cardPicker);
 let outlineFilter = '';
 const filterInput = h('input', { class: 'tree-filter', type: 'search', placeholder: 'Filter', 'aria-label': 'Filter scene objects' });
 filterInput.oninput = () => { outlineFilter = filterInput.value.trim().toLowerCase(); renderOutline(); };
@@ -1679,14 +1681,21 @@ function dropTarget(el: HTMLElement, onFiles: (files: File[]) => void, onState?:
 }
 
 // Drop an image straight onto an object in the viewport to link it.
-viewport.addEventListener('dragover', ev => { if (ev.dataTransfer?.types.includes('Files')) { ev.preventDefault(); dropHint.hidden = false; const id = scene.pick(ev.clientX, ev.clientY); dropHint.textContent = id ? `Add an image as a cast image for ${entity(id)?.name}, or drop a 3D model to place it` : 'Drop a 3D model to place it here, an image on an object to link it, or anywhere to add a shot reference'; } });
+viewport.addEventListener('dragover', ev => { if (ev.dataTransfer?.types.includes('Files')) { ev.preventDefault(); dropHint.hidden = false; const id = scene.pick(ev.clientX, ev.clientY); dropHint.textContent = id ? `Add an image as a cast image for ${entity(id)?.name}, or drop a 3D model to place it` : ev.shiftKey ? 'Drop an image to stand it here as a backdrop card' : 'Drop a 3D model to place it here, an image on an object to link it, or anywhere to add a shot reference (Shift: backdrop card)'; } });
 viewport.addEventListener('dragleave', ev => { if (!viewport.contains(ev.relatedTarget as Node)) dropHint.hidden = true; });
 viewport.addEventListener('drop', ev => {
   ev.preventDefault(); dropHint.hidden = true;
   const files = Array.from(ev.dataTransfer?.files || []); // read before any await: the drop's file list empties afterwards
   if (isModelDrop(files)) { void importDropped(files, scene.view() === 'set' ? scene.groundAt(ev.clientX, ev.clientY) : null); return; }
-  const id = scene.pick(ev.clientX, ev.clientY); void uploadRefs(files, id).then(() => { if (id) select(id); });
+  const id = scene.pick(ev.clientX, ev.clientY);
+  if (!id && ev.shiftKey && files.length && files.every(f => /^image\/(png|jpeg|webp)$/.test(f.type))) { void importCards(files, scene.view() === 'set' ? scene.groundAt(ev.clientX, ev.clientY) : null); return; }
+  void uploadRefs(files, id).then(() => { if (id) select(id); });
 });
+/** Images as upright backdrop cards (docs/import.md#backdrop-cards), side by side from the drop point. */
+async function importCards(files: File[], at: Vec3 | null) {
+  const t = scene.orbitTarget(); let x = at ? at[0] : snap(t[0], 0.1);
+  for (const f of files) { await importDropped([f], [x, 0, at ? at[2] : snap(t[2], 0.1)]); x += 4.5; }
+}
 /** A dropped or picked 3D model becomes a new object at the drop point (else the orbit target), selected. */
 async function importDropped(files: File[], at: Vec3 | null) {
   if (DEMO) { toast('Importing models needs a local install', true); return; }

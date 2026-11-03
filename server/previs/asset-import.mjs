@@ -8,7 +8,8 @@ import { lstat, readFile, realpath } from 'node:fs/promises';
 import { basename, dirname, extname, isAbsolute, resolve, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import * as THREE from 'three';
-import { readGlb, writeGlb, packGltf, safeResourceUri } from './glb.mjs';
+import { readGlb, writeGlb, packGltf, safeResourceUri, imageMime } from './glb.mjs';
+import { cardGlb } from './asset-card.mjs';
 import { readZip, zipEntryNames } from './zip.mjs';
 import { SHAPES, KINDS, handleOf } from '../../shared/director.mjs';
 import { mapHumanoid, RIG_POSES } from '../../shared/rig.mjs';
@@ -47,7 +48,7 @@ export function sourceFromUpload(bytes, name) {
     const main = pickMain(files);
     return { main: { name: main.name.split('/').pop(), bytes: files.get(main.name) }, format: main.format, files: relativeTo(files, main.name) };
   }
-  const format = formatOf(name) || (bytes.readUInt32LE(0) === 0x46546c67 ? 'glb' : null);
+  const format = formatOf(name) || (bytes.readUInt32LE(0) === 0x46546c67 ? 'glb' : imageMime(bytes) ? 'image' : null);
   if (!format) fail(`Unsupported file “${String(name || '').slice(0, 80)}”. Supported: ${MAIN.map(f => `.${f}`).join(', ')}, or a .zip`);
   return { main: { name: basename(String(name || `model.${format}`)), bytes }, format, files: new Map() };
 }
@@ -270,6 +271,7 @@ const prettyName = file => {
  */
 export async function prepareImport(src, { convert, file, projectId, name = null, kind = null, place = {}, height = null, licence = '', attribution = '', url = null }) {
   if (!IMPORT_FORMATS.includes(src.format)) fail(`Unsupported format ${src.format}`);
+  if (src.format === 'image') return prepareCard(src, { file, projectId, name, kind, place, height, licence, attribution, url });
   let json, bin, metres = 1, units = 'glTF metres', notes = [];
   if (src.format === 'glb' || src.format === 'gltf') {
     let doc;
@@ -305,6 +307,22 @@ export async function prepareImport(src, { convert, file, projectId, name = null
     ...(firstClip ? { perform: { clip: firstClip, offset: 0, speed: 1 } } : humanoid ? { pose: RIG_POSES.stand } : {}),
   };
   return { glb, entity, info: { triangles: info.triangles, clips, humanoid, joints: humanoid ? Object.keys(info.rig.joints) : [], units: note || units, notes, warnings, size: size.map(v => Math.round(v * 1000) / 1000) } };
+}
+
+/** An image as an upright backdrop card, 4 m wide (or `height` tall), facing +z. */
+function prepareCard(src, { file, projectId, name, kind, place, height, licence, attribution, url }) {
+  const { glb, width, height: px } = cardGlb(src.main.bytes);
+  const { json, bin } = readGlb(glb); validateGlb(json, bin);
+  const h = Number.isFinite(height) && height > 0 ? height : 4 * px / width, w = h * width / px;
+  const size = [w, h, 0.05], warnings = [];
+  if (size.some(v => v > 50)) warnings.push(`The card is ${size.map(v => Math.round(v * 100) / 100).join(' × ')} m; objects are at most 50 m, so it was clamped`);
+  const position = Array.isArray(place.position) && place.position.length === 3 && place.position.every(Number.isFinite) ? place.position : [0, 0, 0];
+  const entity = {
+    name: String(name || prettyName(src.main.name)).slice(0, 60), kind: KINDS.includes(kind) ? kind : 'environment', shape: 'box', model: `/director-refs/${projectId}/${file}`,
+    position, rotation: Number.isFinite(place.rotation) ? place.rotation : 0, scale: size, color: '#c8ccd4',
+    source: { file: src.main.name, format: 'image', ...(url ? { url } : {}), licence, attribution, triangles: 2, bytes: glb.length, units: `backdrop card, ${width}×${px} px` },
+  };
+  return { glb, entity, info: { triangles: 2, clips: [], humanoid: false, joints: [], units: entity.source.units, notes: [], warnings, size: size.map(v => Math.round(v * 1000) / 1000) } };
 }
 
 /** Wire the importer to a director store: import into a project (new object), returning the edit result. */

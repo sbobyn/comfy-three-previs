@@ -13,6 +13,7 @@ Bring a real mesh into the scene: a character from Mixamo, a car from Sketchfab,
 | `.stl`, `.ply` | Converted to a plain grey mesh, with vertex colours when the file has them. A PLY must have faces. A Gaussian-splat PLY is refused with a clear message (splats are [not supported yet](#not-yet)). |
 | `.usdz` | Converted with three.js's USD loader. Skeletons import. Skeletal animation does not yet. |
 | `.zip` | Holds one of the above with its files. Finder's `__MACOSX` entries are ignored. |
+| `.png`, `.jpg`, `.webp` | A [backdrop card](#backdrop-cards). |
 
 Every format ends up as one self-contained GLB in the project's `refs/` folder, so projects export, import and duplicate with the model inside them. Textures stay PNG, JPEG or WebP, as the original bytes. A texture in any other format (TGA, TIFF, BMP) is left out, with a note.
 
@@ -40,6 +41,10 @@ The whole file is checked before anything changes, so a refused import leaves th
 - **Its Cast Card** with an **Imported model** section: the file, units and triangle count, and fields for **Licence** and **Credit**. Fill them in when the model is not yours. They travel with the project and are never part of a prompt. Only these two fields (and the source link) can be edited. The file facts and the rig are fixed at import.
 
 Imported models are drawn with their own materials and textures. They are left out of the coplanar-surface lint, which is meant for blockout geometry. **Save to library** refuses them for now; import the file into each project instead.
+
+## Backdrop cards
+
+An image can stand in the scene as a flat, upright card: a painted sky behind a set, a location photo, a storyboard panel to block against. **Shift**-drop a PNG, JPEG or WebP on an empty part of the viewport, choose **+ Add ▾ → Backdrop card…**, or give `previs_import_asset` an image path. The card is 4 m wide, or `height` metres tall, at the image's aspect ratio. It faces +z, is unlit (it shows the image's own colours under any light), is visible from both sides, and is an environment object. Several images dropped together stand side by side. Without Shift, a dropped image still becomes a cast image or a shot reference.
 
 ## Rigged characters
 

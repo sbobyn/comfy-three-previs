@@ -3,7 +3,7 @@
 // rights, its rig and clips (entity.source), what it plays (entity.perform) and how video models see it (standIn).
 import { RIG_JOINTS } from './rig.mjs';
 
-export const IMPORT_FORMATS = Object.freeze(['glb', 'gltf', 'fbx', 'obj', 'stl', 'ply', 'usdz']);
+export const IMPORT_FORMATS = Object.freeze(['glb', 'gltf', 'fbx', 'obj', 'stl', 'ply', 'usdz', 'image']);
 const text = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, n) : '');
 const vec3 = v => Array.isArray(v) && v.length === 3 && v.every(Number.isFinite) ? v.map(x => Math.round(Math.max(-10, Math.min(10, x)) * 1e5) / 1e5) : null;
 

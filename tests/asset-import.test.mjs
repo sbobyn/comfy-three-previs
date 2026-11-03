@@ -16,6 +16,7 @@ import { planPerform } from '../server/previs/asset-perform.mjs';
 import { openDirector } from '../server/previs/director.mjs';
 import { writeZip } from '../server/previs/zip.mjs';
 import { entityTriangles } from '../shared/blockout-lint.mjs';
+import { imageSize } from '../server/previs/asset-card.mjs';
 
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
 const withDir = async fn => { const dir = await realpath(await mkdtemp(join(tmpdir(), 'previs-import-'))); try { return await fn(dir); } finally { await rm(dir, { recursive: true, force: true }); } };
@@ -196,3 +197,19 @@ test('Blender-made FBX, USDZ and OBJ (+MTL) of a rigged figure import as the sam
   const obj = await prep(await sourceFromPath(join(dir, 'figure.obj')));
   assert.equal(obj.info.humanoid, false); assert.deepEqual(obj.info.notes, [], 'the .mtl beside it was read'); assert.ok(near(obj.info.size[1], 1.78, 0.02));
 }));
+
+test('backdrop card: a PNG, JPEG or WebP becomes an upright unlit quad, 4 m wide or the height asked for', async () => {
+  // Headers only: the card carries the bytes as they are; nothing is decoded on the server.
+  const png = Buffer.concat([PNG.subarray(0, 16), Buffer.from([0, 0, 6, 64, 0, 0, 3, 132]), PNG.subarray(24)]); // 1600 × 900
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 4, 0, 0, 0xff, 0xc0, 0, 11, 8, 0, 200, 1, 44, 3, 0, 0, 0, 0, 0, 0]); // 300 × 200
+  const webp = Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('WEBPVP8X'), Buffer.alloc(8), Buffer.from([127, 2, 0, 223, 1, 0])]); // 640 × 480
+  assert.deepEqual([png, jpeg, webp].map(imageSize), [{ width: 1600, height: 900 }, { width: 300, height: 200 }, { width: 640, height: 480 }]);
+  const card = await prep(sourceFromUpload(png, 'night-sky.png'));
+  assert.deepEqual(card.info.size, [4, 2.25, 0.05]); assert.equal(card.entity.kind, 'environment'); assert.equal(card.entity.name, 'Night sky');
+  const g = readGlb(card.glb).json;
+  assert.deepEqual(g.extensionsUsed, ['KHR_materials_unlit']); assert.equal(g.materials[0].doubleSided, true); assert.equal(g.images[0].mimeType, 'image/png');
+  const { json, bin } = readGlb(card.glb), box = inspectGlb(json, bin).bounds;
+  assert.deepEqual([box.min.x, box.min.y, box.max.x, box.max.y], [-0.5, 0, 0.5, 1], 'already in the unit box');
+  assert.deepEqual((await prep(sourceFromUpload(webp, 'plate.webp'), { height: 3 })).info.size, [4, 3, 0.05]);
+  assert.equal(readGlb((await prep(sourceFromUpload(webp, 'plate.webp'))).glb).json.textures[0].extensions.EXT_texture_webp.source, 0);
+});
