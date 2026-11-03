@@ -18,6 +18,7 @@ import { installPhoneDemo, openPhonePairing, phoneConnected } from './director-p
 import { createSequence } from './director-sequence';
 import { openTakeLab } from './director-takes';
 import { promptBlock, cameraStyleBlock } from './director-prompt';
+import { lookPresetsBlock } from './director-look-presets'; // [look-presets]
 import { promptInspectorBlock, modelSettingsBlock, planSections } from './director-prompt-inspector'; // [prompts]
 import type { InspectorCtx, SettingsCtx } from './director-prompt-inspector';
 import { videoPromptPlan, stillPromptPlan } from '../shared/prompt-plan.mjs';
@@ -1064,6 +1065,7 @@ function renderShotPane() {
       operateBlock(s)), // [operate]
     section('video', 'Video', shotVideos(s.id).length ? h('span', { class: 'fm-ok' }, `${shotVideos(s.id).length} ready`) : null,
       ...resultsBlock(s),
+      lookPresetsBlock(s, { project: () => project, runEntry: (e: any) => runEntry(e as any), edit: ops => edit(ops as any), refresh: () => { shotPane.dataset.shot = ''; renderShotPane(); }, selectShot }), // [look-presets]
       modelBlock(s),
       modelSettingsBlock(s, settingsCtx), // [prompts]
       promptBlock(s, ctx),

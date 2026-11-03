@@ -161,7 +161,7 @@ export function externalChanges(before: DirectorProject, after: DirectorProject)
   for (const s of after.shots) {
     const old = bS.get(s.id); if (!old) continue;
     const keys = SHOT_KEYS.filter(k => !same(old[k], s[k]));
-    const prompts = !same(old.prompts, s.prompts) || !same(old.style, s.style) || !same(old.promptSections, s.promptSections) || !same(old.settings, s.settings);
+    const prompts = !same(old.prompts, s.prompts) || !same(old.style, s.style) || !same(old.promptSections, s.promptSections) || !same(old.settings, s.settings) || !same(old.look, s.look);
     if (!keys.length && !prompts) continue;
     text.push(`updated ${name(s)}`);
     if (prompts) ok = false;
