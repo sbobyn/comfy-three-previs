@@ -1181,9 +1181,10 @@ function keyFrameBlock(s: Shot) {
   // The model is saved on the shot too (Model settings), so the next still, Claude and the batch start from it.
   model.onchange = () => { f.presetId = model.value; const before = s.settings?.image ?? null; void runEntry({ label: 'Still model', redo: [{ op: 'update_shot', id: s.id, patch: { settings: { image: { model: model.value } } } }], undo: [{ op: 'update_shot', id: s.id, patch: { settings: { image: before } } }] }).then(() => { shotPane.dataset.shot = ''; renderShotPane(); }); };
   const count = h('select', { class: 'field', 'aria-label': 'Takes' }, ...[1, 2, 3, 4].map(n => h('option', { value: n, selected: n === f.count }, `${n} take${n > 1 ? 's' : ''}`)));
-  count.onchange = () => { f.count = Number(count.value); go.textContent = `Generate${estLabel(f.presetId, f.count)}`; };
+  count.onchange = () => { f.count = Number(count.value); go.textContent = `Review quote${estLabel(f.presetId, f.count)}`; };
   const status = h('div', { class: 'status-line' });
   const go = h('button', { class: 'btn camera', type: 'button' }, `Review quote${estLabel(f.presetId, f.count)}`);
+  if (noCloudKey() && chosen?.backend === 'cloud') { go.disabled = true; go.title = 'Add a Comfy Cloud key first'; status.className = 'status-line err'; status.textContent = NO_KEY; }
   // Preparing quotes the exact request; nothing is sent until the artist approves it on the card.
   const review = (job: any) => status.replaceChildren(quoteCard(job, sent => {
     reviewing.delete(`still:${s.id}`);
@@ -1514,6 +1515,7 @@ function renderObjectPane() {
   ckpt.onchange = () => { form.checkpoint = ckpt.value; };
   const quoteBtn = h('button', { class: 'btn camera', type: 'button' }, `Review quote${estLabel(form.presetId, form.count)}`);
   const quoteStatus = h('div', { class: 'status-line' });
+  if (noCloudKey() && preset?.backend === 'cloud') { quoteBtn.disabled = true; quoteBtn.title = 'Add a Comfy Cloud key first'; }
   // Preparing quotes the exact request; nothing is sent until the artist approves it on the card.
   const review = (job: any) => quoteStatus.replaceChildren(quoteCard(job, () => { reviewing.delete(`entity:${e.id}`); objectPane.dataset.id = ''; renderObjectPane(); }));
   if (reviewing.has(`entity:${e.id}`)) review(reviewing.get(`entity:${e.id}`));
@@ -1577,6 +1579,7 @@ function renderObjectPane() {
 function estLabel(presetId: string, count: number) {
   const p: any = refgen.presets.find(x => x.id === presetId);
   if (p?.backend === 'local') return ' · free (local)';
+  if (noCloudKey()) return ''; // as the bottom bar: no price without a key
   const usd = p?.pricing?.usdPerImage; return usd != null ? ` · list ≈ $${(usd * count).toFixed(2)}` : '';
 }
 // Prepared image requests waiting for the artist's approval, by where they were asked for ("entity:<id>", "still:<shotId>").
@@ -2047,7 +2050,9 @@ function openRender() {
   const headModel = () => {
     const st = genCache, def: any = st ? videoChoices(st as any).find(d => d.id === hWf.value) : null; if (!st || !def) return;
     const refs = referenceCapacity(st as any, def.id) ? plannedReferences(project, s, st as any, def.id) : [];
-    hEst.textContent = dialogEstimate(def, clipSeconds(def, s), hBackend.value);
+    const keyless = noCloudKey() && hBackend.value === 'cloud' && !isLocalModel(def.id); // as the bottom bar: no price without a key
+    hEst.textContent = keyless ? 'no Cloud key' : dialogEstimate(def, clipSeconds(def, s), hBackend.value);
+    hEst.title = keyless ? NO_KEY : 'Rate × the seconds the model makes. A partner (paid) model bills even when it runs through Local ComfyUI. The quote shows the exact estimate before anything runs.';
     const cam = cameraSourceOf(def);
     blockoutNote.textContent = `The grey camera clip: every frame through the shot camera at 24 fps. ${cam === 'blockout' ? 'This model takes the clip itself: it is the camera.' : cam === 'keyframes' ? 'This model does not take the clip: it moves between the start and end stills made from it, so the move in between is approximate.' : 'This model does not take the clip: it animates one still, so the camera move is approximate.'}`;
     const fig = modelInputsDiagram(def.task, { twoFrames: def.task === 'first-frame' && !!def.inputs?.lastFrame, castImages: refs.length });
