@@ -1,4 +1,5 @@
 import { projectMesh } from '../shared/blockout-models.mjs';
+import { importModels, importSummary, importedSection, isModelDrop, MODEL_ACCEPT } from './director-import';
 import { loadBlockoutModels } from './director-models';
 import './director.css';
 import { SHAPES, MOVES, MAX_DURATION, ROLES, handleOf, cameraKeys, compilePrompt, describeCamera, focusPoint, objectLooks, lookPrompt, lookViews, shotCast, lookSource, videoReferences, castRows, castCard, normalizeCast, entityAt, upsertKey, removeKeys, sceneLength, MAX_SCENE_TIME, withDescendants, rootOf, keyStills } from '../shared/director.mjs';
@@ -67,7 +68,7 @@ const refUrl = (r: Reference) => `/director-refs/${project.id}/${r.file}`;
 const assetUrl = (a: Asset) => `/director-assets/${project.id}/${a.file.replace(/^assets\//, '')}`;
 const allRefs = () => project.shots.flatMap(s => s.references);
 const fmt = (t: number) => `${t.toFixed(2)}s`;
-const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, ...e }) => ({ ...e, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
+const signature = (p: DirectorProject, s: Shot) => { const text = JSON.stringify([cameraKeys(s, p.scene.entities), s.duration, s.start || 0, p.scene.entities.filter(e => e.shape !== 'group').map(({ look, notes, name, styleNotes, lookFrom, parent, sheets, model, from, source, ...e }) => ({ ...e, ...(projectMesh(model) || e.pose || e.path?.some(k => k.pose) ? { model: model?.split('/').pop() } : {}) })), p.scene.environment.preset]); let x = 5381; for (let i = 0; i < text.length; i++) x = ((x << 5) + x + text.charCodeAt(i)) | 0; return (x >>> 0).toString(16); };
 
 let editsInFlight = 0; // while our own edit is on its way, a poll can't tell our change from someone else's
 async function edit(ops: unknown[], quiet = false) {
@@ -166,6 +167,9 @@ const shotList = h('div', { class: 'shots', role: 'group', 'aria-label': 'Shots'
 const outline = h('div', { class: 'outline', 'aria-label': 'Scene objects' });
 const addMenu = h('div', { class: 'add-menu', role: 'menu', hidden: true });
 for (const shape of Object.keys(SHAPES).filter(x => x !== 'group')) addMenu.append(h('button', { type: 'button', role: 'menuitem', title: `Add ${shape}`, onclick: () => addObject(shape) }, shapeIcon(shape), shape));
+// Import a 3D model (docs/import.md): the same importer as a drop on the viewport.
+const modelPicker = h('input', { type: 'file', accept: MODEL_ACCEPT, multiple: true, hidden: true, onchange: () => { const files = Array.from(modelPicker.files || []); modelPicker.value = ''; addMenu.hidden = true; void importDropped(files, null); } });
+addMenu.append(h('button', { type: 'button', role: 'menuitem', title: 'Import a 3D model: GLB, glTF, FBX, OBJ, STL, PLY, USDZ or a zip', onclick: () => modelPicker.click() }, shapeIcon('box'), 'Import model…'), modelPicker);
 let outlineFilter = '';
 const filterInput = h('input', { class: 'tree-filter', type: 'search', placeholder: 'Filter', 'aria-label': 'Filter scene objects' });
 filterInput.oninput = () => { outlineFilter = filterInput.value.trim().toLowerCase(); renderOutline(); };
@@ -740,7 +744,8 @@ function renderInspector() {
     h('div', { class: 'object-actions' },
       h('button', { class: 'btn sm', type: 'button', onclick: () => frameSelected() }, 'Frame object'),
       h('button', { class: 'btn sm', type: 'button', disabled: isTarget, onclick: () => void runEntry({ label: 'Aim camera', redo: [{ op: 'update_shot', id: shotId, patch: { camera: { target: e.id } } }], undo: [{ op: 'update_shot', id: shotId, patch: { camera: { target: shot().camera.target } } }] }) }, isTarget ? '◎ Camera target' : 'Aim camera here')),
-    transforms);
+    transforms,
+    importedSection(e, { patchUndo, sceneTime: now, shot: shot() }) || '');
 
 }
 
@@ -1674,9 +1679,25 @@ function dropTarget(el: HTMLElement, onFiles: (files: File[]) => void, onState?:
 }
 
 // Drop an image straight onto an object in the viewport to link it.
-viewport.addEventListener('dragover', ev => { if (ev.dataTransfer?.types.includes('Files')) { ev.preventDefault(); dropHint.hidden = false; const id = scene.pick(ev.clientX, ev.clientY); dropHint.textContent = id ? `Add as a cast image for ${entity(id)?.name}` : 'Drop on an object to link it — or anywhere to add a shot reference'; } });
+viewport.addEventListener('dragover', ev => { if (ev.dataTransfer?.types.includes('Files')) { ev.preventDefault(); dropHint.hidden = false; const id = scene.pick(ev.clientX, ev.clientY); dropHint.textContent = id ? `Add an image as a cast image for ${entity(id)?.name}, or drop a 3D model to place it` : 'Drop a 3D model to place it here, an image on an object to link it, or anywhere to add a shot reference'; } });
 viewport.addEventListener('dragleave', ev => { if (!viewport.contains(ev.relatedTarget as Node)) dropHint.hidden = true; });
-viewport.addEventListener('drop', ev => { ev.preventDefault(); dropHint.hidden = true; const id = scene.pick(ev.clientX, ev.clientY); void uploadRefs(Array.from(ev.dataTransfer?.files || []), id).then(() => { if (id) select(id); }); });
+viewport.addEventListener('drop', ev => {
+  ev.preventDefault(); dropHint.hidden = true;
+  const files = Array.from(ev.dataTransfer?.files || []); // read before any await: the drop's file list empties afterwards
+  if (isModelDrop(files)) { void importDropped(files, scene.view() === 'set' ? scene.groundAt(ev.clientX, ev.clientY) : null); return; }
+  const id = scene.pick(ev.clientX, ev.clientY); void uploadRefs(files, id).then(() => { if (id) select(id); });
+});
+/** A dropped or picked 3D model becomes a new object at the drop point (else the orbit target), selected. */
+async function importDropped(files: File[], at: Vec3 | null) {
+  if (DEMO) { toast('Importing models needs a local install', true); return; }
+  const t = scene.orbitTarget(), position: Vec3 = at || [snap(t[0], 0.1), 0, snap(t[2], 0.1)];
+  toast(`Importing ${files.find(f => /\.(glb|gltf|fbx|obj|stl|ply|usdz|zip)$/i.test(f.name))?.name || 'model'}…`);
+  try {
+    const r = await importModels(files, { projectId, position });
+    apply(r.project); selection.set([r.entityId], r.entityId);
+    toast(importSummary(r)); announce(importSummary(r));
+  } catch (e) { toast((e as Error).message, true); }
+}
 
 // ---------- Playback ----------
 function togglePlay(force?: boolean) {

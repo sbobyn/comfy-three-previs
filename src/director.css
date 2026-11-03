@@ -750,6 +750,17 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .object-transforms { border-top: 1px solid var(--line); padding-top: 10px; }
 .object-transforms summary, .object-reference-options > summary { cursor: pointer; color: var(--ink-3); font-size: 12px; }
 .object-transform-body { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }
+/* Imported model (src/director-import.ts) */
+.object-imported { border-top: 1px solid var(--line); padding-top: 10px; }
+.object-imported summary { cursor: pointer; color: var(--ink-3); font-size: 12px; }
+.imp-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.imp-row .xyz-l { width: 58px; flex: none; }
+.imp-row select.field { flex: 1 1 140px; min-width: 0; }
+.imp-field { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.imp-field > span { width: 58px; flex: none; }
+.imp-field .field { flex: 1; min-width: 0; }
+.imp-num { display: inline-flex; align-items: center; gap: 4px; }
+.imp-poses .btn { text-transform: capitalize; }
 .object-reference-options > :not(summary) { margin-top: 10px; }
 .object-generate > summary { cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink); }
 .object-generate[open] > summary { margin-bottom: 14px; }
