@@ -30,9 +30,15 @@ test('all starter objects have compatible meshes and animation leaves cameras, t
     const fixed = structuredClone(s);
     const actors = { 'mountain-trail': [], 'city-blocks': [], 'camera-moves': [], 'look-lab': [], 'two-hander': [], 'breaking-news': ['News anchor', 'Camera operator'], wingspan: ['Bald eagle', 'Elk 1', 'Elk 2', 'Elk 3'], 'final-lap': ['Comfy car', 'Rival car'], posterized: ['Comfy guard', 'Rival defender', 'Basketball'] };
     const rewrittenCast = ['News anchor', 'Bald eagle', 'Comfy car', 'Rival car', 'Comfy guard', 'Rival defender'];
+    // The beret-parts fan cheers with both arms up and holds no phone, so its name and notes were rewritten (its cast
+    // images keep their names). Exactly this text maps back to the baseline's.
+    const renamedCast = { 'Cheering fan': ['Excited race fan in a yellow Comfy cap and blue t-shirt, cheering the finish with both arms raised.',
+      { name: 'Fan with phone', notes: 'Excited race fan in a yellow Comfy cap and blue t-shirt, holding up a phone to film the finish.' }] };
     for (const e of fixed.scene.entities) {
       if (actors[s.slug].includes(e.name)) for (const k of ['position', 'rotation', 'path', 'pose']) delete e[k];
       if (rewrittenCast.includes(e.name)) delete e.notes;
+      const renamed = Object.hasOwn(renamedCast, e.name) && renamedCast[e.name];
+      if (renamed && renamed[0] === e.notes) Object.assign(e, renamed[1]);
     }
     for (const shot of fixed.shots) for (const k of ['description', 'prompts']) delete shot[k];
     // The baseline pins the four finished starters (with the corrected stand yaw in Final Lap and Posterized); the blockout starters
