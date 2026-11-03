@@ -137,6 +137,8 @@ A shot is **direction-critical** when you tick **Motion/direction-critical shot*
 
 Write the description as action and look only ("@comfy-car dives to the inside and blows past to take the checkered flag by a full car length"); the blockout supplies the camera, and the stills the composition.
 
+**Look medium.** A blockout model's prompt ends with the camera rule: follow the blockout clip exactly and repaint it photoreal in the look of the still. When the shot's format or look section, or the project style, names another medium (anime, claymation or stop-motion, watercolour, stylised 3D animation, oil painting, pixel art, comic-book art, cartoon, pencil drawing), the rule repaints it in that medium and never says photoreal. The Gemini still models' edit rule and every still's closing rule do the same (`lookMedium` in `shared/camera-source.mjs`). Photoreal prompts are unchanged. A new look is a new video prompt, so the shot's videos read **inputs changed**.
+
 ## 5. Cut
 
 Choose the versions, order and timing of the film.

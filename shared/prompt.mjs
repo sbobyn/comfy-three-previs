@@ -4,7 +4,7 @@
 // colour each part and show where it came from. Image and video prompts share everything except the
 // camera/motion part.
 import { shotObjects, castCard, MOVES } from './director.mjs';
-import { cameraLine, withCameraLine } from './camera-source.mjs';
+import { cameraLine, lookMedium, withCameraLine } from './camera-source.mjs';
 import { applySections, sectionsText } from './prompt-sections.mjs';
 
 // Camera vocabulary for style tags. Each term is the exact text added to the prompt.
@@ -104,7 +104,9 @@ export function autoPromptSegments(project, shot, kind = 'video', { cap = kind =
   for (const g of groups.filter(x => x.cards[0].kind === 'environment')) for (const x of fresh(pieces(g.text))) items.push({ order: 3, priority: 30, piece: x, ids: g.cards.map(c => c.id) });
   const look = fresh(pieces(environment?.style)).join('. ');
   if (look) items.push({ order: 4, priority: 4, seg: mk('style', 'Visual style', 'Project style', FIELD_COLORS.style, sentence(`Look: ${look}`)) });
-  if (kind === 'video') items.push({ order: 5, priority: 1, seg: mk('camera', 'Camera', CAMERA_FROM[cameraSource] || CAMERA_FROM.still, FIELD_COLORS.camera, cameraLine(cameraSource)) });
+  // The camera line repaints the blockout in the project's look: photoreal unless the style names another medium. A shot's
+  // own look sections can name another (sectionedSegments swaps the line for theirs).
+  if (kind === 'video') items.push({ order: 5, priority: 1, seg: mk('camera', 'Camera', CAMERA_FROM[cameraSource] || CAMERA_FROM.still, FIELD_COLORS.camera, cameraLine(cameraSource, lookMedium(environment?.style))) });
   else items.push({ order: 5, priority: 1, seg: mk('camera', 'Framing', 'Shot camera (blockout)', FIELD_COLORS.camera, `Framing: ${shot.camera.mm}mm lens, match the supplied blockout frame's composition.`) });
   // Lens and filter hints are what the prompt still says about the camera, so a video prompt always keeps them.
   const st = shotStyle(shot), tagPriority = kind === 'video' ? { lens: 1, filter: 1 } : { lens: 7, filter: 21 };
@@ -165,8 +167,17 @@ export function sectionedSegments(project, shot, kind = 'video', opts = {}) {
   const capped = autoPromptSegments(project, shot, kind, opts);
   const overrides = shot.promptSections?.[kind];
   const full = kind === 'image' && opts.cap === undefined ? capped : autoPromptSegments(project, shot, kind, { ...opts, cap: Infinity });
-  return applySections(capped, full, overrides || {});
+  const rows = applySections(capped, full, overrides || {});
+  // A video's camera line follows the shot's chosen look (its format and look sections, overrides included).
+  const camera = kind === 'video' && rows.find(r => r.key === 'camera');
+  if (camera) camera.text = camera.autoText = camera.fullText = cameraLine(opts.cameraSource || 'blockout', sectionsMedium(rows));
+  return rows;
 }
+/**
+ * The medium a shot's look sections name ('' = photoreal): its format and look rows, with overrides applied. A look left
+ * out to fit the length cap is still the shot's look; one you removed is not.
+ */
+export const sectionsMedium = rows => lookMedium(rows.filter(r => (r.key === 'intro' || r.key === 'style') && r.text && r.status !== 'orphan').map(r => r.text).join(' '));
 /** The composed prompt with the shot's section overrides and locks (the auto-prompt when there are none). */
 export function composedPromptText(project, shot, kind = 'video', opts = {}) {
   const overrides = shot.promptSections?.[kind];

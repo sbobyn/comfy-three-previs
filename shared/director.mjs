@@ -5,7 +5,7 @@
 import { normalizePose, blendPose, keyEase } from './blockout-pose.mjs';
 import { blockoutModel, projectMesh } from './blockout-models.mjs';
 import { normalizeSheets } from './sheet-presets.mjs';
-import { cameraLine } from './camera-source.mjs';
+import { cameraLine, lookMedium } from './camera-source.mjs';
 import { normalizeSource, normalizePerform, normalizeStandIn } from './imported-asset.mjs';
 
 export const SHAPES = {
@@ -593,7 +593,7 @@ export function compilePrompt(project, shot, refs = null, { cameraSource = 'bloc
   if (style.length) lines.push(refs ? (style.some(r => num(r.id)) ? `Style: match reference image ${style.map(r => num(r.id)).filter(Boolean).join(', ')}.` : '') : `Style: match ${style.map(r => `“${r.name}”`).join(', ')}.`);
   if (environment?.style) lines.push(`Visual style: ${environment.style}.`);
   if (refs?.length) lines.push(`Keep every object consistent with its reference image across the whole shot.`);
-  lines.push(cameraLine(cameraSource));
+  lines.push(cameraLine(cameraSource, lookMedium(environment?.style)));
   return lines.filter(Boolean).join('\n');
 }
 

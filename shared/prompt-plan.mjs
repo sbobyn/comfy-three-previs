@@ -11,8 +11,8 @@
 //   mode 'edit'     – the shot's whole-prompt edit (Prompt block), section controls paused
 //   mode 'request'  – text typed for this one request (Generate dialog, storyboard composer, MCP `prompt`)
 //   mode 'compiled' – the fallback compiled prompt with numbered references (shared/director.mjs compilePrompt)
-import { sectionedSegments, shotPrompt, VIDEO_PROMPT_CAP } from './prompt.mjs';
-import { CAMERA_LINES, CAMERA_SOURCE_LABELS, cameraLine, cameraMotionWarning, cameraMotionWords, fitPrompt, withCameraLine } from './camera-source.mjs';
+import { sectionedSegments, sectionsMedium, shotPrompt, VIDEO_PROMPT_CAP } from './prompt.mjs';
+import { CAMERA_SOURCE_LABELS, cameraLine, cameraLineIn, cameraMotionWarning, cameraMotionWords, fitPrompt, stripCameraLines, withCameraLine } from './camera-source.mjs';
 import { compilePrompt, referenceLegend } from './director.mjs';
 import { editsGuide, stillPromptParts } from './still-match.mjs';
 import { sectionsText, sourceChanged, wordDiff, diffStats } from './prompt-sections.mjs';
@@ -21,7 +21,6 @@ export const SECTION_GROUPS = { shot: 'Shot description', cast: 'Cast & look', s
 const GROUP_OF = { intro: 'shot', action: 'shot', edit: 'shot', request: 'shot', compiled: 'shot', note: 'shot', world: 'cast', style: 'style', camera: 'camera', frame: 'camera', moment: 'camera', rules: 'camera', guide: 'model', refs: 'model' };
 export const sectionGroup = key => GROUP_OF[key] || (key.startsWith('obj:') ? 'cast' : key.startsWith('cam-') ? 'style' : 'model');
 const SYSTEM_COLOR = '#6B6B6B';
-const stripCameraLines = t => Object.values(CAMERA_LINES).reduce((x, line) => x.split(line).join(' '), String(t || '')).replace(/[ \t]{2,}/g, ' ').trim();
 
 function row(r, kind) {
   const system = !!r.system;
@@ -38,7 +37,7 @@ function row(r, kind) {
 const WHY = { omitted: 'Left out to keep the video prompt short', shortened: 'Shortened to its first sentence to keep the video prompt short', removed: 'You removed this section', orphan: 'Saved for an object that is no longer in this shot; not sent' };
 /** Why a section was left out; for a video, the auto-prompt cap it was left out for (a heuristic, see shared/prompt.mjs). */
 const why = (status, cap) => status === 'omitted' && Number.isFinite(cap) ? `${WHY.omitted} (this model’s auto-prompt aims for about ${cap.toLocaleString('en-US')} characters, a rule of thumb rather than a measured limit)` : WHY[status];
-const composedRows = (rows, kind, cap) => rows.map(r => row({ ...r, system: r.key === 'camera', editable: r.key !== 'camera', group: sectionGroup(r.key), why: why(r.status, cap), ...(r.key === 'camera' ? { changes: kind === 'video' ? 'Follows the chosen model: blockout clip, start → end stills or one still.' : 'Follows the shot camera’s lens.' } : {}) }, kind));
+const composedRows = (rows, kind, cap) => rows.map(r => row({ ...r, system: r.key === 'camera', editable: r.key !== 'camera', group: sectionGroup(r.key), why: why(r.status, cap), ...(r.key === 'camera' ? { changes: kind === 'video' ? 'Follows the chosen model and the shot’s look: blockout clip, start → end stills or one still; a non-photoreal look repaints the blockout in that medium.' : 'Follows the shot camera’s lens.' } : {}) }, kind));
 /** Mark rows whose text did not make it into the final text (cut to the model's limit). */
 function settle(rows, final, limit) {
   for (const r of rows) if (r.text && (r.status === 'included' || r.status === 'shortened') && !final.includes(r.text)) { r.status = 'cut'; r.why = limit ? `Cut to fit the model’s ${limit.toLocaleString('en-US')}-character prompt limit` : 'Cut to fit the prompt limit'; }
@@ -63,7 +62,7 @@ export function videoPromptPlan(project, shot, { cameraSource = 'blockout', refs
   if (cameraSource === 'blockout' ? !(P.trim() && P.trim() !== compiledNull().trim()) : !P.trim()) {
     mode = 'compiled';
     pre = cameraSource === 'blockout' ? compilePrompt(project, shot, refs, opts) : withCameraLine(compiledNull(), cameraSource);
-    rows = [row({ key: 'compiled', label: 'Compiled prompt', source: 'Scene, cast and numbered references', text: stripCameraLines(pre) }, 'video'), row({ key: 'camera', label: 'Camera', source: CAMERA_SOURCE_LABELS[cameraSource], system: true, text: cameraLine(cameraSource) }, 'video')];
+    rows = [row({ key: 'compiled', label: 'Compiled prompt', source: 'Scene, cast and numbered references', text: stripCameraLines(pre) }, 'video'), row({ key: 'camera', label: 'Camera', source: CAMERA_SOURCE_LABELS[cameraSource], system: true, text: cameraLineIn(pre, cameraSource) || cameraLine(cameraSource) }, 'video')];
   } else if (userPrompt !== null && P.trim() !== composed.trim()) {
     mode = 'request';
     pre = [withCameraLine(P, cameraSource), legend].filter(Boolean).join('\n');
@@ -75,7 +74,7 @@ export function videoPromptPlan(project, shot, { cameraSource = 'blockout', refs
   } else {
     mode = 'sections';
     const applied = sectionedSegments(project, shot, 'video', opts);
-    const join = () => [withCameraLine(sectionsText(applied), cameraSource), legend].filter(Boolean).join('\n');
+    const medium = sectionsMedium(applied), join = () => [withCameraLine(sectionsText(applied), cameraSource, medium), legend].filter(Boolean).join('\n');
     pre = join();
     // A locked section is never dropped to fit the model's limit: unlocked sections go first, last in the prompt first.
     if (Number.isInteger(maxLength) && pre.length > maxLength && applied.some(r => r.policy === 'lock')) {
@@ -87,7 +86,7 @@ export function videoPromptPlan(project, shot, { cameraSource = 'blockout', refs
     }
     rows = composedRows(applied, 'video', opts.cap);
   }
-  if (mode !== 'sections' && mode !== 'compiled') rows.push(row({ key: 'camera', label: 'Camera', source: CAMERA_SOURCE_LABELS[cameraSource], system: true, text: cameraLine(cameraSource), changes: 'Follows the chosen model: blockout clip, start → end stills or one still.' }, 'video'));
+  if (mode !== 'sections' && mode !== 'compiled') rows.push(row({ key: 'camera', label: 'Camera', source: CAMERA_SOURCE_LABELS[cameraSource], system: true, text: cameraLineIn(pre, cameraSource) || cameraLine(cameraSource), changes: 'Follows the chosen model and the shot’s look: blockout clip, start → end stills or one still; a non-photoreal look repaints the blockout in that medium.' }, 'video'));
   if (legend && mode !== 'compiled') rows.push(row({ key: 'refs', label: 'Reference legend', source: `${refs.length} numbered image${refs.length === 1 ? '' : 's'} this model receives`, system: true, text: legend, changes: 'Follows the reference images: cast looks, start and end stills, and the model’s image limit.' }, 'video'));
   const text = fitPrompt(pre, maxLength, cameraSource);
   settle(rows, text, maxLength);
@@ -106,7 +105,9 @@ export function stillPromptPlan({ project, shot, t = 0, text = null, moment = ''
   const mode = text !== null && text.trim() !== composed.trim() ? 'request' : whole ? 'edit' : 'sections';
   const applied = mode === 'sections' ? sectionedSegments(project, shot, 'image') : null;
   let body = mode === 'sections' ? sectionsText(applied) : text ?? composed;
-  const build = () => stillPromptParts({ project, shot, t, text: [body.trim(), note].filter(Boolean).join(' '), presetId, looks, prevImage, frame, max, markers });
+  // The guide and rules repaint in the shot's look: its sections when composed, else what the text's look parts name.
+  const medium = applied ? sectionsMedium(applied) : undefined;
+  const build = () => stillPromptParts({ project, shot, t, text: [body.trim(), note].filter(Boolean).join(' '), presetId, looks, prevImage, frame, max, markers, medium });
   let parts = build();
   const over = () => { const b = parts.find(x => x.key === 'body'); return b.text !== b.full; };
   // A locked section is never dropped to fit the limit: unlocked sections go first, last in the prompt first.
