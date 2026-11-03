@@ -71,6 +71,8 @@ dialog.takes .dialog-head { flex-wrap: wrap; }
 .tk-prompt.diff summary { color: var(--info); font-weight: 600; }
 .tk-prompt p { margin: 6px 0 0; max-height: 140px; overflow: auto; white-space: pre-wrap; font-size: var(--fs-xs); color: var(--ink-2); }
 .tk-win { align-self: flex-start; }
+.tk-acts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.tk-pin.on { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 40%, transparent); color: var(--ok); }
 .tk-win.on:disabled { opacity: 1; background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 40%, transparent); color: var(--ok); }
 .tk-status { margin: 0; min-height: 1em; }
 .tk-foot { margin: 0; }
