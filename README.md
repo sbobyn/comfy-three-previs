@@ -10,7 +10,7 @@ Block out a scene in 3D in your browser, give every character and prop a consist
 
 ## Features
 
-- **3D blockout editor** — place, name, group and animate simple objects; keyframed camera moves per shot.
+- **3D blockout editor** — place, name, group and animate simple objects, or drop in 3D models (GLB, FBX, OBJ…) with posable rigged characters; keyframed camera moves per shot.
 - **Cast Cards** — a description and reference images for every character, vehicle and prop. Generate images with AI, including design sheets (turnarounds and expressions), and pick a primary look.
 - **Auto-prompts** — each shot prompt is written from the scene, with every object's words colour-linked to the object in the viewport.
 - **Prompt inspector** — see the exact prompt each still and video model receives, section by section with where every part comes from (cast, shot description, style, camera rules, model-specific additions), what was left out to fit, and override, lock or leave out any section per shot. Versions of the final prompt and every take's prompt can be diffed. Model settings (seed, clip length and the like, from each model's registry entry) are saved on the shot with their estimate.
@@ -96,6 +96,8 @@ claude mcp add comfy-previs -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to
 Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, quote generations and run them. For stills and blockouts without the app open in a browser, start the server with `PREVIS_HEADLESS=1` (needs Google Chrome or a Playwright Chromium; see `PREVIS_CHROMIUM`). Paid tools do not ask you again: each call carries a `maxCostUsd` that Claude sets and the run is skipped when the estimate is higher, and nothing paid runs unless the server has `PREVIS_ALLOW_PAID=1`. Models without a price estimate are refused unless the call passes `allowUnknownCost` and the server runs with `PREVIS_ALLOW_UNKNOWN_COST=1`. Every run also counts against the server's budget caps (see Configuration). Tell Claude your budget, or leave `PREVIS_ALLOW_PAID` at `0` to keep it to free work and quotes.
 
 To bring a shot in from Blender (camera, tagged objects and rendered frames as the shot's blockout), Claude uses `previs_director_blender_helper` and `previs_director_import_blender`; see [Import a Blender shot](docs/blender-import.md).
+
+To bring in a 3D model (GLB, glTF, FBX, OBJ, STL, PLY or USDZ), drop it on the viewport, choose **+ Add ▾ → Import model…**, or have Claude call `previs_import_asset`. Rigged humanoids (Mixamo, Unreal, Rigify, VRM) play their clips and take poses through `previs_director_perform`; see [Import a 3D model](docs/import.md).
 
 When building blockouts, Claude and people follow the [blockout modelling rules](docs/blockout-modeling-rules.md): never put two surfaces on the same plane, and lift decals and lines 2 mm along the normal. Edits that break the rule come back with warnings, and imports lift thin objects automatically. Overlapping surfaces z-fight in every blockout frame, and image and video models copy it.
 

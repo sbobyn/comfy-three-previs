@@ -24,6 +24,10 @@ One name per thing, used the same way in the app, the docs and the film. When a 
 | **Project style** | The look of the whole film ("35 mm anamorphic, teal-and-orange grade"). | Style board |
 | **Shared asset** | An object saved to this computer's library with its description, cast images and design sheets, ready to **Place** in any project. **Save to library** makes one; **Export** writes it as one `.previs-asset.zip`. | Library asset (code: asset), Prefab, Template |
 | **@handle** | The short name an object or shared asset answers to (`@red-racecar`), made from its name. In the scene first, then the library. | Tag, Slug |
+| **Imported model** | An object whose mesh came from a 3D file (GLB, glTF, FBX, OBJ, STL, PLY, USDZ) by drop, **Import model…** or Claude. Its Cast Card keeps the file, **Licence** and **Credit**. See [Import a 3D model](import.md). | Asset (that is a shared asset), Upload |
+| **Clip** | An animation stored in an imported model's file (Walk, Wave). An object plays one at a time, with an offset and speed, and can switch clips from a shot's start. | Action, Animation, Take |
+| **Pose** | Joint angles of a figure: the bundled people and birds, or an imported humanoid. **Stand**, **walk**, **run**, **sit**, **jump**, **point** and **wave** are library poses. | Posture, Keyframe |
+| **Stand-in** | What image and video models see of an imported figure: *posed, as shown*, or a *neutral grey stand-in* in the stand pose. | Proxy (that is the plain shape of an object without a mesh), Mannequin |
 
 "Cast Card" is the old name for an object's description plus its cast images. It survives only in code and in the auto-prompt's source labels; do not use it in new UI.
 
