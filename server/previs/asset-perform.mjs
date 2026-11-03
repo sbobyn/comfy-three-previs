@@ -56,8 +56,9 @@ export function planPerform(p, input = {}) {
       for (const [effector, target] of Object.entries(input.ik)) pose = solveLimb(rig, entitySize(e), pose, effector, target);
     }
     pose = normalizePose(pose) || {};
-    if (keyed) { ops.push({ op: 'set_keyframes', id: e.id, keys: [{ t, pose }] }); summary.push(`pose keyed at ${t} s`); }
-    else { patch.pose = pose; summary.push(typeof input.pose === 'string' ? `stands in the ${input.pose} pose` : 'pose set'); }
+    const how = `${typeof input.pose === 'string' ? `the ${input.pose} pose` : 'a new pose'}${input.ik ? ` reaching with ${Object.keys(input.ik).join(' and ')}` : ''}`;
+    if (keyed) { ops.push({ op: 'set_keyframes', id: e.id, keys: [{ t, pose }] }); summary.push(`${how}, keyed at ${t} s`); }
+    else { patch.pose = pose; summary.push(`holds ${how}`); }
   }
   if (input.standIn !== undefined) {
     if (!['posed', 'neutral'].includes(input.standIn)) fail('standIn must be posed or neutral');

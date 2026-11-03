@@ -49,6 +49,7 @@ export class RigRuntime {
   /** Pose the model for scene time t. root is the object's placed group (its rotation is the character frame). */
   apply(root: THREE.Object3D, entity: Entity, t: number, pose: Pose | undefined, { neutral = false } = {}) {
     this.setNeutral(neutral);
+    if (!this.joints.size && !this.model.animations.length) return; // a static model or a card: nothing moves
     for (const [o, [p, q, s]] of this.rest) { o.position.copy(p); o.quaternion.copy(q); o.scale.copy(s); }
     const perf = neutral ? null : performanceAt(entity, t);
     const action = perf ? this.clip(perf.clip) : null;

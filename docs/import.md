@@ -121,5 +121,5 @@ Also refused: files that point outside their folder (`../`, absolute paths, `htt
 On 2026-11-02:
 
 - `tests/asset-import.test.mjs` (fixtures made in the test) and `tests/rig.test.mjs`.
-- With `PREVIS_BLENDER` set: FBX, USDZ and OBJ+MTL exports of a rigged figure from `scripts/blender/build-rigged-test-asset.py`, on Blender 5.3.0 Alpha.
-- By hand, outside the repo: a Mixamo X Bot FBX (49,112 triangles, 65 bones) imported, posed (stand, sit, IK reach) and rendered by the headless renderer into a blockout clip next to a clip-playing figure and a neutral stand-in. Mixamo files are not committed; their redistribution terms are unclear.
+- With `PREVIS_BLENDER` set: FBX, USDZ and OBJ+MTL exports of a rigged figure from `scripts/blender/build-rigged-test-asset.py`, on Blender 5.3.0 Alpha and 4.5.4 LTS.
+- By hand, outside the repo, with the built app and the headless renderer: a WebP backdrop card; a drop of a rigged GLB on the viewport of a running workspace, which placed it at the drop point, then its clip, stand-in, pose and licence set from the Imported model section; and a Mixamo X Bot FBX (49,112 triangles, 65 bones) imported, posed (stand, sit, IK reach) and rendered by the headless renderer into a blockout clip next to a clip-playing figure and a neutral stand-in. Mixamo files are not committed; their redistribution terms are unclear.
