@@ -8,6 +8,21 @@ import { GRADER_PRICES } from './tiers.mjs';
 const byCreated = (a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
 const round = (v, d = 3) => (Number.isFinite(v) ? Math.round(v * 10 ** d) / 10 ** d : null);
 const isVideoResult = a => a?.kind === 'workflow-result' && String(a.mime || '').startsWith('video/');
+// Inline check (do not import shared/masked-edit.mjs here — it pulls node:crypto into the browser Take lab).
+const isMaskedEditTake = a => !!(a?.source?.maskedEdit && a.source.maskedEdit.v === 1);
+
+/**
+ * Whether a generated video may be chosen by the implicit “newest take” cut fallback.
+ * Accepted masked edits stay out of that path; explicit Mark winner / clip picks still work.
+ */
+export function automaticCutEligible(asset) {
+  return isVideoResult(asset) && !isMaskedEditTake(asset);
+}
+
+/** Newest automatic-cut-eligible generated video of the shot, or null. */
+export function newestAutomaticVideo(project, shot) {
+  return videoResults(project, shot).filter(automaticCutEligible).at(-1) || null;
+}
 
 /** The shot's generated videos, oldest first (Take 1 is the first one made). */
 export function videoResults(project, shot) {
@@ -41,8 +56,10 @@ export function cutAsset(project, shot, clip = cutClip(project, shot)) {
   if (clip?.assetId) return all.find(a => a.id === clip.assetId) || null;
   const w = shot.winner && all.find(a => a.id === shot.winner && isVideoResult(a));
   if (w) return w;
-  const newest = kind => all.filter(a => a.kind === kind).sort(byCreated).at(-1) || null;
-  return newest('workflow-result') || newest('camera-render');
+  const newestResult = newestAutomaticVideo(project, shot);
+  if (newestResult) return newestResult;
+  const newestBlockout = all.filter(a => a.kind === 'camera-render').sort(byCreated).at(-1) || null;
+  return newestBlockout;
 }
 /**
  * Edit ops (redo and undo) that make `assetId` the shot's winner, or clear it (null: the cut follows the newest take).
@@ -54,7 +71,8 @@ export function winnerOps(project, shot, assetId) {
   if (assetId !== null && !results.some(a => a.id === assetId)) throw Error('That take is not a generated video of this shot');
   const redo = [{ op: 'set_winner', shotId: shot.id, assetId }], undo = [{ op: 'set_winner', shotId: shot.id, assetId: shot.winner ?? null }];
   const clips = project.edit?.clips || [], own = clips.find(c => c.shotId === shot.id);
-  const before = cutAsset(project, shot), after = assetId ?? results.at(-1)?.id ?? before?.id;
+  // Post-clear fallback must match cutAsset (skip masked-edit descendants), not results.at(-1).
+  const before = cutAsset(project, shot), after = assetId ?? newestAutomaticVideo(project, shot)?.id ?? before?.id;
   if (own && (own.assetId || ((own.in || own.out != null) && before?.id !== after))) {
     redo.push({ op: 'set_edit', clips: clips.map(c => (c.shotId === shot.id ? { ...c, assetId: null, in: 0, out: null } : c)) });
     undo.push({ op: 'set_edit', clips: structuredClone(clips) });

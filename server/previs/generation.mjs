@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile, access } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { RECOVERY_ATTEMPTS, recoveryAttempts, beginRecovery, recoveryId, saveResultBytes } from './result-recovery.mjs';
@@ -11,7 +11,69 @@ import { keyedLock } from './keyed-lock.mjs';
 import { uploadCacheFor } from './upload-cache.mjs';
 import { expandAsset } from './provenance.mjs';
 import { openBudget, budgetDir, followJob, quoteEstimate } from './budget.mjs';
-import { assertNoSecrets, hashBytes, hashValue, validateWorkflowDefinition, legacyWorkflowDefinition, validateGraph, workflowCost, validateApproval } from './workflows.mjs';
+import { assertNoSecrets, hashBytes, hashValue, validateWorkflowDefinition, legacyWorkflowDefinition, validateGraph, workflowCost, validateApproval, isMaskedEditDefinition, MASKED_EDIT_PURPOSE } from './workflows.mjs';
+
+/** Historical Cloud GPU calibration for the allowlisted masked VACE 14B graph (INTEGRATION.md). Not an invoice. */
+export const MASKED_VACE_CALIBRATION = Object.freeze({
+  definitionId: 'wan-vace-14b-masked-v1',
+  unet: 'wan2.1_vace_14B_fp16.safetensors',
+  steps: 20,
+  basisGpuSeconds: 248.2,
+  basisCropPixels: 399_360, // 832×480
+  basisFrames: 81,
+  creditsPerGpuSecond: 0.266,
+  creditsPerUsd: 211,
+  rateFetchedAt: '2026-11-03T03:55:02.423Z',
+  version: 'masked-vace-14b-hist-20261103',
+  providerEnforcedCap: false,
+});
+
+/**
+ * Server-owned planning estimate for the recovered masked VACE 14B settings.
+ * gpuSeconds = 248.2 × (cropPixels / 399360) × (frames / 81); USD = gpuSeconds × 0.266 / 211.
+ */
+export function estimateMaskedVaceCost({ width, height, frames, steps = 20, unet = MASKED_VACE_CALIBRATION.unet, marginPct = 10 } = {}) {
+  const cal = MASKED_VACE_CALIBRATION;
+  if (unet !== cal.unet || steps !== cal.steps) return null;
+  if (![81, 89, 113].includes(frames) || !Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) return null;
+  const cropPixels = width * height;
+  const gpuSeconds = cal.basisGpuSeconds * (cropPixels / cal.basisCropPixels) * (frames / cal.basisFrames);
+  if (!Number.isFinite(gpuSeconds) || gpuSeconds <= 0) return null;
+  const estimate = Math.round((gpuSeconds * cal.creditsPerGpuSecond / cal.creditsPerUsd) * 10000) / 10000;
+  const reservationRequiredUsd = Math.round(estimate * (1 + (Number.isFinite(marginPct) ? marginPct : 10) / 100) * 10000) / 10000;
+  return {
+    currency: 'USD', status: 'unknown', amount: null, estimate, reservationRequiredUsd,
+    runtime: { gpuSeconds: Math.round(gpuSeconds * 1000) / 1000, hardware: 'historical-rtx_pro_6000-scale', uncertainty: 'planning-envelope' },
+    crop: { width, height, pixels: cropPixels, frames, steps },
+    lineItems: { sam3Usd: 0, graderUsd: 0, retryUsd: 0, uploadStorageKnownUsd: null },
+    marginPct: Number.isFinite(marginPct) ? marginPct : 10,
+    providerEnforcedCap: false,
+    rate: { creditsPerGpuSecond: cal.creditsPerGpuSecond, creditsPerUsd: cal.creditsPerUsd, fetchedAt: cal.rateFetchedAt, version: cal.version },
+  };
+}
+
+export function applyTrustedMaskedEstimate(quote, definition, sources, { marginPct = 10 } = {}) {
+  const allowlisted = definition?.id === MASKED_VACE_CALIBRATION.definitionId
+    || definition?.provenance?.presetId === MASKED_VACE_CALIBRATION.definitionId;
+  if (!isMaskedEditDefinition(definition) || !allowlisted) return quote;
+  // Prefer the bound crop media (actual submit dimensions) over the preset's placeholder graph values.
+  const w = Number(sources?.sourceVideo?.width) || Number(definition.graph?.['13']?.inputs?.width);
+  const h = Number(sources?.sourceVideo?.height) || Number(definition.graph?.['13']?.inputs?.height);
+  const frames = Number(sources?.sourceVideo?.frameCount) || Number(definition.graph?.['13']?.inputs?.length);
+  const steps = Number(definition.graph?.['15']?.inputs?.steps) || 20;
+  const unet = definition.graph?.['8']?.inputs?.unet_name || MASKED_VACE_CALIBRATION.unet;
+  const trusted = estimateMaskedVaceCost({ width: w, height: h, frames, steps, unet, marginPct });
+  if (!trusted) return { ...quote, estimate: null, estimateRefused: 'No reliable estimate is available for these settings. Nothing submitted.', providerEnforcedCap: false };
+  return {
+    ...quote,
+    currency: 'USD',
+    estimate: trusted.estimate,
+    reservationRequiredUsd: trusted.reservationRequiredUsd,
+    providerEnforcedCap: false,
+    estimateBasis: trusted,
+    rateVersion: trusted.rate.version,
+  };
+}
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const draft = job => ['prepared', 'quoted', 'invalidated'].includes(job.status);
@@ -190,7 +252,7 @@ export async function openGeneration(root, project, options = {}) {
       const asset = original ? { ...original, mime: original.mime || original.mimeType } : null;
       if (asset && !asset.filename && uuid.test(asset.id) && asset.url === `/assets/${asset.id}${extensions[asset.mime]}`) asset.filename = asset.id + extensions[asset.mime];
       if (!asset || !asset.binding || !extensions[asset.mime]) fail(`Source ${name} is missing or lacks media/provenance metadata`);
-      const expected = ['sourceVideo', 'controlVideo'].includes(name) ? 'video' : name === 'audio' ? 'audio' : 'image';
+      const expected = ['sourceVideo', 'controlVideo', 'maskVideo'].includes(name) ? 'video' : name === 'audio' ? 'audio' : 'image';
       if (asset.kind !== expected || !asset.mime.startsWith(expected + '/')) fail(`${name} requires ${expected} media`);
       if (expected !== 'audio' && (!Number.isInteger(asset.width) || !Number.isInteger(asset.height) || asset.width < 1 || asset.height < 1)) fail(`Source ${name} requires width and height`);
       if (expected === 'video' && (!Number.isFinite(asset.fps) || asset.fps <= 0 || !Number.isInteger(asset.frameCount) || asset.frameCount <= 0 || !Number.isFinite(asset.duration) || asset.duration <= 0 || !/^[a-f0-9]{64}$/.test(asset.sha256 || ''))) fail(`Source ${name} requires fps, frameCount, duration and sha256`);
@@ -199,6 +261,12 @@ export async function openGeneration(root, project, options = {}) {
       bytes[name] = await readSource(asset, render);
       sources[name] = { ...asset, sha256: hashBytes(bytes[name]), sourceType: render ? 'render' : 'asset' };
       deferredInputs.push({ ...mapping, kind: expected, mime: asset.mime, filename: asset.filename });
+    }
+    if (isMaskedEditDefinition(definition)) {
+      const src = sources.sourceVideo, mask = sources.maskVideo;
+      if (src && mask && (src.frameCount !== mask.frameCount || src.fps !== mask.fps || src.width !== mask.width || src.height !== mask.height)) {
+        fail('maskVideo must match sourceVideo width, height, fps and frameCount');
+      }
     }
     for (const [name, value] of Object.entries(binding.parameters || {})) {
       const mapping = definition.parameters[name];
@@ -213,8 +281,11 @@ export async function openGeneration(root, project, options = {}) {
     for (const classType of definition.backendRequirements.nodes || []) if (!inspected.objectInfo[classType]) validation.issues.push({ code: 'missing-node', classType, message: `Backend requirement ${classType} is unavailable` });
     if (definition.constraints.timingChange && binding.acceptTimingChange !== true) validation.issues.push({code:'timing-review',message:'Explicit timing/framing acknowledgment required: '+definition.constraints.timingChange});
     validation.compatible = !validation.issues.length;
-    const quote = workflowCost(graph, inspected.objectInfo, selection);
-    const context = { requestId: identity(input), projectId: p.id, shotId: shot.id, shot, workflowBindingId: binding.id, binding, cameraSource: cameraSourceOf(definition, assetBindings), definition, definitionHash: definition.definitionHash, graphHash: definition.graphHash, preparedGraph: graph, sources, references: p.references || [], backend: selection, schemaHash: validation.schemaHash, quote };
+    let quote = workflowCost(graph, inspected.objectInfo, selection);
+    quote = applyTrustedMaskedEstimate(quote, definition, sources, { marginPct: budget.marginPct?.() ?? 10 });
+    const purpose = isMaskedEditDefinition(definition) ? MASKED_EDIT_PURPOSE : 'ordinary';
+    // Fingerprint includes source/mask hashes (via sources), trusted estimate and rate version (via quote).
+    const context = { requestId: identity(input), projectId: p.id, shotId: shot.id, shot, workflowBindingId: binding.id, binding, cameraSource: cameraSourceOf(definition, assetBindings), definition, definitionHash: definition.definitionHash, graphHash: definition.graphHash, preparedGraph: graph, sources, references: p.references || [], backend: selection, schemaHash: validation.schemaHash, quote, purpose };
     assertNoSecrets(context);
     // requestRevision is provenance only; it stays out of the fingerprint.
     return { context: { ...context, requestRevision: Number.isInteger(input.revision) ? input.revision : p.revision }, fingerprint: hashValue(context), validation, adapter, bytes, deferredInputs };
@@ -256,6 +327,11 @@ export async function openGeneration(root, project, options = {}) {
     }
     if (!current.validation.compatible) fail('Workflow is not schema-compatible; inspect validation issues');
     validateApproval(input.approval, saved.fingerprint, saved.quote);
+    if (saved.purpose === MASKED_EDIT_PURPOSE || isMaskedEditDefinition(saved.definition)) {
+      if (!Number.isFinite(saved.quote?.estimate) || saved.quote.estimate < 0) fail('No reliable estimate is available. Nothing submitted.');
+      if (saved.quote?.providerEnforcedCap === true) fail('A provider-enforced spending limit is unavailable for this route. Nothing submitted.');
+      // Client-forged cheaper estimates are ignored: only the server fingerprint (with trusted estimate) is authoritative.
+    }
     const twin = input.allowDuplicate === true ? null : duplicateOf(saved);
     if (twin) throw Object.assign(Error(`An identical request is already ${active(twin) ? twin.status : 'completed'} (${twin.id}); nothing was sent. Use it, or pass allowDuplicate to generate again.`), { status: 409, apiCode: 'duplicate', existingId: twin.id });
 
@@ -354,7 +430,19 @@ export async function openGeneration(root, project, options = {}) {
         const result = { ...media, id: resultId, filename, url: `/${folder}/${filename}`, kind: output.mediaType === 'image/png' ? 'image' : 'video', mime: output.mediaType, mimeType: output.mediaType, sha256: hashBytes(bytes), nodeId: output.nodeId, key: output.key, backend: output.location, shotId: job.shotId, requestRevision: job.requestRevision, generationJobId: job.id, createdAt: now() };
         job = await persist({ ...job, results: [...job.results, result] });
       }
-      job = await persist({ ...job, failure: null, tracking: { ...job.tracking, error: null }, status: requiresAttachment ? 'attaching' : 'completed', ...(requiresAttachment ? {} : { completedAt: now() }), message: 'Only declared outputs were probed and saved. Timing and visual quality require review; no timing fit was performed.' });
+      const masked = job.purpose === MASKED_EDIT_PURPOSE || isMaskedEditDefinition(job.definition);
+      if (masked && job.results.length) {
+        const candDir = join(root, 'masked-edits', job.id);
+        await mkdir(candDir, { recursive: true });
+        await atomicJson(join(candDir, 'candidate.json'), {
+          v: 1, jobId: job.id, purpose: MASKED_EDIT_PURPOSE, quarantined: true, verified: true,
+          resultIds: job.results.map(r => r.id), resultSha256: job.results.map(r => r.sha256),
+          sourceSha256: job.sources?.sourceVideo?.sha256 || null, maskSha256: job.sources?.maskVideo?.sha256 || null,
+          fingerprint: job.fingerprint, at: now(),
+        });
+        job = { ...job, purpose: MASKED_EDIT_PURPOSE, quarantine: true, maskedEdit: { candidatePath: `masked-edits/${job.id}/candidate.json`, durable: true } };
+      }
+      job = await persist({ ...job, failure: null, tracking: { ...job.tracking, error: null }, status: requiresAttachment ? 'attaching' : 'completed', ...(requiresAttachment ? {} : { completedAt: now() }), message: masked ? 'Masked patch collected and quarantined. Local composite/accept is required before it can become a take.' : 'Only declared outputs were probed and saved. Timing and visual quality require review; no timing fit was performed.' });
       return requiresAttachment ? finishAttachment(job) : job;
     } catch (error) {
       return persist({ ...job, ...(job.collection && recoveryAttempts(job, 'collection') >= RECOVERY_ATTEMPTS ? { status: 'recovery-required' } : {}), failure: { phase, detail: errorDetail(error) }, tracking: { ...job.tracking, error: errorDetail(error) }, message: `Tracking failed at ${phase}. Preserve the receipt; no resubmission or undeclared output collection occurred.` });
@@ -389,5 +477,15 @@ export async function openGeneration(root, project, options = {}) {
     if (job.status !== 'orphaned') fail('Only a job whose project was archived or deleted can be dismissed', 409);
     return job.dismissedAt ? job : persist({ ...job, dismissedAt: now() });
   }
-  return { setAttachment: fn => { attachResults = fn; }, dismiss: byJobId(dismiss), prepare: byRequest(input => prepare(input)), quote: byRequest(input => prepare(input, true)), submit: byRequest(submit), track: byJob(track), reconcile: byJobId(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect(), isActive: active, kindOf: generationKind, expectedSeconds, label: generationLabel, estimate: generationEstimate, duplicateOf: job => duplicateOf(job) };
+  /** Jobs that syncResults must skip (quarantined masked patches). Sol’s director.syncResults should honor purpose. */
+  const listForSync = () => [...jobs.values()].filter(job => job.purpose !== MASKED_EDIT_PURPOSE && !isMaskedEditDefinition(job.definition)).map(job => structuredClone(job));
+  async function durableMaskedCandidate(job) {
+    if (!(job.purpose === MASKED_EDIT_PURPOSE || isMaskedEditDefinition(job.definition))) return false;
+    if (!job.results?.length) return false;
+    try {
+      await access(join(root, 'masked-edits', job.id, 'candidate.json'));
+      return true;
+    } catch { return Boolean(job.maskedEdit?.durable); }
+  }
+  return { setAttachment: fn => { attachResults = fn; }, dismiss: byJobId(dismiss), prepare: byRequest(input => prepare(input)), quote: byRequest(input => prepare(input, true)), submit: byRequest(submit), track: byJob(track), reconcile: byJobId(reconcile), get, list: () => [...jobs.values()].map(job => structuredClone(job)), listForSync, durableMaskedCandidate, inspect: selection => backendFor(backendSnapshot(selection || options.backend || {})).inspect(), isActive: active, kindOf: generationKind, expectedSeconds, label: generationLabel, estimate: generationEstimate, duplicateOf: job => duplicateOf(job) };
 }

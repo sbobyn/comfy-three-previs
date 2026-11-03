@@ -15,7 +15,7 @@ import { prepareShotVideo, videoChoices, referenceCapacity, plannedReferences, c
 import type { Def, EngineRef } from './director-videogen';
 import { CAMERA_SOURCE_LABELS, CAMERA_SOURCE_GLYPHS, cameraSourceOf } from '../shared/camera-source.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
-import { cutAsset, winnerOf, winnerOps } from '../shared/takes.mjs';
+import { automaticCutEligible, cutAsset, winnerOf, winnerOps } from '../shared/takes.mjs';
 
 export type SequenceCtx = {
   project(): DirectorProject;
@@ -418,7 +418,10 @@ export function createSequence(ctx: SequenceCtx) {
     abSeg.hidden = !s;
     takesBtn.hidden = !s || !ctx.openTakes || (!results(s).length && !s.references.some(r => r.role === 'frame'));
     if (!s) { compareOff(); abSeg.replaceChildren(); setCaption(''); show(null, 0, 'Pick a shot to watch it, or play the whole cut.'); return; }
-    const generated = winner(s) || results(s)[0], b = blockout(s);
+    // Playback follows the shared cut resolver — masked edits never win via implicit newest.
+    const cutMedia = media(s);
+    const generated = (cutMedia?.kind === 'workflow-result' ? cutMedia : null) || winner(s) || results(s).find(automaticCutEligible) || null;
+    const b = blockout(s);
     if (view !== 'blockout' && !generated && b) view = 'blockout';
     if (view === 'overlay' && !b) view = generated ? 'generated' : 'blockout';
     const TITLES = { blockout: 'The blockout this shot was made from', generated: 'The version in the cut', compare: 'Blockout, start still and every generated version, split by draggable seams', overlay: 'Boxes around what the shot camera sees, linked to each cast image and its words in the prompt; the generated frame fades in under them' };

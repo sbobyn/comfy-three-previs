@@ -1,8 +1,12 @@
 import { createHash } from 'node:crypto';
 
-export const workflowTasks = ['transform-video', 'control-video', 'first-frame', 'passthrough'];
+export const workflowTasks = ['transform-video', 'control-video', 'first-frame', 'passthrough', 'masked-video-edit'];
 export const outputMediaTypes = ['image/png', 'video/mp4', 'video/webm', 'video/quicktime', 'video/x-matroska'];
-const semantics = ['sourceVideo', 'controlVideo', 'firstFrame', 'lastFrame', 'referenceImage', 'image', 'prompt', 'audio'];
+const semantics = ['sourceVideo', 'controlVideo', 'maskVideo', 'firstFrame', 'lastFrame', 'referenceImage', 'image', 'prompt', 'audio'];
+/** Result purpose for masked VACE patch jobs: quarantined, never an ordinary take. */
+export const MASKED_EDIT_PURPOSE = 'masked-edit-patch';
+export const isMaskedEditDefinition = definition => definition?.task === 'masked-video-edit';
+export const isMaskedEditJob = job => job?.purpose === MASKED_EDIT_PURPOSE || isMaskedEditDefinition(job?.definition);
 const object = value => value && typeof value === 'object' && !Array.isArray(value);
 const has = (value, key) => Object.hasOwn(value, key);
 const fail = message => { throw Error(message); };
@@ -59,6 +63,7 @@ export function validateWorkflowDefinition(input) {
   if (result.task === 'transform-video' && !result.inputs.sourceVideo) fail('transform-video requires sourceVideo');
   if (result.task === 'control-video' && (!result.inputs.controlVideo || typeof result.inputs.controlVideo.pass !== 'string' || !result.inputs.controlVideo.pass)) fail('control-video requires an explicit controlVideo pass');
   if (result.task === 'first-frame' && !result.inputs.firstFrame) fail('first-frame requires firstFrame');
+  if (result.task === 'masked-video-edit' && (!result.inputs.sourceVideo || !result.inputs.maskVideo)) fail('masked-video-edit requires sourceVideo and maskVideo');
   if (!Array.isArray(result.outputs) || !result.outputs.length || result.outputs.length > 32 || result.outputs.some(output => !has(result.graph, output.nodeId) || !outputMediaTypes.includes(output.mediaType)) || new Set(result.outputs.map(output => output.nodeId)).size !== result.outputs.length) fail('Declare distinct output node IDs and supported PNG/video media types');
   result.graphHash = hashValue(result.graph);
   result.definitionHash = hashValue(result);
@@ -178,5 +183,9 @@ export function validateApproval(approval, fingerprint, quote) {
   if (!allowance || allowance.currency !== quote.currency || !Number.isFinite(allowance.maxAmount) || allowance.maxAmount < 0) fail('Explicit matching currency and nonnegative allowance are required');
   if (quote.status === 'unknown' && allowance.allowUnknownCharges !== true) fail('Unknown charges require explicit allowUnknownCharges approval; an allowance is not a backend spending cap');
   if (quote.status === 'known' && quote.amount > allowance.maxAmount) fail('Quote exceeds the approved allowance');
+  // Trusted finite estimate (e.g. masked VACE): run allowance must cover the reservation requirement, not only the estimate.
+  const required = Number.isFinite(quote?.reservationRequiredUsd) ? quote.reservationRequiredUsd
+    : Number.isFinite(quote?.estimate) ? quote.estimate : null;
+  if (quote.status === 'unknown' && required != null && allowance.maxAmount < required) fail('Run allowance is below the required reservation for this estimated Cloud charge');
   return true;
 }

@@ -17,7 +17,7 @@ import { shotPrompt } from './prompt.mjs';
 import { resolveImageParams, resolveVideoParams } from './model-params.mjs';
 import { cameraSourceOf } from './camera-source.mjs';
 import { maxReferences } from './video-refs.mjs';
-import { winnerOf, cutClip } from './takes.mjs';
+import { winnerOf, cutClip, cutAsset, automaticCutEligible } from './takes.mjs';
 import { FIRST_FRAME_FALLBACK } from './tiers.mjs';
 import { AXIS_IDS, effectiveLook, baseShotOf, hasLook } from './look-presets.mjs';
 
@@ -157,7 +157,11 @@ export function nodeOutput(project, node) {
   if (node.type === 'video') {
     const vids = (project.assets || []).filter(a => a.shotId === shot?.id && isVideo(a));
     const w = shot && winnerOf(project, shot), c = shot && cutClip(project, shot);
-    const a = (node.assetId && vids.find(x => x.id === node.assetId)) || (w && vids.find(x => x.id === w.assetId)) || (c?.assetId && vids.find(x => x.id === c.assetId)) || vids.sort((x, y) => String(x.createdAt).localeCompare(String(y.createdAt))).at(-1);
+    const cut = shot ? cutAsset(project, shot, c) : null;
+    const a = (node.assetId && vids.find(x => x.id === node.assetId))
+      || (cut?.kind === 'workflow-result' ? cut : null)
+      || (w && vids.find(x => x.id === w.assetId))
+      || vids.filter(automaticCutEligible).sort((x, y) => String(x.createdAt).localeCompare(String(y.createdAt))).at(-1);
     return a ? { id: a.id, rec: a } : null;
   }
   if (node.type === 'look') { const ref = objectLooks(project, node.entityId)[0]; return ref ? { id: ref.id, rec: ref } : null; }
@@ -173,6 +177,8 @@ const LEGACY = { code: 'blocking', part: 'signature', text: 'the camera, timing 
  * Returns { state: 'missing'|'fresh'|'stale'|'pinned'|'uploaded', output: { id }|null, legacy, blocking (a blocking reason),
  * reasons, key (current), madeKey }. Pinned outputs report their reasons but count as accepted.
  */
+const EDITED_OLDER = { code: 'masked-edit-parent', part: 'parent', text: 'Edited from an older take' };
+
 export function explainStale(project, node, opts = {}) {
   const shot = node.shotId ? project.shots.find(s => s.id === node.shotId) : null;
   if (node.shotId && !shot) return { state: 'missing', output: null, legacy: false, blocking: false, reasons: [{ code: 'missing', part: 'shot', text: 'unknown shot' }] };
@@ -180,6 +186,21 @@ export function explainStale(project, node, opts = {}) {
   if (!out) return { state: 'missing', output: null, legacy: false, blocking: false, reasons: [{ code: 'missing', part: 'output', text: 'not made yet' }] };
   const { rec } = out, output = { id: out.id };
   if ((node.type === 'still' || node.type === 'look') && !rec.generated) return { state: 'uploaded', output, legacy: false, blocking: false, reasons: [] };
+  // Masked edits do not own an ordinary videoKey; inherit parent blocking / expose edited-from-older.
+  if (node.type === 'video' && rec.source?.maskedEdit?.v === 1) {
+    const parentId = rec.source.maskedEdit.parentAssetId || rec.source.sourceAssetId;
+    const parent = (project.assets || []).find(a => a.id === parentId);
+    if (!parent) {
+      const reasons = [{ code: 'missing', part: 'parent', text: 'the take this edit was made from is gone' }];
+      return { state: rec.pinned ? 'pinned' : 'stale', output, legacy: false, blocking: true, reasons, key: null, madeKey: null };
+    }
+    const parentExplain = explainStale(project, { type: 'video', shotId: shot.id, assetId: parent.id }, opts);
+    const reasons = parentExplain.blocking || parentExplain.state === 'stale'
+      ? [EDITED_OLDER, ...parentExplain.reasons.filter(r => r !== EDITED_OLDER)]
+      : [];
+    const state = rec.pinned ? 'pinned' : reasons.length ? 'stale' : 'fresh';
+    return { state, output, legacy: false, blocking: reasons.some(r => r === EDITED_OLDER || r === LEGACY || isBlockingPart(r.part) || r.code.startsWith('object-')), reasons, key: null, madeKey: null };
+  }
   const made = recordedOf(node.type, rec), target = { shot, at: node.at, entityId: node.entityId };
   let reasons, legacy = false, key = null;
   if (isManifest(made)) {

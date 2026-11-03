@@ -16,6 +16,8 @@ export type Take = VideoTake | StillTake;
 export type StillMoment = { key: string; t: number | null; label: string; inUse: string | null; takes: StillTake[] };
 export type Ledger = Record<string, { state: string; costUsd: number | null; expectedUsd: number | null; costStatus?: string }>;
 export type TakeOptions = { jobs?: any[]; stillJobs?: any[]; ledger?: Ledger; prices?: Record<string, number | null | undefined> };
+export function automaticCutEligible(asset: Asset | null | undefined): boolean;
+export function newestAutomaticVideo(project: DirectorProject, shot: Shot): Asset | null;
 export function videoResults(project: DirectorProject, shot: Shot): Asset[];
 export function blockoutClips(project: DirectorProject, shot: Shot): Asset[];
 export function cutClip(project: DirectorProject, shot: Shot): EditClip | null;

@@ -95,10 +95,13 @@ export function autoPromptCap(def) {
 }
 /** What a video model takes and costs, for pickers and the MCP model list. */
 export function videoCapabilities(def) {
-  const clip = def.task === 'transform-video' || def.task === 'control-video', local = presetOf(def).startsWith('wan-');
+  const clip = def.task === 'transform-video' || def.task === 'control-video' || def.task === 'masked-video-edit';
+  // Local Wan graphs are free of partner fees; Cloud-only masked VACE is billed by GPU-second estimate elsewhere.
+  const cloudOnly = (def.backendRequirements?.kinds || []).includes('cloud') && !(def.backendRequirements?.kinds || []).includes('local');
+  const local = presetOf(def).startsWith('wan-') && !cloudOnly && def.task !== 'masked-video-edit';
   return {
     id: def.id, title: def.title, task: def.task, cameraSource: cameraSourceOf(def),
-    inputs: { blockoutClip: clip, startStill: def.task === 'first-frame', endStill: def.task === 'first-frame' && !!def.inputs?.lastFrame, referenceImages: maxReferences(def), prompt: !!def.inputs?.prompt },
+    inputs: { blockoutClip: clip && def.task !== 'masked-video-edit', startStill: def.task === 'first-frame', endStill: def.task === 'first-frame' && !!def.inputs?.lastFrame, referenceImages: maxReferences(def), prompt: !!def.inputs?.prompt, maskVideo: def.task === 'masked-video-edit' },
     promptMaxLength: def.constraints?.promptMaxLength ?? null,
     autoPromptCap: { chars: autoPromptCap(def), heuristic: true, fromPreset: Number.isInteger(def.constraints?.autoPromptCap) && def.constraints.autoPromptCap > 0 },
     clipLengths: def.task === 'first-frame' ? def.constraints?.durations ?? null : null,
@@ -110,7 +113,8 @@ export function videoCapabilities(def) {
 }
 /** List-price USD for `seconds` of `def`; 0 for a local model, null when unpriced. */
 export function videoEstimate(def, seconds) {
-  if (presetOf(def).startsWith('wan-')) return 0;
+  const cloudOnly = (def?.backendRequirements?.kinds || []).includes('cloud') && !(def?.backendRequirements?.kinds || []).includes('local');
+  if (presetOf(def).startsWith('wan-') && !cloudOnly && def?.task !== 'masked-video-edit') return 0;
   const rate = def?.pricing?.ratePerSecond;
   return Number.isFinite(rate) && seconds > 0 ? Math.round(rate * seconds * 10000) / 10000 : null;
 }

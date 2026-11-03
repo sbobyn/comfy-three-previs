@@ -38,6 +38,7 @@ import { createJobProgressRoutes } from './job-progress-routes.mjs';
 import { createProgressCoordinator } from './job-progress-coordinator.mjs';
 import { keyedLock } from './keyed-lock.mjs';
 import { openBudget, budgetDir, refusalFields } from './budget.mjs';
+import { openMaskedEdit } from './masked-edit.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const data = resolve(process.env.PREVIS_DATA_DIR || join(root, '.previs'));
@@ -56,7 +57,9 @@ const observe = createJobProgress({ connect: createProgressSocketFactory({ WebSo
 progress = createProgressCoordinator({ observe, sources: jobSources, budget });
 const generation = await generationRoutes(data,project,{ telemetry: progress.telemetry('generation'), budget, log: console.log });
 let refgen, agentRunner; // [agent]
-const director = await openDirector(data, { startersDir: process.env.PREVIS_STARTERS_DIR || undefined, engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
+// listForSync omits quarantined masked-edit patches so syncResults never auto-promotes them as takes.
+const director = await openDirector(data, { startersDir: process.env.PREVIS_STARTERS_DIR || undefined, engineJobs: () => generation.listForSync(), onImported: id => refgen?.load(id), runner: () => agentRunner });
+const maskedEdit = openMaskedEdit(data, director, { log: console.log, generation, engineProject: project });
 const blenderImport = openBlenderImport({ data, director, previs: project });
 const assetImport = openAssetImport({ director, convert: convertToGlb });
 refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen'), budget, log: console.log });
@@ -177,6 +180,13 @@ const server = createServer(async (req, res) => {
       if (!req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       const input = await body(req);
       return send(await takeGrader.grade({ projectId: input.projectId, assetId: input.assetId, maxCostUsd: input.maxCostUsd }));
+    }
+    // Masked-edit offline foundation: prepare / status / review / accept (no provider submit).
+    if (url.pathname.startsWith('/api/director/masked-edit')) {
+      if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
+      if (!['GET', 'POST'].includes(req.method)) fail('Method not allowed', 405);
+      const input = req.method === 'POST' ? await body(req) : {};
+      return send(await maskedEdit.routes(req.method, url, input));
     }
     if (url.pathname.startsWith('/api/director/')) {
       if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);

@@ -12,6 +12,7 @@ import { explainStale, staleText } from '../shared/regen.mjs';
 import { GRADER_PRICES } from '../shared/tiers.mjs';
 import type { CameraSource } from '../shared/camera-source.mjs';
 import { defaultPicks, togglePick, MAX_LANES, FPS, stepFrame, laneTime, gridColumns, timecode, costText, settingParts, gradeText, directionText, duration } from './director-takes-core';
+import { openMaskedEdit, maskedEditEligibility } from './director-masked-edit';
 
 export type TakeLabCtx = {
   project(): DirectorProject;
@@ -214,6 +215,18 @@ export async function openTakeLab(ctx: TakeLabCtx, shotId: string, initial?: 'vi
     const pin = h('button', { class: `btn sm tk-pin${isPinned ? ' on' : ''}`, type: 'button', 'aria-pressed': String(isPinned), title: `${staleText(verdict)} ${isPinned ? 'Unpin to judge it by its inputs again.' : 'Pin to keep it as it is: a batch will not make it again.'}`, 'aria-label': `${isPinned ? 'Pinned' : 'Pin'}: ${name}` }, isPinned ? 'Pinned' : 'Pin');
     pin.onclick = () => void togglePin(tk, !isPinned);
     if (verdict?.state === 'stale' && !tk.stale) badges.push(h('span', { class: 'tk-badge warn', title: staleText(verdict) }, 'Inputs changed'));
+    // Fixed-mask region edit: one take ID from this lane (not comparison checkboxes). Experimental / eligibility-gated.
+    const assetRec = isVideo ? P().assets?.find(a => a.id === tk.id) : null;
+    const canEdit = isVideo && maskedEditEligibility(assetRec || {
+      kind: 'workflow-result', mime: 'video/mp4',
+      width: v.media.width, height: v.media.height, fps: v.media.fps, frameCount: v.media.frames, duration: v.media.duration,
+    } as Asset).ok;
+    const editBtn = canEdit ? h('button', {
+      class: 'btn sm tk-edit-open', type: 'button',
+      'aria-label': `Edit region: ${name}`,
+      title: 'Paint a fixed screen region and generate a Cloud crop edit. Original and cut stay unchanged.',
+    }, 'Edit region…') : null;
+    if (editBtn) editBtn.onclick = () => void openMaskedEdit({ project: P, assetUrl: ctx.assetUrl, focusReturn: editBtn }, s.id, v);
     return h('section', { class: 'tk-lane', 'aria-label': name },
       h('div', { class: 'tk-media' }, media, h('span', { class: 'tk-tag' }, tk.label), ended),
       h('div', { class: 'tk-card' },
@@ -228,7 +241,7 @@ export async function openTakeLab(ctx: TakeLabCtx, shotId: string, initial?: 'vi
           fact('Made', `${when(tk.createdAt)}${tk.elapsedSeconds != null ? ` · ran ${duration(tk.elapsedSeconds)}` : ''}`)),
         gradeList(tk.grades, tk),
         tk.prompt && (!onlyDiff || diffs.has('prompt')) ? h('details', { class: `tk-prompt${diffs.has('prompt') ? ' diff' : ''}` }, h('summary', {}, `Prompt · ${tk.promptLength} characters`), h('p', {}, tk.prompt)) : null,
-        h('div', { class: 'tk-acts' }, win, pin)));
+        h('div', { class: 'tk-acts' }, win, pin, editBtn)));
   }
   /** The blockout as a reference lane: the clip the takes were made from, or (stills) its frame at the moment. */
   function refLane(takes: Take[]) {

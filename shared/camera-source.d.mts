@@ -14,3 +14,4 @@ export function withCameraLine(text: string, source: CameraSource | string | nul
 export function fitPrompt(text: string, max: number | undefined, source: CameraSource | string | null | undefined): string;
 export function cameraMotionWords(text: string | null | undefined): string[];
 export function cameraMotionWarning(text: string | null | undefined, source?: CameraSource | string | null): string;
+export function cameraSourceForMaskedEdit(parentAsset: { source?: { cameraSource?: CameraSource | string | null } } | null | undefined): CameraSource | null;
