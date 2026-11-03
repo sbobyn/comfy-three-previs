@@ -78,7 +78,7 @@ test('workspace: the model input card reports stale stills after a camera edit (
     const ctx = { h, project, genCache: { presets: choices, definitions: [], jobs: [] }, shotModel: () => def, videoChoices: st => st.presets, modelLabel: d => d.title, referenceCapacity: () => 0, plannedReferences: () => [],
       cameraSourceOf, keyStillState, shotPrompt, cameraMotionWarning, CAMERA_SOURCE_LABELS, castRows, objectLooks, signature: shotSignature, clipSeconds: () => 5, clipLengths: () => '2–10 s', startOnlyFallback: d => FIRST_FRAME_FALLBACK[d.id],
       modelInputsDiagram: () => h('div'), middleSlotText: () => null, refUrl: r => r.file, fromBlender: () => false, localStorage: { setItem() {} }, shotPane: { dataset: {} }, KIND_COLORS: {}, entity: () => null,
-      blockoutFidelity, fidelityAdvice, runEntry: async () => {}, blockoutOld: s => blockoutStale(project, s), blockoutWhy: s => staleText(explainStale(project, { type: 'blockout', shotId: s.id })) };
+      blockoutFidelity, fidelityAdvice, runEntry: async () => {}, blockoutOld: s => blockoutStale(project, s), blockoutWhy: s => staleText(explainStale(project, { type: 'blockout', shotId: s.id })), noCloudKey: () => false, isLocalModel: () => false, NO_KEY: '', openSetup() {} };
     runInNewContext(compile(slice('function modelBlock(s: Shot) {', '// ---------- Shot panel sections')), ctx);
     return text(ctx.modelBlock(project.shots[0]));
   };
