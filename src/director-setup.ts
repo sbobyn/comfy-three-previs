@@ -1,7 +1,7 @@
 // Setup: what works on this machine, what each key unlocks, and the .env settings.
 // Rendered in the home page's Setup dialog and on /setup.html.
 import './director-setup.css';
-import { api, h } from './director-common';
+import { DEMO, api, h } from './director-common';
 import { THEME_PREFS, readThemePref, setThemePref } from './theme';
 
 export type Check = { id: string; label: string; status: 'ok' | 'optional' | 'warn' | 'required'; detail: string; fix: string };
@@ -57,8 +57,10 @@ export function setupBody(s: Setup | null, phone: { available: boolean } | null)
   return h('div', { class: 'setup' },
     h('section', {}, h('h3', {}, 'Appearance'), themeControl()),
     h('section', {}, h('h3', {}, 'This machine'),
+      // The read-only web demo has no server to check: say so instead of an empty list and "Projects live in ."
+      DEMO ? h('p', { class: 'note' }, 'This is the read-only web demo, so there is nothing to check here. Run Comfy Previs on your computer to see what works there.') :
       s ? checkList(s.checks) : h('p', { class: 'note' }, 'Could not read the setup checks. Is the server running?'),
-      s ? h('p', { class: 'note' }, 'Projects live in ', h('code', {}, s.dataDir), '.') : null),
+      s && !DEMO ? h('p', { class: 'note' }, 'Projects live in ', h('code', {}, s.dataDir), '.') : null),
     h('section', {}, h('h3', {}, 'What you can do'),
       h('table', { class: 'setup-can' },
         h('thead', {}, h('tr', {}, h('th', {}, ''), h('th', {}, 'Needs'), h('th', {}, 'Now'))),
