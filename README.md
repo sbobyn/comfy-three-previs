@@ -1,151 +1,124 @@
+<p align="center">
+  <img src="assets/brand/logo.png" alt="Comfy Previs logo" width="112" />
+</p>
+
 # Comfy Previs
 
-**Open-source AI previs: 3D blockouts, consistent cast images, gamepad & phone camera, AI video.**
+**Direct AI video in 3D.**
 
-Block out a scene in 3D in your browser, give every character and prop a consistent look, frame the shot with a real camera (keyboard, gamepad or your phone), then turn the blockout into storyboard stills and AI video on Comfy Cloud. Built with three.js, Vite and Node.
+AI video takes a prompt. Comfy Previs takes direction. Block out a scene, cast your characters, frame the camera and turn your shots into storyboard stills and AI video. Open source, MIT licensed, and built on [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
 
-**Live demo:** <https://sbobyn.github.io/comfy-three-previs/> — read-only. Image and video generation need a local install (below).
+[**Try the live demo**](https://sbobyn.github.io/comfy-three-previs/) · [**Watch the launch film**](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film.mp4) · [**Get started**](#quick-start) · [**Read the guide**](docs/director.md)
 
-**Launch film:** <https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film.mp4> (also [square](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film-1x1.mp4), [vertical](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film-9x16.mp4) and [30 s](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film-30s.mp4)), from the [Launch films](https://github.com/sbobyn/comfy-three-previs/releases/tag/films) release.
+The demo is read-only: explore the scenes and watch their existing media. Install locally to edit and generate.
 
-## Features
+## From blockout to finished shot
 
-- **3D blockout editor** — place, name, group and animate simple objects, or drop in 3D models (GLB, FBX, OBJ…) with posable rigged characters; keyframed camera moves per shot.
-- **Cast Cards** — a description and reference images for every character, vehicle and prop. Generate images with AI, including design sheets (turnarounds and expressions), and pick a primary look.
-- **Auto-prompts** — each shot prompt is written from the scene, with every object's words colour-linked to the object in the viewport.
-- **Prompt inspector** — see the exact prompt each still and video model receives, section by section with where every part comes from (cast, shot description, style, camera rules, model-specific additions), what was left out to fit, and override, lock or leave out any section per shot. Versions of the final prompt and every take's prompt can be diffed. Model settings (seed, clip length and the like, from each model's registry entry) are saved on the shot with their estimate.
-- **Storyboard stills** — image-to-image from the rendered blockout, so composition stays locked to your camera.
-- **AI video on Comfy Cloud** — LTX 2.5 from your key frames, Seedance 2.5 and Kling O1 edits of the blockout clip, and Wan VACE on your own ComfyUI, with a model-input card showing exactly what each model receives and how faithfully it keeps the blockout's motion and direction. Shots whose subject's direction matters are recommended a route that edits the blockout clip, and a paid direction check ($0.01 a take) flags takes where the subject faces or travels the wrong way. See [What models work today](#what-models-work-today) and [the guide](docs/director.md#shots-where-the-subjects-direction-matters).
-- **Live camera** — keyboard, gamepad "drone" flying, or an iPhone as a handheld camera over local HTTPS.
-- **Sequence, Compare & export** — play shots in order, compare versions side by side, export projects as portable `.previs.zip` files.
-- **Claude connector (MCP)** — `server/previs/agent.mjs` lets you direct scenes from Claude Desktop or Claude Code; every edit shows up live in the app, and object and camera edits can be undone.
+**Build → Cast → Shoot → Generate → Cut.**
+
+- **Direct in 3D.** Place, group and keyframe people, props and sets. Choose a camera preset or set your own camera keys. Record a handheld take with your phone's gyro, or fly the camera with a keyboard or gamepad.
+- **Bring your own scene.** Import 3D models, including rigged characters, or bring a shot from Blender with its camera, animated objects and rendered blockout frames. [Model import](docs/import.md) · [Blender import](docs/blender-import.md)
+- **See where the prompt comes from.** Auto-prompt identifies what is in the shot from the scene and camera. Colour-coded words link back to objects in the viewport. Inspect the exact prompt sent to each model, see each section's source, and override or lock sections per shot.
+- **Try the still before the video.** Make a storyboard frame for a few cents, then compare takes. Cast Cards keep descriptions, reference images and design sheets together to help characters and props stay consistent across shots.
+- **Change one thing at a time.** Look presets cover time of day, weather, season, lighting, wardrobe and art style. Make variants of one shot with the same blocking and camera; inspect the world and look sections before generating. [Look presets and variants](docs/look-presets.md)
+- **Choose your model.** Use the built-in image and video presets on Comfy Cloud, or your own GPU with local ComfyUI. Models take different inputs: the app shows whether a model sees a blockout clip, a start still or start/end stills. [Available models](#models-and-costs)
+- **Know the cost before a paid run.** Review the quote, set account and project caps, and track reservations and spend in the ledger. A dry-run batch plans the work without sending anything.
+- **Bring your own agent.** The local MCP server exposes scene, cast, camera, prompt and generation tools to MCP clients such as Claude Code and Claude Desktop. Agent edits appear live in the workspace. [Connect an agent](#direct-with-an-agent-mcp)
+- **Cut and share.** Sequence shots, choose takes, compare results and export a film, or share an editable project as a portable `.previs.zip`. Film exports currently have no sound.
+
+**Layer edits — In preview.** Layer editing is not included in this checkout.
 
 ## Quick start
 
-You need **Node.js 22.12+** and **pnpm 10** (`corepack enable`). FFmpeg is needed to export camera videos.
+You need **Node.js 22.12+** and **pnpm 10**. FFmpeg is needed to encode blockout videos and export films; `pnpm run doctor` checks your machine.
 
 ```sh
 git clone --depth 1 --single-branch https://github.com/sbobyn/comfy-three-previs.git
 cd comfy-three-previs
+corepack enable
 pnpm install
 pnpm build
-cp .env.example .env      # optional: add COMFY_CLOUD_API_KEY for quotes and generation
-pnpm start                # → http://127.0.0.1:5190 (PORT=… to change)
+pnpm start
 ```
 
-The shallow clone downloads about 40 MB. A plain `git clone` works too and downloads about 100 MB, because it includes the history of `main`.
+Open **<http://127.0.0.1:5190>**. Choose a starter or **New scene**, then build and shoot. No API key is needed to explore starters, edit scenes or make local blockouts.
 
-No key is needed to try it: open a starter, build, shoot, preview, watch the starter's videos and cut. A Comfy Cloud key adds quotes and generation; nothing paid runs unless `PREVIS_ALLOW_PAID=1`. `pnpm run doctor` checks your machine and explains how to fix anything missing.
-
-### Plan a batch without spending
-
-A dry run plans every still and video a batch would make, with its estimate, and sends nothing. It needs no key:
+For Comfy Cloud generation, copy the example configuration, edit `.env`, then restart the server:
 
 ```sh
-curl -s -X POST http://127.0.0.1:5190/api/director/batch -H 'content-type: application/json' \
-  -d '{"projectId":"<id from the project URL>","steps":["stills","videos"],"tier":"draft","maxCostUsd":0,"dryRun":true}'
+cp .env.example .env
 ```
 
-Claude does the same with `previs_director_batch_generate` and `dryRun: true`.
+Set `COMFY_CLOUD_API_KEY` to your own key and `PREVIS_ALLOW_PAID=1` to enable paid work. Set spending caps before generating; the app quotes each run. Keep `.env` private. For your own GPU, configure local ComfyUI in **Setup** (`PREVIS_COMFY_URL`, default `http://127.0.0.1:8000`).
 
-### Configuration (`.env`)
+Follow the [first-use walkthrough](docs/first-use.md) for your first shot. Phone control needs local HTTPS and pairing: [phone setup](docs/director-phone.md). See [gamepad controls](docs/gamepad.md) for both game and RC Mode 2 layouts.
 
-| Variable | What it does |
+## Start with a scene
+
+Open a starter from the home page to make an editable copy. The [starter index](examples/starters/index.json) is the source of truth; [starter notes](examples/starters/README.md) describe the included media and model limitations.
+
+| Starter | Explore |
 |---|---|
-| `COMFY_CLOUD_API_KEY` | Your Comfy Cloud API key (comfy.org). Enables quotes and generation. |
-| `PREVIS_ALLOW_PAID` | Set to `1` to allow paid generation. Default `0`; each run still shows a cost estimate first. |
-| `PORT` | Server port. Default `5190`. |
-| `PREVIS_DATA_DIR` | Where projects are stored. Default `.previs/` in the checkout. |
-| `PREVIS_LIBRARY_DIR` | Where shared assets are stored. Default `PREVIS_DATA_DIR/library/`. Point several data dirs at one library to share it (one server at a time). |
-| `PREVIS_COMFY_URL` | A local ComfyUI server, e.g. `http://127.0.0.1:8000`. |
-| `PREVIS_FFMPEG`, `PREVIS_FFPROBE` | Full paths if FFmpeg is not on your `PATH`. |
-| `PREVIS_PHONE_*` | Phone camera over HTTPS (see below). |
-| `PREVIS_HEADLESS` | Set to `1` so the server renders blockouts and still guides itself in a headless browser, without the app open. Claude's still, blockout and batch tools need it. Default off. |
-| `PREVIS_HEADLESS_POOL` | How many headless pages render at once. Default `2`. |
-| `PREVIS_CHROMIUM` | Full path to the Chrome or Chromium that headless rendering uses. Default: the newest Playwright Chromium in `~/Library/Caches/ms-playwright/`, then Google Chrome in `/Applications` (macOS only; set this on other systems). |
-| `PREVIS_BUDGET_CAP_USD`, `PREVIS_BUDGET_PROJECT_CAP_USD` | Spending caps in USD for the account (per month by default) and for each project. Unset means no cap. |
-| `PREVIS_BUDGET_MARGIN` | Safety margin added to every reservation, in percent (`10` or `10%`; default 10). It is held while a job runs and released when it settles; it is never part of a displayed price. |
-| `PREVIS_ALLOW_UNKNOWN_COST` | Set to `1` to let models without a price estimate run. Default: they are refused. |
+| **Breaking News** | A news anchor breaks the story of this launch. |
+| **Wingspan** | An eagle dives through an alpine valley. |
+| **Final Lap** | A race car wins on the last lap. |
+| **Posterized** | A dunk in a packed arena. |
+| **Mountain Trail** | An open valley for tracking, drone and phone-camera takes. |
+| **City Blocks** | Street-level and rooftop camera moves. |
+| **Camera Moves & Transitions** | Camera presets, custom keys and transitions composed across shot pairs. |
+| **Look Lab** | One blockout in thirty-four looks, with stills and selected videos. |
+| **Two-Hander** | Seated dialogue coverage, gestures and an insert. |
 
-**Budget.** Every paid run (images, sheets, stills, videos, batches, and Claude's tools) first reserves its estimated cost in a ledger at `PREVIS_DATA_DIR/budget/`. A run that would go over a cap is refused before anything is sent. The reservation becomes spend when the job finishes, and is freed if the job never ran. If a job fails after it was sent, or its outcome is unknown, the reservation is kept for 24 hours (`PREVIS_BUDGET_RESERVATION_TTL_HOURS`) because a charge may still arrive. The Jobs panel shows how much is left and warns at 50%, 80% and 95%. You can change the caps while the server runs: `POST /api/budget/caps` with `{ "accountCapUsd": 15 }` or `{ "projectId": "…", "projectCapUsd": 5 }`, saved in `budget/config.json`. Other settings: `PREVIS_BUDGET_PERIOD` (`month`, `day` or `all`), `PREVIS_BUDGET_TZ`, and `PREVIS_BUDGET_DIR` (point two servers at one ledger so they share a budget). Amounts are estimates, because Comfy Cloud does not cap spending itself. An estimate is the list price plus the reference images the model is sent (the blockout guide counts; per-model assumptions are in `shared/tiers.mjs`) plus the paid still grader (reserved at $0.01 per graded still, when `PREVIS_MATCH_GRADER=gemini`; `GRADER_PRICES` in `shared/tiers.mjs`. Billing for the 2026-10-31 regeneration showed about $0.006 per grade, so this keeps a margin over it that `pnpm usage:settle` will show as under-spend). A take direction check (**Check direction**, `previs_director_grade_take`) reserves and books one grade, $0.01, and the take shows the amount the ledger booked. A reservation adds the safety margin on top (`PREVIS_BUDGET_MARGIN`, default 10%), and batch caps (`maxCostUsd`) are checked against reservations, so a plan that fits on list prices alone can still be refused. Dry runs and cap refusals show the parts (list, references, grader, margin), and the Jobs panel shows what is settled and what is still reserved. A request the provider refuses can still be billed: a FLUX.2 Pro request that moderation rejects settles at its output price instead of being forgotten. `pnpm usage:report` prints what the account was billed per model and per product, next to the ledger (default: yesterday; `-- --from 2026-10-29 --to 2026-10-31`). `pnpm usage:settle` (same options, plus `--granularity hour|day`) compares ledger entries with the billed hourly buckets by model and time window: Comfy's billing has no job IDs, so an entry gets its own variance only when it is alone on its model in that hour, shared hours report the window total, and entries without billing yet are "pending", not zero. Both only read data and need `COMFY_CLOUD_API_KEY`.
+The first four include generated media and a cut. The blockout starters focus on cameras and scene direction; Look Lab also includes generated looks. If blocking changed after a starter's media was made, it marks that media as older. If media is missing, it opens as a blockout and says so. Cut joins shots with hard cuts; it does not add transition effects.
 
-`.env` is git-ignored. Never commit it or paste keys into prompts or chat.
+## Direct with an agent (MCP)
 
-## Direct scenes from Claude (MCP)
-
-With the app running, open **⋯ More → Direct with Claude** in the workspace and copy the command or the Claude Desktop configuration it shows: it already has the right `node` path and this checkout's path.
-
-To write it by hand instead, add the MCP server to Claude Desktop (`claude_desktop_config.json`), replacing `/path/to/` with where you cloned the repo:
-
-```json
-{
-  "mcpServers": {
-    "comfy-previs": {
-      "command": "node",
-      "args": ["/path/to/comfy-three-previs/server/previs/agent.mjs"],
-      "env": { "PREVIS_URL": "http://127.0.0.1:5190" }
-    }
-  }
-}
-```
-
-Or with Claude Code:
+Start the app, then open **⋯ More → Direct with Claude** to copy a command with your actual Node and checkout paths, or a Claude Desktop configuration. For Claude Code, the command is:
 
 ```sh
 claude mcp add comfy-previs -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to/comfy-three-previs/server/previs/agent.mjs
 ```
 
-Then ask Claude to build a scene. It can create projects, edit objects and Cast Cards, write shots and cameras, quote generations and run them. For stills and blockouts without the app open in a browser, start the server with `PREVIS_HEADLESS=1` (needs Google Chrome or a Playwright Chromium; see `PREVIS_CHROMIUM`). Paid tools do not ask you again: each call carries a `maxCostUsd` that Claude sets and the run is skipped when the estimate is higher, and nothing paid runs unless the server has `PREVIS_ALLOW_PAID=1`. Models without a price estimate are refused unless the call passes `allowUnknownCost` and the server runs with `PREVIS_ALLOW_UNKNOWN_COST=1`. Every run also counts against the server's budget caps (see Configuration). Tell Claude your budget, or leave `PREVIS_ALLOW_PAID` at `0` to keep it to free work and quotes.
+Replace `/path/to/comfy-three-previs` with your checkout. Other MCP clients can launch the same `node` process with `PREVIS_URL` pointing to the running app.
 
-To bring a shot in from Blender (camera, tagged objects and rendered frames as the shot's blockout), Claude uses `previs_director_blender_helper` and `previs_director_import_blender`; see [Import a Blender shot](docs/blender-import.md).
+Try: “Build a two-person conversation in a café. Give me a wide shot, two over-the-shoulders and a close-up. Quote the stills before generating.”
 
-To bring in a 3D model (GLB, glTF, FBX, OBJ, STL, PLY or USDZ), drop it on the viewport, choose **+ Add ▾ → Import model…**, or have Claude call `previs_import_asset`. Rigged humanoids (Mixamo, Unreal, Rigify, VRM) play their clips and take poses through `previs_director_perform`; see [Import a 3D model](docs/import.md).
+The agent can create projects, edit objects and Cast Cards, set cameras, inspect prompt sections, import Blender shots and quote batches. Tell it your budget: paid tools carry `maxCostUsd` and can execute when the server permits paid work, without another UI confirmation. The server's spending caps still apply. Leave `PREVIS_ALLOW_PAID` off for free editing and quotes.
 
-When building blockouts, Claude and people follow the [blockout modelling rules](docs/blockout-modeling-rules.md): never put two surfaces on the same plane, and lift decals and lines 2 mm along the normal. Edits that break the rule come back with warnings, and imports lift thin objects automatically. Overlapping surfaces z-fight in every blockout frame, and image and video models copy it.
+To make stills and blockouts without the app open in a browser, start the server with `PREVIS_HEADLESS=1`. This needs Google Chrome or Playwright Chromium; set `PREVIS_CHROMIUM` to its executable path on other systems.
 
-Claude reads and edits the same prompt sections and model settings as the workspace: `previs_director_prompt_sections` returns the exact final prompt by section, `previs_director_set_prompt_section` overrides, locks or resets one section, `previs_director_prompt_history` diffs versions and takes, and `previs_director_model_settings` reads or saves the shot's model and parameters.
+## Spending controls
 
-Claude sees the director tools (`previs_director_*`) and the asset library tools (`previs_library_list`, `_save`, `_place`, `_import`, `_export`), so "put @red-racecar at the start line" places a saved car in the current project. The older engine, Blender and raw-workflow tools (`previs_render_animation`, `previs_submit_passthrough` and the like) are listed only when the MCP server runs with `PREVIS_MCP_LEGACY=1`; their Blender, transfer, raw Comfy and handoff routes also need the app started with `PREVIS_LEGACY_ROUTES=1`.
+Every paid run reserves its estimate before dispatch. Work that would exceed an account or project cap is refused before it is sent. Estimates include reference images and any paid grader; reservations add a safety margin (10% by default). The Jobs panel shows settled spend and outstanding reservations. Estimates are not a provider-enforced billing limit.
 
-## Phone camera
+| `.env` setting | Purpose |
+|---|---|
+| `COMFY_CLOUD_API_KEY` | Your Comfy Cloud key; never commit it. |
+| `PREVIS_ALLOW_PAID` | `1` enables paid work; off by default. |
+| `PREVIS_BUDGET_CAP_USD` | Account cap in USD, per month by default. Unset means no cap. |
+| `PREVIS_BUDGET_PROJECT_CAP_USD` | Cap in USD per project. Unset means no cap. |
+| `PREVIS_BUDGET_MARGIN` | Reservation safety margin, default 10%. |
+| `PREVIS_COMFY_URL` | Local ComfyUI URL. |
+| `PREVIS_DATA_DIR` | Project storage, default `.previs/`. |
+| `PREVIS_LIBRARY_DIR` | Shared asset library, default under the data directory. |
+| `PORT` | App port, default `5190`. |
+| `PREVIS_FFMPEG`, `PREVIS_FFPROBE` | Executable paths when FFmpeg tools are not on `PATH`. |
 
-Your phone streams its orientation to the app over HTTPS on your local network.
+A batch dry run needs no key and sends no generation requests. With the app running, replace the project ID below with the one from your project URL:
 
-1. Create a local certificate (nothing is installed or trusted automatically):
+```sh
+curl -s -X POST http://127.0.0.1:5190/api/director/batch \
+  -H 'content-type: application/json' \
+  -d '{"projectId":"<id from the project URL>","steps":["stills","videos"],"tier":"draft","maxCostUsd":0,"dryRun":true}'
+```
 
-   ```sh
-   node scripts/phone-certificate.mjs ./phone-cert 192.168.x.y   # your computer's LAN IP
-   ```
+Agents can use `previs_director_batch_generate` with `dryRun: true`. `pnpm usage:report` reads provider billing; `pnpm usage:settle` compares billed model/time buckets with the ledger. Both need your Cloud key and only read data. The ledger lives in `PREVIS_DATA_DIR/budget/`; uncertain jobs retain reservations because a charge may still arrive.
 
-2. Add to `.env` and restart:
+## Models and costs
 
-   ```sh
-   PREVIS_PHONE_HOST=192.168.x.y
-   PREVIS_PHONE_PORT=5443
-   PREVIS_PHONE_CERT=/path/to/phone-cert/server.crt
-   PREVIS_PHONE_KEY=/path/to/phone-cert/server.key
-   PREVIS_PHONE_CA=/path/to/phone-cert/ca.crt
-   ```
+Built on ComfyUI, with a choice of Cloud partner models and local workflows. The presets below ship in this branch. Choose the inputs and model that fit your shot: support for one model does not imply that every ComfyUI workflow runs unchanged. Local presets require compatible installed checkpoints and nodes.
 
-3. Install `ca.crt` on the phone, then pair from the camera panel. Details: [phone camera](docs/director-phone.md) and [gamepad](docs/gamepad.md).
-
-## Starters
-
-Open one from the home page and make it yours: **Breaking News** (a news anchor breaks the story of this launch), **Wingspan** (an eagle dives through an alpine valley), **Final Lap** (the Comfy car wins on the last lap) and **Posterized** (a dunk in a packed arena), or start from an empty stage. Each opens with every cast member's image and design sheet, stills, a blockout clip and a generated video for each shot, and a cut.
-
-Five blockout starters open with a blockout clip per shot and written Cast Cards, ready to generate: **Mountain Trail** and **City Blocks** (open sets for Fly camera, drone and phone takes), **Camera Moves & Transitions** (every camera preset, custom-key showcases and transitions crafted as shot pairs), **Look Lab** (one blockout in thirty-four looks, with a still for each look and videos of twelve) and **Two-Hander** (seated dialogue coverage). Their people are an original rigged mannequin with walk, idle and wave clips. The media is in the repo (about 75 MB, see [examples/starters](examples/starters/README.md)), so nothing is downloaded or generated.
-
-When a starter's blocking has changed since its stills and videos were made, it says so when you open it and marks those videos "older"; generating makes matching ones. If its media files are not in your checkout, it opens as a blockout and says that instead. A starter's blockout clip is for watching: generating first makes the shot's own blockout (free, in the browser).
-
-## Asset library
-
-Save any object to reuse it in other projects: select it and choose **Save to library** under Appearance (or ask Claude, `previs_library_save`). The object comes with everything grouped under it, its description, style notes, primary cast image and design sheets. The library lives in `PREVIS_DATA_DIR/library/`, outside any project, so archiving a project keeps it. In another project, open **Library → Shared assets** and choose **Place**, or tell Claude "put @red-racecar at the start line". A placed object answers to its @handle; a second copy becomes `@red-racecar-2`. Saving an object again makes a new version.
-
-To share an asset, **Export** writes one `<handle>.previs-asset.zip`. Drop it on the home page's **Import…** (it goes to the library, not a new project), use **Import asset…** in the Library dialog, or have Claude run `previs_library_import` with its path. Claude can also take one object out of a colleague's `.previs.zip` project export, or out of a Blender export (the folder `previs_export.py` writes) with its optional viewport mesh and no images yet (the folder or a zip of it, read by the same importer as **Import Blender shot…**). Bundles hold `asset.json` and `refs/` images (PNG, JPEG, WebP up to 10 MB each) plus optional validated GLB blockout meshes (2 MB/20,000 triangles each; 32 MB/100,000 triangles total). A bundle holds at most 64 MB and 50 objects. They contain no local paths, job ids or keys, and imports refuse anything else. Format version 2 adds three optional fields for assets made by generators such as beret-parts: `license` (an SPDX id), `authors`, and `parametric` (library, family, version, flat params and seed). The recipe lets Claude re-make the asset with other parameters. Assets saved from a project are still written as version 1, so older installs can read them.
-
-## What models work today
-
-These are the built-in presets; the table is generated from them (`pnpm docs:models`). Estimates are list prices; every run shows its own quote first.
+These are list-price estimates; review the actual quote, including reference images, before running. The table is generated from the registry with `pnpm docs:models`.
 
 <!-- models:start (generated by scripts/models-table.mjs; do not edit by hand) -->
 | Model | Used for | Runs on | Takes | List-price estimate |
@@ -178,31 +151,30 @@ These are the built-in presets; the table is generated from them (`pnpm docs:mod
 | Wan VACE 1.3B · edge control alternative | Video from the blockout clip | Your ComfyUI | blockout video (as control frames), prompt | free (your GPU) |
 <!-- models:end -->
 
-## Guide
+## Documentation
 
-[Build · Cast · Shoot · Generate · Cut](docs/director.md) — the user guide, with captured examples. The in-app **Guide** adds interactive viewport examples and before/after comparisons. Also: [phone and gamepad](docs/device-controls.md), [glossary](docs/glossary.md). The other files in `docs/` are dated engineering and review notes ([list](docs/history/README.md)); their links into `.evidence/` point at files that are not published.
+- [First use](docs/first-use.md) and [full director guide](docs/director.md)
+- [Look presets and variants](docs/look-presets.md) and [what needs regenerating](docs/regeneration.md)
+- [Bring a shot from Blender](docs/blender-import.md) and [import models and rigged characters](docs/import.md)
+- [Phone camera](docs/director-phone.md) and [gamepad controls](docs/gamepad.md)
+- [Blockout modelling rules](docs/blockout-modeling-rules.md) and [glossary](docs/glossary.md)
+- [Starter projects and their media](examples/starters/README.md)
+
+The in-app **Guide** includes interactive camera examples and before/after comparisons. [Historical engineering notes](docs/history/README.md) may refer to unpublished `.evidence/` files.
 
 ## Development
 
 ```sh
-pnpm check     # typecheck + build
-pnpm test      # node --test
+pnpm check     # typecheck + browser and server builds
+pnpm test      # full Node test suite
 ```
 
-The server is plain Node (`server/previs/`), the browser app is Vite + three.js (`src/`), and shared scene logic lives in `shared/`.
+The browser app is Vite + three.js (`src/`), the server is plain Node (`server/previs/`), and scene logic is shared in `shared/`.
 
-### Publishing
+To build the read-only demo locally, run `pnpm run demo:local`. It imports the bundled starters into temporary storage and writes `dist-demo/`, to be served under `/comfy-three-previs/`. Publishing is documented in [the public publish script](scripts/publish-public.sh); [film publishing](scripts/publish-films.sh) keeps the launch-film release URLs stable. The demo and films are release assets, rather than build outputs committed to the repo.
 
-Publishing uses three scripts. Nothing large goes into git: the demo media is not committed, and the launch films and the built demo are GitHub Release assets, so the public repo stays small to clone.
+## License and credits
 
-- `scripts/publish-public.sh` publishes the committed tree to the public repo and redeploys the live demo. It runs the gate and a secret scan first, adds one commit to public `main` (the tree, not the history), builds the demo (`pnpm run demo:build` from a temporary read-only server) and uploads it as `demo-site.tar.gz` to the `demo-site` release. Then it deploys and checks the live site: every demo file must match the local build, the films must be served, and headless Chrome must load every starter with no console errors and play the films. It never force-pushes. Settings are environment variables listed at the top of the script (`SOURCE_DATA`, `DRY_RUN=1`, …).
-- `scripts/publish-films.sh TRAILER_DIR VERSION` (for example `scripts/publish-films.sh .evidence/launch-film/v7 v7.5`) uploads a new cut of the launch films to the `films` release under fixed names (`launch-film.mp4`, `-1x1`, `-9x16`, `-30s`), so links never change, then redeploys the demo. It takes `trailer-*-VERSION.mp4` with `BUILD-REPORT-VERSION.md`, or the same names without the suffix.
-- `scripts/publish-pages.sh` redeploys the demo on its own. It runs the `Deploy demo to Pages` workflow (`.github/workflows/pages.yml`), which builds nothing: it unpacks `demo-site.tar.gz`, adds the films (so `…/comfy-three-previs/launch-film.mp4` keeps working) and deploys with `actions/deploy-pages`. Pages is set to deploy from GitHub Actions; there is no `gh-pages` branch.
+[MIT](LICENSE) · Copyright © 2026 Steven Bobyn.
 
-To build the demo yourself, run `pnpm run demo:local`. It loads the bundled starters into a temporary data dir, starts a temporary read-only server on it, runs `pnpm run demo:build` against that server and writes `dist-demo/`; serve that folder under `/comfy-three-previs/`. `pnpm run demo:build` on its own needs a running server and its data dir (`PREVIS_URL`, `PREVIS_DATA`), and stops with a message naming them when there is none.
-
-The demo shows the bundled starters: the publish script runs `starters:import --force` on its copy of the data, and `pnpm demo:build` snapshots those source projects and fails if any differs from its bundle in `examples/starters` (scene, models, cameras, stills, clips or cut). The demo snapshot keeps each shot's Cut selection, current key stills and blockouts, cast looks and sheets, and their input media and generation receipts. Archived projects and `Regen …` scratch projects are excluded. Images become WebP derivatives bounded to 1280 pixels on both axes; videos, source files and generation settings are unchanged. Derivative metadata records both original and published hashes, dimensions and paths. Snapshotting needs FFmpeg and ffprobe (`PREVIS_FFMPEG` / `PREVIS_FFPROBE`); missing media or a snapshot over `DEMO_MEDIA_MB` (default 400 MiB) fails the build instead of dropping files. `demo-data/snapshot-manifest.json` records every copied file and the measured media size. Build into a fresh output directory before snapshotting again. Publishing's `DRY_RUN=1` still fetches remote refs, although it does not push.
-
-## License
-
-MIT — see [LICENSE](LICENSE). Third-party components and their licenses are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and `third-party-licenses/`.
+Built on [ComfyUI](https://github.com/comfyanonymous/ComfyUI), with three.js, Vite and Node. Third-party components and their licenses are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [third-party-licenses/](third-party-licenses/). Imported assets and model services have their own licenses and terms.
