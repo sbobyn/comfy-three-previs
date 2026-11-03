@@ -46,9 +46,37 @@ test('theme: every app page applies the stored choice before first paint, the sa
 
 test('theme: the dark tokens override the light ones and keep the stage text constant', () => {
   const css = read('src/director.css');
-  assert.match(css, /:root\[data-theme="dark"\] \{[\s\S]*?--paper:\s*#151412;[\s\S]*?--ink:\s*#F2EDE4;/);
-  assert.match(css, /--stage-ink:\s*#15130F;/);
+  assert.match(css, /:root\[data-theme="dark"\] \{[\s\S]*?--paper:\s*#211927;[\s\S]*?--ink:\s*#F0EFED;/);
+  assert.match(css, /--stage-ink:\s*#211927;/);
   assert.doesNotMatch(css, /background: var\(--on-stage\); color: var\(--ink\)/, 'text on light stage chips uses --stage-ink, not the theme ink');
+});
+
+// Check the colour roles themselves as well as axe's rendered-screen coverage.
+// Official Comfy colours: comfy.org/_website/IconButton.CCPIfO3V.css.
+test('theme: brand text, buttons, focus and control boundaries retain AA contrast', () => {
+  const [light, dark] = read('src/director.css').split(':root[data-theme="dark"] {');
+  const tokens = css => Object.fromEntries([...css.split('/* ---------- Base')[0].matchAll(/--([\w-]+):\s*(#[\da-f]{6})\s*;/gi)].map(m => [m[1], m[2]]));
+  const luminance = hex => {
+    const rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4);
+    return rgb[0] * .2126 + rgb[1] * .7152 + rgb[2] * .0722;
+  };
+  const pairs = [
+    ...['ink', 'ink-2', 'ink-3', 'ink-4', 'accent'].flatMap(fg => ['paper', 'paper-2', 'paper-3', 'card'].map(bg => [fg, bg, 4.5])),
+    ...['ok', 'warn', 'bad', 'info'].map(fg => [fg, `${fg}-soft`, 4.5]),
+    ['accent-ink', 'accent', 4.5], ['accent-ink', 'accent-hover', 4.5],
+    ['cta-ink', 'cta', 4.5], ['cta-ink', 'cta-hover', 4.5], ['accent', 'accent-soft', 4.5],
+    ['on-stage', 'stage', 4.5], ['on-stage-2', 'stage-2', 4.5],
+    ...['paper', 'paper-2', 'paper-3', 'card'].map(bg => ['ink', bg, 3]), // focus ring
+    ['cta-line', 'paper', 3], ['cta-line', 'card', 3], ['line-2', 'card', 3],
+  ];
+  const base = tokens(light);
+  for (const [theme, values] of [['light', base], ['dark', { ...base, ...tokens(dark) }]]) {
+    for (const [fg, bg, minimum] of pairs) {
+      const [low, high] = [luminance(values[fg]), luminance(values[bg])].sort((a, b) => a - b);
+      const contrast = (high + .05) / (low + .05);
+      assert.ok(contrast >= minimum, `${theme}: ${fg} on ${bg} is ${contrast.toFixed(2)}:1; needs ${minimum}:1`);
+    }
+  }
 });
 
 test('theme in the browser: Dark by default, Light persists across reloads and sessions, System follows the OS; axe passes in both themes', { skip: skipReason, timeout: 360_000 }, async () => {
@@ -62,7 +90,7 @@ test('theme in the browser: Dark by default, Light persists across reloads and s
     await page.goto(`${app.base}/`, { waitUntil: 'networkidle' });
     assert.equal(await themeOf(page), 'dark', 'new users get Dark');
     assert.equal(await page.evaluate(() => window.__themeAtInteractive), 'dark', 'set before the page is interactive');
-    assert.equal(await page.evaluate(() => getComputedStyle(document.body).backgroundColor), 'rgb(21, 20, 18)');
+    assert.equal(await page.evaluate(() => getComputedStyle(document.body).backgroundColor), 'rgb(33, 25, 39)');
 
     // The setting: Setup → Appearance. Light applies at once and survives a reload and a new page.
     await page.getByRole('button', { name: 'Setup' }).first().click();
