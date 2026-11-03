@@ -54,7 +54,8 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     if (method !== 'GET' && method !== 'HEAD') return json({ error: READ_ONLY }, 403);
     return apiGet(url.pathname.slice(5), url.searchParams);
   }
-  return realFetch(typeof input === 'string' ? rewrite(input) : input, init);
+  const rewritten = url.origin === location.origin ? new URL(rewrite(url.pathname) + url.search + url.hash, url).href : url.href;
+  return realFetch(rewritten === url.href ? input : input instanceof Request ? new Request(rewritten, input) : rewritten, init);
 };
 
 // No live agent stream in the demo: a quiet EventSource that never connects.
