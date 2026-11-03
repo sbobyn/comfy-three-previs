@@ -2250,7 +2250,7 @@ function genQuote(job: any, def: any, request: any, s: Shot, plan?: { est: numbe
     h('details', {}, h('summary', {}, 'Details'), h('pre', { tabindex: 0, role: 'region', 'aria-label': 'Request details', style: 'max-height:240px;overflow:auto;white-space:pre-wrap' }, JSON.stringify({ prompt: job.binding?.prompt, sources: job.sources, graph: job.preparedGraph }, null, 2))),
     issues.length ? h('ul', { class: 'note', style: 'margin:0;padding-left:16px' }, ...issues.slice(0, 5).map((i: any) => h('li', {}, i.message))) : null,
     h('label', {}, approve, ' I approve this exact request, with an allowance of ', max, ' USD.'),
-    !free ? h('label', {}, unknown, ' Allowance for this run; Comfy Cloud bills actual usage.') : null,
+    !free ? h('label', {}, unknown, ' Allowance for this run, not a provider-enforced spending cap; Comfy Cloud bills actual usage.') : null,
     h('div', {}, go), status, live);
 }
 
