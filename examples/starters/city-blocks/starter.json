@@ -7235,7 +7235,42 @@
           "no logos or lettering"
         ]
       },
-      "references": []
+      "references": [
+        {
+          "id": "baa15787-ac1e-5c05-a5ab-f47c9890dac7",
+          "name": "Shot 01 Drone rise · GPT Image 2.5 · 89283",
+          "file": "baa15787-ac1e-5c05-a5ab-f47c9890dac7.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-03T17:57:40.813Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 89283,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 28mm wide lens; wide shot, Commuter small in frame; camera 37.6 m high, well above Commuter's head and 34.3 m from Commuter, looking steeply down; we see Commuter from straight in front; the horizon is above the top edge (only ground in frame).\nIn frame: Parked car 2: lower far right of frame, a small part of the frame height tall, cut off by the right and bottom edges, in front of Commuter to the right, nose pointing screen-right: a flat side profile with its wheels in a level row, tail lights and rear at the left end, headlights and front at the right end, its front end cut off by the right edge.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Commuter walks east along the sidewalk past street lamps; Red hatchback drives up the avenue toward the intersection in the afternoon sun. An adult commuter in a long camel coat, dark trousers, white canvas shoes and a grey shoulder bag. Short curly black hair. Plain clothing without logos or lettering. Passers-by in plain everyday coats, sweaters and jeans in muted colours. Set: A compact downtown grid on a clear spring afternoon: mid-rise and high-rise blocks, wide asphalt streets with zebra crosswalks, street lamps, and a small paved plaza with a fountain and young trees; Low green hills on the horizon beyond the city; Dark grey asphalt streets with faint tyre marks; Pale concrete sidewalks with a low kerb; City buildings with concrete, brick and glass facades and regular window grids, plain ground-floor glazing, no signs; Yellow dashed centre line; Freshly painted white zebra crosswalk stripes. Look: Photoreal contemporary city film. Bright afternoon sun, crisp shadows, clean natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 28mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. Filter: deep…\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "6b205749"
+          }
+        },
+        {
+          "id": "f4bae361-a038-5e0f-a5a0-86d934343f1b",
+          "name": "Shot 01 Drone rise · GPT Image 2.5 · 991621",
+          "file": "f4bae361-a038-5e0f-a5a0-86d934343f1b.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T17:57:37.688Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 991621,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 28mm wide lens; wide shot, Commuter small in frame; camera 1.6 m high, at eye level and 45.6 m from Commuter, level; we see Commuter from straight in front; horizon across the middle.\nIn frame: Passer-by 2: far right of frame, about a quarter of the frame height tall, in front of Commuter to the right, facing the camera, same direction as Commuter.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Commuter walks east along the sidewalk past street lamps; Red hatchback drives up the avenue toward the intersection in the afternoon sun. An adult commuter in a long camel coat, dark trousers, white canvas shoes and a grey shoulder bag. Short curly black hair. Plain clothing without logos or lettering. Passers-by in plain everyday coats, sweaters and jeans in muted colours. Set: A compact downtown grid on a clear spring afternoon: mid-rise and high-rise blocks, wide asphalt streets with zebra crosswalks, street lamps, and a small paved plaza with a fountain and young trees; Low green hills on the horizon beyond the city; Dark grey asphalt streets with faint tyre marks; Pale concrete sidewalks with a low kerb; City buildings with concrete, brick and glass facades and regular window grids, plain ground-floor glazing, no signs; Yellow dashed centre line; Freshly painted white zebra crosswalk stripes. Look: Photoreal contemporary city film. Bright afternoon sun, crisp shadows, clean natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 28mm lens, match the supplied blockout frame's composition. Lens: 24mm wide. Filter: deep focus, no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "6b205749"
+          }
+        }
+      ]
     },
     {
       "id": "822a7e6a-ae98-4e20-b1bf-6a7fcc2e94df",
@@ -8670,16 +8705,46 @@
       "sourceSha256": "6c04e355a8b06ee0c05bb84d9ac3b34e5ab2c55cc011aa7d3d4ab51298a90f57"
     },
     {
-      "path": "media/assets/f6f0914e-9cc8-4e45-b0d3-f4febf54d639.mp4",
+      "path": "media/refs/baa15787-ac1e-5c05-a5ab-f47c9890dac7.webp",
+      "kind": "image",
+      "bytes": 202910,
+      "sha256": "babec0a7be01e068997bd40de5a90e9c8588d45ac108c93df709bd183f3dd897",
+      "sourceSha256": "41720c55c96525df95dd962c5d6733fc0fb84acf2e7a55209a77830abf707b53",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/f4bae361-a038-5e0f-a5a0-86d934343f1b.webp",
+      "kind": "image",
+      "bytes": 188890,
+      "sha256": "8d052b9f11574da268988e970d3a0f3a7d9fa3b90ecce980c1f47d7de9b3594d",
+      "sourceSha256": "0157e371b6496e757f9ec6d00be37c29bede37792538d2d451c2a3fce17d535a",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/9570cb99-508d-40fa-8167-990ec78f7ca2.mp4",
       "kind": "video",
-      "bytes": 1085936,
-      "sha256": "fc2f673e89b8eac2609a2d564158272848dc81fb8c1667626492e2086d70c636",
+      "bytes": 1083331,
+      "sha256": "4ddfa80034814d595b0264077b6f21430b7aab44b0cf009d82603a2705f52d15",
       "sourceSha256": "4c2dfeb7ca1601bb95f847155c10ad132f08d965255ef80680506581c8a6a75d",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 120,
       "duration": 5
+    },
+    {
+      "path": "media/assets/5744fef8-7425-510e-addd-4e24c271d831.mp4",
+      "kind": "video",
+      "bytes": 990069,
+      "sha256": "445691ec70153f9497afa7bdf26f76946960c4db38c0e2f80d604f55f52498d9",
+      "sourceSha256": "395ccab9d44ccecfa5dfd6099c97475642acc10982925bd09acc0c871bd3c582",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708
     },
     {
       "path": "media/assets/3e25ca27-ceb9-46e6-a70b-d764bb4eaa30.mp4",
@@ -8720,16 +8785,31 @@
   ],
   "assets": [
     {
-      "id": "f6f0914e-9cc8-4e45-b0d3-f4febf54d639",
+      "id": "9570cb99-508d-40fa-8167-990ec78f7ca2",
       "kind": "camera-render",
       "shotId": "f41f40d8-3180-4e50-9a79-5028a05195f1",
-      "file": "assets/f6f0914e-9cc8-4e45-b0d3-f4febf54d639.mp4",
+      "file": "assets/9570cb99-508d-40fa-8167-990ec78f7ca2.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-11-03T01:31:29.845Z",
+      "createdAt": "2026-11-03T17:57:04.137Z",
       "source": {
         "engineShotId": null,
         "signature": "6b205749"
+      }
+    },
+    {
+      "id": "5744fef8-7425-510e-addd-4e24c271d831",
+      "kind": "workflow-result",
+      "shotId": "f41f40d8-3180-4e50-9a79-5028a05195f1",
+      "file": "assets/5744fef8-7425-510e-addd-4e24c271d831.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-11-03T18:01:11.910Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 2 reference images",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Commuter walks east along the sidewalk past street lamps; Red hatchback drives up the avenue toward the intersection in the afternoon sun. An adult commuter in a long camel coat, dark trousers, white canvas shoes and a grey shoulder bag. Short curly black hair. Plain clothing without logos or lettering. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 24mm wide. Filter: deep focus, no logos or lettering.\nReference images: 1 = start still; 2 = end still.",
+        "sourceAssetId": "9570cb99-508d-40fa-8167-990ec78f7ca2"
       }
     },
     {
@@ -8773,6 +8853,13 @@
     }
   ],
   "edit": {
-    "clips": []
+    "clips": [
+      {
+        "shotId": "f41f40d8-3180-4e50-9a79-5028a05195f1",
+        "assetId": "5744fef8-7425-510e-addd-4e24c271d831",
+        "in": 0,
+        "out": null
+      }
+    ]
   }
 }

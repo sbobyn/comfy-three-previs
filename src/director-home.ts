@@ -149,8 +149,8 @@ function heroSeam(starters: Starter[]) {
   probe.onerror = () => { void guideManifest().then(map => {
     const m = starterMedia('final-lap', [...map.values()]);
     if (m.kind !== 'video' || !slot.isConnected) return;
-    const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: 'video', posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: 'once', alt: `${m.label || 'The draft'}: the blockout on the left and the generated video on the right, the same camera. Drag the seam or use the arrow keys.` });
-    slot.replaceChildren(seam, h('p', { class: 'home-hero-cap' }, h('strong', {}, 'Same camera.'), ' Drag the seam.', h('span', {}, m.label || 'Final Lap · The draft')));
+    const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: 'video', posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: 'once', alt: `${m.label || 'The draft'}: the saved source blockout on the left and its generated result on the right. Drag the seam or use the arrow keys.` });
+    slot.replaceChildren(seam, h('p', { class: 'home-hero-cap' }, h('strong', {}, 'Blockout → AI result.'), ' Drag the seam.', h('span', {}, m.label || 'Final Lap · The draft')));
   }); };
   probe.src = guideUrl(first);
   return slot;
@@ -167,7 +167,7 @@ function heroCycle(slot: HTMLElement) {
     if (k === i) return;
     i = k; const r = HERO_REEL[k]!, f = heroFiles(r.id);
     const next = beforeAfter({ before: guideUrl(f.before), after: guideUrl(f.after), kind: 'video', posters: f.posters.map(guideUrl) as [string, string], sweep: reduced ? false : 'once',
-      alt: `${r.label}: the blockout on the left and the generated video on the right, the same camera. Drag the seam or use the arrow keys.` });
+      alt: `${r.label}: the saved source blockout on the left and its generated result on the right. Drag the seam or use the arrow keys.` });
     next.classList.add('is-entering');
     const old = seam; seam = next; stage.append(next);
     requestAnimationFrame(() => requestAnimationFrame(() => next.classList.remove('is-entering')));
@@ -190,7 +190,7 @@ function heroCycle(slot: HTMLElement) {
   window.addEventListener('pointerup', () => { if (hold & 2) pause(false, 2); });
   slot.addEventListener('focusin', () => pause(true, 4));
   slot.addEventListener('focusout', ev => { if (!slot.contains(ev.relatedTarget as Node)) pause(false, 4); });
-  slot.replaceChildren(stage, h('p', { class: 'home-hero-cap' }, h('strong', {}, 'Same camera.'), ' Drag the seam.',
+  slot.replaceChildren(stage, h('p', { class: 'home-hero-cap' }, h('strong', {}, 'Blockout → AI result.'), ' Drag the seam.',
     h('span', { class: 'home-hero-dots', role: 'group', 'aria-label': 'Hero shots' }, ...dots), label));
   slot.classList.add('is-cycling'); if (reduced) slot.classList.add('is-still');
   show(0); restart();

@@ -3259,7 +3259,42 @@
           "no logos or lettering"
         ]
       },
-      "references": []
+      "references": [
+        {
+          "id": "5e0d9e0d-7abf-552b-a974-29f5937e8f18",
+          "name": "Shot 01 Ridge reveal · GPT Image 2.5 · 477287",
+          "file": "5e0d9e0d-7abf-552b-a974-29f5937e8f18.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-03T17:57:41.530Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 477287,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 32mm normal lens; wide shot, Hiker small in frame; camera 15.7 m high, well above Hiker's head and 41.4 m from Hiker, looking slightly down; we see Hiker side-on, from its right side (a side profile, not a three-quarter or chase view); horizon near the top edge.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Hiker walks the trail across the open meadow toward the lake and the cabin, small in the wide valley; morning light rakes across the moraine boulders. An adult hiker in a teal waterproof shell jacket, charcoal trekking trousers, a rust-red daypack and brown leather boots. Short dark hair, steady easy stride. Plain outdoor clothing without logos or lettering. Set: A wide alpine valley on an early-autumn morning: green-gold meadows, a still blue-green lake, dark pine stands, a lone timber cabin, a packed-dirt trail and granite ridges with fresh snow on the summits; Alpine valley floor of green-gold meadow grass and late wildflowers, granite ridges and scree slopes, fresh snow on the highest summits; Lichen-grey granite boulders piled into a low moraine ridge; Still glacial lake, deep blue-green, mirror reflections of the peaks; Tall dark-green subalpine firs and pines; Narrow packed-dirt hiking trail worn into the meadow. Look: Photoreal outdoor adventure film. Low morning sun, crisp clear air, light haze on the distant ridges, natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 32mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. Filter: golden hour light, no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "b283f3e2"
+          }
+        },
+        {
+          "id": "669f9e5c-ac2b-521b-a565-2e9005538ed0",
+          "name": "Shot 01 Ridge reveal · GPT Image 2.5 · 300625",
+          "file": "669f9e5c-ac2b-521b-a565-2e9005538ed0.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T17:57:42.520Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 300625,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 32mm normal lens; wide shot, Hiker small in frame; camera 2.6 m high, just above Hiker's eye line and 64.1 m from Hiker, level; we see Hiker side-on, from its right side (a side profile, not a three-quarter or chase view); horizon across the middle.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Hiker walks the trail across the open meadow toward the lake and the cabin, small in the wide valley; morning light rakes across the moraine boulders. An adult hiker in a teal waterproof shell jacket, charcoal trekking trousers, a rust-red daypack and brown leather boots. Short dark hair, steady easy stride. Plain outdoor clothing without logos or lettering. Set: A wide alpine valley on an early-autumn morning: green-gold meadows, a still blue-green lake, dark pine stands, a lone timber cabin, a packed-dirt trail and granite ridges with fresh snow on the summits; Alpine valley floor of green-gold meadow grass and late wildflowers, granite ridges and scree slopes, fresh snow on the highest summits; Lichen-grey granite boulders piled into a low moraine ridge; Still glacial lake, deep blue-green, mirror reflections of the peaks; Tall dark-green subalpine firs and pines; Narrow packed-dirt hiking trail worn into the meadow. Look: Photoreal outdoor adventure film. Low morning sun, crisp clear air, light haze on the distant ridges, natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 32mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. Filter: golden hour light, no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "b283f3e2"
+          }
+        }
+      ]
     },
     {
       "id": "a5297234-f4a5-456d-9372-9072d70cefc5",
@@ -4496,16 +4531,46 @@
       "sourceSha256": "6ca519b3e3dc9c1dba7a4881f75ab121865c0a2673bf7ef97d8f2c7fe879a845"
     },
     {
-      "path": "media/assets/d869b12d-f5a1-4015-82d3-eda4f30f0cec.mp4",
+      "path": "media/refs/5e0d9e0d-7abf-552b-a974-29f5937e8f18.webp",
+      "kind": "image",
+      "bytes": 466102,
+      "sha256": "5dd4c8e81d695265455742bf08b72b88b8cf744663ad5ec33cc87aee38032fce",
+      "sourceSha256": "c521aa0e8bd09b3c7c11d200e8951975382f1c203c18127ceb13dfa7b9c55187",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/669f9e5c-ac2b-521b-a565-2e9005538ed0.webp",
+      "kind": "image",
+      "bytes": 385080,
+      "sha256": "21d20dae52a663125ba996bd290313cc094bf25dd30f48dd2babf37feb03f6fb",
+      "sourceSha256": "56a7fb57699f44ce65655392f2392c18155d747b235b145d83eec9a6dcfc2886",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/2aee0ec1-93ed-48cb-8a31-eddfd3ca7683.mp4",
       "kind": "video",
-      "bytes": 1125523,
-      "sha256": "f2f2057457bb136e061da4ac42ff0006d47e967eb8ebb172368dfe63e5a4373d",
+      "bytes": 1098424,
+      "sha256": "52c2e71398cac6673018a42dbc4f4775cc0ef1301ad755843a18d06a3c841d8b",
       "sourceSha256": "cb45e9a96d20e2434a4134b8037f1215ab97b01b39442282a2dc7c0263658c5e",
       "width": 1280,
       "height": 720,
       "fps": 24,
       "frameCount": 120,
       "duration": 5
+    },
+    {
+      "path": "media/assets/089144bc-51ac-54bc-ae1d-c74e276b1d50.mp4",
+      "kind": "video",
+      "bytes": 1068461,
+      "sha256": "7eb336cd5afb864c928e3677532abe68a3b3c438a66a66b7f6c8f0ac715e80bc",
+      "sourceSha256": "746fe55042cc8bf7a5a305465d9e75feea7465cf512068af81b06d47a2e169ef",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708
     },
     {
       "path": "media/assets/e99acbe7-2aa2-4cd6-81eb-67b820f0eeeb.mp4",
@@ -4546,16 +4611,31 @@
   ],
   "assets": [
     {
-      "id": "d869b12d-f5a1-4015-82d3-eda4f30f0cec",
+      "id": "2aee0ec1-93ed-48cb-8a31-eddfd3ca7683",
       "kind": "camera-render",
       "shotId": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
-      "file": "assets/d869b12d-f5a1-4015-82d3-eda4f30f0cec.mp4",
+      "file": "assets/2aee0ec1-93ed-48cb-8a31-eddfd3ca7683.mp4",
       "mime": "video/mp4",
       "duration": 5,
-      "createdAt": "2026-11-03T01:31:18.559Z",
+      "createdAt": "2026-11-03T17:57:00.168Z",
       "source": {
         "engineShotId": null,
         "signature": "b283f3e2"
+      }
+    },
+    {
+      "id": "089144bc-51ac-54bc-ae1d-c74e276b1d50",
+      "kind": "workflow-result",
+      "shotId": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
+      "file": "assets/089144bc-51ac-54bc-ae1d-c74e276b1d50.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-11-03T18:01:24.881Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 2 reference images",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Hiker walks the trail across the open meadow toward the lake and the cabin, small in the wide valley; morning light rakes across the moraine boulders. An adult hiker in a teal waterproof shell jacket, charcoal trekking trousers, a rust-red daypack and brown leather boots. Set: Tall dark-green subalpine firs and pines. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 35mm natural. Filter: golden hour light, no logos or lettering.\nReference images: 1 = start still; 2 = end still.",
+        "sourceAssetId": "2aee0ec1-93ed-48cb-8a31-eddfd3ca7683"
       }
     },
     {
@@ -4599,6 +4679,13 @@
     }
   ],
   "edit": {
-    "clips": []
+    "clips": [
+      {
+        "shotId": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
+        "assetId": "089144bc-51ac-54bc-ae1d-c74e276b1d50",
+        "in": 0,
+        "out": null
+      }
+    ]
   }
 }
