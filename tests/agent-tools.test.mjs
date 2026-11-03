@@ -379,11 +379,12 @@ test('tools/list: the director and library tools by default; legacy engine, Blen
     const PROMPT_TOOLS = ['previs_director_prompt_sections', 'previs_director_set_prompt_section', 'previs_director_prompt_history', 'previs_director_model_settings'];
     const PERFORM_TOOLS = ['previs_director_perform'];
     const REGEN_TOOLS = ['previs_director_regen_status', 'previs_director_pin_output'];
-    const GROUPS = [...BLENDER_TOOLS, ...KEYFRAME_TOOLS, ...TAKE_TOOLS, ...PROMPT_TOOLS, ...PERFORM_TOOLS, ...REGEN_TOOLS];
-    assert.equal(director.length, 27 + GROUPS.length, `${director.length} director tools: 27 plus the ${BLENDER_TOOLS.length} Blender import, ${KEYFRAME_TOOLS.length} keyframe, ${TAKE_TOOLS.length} take, ${PROMPT_TOOLS.length} prompt, ${PERFORM_TOOLS.length} perform and ${REGEN_TOOLS.length} regeneration tools`);
+    const LOOK_TOOLS = ['previs_director_look_presets', 'previs_director_set_look', 'previs_director_add_variants'];
+    const GROUPS = [...BLENDER_TOOLS, ...KEYFRAME_TOOLS, ...TAKE_TOOLS, ...PROMPT_TOOLS, ...PERFORM_TOOLS, ...REGEN_TOOLS, ...LOOK_TOOLS];
+    assert.equal(director.length, 27 + GROUPS.length, `${director.length} director tools: 27 plus the ${BLENDER_TOOLS.length} Blender import, ${KEYFRAME_TOOLS.length} keyframe, ${TAKE_TOOLS.length} take, ${PROMPT_TOOLS.length} prompt, ${PERFORM_TOOLS.length} perform, ${REGEN_TOOLS.length} regeneration and ${LOOK_TOOLS.length} look tools`);
     for (const name of GROUPS) assert.ok(director.includes(name), name);
     assert.deepEqual(library, LIBRARY_TOOLS, 'the asset library tools, as one group');
-    assert.equal(names.length, 27 + GROUPS.length + LIBRARY_TOOLS.length + 1, 'director (with Blender import, keyframe, take, prompt, perform and regeneration tools), library tools and previs_import_asset');
+    assert.equal(names.length, 27 + GROUPS.length + LIBRARY_TOOLS.length + 1, 'director (with Blender import, keyframe, take, prompt, perform, regeneration and look tools), library tools and previs_import_asset');
     assert.deepEqual(names.filter(n => !director.includes(n) && !library.includes(n)), ['previs_import_asset']);
     assert.match(tools.find(t => t.name === 'previs_director_edit').description, /\{op:"use_take",shotId,referenceId\}/);
     const refused = await rpc('tools/call', { name: 'previs_render_animation', arguments: {} });
