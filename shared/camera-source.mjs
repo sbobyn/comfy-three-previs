@@ -154,3 +154,12 @@ export function cameraMotionWarning(text, source = 'blockout') {
   const from = source === 'blockout' ? 'the blockout clip' : source === 'keyframes' ? 'the start and end stills' : 'the start still';
   return `The prompt directs the camera (${words.map(w => `“${w}”`).join(', ')}), but the camera comes from ${from}. Remove those words, or change the camera in the shot.`;
 }
+
+/**
+ * Camera-source annotation for an accepted masked edit: keep the parent's recorded grade when known.
+ * Crop/mask support media are not a new blockout camera; unknown parent provenance stays unknown.
+ */
+export function cameraSourceForMaskedEdit(parentAsset) {
+  const known = parentAsset?.source?.cameraSource;
+  return CAMERA_SOURCES.includes(known) ? known : null;
+}

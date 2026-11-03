@@ -492,9 +492,20 @@ export function stillStale(project, shot, ref) {
  * A generated video made for an earlier blocking: the blockout clip it was made from recorded another shot
  * signature, or (no signature recorded) the shot has a newer blockout clip. A video whose source clip is unknown
  * is not judged.
+ * Masked edits are immutable derivations: inherit the parent's blocking staleness (bounded); missing parent is
+ * unknown/stale, never freshly generated from a fabricated current-shot videoKey.
  */
-export function videoStale(project, shot, video) {
+export function videoStale(project, shot, video, _seen = new Set()) {
   if (video?.kind !== 'workflow-result' || video.pinned) return false;
+  const me = video.source?.maskedEdit;
+  if (me?.v === 1) {
+    if (_seen.has(video.id)) return true;
+    _seen.add(video.id);
+    const parentId = me.parentAssetId || video.source?.sourceAssetId;
+    const parent = (project.assets || []).find(a => a.id === parentId);
+    if (!parent) return true;
+    return videoStale(project, shot, parent, _seen);
+  }
   if (hasManifest(video.source?.regen)) return blockingChanges(project, shot, video.source.regen).length > 0;
   const assets = project.assets || [];
   const src = assets.find(a => a.id === video.source?.sourceAssetId && a.kind === 'camera-render');
