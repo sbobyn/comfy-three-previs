@@ -181,7 +181,22 @@ const server = createServer(async (req, res) => {
       const input = await body(req);
       return send(await takeGrader.grade({ projectId: input.projectId, assetId: input.assetId, maxCostUsd: input.maxCostUsd }));
     }
-    // Masked-edit offline foundation: prepare / status / review / accept (no provider submit).
+    // Masked-edit: prepare / status / resume / review / accept (+ binary review media).
+    if (url.pathname === '/api/director/masked-edit/media' && req.method === 'GET') {
+      const media = await maskedEdit.mediaFile({
+        projectId: url.searchParams.get('projectId'),
+        editId: url.searchParams.get('editId'),
+        file: url.searchParams.get('file'),
+      });
+      const bytes = await readFile(media.path);
+      res.writeHead(200, {
+        'Content-Type': media.contentType,
+        'Content-Length': bytes.length,
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+      });
+      return res.end(bytes);
+    }
     if (url.pathname.startsWith('/api/director/masked-edit')) {
       if (req.method === 'POST' && !req.headers['content-type']?.startsWith('application/json')) fail('JSON required', 415);
       if (!['GET', 'POST'].includes(req.method)) fail('Method not allowed', 405);
