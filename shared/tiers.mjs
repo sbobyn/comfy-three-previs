@@ -62,6 +62,8 @@ export const VIDEO_PRICES = {
   'seedance-25-edit-v1': { ratePerSecond: 0.395 },
   'kling-o1-edit-v1': { ratePerSecond: 0.126 },
   'wan-vace-13b-edge-v1': { ratePerSecond: 0, local: true },
+  // Crop cost is a historical GPU planning envelope (not list $/s). Batches must not price or dispatch it.
+  'wan-vace-14b-masked-v1': { ratePerSecond: 0, planning: true },
 };
 // A start→end video model falls back to its start-only sibling (same list price) when a shot's end still is missing.
 export const FIRST_FRAME_FALLBACK = {
@@ -90,6 +92,7 @@ export function estimateFor(type, model, { duration = 0, count = 1 } = {}) {
   const round = x => Math.round(x * 10000) / 10000;
   if (type === 'video') {
     const p = VIDEO_PRICES[model]; if (!p || !(duration > 0)) return null;
+    if (p.planning || p.unknown) return null;
     return round(p.ratePerSecond * (p.keyFrames ? snapSeconds(duration, p.durations) : duration));
   }
   if (!STEP_OF[type]) return null;
