@@ -35,7 +35,7 @@ test('all starter objects have compatible meshes and animation leaves cameras, t
       if (rewrittenCast.includes(e.name)) delete e.notes;
     }
     for (const shot of fixed.shots) for (const k of ['description', 'prompts']) delete shot[k];
-    // The baseline pins the four finished starters as they were before the animation pass; the blockout starters
+    // The baseline pins the four finished starters (with the corrected stand yaw in Final Lap and Posterized); the blockout starters
     // (2026-11-02) came later and also use plain proxy shapes (buildings, rocks, chairs) that have no bundled mesh.
     const pinned = Object.hasOwn(baseline, s.slug);
     if (pinned) assert.equal(digest(withoutShotMedia(fixed)), baseline[s.slug], `${s.slug}: only the named actors' blocking, shot/cast action text and shot media may change`);
@@ -93,4 +93,34 @@ test('every GLB is self-contained, within its triangle/size budget and fitted to
     }
   }
   assert.ok(total < 1_500_000, 'whole library stays small enough to bundle offline');
+});
+
+// The bundled bleachers descend toward local -Z; their front rows must look into the venue.
+test('race and basketball stands face inward, from the low row of the actual bundled mesh', async () => {
+  const bytes = readFileSync(new URL('stands.glb', root));
+  const { scene } = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), '');
+  scene.updateMatrixWorld(true);
+  const height = { front: -Infinity, back: -Infinity }, vertex = new Vector3();
+  scene.traverse(mesh => {
+    if (!mesh.isMesh || mesh.material.name !== 'entity-color') return;
+    const positions = mesh.geometry.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+      vertex.fromBufferAttribute(positions, i).applyMatrix4(mesh.matrixWorld);
+      if (vertex.z < -0.4) height.front = Math.max(height.front, vertex.y);
+      if (vertex.z > 0.4) height.back = Math.max(height.back, vertex.y);
+    }
+  });
+  assert.ok(Number.isFinite(height.front) && Number.isFinite(height.back));
+  assert.ok(height.back - height.front > 0.5, 'the low/front row points toward local -Z');
+  for (const s of (await loadStarters()).filter(s => ['final-lap', 'posterized'].includes(s.slug))) {
+    const limit = s.slug === 'final-lap' ? 60 : 14;
+    const stands = s.scene.entities.filter(e => e.model === 'stands');
+    assert.equal(stands.length, s.slug === 'final-lap' ? 34 : 22);
+    for (const e of stands) {
+      const [x, , z] = e.position, dx = Math.max(-limit, Math.min(limit, x)) - x, dz = -z;
+      const yaw = e.rotation * Math.PI / 180;
+      const inward = (-Math.sin(yaw) * dx - Math.cos(yaw) * dz) / Math.hypot(dx, dz);
+      assert.ok(inward > 0.999, `${s.slug}: ${e.name} faces the track/court`);
+    }
+  }
 });

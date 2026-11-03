@@ -13,6 +13,13 @@ examples/starters/
   <slug>/media/assets/<id>.mp4  # each shot's blockout clip and chosen video
 ```
 
+## Stand orientation correction (2026-11-03)
+
+Final Lap and Posterized now place every grandstand with its low/front row facing the track or court.
+The existing shot stills, blockout clips and generated videos are preserved with their original source signatures;
+the app marks these seven shots as made for earlier blocking. Newly opened starter copies use the corrected scenes.
+Existing user projects are not modified.
+
 ## Blockout starters (2026-11-02)
 
 Five starters open with a blockout clip per shot and written Cast Cards, and no generated media: making the cast images,

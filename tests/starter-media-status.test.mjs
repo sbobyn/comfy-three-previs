@@ -10,7 +10,11 @@ import { shotSignature, starterBlockout, starterMediaStatus, stillStale, videoSt
 const starters = await loadStarters();
 
 // Shots whose video (and so blockout clip) still predates the posed animation; see tests/starter-blockouts.test.mjs EARLIER_MEDIA.
-const EARLIER_CLIPS = {};
+// Existing media predates the 2026-11-03 inward-facing stand correction; do not relabel it as fresh.
+const EARLIER_CLIPS = {
+  'final-lap': ['Final lap', 'The draft', 'From the stands', 'Checkered flag'],
+  posterized: ['Fast break', 'The drive', 'Posterized'],
+};
 
 test('each starter ships the blockout clip of its video, current except where the video predates the posed animation', () => {
   for (const s of starters) {
