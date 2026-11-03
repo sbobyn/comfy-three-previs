@@ -94,7 +94,7 @@ export function cameraStyleBlock(s: Shot, ctx: Ctx) {
   }));
 
   return h('div', { class: 'block ap-block ap-camstyle' },
-    h('div', { class: 'ap-stylehead' }, h('span', { class: 'eyebrow' }, 'Camera style'), chosen ? h('button', { class: 'btn ghost sm', type: 'button', title: 'Back to suggestions from the shot camera', onclick: () => void setStyle(null, 'Reset camera style') }, 'Reset') : h('span', { class: 'note' }, 'Suggested from the shot camera')),
+    h('div', { class: 'ap-stylehead' }, h('span', { class: 'eyebrow' }, 'Camera notes & lens tags'), chosen ? h('button', { class: 'btn ghost sm', type: 'button', title: 'Back to suggestions from the shot camera', onclick: () => void setStyle(null, 'Reset camera style') }, 'Reset') : h('span', { class: 'note' }, 'Suggested from the shot camera')),
     styleRow,
     h('p', { class: 'note' }, 'Lens and filter terms go into the prompts. Movement and cuts are notes for you: the blockout is the camera, so no prompt describes the move.'));
 }

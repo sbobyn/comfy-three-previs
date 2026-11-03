@@ -8,7 +8,7 @@ import { cameraLine, lookMedium, withCameraLine } from './camera-source.mjs';
 import { applySections, sectionsText } from './prompt-sections.mjs';
 import { effectiveLook, hasLook, lookSectionTexts } from './look-presets.mjs';
 
-// Camera vocabulary for style tags. Each term is the exact text added to the prompt.
+// Camera vocabulary for style tags. Lens and filter terms are added to prompts as written; movement and cuts are notes only.
 export const CAMERA_TERMS = {
   movement: ['FPV drone chase', 'dolly zoom', 'crane up into an orbit', 'static locked-off shot', 'slow push-in', 'slow pull-out', 'tracking shot', 'dolly alongside', 'crane up', 'crane down', 'orbit around the subject', 'handheld', 'steadicam follow', 'drone flyover', 'whip pan', 'slow pan', 'tilt up'],
   cuts: ['speed ramp', 'hard cut', 'match cut', 'smash cut', 'jump cut', 'cross-dissolve', 'continuous take, no cuts'],
@@ -110,7 +110,7 @@ export function autoPromptSegments(project, shot, kind = 'video', { cap = kind =
   // The camera line repaints the blockout in the project's look: photoreal unless the style names another medium. A shot's
   // own look sections can name another (sectionedSegments swaps the line for theirs).
   if (kind === 'video') items.push({ order: 5, priority: 1, seg: mk('camera', 'Camera', CAMERA_FROM[cameraSource] || CAMERA_FROM.still, FIELD_COLORS.camera, cameraLine(cameraSource, lookMedium(environment?.style))) });
-  else items.push({ order: 5, priority: 1, seg: mk('camera', 'Framing', 'Shot camera (blockout)', FIELD_COLORS.camera, `Framing: ${shot.camera.mm}mm lens, match the supplied blockout frame's composition.`) });
+  else items.push({ order: 5, priority: 1, seg: mk('camera', 'Framing', 'Shot camera (blockout)', FIELD_COLORS.camera, `Framing: ${Math.round(shot.camera.mm)}mm lens, match the supplied blockout frame's composition.`) });
   // Lens and filter hints are what the prompt still says about the camera, so a video prompt always keeps them.
   const st = shotStyle(shot), tagPriority = kind === 'video' ? { lens: 1, filter: 1 } : { lens: 7, filter: 21 };
   Object.keys(CAMERA_TERMS).forEach((g, i) => {

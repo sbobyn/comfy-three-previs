@@ -2079,7 +2079,7 @@ function openRender() {
   const step2 = h('div', { class: 'step' }, h('span', { class: 'n' }, '2'), h('div', {}, h('h3', {}, 'Prompt & images'), h('p', {}, 'Composed from the story, cast and camera. Edit freely.'), prompt,
     refs.length ? h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:8px' }, ...refs.map(({ ref: r, names }) => h('div', { style: 'display:flex;gap:8px;align-items:center;font-size:12px' }, h('img', { src: refUrl(r), alt: '', style: 'width:34px;height:34px;flex:none;object-fit:cover;border-radius:6px' }), h('div', { style: 'flex:1;min-width:0;overflow-wrap:anywhere' }, h('div', {}, r.name), h('small', { class: 'muted', title: [...names].join(', ') }, names.size > 1 ? `× ${names.size} objects` : [...names][0] || (r.role === 'style' ? 'Style' : 'Shot image')))))) : h('p', { class: 'note', style: 'margin-top:8px' }, 'No images for this shot.'),
     h('p', { class: 'note', style: 'margin-top:8px' }, 'Cast images are named in the prompt and sent to models that take images.')));
-  const gen = h('div', { class: 'gen-box' }, noCloudKey() && !isLocalModel(shotModel(s)?.id) ? h('p', { class: 'status-line err', role: 'note' }, NO_KEY) : null, h('p', { class: 'note', style: 'margin:0' }, 'Make the blockout first.'));
+  const gen = h('div', { class: 'gen-box' }, noCloudKey() && !isLocalModel(shotModel(s)?.id) ? h('p', { class: 'status-line err', role: 'note' }, NO_KEY) : null, h('p', { class: 'note', style: 'margin:0' }, 'Press ', h('strong', {}, 'Generate'), ' above: it makes the blockout (free, on this computer), then shows the quote.'));
   const step3 = h('div', { class: 'step' }, h('span', { class: 'n' }, '3'), h('div', {}, h('h3', {}, 'Generate the video'), h('p', { style: 'margin:0 0 8px' }, 'Run the chosen video model on this shot. You see the quote, camera source and final prompt first; nothing runs until you approve it.'), gen));
   const setOpen = (previsShotId: string, assetId: string) => renderGenerate(gen, s, previsShotId, assetId, () => prompt.value, { wf: hWf, backendSel: hBackend });
   prompt.oninput = () => { if (s.render && blockoutCurrent(s)) setOpen(s.render.previsShotId, s.render.assetId); };
@@ -2195,7 +2195,7 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   drawJobs();
   box.replaceChildren(keyNote, note,
     h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, useRefs, 'Send the cast’s images with the request'), refsBox, startOnlyRow,
-    h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, timing, 'I have reviewed that output timing/resolution may differ from the source; originals will not be fitted or replaced.'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)' }, timing, 'Output length and size may differ from the blockout.'),
     h('div', {}, quoteBtn), out, jobsBox);
 }
 /** `plan`: what preparation decided (prepareShotVideo): the estimate for the seconds the model makes, the camera source and the final prompt. */
@@ -2208,7 +2208,7 @@ function genQuote(job: any, def: any, request: any, s: Shot, plan?: { est: numbe
   const issues = job.validation?.issues || [];
   const approve = h('input', { type: 'checkbox' }), unknown = h('input', { type: 'checkbox' });
   const max = h('input', { class: 'field', type: 'number', min: 0, step: 0.01, value: est ? Math.ceil(est * 1.5 * 100) / 100 : 1, style: 'width:90px', 'aria-label': 'Maximum USD' });
-  const go = h('button', { class: 'btn camera gen-send', type: 'button', disabled: true }, 'Approve & submit once');
+  const go = h('button', { class: 'btn camera gen-send', type: 'button', disabled: true }, free ? 'Generate · free' : est ? `Generate · ≈ $${est.toFixed(2)}` : 'Generate');
   let dispatched = false;
   const status = h('div', { class: 'status-line' });
   const live = h('div', { class: 'gen-live' }); // [live-progress] separate child; approval controls stay untouched
@@ -2250,7 +2250,7 @@ function genQuote(job: any, def: any, request: any, s: Shot, plan?: { est: numbe
     h('details', {}, h('summary', {}, 'Details'), h('pre', { tabindex: 0, role: 'region', 'aria-label': 'Request details', style: 'max-height:240px;overflow:auto;white-space:pre-wrap' }, JSON.stringify({ prompt: job.binding?.prompt, sources: job.sources, graph: job.preparedGraph }, null, 2))),
     issues.length ? h('ul', { class: 'note', style: 'margin:0;padding-left:16px' }, ...issues.slice(0, 5).map((i: any) => h('li', {}, i.message))) : null,
     h('label', {}, approve, ' I approve this exact request, with an allowance of ', max, ' USD.'),
-    !free ? h('label', {}, unknown, ' Cloud bills actual usage, which may be unknown. This is my spending allowance for this run, not a provider-enforced spending cap.') : null,
+    !free ? h('label', {}, unknown, ' Allowance for this run; Comfy Cloud bills actual usage.') : null,
     h('div', {}, go), status, live);
 }
 
