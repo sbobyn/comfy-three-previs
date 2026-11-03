@@ -13,7 +13,7 @@ import { openJourney } from './director-guide';
 import { checkList, openSetup } from './director-setup';
 import type { Check } from './director-setup';
 import { beforeAfter, guideManifest, guideUrl } from './director-media';
-import { starterMedia, HERO_REEL, HERO_SHOT_MS, heroFiles, heroNext } from './director-desktop-core';
+import { starterMedia, projectMediaCoverage, HERO_REEL, HERO_SHOT_MS, heroFiles, heroNext } from './director-desktop-core';
 import { mountJobsPip } from './director-jobs'; // [jobs] the only place with a count across every project
 
 type Summary = { id: string; title: string; template: string; updatedAt: string; shots: number; entities: number; references: number; renders: number; assets: number; sceneName: string };
@@ -22,7 +22,7 @@ type Summary = { id: string; title: string; template: string; updatedAt: string;
  * demo `projectId` is the finished project the card opens (scripts/snapshot-demo.mjs pairs them).
  */
 export type Starter = { key: string; title: string; description: string; scene: DirectorProject['scene']; shot: Shot; shots?: number; projectId?: string };
-/** The demo's "Explore a finished scene" opens this starter's project (the one the hero seam shows), else the first. */
+/** The demo's "Explore a demo scene" opens this starter's project (the one the hero seam shows), else the first. */
 const FEATURED = 'final-lap';
 /** A workspace URL under the deploy base (the demo lives under /comfy-three-previs/). */
 const projectUrl = (id: string) => `${import.meta.env.BASE_URL}director.html?project=${encodeURIComponent(id)}`;
@@ -32,6 +32,26 @@ let agent: AgentStatus | null = null, connect: Connect = null;
 let showArchived = false;
 const jobsHost = h('span', { class: 'home-jobs' }); mountJobsPip(jobsHost, { projectId: '', api });
 const stills = new Map<string, string>();
+const coverageProjects = new Map<string, Promise<DirectorProject>>();
+/** Start nonessential card work only when it becomes visible, once per card. */
+function whenVisible(el: HTMLElement, load: () => void) {
+  if (typeof IntersectionObserver !== 'function') { requestAnimationFrame(() => { if (el.isConnected) load(); }); return; }
+  const observer = new IntersectionObserver(entries => {
+    if (!el.isConnected) { observer.disconnect(); return; }
+    if (entries.some(e => e.isIntersecting)) { observer.disconnect(); load(); }
+  });
+  observer.observe(el);
+}
+function shotCoverage(project: DirectorProject) {
+  const c = projectMediaCoverage(project);
+  const details = h('details', { class: 'home-shot-coverage' }, h('summary', {}, 'Shot coverage'),
+    h('ol', {}, ...c.shots.map(s => h('li', {}, h('strong', {}, s.title), h('span', {},
+      `Video: ${s.video ? 'available' : 'not included'} · Still: ${s.still ? 'available' : 'not included'} · Blockout clip: ${s.blockout ? 'available' : 'not included'}`)))),
+    h('p', {}, 'Saved media may reflect earlier blocking. Shots without saved clips still have editable 3D scenes.'));
+  details.addEventListener('click', ev => ev.stopPropagation());
+  return [h('span', { class: 'home-coverage-label' }, 'Shots with saved media'),
+    h('span', {}, `Video ${c.video}/${c.total} · Stills ${c.still}/${c.total} · Blockout clips ${c.blockout}/${c.total}`), details];
+}
 
 async function create(template: string) {
   try {
@@ -72,12 +92,20 @@ function card(el: HTMLElement, img: HTMLElement | null, title: string, line: str
  */
 export function starterCards(starters: Starter[], onPick: (key: string) => void) {
   const cards = starters.map(s => {
-    const blockout = frame(still({ scene: s.scene }, s.shot, `starter:${s.key}`));
-    const slot = h('button', { class: 'home-seam-slot', type: 'button', tabindex: -1, 'aria-hidden': 'true', onclick: () => onPick(s.key) }, blockout);
+    const slot = h('div', { class: 'home-seam-slot' }, frame('', 'is-loading'));
     const cast = h('div', { class: 'home-cast', hidden: true });
     const open = card(h('button', { class: 'home-starter-open', type: 'button', onclick: () => onPick(s.key) }), null, s.title, s.description,
       h('span', { class: 'home-open', 'aria-hidden': 'true' }, s.shots && s.shots > 1 ? `${s.shots} shots` : 'Open', ' →'));
-    const el = h('div', { class: 'home-starter', 'data-template': s.key }, slot, cast, open);
+    const coverage = DEMO && s.projectId ? h('div', { class: 'home-coverage', 'aria-busy': 'true' }, 'Loading shot coverage…') : null;
+    const el = h('div', { class: 'home-starter', 'data-template': s.key }, slot, cast, open, coverage);
+    if (coverage) whenVisible(el, () => {
+      const id = s.projectId!;
+      if (!coverageProjects.has(id)) coverageProjects.set(id, api(`director/project?id=${encodeURIComponent(id)}`).then(({ project }) => project));
+      void coverageProjects.get(id)!.then(project => {
+        if (el.isConnected) coverage.replaceChildren(...shotCoverage(project));
+      }).catch(() => { if (el.isConnected) coverage.textContent = 'Coverage unavailable'; })
+        .finally(() => coverage.removeAttribute('aria-busy'));
+    });
     // The comparison captures pointers while dragging; a plain thumbnail/cast click still opens the scene.
     let origin: { x: number; y: number } | null = null, dragged = false;
     el.addEventListener('pointerdown', ev => { origin = { x: ev.clientX, y: ev.clientY }; dragged = false; });
@@ -94,11 +122,23 @@ export function starterCards(starters: Starter[], onPick: (key: string) => void)
     const entries = [...map.values()];
     for (const c of cards) {
       const m = starterMedia(c.s.key, entries);
-      if (m.kind !== 'still' && c.slot.isConnected) {
+      if (!c.slot.isConnected) continue;
+      const fallback = () => whenVisible(c.el, () => {
+        void loadBlockoutModels(c.s.scene.entities).then(() => {
+          if (!c.slot.isConnected) return;
+          const url = still({ scene: c.s.scene }, c.s.shot, `starter:${c.s.key}`);
+          c.slot.replaceChildren(frame(url));
+          if (!url) c.slot.firstElementChild!.append(h('span', { class: 'home-preview-note' }, 'Preview unavailable'));
+        }).catch(() => { if (c.slot.isConnected) c.slot.replaceChildren(h('div', { class: 'home-frame' }, h('span', { class: 'home-preview-note' }, 'Preview unavailable'))); });
+      });
+      if (m.kind !== 'still') {
         // The generated loop fills the card; hovering (or dragging on touch) scrubs the blockout in from the left.
         const seam = beforeAfter({ before: guideUrl(m.before!), after: guideUrl(m.after!), kind: m.kind, posters: m.posters?.map(guideUrl) as [string, string] | undefined, sweep: false, reveal: true, alt: `${m.label || c.s.title}: the generated ${m.kind === 'video' ? 'video' : 'still'}. Click to open the scene. Drag across it, or use the comparison slider’s arrow keys, to reveal the blockout it was made from.` });
-        c.slot.replaceWith(h('div', { class: 'home-seam-slot has-seam' }, seam));
-      }
+        c.slot.classList.add('has-seam'); c.slot.replaceChildren(seam);
+      } else if (m.poster) {
+        const saved = frame(guideUrl(m.poster)); c.slot.replaceChildren(saved);
+        saved.querySelector('img')!.addEventListener('error', fallback, { once: true });
+      } else fallback();
       if (m.cast.length) { c.cast.hidden = false; c.cast.replaceChildren(h('span', { class: 'home-cast-label' }, 'Cast'), ...m.cast.slice(0, 5).map(x => h('img', { src: guideUrl(x.file), alt: x.label, title: x.label, loading: 'lazy', decoding: 'async' }))); }
     }
   });
@@ -340,16 +380,15 @@ async function render() {
     const [data, s, st] = await Promise.all([api('director/projects'), api('director/setup').catch(() => null), api('director/starters').catch(() => ({ starters: [] }))]);
     projects = data.projects; agent = data.agent; connect = data.connect; archivedCount = data.archived; setup = s;
     served = (st.starters || []).map((t: any) => ({ key: t.slug, title: String(t.title).replace(/^Starter · /, ''), description: t.description, shots: t.shots, scene: t.scene, shot: { ...t.shot, id: `starter-${t.slug}`, references: [], render: null }, projectId: t.projectId }));
-    await loadBlockoutModels(served.flatMap(s => s.scene.entities));
     if (showArchived) archived = (await api('director/archived')).projects;
   } catch (e) { toast((e as Error).message, true); }
   const starters = served.length ? served : templateStarters();
-  // The read-only demo can't create anything: its starters are finished projects that open as they are.
+  // The read-only demo can't create anything: its demo scenes open as they are.
   const scenes = DEMO ? served.filter(s => s.projectId) : [];
   const featured = DEMO ? (scenes.find(s => s.key === FEATURED)?.projectId || scenes[0]?.projectId || projects[0]?.id) : undefined;
   const starterSection = DEMO
     ? h('section', { class: 'home-section', id: 'starters', 'aria-labelledby': 'starters-title' },
-      h('div', { class: 'home-head' }, h('h2', { id: 'starters-title' }, 'Finished scenes'), h('span', {}, 'Open one to look around: blockout, cast, stills and videos.')),
+      h('div', { class: 'home-head' }, h('h2', { id: 'starters-title' }, 'Explore the demo scenes'), h('span', {}, 'Compare the blockout and result. Check shot coverage for more.')),
       scenes.length ? starterCards(scenes, key => { const id = scenes.find(s => s.key === key)?.projectId; if (id) location.href = projectUrl(id); })
         : h('div', { class: 'home-projects' }, ...projects.map(projectCard)))
     : h('section', { class: 'home-section', id: 'starters', 'aria-labelledby': 'starters-title' },
@@ -362,9 +401,9 @@ async function render() {
   // First use leads with a finished starter (the quickest way to see what it does); New scene leads after that.
   const isNew = projects.length < 3;
   const actions = DEMO
-    ? [featured ? h('a', { class: 'home-btn primary', href: projectUrl(featured) }, 'Explore a finished scene') : null, h('button', { class: 'home-btn', type: 'button', onclick: () => runLocally() }, 'Run locally')]
+    ? [featured ? h('a', { class: 'home-btn primary', href: projectUrl(featured) }, 'Explore a demo scene') : null, h('button', { class: 'home-btn', type: 'button', onclick: () => runLocally() }, 'Run locally')]
     : isNew ? [openStarter('primary'), newScene('New scene', '')] : [newScene('New scene'), openStarter()];
-  const list = projects.length
+  const list = DEMO ? null : projects.length
     ? h('div', { class: 'home-projects' }, ...projects.map(projectCard))
     : h('div', { class: 'home-empty' }, h('strong', {}, 'No projects yet'), h('span', {}, 'Start a new scene or open a starter. Your work saves here automatically.'), newScene('New scene', 'ghost'));
   const archivedList = showArchived ? h('div', { class: 'home-projects is-archived' }, ...archived.map(p => card(h('div', { class: 'home-project' }), null, p.title, `${plural(p.shots, 'shot')} · archived`,

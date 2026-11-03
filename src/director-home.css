@@ -149,6 +149,19 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
 .home-card-meta .home-open { margin-top: 6px; color: var(--ink); font-weight: 550; opacity: 0; transform: translateX(-4px); transition: opacity var(--t-base), transform var(--t-base) var(--ease-out); }
 .home-starter:hover .home-open, .home-starter:focus-within .home-open { opacity: 1; transform: none; }
 
+.home-preview-note { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-3); font-size: var(--fs-sm); }
+#starters > .home-head { flex-wrap: wrap; }
+.home-coverage { display: flex; flex-direction: column; gap: 4px; padding: 0 2px; color: var(--ink-3); font-size: var(--fs-xs); overflow-wrap: anywhere; }
+.home-coverage-label { font-weight: 600; color: var(--ink-2); }
+.home-shot-coverage { margin-top: 2px; cursor: default; }
+.home-shot-coverage summary { min-height: 44px; display: list-item; align-content: center; cursor: pointer; color: var(--ink); }
+.home-shot-coverage summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-sm); }
+.home-shot-coverage ol { max-height: 240px; overflow-y: auto; padding-left: 22px; margin: 0 0 8px; }
+.home-shot-coverage li { padding: 4px 0; }
+.home-shot-coverage li strong, .home-shot-coverage li span { display: block; }
+.home-shot-coverage li strong { color: var(--ink-2); font-weight: 500; }
+.home-shot-coverage p { margin: 0; }
+
 /* Your projects */
 .home-projects { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 24px 20px; }
 .home-projects.is-archived { margin-top: 24px; padding-top: 24px; border-top: 1px dashed var(--line-2); }
