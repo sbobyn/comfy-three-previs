@@ -110,6 +110,12 @@ with the shipped still listed as a reference. Details per item are in `.evidence
 git). Look Lab's copy is encoded smaller than the other starters' (540p video at about 1 Mbit/s, WebP stills at most
 1280 px), set by its `encode` in `scripts/export-starters.mjs`; the full-quality originals are in the source project.
 
+**Launch-film takes (2026-11-03).** Lighthouse · Camera Moves' **Orbit right** ships the storm take from the launch film (Seedance 2.5 edit of
+its own blockout clip, with its GPT Image 2.5 start still), and Look Lab gains **Cyberpunk city**, a world variant (neon city at night in rain)
+with its still and a Seedance 2.5 edit of the shared blockout. Both were already paid for; nothing new was generated. A starter now keeps
+every take of a shot (each with the blockout clip it was made from) and every still, not only the chosen ones, so a copy opens with all of
+them in Compare takes; the cut keeps the chosen take.
+
 The snapshot format keeps a shot's prompt-section overrides, saved models and settings and its direction flag
 (`promptSections`, `settings`, `motionCritical`); a copy re-keys `obj:<id>` sections to its own object ids. Prompt version
 history stays with the source project.

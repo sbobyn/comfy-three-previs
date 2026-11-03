@@ -71,7 +71,12 @@ export function starterPicks(project, hero = {}) {
     const video = mine.find(a => a.id === hero.videos?.[s.id]) || mine.find(a => a.id === clip?.assetId && a.kind === 'workflow-result') || newest(mine.filter(a => a.kind === 'workflow-result'));
     const renders = mine.filter(a => a.kind === 'camera-render');
     const blockout = renders.find(a => a.id === video?.source?.sourceAssetId) || newest(renders);
-    return { shotId: s.id, start, end, video, blockout, clip: clip && video && clip.assetId === video.id ? clip : null };
+    // Every other take of the shot travels too (in the order made), with the blockout clip each was made from, so a
+    // copy opens with all of them to compare and pick from; the cut keeps the chosen one.
+    const takes = video ? mine.filter(a => a.kind === 'workflow-result' && a.id !== video.id) : [];
+    const takeBlockouts = takes.map(a => renders.find(r => r.id === a.source?.sourceAssetId)).filter((r, i, a) => r && r.id !== blockout?.id && a.indexOf(r) === i);
+    const stills = frames.filter(r => r !== start && r !== end);
+    return { shotId: s.id, start, end, video, blockout, takes, takeBlockouts, stills, clip: clip && video && clip.assetId === video.id ? clip : null };
   });
 }
 
@@ -131,7 +136,7 @@ export function starterSnapshot(project, { slug, title, description, order = 0, 
   const takeAsset = a => {
     files.push({ path: `media/assets/${a.id}.mp4`, from: a.file, kind: 'video' });
     // A video keeps the link to the blockout clip it was made from, so Compare and the seam can pair them.
-    const from = a.source?.sourceAssetId && picks.some(pk => pk.blockout?.id === a.source.sourceAssetId) ? a.source.sourceAssetId : null;
+    const from = a.source?.sourceAssetId && picks.some(pk => pk.blockout?.id === a.source.sourceAssetId || pk.takeBlockouts.some(b => b.id === a.source.sourceAssetId)) ? a.source.sourceAssetId : null;
     // A blockout clip keeps the signature of the blocking it shows, so a copy can tell whether it still matches.
     const sig = a.source?.signature || project.shots.find(s => s.render?.assetId === a.id)?.render.signature || null;
     const source = a.kind === 'workflow-result' ? { workflow: a.source?.workflow || 'Video', backend: a.source?.backend || null, prompt: a.source?.prompt || '', sourceAssetId: from } : { engineShotId: null, ...(sig ? { signature: sig } : {}) };
@@ -146,8 +151,10 @@ export function starterSnapshot(project, { slug, title, description, order = 0, 
     if (!media) { delete out.id; return out; }
     const pk = picks[i];
     // The chosen start still goes last: the newest start key frame is the one in use.
-    out.references = [pk.end, pk.start].filter(Boolean).map(takeRef);
+    out.references = [...pk.stills, pk.end, pk.start].filter(Boolean).map(takeRef);
     if (pk.blockout) assets.push(takeAsset(pk.blockout));
+    for (const b of pk.takeBlockouts) assets.push(takeAsset(b));
+    for (const t of pk.takes) assets.push(takeAsset(t));
     if (pk.video) { assets.push(takeAsset(pk.video)); clips.push({ shotId: s.id, assetId: pk.video.id, in: pk.clip?.in ?? 0, out: pk.clip?.out ?? null }); }
     return out;
   });

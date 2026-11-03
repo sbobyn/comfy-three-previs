@@ -18,7 +18,7 @@
 // has not changed is not re-encoded, so re-exports leave unchanged media byte-identical.
 //
 // Options: --check; --<slug> <project-id> overrides a source project; --only <slug>; --no-media writes the
-// version 1 snapshot (no media); --max-mb <n> (default 80) keeps only the hero shots' videos when over.
+// version 1 snapshot (no media); --max-mb <n> (default 200) keeps only the hero shots' videos when over.
 import { readFile, writeFile, mkdir, readdir, rm, cp, mkdtemp } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
@@ -64,11 +64,11 @@ async function main(args) {
   const opt = name => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : undefined; };
   const server = opt('server'), dataDir = opt('data-dir') || process.env.PREVIS_DATA_DIR;
   if (!server && !dataDir) {
-    console.error('Usage: node scripts/export-starters.mjs (--server <url> | --data-dir <dir>) [--check] [--out <dir>] [--only <slug>] [--no-media] [--max-mb 80] [--<slug> <project-id>]');
+    console.error('Usage: node scripts/export-starters.mjs (--server <url> | --data-dir <dir>) [--check] [--out <dir>] [--only <slug>] [--no-media] [--max-mb 200] [--<slug> <project-id>]');
     process.exit(2);
   }
   const ids = Object.fromEntries(SOURCES.map(s => [s.slug, opt(s.slug)]).filter(([, id]) => id));
-  const { failed, diffs } = await exportStarters({ server, dataDir, out: opt('out'), only: opt('only'), media: !args.includes('--no-media'), maxMb: Number(opt('max-mb') || 80), check: args.includes('--check'), ids });
+  const { failed, diffs } = await exportStarters({ server, dataDir, out: opt('out'), only: opt('only'), media: !args.includes('--no-media'), maxMb: Number(opt('max-mb') || 200), check: args.includes('--check'), ids });
   if (failed) process.exitCode = 1;
   if (args.includes('--check')) {
     if (diffs.length) {
@@ -85,7 +85,7 @@ async function main(args) {
  * instead and return what differs from `out` (`diffs`: { path, change: 'changed' | 'added' | 'removed' }); `out` is never written.
  * `ids` overrides a source project per slug. `failed` counts starters whose project could not be read.
  */
-export async function exportStarters({ server, dataDir, out: outDir, only, media = true, maxMb = 80, check = false, ids = {}, log = console.log } = {}) {
+export async function exportStarters({ server, dataDir, out: outDir, only, media = true, maxMb = 200, check = false, ids = {}, log = console.log } = {}) {
   const target = outDir || STARTERS_DIR, maxBytes = maxMb * 1024 * 1024;
   const scratch = check ? await mkdtemp(join(tmpdir(), 'starters-check-')) : null;
   const out = scratch || target;

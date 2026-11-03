@@ -125,6 +125,8 @@ test('blockout starter copies open with current blockout clips, and a final-tier
       }
       // Look Lab ships one start still per shot (examples/starters/README.md); it shows the current blocking.
       if (s.slug === 'look-lab') { assert.equal(sh.references.length, 1, sh.title); assert.equal(stillStale(p, sh, sh.references[0]), false, `${sh.title}: the still is current`); }
+      // The others ship a start still only on a shot with a generated take (Lighthouse · Orbit right's storm), and it is current.
+      else if ((p.assets || []).some(a => a.shotId === sh.id && a.kind === 'workflow-result')) { assert.equal(sh.references.length, 1, `${s.slug} ${sh.title}`); assert.equal(stillStale(p, sh, sh.references[0]), false, `${s.slug} ${sh.title}: the still is current`); }
       else assert.equal(sh.references.length, 0, `${s.slug} ${sh.title}: no stills yet`);
     }
     const plan = planBatch(p, { steps: ['stills', 'videos'], tier: 'final', dryRun: true, maxCostUsd: 100 });

@@ -9,7 +9,7 @@ import { createProjectDocument, openDirector } from '../server/previs/director.m
 import { loadStarters, starterSnapshot, instantiateStarter, attachStarterMedia, starterCard, MODEL_BASE } from '../server/previs/starters.mjs';
 import { shotSignature } from '../shared/director.mjs';
 import { projectMesh } from '../shared/blockout-models.mjs';
-import { FINISHED_STARTERS, BLOCKOUT_STARTERS, LOOK_LAB_VIDEOS, LOOK_LAB_STILL_MODELS } from './helpers/starters.mjs';
+import { FINISHED_STARTERS, BLOCKOUT_STARTERS, LOOK_LAB_VIDEOS, LOOK_LAB_STILL_MODELS, BLOCKOUT_TAKES } from './helpers/starters.mjs';
 
 test('starter snapshots load in launch-page order, carry no absolute paths, and list media that is present', async () => {
   const starters = await loadStarters();
@@ -39,17 +39,18 @@ test('starter snapshots load in launch-page order, carry no absolute paths, and 
         assert.ok(clipped.has(shot.id) || s.shots.some(o => clipped.has(o.id) && shotSignature(s, o) === shotSignature(s, shot)), `${s.slug} ${shot.title} has no blockout clip`);
         assert.ok(shot.duration >= 4 && shot.duration <= 5);
         assert.ok((s.scene.entities.find(e => e.id === shot.camera.target)?.notes || '').trim(), `${s.slug} ${shot.title}: its subject has no Cast Card`);
-        if (!lookLab) { assert.equal(shot.references.length, 0); continue; }
+        if (!lookLab && !(BLOCKOUT_TAKES[s.slug] || []).includes(shot.title)) { assert.equal(shot.references.length, 0, `${s.slug} ${shot.title}: no stills`); continue; }
         assert.equal(shot.references.length, 1, `${shot.title}: one still`);
         const [still] = shot.references;
         assert.equal(still.role, 'frame'); assert.equal(still.note, 'key frame start');
         assert.equal(still.generated?.signature, shotSignature(s, shot), `${shot.title}: the still shows the current blocking`);
-        assert.equal(still.generated?.presetId, LOOK_LAB_STILL_MODELS[shot.title] || 'gpt-image-25', shot.title); assert.equal(still.generated?.regen, undefined, `${shot.title}: no manifest ships`);
+        if (lookLab) assert.equal(still.generated?.presetId, LOOK_LAB_STILL_MODELS[shot.title] || 'gpt-image-25', shot.title);
+        assert.equal(still.generated?.regen, undefined, `${shot.title}: no manifest ships`);
       }
       const videos = s.assets.filter(a => a.kind === 'workflow-result');
-      if (!lookLab) assert.ok(!videos.length && !s.edit.clips.length, `${s.slug}: no generated media`);
+      if (!lookLab && !BLOCKOUT_TAKES[s.slug]) assert.ok(!videos.length && !s.edit.clips.length, `${s.slug}: no generated media`);
       else {
-        assert.deepEqual(videos.map(v => s.shots.find(x => x.id === v.shotId).title).sort(), LOOK_LAB_VIDEOS, 'Look Lab videos');
+        assert.deepEqual(videos.map(v => s.shots.find(x => x.id === v.shotId).title).sort(), lookLab ? LOOK_LAB_VIDEOS : [...BLOCKOUT_TAKES[s.slug]].sort(), `${s.slug} videos`);
         // Each video is in the cut and points at its own shot's blockout clip, which shows the current blocking.
         assert.deepEqual(s.edit.clips.map(c => c.assetId).sort(), videos.map(v => v.id).sort());
         for (const v of videos) { const b = s.assets.find(a => a.id === v.source.sourceAssetId); assert.equal(b?.kind, 'camera-render'); assert.equal(b.shotId, v.shotId); assert.equal(b.source.signature, shotSignature(s, s.shots.find(x => x.id === v.shotId))); }
