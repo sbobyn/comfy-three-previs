@@ -179,6 +179,7 @@ dialog.confirm.home-run { width: min(600px, calc(100vw - 32px)); }
 .home-reel { animation-delay: 100ms; }
 .home-steps { animation-delay: 160ms; }
 .home-section { animation-delay: 220ms; }
+.home-hero-copy.is-shown > * { animation: none; }
 
 @keyframes home-rise { from { opacity: 0; transform: translateY(10px); } }
 @keyframes home-pop { from { opacity: 0; transform: translateY(-4px) scale(.98); } }

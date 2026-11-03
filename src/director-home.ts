@@ -348,10 +348,8 @@ async function render() {
     // Phones list projects before starters, except for someone new (fewer than 3 projects): starters first.
     h('main', { class: 'home' + (projects.length < 3 ? ' is-new' : '') },
       h('section', { class: 'home-hero' },
-        h('div', { class: 'home-hero-copy' },
-          h('p', { class: 'home-eyebrow' }, 'Previsualization for AI video'),
-          h('h1', {}, 'Block out the scene.', h('br'), h('span', {}, 'Generate the shot you meant.')),
-          h('p', { class: 'home-lede' }, 'Arrange a scene in 3D, direct the camera, and Comfy turns it into video.'),
+        h('div', { class: 'home-hero-copy' + (shellShown ? ' is-shown' : '') },
+          ...heroHead(),
           h('div', { class: 'home-actions' }, ...actions),
           // Said up front, before anyone tries to change something.
           DEMO ? h('p', { class: 'home-demo-note', role: 'note' }, h('strong', {}, 'Read-only demo.'), ' Open any scene and look around: camera, cast, stills and videos. Editing and generating run on your own machine.') : null,
@@ -368,7 +366,22 @@ async function render() {
         list, archivedList)));
 }
 
+const heroHead = () => [
+  h('p', { class: 'home-eyebrow' }, 'Previsualization for AI video'),
+  h('h1', {}, 'Block out the scene.', h('br'), h('span', {}, 'Generate the shot you meant.')),
+  h('p', { class: 'home-lede' }, 'Arrange a scene in 3D, direct the camera, and Comfy turns it into video.')];
+// The headline paints at once, before the projects, starters and their models load; the full page then keeps it in place (no second fade).
+let shellShown = false;
+function shell() {
+  if (app.childElementCount) return;
+  shellShown = true;
+  app.replaceChildren(
+    h('header', { class: 'home-top' }, h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Previs')),
+    h('main', { class: 'home is-new' }, h('section', { class: 'home-hero' }, h('div', { class: 'home-hero-copy is-shown' }, ...heroHead()), h('div', { class: 'home-hero-seam' }, h('div', { class: 'home-reel is-empty' })))));
+}
+
 export function renderHome() {
+  shell();
   document.addEventListener('click', ev => {
     document.querySelectorAll('.home-menu').forEach(m => { (m as HTMLElement).hidden = true; m.previousElementSibling?.setAttribute('aria-expanded', 'false'); });
     const status = document.querySelector<HTMLDetailsElement>('.home-status[open]');
