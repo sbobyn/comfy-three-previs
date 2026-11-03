@@ -77,9 +77,27 @@ dialog.takes .dialog-head { flex-wrap: wrap; }
 .tk-status { margin: 0; min-height: 1em; }
 .tk-foot { margin: 0; }
 
+/* Fixed-mask region edit (src/director-masked-edit.ts) — scoped to Take lab tokens only */
+dialog.takes.tk-edit { width: min(960px, 97vw); }
+.tk-edit-body { padding: 12px 18px 16px; display: flex; flex-direction: column; gap: 10px; overflow: auto; max-height: calc(94vh - 66px); }
+.tk-edit-status { margin: 0 18px 14px; min-height: 1.2em; }
+.tk-edit-meta { margin: 0; }
+.tk-edit-stage { position: relative; background: var(--stage); aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
+.tk-edit-video, .tk-edit-overlay { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+.tk-edit-overlay { cursor: crosshair; touch-action: none; }
+.tk-edit-tools, .tk-edit-rect, .tk-edit-acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tk-edit-field { display: inline-flex; flex-direction: column; gap: 2px; font-size: var(--fs-xs); color: var(--ink-2); }
+.tk-edit-field input[type="number"] { width: 5.5rem; }
+.tk-edit-prompt-label { display: flex; flex-direction: column; gap: 4px; }
+.tk-edit-prompt { width: 100%; resize: vertical; min-height: 4.5rem; }
+.tk-edit-quote { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--paper-2); }
+.tk-edit-quote > p { margin: 0; font-size: var(--fs-sm); }
+.btn.sm.tk-edit-open { margin-left: 0; }
+
 @media (max-width: 699px) {
   .tk-lanes { grid-template-columns: minmax(0, 1fr); }
   .tk-transport { flex-wrap: wrap; }
   .tk-clock { min-width: 0; }
   .tk-keys { display: none; }
+  .tk-edit-tools, .tk-edit-rect { flex-direction: column; align-items: stretch; }
 }

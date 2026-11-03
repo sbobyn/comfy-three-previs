@@ -56,7 +56,8 @@ const observe = createJobProgress({ connect: createProgressSocketFactory({ WebSo
 progress = createProgressCoordinator({ observe, sources: jobSources, budget });
 const generation = await generationRoutes(data,project,{ telemetry: progress.telemetry('generation'), budget, log: console.log });
 let refgen, agentRunner; // [agent]
-const director = await openDirector(data, { startersDir: process.env.PREVIS_STARTERS_DIR || undefined, engineJobs: () => generation.state().jobs, onImported: id => refgen?.load(id), runner: () => agentRunner });
+// listForSync omits quarantined masked-edit patches so syncResults never auto-promotes them as takes.
+const director = await openDirector(data, { startersDir: process.env.PREVIS_STARTERS_DIR || undefined, engineJobs: () => generation.listForSync(), onImported: id => refgen?.load(id), runner: () => agentRunner });
 const blenderImport = openBlenderImport({ data, director, previs: project });
 const assetImport = openAssetImport({ director, convert: convertToGlb });
 refgen = await openRefgen(data, director, { telemetry: progress.telemetry('refgen'), budget, log: console.log });

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { openGeneration } from './generation.mjs';
-import { validateWorkflowDefinition, assertNoSecrets, validateGraph } from './workflows.mjs';
+import { validateWorkflowDefinition, assertNoSecrets, validateGraph, isMaskedEditJob, MASKED_EDIT_PURPOSE } from './workflows.mjs';
 import { inspectOutputVideo } from './media-inspect.mjs';
 import { builtInPresets } from './presets.mjs';
 import { compactAsset, compactAssets } from './provenance.mjs';
@@ -20,6 +20,8 @@ export async function generationRoutes(data, project, options = {}) {
   // (project.append), so a concurrent bind, video-refs registration or edit never fails the attach with "Project changed".
   const attach=job=>{const task=attaching.then(()=>attachNow(job));attaching=task.catch(()=>{});return task;};
   async function attachNow(job) {
+    // Masked-edit patches stay quarantined: never auto-attach as ordinary engine takes.
+    if (isMaskedEditJob(job)) return;
     const missing=assets=>(job.results||[]).filter(r=>!(assets || []).some(a=>a.generationJobId===job.id&&a.key===r.key));
     if(!missing(project.get().assets).length)return;
     await project.append(next=>{
@@ -33,6 +35,12 @@ export async function generationRoutes(data, project, options = {}) {
   const additive=(revision,fn)=>{if(revision!==undefined&&(!Number.isInteger(revision)||revision>project.get().revision)){const e=Error('Unknown project revision; refresh first');e.status=409;throw e;}return project.append(fn);};
   let resultDirector;
   generation.setAttachment(async job=>{
+    if (isMaskedEditJob(job)) {
+      // Quarantined patch: complete against a durable candidate receipt, not director takes.
+      const ok = await generation.durableMaskedCandidate(job);
+      if (!ok) throw Error('Masked-edit durable candidate is missing; local capture/composite verification required');
+      return;
+    }
     await attach(job);
     const id=job.shot?.browser?.director?.projectId;
     if(id){
@@ -49,14 +57,14 @@ export async function generationRoutes(data, project, options = {}) {
     name:'generation',list:generation.list,get:id=>generation.get(id),isActive:generation.isActive,track:(id,tracking)=>generation.track(id,tracking),
     expectedSeconds:generation.expectedSeconds,label:generation.label,kindOf:generation.kindOf,
     projectIdOf:job=>job.shot?.browser?.director?.projectId||null,costOf:job=>job.quote?.amount??job.quote?.estimate??null,
-    resultsOf:job=>(job.results||[]).map(r=>({id:r.id,kind:r.kind,url:r.url})),
+    resultsOf:job=>isMaskedEditJob(job)?[]:(job.results||[]).map(r=>({id:r.id,kind:r.kind,url:r.url})),
   });};
   async function route(path,input) {
     assertNoSecrets(input);
     if(path==='/api/generation/inspect')return generation.inspect(input.backend);
     if(path==='/api/generation/validate'){
       const definition=validateWorkflowDefinition(input.definition), inspected=await generation.inspect(input.backend);
-      const deferredInputs=Object.entries(definition.inputs).filter(([role])=>role!=='prompt').map(([role,m])=>({...m,kind:['sourceVideo','controlVideo'].includes(role)?'video':role==='audio'?'audio':'image'}));
+      const deferredInputs=Object.entries(definition.inputs).filter(([role])=>role!=='prompt').map(([role,m])=>({...m,kind:['sourceVideo','controlVideo','maskVideo'].includes(role)?'video':role==='audio'?'audio':'image'}));
       return {definition,backend:inspected.backend,validation:validateGraph(definition.graph,inspected.objectInfo,{deferredInputs})};
     }
     if(path==='/api/generation/preset') {
@@ -70,7 +78,7 @@ export async function generationRoutes(data, project, options = {}) {
         if(!p.shots.some(s=>s.id===input.shotId))throw Error('Choose a saved originating shot');
         const definition=p.workflowDefinitions?.find(d=>d.id===input.definitionId);
         if(!definition)throw Error('Save the mapped workflow preset first');
-        for(const role of ['sourceVideo','controlVideo','firstFrame']){
+        for(const role of ['sourceVideo','controlVideo','firstFrame','maskVideo']){
           const b=input.assetBindings?.[role]; if(!b)continue;
           const asset=b.assetId?p.assets?.find(a=>a.id===b.assetId):p.renders.find(r=>r.id===b.renderId);
           if(!asset||asset.shotId!==input.shotId)throw Error('The primary input must belong to the originating shot');
@@ -92,5 +100,6 @@ export async function generationRoutes(data, project, options = {}) {
     }
     throw Error('Unknown generation operation');
   }
-  return {state,route,attach,trackerSource,useTracker:t=>{tracker=t;}};
+  // listForSync: wire as openDirector({ engineJobs: () => generationRoutes.listForSync() }) so syncResults skips quarantined patches.
+  return {state,route,attach,trackerSource,useTracker:t=>{tracker=t;},listForSync:generation.listForSync,MASKED_EDIT_PURPOSE};
 }

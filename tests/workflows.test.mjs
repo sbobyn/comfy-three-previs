@@ -7,7 +7,8 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { openProject } from '../server/previs/store.mjs';
 import { atomicJson } from '../server/previs/atomic.mjs';
-import { validateWorkflowDefinition, validateGraph, hashValue, hashBytes, workflowCost, validateApproval, assertNoSecrets } from '../server/previs/workflows.mjs';
+import { validateWorkflowDefinition, validateGraph, hashValue, hashBytes, workflowCost, validateApproval, assertNoSecrets, MASKED_EDIT_PURPOSE, isMaskedEditDefinition } from '../server/previs/workflows.mjs';
+import { builtInPresets } from '../server/previs/presets.mjs';
 import { createBackend, backendSnapshot, backendTransportKey, safeMediaLocation } from '../server/previs/backends.mjs';
 import { openGeneration, declaredOutputs, validateAssetConstraints } from '../server/previs/generation.mjs';
 import { createSlots } from '../server/previs/concurrency.mjs';
@@ -22,6 +23,17 @@ const schema = {
 const definition = () => ({ version: 1, id: 'definition', task: 'passthrough', graph: structuredClone(graph), inputs: { image: { nodeId: '1', input: 'image' } }, outputs: [{ nodeId: '2', mediaType: 'image/png' }], pricing: { status: 'estimate', currency: 'USD', ratePerSecond: 0.1 } });
 const approve = job => ({ approved: true, fingerprint: job.fingerprint, allowance: { currency: 'USD', maxAmount: 0 } });
 const deferred = [{ nodeId: '1', input: 'image', kind: 'image', mime: 'image/png', filename: 'new.png' }];
+
+test('masked-video-edit requires sourceVideo + maskVideo; purpose constant is quarantined', () => {
+  assert.equal(MASKED_EDIT_PURPOSE, 'masked-edit-patch');
+  const masked = structuredClone(builtInPresets.find(p => p.id === 'wan-vace-14b-masked-v1'));
+  assert.equal(isMaskedEditDefinition(validateWorkflowDefinition(masked)), true);
+  assert.throws(() => validateWorkflowDefinition({ ...masked, inputs: { sourceVideo: masked.inputs.sourceVideo, prompt: masked.inputs.prompt } }), /maskVideo/);
+  assert.throws(() => validateApproval({
+    approved: true, fingerprint: 'x',
+    allowance: { currency: 'USD', maxAmount: 0.05, allowUnknownCharges: true },
+  }, 'x', { status: 'unknown', currency: 'USD', estimate: 0.12, reservationRequiredUsd: 0.132 }), /Run allowance is below the required reservation/);
+});
 
 test('definition roundtrip preserves unknown nodes, private model names, LoRA chains and author strengths', () => {
   const source = definition();
