@@ -19,6 +19,7 @@ import { cameraSourceOf } from './camera-source.mjs';
 import { maxReferences } from './video-refs.mjs';
 import { winnerOf, cutClip } from './takes.mjs';
 import { FIRST_FRAME_FALLBACK } from './tiers.mjs';
+import { AXIS_IDS, effectiveLook, baseShotOf, hasLook } from './look-presets.mjs';
 
 export { REGEN_VERSION };
 const STILL_ASPECT = '16:9';
@@ -53,6 +54,22 @@ function castParts(project, shot, parts) {
   for (const r of castRows(project, shot)) if (r.inCast) { parts[`look:${r.entity.id}`] = objectLooks(project, r.entity.id)[0]?.id || 'none'; parts[`card:${r.entity.id}`] = cardHash(project, r.entity.id); }
 }
 const blockingOf = (project, shot) => blockoutManifest(project, shot).parts;
+/**
+ * preset:<axis> (the preset id) and preset:subject:<objectId> (a hash of its swap text) for every axis the shot's look sets
+ * (shared/look-presets.mjs). Recorded only when set, so outputs made without presets keep their keys. The composed prompt
+ * already carries the look; these parts make the reason readable ("Time of day preset changed (night → dawn)").
+ */
+function lookParts(project, shot, parts) {
+  const look = effectiveLook(project, shot);
+  for (const a of AXIS_IDS) if (look[a]) parts[`preset:${a}`] = look[a];
+  for (const [id, text] of Object.entries(look.subjects || {})) parts[`preset:subject:${id}`] = hashValue(text);
+}
+/** A variant's still is an edit of its base shot's still at the same moment: `base` is that still's id ('none' when missing). */
+function baseStillPart(project, shot, at, parts) {
+  const base = baseShotOf(project, shot); if (!base) return;
+  const notes = momentNote(at);
+  parts.base = base.references.filter(r => r.role === 'frame' && notes.includes(r.note || '')).at(-1)?.id || 'none';
+}
 
 // ---------- Keys ----------
 /** The blockout clip's manifest (shared/director.mjs). */
@@ -79,7 +96,7 @@ export function lookPromptView(project, entity, prompt) {
 /** A key-frame still's manifest at moment `at` ('start', 'end' or seconds). The seed is the shot's seed setting for `model`. */
 export function stillKey(project, shot, at, { model } = {}) {
   const parts = { ...blockingOf(project, shot), moment: hashValue(normalAt(at)), prompt: hashValue(shotPrompt(project, shot, 'image')) };
-  castParts(project, shot, parts);
+  castParts(project, shot, parts); lookParts(project, shot, parts); baseStillPart(project, shot, normalAt(at), parts);
   if (model !== undefined) { parts.model = model; parts.params = hashValue({ aspect: STILL_ASPECT }); parts.seed = resolveImageParams(model, shot).seed ?? 'random'; }
   return manifest('still', parts, { at: normalAt(at) });
 }
@@ -98,6 +115,7 @@ export function videoUses(def) {
  */
 export function videoKey(project, shot, { def = null, model, cameraSource = def ? cameraSourceOf(def) : 'blockout', uses = videoUses(def) } = {}) {
   const parts = { ...blockingOf(project, shot), source: cameraSource, prompt: hashValue(shotPrompt(project, shot, 'video', { cameraSource })) };
+  lookParts(project, shot, parts);
   const ks = keyStills(shot);
   for (const at of uses.stills || []) parts[`still:${at}`] = (at === 'start' ? ks.start : ks.end)?.id || 'none';
   if (uses.looks) castParts(project, shot, parts);
@@ -146,6 +164,7 @@ export function nodeOutput(project, node) {
   return null;
 }
 const recordedOf = (type, rec) => (type === 'blockout' ? rec.regen : type === 'video' ? rec.source?.regen : rec.generated?.regen);
+const LEGACY_LOOK = { code: 'look-preset', part: 'preset', text: 'look presets were set after it was made (older output: no per-input record)' };
 const LEGACY = { code: 'blocking', part: 'signature', text: 'the camera, timing or scene changed since it was made (older output: no per-input record)' };
 
 /**
@@ -171,6 +190,8 @@ export function explainStale(project, node, opts = {}) {
     legacy = true;
     const old = node.type === 'blockout' ? blockoutStale(project, shot) : node.type === 'still' ? stillStale(project, shot, { ...rec, pinned: false }) : node.type === 'video' ? videoStale(project, shot, { ...rec, pinned: false }) : false;
     reasons = old ? [LEGACY] : [];
+    // An output without a manifest predates look presets: if the shot now has a look, it was made without it.
+    if ((node.type === 'still' || node.type === 'video') && hasLook(effectiveLook(project, shot))) reasons.push(LEGACY_LOOK);
   }
   const blocking = reasons.some(r => r === LEGACY || isBlockingPart(r.part) || r.code.startsWith('object-'));
   const state = rec.pinned ? 'pinned' : reasons.length ? 'stale' : 'fresh';

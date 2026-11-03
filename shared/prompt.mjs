@@ -6,6 +6,7 @@
 import { shotObjects, castCard, MOVES } from './director.mjs';
 import { cameraLine, lookMedium, withCameraLine } from './camera-source.mjs';
 import { applySections, sectionsText } from './prompt-sections.mjs';
+import { effectiveLook, hasLook, lookSectionTexts } from './look-presets.mjs';
 
 // Camera vocabulary for style tags. Each term is the exact text added to the prompt.
 export const CAMERA_TERMS = {
@@ -67,7 +68,7 @@ const cap1 = x => x.charAt(0).toUpperCase() + x.slice(1);
  * a second named cast member (shortened to their first sentence when needed) and the lens and filter hints, then
  * adds the rest by priority while it fits `cap`: format, look, set, more named cast, other cast, set pieces.
  */
-export function autoPromptSegments(project, shot, kind = 'video', { cap = kind === 'video' ? VIDEO_PROMPT_CAP : Infinity, cameraSource = 'blockout', sent = null } = {}) {
+export function autoPromptSegments(project, shot, kind = 'video', { cap = kind === 'video' ? VIDEO_PROMPT_CAP : Infinity, cameraSource = 'blockout', sent = null, ensure = [] } = {}) {
   const { entities, environment } = project.scene;
   const items = []; // { order, priority, seg } or set pieces { order: 3, priority, piece, ids }
   const seen = new Set();
@@ -102,8 +103,10 @@ export function autoPromptSegments(project, shot, kind = 'video', { cap = kind =
   const world = fresh(pieces(environment?.description)).join('; ');
   if (world) items.push({ order: 3, priority: 5, piece: world, ids: [] });
   for (const g of groups.filter(x => x.cards[0].kind === 'environment')) for (const x of fresh(pieces(g.text))) items.push({ order: 3, priority: 30, piece: x, ids: g.cards.map(c => c.id) });
+  // A look preset can set the world or the look of a scene that has none written (`ensure`): those sections then exist to override.
+  if (!world && !items.some(x => x.piece) && ensure.includes('world')) items.push({ order: 3, priority: 5, piece: 'the scene as blocked', ids: [] });
   const look = fresh(pieces(environment?.style)).join('. ');
-  if (look) items.push({ order: 4, priority: 4, seg: mk('style', 'Visual style', 'Project style', FIELD_COLORS.style, sentence(`Look: ${look}`)) });
+  if (look || ensure.includes('style')) items.push({ order: 4, priority: 4, seg: mk('style', 'Visual style', look ? 'Project style' : 'Look preset', FIELD_COLORS.style, look ? sentence(`Look: ${look}`) : '') });
   // The camera line repaints the blockout in the project's look: photoreal unless the style names another medium. A shot's
   // own look sections can name another (sectionedSegments swaps the line for theirs).
   if (kind === 'video') items.push({ order: 5, priority: 1, seg: mk('camera', 'Camera', CAMERA_FROM[cameraSource] || CAMERA_FROM.still, FIELD_COLORS.camera, cameraLine(cameraSource, lookMedium(environment?.style))) });
@@ -169,7 +172,23 @@ export const autoPromptText = (project, shot, kind = 'video', opts) => autoPromp
  * applySections): one row per candidate section, in prompt order, with its policy and whether it is sent.
  */
 export function sectionedSegments(project, shot, kind = 'video', opts = {}) {
-  const overrides = shot.promptSections?.[kind] || {}, source = opts.cameraSource || 'blockout';
+  // Look presets (shared/look-presets.mjs) act as overrides under your own; when they push a video prompt over its cap, their
+  // compact forms are used instead.
+  const rows = sectionedRows(project, shot, kind, opts, sectionOverrides(project, shot, kind));
+  const cap = opts.cap ?? (kind === 'video' ? VIDEO_PROMPT_CAP : Infinity);
+  if (!hasLook(effectiveLook(project, shot)) || sectionsText(rows).length <= cap) return rows;
+  let last = rows;
+  for (const compact of [true, 'tight', 'minimal']) { last = sectionedRows(project, shot, kind, opts, sectionOverrides(project, shot, kind, { compact })); if (sectionsText(last).length <= cap) return last; }
+  return last; // still over: the shot's own required text fills the budget (videoPromptPlan reports lookWarning)
+}
+/** The shot's section overrides for a kind: its look presets' sections, with your own overrides and locks on top. */
+export function sectionOverrides(project, shot, kind = 'video', { compact = false } = {}) {
+  const own = shot.promptSections?.[kind] || {}, look = effectiveLook(project, shot);
+  return hasLook(look) ? { ...lookSectionTexts(project, shot, kind, look, { groups: castGroups(project, shot), compact }), ...own } : own;
+}
+function sectionedRows(project, shot, kind, opts, overrides) {
+  const source = opts.cameraSource || 'blockout';
+  opts = { ...opts, ensure: Object.keys(overrides) };
   const full = kind === 'image' && opts.cap === undefined ? null : autoPromptSegments(project, shot, kind, { ...opts, cap: Infinity });
   // A video's camera line follows the shot's chosen look: its format and look sections, overrides included.
   const line = rows => cameraLine(source, sectionsMedium(rows));
@@ -188,8 +207,8 @@ export function sectionedSegments(project, shot, kind = 'video', opts = {}) {
 export const sectionsMedium = rows => lookMedium(rows.filter(r => (r.key === 'intro' || r.key === 'style') && r.text && r.status !== 'orphan').map(r => r.text).join(' '));
 /** The composed prompt with the shot's section overrides and locks (the auto-prompt when there are none). */
 export function composedPromptText(project, shot, kind = 'video', opts = {}) {
-  const overrides = shot.promptSections?.[kind];
-  return overrides && Object.keys(overrides).length ? sectionsText(sectionedSegments(project, shot, kind, opts)) : autoPromptText(project, shot, kind, opts);
+  const overrides = sectionOverrides(project, shot, kind);
+  return Object.keys(overrides).length ? sectionsText(sectionedSegments(project, shot, kind, opts)) : autoPromptText(project, shot, kind, opts);
 }
 /**
  * The prompt actually used: the user's whole-prompt edit if there is one, else the composed prompt (the auto-prompt with

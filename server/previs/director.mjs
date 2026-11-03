@@ -9,6 +9,8 @@ import { renderEdit, withTemp, imageToPng } from './edit.mjs';
 import { normalizePrompts, normalizeStyle } from '../../shared/prompt.mjs';
 import { mergePromptSections, appendPromptVersion } from '../../shared/prompt-sections.mjs';
 import { normalizeShotSettings } from '../../shared/model-params.mjs';
+import { normalizeLook } from '../../shared/look-presets.mjs';
+import { addVariantShots } from '../../shared/look-variants.mjs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { recoveryId, saveResultBytes } from './result-recovery.mjs';
@@ -194,6 +196,9 @@ export function applyOps(p, ops) {
         // Model and settings per kind (shared/model-params.mjs): { video|image: { model, params } | null } replaces that kind.
         // Motion/direction-critical (shared/blockout-fidelity.mjs): video advice recommends a route that edits the blockout clip.
         if (patch.motionCritical !== undefined) { if (patch.motionCritical === true) s.motionCritical = true; else delete s.motionCritical; }
+        // Look presets (shared/look-presets.mjs): the shot's own look on top of the project default; null or {} clears it.
+        if (patch.look !== undefined) { const v = normalizeLook(patch.look); if (Object.keys(v).length) s.look = v; else delete s.look; }
+        if (patch.variantOf !== undefined) { const b = patch.variantOf === null ? null : resolveShot(p, patch.variantOf); if (patch.variantOf !== null && (!b || b.id === s.id)) fail('variantOf must name another shot'); if (b) s.variantOf = b.id; else delete s.variantOf; }
         if (patch.settings !== undefined) { const v = normalizeShotSettings(patch.settings === null ? {} : { ...(s.settings || {}), ...Object.fromEntries(Object.entries(patch.settings).filter(([, x]) => x !== null)) }); for (const [k, x] of Object.entries(patch.settings || {})) if (x === null) delete v[k]; if (Object.keys(v).length) s.settings = v; else delete s.settings; }
         if (patch.cast !== undefined) {
           const known = id => resolveEntity(p, id)?.id || fail(`Unknown object ${id}`);
@@ -299,8 +304,16 @@ export function applyOps(p, ops) {
         }), updatedAt: now() };
         results.push({ op: op.op, clips: p.edit.clips.length }); break;
       }
+      case 'add_variants': {
+        // Variants of a base shot (shared/look-presets.mjs): copies with the same camera, timing and blocking whose look differs
+        // on one axis each (or every combination, only with combine: true). An identical variant that exists is reused.
+        let r; try { r = addVariantShots(p, resolveShot(p, op.shotId)?.id, { axes: op.axes, combine: op.combine === true, looks: op.looks }, randomUUID); } catch (e) { fail(e.message); }
+        results.push({ op: op.op, ids: r.ids, existing: r.existing, base: r.base.id }); break;
+      }
       case 'set_project': {
         if (op.patch?.title !== undefined) p.title = String(op.patch.title).slice(0, 120) || p.title;
+        // The project's default look (shared/look-presets.mjs); null or {} clears it.
+        if (op.patch?.look !== undefined) { const v = normalizeLook(op.patch.look); if (Object.keys(v).length) p.look = v; else delete p.look; }
         results.push({ op: op.op }); break;
       }
       case 'set_middle_keys': case 'use_as_key_still': results.push(applyKeyframeOp(p, op, { resolveShot, newId: randomUUID, now })); break; // shared/keyframes.mjs

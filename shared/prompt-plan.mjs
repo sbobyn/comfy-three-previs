@@ -11,6 +11,7 @@
 //   mode 'edit'     – the shot's whole-prompt edit (Prompt block), section controls paused
 //   mode 'request'  – text typed for this one request (Generate dialog, storyboard composer, MCP `prompt`)
 //   mode 'compiled' – the fallback compiled prompt with numbered references (shared/director.mjs compilePrompt)
+import { effectiveLook, hasLook } from './look-presets.mjs';
 import { sectionedSegments, sectionsMedium, shotPrompt, VIDEO_PROMPT_CAP } from './prompt.mjs';
 import { CAMERA_SOURCE_LABELS, cameraLine, cameraLineIn, cameraMotionWarning, cameraMotionWords, fitPrompt, stripCameraLines, withCameraLine } from './camera-source.mjs';
 import { compilePrompt, referenceLegend } from './director.mjs';
@@ -91,7 +92,9 @@ export function videoPromptPlan(project, shot, { cameraSource = 'blockout', refs
   const text = fitPrompt(pre, maxLength, cameraSource);
   settle(rows, text, maxLength);
   for (const r of rows) if (r.status === 'cut' && !r.why) r.why = `Cut to fit the model’s ${maxLength}-character prompt limit`;
-  return { kind: 'video', mode, model, cameraSource, cameraLabel: CAMERA_SOURCE_LABELS[cameraSource], text, length: text.length, maxLength: Number.isInteger(maxLength) ? maxLength : null, autoPromptCap: cap, cut: pre.length > text.length, sections: rows, cameraWarning: cameraMotionWarning(text, cameraSource), ...counts(rows) };
+  // Look presets are kept even when the shot's required text (action, lead, camera rule) already fills the budget: say so.
+  const lookWarning = mode === 'sections' && hasLook(effectiveLook(project, shot)) && text.length > cap ? `The look presets run ${text.length - cap} characters past this shot’s ${cap}-character budget: its action, lead and camera rule already fill it. The look is kept (the model takes up to ${maxLength ?? text.length}); shorten the shot description to make room.` : '';
+  return { ...(lookWarning ? { lookWarning } : {}), kind: 'video', mode, model, cameraSource, cameraLabel: CAMERA_SOURCE_LABELS[cameraSource], text, length: text.length, maxLength: Number.isInteger(maxLength) ? maxLength : null, autoPromptCap: cap, cut: pre.length > text.length, sections: rows, cameraWarning: cameraMotionWarning(text, cameraSource), ...counts(rows) };
 }
 
 /**

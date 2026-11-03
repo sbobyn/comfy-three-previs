@@ -4,13 +4,15 @@
 // A node's estimate is its expected charge: list price + reference images + the paid still grader (shared/tiers.mjs
 // estimateBreakdown). Its reserve adds the budget's safety margin, and the batch cap counts reserves, so a batch can no longer
 // plan under its cap and bill over it. A node with an unknown price is never submitted. Nothing is resent after an uncertain outcome.
+import { effectiveLook, baseShotOf, variantLabel, variantModels, VARIANT_STILL_MODEL, VARIANT_VIDEO_MODELS } from '../../shared/look-presets.mjs';
+import { baseStill, addVariantShots } from '../../shared/look-variants.mjs';
 import { mkdir, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { atomicJson } from './atomic.mjs';
 import { assertNoSecrets } from './workflows.mjs';
 import { builtInPresets } from './presets.mjs';
-import { stillStale, castRows, lookSource, objectLooks } from '../../shared/director.mjs';
+import { stillStale, castRows, lookSource, objectLooks, shotSignature } from '../../shared/director.mjs';
 import { explainStale, videoVerdict } from '../../shared/regen.mjs';
 import { cameraSourceOf, CAMERA_SOURCE_LABELS } from '../../shared/camera-source.mjs';
 import { maxReferences } from '../../shared/video-refs.mjs';
@@ -85,6 +87,8 @@ export function normalizeInput(input = {}) {
 // the model's limit (src/director.ts picks the real ones at dispatch; the whole cast is the upper bound for "in frame").
 // grades: one paid grade per still when the grader is on.
 function stillInputs(project, shot, model, castCount, costs) {
+  // A look variant sends the base still (image 1), the cast and an optional style reference, never the previous shot.
+  if (shot.variantOf) { const cap = maxRefsFor(model), style = variantModels(project, shot, effectiveLook(project, shot)).styleRef ? 1 : 0; return { refs: cap ? 1 + Math.min(cap - 1, castCount + style) : 0, grades: costs.graderOn ? 1 : 0 }; }
   const cap = maxRefsFor(model), prev = project.shots.indexOf(shot) > 0 ? 1 : 0;
   return { refs: cap ? 1 + Math.min(cap - 1, castCount + prev) : 0, grades: costs.graderOn ? 1 : 0 };
 }
@@ -190,6 +194,22 @@ export function planBatch(project, raw, { definitions = builtInPresets, costs = 
       if (still.has(at)) { n.deps.push(still.get(at).id); if (at === 'end' && endOptional) (n.optional ||= []).push(still.get(at).id); }
       else if (!hasStill(project, s, at) && !(at === 'end' && endOptional)) planError({ status: 'failed', planError: true, error: `Needs a ${at} key frame; add the stills step` });
     }
+  }
+  // Look variants (shared/look-presets.mjs): a variant's still is an edit of its base's still at the same moment, so it waits for
+  // that still when this batch makes it, and cannot be made without one. Variant nodes say which attribute differs from the base.
+  for (const s of shots.filter(x => x.variantOf)) {
+    const base = baseShotOf(project, s); if (!base) continue;
+    const variant = { baseId: base.id, label: variantLabel(project, effectiveLook(project, base), effectiveLook(project, s)) };
+    for (const n of nodes.filter(x => x.target?.shotId === s.id)) n.variant = variant;
+    for (const n of nodes.filter(x => x.type === 'still' && x.target.shotId === s.id)) {
+      const up = byId.get(`still:${base.id}${atKey(n.target.t)}`);
+      if (up && up.status !== 'skipped') n.deps.push(up.id);
+      else if (!baseStill(project, s, n.target.t) && n.status !== 'skipped') Object.assign(n, { status: 'failed', planError: true, error: `Needs the base shot’s ${atLabel(n.target.t)} still: a variant is an edit of it. Add the base shot to the batch or make its still first` });
+    }
+    const blockout = byId.get(`blockout:${s.id}`);
+    if (blockout && shotSignature(project, base) === shotSignature(project, s)) blockout.note = blockout.status === 'skipped' ? 'Same blocking as the base: identical clip' : 'Same blocking as the base: the identical clip is rendered (free)';
+    const video = byId.get(`video:${s.id}`), lead = project.scene.entities.find(e => e.id === s.camera?.target);
+    if (video && video.model === VARIANT_VIDEO_MODELS.cheap && (s.motionCritical || lead?.kind === 'character')) video.timingAdvice = { message: `${lead?.name || 'The lead'} walks: Kling O1 edit rushed a walking character ahead of the blockout in testing; Seedance 2.5 edit kept its pace.`, recommend: VARIANT_VIDEO_MODELS.timing };
   }
   // Everything downstream of a node that is made again (it replaces an out-of-date output) is made again too, unless pinned.
   // A first output (a look an object never had) fills a gap and leaves what was made without it alone.
@@ -397,13 +417,33 @@ export async function openBatches(root, options = {}) {
   }
 
   const prune = () => { for (const b of batches.values()) if (expiredPlan(b)) batches.delete(b.id); };
+  async function withVariants(project, raw) {
+    const v = raw.variants || {}, args = { axes: v.axes, combine: v.combine === true, looks: v.looks };
+    let r;
+    if (raw.dryRun) {
+      project = structuredClone(project);
+      try { const x = addVariantShots(project, v.shot, args, randomUUID); r = { base: x.base.id, ids: x.ids, existing: x.existing }; } catch (e) { fail(e.message); }
+    } else {
+      if (!options.addVariants) fail('Variants are not available on this server');
+      const res = await options.addVariants(project.id, { op: 'add_variants', shotId: v.shot, ...args });
+      r = res.results?.[0] || res; project = await loadProject(project.id);
+    }
+    const base = project.shots.find(s => s.id === r.base), rec = variantModels(project, base, effectiveLook(project, base));
+    const shots = [...(v.includeBase ? [base.id] : []), ...r.ids, ...r.existing];
+    return { project, variants: { base: base.id, preview: !!raw.dryRun, shots, ids: r.ids, existing: r.existing, why: rec.why },
+      raw: { ...raw, shots, steps: raw.steps || ['stills', 'videos'], stillsAt: raw.stillsAt || ['start'], models: { stills: VARIANT_STILL_MODEL, videos: rec.video, ...(raw.models || {}) } } };
+  }
   const get = id => { prune(); const b = batches.get(id); if (!b) fail('Unknown batch', 404); return b; };
   return {
     /** Begin ticking (after the HTTP server listens, so loopback drivers can reach it). Resumes running batches. */
     start() { started = true; for (const b of batches.values()) if (watching(b)) { if (b.status === 'running') event(b, 'Resumed after server start'); schedule(b.id, 0); } },
-    async create(raw) {
-      if (!uuid.test(raw?.projectId || '')) fail('Unknown project', 404);
-      const project = await loadProject(raw.projectId);
+    async create(raw0) {
+      if (!uuid.test(raw0?.projectId || '')) fail('Unknown project', 404);
+      let project = await loadProject(raw0.projectId), raw = raw0, variants = null;
+      // Look variants (shared/look-presets.mjs): fan one base shot out over preset looks, single-axis unless combine is asked for.
+      // A dry run plans them on a copy of the project (a preview: one quote, nothing saved, it cannot be resumed); a run adds the
+      // variant shots to the project first (options.addVariants, the `add_variants` edit op), then plans those shots.
+      if (raw0.variants) ({ project, raw, variants } = await withVariants(project, raw0));
       const costs = { ...DEFAULT_COSTS, ...(typeof options.costs === 'function' ? options.costs() : options.costs) };
       const { input, nodes } = planBatch(project, raw, { definitions: definitions(project), costs });
       const planned = nodes.filter(n => !['skipped', 'failed'].includes(n.status)), breakdown = sumBreakdowns(planned.map(n => n.breakdown));
@@ -413,6 +453,7 @@ export async function openBatches(root, options = {}) {
       const t = iso(now()), b = { id: randomUUID(), projectId: project.id, status: input.dryRun ? 'planned' : 'running', createdAt: t, updatedAt: t, steps: input.steps, tier: input.tier, models: input.models,
         maxCostUsd: input.maxCostUsd, estimateUsd, reserveUsd, breakdown: { ...breakdown, marginPct: costs.marginPct, graderOn: costs.graderOn }, regen, ...(input.force ? { force: input.force } : {}), costs, spentEstimateUsd: 0, budgetSkipped: 0, dryRun: input.dryRun, ...(input.retryWeakMatch ? { retryWeakMatch: true } : {}), ...(input.shots ? { shots: input.shots } : {}), ...(input.objects ? { objects: input.objects } : {}), nodes, events: [] };
       event(b, `Planned ${nodes.length} nodes for “${project.title}”: ${regen.remake} of ${regen.total} need regenerating${regen.pinned ? ` (${regen.pinned} pinned)` : ''}, ≈ ${usd(estimateUsd)} expected (${describeBreakdown({ ...breakdown, marginUsd: 0 })}${breakdown.marginUsd ? `; reserves ${usd(reserveUsd)} with the ${costs.marginPct}% margin` : ''}) (${input.tier}), cap ${usd(input.maxCostUsd)}${input.dryRun ? '; dry run, nothing submitted' : ''}`);
+      if (variants) b.variants = { ...variants, list: variants.shots.map(id => { const s = project.shots.find(x => x.id === id); return { shotId: id, title: s.title, label: s.variantOf ? variantLabel(project, effectiveLook(project, baseShotOf(project, s)), effectiveLook(project, s)) : 'Base', existing: variants.existing.includes(id) }; }) };
       if (!input.dryRun) resolve(b);
       batches.set(b.id, b); if (!input.dryRun) await persist(b);
       if (!input.dryRun) schedule(b.id, 0);
@@ -430,6 +471,7 @@ export async function openBatches(root, options = {}) {
     /** Resume a planned, paused, cancelled or finished batch: retry cancelled, blocked, over-budget and failed nodes — never uncertain ones. */
     async resume(id, { maxCostUsd } = {}) {
       const b = get(id);
+      if (b.variants?.preview) fail('This was a preview of variants that do not exist yet; run the batch again without dryRun to add and make them');
       if (b.status === 'running') return structuredClone(b);
       if (maxCostUsd != null) { const cap = Number(maxCostUsd); if (!Number.isFinite(cap) || cap < b.spentEstimateUsd) fail(`maxCostUsd must be at least the ${usd(b.spentEstimateUsd)} already committed`); b.maxCostUsd = cap; }
       for (const n of b.nodes) if (n.cancelled || n.status === 'budget' || (n.status === 'failed' && !n.uncertain && !n.recoveryRequired && !n.planError))

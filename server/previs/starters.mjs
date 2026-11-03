@@ -6,6 +6,7 @@
 // a starter deep-copies the snapshot with fresh ids and copies whichever media files are present.
 // Imported models (docs/import.md) travel as media/refs/<id>.glb, copied byte for byte; in the snapshot their
 // `model` points at a placeholder project (MODEL_BASE) and each copy points it at its own project folder.
+import { normalizeLook } from '../../shared/look-presets.mjs';
 import { readFile, copyFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -42,6 +43,9 @@ function shotExtras(shot, x, re = id => id) {
     }
     if (k === 'settings' && x.settings) { const v = normalizeShotSettings(x.settings); if (Object.keys(v).length) shot.settings = v; }
     if (k === 'motionCritical' && x.motionCritical === true) shot.motionCritical = true;
+    // Look presets: subject swaps name objects (re-keyed like sections); variantOf is re-keyed to the copy's shot ids afterwards.
+    if (k === 'look' && x.look) { const v = normalizeLook({ ...x.look, subjects: Object.fromEntries(Object.entries(x.look.subjects || {}).map(([id, t]) => [re(id), t]).filter(([id]) => id)) }); if (Object.keys(v).length) shot.look = v; }
+    if (k === 'variantOf' && typeof x.variantOf === 'string') shot.variantOf = x.variantOf;
   }
 }
 
@@ -228,6 +232,7 @@ export function instantiateStarter(s, { has = () => true, projectId = MODEL_BASE
     shot.references = (src.references || []).map(copyRef).filter(Boolean);
     return shot;
   });
+  for (const shot of shots) if (shot.variantOf) { const id = shotMap.get(shot.variantOf); if (id) shot.variantOf = id; else delete shot.variantOf; }
   const assetMap = new Map();
   const assets = (s.assets || []).flatMap(a => {
     const path = `media/${a.file}`, shotId = shotMap.get(a.shotId);

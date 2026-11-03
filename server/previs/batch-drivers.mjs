@@ -1,5 +1,6 @@
 // Batch drivers. `fakeBackend()` simulates refgen/generation jobs and the job dashboard (tests, PREVIS_BATCH_FAKE=1);
 // it never touches real job stores and never sends anything. `loopbackDrivers()` drives the real routes over loopback HTTP.
+import { variantStillRequest } from '../../shared/look-variants.mjs';
 import { randomUUID } from 'node:crypto';
 import { blockoutStale, castCard, keyStillState, lookPrompt, lookSource, objectLooks, objectNotes, videoReferences } from '../../shared/director.mjs';
 import { stillReferences } from '../../shared/still-match.mjs';
@@ -262,6 +263,11 @@ export function loopbackDrivers(base) {
           // One encoded blockout frame (shared/keyframes.mjs): "end" is the clip's last frame; the guide, words and grade use it.
           const f = resolveFrame(p, s, { at }), t = f.t;
           const cap = (await presets(p.id)).find(x => x.id === ctx.node.model)?.maxRefs || 0;
+          // A look variant (shared/look-presets.mjs) is an edit of its base shot's still: image 1 is that still, not the blockout.
+          if (s.variantOf) {
+            let v; try { v = variantStillRequest(p, s, { at, t, cap }); } catch (e) { throw notSent(`${e.message}; nothing was sent`); }
+            return { projectId: p.id, target: 'shot', shotId: s.id, frameAt: f.frameAt, frame: f.index, presetId: ctx.node.model, prompt: v.prompt, aspect: '16:9', count: 1, seed: resolveImageParams(ctx.node.model, s).seed ?? randomSeed(), referenceIds: v.referenceIds, guideReferenceId: v.guideReferenceId };
+          }
           const looks = stillReferences(p, s, t, cap).looks; // objects in frame, one environment image
           const prev = p.shots[p.shots.indexOf(s) - 1]?.references.filter(r => r.role === 'frame').at(-1);
           const refIds = [...looks.map(r => r.ref.id), ...(prev ? [prev.id] : [])].slice(0, Math.max(0, cap - 1));

@@ -2,6 +2,7 @@
 // Director scene model shared by the browser workspace, the server and MCP tools.
 // Units are metres. The stage faces +z: "front" is toward the default camera,
 // "left" is -x as seen from the default camera.
+import { LOOK_AXES, presetOf } from './look-presets.mjs';
 import { normalizePose, blendPose, keyEase } from './blockout-pose.mjs';
 import { blockoutModel, projectMesh } from './blockout-models.mjs';
 import { normalizeSheets } from './sheet-presets.mjs';
@@ -429,6 +430,9 @@ export function diffParts(project, recorded = {}, current = {}, { only = null } 
   for (const k of keys) {
     const a = recorded[k], b = current[k];
     if (a === b || (b === undefined && OPTIONAL_PARTS.has(k))) continue;
+    const p = /^preset:(subject:)?(.+)$/.exec(k);
+    if (p) { out.push(presetReason(project, k, p, a, b)); continue; }
+    if (k === 'base') { out.push({ code: 'base-still', part: k, text: 'base still changed', from: a ?? null, to: b ?? null }); continue; }
     const m = /^(move|form|look|card|still):(.+)$/.exec(k);
     if (m && (m[1] === 'move' || m[1] === 'form')) { const o = objects.get(m[2]) || {}; o[m[1]] = a === undefined ? 'entered' : b === undefined ? 'left' : 'changed'; objects.set(m[2], o); continue; }
     if (m && m[1] === 'look') { const n = name(m[2]); if (a === undefined && b === 'none') continue; out.push({ code: 'look-changed', part: k, entityId: m[2], text: `cast image of ${n || 'a removed object'} changed`, from: a ?? null, to: b ?? null }); continue; }
@@ -447,6 +451,12 @@ export function diffParts(project, recorded = {}, current = {}, { only = null } 
     }
   }
   return out;
+}
+/** A look preset reason (shared/look-presets.mjs): "Time of day preset changed (night → dawn)" or "Eagle's subject swap changed". */
+function presetReason(project, k, [, subject, rest], a, b) {
+  if (subject) { const n = project.scene.entities.find(e => e.id === rest)?.name || 'an object'; return { code: 'look-preset', part: k, entityId: rest, text: `${n}'s subject swap ${a === undefined ? 'added' : b === undefined ? 'removed' : 'changed'}` }; }
+  const axis = LOOK_AXES.find(x => x.id === rest), name = id => (id === undefined ? 'none' : presetOf(rest, id)?.label || id);
+  return { code: 'look-preset', part: k, text: `${axis?.label || rest} preset changed (${name(a)} → ${name(b)})`, from: a ?? null, to: b ?? null };
 }
 const hasManifest = m => !!(m && typeof m === 'object' && m.parts && typeof m.parts === 'object' && m.v === REGEN_VERSION);
 /** What changed in the blocking since a manifest was recorded for this shot (blocking parts only; [] when it still matches). */

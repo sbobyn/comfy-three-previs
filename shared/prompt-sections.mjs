@@ -63,7 +63,7 @@ export function applySections(capped, full, overrides = {}) {
   for (const f of full) {
     const c = kept.get(f.key), o = SYSTEM_KEYS.has(f.key) ? null : overrides?.[f.key];
     const base = c || f, autoText = base.text;
-    if (o) rows.push({ ...base, text: o.text, autoText, fullText: f.text, policy: o.mode, basedOn: o.basedOn, at: o.at, active: true, status: o.text ? 'included' : 'removed' });
+    if (o) rows.push({ ...base, text: o.text, autoText, fullText: f.text, policy: o.mode, basedOn: o.basedOn, at: o.at, active: true, status: o.text ? 'included' : 'removed', ...(o.preset ? { preset: true } : {}) });
     else if (c) rows.push({ ...c, autoText, fullText: f.text, policy: 'inherit', active: true, status: c.text === f.text ? 'included' : 'shortened' });
     else rows.push({ ...f, autoText, fullText: f.text, policy: 'inherit', active: false, status: 'omitted' });
   }

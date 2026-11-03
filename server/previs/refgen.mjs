@@ -398,7 +398,13 @@ export async function openRefgen(root, director, options = {}) {
       return Array.isArray(list) ? list.filter(x => typeof x === 'string') : [];
     },
     prepare: async input => { // a fresh request id: no lock needed
-      const guideBytes = input.target === 'shot' && input.guide ? Buffer.from(String(input.guide), 'base64') : null;
+      let guideBytes = input.target === 'shot' && input.guide ? Buffer.from(String(input.guide), 'base64') : null;
+      // A look variant (shared/look-presets.mjs) is an edit of its base shot's still: that still, as PNG, is image 1.
+      if (!guideBytes && input.target === 'shot' && typeof input.guideReferenceId === 'string') {
+        const ref = (await director.get(input.projectId)).shots.flatMap(s => s.references).find(r => r.id === input.guideReferenceId && r.role === 'frame');
+        if (!ref) fail('Unknown base still');
+        guideBytes = await imageToPng(await director.refFile(input.projectId, ref.file));
+      }
       if (guideBytes && guideBytes.length > 12 * 1024 * 1024) fail('The composition guide is too large');
       // Reference images: director references (object looks, earlier key frames), normalised to PNG.
       if (Array.isArray(input.referenceIds) && input.referenceIds.length > 9) fail('At most 9 reference images are supported');

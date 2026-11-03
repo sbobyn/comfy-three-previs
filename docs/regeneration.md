@@ -17,8 +17,8 @@ input, and `key` is the hash of all of them. When the key no longer matches, com
 |---|---|
 | **Blockout** | `camera`: the camera pose in every encoded frame (24 fps); `timing`: length and start; `environment`: the stage preset; and for each object the frames can show, `move:<id>` (its place in every frame) and `form:<id>` (shape, size, colour, model, and any other field it has) |
 | **Cast image** (look) | `card`: the object's description and style notes; `prompt`: its auto look prompt, unless the prompt was typed by hand; `model`; `params` (aspect); `refs`: the images it was sent |
-| **Still** | the blockout's parts; `moment` (start, end or seconds); `prompt`: the composed image prompt; `look:<id>` and `card:<id>` for each object in the cast; `model`; `params`; `seed` |
-| **Video** | the blockout's parts; `source` (camera source); `prompt`: the composed video prompt for that camera source; `still:start` / `still:end` for models that take stills; `look:<id>` and `card:<id>` for models that take cast images; `model`; `params`; `seed` |
+| **Still** | the blockout's parts; `moment` (start, end or seconds); `prompt`: the composed image prompt; `look:<id>` and `card:<id>` for each object in the cast; `preset:<axis>` for each look preset set (docs/look-presets.md); `base`: a look variant's base still; `model`; `params`; `seed` |
+| **Video** | the blockout's parts; `source` (camera source); `prompt`: the composed video prompt for that camera source; `preset:<axis>` for each look preset set; `still:start` / `still:end` for models that take stills; `look:<id>` and `card:<id>` for models that take cast images; `model`; `params`; `seed` |
 
 Notes:
 
@@ -66,6 +66,8 @@ These are the reason codes. The display text is in brackets.
 - `cast-card-changed` ("description of Eagle changed")
 - `look-changed` ("cast image of Eagle changed")
 - `still-changed` ("start still changed")
+- `look-preset` ("Time of day preset changed (Night → Dawn)"; never blocking)
+- `base-still` ("base still changed", a look variant)
 - `model` ("model changed (flux-2-pro → flux-3)")
 - `params`
 - `seed`
