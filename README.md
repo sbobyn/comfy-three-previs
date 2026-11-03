@@ -173,6 +173,7 @@ These are list-price estimates; review the actual quote, including reference ima
 | Seedance 2.5 · edit the complete video | Video from the blockout clip | Comfy Cloud | blockout video, prompt | ≈ $0.40 / s |
 | Kling O1 · edit the complete video | Video from the blockout clip | Comfy Cloud | blockout video, prompt | ≈ $0.13 / s |
 | Wan VACE 1.3B · edge control alternative | Video from the blockout clip | Your ComfyUI | blockout video (as control frames), prompt | free (your GPU) |
+| Wan VACE 14B · masked crop edit (experimental) | Fixed-region crop edit of a take | Comfy Cloud | source crop, mask video, prompt | planning estimate (quoted live) |
 <!-- models:end -->
 
 ## Documentation
