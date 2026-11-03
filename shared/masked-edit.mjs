@@ -109,12 +109,14 @@ export function normalizeMask(input, { width = ELIGIBLE_WIDTH, height = ELIGIBLE
   const h = intNum(input.height ?? height, 'mask.height', 1, 4320);
   if (w !== width || h !== height) fail(`mask size must match source (${width}×${height})`);
   const featherPx = input.featherPx == null ? DEFAULT_FEATHER_PX : intNum(input.featherPx, 'featherPx', 0, 64);
-  const strokes = Array.isArray(input.strokes) ? input.strokes : fail('mask.strokes must be an array');
+  const strokes = Array.isArray(input.strokes) ? [...input.strokes] : fail('mask.strokes must be an array');
+  // Take-lab UI keeps the active rectangle on `mask.rect` and uses `tool`/`size` stroke fields.
+  if (input.rect && typeof input.rect === 'object') strokes.unshift({ type: 'rect', ...input.rect });
   if (strokes.length > MAX_STROKES) fail(`At most ${MAX_STROKES} strokes`);
   const out = [];
   for (const s of strokes) {
     if (!s || typeof s !== 'object') fail('Invalid stroke');
-    const type = s.type || s.op;
+    const type = s.type || s.op || s.tool;
     if (type === 'rect') {
       const x = finiteNum(s.x, 'rect.x'), y = finiteNum(s.y, 'rect.y');
       const rw = finiteNum(s.w ?? s.width, 'rect.w'), rh = finiteNum(s.h ?? s.height, 'rect.h');
@@ -354,7 +356,8 @@ export function composeInputKey(parts) {
 /** Offline quote envelope (no provider). Estimate is informational; status stays unknown. */
 export function offlineQuoteEnvelope({ frameCount, crop, steps = 20 } = {}) {
   const cropPixels = (crop?.w || 0) * (crop?.h || 0);
-  const calibPixels = 320 * 480, calibFrames = 81, calibGpuS = 248.2;
+  // INTEGRATION.md: 248.2 GPU s × (cropPixels / 399_360) × (frames / 81); 320×480×81 ≈ $0.120 planning.
+  const calibPixels = 399_360, calibFrames = 81, calibGpuS = 248.2;
   const gpuEstimate = calibGpuS * (cropPixels / calibPixels) * ((frameCount || calibFrames) / calibFrames);
   const creditsPerS = 0.266, creditsPerUsd = 211;
   const estimate = round((gpuEstimate * creditsPerS) / creditsPerUsd, 4);
