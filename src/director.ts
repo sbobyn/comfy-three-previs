@@ -862,7 +862,7 @@ function modelBlock(s: Shot) {
   pick.onchange = () => useModel(pick.value);
   const setCritical = (on: boolean) => { void runEntry({ label: on ? 'Mark motion-critical' : 'Clear motion-critical', redo: [{ op: 'update_shot', id: s.id, patch: { motionCritical: on } }], undo: [{ op: 'update_shot', id: s.id, patch: { motionCritical: s.motionCritical === true } }] }).then(() => { shotPane.dataset.shot = ''; renderShotPane(); }); };
   const fidelity = h('div', { class: 'vm-fid' },
-    h('div', { class: `vm-fid-chip f-${fid.direction}`, title: `${fid.note} Heuristic (${fid.basis}); judge every take.` }, `${fid.routeLabel} · ${fid.label}`, h('span', { class: 'vm-heur' }, 'heuristic')),
+    h('div', { class: `vm-fid-chip f-${fid.direction}`, title: `${fid.note} Heuristic (${fid.basis}); judge every take.` }, `${fid.routeLabel} · ${fid.label}`),
     h('label', { class: 'vm-crit', title: 'The subject’s motion or facing must match the blockout. Recommends a model that edits the blockout clip; nothing is blocked.' },
       h('input', { type: 'checkbox', checked: s.motionCritical === true, onchange: (e: Event) => setCritical((e.target as HTMLInputElement).checked) }), ' Motion/direction-critical shot'),
     advice.critical ? h('div', { class: 'vm-advice' + (advice.ok ? ' ok' : ' warn'), role: 'note' },

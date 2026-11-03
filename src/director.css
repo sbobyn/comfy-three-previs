@@ -845,13 +845,12 @@ dialog::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 /* Camera source of the chosen model, and its inputs in order: camera (blockout) → look (stills) → cast refs. */
 .vm-camsrc { font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 8px; align-self: flex-start; }
 .vm-camsrc.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
-.vm-camsrc.warn { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.vm-camsrc.warn { color: var(--muted); font-weight: 400; padding: 0; background: none; } /* a quiet note, not an alarm */
 /* Blockout fidelity of the route (a heuristic) and the motion/direction-critical advice. */
 .vm-fid { display: flex; flex-direction: column; gap: 6px; }
 .vm-fid-chip { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 8px; align-self: flex-start; display: inline-flex; gap: 6px; align-items: baseline; }
 .vm-fid-chip.f-follows { color: var(--ok); background: color-mix(in srgb, var(--ok) 10%, transparent); }
-.vm-fid-chip.f-mixed, .vm-fid-chip.f-approximate { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-.vm-heur { font-weight: 500; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; opacity: .75; }
+.vm-fid-chip.f-mixed, .vm-fid-chip.f-approximate { color: var(--muted); font-weight: 400; padding: 0; background: none; } /* a quiet note, not an alarm */
 .vm-crit { font-size: 12px; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
 .vm-advice { font-size: 12px; line-height: 1.45; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 .vm-advice p { margin: 0; }
