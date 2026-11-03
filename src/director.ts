@@ -2137,8 +2137,8 @@ async function renderGenerate(box: HTMLElement, s: Shot, previsShotId: string, a
   const previous = st.jobs.filter(j => j.shotId === previsShotId && (j.sources?.sourceVideo?.id === assetId || j.sources?.controlVideo?.id === assetId)).at(-1);
   if (previous && choices.some(d => d.id === previous.definition?.id)) wf.value = previous.definition.id;
   const note = h('p', { class: 'note', style: 'margin:0' });
-  const keyNote = h('p', { class: 'status-line err', role: 'note', hidden: true }, NO_KEY, ' ', h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openSetup() }, 'Setup'));
-  const showKey = () => { const off = noCloudKey() && backendSel.value === 'cloud'; keyNote.hidden = !off; quoteBtn.disabled = off; quoteBtn.title = off ? 'Add a Comfy Cloud key first' : ''; };
+  const keyNote = h('p', { class: 'status-line', role: 'note', hidden: true }, NO_KEY, ' ', h('button', { class: 'btn ghost sm', type: 'button', onclick: () => openSetup() }, 'Setup'));
+  const showKey = () => { const off = noCloudKey() && backendSel.value === 'cloud'; keyNote.hidden = !off; keyNote.classList.toggle('err', off); quoteBtn.disabled = off; quoteBtn.title = off ? 'Add a Comfy Cloud key first' : ''; };
   const showNote = () => { const d = choices.find(c => c.id === wf.value); note.textContent = d?.description || ''; backendSel.value = d?.id?.startsWith('wan-') ? 'local' : 'cloud'; };
   const useRefs = h('input', { type: 'checkbox', checked: localStorage.getItem('previs.seq.refs') !== '0' });
   const refsBox = h('div', { class: 'gen-refs' });
