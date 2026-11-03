@@ -7288,7 +7288,7 @@
       },
       {
         "id": "9d6d1c24-cd50-482c-becf-ce4997f08c81",
-        "name": "Fan with phone",
+        "name": "Cheering fan",
         "kind": "character",
         "shape": "person",
         "model": "fan",
@@ -7304,7 +7304,7 @@
           1
         ],
         "color": "#E0A040",
-        "notes": "Excited race fan in a yellow Comfy cap and blue t-shirt, holding up a phone to film the finish.",
+        "notes": "Excited race fan in a yellow Comfy cap and blue t-shirt, cheering the finish with both arms raised.",
         "lookFrom": null,
         "styleNotes": "",
         "pitch": 0,
