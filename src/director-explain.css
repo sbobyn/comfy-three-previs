@@ -1,0 +1,110 @@
+/* Explainers, diagrams and guide media (director-explain.ts, director-media.ts, director-guide.ts). */
+
+/* ---------- Explainer scene ---------- */
+.ex { margin: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ex-stage { position: relative; width: 100%; max-width: 288px; max-height: 162px; aspect-ratio: 16 / 9; border-radius: var(--r-sm); overflow: hidden; background: #F1EDE5; box-shadow: inset 0 0 0 1px var(--line); }
+.ex-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: ew-resize; touch-action: pan-y; }
+.ex-keys { position: absolute; left: 8px; bottom: 8px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; max-width: calc(100% - 60px); pointer-events: none; }
+.ex-keys kbd { box-shadow: 0 1px 0 var(--line-2), 0 4px 10px -6px rgba(21,19,15,.4); font-weight: 600; color: var(--ink); }
+.ex-keys kbd:last-child { border-color: var(--accent); color: var(--accent); }
+.ex-plus { font: 600 var(--fs-2xs) var(--mono); color: var(--ink-3); }
+.ex-play { position: absolute; right: 8px; top: 8px; width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 1px solid var(--line-2); background: color-mix(in srgb, var(--card) 90%, transparent); color: var(--ink-2); font-size: 10px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.ex-play:hover { color: var(--ink); border-color: var(--ink-4); }
+.ex-play:focus-visible { outline: none; box-shadow: var(--focus); }
+.ex figcaption { display: flex; align-items: baseline; gap: 8px; font-size: var(--fs-sm); line-height: var(--lh-snug); color: var(--ink-3); min-width: 0; }
+.ex figcaption b { color: var(--ink); font-weight: 600; flex: none; }
+.ex-say { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ex.ex-nogl .ex-stage { display: none; }
+.ex.ex-nogl figcaption { flex-direction: column; gap: 2px; }
+.ex.ex-nogl .ex-say { white-space: normal; }
+/* Inside the Controls card slot (W2's .help-explain is 96px tall): fill it, no caption. */
+.help-explain .ex { height: 100%; }
+.help-explain .ex-stage { aspect-ratio: auto; height: 100%; }
+.help-explain .ex figcaption { display: none; }
+
+.ex-tabbed { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ex-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.ex-tab { height: 26px; padding: 0 9px; border-radius: var(--r-full); border: 1px solid var(--line-2); background: var(--card); color: var(--ink-3); font: inherit; font-size: var(--fs-xs); cursor: pointer; white-space: nowrap; }
+.ex-tab:hover { color: var(--ink); }
+.ex-tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--on-ink, #FFFDF9); }
+.ex-tab:focus-visible { outline: none; box-shadow: var(--focus); }
+
+/* ---------- SVG diagrams ---------- */
+.ex-diagram { margin: 0; max-width: 420px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ex-diagram figcaption { font-size: var(--fs-2xs); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-3); }
+.ex-svg svg { display: block; width: 100%; height: auto; overflow: visible; }
+.ex-svg text { font: 600 11px var(--font); fill: var(--ink); }
+.ex-svg text:not([text-anchor]) { text-anchor: middle; }
+.ex-svg text.n { font-weight: 500; font-size: 10.5px; fill: var(--ink-3); }
+.ex-svg tspan.kn { font: 700 10.5px var(--mono); fill: var(--ink); }
+.ex-svg text.b { font: 700 10px var(--mono); }
+.ex-svg text.inv { fill: var(--card); }
+.ex-svg .k rect { fill: var(--card); stroke: var(--line-2); stroke-width: 1; }
+.ex-svg .k.hot rect { stroke: var(--accent); fill: var(--accent-soft); }
+.ex-svg .k text { font: 600 10.5px var(--mono); }
+.ex-svg .pad, .ex-svg .phone { fill: var(--paper-2); stroke: var(--ink-3); stroke-width: 1.4; }
+.ex-svg .sh, .ex-svg .track { fill: var(--paper-3, var(--line)); stroke: var(--ink-4); }
+.ex-svg .stick { fill: var(--card); stroke: var(--ink-2); stroke-width: 2; }
+.ex-svg .dp { fill: var(--ink-3); }
+.ex-svg .btn { fill: var(--card); stroke: var(--ink-2); stroke-width: 1.4; }
+.ex-svg .screen { fill: var(--card); stroke: var(--line-2); }
+.ex-svg .frame, .ex-svg .arc, .ex-svg .arr { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+.ex-svg .arr { marker-end: none; stroke: var(--ink-4); stroke-dasharray: 3 3; }
+.ex-svg .rec, .ex-svg .num { fill: var(--accent); }
+.ex-svg .qr rect { fill: var(--ink); }
+.ex-svg .shield { fill: var(--ok-soft, #E3F0E6); stroke: var(--ok, #2E7D5B); stroke-width: 1.6; }
+.ex-svg .tick { fill: none; stroke: var(--ok, #2E7D5B); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.ex-svg .clip, .ex-svg .still { fill: #59606E; } .ex-svg .film { stroke: #E4DDD0; stroke-dasharray: 4 4; stroke-width: 3; }
+.ex-svg .still { fill: #8E877B; }
+.ex-svg .prompt { fill: var(--card); stroke: var(--line-2); } .ex-svg .lines { stroke: var(--ink-4); stroke-width: 2; stroke-linecap: round; }
+.ex-svg .video { fill: var(--ink); } .ex-svg .play { fill: var(--card); }
+.ex-svg .cast { fill: var(--pv-cast-1, #B4235A); } .ex-svg .cast + text { fill: #fff; }
+.ex-devices { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px 18px; }
+
+/* ---------- Before / after, loop clip, annotated screenshot (director-media.ts) ---------- */
+.ba { --x: 50%; position: relative; margin: 0; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--r-sm); overflow: hidden; background: var(--stage, #15130F); user-select: none; touch-action: pan-y; cursor: ew-resize; box-shadow: inset 0 0 0 1px var(--line); }
+.ba > img, .ba > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.ba > .ba-after { clip-path: inset(0 0 0 var(--x)); }
+.ba-seam { position: absolute; top: 0; bottom: 0; left: var(--x); width: 2px; margin-left: -1px; background: #FFFDF9; box-shadow: 0 0 0 1px rgba(21,19,15,.25); outline: none; }
+.ba-seam::after { content: '‹ ›'; position: absolute; top: 50%; left: 50%; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; background: #FFFDF9; color: var(--ink); font: 700 12px/28px var(--mono); text-align: center; letter-spacing: -1px; box-shadow: 0 4px 14px -4px rgba(21,19,15,.55); }
+.ba-seam:focus-visible::after { box-shadow: 0 4px 14px -4px rgba(21,19,15,.55), var(--focus); }
+.ba-tag { position: absolute; top: 8px; z-index: 1; font: 600 9.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: rgba(21,19,15,.66); color: #F6F3EE; pointer-events: none; }
+.ba-tag.l { left: 8px; } .ba-tag.r { right: 8px; }
+.ba-toggle { position: absolute; right: 8px; bottom: 8px; z-index: 2; width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 0; background: rgba(21,19,15,.66); color: #F6F3EE; font-size: 10px; cursor: pointer; display: grid; place-items: center; }
+.ba-toggle:focus-visible { outline: none; box-shadow: var(--focus); }
+.ba.is-missing { display: grid; place-items: center; cursor: default; background: var(--paper-2); }
+.ba.is-missing::after { content: attr(data-missing); font-size: var(--fs-xs); color: var(--ink-3); padding: 0 16px; text-align: center; }
+
+.lc { position: relative; margin: 0; border-radius: var(--r-sm); overflow: hidden; aspect-ratio: 16 / 9; background: var(--paper-2); }
+.lc video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.an { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.an-shot { position: relative; border-radius: var(--r-sm); overflow: hidden; box-shadow: inset 0 0 0 1px var(--line), var(--sh-1); }
+.an-shot img { display: block; width: 100%; height: auto; }
+.an-box { position: absolute; border: 2px solid var(--accent); border-radius: 6px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); pointer-events: none; }
+.an-pin { position: absolute; left: -9px; top: -9px; width: 17px; height: 17px; border-radius: 50%; background: var(--accent); color: #fff; font: 700 10px/17px var(--mono); text-align: center; box-shadow: 0 2px 6px rgba(21,19,15,.35); }
+.an .an-legend { list-style: none; margin: 0; padding: 0 !important; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 6px 14px; font-size: var(--fs-sm); color: var(--ink-2); }
+.an-legend li { display: flex; gap: 8px; align-items: baseline; }
+.an-legend i { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: #fff; font: 700 10px/18px var(--mono); text-align: center; font-style: normal; }
+
+/* ---------- Guide (director-guide.ts) ---------- */
+dialog.journey-dialog { width: min(980px, 95vw); }
+.journey-dialog .journey-steps > li.jy-stage { grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px 18px; align-items: start; padding: 18px 0; }
+.jy-copy { min-width: 0; }
+.jy-promise { font-size: var(--fs-md) !important; color: var(--ink-2); margin: 0 0 8px !important; }
+.jy-copy ul { margin: 0 0 12px; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-sm); line-height: var(--lh-snug); color: var(--ink-2); }
+.jy-copy ul b { color: var(--ink); font-weight: 600; }
+.jy-visual { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.jy-visual .jy-cap { margin: 0; font-size: var(--fs-xs) !important; color: var(--ink-3); line-height: var(--lh-snug); }
+.jy-casts { display: flex; gap: 6px; flex-wrap: wrap; }
+.jy-casts figure { margin: 0; width: 64px; display: flex; flex-direction: column; gap: 3px; }
+.jy-casts img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); background: var(--paper-2); }
+.jy-casts figcaption { font-size: 10.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.journey-boundaries .ex-devices { margin-top: 12px; }
+.journey-boundaries dl { margin: 0; }
+@media (max-width: 900px) {
+  .journey-dialog .journey-steps > li.jy-stage { grid-template-columns: 28px minmax(0, 1fr); }
+  .jy-visual { grid-column: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) { .ex-tab, .ex-play { transition: none; } }

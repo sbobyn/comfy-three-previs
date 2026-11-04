@@ -1,0 +1,2602 @@
+{
+ "version": 1,
+ "id": "f158baf1-2cac-4311-859a-e5c590d381d4",
+ "title": "Starter \u00b7 Wingspan",
+ "template": "empty",
+ "scene": {
+  "name": "Alpine valley",
+  "environment": {
+   "preset": "stage",
+   "description": "A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.",
+   "style": "Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour."
+  },
+  "entities": [
+   {
+    "id": "910451e8-e15e-4907-ac3a-a388cba96e01",
+    "name": "Alpine lake",
+    "kind": "environment",
+    "shape": "cylinder",
+    "position": [
+     0,
+     0.51,
+     -45
+    ],
+    "rotation": 0,
+    "scale": [
+     50,
+     0.05,
+     44
+    ],
+    "color": "#2f7fa6",
+    "notes": "Clear turquoise glacial lake reflecting the peaks.",
+    "look": "8a65ed8d-12d4-4243-9750-2c6038e522a7",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+    "name": "River 1",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     38.03,
+     3.99,
+     42.37
+    ],
+    "rotation": 120.95999999999998,
+    "scale": [
+     31.155,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": "b089b9cd-c5e7-4214-9bde-8737cc988302",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "83c26dc9-e3a6-48d9-bb88-ed6e8359d030",
+    "name": "River 2",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     39.08,
+     3.89,
+     43.66
+    ],
+    "rotation": 120.57999999999998,
+    "scale": [
+     27.554,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "947a503d-f221-439e-aa92-6540ede5cc32",
+    "name": "River 3",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     35,
+     1.08,
+     39
+    ],
+    "rotation": 127.87,
+    "scale": [
+     24.804,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "353a0feb-b328-41be-bebe-6788175954b7",
+    "name": "River 4",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     23,
+     0.74,
+     21
+    ],
+    "rotation": 119.05000000000001,
+    "scale": [
+     22.591,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "85bbe9ab-a681-4c2c-9b5f-471b5e175bdf",
+    "name": "River 5",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     14,
+     0.29,
+     3
+    ],
+    "rotation": 113.95999999999998,
+    "scale": [
+     21.698,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "2414bb8c-0206-468a-b65e-331feabdb678",
+    "name": "River 6",
+    "kind": "environment",
+    "shape": "box",
+    "position": [
+     7,
+     0.04,
+     -14
+    ],
+    "rotation": 110.56,
+    "scale": [
+     19.088,
+     0.05,
+     6
+    ],
+    "color": "#3d8fb5",
+    "notes": "",
+    "look": null,
+    "lookFrom": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+   },
+   {
+    "id": "82a23174-4a95-47ce-b8d5-9ce856f186f7",
+    "name": "Pine 30,40 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     39.8,
+     0.03,
+     33.2
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9601630635824202,
+     1.5362609017318725,
+     0.9601630635824202
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "b2c4252c-3e42-40a1-84d7-0512b3a3ea3a",
+    "name": "Pine 30,40 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     28,
+     0.51,
+     33.8
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2857330776539702,
+     2.0571729242463523,
+     1.2857330776539702
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "6b12bc98-093a-4f45-bc5c-869a95bc1405",
+    "name": "Pine 30,40 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     19.4,
+     0.37,
+     41.6
+    ],
+    "rotation": 0,
+    "scale": [
+     1.5632147904952411,
+     2.501143664792386,
+     1.5632147904952411
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "6c6a111c-041a-48b8-b747-28ad16b82347",
+    "name": "Pine 30,40 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     33.1,
+     0.39,
+     42
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9433034338352984,
+     1.5092854941364775,
+     0.9433034338352984
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "c85189ad-ce30-4df1-bb56-14db334a3f1c",
+    "name": "Pine 30,40 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     32.1,
+     0.38,
+     29.2
+    ],
+    "rotation": 0,
+    "scale": [
+     1.0547572764203539,
+     1.6876116422725662,
+     1.0547572764203539
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "c11992cc-c705-4af1-b9e3-a8257ac1d2ef",
+    "name": "Pine 30,40 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     31.4,
+     0.42,
+     31.2
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1933973305000256,
+     1.909435728800041,
+     1.1933973305000256
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "9775db1d-db9d-49fc-9abc-71d0a4faa77b",
+    "name": "Pine 30,40 \u00b7 7",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     31,
+     0.42,
+     41.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.292180093908969,
+     2.0674881502543503,
+     1.292180093908969
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "520d360e-02ff-4a53-8c7b-bc5545c3e889",
+    "name": "Pine -25,-10 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -20.6,
+     -0.06,
+     -19.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2998430739882547,
+     2.0797489183812075,
+     1.2998430739882547
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "b64c0e83-eeda-48c6-9610-0424c410985d",
+    "name": "Pine -25,-10 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -32.5,
+     -0.1,
+     -19.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.3984775360223076,
+     2.237564057635692,
+     1.3984775360223076
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "81f45ec9-0ae2-4012-8c77-01ce5af2f909",
+    "name": "Pine -25,-10 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -23.5,
+     -0.06,
+     -7.1
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2474901465794443,
+     1.995984234527111,
+     1.2474901465794443
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "98a8e209-fbcc-4a83-8372-266a13c3b667",
+    "name": "Pine -25,-10 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -24.2,
+     -0.06,
+     -3.3
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2259213060877718,
+     1.961474089740435,
+     1.2259213060877718
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "7e4d775d-be32-4e28-8892-b157e868bf16",
+    "name": "Pine -25,-10 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -14.8,
+     -0.14,
+     -13.3
+    ],
+    "rotation": 0,
+    "scale": [
+     1.0738986094002845,
+     1.7182377750404552,
+     1.0738986094002845
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "55498705-af3a-4c3e-8cb3-88b489496eb2",
+    "name": "Pine -25,-10 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -32.7,
+     -0.04,
+     -3.3
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9572985075570389,
+     1.5316776120912623,
+     0.9572985075570389
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "918b4a0d-2989-4100-8410-cc2bea69e2a3",
+    "name": "Pine -25,-10 \u00b7 7",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -29.8,
+     -0.06,
+     -10.1
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1404329829708613,
+     1.8246927727533782,
+     1.1404329829708613
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "2892f942-4050-4fd5-9600-b97c692f3e39",
+    "name": "Pine -25,-10 \u00b7 8",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -26.2,
+     -0.06,
+     -7.4
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9512406072217676,
+     1.5219849715548284,
+     0.9512406072217676
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "c9e3c3ac-ed62-4284-8262-ebcaeab27a3d",
+    "name": "Pine 20,-20 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     20.3,
+     0.27,
+     -28
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1394390643119006,
+     1.823102502899041,
+     1.1394390643119006
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "f028ef6d-33e7-49ea-a59a-5b829cd96c15",
+    "name": "Pine 20,-20 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     30.4,
+     0.27,
+     -21.9
+    ],
+    "rotation": 0,
+    "scale": [
+     1.5734133583884768,
+     2.517461373421563,
+     1.5734133583884768
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "2b046f26-461a-4950-83c9-4330f5ee829d",
+    "name": "Pine 20,-20 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     9.9,
+     -0.24,
+     -18.6
+    ],
+    "rotation": 0,
+    "scale": [
+     1.4523659200432486,
+     2.323785472069198,
+     1.4523659200432486
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "fa6977c1-c9f1-4353-ac94-9efeee05709e",
+    "name": "Pine 20,-20 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     27.6,
+     0.35,
+     -23.8
+    ],
+    "rotation": 0,
+    "scale": [
+     1.145124871403418,
+     1.8321997942454686,
+     1.145124871403418
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "d9a01948-a5e8-4530-b789-e63a5def8821",
+    "name": "Pine 20,-20 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     19.9,
+     -0.08,
+     -12.9
+    ],
+    "rotation": 0,
+    "scale": [
+     0.9481340645848024,
+     1.5170145033356839,
+     0.9481340645848024
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "e36e50cd-4b29-4ca9-aefd-3d0db58042a1",
+    "name": "Pine 20,-20 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     10.2,
+     -0.24,
+     -25.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.3879294474788497,
+     2.2206871159661596,
+     1.3879294474788497
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "e258d808-40cc-4d52-a100-961a930ce6c4",
+    "name": "Pine -45,-60 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -55.4,
+     -0.17,
+     -54.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1167251635565623,
+     1.7867602616904996,
+     1.1167251635565623
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "150cacac-c987-40d1-b0bc-3dd674b6df21",
+    "name": "Pine -45,-60 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -43.1,
+     -0.17,
+     -55.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2119485370756453,
+     1.9391176593210326,
+     1.2119485370756453
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "13f4eb4d-9fd8-44da-8e5d-694d0dbf682b",
+    "name": "Pine -45,-60 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -39.8,
+     -0.26,
+     -50.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1429036789819156,
+     1.828645886371065,
+     1.1429036789819156
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "8d3b1304-acee-485d-a208-20782e7d7fc9",
+    "name": "Pine -45,-60 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -34.4,
+     -0.02,
+     -63.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.327643680438154,
+     2.1242298887010462,
+     1.327643680438154
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "1beb6f3c-d216-43ac-b689-cba24e83a9aa",
+    "name": "Pine -45,-60 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -45.2,
+     0.12,
+     -66.8
+    ],
+    "rotation": 0,
+    "scale": [
+     1.1012023485492033,
+     1.7619237576787254,
+     1.1012023485492033
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "e37b2f0a-b276-467b-ac7d-abdcc7e8e4ce",
+    "name": "Pine -45,-60 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -39.3,
+     -0.02,
+     -62.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.541771358326043,
+     2.466834173321669,
+     1.541771358326043
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "fa8e4f34-eb14-45fe-b37a-c2c209333e0d",
+    "name": "Pine -45,-60 \u00b7 7",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -45.1,
+     0.15,
+     -68
+    ],
+    "rotation": 0,
+    "scale": [
+     1.181150979434013,
+     1.8898415670944209,
+     1.181150979434013
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "47194363-1e1a-4aea-bac5-48445f204e28",
+    "name": "Pine 45,-65 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     39.7,
+     0.18,
+     -73.7
+    ],
+    "rotation": 0,
+    "scale": [
+     1.201365155762353,
+     1.922184249219765,
+     1.201365155762353
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "7fd3e21f-2c40-4a08-bb94-7e77e5722ec5",
+    "name": "Pine 45,-65 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     46.2,
+     0.1,
+     -60
+    ],
+    "rotation": 0,
+    "scale": [
+     1.5905269567008302,
+     2.5448431307213286,
+     1.5905269567008302
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "35d23ef3-0157-4b08-9472-d27c4a035b17",
+    "name": "Pine 45,-65 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     49.4,
+     0.43,
+     -67.9
+    ],
+    "rotation": 0,
+    "scale": [
+     1.0615260556760775,
+     1.698441689081724,
+     1.0615260556760775
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "d3cfec51-e0d1-4ad2-859c-abe5aac5500b",
+    "name": "Pine 45,-65 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     35,
+     -0.1,
+     -73.4
+    ],
+    "rotation": 0,
+    "scale": [
+     1.3609616738806312,
+     2.17753867820901,
+     1.3609616738806312
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "6ae671b4-a8d8-48a9-a386-91cb162e916c",
+    "name": "Pine 45,-65 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     33.3,
+     -0.1,
+     -57.1
+    ],
+    "rotation": 0,
+    "scale": [
+     1.027640011786838,
+     1.644224018858941,
+     1.027640011786838
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "3743d56a-947d-4d67-b0b3-272197050ae4",
+    "name": "Pine 45,-65 \u00b7 6",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     39.8,
+     0.19,
+     -73.5
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2742136736100727,
+     2.038741877776116,
+     1.2742136736100727
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "71c8eda8-820e-47f6-b753-d274cb46d70d",
+    "name": "Pine 60,80 \u00b7 1",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     48.9,
+     4,
+     54.69
+    ],
+    "rotation": 0,
+    "scale": [
+     0.987844058747184,
+     1.5805504939954944,
+     0.987844058747184
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "005d2470-1aa7-418d-841c-26a28c06c680",
+    "name": "Pine 60,80 \u00b7 2",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     46.49,
+     3.6,
+     55.09
+    ],
+    "rotation": 0,
+    "scale": [
+     1.35847652460143,
+     2.1735624393622883,
+     1.35847652460143
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "a726b1a2-87cb-4f2b-9b56-c4d97880cfc3",
+    "name": "Pine 60,80 \u00b7 3",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     49.19,
+     3.72,
+     54.02
+    ],
+    "rotation": 0,
+    "scale": [
+     1.5096856508104404,
+     2.415497041296705,
+     1.5096856508104404
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "aa749c97-3146-47d5-afc4-7ff6ba5fdf48",
+    "name": "Pine 60,80 \u00b7 4",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     50.02,
+     3.78,
+     53.69
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2914902185996266,
+     2.0663843497594026,
+     1.2914902185996266
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "c76b6dbf-ef9d-4436-b42b-0d08ded2f6e4",
+    "name": "Pine 60,80 \u00b7 5",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     44.88,
+     3.57,
+     55.98
+    ],
+    "rotation": 0,
+    "scale": [
+     1.2370659727156363,
+     1.9793055563450181,
+     1.2370659727156363
+    ],
+    "color": "#2f5d3a",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "f8e76546-d2f0-4caf-9276-cbde518ae391",
+    "name": "Pine tree",
+    "kind": "environment",
+    "shape": "tree",
+    "position": [
+     -30,
+     0.19,
+     20
+    ],
+    "rotation": 0,
+    "scale": [
+     1.4,
+     2.2,
+     1.4
+    ],
+    "color": "#2f5d3a",
+    "notes": "Tall subalpine fir and pine trees, dark green, dense.",
+    "look": "51b2c693-ffb7-4a99-872d-27760f502590",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+   },
+   {
+    "id": "311a48d9-648a-4672-ba4e-1e047baf087f",
+    "name": "Elk 1",
+    "kind": "prop",
+    "shape": "box",
+    "position": [
+     -14,
+     0.52,
+     -20
+    ],
+    "rotation": 40,
+    "scale": [
+     0.9,
+     1.5,
+     2.3
+    ],
+    "color": "#7a5534",
+    "notes": "A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest.",
+    "look": "5f0b0e59-0cb7-442d-a1b7-c8cea8d03467",
+    "lookFrom": null,
+    "styleNotes": "Wildlife photograph of the living animal in natural light, no studio props",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "3197eeea-90f6-47db-86d8-15d534e592fe",
+    "sheets": [
+     {
+      "id": "sblp0fnzu",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:06:12.450Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "dkzmk8qd",
+          "requestId": "eb8a1b79-bc9d-4147-8997-620197aeec62",
+          "referenceId": "4c044cfd-658d-4ae8-bf4a-93208df2267a",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 108241,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:12.450Z"
+         }
+        ],
+        "selected": "dkzmk8qd",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "n9z9g77n",
+          "requestId": "67efe17f-c838-4387-a8d4-14d6a6fcae64",
+          "referenceId": "27533908-b04c-4293-84b3-8aaec8482458",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 39803,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:12.450Z"
+         }
+        ],
+        "selected": "n9z9g77n",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "aiy3twcf",
+          "requestId": "af07f7d1-274f-4028-bb0e-d7ef56d7ba56",
+          "referenceId": "3d95b2bb-2239-4625-b527-5013988babbf",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 724744,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:12.450Z"
+         }
+        ],
+        "selected": "aiy3twcf",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "ompcyz03",
+          "requestId": "943d4c02-1911-481a-8a37-34dfd0317b5c",
+          "referenceId": "7add3732-3df5-4c57-9cde-44511f5aa7b5",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 218535,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:12.450Z"
+         }
+        ],
+        "selected": "ompcyz03",
+        "accepted": null
+       }
+      ]
+     },
+     {
+      "id": "sabnj3skt",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:06:22.515Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "yx72v98v",
+          "requestId": "331bbe29-71b7-4030-b384-319514bf5f04",
+          "referenceId": "bce75264-d4bd-484e-8c89-a3d7a5d42615",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 427466,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:22.515Z"
+         }
+        ],
+        "selected": "yx72v98v",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "opcrze6p",
+          "requestId": "10dfc052-c2be-4a2d-97e0-2aaa357b00ae",
+          "referenceId": "914454f0-e484-4e41-8c61-de020de2f02e",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 290416,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:22.515Z"
+         }
+        ],
+        "selected": "opcrze6p",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "wr9pbk14",
+          "requestId": "955ce6a7-1595-4a9f-bb0e-69bf3cfd84b3",
+          "referenceId": "b979961e-1521-4d2d-a981-6a658ec4c90e",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 19270,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:22.515Z"
+         }
+        ],
+        "selected": "wr9pbk14",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "k3hzpu7n",
+          "requestId": "c210b6aa-947d-460d-a9f3-0374d73189d6",
+          "referenceId": "a52325bc-da6c-48b8-b4e9-d5b7b44065de",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 654542,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:22.515Z"
+         }
+        ],
+        "selected": "k3hzpu7n",
+        "accepted": null
+       }
+      ]
+     },
+     {
+      "id": "shys5o2jg",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:28:48.393Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "1jkdk21y",
+          "requestId": "c0873a22-b372-462a-a56a-c35bce290d3a",
+          "referenceId": "e4ffc85f-2920-4e77-b604-4c54b41b8ed9",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 896187,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "1jkdk21y",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "v94iluzx",
+          "requestId": "37d5df79-6744-48dc-b961-cce836b0f14e",
+          "referenceId": "fe5b7e17-3ffd-4697-ba57-732338f34142",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 125937,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "v94iluzx",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "fifymz8g",
+          "requestId": "1f0bc9f9-0772-4193-8010-fd36c67ea82c",
+          "referenceId": "29d3821c-594e-44e0-acb3-f13459b1b5b5",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 537147,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "fifymz8g",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "sh6j8dxc",
+          "requestId": "414390bd-ad7e-49ee-9ef4-d705bdc532ce",
+          "referenceId": "0148ed94-b49a-463d-8a51-1da3adba22b2",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 825168,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "sh6j8dxc",
+        "accepted": null
+       }
+      ]
+     },
+     {
+      "id": "s71mxa2rc",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:28:48.393Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "dzy6e52b",
+          "requestId": "04cc5278-1b8d-470f-81ef-91064461b7ee",
+          "referenceId": "0edd75d2-46e8-4750-abcc-ab5f8f6c35f2",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 420387,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "dzy6e52b",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "08i9605e",
+          "requestId": "3d9481dc-338c-4092-8311-bcb6d7a6ea4d",
+          "referenceId": "2bbe938a-3c7f-45d8-9fd8-ec09bcbcfa70",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 353387,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "08i9605e",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "nw5p9z7l",
+          "requestId": "65f0a114-534c-4c3f-ab32-6400e97028af",
+          "referenceId": "9273f04b-c581-4036-9e4a-09521a227c8a",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 751100,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "nw5p9z7l",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "7dyn34ve",
+          "requestId": "e2b0e3a9-2340-47e1-9617-18d26a32f500",
+          "referenceId": "a26d22f2-6a90-4d22-a300-73e38e060b93",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 407955,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "7dyn34ve",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "b97a657b-5608-4482-a5a2-cad13f6eaab3",
+    "name": "Elk 2",
+    "kind": "character",
+    "shape": "box",
+    "position": [
+     -11,
+     0.4,
+     -24
+    ],
+    "rotation": 70,
+    "scale": [
+     0.9,
+     1.5,
+     2.3
+    ],
+    "color": "#7a5534",
+    "notes": "",
+    "look": null,
+    "lookFrom": "311a48d9-648a-4672-ba4e-1e047baf087f",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+   },
+   {
+    "id": "784d7710-1963-47c5-8176-78f3363c2d6e",
+    "name": "Elk 3",
+    "kind": "character",
+    "shape": "box",
+    "position": [
+     -17,
+     0.59,
+     -25
+    ],
+    "rotation": 10,
+    "scale": [
+     0.9,
+     1.5,
+     2.3
+    ],
+    "color": "#7a5534",
+    "notes": "",
+    "look": null,
+    "lookFrom": "311a48d9-648a-4672-ba4e-1e047baf087f",
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+   },
+   {
+    "id": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "name": "Bald eagle",
+    "kind": "prop",
+    "shape": "box",
+    "position": [
+     80,
+     70,
+     120
+    ],
+    "rotation": 0,
+    "scale": [
+     2.2,
+     0.3,
+     0.9
+    ],
+    "color": "#3b2a1e",
+    "notes": "A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing.",
+    "look": "ac6e3af5-b365-461c-9e1b-dbbb01f59d26",
+    "lookFrom": null,
+    "styleNotes": "Wildlife photograph of the living animal in natural light, feathers sharp, no studio props",
+    "pitch": 0,
+    "roll": 0,
+    "path": [
+     {
+      "t": 0,
+      "p": [
+       95,
+       127.19,
+       135
+      ]
+     },
+     {
+      "t": 3,
+      "p": [
+       72,
+       72.2,
+       95
+      ]
+     },
+     {
+      "t": 5,
+      "p": [
+       55,
+       38,
+       66
+      ]
+     },
+     {
+      "t": 7,
+      "p": [
+       40,
+       22,
+       40
+      ]
+     },
+     {
+      "t": 9,
+      "p": [
+       22,
+       18.13,
+       14
+      ]
+     },
+     {
+      "t": 10.5,
+      "p": [
+       6,
+       4,
+       -8
+      ]
+     },
+     {
+      "t": 11.8,
+      "p": [
+       -8,
+       2.6,
+       -18
+      ]
+     },
+     {
+      "t": 13,
+      "p": [
+       -24,
+       5.91,
+       -32
+      ]
+     },
+     {
+      "t": 15,
+      "p": [
+       -45,
+       22,
+       -58
+      ]
+     }
+    ],
+    "parent": null,
+    "sheets": [
+     {
+      "id": "szgigya37",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:06:12.450Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "osv7hmry",
+          "requestId": "668a5e06-9874-4f1d-a9b9-e009c8e4b4b6",
+          "referenceId": "28a7212f-5704-4bb7-bff0-e0e9402af62a",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 790377,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:12.450Z"
+         }
+        ],
+        "selected": "osv7hmry",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "qk6y52hm",
+          "requestId": "a335c76a-5b22-4c40-b4aa-c17f68d759e6",
+          "referenceId": "577ca2a6-08e6-4004-a266-7c1fc09f6a32",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 99765,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:12.450Z"
+         }
+        ],
+        "selected": "qk6y52hm",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "mtpvnzre",
+          "requestId": "f432225f-7e0d-42b6-9fc0-453c14e6bf2c",
+          "referenceId": "71380fbb-2365-47c7-9385-ebe7c377252d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 488363,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:12.450Z"
+         }
+        ],
+        "selected": "mtpvnzre",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "kl1ewozn",
+          "requestId": "3f8664a1-4e37-462b-9b69-c2e47549b9df",
+          "referenceId": "3625982b-a212-4628-9f6c-a695c56c734d",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 355780,
+          "error": "",
+          "createdAt": "2026-10-30T17:06:12.450Z"
+         }
+        ],
+        "selected": "kl1ewozn",
+        "accepted": null
+       }
+      ]
+     },
+     {
+      "id": "s9ab36ogj",
+      "setId": "turn4",
+      "label": "Turnaround \u00b7 4",
+      "options": {},
+      "presetId": "flux-2-pro",
+      "createdAt": "2026-10-30T17:28:48.393Z",
+      "slots": [
+       {
+        "id": "front",
+        "label": "Front",
+        "spec": {
+         "framing": "full",
+         "angle": "front"
+        },
+        "attempts": [
+         {
+          "id": "2f8h1pn5",
+          "requestId": "3a289e3b-0662-4f0f-bd8d-089365799313",
+          "referenceId": "cc40f769-94d4-49a5-8149-4784f83fabac",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 14535,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "2f8h1pn5",
+        "accepted": null
+       },
+       {
+        "id": "left",
+        "label": "Left",
+        "spec": {
+         "framing": "full",
+         "angle": "left"
+        },
+        "attempts": [
+         {
+          "id": "nthm6g7l",
+          "requestId": "389fa603-1ca6-48c0-8696-bee0ae298956",
+          "referenceId": "320f924b-9e4c-465c-93f9-472e44e2f1e5",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 280577,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "nthm6g7l",
+        "accepted": null
+       },
+       {
+        "id": "back",
+        "label": "Back",
+        "spec": {
+         "framing": "full",
+         "angle": "back"
+        },
+        "attempts": [
+         {
+          "id": "ld912mmh",
+          "requestId": "f2cc7387-b357-4610-a98a-3d1275215a06",
+          "referenceId": "4e7d0854-f68d-4640-9937-7f772a138343",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 453487,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "ld912mmh",
+        "accepted": null
+       },
+       {
+        "id": "right",
+        "label": "Right",
+        "spec": {
+         "framing": "full",
+         "angle": "right"
+        },
+        "attempts": [
+         {
+          "id": "6y28c2e5",
+          "requestId": "4d3c323e-f43a-4ab4-8512-567d57b7db8b",
+          "referenceId": "e3adcd38-6668-4762-9574-df36ff292bae",
+          "mode": "generate",
+          "note": "",
+          "from": null,
+          "presetId": "flux-2-pro",
+          "seed": 603129,
+          "error": "",
+          "createdAt": "2026-10-30T17:28:48.393Z"
+         }
+        ],
+        "selected": "6y28c2e5",
+        "accepted": null
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "10a9a848-8da4-43ee-95d9-d33975e4419c",
+    "name": "River",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     31.666666666666668,
+     0,
+     31.75
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "206c50a1-c23a-4cd1-be52-92d976ee68ee",
+    "name": "Forest",
+    "kind": "environment",
+    "shape": "group",
+    "position": [
+     9.1325,
+     0,
+     -9.045
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "3197eeea-90f6-47db-86d8-15d534e592fe",
+    "name": "Elk herd",
+    "kind": "character",
+    "shape": "group",
+    "position": [
+     -14,
+     0,
+     -23
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#9aa7b8",
+    "notes": "",
+    "look": null,
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   },
+   {
+    "id": "a0f8b196-e985-42f2-bec8-96b8208980e5",
+    "name": "Alpine terrain",
+    "kind": "environment",
+    "shape": "terrain",
+    "position": [
+     0,
+     0,
+     0
+    ],
+    "rotation": 0,
+    "scale": [
+     1,
+     1,
+     1
+    ],
+    "color": "#6f8f4e",
+    "notes": "Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above.",
+    "look": "5612c99c-a5b2-4013-adee-f32dd9948f13",
+    "lookFrom": null,
+    "styleNotes": "",
+    "pitch": 0,
+    "roll": 0,
+    "path": null,
+    "parent": null
+   }
+  ],
+  "references": [
+   {
+    "id": "51b2c693-ffb7-4a99-872d-27760f502590",
+    "name": "Pine tree \u00b7 FLUX 3 Image \u00b7 7301",
+    "file": "51b2c693-ffb7-4a99-872d-27760f502590.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "f8e76546-d2f0-4caf-9276-cbde518ae391",
+    "note": "",
+    "createdAt": "2026-10-30T15:26:57.678Z"
+   },
+   {
+    "id": "b089b9cd-c5e7-4214-9bde-8737cc988302",
+    "name": "River 1 \u00b7 Flux.2 [pro] \u00b7 879637",
+    "file": "b089b9cd-c5e7-4214-9bde-8737cc988302.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+    "note": "",
+    "createdAt": "2026-10-30T17:06:59.175Z"
+   },
+   {
+    "id": "5612c99c-a5b2-4013-adee-f32dd9948f13",
+    "name": "Alpine terrain \u00b7 Flux.2 [pro] \u00b7 187585",
+    "file": "5612c99c-a5b2-4013-adee-f32dd9948f13.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "a0f8b196-e985-42f2-bec8-96b8208980e5",
+    "note": "",
+    "createdAt": "2026-10-30T17:12:52.217Z"
+   },
+   {
+    "id": "8a65ed8d-12d4-4243-9750-2c6038e522a7",
+    "name": "Alpine lake \u00b7 Flux.2 [pro] \u00b7 753132",
+    "file": "8a65ed8d-12d4-4243-9750-2c6038e522a7.png",
+    "mime": "image/png",
+    "role": "environment",
+    "entityId": "910451e8-e15e-4907-ac3a-a388cba96e01",
+    "note": "",
+    "createdAt": "2026-10-30T17:13:27.565Z"
+   },
+   {
+    "id": "ac6e3af5-b365-461c-9e1b-dbbb01f59d26",
+    "name": "Bald eagle \u00b7 Flux.2 [pro] \u00b7 332619",
+    "file": "ac6e3af5-b365-461c-9e1b-dbbb01f59d26.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "note": "",
+    "createdAt": "2026-10-30T17:41:01.929Z"
+   },
+   {
+    "id": "5f0b0e59-0cb7-442d-a1b7-c8cea8d03467",
+    "name": "Elk 1 \u00b7 Flux.2 [pro] \u00b7 620611",
+    "file": "5f0b0e59-0cb7-442d-a1b7-c8cea8d03467.png",
+    "mime": "image/png",
+    "role": "prop",
+    "entityId": "311a48d9-648a-4672-ba4e-1e047baf087f",
+    "note": "",
+    "createdAt": "2026-10-30T17:41:09.056Z"
+   }
+  ]
+ },
+ "shots": [
+  {
+   "id": "b59a89ad-13b3-4978-949c-e4eb450147be",
+   "title": "The valley",
+   "description": "Sweeping aerial over the lake and peaks as a tiny @bald-eagle glides down from the ridge.",
+   "duration": 5,
+   "start": 0,
+   "camera": {
+    "move": "custom",
+    "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "distance": 6,
+    "height": 1.6,
+    "angle": 0,
+    "mm": 24,
+    "keys": [
+     {
+      "t": 0,
+      "p": [
+       -40,
+       46.8,
+       -95
+      ],
+      "look": [
+       95,
+       121.19,
+       135
+      ],
+      "mm": 24
+     },
+     {
+      "t": 0.25,
+      "p": [
+       -27.5,
+       43.96,
+       -75
+      ],
+      "look": [
+       85.42,
+       98.28,
+       118.33
+      ],
+      "mm": 24
+     },
+     {
+      "t": 0.5,
+      "p": [
+       -15,
+       42.5,
+       -55
+      ],
+      "look": [
+       75.83,
+       75.37,
+       101.67
+      ],
+      "mm": 24
+     },
+     {
+      "t": 0.75,
+      "p": [
+       -2.5,
+       41.25,
+       -35
+      ],
+      "look": [
+       65.63,
+       53.38,
+       84.13
+      ],
+      "mm": 24
+     },
+     {
+      "t": 1,
+      "p": [
+       10,
+       40,
+       -15
+      ],
+      "look": [
+       55,
+       32,
+       66
+      ],
+      "mm": 24
+     }
+    ]
+   },
+   "references": [
+    {
+     "id": "fc1ce5da-1edc-48c0-a95c-329f1f60fed6",
+     "name": "Shot 01 The valley \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "fc1ce5da-1edc-48c0-a95c-329f1f60fed6.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T15:47:44.017Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "drone flyover"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "24mm wide"
+    ],
+    "filter": [
+     "golden hour light",
+     "deep focus"
+    ]
+   }
+  },
+  {
+   "id": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+   "title": "The dive",
+   "description": "FPV drone chase locked right behind @bald-eagle as it folds its wings and dives down the river canyon, the camera rolling with every bank, treetops whipping past underneath.",
+   "duration": 5,
+   "start": 5,
+   "camera": {
+    "move": "custom",
+    "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "distance": 7,
+    "height": 2.5,
+    "angle": 180,
+    "mm": 20,
+    "keys": [
+     {
+      "t": 0,
+      "p": [
+       57.65,
+       43.02,
+       70.59
+      ],
+      "look": [
+       53.68,
+       36.59,
+       63.71
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.1,
+      "p": [
+       54.76,
+       38.25,
+       62.78
+      ],
+      "look": [
+       49.15,
+       32.99,
+       57.66
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.2,
+      "p": [
+       51.43,
+       33.27,
+       55.21
+      ],
+      "look": [
+       44.79,
+       28.29,
+       51.51
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.3,
+      "p": [
+       47.17,
+       30.23,
+       50.23
+      ],
+      "look": [
+       42.08,
+       25.19,
+       44.41
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.4,
+      "p": [
+       42.53,
+       25.23,
+       46.46
+      ],
+      "look": [
+       39.37,
+       21.14,
+       36.81
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.5,
+      "p": [
+       36.35,
+       23.14,
+       38.95
+      ],
+      "look": [
+       35.28,
+       20.87,
+       30.03
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.6,
+      "p": [
+       32.49,
+       21.53,
+       30.56
+      ],
+      "look": [
+       29.72,
+       20.4,
+       24.27
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.7,
+      "p": [
+       30.09,
+       21.26,
+       23.57
+      ],
+      "look": [
+       23.98,
+       18.33,
+       18.62
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.8,
+      "p": [
+       25.51,
+       22.8,
+       17.81
+      ],
+      "look": [
+       20.19,
+       17.05,
+       12.02
+      ],
+      "mm": 20
+     },
+     {
+      "t": 0.9,
+      "p": [
+       18.66,
+       16.98,
+       10.6
+      ],
+      "look": [
+       15.59,
+       11.84,
+       4.16
+      ],
+      "mm": 20
+     },
+     {
+      "t": 1,
+      "p": [
+       13.53,
+       12.15,
+       2.35
+      ],
+      "look": [
+       9.77,
+       7.33,
+       -2.82
+      ],
+      "mm": 20
+     }
+    ]
+   },
+   "references": [
+    {
+     "id": "46987310-01b1-49b3-a0dc-e09d669bd56a",
+     "name": "Shot 02 The dive \u00b7 FLUX 3 Image \u00b7 4242",
+     "file": "46987310-01b1-49b3-a0dc-e09d669bd56a.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:02:49.974Z"
+    },
+    {
+     "id": "f20672ef-bdde-44ec-ba91-905741259fc4",
+     "name": "Shot 02 The dive \u00b7 Flux.2 [pro] \u00b7 660773",
+     "file": "f20672ef-bdde-44ec-ba91-905741259fc4.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:45:02.082Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "FPV drone chase"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "14mm ultra-wide"
+    ],
+    "filter": [
+     "golden hour light"
+    ]
+   }
+  },
+  {
+   "id": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+   "title": "The swoop",
+   "description": "Low tracking shot at the lakeshore as @bald-eagle skims the water past the grazing @elk-herd and climbs away.",
+   "duration": 5,
+   "start": 10,
+   "camera": {
+    "move": "truck-left",
+    "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+    "distance": 12,
+    "height": 2,
+    "angle": 80,
+    "mm": 35,
+    "keys": null
+   },
+   "references": [
+    {
+     "id": "039d2d7a-9b7d-40f4-b6ad-5cfae27517b2",
+     "name": "Shot 03 The swoop \u00b7 Flux.2 [pro] \u00b7 67341",
+     "file": "039d2d7a-9b7d-40f4-b6ad-5cfae27517b2.png",
+     "mime": "image/png",
+     "role": "frame",
+     "entityId": null,
+     "note": "key frame start",
+     "createdAt": "2026-10-30T17:18:43.512Z"
+    }
+   ],
+   "render": null,
+   "cast": {
+    "include": [],
+    "exclude": []
+   },
+   "style": {
+    "movement": [
+     "tracking shot"
+    ],
+    "cuts": [
+     "continuous take, no cuts"
+    ],
+    "lens": [
+     "35mm natural"
+    ],
+    "filter": [
+     "golden hour light"
+    ]
+   }
+  }
+ ],
+ "note": "Copied from the live starter project on 30 Oct 2026 (generation provenance, assets and messages removed) for auto-prompt tests."
+}

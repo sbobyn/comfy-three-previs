@@ -1,0 +1,26 @@
+/* Phone aim source: pairing dialog and viewport demo controls (director-phone.ts). */
+dialog.phone-dialog { width: min(680px, 95vw); max-height: 92vh; }
+.phone-dialog .dialog-body { overflow: auto; }
+.phone-pair { display: flex; flex-direction: column; gap: 10px; }
+.phone-qrs { display: flex; gap: 14px; flex-wrap: wrap; }
+.phone-qr { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; }
+.phone-qr svg { display: block; width: 172px; height: 172px; border-radius: 4px; }
+.phone-qr figcaption { font-size: 12px; color: var(--muted); }
+.phone-link { padding-right: 70px; margin-top: 0; }
+.phone-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; }
+.phone-line a { color: var(--accent); }
+.phone-steps summary { cursor: pointer; color: var(--text); font-weight: 600; }
+.phone-steps ol { margin-top: 10px; gap: 8px; }
+.phone-status { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; padding: 12px 14px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; }
+.phone-status-head { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; }
+.phone-stat { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; min-width: 0; }
+.phone-status > .phone-stat:nth-child(2) { grid-column: 1 / -1; }
+.phone-stat .mono { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.phone-chip { font-size: 11.5px; font-family: var(--mono); color: var(--muted); background: var(--paper-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 4px 8px; white-space: nowrap; }
+.phone-chip.live { color: var(--text); border-color: var(--ok); }
+
+/* Toolbar group: Phone (pair) + Aim (live preview) joined into one control. */
+.phone-group { display: inline-flex; }
+.phone-group .btn:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.phone-group .btn:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: -1px; }
+

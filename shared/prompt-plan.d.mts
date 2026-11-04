@@ -1,0 +1,14 @@
+import type { DirectorProject, Shot, VideoRef } from './director.mjs';
+import type { CameraSource } from './camera-source.mjs';
+import type { DiffPart } from './prompt-sections.mjs';
+export type PlanGroup = 'shot' | 'cast' | 'style' | 'camera' | 'model';
+export const SECTION_GROUPS: Record<PlanGroup, string>;
+export function sectionGroup(key: string): PlanGroup;
+export type PlanRow = { key: string; label: string; source: string; group: PlanGroup; color: string; ids?: string[]; policy: 'inherit' | 'override' | 'lock' | 'system'; system: boolean; editable: boolean; text: string; autoText: string; status: 'included' | 'shortened' | 'omitted' | 'removed' | 'cut' | 'orphan'; why?: string; changes?: string; sourceChanged?: boolean; cameraWords?: string[] };
+export type PromptPlan = { kind: 'video' | 'image'; mode: 'sections' | 'edit' | 'request' | 'compiled'; model: string; text: string; length: number; maxLength: number | null; autoPromptCap?: number; cut: boolean; sections: PlanRow[]; cameraWarning: string; overrides: number; locks: number; cameraSource?: CameraSource; cameraLabel?: string; t?: number };
+export function videoPromptPlan(project: DirectorProject, shot: Shot, o?: { cameraSource?: CameraSource; refs?: VideoRef[]; maxLength?: number; cap?: number; userPrompt?: string | null; model?: string }): PromptPlan;
+export function stillPromptPlan(o: { project: DirectorProject; shot: Shot; t?: number; text?: string | null; moment?: string; presetId?: string; looks?: { label: string }[]; prevImage?: number | null; frame?: { text: string } | null; max?: number; markers?: boolean; model?: string }): PromptPlan;
+export type HistoryEntry = { id: string; label: string; text: string; at: string; model: string };
+export function promptTakes(project: DirectorProject, shot: Shot, kind: 'video' | 'image'): (HistoryEntry & { kind: string })[];
+export function promptHistory(project: DirectorProject, shot: Shot, kind: 'video' | 'image'): { versions: (HistoryEntry & { reason: string; by: string })[]; takes: HistoryEntry[] };
+export function comparePrompts(project: DirectorProject, shot: Shot, kind: 'video' | 'image', fromId: string, toId: string, current?: string): { from: { id: string; label: string }; to: { id: string; label: string }; diff: DiffPart[]; added: number; removed: number; same: boolean };

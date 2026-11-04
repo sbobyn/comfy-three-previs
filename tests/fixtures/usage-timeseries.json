@@ -1,0 +1,133 @@
+{
+ "_note": "Synthetic values in the shape GET /api/billing/usage/timeseries returned on 2026-10-30 (group_by=model and product).",
+ "model": {
+  "as_of": "2026-10-31T02:06:12.34476604Z",
+  "attribution_since": "2026-10-09T06:00:00Z",
+  "breakdown": [
+   {
+    "cost_micros": 4815000,
+    "group_key": "seedance-2-5-edit",
+    "run_count": 3,
+    "share": 0.6
+   },
+   {
+    "cost_micros": 3200000.5,
+    "group_key": "flux-3",
+    "run_count": 40,
+    "share": 0.398
+   },
+   {
+    "cost_micros": 1200,
+    "group_key": "unspecified",
+    "run_count": 1,
+    "share": 0.0001
+   }
+  ],
+  "buckets": [
+   {
+    "cost_micros": 2000000,
+    "group_key": "seedance-2-5-edit",
+    "period_end": "2026-10-30T00:00:00Z",
+    "period_start": "2026-10-29T00:00:00Z"
+   },
+   {
+    "cost_micros": 2815000,
+    "group_key": "seedance-2-5-edit",
+    "period_end": "2026-10-31T00:00:00Z",
+    "period_start": "2026-10-30T00:00:00Z"
+   },
+   {
+    "cost_micros": 3200000.5,
+    "group_key": "flux-3",
+    "period_end": "2026-10-30T00:00:00Z",
+    "period_start": "2026-10-29T00:00:00Z"
+   },
+   {
+    "cost_micros": 1200,
+    "group_key": "unspecified",
+    "period_end": "2026-10-31T00:00:00Z",
+    "period_start": "2026-10-30T00:00:00Z"
+   }
+  ],
+  "ending_before": "2026-10-31T07:00:00Z",
+  "granularity": "day",
+  "group_by": "model",
+  "group_labels": [
+   {
+    "display_name": "Seedance 2.5 edit",
+    "key": "seedance-2-5-edit",
+    "provider": "bytedance",
+    "provider_display_name": "ByteDance"
+   },
+   {
+    "display_name": "FLUX 3",
+    "key": "flux-3",
+    "provider": "bfl",
+    "provider_display_name": "Black Forest Labs"
+   }
+  ],
+  "groups": [
+   "seedance-2-5-edit",
+   "flux-3",
+   "unspecified"
+  ],
+  "served_from": "ledger",
+  "starting_on": "2026-10-29T07:00:00Z",
+  "summary": {
+   "balance": {
+    "amount_cents": 12345.678,
+    "amount_micros": 12345.678,
+    "cloud_credit_balance_cents": 10345.678,
+    "cloud_credit_balance_micros": 10345.678,
+    "currency": "USD",
+    "prepaid_balance_cents": 2000,
+    "prepaid_balance_micros": 2000
+   },
+   "spend_micros": 8016200.5
+  }
+ },
+ "product": {
+  "as_of": "2026-10-31T02:06:13.938196917Z",
+  "attribution_since": "2026-10-09T06:00:00Z",
+  "breakdown": [
+   {
+    "cost_micros": 4815000,
+    "group_key": "BytePlus Video Generation",
+    "share": 0.6
+   },
+   {
+    "cost_micros": 3201200.5,
+    "group_key": "Black Forest Labs Image",
+    "share": 0.4
+   }
+  ],
+  "buckets": [
+   {
+    "cost_micros": 4815000,
+    "group_key": "BytePlus Video Generation",
+    "period_end": "2026-10-30T00:00:00Z",
+    "period_start": "2026-10-29T00:00:00Z"
+   }
+  ],
+  "ending_before": "2026-10-31T07:00:00Z",
+  "granularity": "day",
+  "group_by": "product",
+  "groups": [
+   "BytePlus Video Generation",
+   "Black Forest Labs Image"
+  ],
+  "starting_on": "2026-10-29T07:00:00Z",
+  "summary": {
+   "balance": {
+    "amount_cents": 12345.678,
+    "amount_micros": 12345.678,
+    "cloud_credit_balance_cents": 10345.678,
+    "cloud_credit_balance_micros": 10345.678,
+    "currency": "USD",
+    "prepaid_balance_cents": 2000,
+    "prepaid_balance_micros": 2000
+   },
+   "spend_micros": 8016200.49
+  }
+ }
+}

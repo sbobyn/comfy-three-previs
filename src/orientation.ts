@@ -83,6 +83,7 @@ type PermissionRequestable = {
 
 /** Must be called from a user gesture — iOS rejects it anywhere else. */
 export async function requestMotionPermission(): Promise<boolean> {
+  if (!globalThis.isSecureContext || typeof DeviceOrientationEvent === "undefined") return false;
   const ctor = DeviceOrientationEvent as unknown as PermissionRequestable;
   if (typeof ctor.requestPermission !== "function") return true;
   return (await ctor.requestPermission()) === "granted";
@@ -94,7 +95,7 @@ export function onDeviceQuaternion(
 ): () => void {
   const quaternion = new THREE.Quaternion();
   const listener = (event: DeviceOrientationEvent): void => {
-    if (event.alpha === null || event.beta === null || event.gamma === null) return;
+    if (event.alpha === null || event.beta === null || event.gamma === null || ![event.alpha,event.beta,event.gamma].every(Number.isFinite)) return;
     deviceQuaternion(quaternion, event.alpha, event.beta, event.gamma);
     handler(quaternion, event);
   };

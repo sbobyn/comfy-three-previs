@@ -1,0 +1,51 @@
+# Deploys the read-only demo to GitHub Pages. Nothing is built here: the demo's media is not in git, so
+# scripts/publish-public.sh builds the demo locally, uploads it as demo-site.tar.gz to the `demo-site` release and
+# starts this workflow through scripts/publish-pages.sh. The launch films come from the `films` release
+# (scripts/publish-films.sh) and are served next to the demo, so launch-film*.mp4 links on the site keep working.
+name: Deploy demo to Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      demo_sha256:
+        description: SHA-256 that demo-site.tar.gz must have (empty deploys whatever the demo-site release holds)
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download the demo and the launch films
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WANT: ${{ inputs.demo_sha256 }}
+        run: |
+          set -euo pipefail
+          gh release download demo-site -R "$GITHUB_REPOSITORY" -p demo-site.tar.gz -D dl
+          got=$(sha256sum dl/demo-site.tar.gz | cut -d' ' -f1)
+          echo "demo-site.tar.gz: $got"
+          if [ -n "$WANT" ] && [ "$got" != "$WANT" ]; then echo "::error::demo-site.tar.gz is $got, expected $WANT"; exit 1; fi
+          mkdir _site
+          tar -xzf dl/demo-site.tar.gz -C _site
+          gh release download films -R "$GITHUB_REPOSITORY" -p 'launch-film*.mp4' -D _site
+          ls -l _site
+          du -sh _site
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+          include-hidden-files: true
+      - id: deployment
+        uses: actions/deploy-pages@v5

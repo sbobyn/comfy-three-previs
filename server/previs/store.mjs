@@ -1,0 +1,98 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { atomicJson } from './atomic.mjs';
+import { browserDelivery } from '../../shared/browser-delivery.mjs';
+
+export async function openProject(root) {
+  await mkdir(join(root, 'renders'), { recursive: true });
+  const file = join(root, 'project.json');
+  let project;
+  try { project = JSON.parse(await readFile(file, 'utf8')); }
+  catch (e) { if (e.code !== 'ENOENT') throw e; project = { version: 1, id: randomUUID(), revision: 0, title: 'My previs project', scenes: [], shots: [], references: [], renders: [], workflowBindings: [] }; }
+  if (project.version !== 1) throw Error('Unsupported project version');
+  // Compact JSON: indenting the shots' camera frames alone made this file almost 3× larger (B23).
+  async function save(next) { await atomicJson(file, next, 0); project = next; return structuredClone(project); }
+  if (!project.revision) await save({ ...project, revision: 1 });
+  let chain = Promise.resolve();
+  return {
+    get: () => structuredClone(project),
+    mutate(revision, fn) {
+      const task = chain.then(async () => {
+        if (revision !== project.revision) { const e = Error('Project changed. Refresh before editing.'); e.status = 409; throw e; }
+        const next = structuredClone(project); await fn(next); next.revision++; return save(next);
+      });
+      chain = task.catch(() => {}); return task;
+    },
+    /**
+     * Additive, idempotent server-side writes (attach results, register reference renders, save a binding or preset).
+     * Runs in the same queue as mutate() but against the latest revision, so it never fails with "Project changed".
+     * fn must re-check state on the project it is given; returning false means "nothing to write" (no revision bump).
+     */
+    append(fn) {
+      const task = chain.then(async () => {
+        const next = structuredClone(project);
+        if (await fn(next) === false) return structuredClone(project);
+        next.revision++; return save(next);
+      });
+      chain = task.catch(() => {}); return task;
+    },
+    /**
+     * Representation-only rewrite (a storage migration): same queue, no revision bump, because the project's
+     * meaning does not change. fn edits the project it is given and returns true when there is something to write.
+     */
+    migrate(fn) {
+      const task = chain.then(async () => {
+        const next = structuredClone(project);
+        if (await fn(next) !== true) return structuredClone(project);
+        return save(next);
+      });
+      chain = task.catch(() => {}); return task;
+    },
+    async image(bytes) {
+      if (bytes.length < 24 || bytes.length > 32 * 1024 * 1024 || !bytes.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) throw Error('Expected a PNG under 32 MB');
+      const width = bytes.readUInt32BE(16), height = bytes.readUInt32BE(20);
+      if (!width || !height || width * height > 16000000) throw Error('Unsupported PNG dimensions');
+      const id = randomUUID(); await writeFile(join(root, 'renders', id + '.png'), bytes, { flag: 'wx' }); return { id, width, height };
+    },
+  };
+}
+export function sameBinding(a, b) {
+  return a && b && ['source', 'file', 'scene', 'camera', 'fps', 'start', 'end', 'frame'].every(key => a[key] === b[key]);
+}
+export function validateBinding(input, catalog) {
+  if (!input || typeof input !== 'object') throw Error('Choose a Blender scene and camera');
+  const scene = catalog?.scenes.find(s => s.name === input.scene);
+  if (!scene || !scene.cameras.includes(input.camera)) throw Error('Refresh Blender and choose an existing scene and camera');
+  for (const key of ['frame', 'start', 'end']) if (!Number.isInteger(input[key]) || input[key] < scene.start || input[key] > scene.end) throw Error('Frames must be integers within the Blender scene range');
+  if (input.start > input.end || input.frame < input.start || input.frame > input.end) throw Error('Preview frame must be within the shot range');
+  if (!catalog.file) throw Error('Save the Blender file before binding a persistent shot');
+  return { source: 'blender', file: catalog.file, scene: scene.name, camera: input.camera, fps: scene.fps, frame: input.frame, start: input.start, end: input.end };
+}
+
+export function validateBrowser(input) {
+  const vector = (v, n) => Array.isArray(v) && v.length === n && v.every(x => Number.isFinite(x) && Math.abs(x) < 100000);
+  const frame = f => f && Number.isFinite(f.t) && f.t >= 0 && f.t <= 61 && vector(f.p, 3) && vector(f.q, 4) && Math.abs(Math.hypot(...f.q) - 1) < 0.01 && Number.isFinite(f.mm) && f.mm >= 1 && f.mm <= 2000;
+  if (!vector(input.subject, 3) || !frame(input.camera) || !Array.isArray(input.frames) || input.frames.length > 1500 || !input.frames.every((f, i) => frame(f) && (!i || f.t > input.frames[i - 1].t))) throw Error('Invalid browser camera recording');
+  const director = input.director === undefined ? undefined : validateDirectorSnapshot(input.director);
+  return { subject: input.subject, camera: input.camera, frames: input.frames, sceneVersion: director ? 2 : 1, ...(input.delivery ? { delivery: browserDelivery(input.delivery) } : {}), ...(director ? { director } : {}) };
+}
+
+/**
+ * Add a saved browser camera shot (and its first-frame render) to the engine project `p`, as POST /api/browser-shot
+ * does. `browser` comes from validateBrowser, `image` from project.image. Shared with the Blender import.
+ */
+export function addBrowserShot(p, { id, title, browser, image }) {
+  const binding = { source: 'three', scene: browser.director ? String(browser.director.sceneName || 'Director scene').slice(0, 120) : 'Camera study', camera: browser.director ? 'Director camera' : 'Operated camera', fps: 24, start: 0, end: Math.max(0, Math.floor((browser.frames.at(-1)?.t || 0) * 24 + 1e-8)), frame: 0 };
+  p.shots.push({ id, title: String(title || 'Camera study').slice(0, 160), createdRevision: p.revision + 1, binding, browser, renders: [image.id] });
+  p.renders.push({ id: image.id, shotId: id, source: 'three', pass: 'beauty', width: image.width, height: image.height, binding, createdAt: new Date().toISOString() });
+  if (!browser.director && !p.scenes.some(s => s.owner === 'three')) p.scenes.push({ id: randomUUID(), owner: 'three', name: 'Camera study', version: 1 });
+}
+
+// Snapshot of the director blockout a browser recording was rendered from.
+function validateDirectorSnapshot(d) {
+  const id = /^[a-f0-9-]{36}$/;
+  if (!d || typeof d !== 'object' || !id.test(d.projectId || '') || !id.test(d.shotId || '') || !Number.isInteger(d.projectRevision) || !Array.isArray(d.entities) || d.entities.length > 200) throw Error('Invalid director snapshot');
+  const text = JSON.stringify(d); if (text.length > 200000) throw Error('Director snapshot too large');
+  return { projectId: d.projectId, shotId: d.shotId, projectRevision: d.projectRevision, sceneName: String(d.sceneName || '').slice(0, 120), shotTitle: String(d.shotTitle || '').slice(0, 120), camera: d.camera ?? null, entities: d.entities };
+}

@@ -1,11 +1,9 @@
-import * as THREE from "three";
 import { element } from "./dom";
-import { sliderToMm } from "./lens";
+import { mmToSlider, sliderToMm } from "./lens";
 import {
   applyGrip,
   onDeviceQuaternion,
   requestMotionPermission,
-  YawZero,
   type Grip,
 } from "./orientation";
 import {
@@ -16,186 +14,309 @@ import {
   type ViewerMessage,
 } from "./protocol";
 import { createViewfinder } from "./scene";
-import { defaultSettings, OrientationSmoother, type SmoothingSettings } from "./smoothing";
 
-const canvas = element<HTMLCanvasElement>("scene");
-const startCard = element("start");
-const bar = element("bar");
-const enableButton = element<HTMLButtonElement>("enable");
-const zeroButton = element<HTMLButtonElement>("zero");
-const chromeButton = element<HTMLButtonElement>("chrome");
-const linkField = element("link");
-const sensorField = element("sensor");
-const gripSelect = element<HTMLSelectElement>("grip");
-const zoomSlider = element<HTMLInputElement>("zoom");
-const zoomValue = element("zoomValue");
-
-const viewfinder = createViewfinder(canvas);
-const smoother = new OrientationSmoother();
-const yawZero = new YawZero();
-const raw = new THREE.Quaternion();
-const smoothed = new THREE.Quaternion();
-
-let settings: SmoothingSettings = defaultSettings();
-let socket: WebSocket | null = null;
-let motionEnabled = false;
-let detached = false;
-let pendingZero = false;
-let hasSample = false;
-let chromeHidden = false;
-let lastFrame = performance.now();
-let desktopAim: [number, number, number, number] | null = null;
-
-function refreshChrome(): void {
-  startCard.hidden = motionEnabled && !detached;
-  bar.hidden = !motionEnabled || chromeHidden;
-  element("status").style.opacity = chromeHidden ? "0" : "1";
-  enableButton.textContent = !motionEnabled ? "Enable Motion" : "Reconnect";
+const viewfinder = createViewfinder(element<HTMLCanvasElement>("scene"));
+const start = element("start"),
+  bar = element("bar"),
+  link = element("link"),
+  sensor = element("sensor");
+const enable = element<HTMLButtonElement>("enable"),
+  touch = element<HTMLButtonElement>("touchOnly");
+const grip = element<HTMLSelectElement>("grip"),
+  zoom = element<HTMLInputElement>("zoom");
+let socket: WebSocket | null = null,
+  retry: ReturnType<typeof setTimeout> | undefined;
+let activation = 0;
+let enabledAt = 0;
+let enabled = false,
+  motion = false,
+  detached = false,
+  lastSample = 0,
+  lastRig = 0;
+let detachSensor: (() => void) | undefined;
+let wakeLock: { release: () => Promise<void> } | undefined;
+const sticks = { forward: 0, lateral: 0, vertical: 0, yaw: 0, pitch: 0 };
+let slow = false,
+  fast = false;
+const reset = () => {
+  for (const key of Object.keys(sticks) as (keyof typeof sticks)[])
+    sticks[key] = 0;
+  slow = false;
+  fast = false;
+};
+function send(message: PhoneMessage) {
+  if (socket?.readyState === WebSocket.OPEN)
+    socket.send(JSON.stringify(message));
 }
-
-function send(message: PhoneMessage): void {
-  if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
+function refresh() {
+  start.hidden = enabled && !detached;
+  bar.hidden = !enabled;
+  enable.disabled = false;
+  touch.disabled = false;
 }
-
-function sendLens(): void {
-  const mm = sliderToMm(Number(zoomSlider.value));
-  zoomValue.textContent = `${mm} mm`;
-  viewfinder.setFocalLength(mm);
-  send({ t: "lens", mm });
+function pause(reason: string) {
+  const wasEnabled = enabled;
+  activation++;
+  enabled = false;
+  motion = false;
+  detachSensor?.();
+  detachSensor = undefined;
+  reset();
+  send({ t: "control", active: false, input: { ...sticks } });
+  if (wasEnabled) send({ t: "pause" });
+  sensor.textContent = reason;
+  void wakeLock?.release();
+  wakeLock = undefined;
+  refresh();
 }
-
-function connect(): void {
-  detached = false;
+function connect() {
+  if (socket || detached) return;
   socket = new WebSocket(relayUrl("phone"));
-
-  socket.addEventListener("open", () => {
-    linkField.textContent = "linked";
-    // Announce the lens on connect so the desktop adopts the operator's setting
-    // rather than whatever it happened to be showing.
-    sendLens();
-    refreshChrome();
-  });
-
-  socket.addEventListener("message", (event) => {
-    const message = JSON.parse(String(event.data)) as ViewerMessage;
-
-    if (message.t === "rig") {
-      // Only what the device cannot derive locally. Aiming normally stays on
-      // this side of the link; `aim` is set when the desktop owns it instead,
-      // which turns this page into an FPV monitor rather than the controller.
-      settings = message.settings;
-      viewfinder.setPosition(message.pos[0], message.pos[1], message.pos[2]);
-      viewfinder.setFormat(message.format);
-      desktopAim = message.aim;
+  socket.onopen = () => {
+    link.textContent = (globalThis.location?.hash.length ?? 0) > 1
+      ? "Linked · enable controls on Mac and phone"
+      : "Not paired · open this page from the Phone… link on your computer";
+    refresh();
+  };
+  socket.onmessage = (event) => {
+    let message: ViewerMessage;
+    try {
+      message = JSON.parse(String(event.data));
+    } catch {
       return;
     }
-
-    // Echoed immediately so the desktop can measure round-trip without needing
-    // the two devices' clocks to agree.
-    if (message.t === "ping") send({ t: "pong", id: message.id });
-  });
-
-  socket.addEventListener("close", (event) => {
+    if (message.t === "ping") {
+      send({ t: "pong", id: message.id });
+      return;
+    }
+    if (message.t !== "rig") return;
+    lastRig = performance.now();
+    // [director-phone] The Director desktop aims its own shot camera: hide the
+    // camera-study viewfinder and touch sticks, keep Re-zero / lens / Record.
+    document.body?.classList.toggle("director-mode", message.mode === "director");
+    const record = element<HTMLButtonElement>("phoneRecord");
+    record.textContent = message.controls?.recording
+      ? "Stop shot"
+      : message.controls?.enabled
+        ? "Record shot"
+        : "Arm camera";
+    record.disabled = !enabled;
+    viewfinder.setPosition(...message.pos);
+    viewfinder.setFormat(message.format);
+    if (message.aim) viewfinder.camera.quaternion.fromArray(message.aim);
+    if (message.mm) {
+      viewfinder.setFocalLength(message.mm);
+      zoom.value = String(mmToSlider(message.mm));
+      element("zoomValue").textContent = `${message.mm.toFixed(0)} mm`;
+    }
+    if (message.subject) viewfinder.setSubjectPosition(message.subject);
+  };
+  socket.onclose = (event) => {
     socket = null;
-    if (event.code === REPLACED_BY_NEWER || event.code === EVICTED_BY_VIEWER) {
-      // A deliberate handover. Staying down stops two controllers evicting each
-      // other in a loop, but the sensor listener and its permission survive, so
-      // taking the slot back is one tap rather than a reload.
-      detached = true;
-      linkField.textContent =
-        event.code === EVICTED_BY_VIEWER ? "released by desktop" : "taken over";
-      refreshChrome();
-      return;
-    }
-    linkField.textContent = "reconnecting…";
-    refreshChrome();
-    setTimeout(connect, 1000);
-  });
+    pause("Connection lost; enable again after reconnect.");
+    detached = [REPLACED_BY_NEWER, EVICTED_BY_VIEWER, 4003].includes(
+      event.code,
+    );
+    link.textContent = detached
+      ? "Pairing ended or another phone took over. Create/reopen a pairing link."
+      : "Reconnecting…";
+    if (!detached) retry = setTimeout(connect, 1000);
+  };
 }
-
-async function keepAwake(): Promise<void> {
-  const wakeLock = (
-    navigator as Navigator & { wakeLock?: { request: (type: string) => Promise<unknown> } }
-  ).wakeLock;
+async function activate(useMotion: boolean) {
+  if (socket?.readyState !== WebSocket.OPEN) {
+    link.textContent =
+      "Wait for pairing connection. Reopen the current link if it expired.";
+    return;
+  }
+  pause("Enabling…");
+  const attempt = activation;
+  enable.disabled = true;
+  touch.disabled = true;
   try {
-    await wakeLock?.request("screen");
-  } catch {
-    // Unsupported or refused; the operator just gets a screen that may sleep.
+    if (useMotion) {
+      if (!(await requestMotionPermission()))
+        throw Error(
+          "Motion unavailable or denied. Use trusted HTTPS and allow Motion & Orientation, or choose touch controls.",
+        );
+      if (attempt !== activation || document.hidden) return;
+      motion = true;
+      lastSample = 0;
+      detachSensor = onDeviceQuaternion((q) => {
+        if (!enabled || !motion) return;
+        applyGrip(q, grip.value as Grip);
+        lastSample = performance.now();
+        sensor.textContent = "Motion samples live";
+        directorAim(q); // [director-phone]
+        send({ t: "q", q: q.toArray() as [number, number, number, number] });
+      });
+    }
+    if (attempt !== activation || document.hidden) return;
+    enabled = true;
+    enabledAt = performance.now();
+    send({ t: "recenter" });
+    sensor.textContent = useMotion
+      ? "Waiting for sensor samples…"
+      : "Touch controls enabled";
+    const api = navigator as Navigator & {
+      wakeLock?: {
+        request: (type: string) => Promise<{ release: () => Promise<void> }>;
+      };
+    };
+    try {
+      const lock = await api.wakeLock?.request("screen");
+      if (attempt !== activation) void lock?.release();
+      else wakeLock = lock;
+    } catch {
+      /* Screen lock remains a user/device setting. */
+    }
+  } catch (e) {
+    sensor.textContent = (e as Error).message;
+  } finally {
+    refresh();
   }
 }
-
-enableButton.addEventListener("click", async () => {
-  if (!motionEnabled) {
-    enableButton.disabled = true;
-    sensorField.textContent = "requesting…";
-
-    if (!(await requestMotionPermission())) {
-      sensorField.textContent = "motion denied";
-      enableButton.disabled = false;
-      return;
-    }
-
-    onDeviceQuaternion((q) => {
-      // Grip is a body-mount constant, so it applies before the re-zero that
-      // decides which way the operator is pointing.
-      applyGrip(q, gripSelect.value as Grip);
-      if (pendingZero) {
-        yawZero.capture(q);
-        pendingZero = false;
-      }
-      yawZero.apply(q);
-      raw.copy(q);
-      hasSample = true;
-      send({ t: "q", q: [q.x, q.y, q.z, q.w] });
-    });
-
-    motionEnabled = true;
-    enableButton.disabled = false;
-    zeroButton.disabled = false;
-    sensorField.textContent = "live";
-    void keepAwake();
-  }
-
-  if (!socket) connect();
-  refreshChrome();
-});
-
-zeroButton.addEventListener("click", () => {
-  pendingZero = true;
-});
-
-chromeButton.addEventListener("click", () => {
-  chromeHidden = true;
-  refreshChrome();
-});
-
-canvas.addEventListener("pointerdown", () => {
-  if (!chromeHidden) return;
-  chromeHidden = false;
-  refreshChrome();
-});
-
-zoomSlider.addEventListener("input", sendLens);
-
-const animate = (): void => {
-  const now = performance.now();
-  const dt = (now - lastFrame) / 1000;
-  lastFrame = now;
-
-  if (desktopAim) {
-    viewfinder.camera.quaternion.set(desktopAim[0], desktopAim[1], desktopAim[2], desktopAim[3]);
-  } else if (hasSample) {
-    // The same filter the desktop runs, over the same samples, so the viewfinder
-    // shows the shot being recorded rather than a shakier version of it.
-    smoother.apply(raw, dt, settings, smoothed);
-    viewfinder.camera.quaternion.copy(smoothed);
-  }
-
-  viewfinder.render();
-  requestAnimationFrame(animate);
+enable.onclick = () => void activate(true);
+touch.onclick = () => void activate(false);
+element("phoneRecord").onclick = () => {
+  if (
+    enabled &&
+    (!motion || (lastSample > 0 && performance.now() - lastSample < 500))
+  )
+    send({ t: "record" });
+};
+element("zero").onclick = () => {
+  reset();
+  send({ t: "recenter" });
+  sensor.textContent = "Recentered against desktop framing";
+};
+element("chrome").onclick = () => pause("Paused. Enable controls to resume.");
+grip.onchange = () => {
+  reset();
+  send({ t: "recenter" });
+};
+zoom.oninput = () => {
+  if (enabled) send({ t: "lens", mm: sliderToMm(Number(zoom.value)) });
 };
 
-sendLens();
-refreshChrome();
-animate();
+// Independent pointer ownership for move, aim and altitude. Losing any pointer
+// clears that control; no document-wide touch handler can leave movement latched.
+function joystick(id: string, update: (x: number, y: number) => void) {
+  const pad = element(id);
+  let pointer: number | null = null,
+    startX = 0,
+    startY = 0;
+  const release = () => {
+    pointer = null;
+    update(0, 0);
+    pad.style.background = "";
+  };
+  pad.addEventListener("pointerdown", (event) => {
+    if (!enabled || pointer !== null) return;
+    pointer = event.pointerId;
+    startX = event.clientX;
+    startY = event.clientY;
+    pad.setPointerCapture(pointer);
+    event.preventDefault();
+  });
+  pad.addEventListener("pointermove", (event) => {
+    if (pointer !== event.pointerId) return;
+    let x = (event.clientX - startX) / 50,
+      y = (event.clientY - startY) / 50;
+    const magnitude = Math.max(1, Math.hypot(x, y));
+    x /= magnitude;
+    y /= magnitude;
+    update(x, y);
+    pad.style.background = "#49378B";
+  });
+  for (const name of ["pointerup", "pointercancel", "lostpointercapture"])
+    pad.addEventListener(name, release);
+  window.addEventListener("blur", release);
+}
+joystick("movePad", (x, y) => {
+  sticks.lateral = x;
+  sticks.forward = -y;
+});
+joystick("lookPad", (x, y) => {
+  sticks.yaw = motion ? 0 : x;
+  sticks.pitch = motion ? 0 : -y;
+});
+joystick("heightPad", (_x, y) => {
+  sticks.vertical = -y;
+});
+for (const id of ["slow", "fast"]) {
+  const button = element(id);
+  const set = (v: boolean) => {
+    if (id === "slow") slow = v;
+    else fast = v;
+  };
+  button.addEventListener("pointerdown", (event) => {
+    button.setPointerCapture(event.pointerId);
+    set(true);
+  });
+  for (const name of ["pointerup", "pointercancel", "lostpointercapture"])
+    button.addEventListener(name, () => set(false));
+}
+window.addEventListener("blur", () => {
+  if (enabled) pause("Phone lost focus. Enable again.");
+});
+window.addEventListener("pagehide", () => {
+  pause("Page closed");
+  clearTimeout(retry);
+  detached = true;
+  socket?.close();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) pause("Phone hidden/locked. Enable again.");
+});
+setInterval(() => {
+  if (!enabled) return;
+  if (
+    socket?.readyState !== WebSocket.OPEN ||
+    performance.now() - lastRig > 2000
+  ) {
+    pause("Desktop stopped responding. Return to Mac, then enable again.");
+    return;
+  }
+  if (motion && (!lastSample || performance.now() - lastSample > 500)) {
+    reset();
+    send({ t: "control", active: false, input: { ...sticks } });
+    if (lastSample || performance.now() - enabledAt > 1500)
+      pause(
+        "Motion samples unavailable. Enable motion again or choose touch-only controls.",
+      );
+    return;
+  }
+  const speed = slow ? 0.3 : fast ? 2.5 : 1,
+    look = slow ? 0.3 : 1;
+  send({
+    t: "control",
+    active: true,
+    input: {
+      forward: sticks.forward * speed,
+      lateral: sticks.lateral * speed,
+      vertical: sticks.vertical * speed,
+      yaw: sticks.yaw * look,
+      pitch: sticks.pitch * look,
+    },
+  });
+  if (motion && performance.now() - lastSample > 1000)
+    sensor.textContent =
+      "No recent motion samples. Check Safari permission or use touch controls.";
+}, 33);
+// [director-phone] Local readout of the phone's own aim (the desktop shows the real shot).
+let aimShownAt = 0;
+function directorAim(q: { x: number; y: number; z: number; w: number }) {
+  if (!document.body?.classList.contains("director-mode") || performance.now() - aimShownAt < 100) return;
+  aimShownAt = performance.now();
+  const yaw = Math.atan2(2 * (q.w * q.y + q.x * q.z), 1 - 2 * (q.x * q.x + q.y * q.y));
+  const pitch = Math.asin(Math.max(-1, Math.min(1, 2 * (q.w * q.x - q.y * q.z))));
+  element("directorAim").textContent = `heading ${(yaw * 180 / Math.PI).toFixed(0)}° · tilt ${(pitch * 180 / Math.PI).toFixed(0)}°`;
+}
+function animate() {
+  viewfinder.render();
+  requestAnimationFrame(animate);
+}
+refresh();
 connect();
+animate();

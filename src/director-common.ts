@@ -1,0 +1,175 @@
+import { SHAPES, entitySize } from '../shared/director.mjs';
+import type { Entity, DirectorProject } from '../shared/director.mjs';
+import { claudeExamples } from './director-design-core';
+
+/** The read-only GitHub Pages demo (built with VITE_DEMO=1): no Cloud status, no generation. */
+export const DEMO = Boolean(import.meta.env.VITE_DEMO);
+export { REPO_URL } from '../shared/report-issue.mjs';
+import { REPO_URL } from '../shared/report-issue.mjs';
+/** In-page demo notice, in the page's own header (the demo shim's floating banner steps aside for it). */
+export const demoBadge = () => h('a', { class: 'demo-badge', href: REPO_URL, target: '_blank', rel: 'noopener', title: 'This is a read-only demo. Run Comfy Previs locally to edit and generate.' }, 'Read-only demo · Run it locally ↗');
+
+export type RunnerStatus = { available: boolean; model: string; busy: string[]; runs: Record<string, { messageId: string; startedAt: string; text: string; steps: string[] } | null> }; // [agent]
+export type AgentStatus = { connected: boolean; waiting: boolean; lastSeen: string | null; name: string | null; runner?: RunnerStatus | null };
+export type Connect = { command: string; args: string[]; env: Record<string, string> } | null;
+
+export async function api<T = any>(path: string, body?: unknown): Promise<T> {
+  const response = await fetch('/api/' + path, body === undefined ? { cache: 'no-store' } : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const data = await response.json().catch(() => ({ error: `Request failed (${response.status})` }));
+  if (!response.ok) throw Error(data.error || `Request failed (${response.status})`);
+  return data as T;
+}
+
+export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, any> = {}, ...children: (Node | string | null | undefined | false)[]): HTMLElementTagNameMap[K] {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === undefined || v === null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on') && typeof v === 'function') (el as any)[k.toLowerCase()] = v;
+    else if (k === 'dataset') Object.assign(el.dataset, v);
+    else if (k in el && typeof v !== 'string') (el as any)[k] = v;
+    else el.setAttribute(k, v === true ? '' : String(v));
+  }
+  for (const c of children) if (c !== null && c !== undefined && c !== false) el.append(c);
+  return el;
+}
+
+/** The modal dialog on top, if any: everything outside it is inert, so toasts and announcements have to live inside it. */
+const liveHost = (): HTMLElement => Array.from(document.querySelectorAll<HTMLDialogElement>('dialog[open]')).filter(d => d.matches(':modal')).pop() ?? document.body;
+export const SR_ONLY = 'position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0';
+const pending = new Map<HTMLElement, { texts: string[]; timer: number }>();
+/**
+ * Say something to screen readers without moving focus or showing anything: job progress and completion, a quote that
+ * appeared, an error. Polite, so it waits for the reader to finish. The region is created before its text is set (readers
+ * ignore a live region that arrives with its content) and sits inside the open modal dialog when there is one.
+ * Messages sent within a moment of each other are read together, in order.
+ */
+export function announce(text: string) {
+  if (!text.trim()) return;
+  const root = liveHost();
+  let region = root.querySelector<HTMLElement>(':scope > .sr-live');
+  const fresh = !region;
+  if (!region) { region = h('div', { class: 'sr-live', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true', style: SR_ONLY }); root.append(region); }
+  const entry = pending.get(region) ?? { texts: [], timer: 0 };
+  clearTimeout(entry.timer); entry.texts.push(text.trim());
+  const el = region;
+  entry.timer = window.setTimeout(() => { el.textContent = ''; el.textContent = entry.texts.join('. '); pending.delete(el); }, fresh ? 150 : 60);
+  pending.set(el, entry);
+}
+
+/** A button that disables itself while it works drops focus to the page. When the work is done, put focus on `el` unless the user has already gone somewhere else. */
+export function refocus(el: HTMLElement | null | undefined) {
+  const a = document.activeElement;
+  if (el?.isConnected && !el.hidden && (!a || a === document.body)) el.focus({ preventScroll: true });
+}
+
+/** A short status line at the bottom. With an action (e.g. Undo) it stays a little longer and carries one button. Also announced politely. */
+export function toast(text: string, error = false, action?: { label: string; run: () => void }) {
+  const t = h('div', { class: 'toast' + (error ? ' err' : '') }, text);
+  // An error with no action of its own offers to report it (src/director-report.ts: a preview first, nothing is sent).
+  if (error && !action) action = { label: 'Report this', run: () => void import('./director-report').then(m => m.openReport(text)) };
+  if (action) t.append(h('button', { class: 'btn', type: 'button', onclick: () => { t.remove(); action.run(); } }, action.label));
+  liveHost().append(t);
+  announce(error ? `Error: ${text}` : text);
+  setTimeout(() => t.remove(), action ? 8000 : error ? 6000 : 2600);
+}
+
+export function ago(iso: string) {
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+// Top-down plan of a blockout. Camera sits at the bottom (+z), looking up the page.
+export function planSvg(entities: Pick<Entity, 'shape' | 'position' | 'rotation' | 'scale' | 'color' | 'kind'>[], width = 320, height = 200) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  svg.setAttribute('class', 'plan');
+  svg.setAttribute('aria-hidden', 'true');
+  const scale = 9, cx = width / 2, cy = height * 0.58;
+  const grid = document.createElementNS(ns, 'g');
+  grid.setAttribute('stroke', 'rgba(255,255,255,0.05)');
+  for (let x = -20; x <= 20; x += 2) { const l = document.createElementNS(ns, 'line'); l.setAttribute('x1', String(cx + x * scale)); l.setAttribute('x2', String(cx + x * scale)); l.setAttribute('y1', '0'); l.setAttribute('y2', String(height)); grid.append(l); }
+  for (let z = -16; z <= 12; z += 2) { const l = document.createElementNS(ns, 'line'); l.setAttribute('y1', String(cy + z * scale)); l.setAttribute('y2', String(cy + z * scale)); l.setAttribute('x1', '0'); l.setAttribute('x2', String(width)); grid.append(l); }
+  svg.append(grid);
+  const sorted = [...entities].sort((a, b) => (a.kind === 'environment' ? -1 : 0) - (b.kind === 'environment' ? -1 : 0));
+  for (const e of sorted) {
+    const [w, , d] = entitySize(e as Entity);
+    const g = document.createElementNS(ns, 'g');
+    g.setAttribute('transform', `translate(${cx + e.position[0] * scale} ${cy + e.position[2] * scale}) rotate(${-e.rotation})`);
+    const shape = SHAPES[e.shape] ? e.shape : 'box';
+    const round = ['person', 'sphere', 'cylinder', 'tree', 'lamp', 'rock'].includes(shape);
+    const r = document.createElementNS(ns, round ? 'ellipse' : 'rect');
+    if (round) { r.setAttribute('rx', String(Math.max(2.5, (w * scale) / 2))); r.setAttribute('ry', String(Math.max(2.5, (d * scale) / 2))); }
+    else { r.setAttribute('x', String((-w * scale) / 2)); r.setAttribute('y', String((-d * scale) / 2)); r.setAttribute('width', String(w * scale)); r.setAttribute('height', String(Math.max(2, d * scale))); r.setAttribute('rx', '1.5'); }
+    r.setAttribute('fill', e.color);
+    r.setAttribute('fill-opacity', e.kind === 'environment' ? '0.35' : '0.9');
+    r.setAttribute('stroke', 'rgba(255,255,255,0.25)');
+    g.append(r);
+    if (shape === 'person' || shape === 'car') { const n = document.createElementNS(ns, 'line'); n.setAttribute('x1', '0'); n.setAttribute('y1', '0'); n.setAttribute('x2', '0'); n.setAttribute('y2', String((d * scale) / 2 + 4)); n.setAttribute('stroke', '#fff'); n.setAttribute('stroke-opacity', '.7'); g.append(n); }
+    svg.append(g);
+  }
+  const cam = document.createElementNS(ns, 'path');
+  cam.setAttribute('d', `M${cx} ${height - 10} l-7 -10 h14 z`);
+  cam.setAttribute('fill', '#ffb547');
+  svg.append(cam);
+  return svg;
+}
+
+export const SHAPE_ICONS: Record<string, string> = {
+  person: '<circle cx="12" cy="6" r="3"/><path d="M7 21v-6a5 5 0 0 1 10 0v6"/>',
+  car: '<path d="M3 15h18v-3l-3-5H7l-4 5z"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/>',
+  box: '<rect x="5" y="5" width="14" height="14" rx="1.5"/>',
+  table: '<path d="M3 9h18M6 9v10M18 9v10"/>',
+  chair: '<path d="M7 3v18M7 12h10v9M7 12h10"/>',
+  sphere: '<circle cx="12" cy="12" r="7"/>',
+  cylinder: '<ellipse cx="12" cy="6" rx="6" ry="2.5"/><path d="M6 6v12c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V6"/>',
+  lamp: '<path d="M12 21V6M8 6h8M12 3v3"/>',
+  building: '<rect x="6" y="3" width="12" height="18"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/>',
+  wall: '<rect x="3" y="8" width="18" height="8"/>',
+  tree: '<path d="M12 3l6 11H6z"/><path d="M12 14v7"/>',
+  rock: '<path d="M4 18l3-8 5-3 6 4 2 7z"/>',
+};
+export function shapeIcon(shape: string) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor'); s.setAttribute('stroke-width', '1.6'); s.setAttribute('stroke-linejoin', 'round'); s.setAttribute('stroke-linecap', 'round');
+  s.innerHTML = SHAPE_ICONS[shape] || SHAPE_ICONS.box;
+  return s;
+}
+
+const quote = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
+export function claudeDialog(connect: Connect, project?: DirectorProject) {
+  document.getElementById('connect-dialog')?.remove();
+  const opener = document.activeElement as HTMLElement | null;
+  const command = connect ? `claude mcp add comfy-previs -e ${quote(`PREVIS_URL=${location.origin}`)} -- ${quote(connect.command)} ${connect.args.map(quote).join(' ')}` : 'Start the Comfy Previs server to see the setup command.';
+  // Copy sits in each block's header row, never over the command itself.
+  const code = (title: Node, text: string) => {
+    const copy = h('button', { class: 'btn sm', type: 'button', 'aria-label': 'Copy the command' }, 'Copy');
+    copy.onclick = async () => { try { await navigator.clipboard.writeText(text); copy.textContent = 'Copied'; } catch { toast('Could not copy. Select and copy the command below.', true); } };
+    return h('div', { class: 'code-block' }, h('div', { class: 'code-head' }, title, copy), h('div', { class: 'code', style: 'white-space:pre-wrap;overflow-wrap:anywhere' }, text));
+  };
+  const dlg = h('dialog', { id: 'connect-dialog', class: 'claude-help', 'aria-labelledby': 'connect-title' },
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'connect-title' }, 'Direct with Claude'), h('button', { class: 'btn ghost sm icon', type: 'button', 'aria-label': 'Close', onclick: () => dlg.close() }, '✕')),
+    h('div', { class: 'dialog-body' },
+      h('p', {}, 'Connect Claude Desktop or Claude Code to Comfy Previs. Ask Claude to build and direct your scene; edits appear here live, and object and camera edits can be undone.'),
+      code(h('h3', {}, 'Claude Code'), command),
+      connect ? h('details', {}, h('summary', {}, 'Claude Desktop configuration'), code(h('span', { class: 'muted' }, 'claude_desktop_config.json'), JSON.stringify({ mcpServers: { 'comfy-previs': { ...connect, env: { ...connect.env, PREVIS_URL: location.origin } } } }, null, 2))) : null,
+      h('h3', {}, project ? `Try asking, in ${project.title.replace(/^Starter · /, '')}` : 'Try asking'),
+      h('ul', { class: 'claude-asks' }, ...claudeExamples(project).map(t => h('li', {}, t))),
+      h('p', { class: 'note' }, 'Edits are free; object and camera edits can be undone here. Generating costs money: when this server is started with PREVIS_ALLOW_PAID=1, Claude approves its own Comfy Cloud runs up to the limit (maxCostUsd) it sets on each request, without showing you a quote here. A request estimated above its limit is refused; so is a model with no price estimate, unless you ask Claude to send it anyway. Cloud bills actual usage, so the limit is an allowance, not a hard cap.')));
+  dlg.addEventListener('keydown', ev => ev.stopPropagation());
+  dlg.addEventListener('close', () => { dlg.remove(); if (opener?.isConnected) opener.focus(); });
+  document.body.append(dlg); dlg.showModal();
+}
+
+export function readFileBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(',')[1] || '');
+    r.onerror = () => reject(r.error || Error('Could not read file'));
+    r.readAsDataURL(file);
+  });
+}

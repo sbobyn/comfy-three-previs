@@ -1,0 +1,4719 @@
+{
+  "format": "comfy-previs-starter",
+  "version": 2,
+  "slug": "mountain-trail",
+  "order": 4,
+  "title": "Mountain Trail",
+  "description": "A hiker crosses an open alpine valley toward a lake and a cabin: room to fly a drone or phone camera, with a ridge reveal, a slope dive, a low track and a wide.",
+  "scene": {
+    "name": "Alpine valley",
+    "environment": {
+      "preset": "stage",
+      "description": "A wide alpine valley on an early-autumn morning: green-gold meadows, a still blue-green lake, dark pine stands, a lone timber cabin, a packed-dirt trail and granite ridges with fresh snow on the summits",
+      "style": "Photoreal outdoor adventure film. Low morning sun, crisp clear air, light haze on the distant ridges, natural colour. No logos, brand names, badges, signage or lettering anywhere"
+    },
+    "entities": [
+      {
+        "id": "ee073f19-ebf7-46e4-ac8d-a9b090047664",
+        "name": "Alpine terrain",
+        "kind": "environment",
+        "shape": "terrain",
+        "model": "terrain",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1.4,
+          0.45,
+          1.4
+        ],
+        "color": "#7b8f4e",
+        "notes": "Alpine valley floor of green-gold meadow grass and late wildflowers, granite ridges and scree slopes, fresh snow on the highest summits",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "6748389b-438f-41af-bdbf-f379a9e975e4",
+        "name": "Glacial lake",
+        "kind": "environment",
+        "shape": "cylinder",
+        "model": "lake",
+        "position": [
+          -45,
+          0.3,
+          -45
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.05,
+          50
+        ],
+        "color": "#2f7f8f",
+        "notes": "Still glacial lake, deep blue-green, mirror reflections of the peaks",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "name": "Trail 1.1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -1.6,
+          3.645,
+          109.6
+        ],
+        "rotation": 170.5,
+        "scale": [
+          1.3,
+          0.08,
+          5.466210024238574
+        ],
+        "color": "#9c8462",
+        "notes": "Narrow packed-dirt hiking trail worn into the meadow",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": -9.4,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "2077ab7f-e790-4100-8cab-caaac338e332",
+        "name": "Trail 1.2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          -0.8,
+          2.843,
+          104.8
+        ],
+        "rotation": 170.5,
+        "scale": [
+          1.3,
+          0.08,
+          5.466210024238574
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -8.7,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "691aee9d-b905-4a42-9f64-f49c9b720ac4",
+        "name": "Trail 1.3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0,
+          2.097,
+          100
+        ],
+        "rotation": 170.5,
+        "scale": [
+          1.3,
+          0.08,
+          5.466210024238574
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -7.7,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "cedd6198-7788-4112-9c44-cb19a8c63630",
+        "name": "Trail 1.4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          0.8,
+          1.44,
+          95.2
+        ],
+        "rotation": 170.5,
+        "scale": [
+          1.3,
+          0.08,
+          5.466210024238574
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -7.1,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "f053e5b5-8e17-48db-b3a5-7cf50c21f290",
+        "name": "Trail 1.5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          1.6,
+          0.831,
+          90.4
+        ],
+        "rotation": 170.5,
+        "scale": [
+          1.3,
+          0.08,
+          5.466210024238574
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -5.8,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "d79e17e4-e210-4ee9-83cb-a00c93b45108",
+        "name": "Trail 2.1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          2.4,
+          0.34,
+          85.8
+        ],
+        "rotation": 169.70000000000005,
+        "scale": [
+          1.3,
+          0.08,
+          5.072135954999578
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -4.2,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "41b2c866-e45d-422f-84ab-0a380af1c077",
+        "name": "Trail 2.2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          3.2,
+          0.008,
+          81.4
+        ],
+        "rotation": 169.70000000000005,
+        "scale": [
+          1.3,
+          0.08,
+          5.072135954999578
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -2.5,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "1687cc4d-6bad-4e37-bd75-834e64117dd1",
+        "name": "Trail 2.3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          4,
+          -0.184,
+          77
+        ],
+        "rotation": 169.70000000000005,
+        "scale": [
+          1.3,
+          0.08,
+          5.072135954999578
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -0.3,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "2fe0af4b-96ee-4159-b54c-775cd0e394fd",
+        "name": "Trail 2.4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          4.8,
+          -0.198,
+          72.6
+        ],
+        "rotation": 169.70000000000005,
+        "scale": [
+          1.3,
+          0.08,
+          5.072135954999578
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.1,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "29a59ceb-d8ba-42b2-b84a-f73bbca9ad71",
+        "name": "Trail 2.5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          5.6,
+          -0.181,
+          68.2
+        ],
+        "rotation": 169.70000000000005,
+        "scale": [
+          1.3,
+          0.08,
+          5.072135954999578
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.2,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "01d4b919-235f-4e54-a9e9-d0f1789d6f04",
+        "name": "Trail 3.1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          6.333,
+          -0.151,
+          64.167
+        ],
+        "rotation": 169.70000000000005,
+        "scale": [
+          1.3,
+          0.08,
+          4.326779962499649
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.5,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "7ad05fdd-b87f-45de-aa69-f98f00432f5d",
+        "name": "Trail 3.2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          7,
+          -0.111,
+          60.5
+        ],
+        "rotation": 169.70000000000005,
+        "scale": [
+          1.3,
+          0.08,
+          4.326779962499649
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.6,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "393efcf2-b07b-4653-856b-5afd86a4b3c9",
+        "name": "Trail 3.3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          7.667,
+          -0.065,
+          56.833
+        ],
+        "rotation": 169.70000000000005,
+        "scale": [
+          1.3,
+          0.08,
+          4.326779962499649
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.7,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "cd2ad4a3-271b-43ff-b30d-e1f4bd531214",
+        "name": "Trail 4.1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          8.6,
+          -0.003,
+          52.7
+        ],
+        "rotation": 165.39999999999998,
+        "scale": [
+          1.3,
+          0.08,
+          5.353945729601884
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.7,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "0f0729bd-d2d8-425c-aaaa-f4ad8c51ec2e",
+        "name": "Trail 4.2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          9.8,
+          0.054,
+          48.1
+        ],
+        "rotation": 165.39999999999998,
+        "scale": [
+          1.3,
+          0.08,
+          5.353945729601884
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.7,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "0e6b4451-e780-46e0-919e-c0936cc80d15",
+        "name": "Trail 4.3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          11,
+          0.098,
+          43.5
+        ],
+        "rotation": 165.39999999999998,
+        "scale": [
+          1.3,
+          0.08,
+          5.353945729601884
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.5,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "a5c02b84-3707-4e69-ae89-35ee4b2b9e77",
+        "name": "Trail 4.4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          12.2,
+          0.125,
+          38.9
+        ],
+        "rotation": 165.39999999999998,
+        "scale": [
+          1.3,
+          0.08,
+          5.353945729601884
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.3,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "c725229b-bcac-4b3d-93f4-ac0bbeaa8cfa",
+        "name": "Trail 4.5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          13.4,
+          0.13,
+          34.3
+        ],
+        "rotation": 165.39999999999998,
+        "scale": [
+          1.3,
+          0.08,
+          5.353945729601884
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": 0.1,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "94d83164-9cfe-4aa0-bbd8-15d0069df325",
+        "name": "Trail 5.1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          14.6,
+          0.13,
+          30
+        ],
+        "rotation": 163.29999999999995,
+        "scale": [
+          1.3,
+          0.08,
+          4.77612260356422
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -0.2,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "7852c672-7a54-4157-830d-55183e3b91ab",
+        "name": "Trail 5.2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          15.8,
+          0.117,
+          26
+        ],
+        "rotation": 163.29999999999995,
+        "scale": [
+          1.3,
+          0.08,
+          4.77612260356422
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -0.4,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "5e036570-33a6-4b21-9671-aade2a940c11",
+        "name": "Trail 5.3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          17,
+          0.088,
+          22
+        ],
+        "rotation": 163.29999999999995,
+        "scale": [
+          1.3,
+          0.08,
+          4.77612260356422
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -0.6,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "be7b1b84-8326-4449-982a-afac1a357668",
+        "name": "Trail 5.4",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          18.2,
+          0.045,
+          18
+        ],
+        "rotation": 163.29999999999995,
+        "scale": [
+          1.3,
+          0.08,
+          4.77612260356422
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -0.7,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "b2ed468e-37fe-4ede-8e37-4fa747707bf6",
+        "name": "Trail 5.5",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          19.4,
+          -0.009,
+          14
+        ],
+        "rotation": 163.29999999999995,
+        "scale": [
+          1.3,
+          0.08,
+          4.77612260356422
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -0.8,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "0a3a4eed-2125-4e0f-a2d4-e55d97856113",
+        "name": "Trail 6.1",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          21.167,
+          -0.068,
+          9.833
+        ],
+        "rotation": 151.7,
+        "scale": [
+          1.3,
+          0.08,
+          5.521607686744466
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -0.8,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "7520f24e-437e-4e2c-a266-ceeb93733265",
+        "name": "Trail 6.2",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          23.5,
+          -0.138,
+          5.5
+        ],
+        "rotation": 151.7,
+        "scale": [
+          1.3,
+          0.08,
+          5.521607686744466
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -0.7,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "afc83110-0c40-46dc-bdc0-4f5cc81dcf54",
+        "name": "Trail 6.3",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          25.833,
+          -0.196,
+          1.167
+        ],
+        "rotation": 151.7,
+        "scale": [
+          1.3,
+          0.08,
+          5.521607686744466
+        ],
+        "color": "#9c8462",
+        "notes": "",
+        "lookFrom": "30cb2477-0979-42b5-8e9a-b678fa0e4958",
+        "styleNotes": "",
+        "pitch": -0.3,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "697e2dcc-5e03-48ef-a4ae-f0f0a3e51539",
+        "name": "Cabin",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          30,
+          -0.153,
+          -10
+        ],
+        "rotation": 0,
+        "scale": [
+          7,
+          3,
+          5
+        ],
+        "color": "#7a5636",
+        "notes": "Small weathered log cabin with a dark green metal roof, a stone chimney and a covered front porch",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "a02b07bb-9fae-4483-8c9b-18c079127f8a"
+      },
+      {
+        "id": "2291ce30-2ffe-4e29-aa0f-f17bf7b0008a",
+        "name": "Cabin roof south",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          30,
+          2.897,
+          -8.65
+        ],
+        "rotation": 0,
+        "scale": [
+          7.8,
+          0.18,
+          3.35
+        ],
+        "color": "#2f4a3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": -32,
+        "roll": 0,
+        "path": null,
+        "parent": "a02b07bb-9fae-4483-8c9b-18c079127f8a"
+      },
+      {
+        "id": "123bf8b8-b587-41ae-a1a4-6bd95357c958",
+        "name": "Cabin roof north",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          30,
+          2.897,
+          -11.35
+        ],
+        "rotation": 0,
+        "scale": [
+          7.8,
+          0.18,
+          3.35
+        ],
+        "color": "#2f4a3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 32,
+        "roll": 0,
+        "path": null,
+        "parent": "a02b07bb-9fae-4483-8c9b-18c079127f8a"
+      },
+      {
+        "id": "0d7f5bc5-fe4a-4b0c-88a5-2904d62e827d",
+        "name": "Cabin chimney",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          32.6,
+          2.247,
+          -10.6
+        ],
+        "rotation": 0,
+        "scale": [
+          0.7,
+          2.6,
+          0.7
+        ],
+        "color": "#8a8580",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "a02b07bb-9fae-4483-8c9b-18c079127f8a"
+      },
+      {
+        "id": "2961dfcd-7309-4a56-b65f-c5b9e68c2846",
+        "name": "Cabin door",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          29,
+          0.047,
+          -7.496
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          2,
+          0.06
+        ],
+        "color": "#4a3020",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "a02b07bb-9fae-4483-8c9b-18c079127f8a"
+      },
+      {
+        "id": "6f8d71a9-a06d-4c18-ab57-286d0cf9778f",
+        "name": "Cabin porch",
+        "kind": "environment",
+        "shape": "box",
+        "position": [
+          30,
+          -0.153,
+          -6.6
+        ],
+        "rotation": 0,
+        "scale": [
+          7,
+          0.2,
+          1.8
+        ],
+        "color": "#6b4a2e",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "a02b07bb-9fae-4483-8c9b-18c079127f8a"
+      },
+      {
+        "id": "a02b07bb-9fae-4483-8c9b-18c079127f8a",
+        "name": "Cabin set",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          30.266666666666666,
+          0,
+          -9.116000000000001
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "name": "Moraine 1",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          49,
+          -0.301,
+          40
+        ],
+        "rotation": 20,
+        "scale": [
+          9,
+          8,
+          12
+        ],
+        "color": "#8a8478",
+        "notes": "Lichen-grey granite boulders piled into a low moraine ridge",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "575b46e5-edae-4592-a508-e0f31f905470"
+      },
+      {
+        "id": "cc360476-f0bd-4ede-8e7a-dd7c8bccf59e",
+        "name": "Moraine 2",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          51,
+          -0.268,
+          55
+        ],
+        "rotation": 345,
+        "scale": [
+          8,
+          6.5,
+          11
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "575b46e5-edae-4592-a508-e0f31f905470"
+      },
+      {
+        "id": "6e3ededf-9a43-4967-b06c-cc82a8587af1",
+        "name": "Moraine 3",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          47,
+          -0.216,
+          68
+        ],
+        "rotation": 40,
+        "scale": [
+          7,
+          5,
+          9
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "575b46e5-edae-4592-a508-e0f31f905470"
+      },
+      {
+        "id": "90943240-bda9-4f77-bb49-38a6e084e936",
+        "name": "Moraine 4",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          53,
+          -0.409,
+          28
+        ],
+        "rotation": 5,
+        "scale": [
+          6,
+          4.5,
+          8
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "575b46e5-edae-4592-a508-e0f31f905470"
+      },
+      {
+        "id": "575b46e5-edae-4592-a508-e0f31f905470",
+        "name": "Moraine ridge",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          50,
+          0,
+          47.75
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "94ba1663-9fce-4c81-b22f-21194ee9f8ca",
+        "name": "Boulder 1",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -18,
+          -0.023,
+          40
+        ],
+        "rotation": 0,
+        "scale": [
+          1.6,
+          1.2800000000000002,
+          1.7600000000000002
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "25e04950-f06c-405d-850c-6c051bccdf3b",
+        "name": "Boulder 2",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -30,
+          -0.106,
+          10
+        ],
+        "rotation": 161,
+        "scale": [
+          2.2,
+          1.7600000000000002,
+          2.4200000000000004
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "baacb9c9-c0cf-43db-9302-bb28e9e1a6f9",
+        "name": "Boulder 3",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          35,
+          0.103,
+          60
+        ],
+        "rotation": 112,
+        "scale": [
+          1.4,
+          1.1199999999999999,
+          1.54
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "35d95c33-f25c-4ed7-bf52-d19aa4c3402b",
+        "name": "Boulder 4",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -8,
+          -0.042,
+          20
+        ],
+        "rotation": 16,
+        "scale": [
+          1.1,
+          0.8800000000000001,
+          1.2100000000000002
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "8e825ddf-e4d4-4f56-a2d0-5470349895d4",
+        "name": "Boulder 5",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          24,
+          0.086,
+          48
+        ],
+        "rotation": 310,
+        "scale": [
+          1.3,
+          1.04,
+          1.4300000000000002
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "aac7ba0e-ed4f-49ef-8728-0c959047e2c6",
+        "name": "Boulder 6",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -55,
+          0.083,
+          30
+        ],
+        "rotation": 147,
+        "scale": [
+          2.6,
+          2.08,
+          2.8600000000000003
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "e6fc00e2-529e-49a8-88ed-038ea197bcb3",
+        "name": "Boulder 7",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          60,
+          -0.255,
+          0
+        ],
+        "rotation": 186,
+        "scale": [
+          1.8,
+          1.4400000000000002,
+          1.9800000000000002
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "89234e7b-cec0-4acf-a502-6260ffbfc97e",
+        "name": "Boulder 8",
+        "kind": "environment",
+        "shape": "rock",
+        "position": [
+          -12,
+          -0.152,
+          -12
+        ],
+        "rotation": 168,
+        "scale": [
+          1.5,
+          1.2000000000000002,
+          1.6500000000000001
+        ],
+        "color": "#8a8478",
+        "notes": "",
+        "lookFrom": "5a2e31c9-3f15-439f-86c7-018ae2829180",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "name": "Pine West shore 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -80.777,
+          -0.175,
+          -46.115
+        ],
+        "rotation": 0,
+        "scale": [
+          1.153,
+          1.845,
+          1.153
+        ],
+        "color": "#2f5d3a",
+        "notes": "Tall dark-green subalpine firs and pines",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00fc3306-e327-4915-971d-ead0dad023ca"
+      },
+      {
+        "id": "01528a75-9832-4ba0-a0aa-808e7708a77e",
+        "name": "Pine West shore 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -74.02,
+          -0.199,
+          -50.063
+        ],
+        "rotation": 0,
+        "scale": [
+          1.266,
+          2.026,
+          1.266
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00fc3306-e327-4915-971d-ead0dad023ca"
+      },
+      {
+        "id": "573cb18e-b607-4ce2-81c5-7dc9cb64722d",
+        "name": "Pine West shore 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -77.534,
+          -0.208,
+          -30.852
+        ],
+        "rotation": 0,
+        "scale": [
+          1.268,
+          2.029,
+          1.268
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00fc3306-e327-4915-971d-ead0dad023ca"
+      },
+      {
+        "id": "e748f2dc-5883-4288-b829-24ba6f29b66c",
+        "name": "Pine West shore 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -91.629,
+          -0.088,
+          -47.908
+        ],
+        "rotation": 0,
+        "scale": [
+          1.515,
+          2.423,
+          1.515
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00fc3306-e327-4915-971d-ead0dad023ca"
+      },
+      {
+        "id": "f1966913-6b4a-4ed6-9337-1ef4def0a05e",
+        "name": "Pine West shore 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -77.414,
+          -0.214,
+          -38.474
+        ],
+        "rotation": 0,
+        "scale": [
+          1.335,
+          2.136,
+          1.335
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00fc3306-e327-4915-971d-ead0dad023ca"
+      },
+      {
+        "id": "52cc91fb-a740-4dac-8ab9-9224a8c9b659",
+        "name": "Pine West shore 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -87.426,
+          -0.117,
+          -45.381
+        ],
+        "rotation": 0,
+        "scale": [
+          1.557,
+          2.492,
+          1.557
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00fc3306-e327-4915-971d-ead0dad023ca"
+      },
+      {
+        "id": "81c11cad-9317-4db2-9ab7-72fa37265afd",
+        "name": "Pine West shore 7",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -93.675,
+          -0.076,
+          -48.593
+        ],
+        "rotation": 0,
+        "scale": [
+          1.403,
+          2.245,
+          1.403
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00fc3306-e327-4915-971d-ead0dad023ca"
+      },
+      {
+        "id": "67b244cb-3d91-47f1-b64d-a20095f1ea62",
+        "name": "Pine West shore 8",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -74.033,
+          -0.184,
+          -53.621
+        ],
+        "rotation": 0,
+        "scale": [
+          1.269,
+          2.03,
+          1.269
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00fc3306-e327-4915-971d-ead0dad023ca"
+      },
+      {
+        "id": "eaf17d6f-abcb-4374-8f47-b77903487b00",
+        "name": "Pine West shore 9",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -69.164,
+          -0.244,
+          -39.381
+        ],
+        "rotation": 0,
+        "scale": [
+          1.068,
+          1.709,
+          1.068
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "00fc3306-e327-4915-971d-ead0dad023ca"
+      },
+      {
+        "id": "00fc3306-e327-4915-971d-ead0dad023ca",
+        "name": "Pines · West shore",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          -80.63022222222223,
+          0,
+          -44.48755555555556
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "eca0b07c-b999-433b-bb44-5e76ba25807d",
+        "name": "Pine North wood 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -6.462,
+          -0.059,
+          -80.311
+        ],
+        "rotation": 0,
+        "scale": [
+          1.224,
+          1.959,
+          1.224
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "8d26a470-bea8-418c-9241-7b65ef7f9e68"
+      },
+      {
+        "id": "3199e294-7bdb-4225-8a10-2b2eed2609df",
+        "name": "Pine North wood 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          2.845,
+          -0.155,
+          -110.401
+        ],
+        "rotation": 0,
+        "scale": [
+          1.502,
+          2.404,
+          1.502
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "8d26a470-bea8-418c-9241-7b65ef7f9e68"
+      },
+      {
+        "id": "c9bd4c20-0485-44cc-9286-54d5212a8b14",
+        "name": "Pine North wood 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -0.142,
+          -0.05,
+          -80.624
+        ],
+        "rotation": 0,
+        "scale": [
+          1.201,
+          1.921,
+          1.201
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "8d26a470-bea8-418c-9241-7b65ef7f9e68"
+      },
+      {
+        "id": "87e4eff1-3149-4f48-a599-212d83ac69cf",
+        "name": "Pine North wood 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -20.665,
+          -0.099,
+          -85.415
+        ],
+        "rotation": 0,
+        "scale": [
+          1.664,
+          2.662,
+          1.664
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "8d26a470-bea8-418c-9241-7b65ef7f9e68"
+      },
+      {
+        "id": "1fd7d2da-5155-40d6-afd9-f873490e0a12",
+        "name": "Pine North wood 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -2.583,
+          -0.045,
+          -79.006
+        ],
+        "rotation": 0,
+        "scale": [
+          1.56,
+          2.497,
+          1.56
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "8d26a470-bea8-418c-9241-7b65ef7f9e68"
+      },
+      {
+        "id": "f98dd95b-1061-4b3b-8029-8606f9b39db0",
+        "name": "Pine North wood 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -12.194,
+          -0.096,
+          -102.838
+        ],
+        "rotation": 0,
+        "scale": [
+          1.431,
+          2.289,
+          1.431
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "8d26a470-bea8-418c-9241-7b65ef7f9e68"
+      },
+      {
+        "id": "4faf39ea-7213-488c-adbe-11772607be0a",
+        "name": "Pine North wood 7",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -25.233,
+          -0.143,
+          -80.539
+        ],
+        "rotation": 0,
+        "scale": [
+          1.582,
+          2.531,
+          1.582
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "8d26a470-bea8-418c-9241-7b65ef7f9e68"
+      },
+      {
+        "id": "a7610601-7ccb-458d-87eb-fd665c6edd50",
+        "name": "Pine North wood 8",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -14.746,
+          -0.091,
+          -83.025
+        ],
+        "rotation": 0,
+        "scale": [
+          1.001,
+          1.601,
+          1.001
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "8d26a470-bea8-418c-9241-7b65ef7f9e68"
+      },
+      {
+        "id": "8d26a470-bea8-418c-9241-7b65ef7f9e68",
+        "name": "Pines · North wood",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          -9.897499999999999,
+          0,
+          -87.769875
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "7efba7f2-f6df-49c7-acb9-10fc7a051ca0",
+        "name": "Pine Behind the cabin 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          50.992,
+          -0.114,
+          -17.879
+        ],
+        "rotation": 0,
+        "scale": [
+          1.385,
+          2.216,
+          1.385
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "e34124f6-cddb-473a-81f7-9492fa44bdda"
+      },
+      {
+        "id": "edf4adba-e745-4cb1-946b-3566a1d9bc73",
+        "name": "Pine Behind the cabin 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          51.226,
+          -0.037,
+          -25.831
+        ],
+        "rotation": 0,
+        "scale": [
+          1.597,
+          2.555,
+          1.597
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "e34124f6-cddb-473a-81f7-9492fa44bdda"
+      },
+      {
+        "id": "855c5184-3578-40c4-9358-65e24e5d99dc",
+        "name": "Pine Behind the cabin 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          46.807,
+          -0.095,
+          -18.303
+        ],
+        "rotation": 0,
+        "scale": [
+          1.699,
+          2.718,
+          1.699
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "e34124f6-cddb-473a-81f7-9492fa44bdda"
+      },
+      {
+        "id": "92345d01-0e0d-4936-8bdd-ebcbccebcdef",
+        "name": "Pine Behind the cabin 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          46.657,
+          -0.067,
+          -20.398
+        ],
+        "rotation": 0,
+        "scale": [
+          1.355,
+          2.169,
+          1.355
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "e34124f6-cddb-473a-81f7-9492fa44bdda"
+      },
+      {
+        "id": "71c1c2b1-ff37-4092-98c8-662b16759f63",
+        "name": "Pine Behind the cabin 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          43.06,
+          0.083,
+          -34.138
+        ],
+        "rotation": 0,
+        "scale": [
+          1.036,
+          1.658,
+          1.036
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "e34124f6-cddb-473a-81f7-9492fa44bdda"
+      },
+      {
+        "id": "9f5a2b2b-b31d-4a2e-ab0e-516ea5fac6c7",
+        "name": "Pine Behind the cabin 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          53.89,
+          -0.026,
+          -33.04
+        ],
+        "rotation": 0,
+        "scale": [
+          1.246,
+          1.993,
+          1.246
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "e34124f6-cddb-473a-81f7-9492fa44bdda"
+      },
+      {
+        "id": "e34124f6-cddb-473a-81f7-9492fa44bdda",
+        "name": "Pines · Behind the cabin",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          48.77199999999999,
+          0,
+          -24.9315
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "9afdf2ca-9dda-432d-b37d-a11ca35580d7",
+        "name": "Pine South slope 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -30.778,
+          2.26,
+          97.04
+        ],
+        "rotation": 0,
+        "scale": [
+          1.331,
+          2.129,
+          1.331
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0802fb0f-bc36-489d-bdfa-4d25dc027c85"
+      },
+      {
+        "id": "012818e9-24ce-4edf-9785-c252ae8c19f9",
+        "name": "Pine South slope 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -41.456,
+          2.758,
+          97.096
+        ],
+        "rotation": 0,
+        "scale": [
+          1.122,
+          1.795,
+          1.122
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0802fb0f-bc36-489d-bdfa-4d25dc027c85"
+      },
+      {
+        "id": "d6c46555-ba4f-4015-a9b9-8aadf34942b6",
+        "name": "Pine South slope 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -30.248,
+          3.032,
+          101.217
+        ],
+        "rotation": 0,
+        "scale": [
+          1.647,
+          2.636,
+          1.647
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0802fb0f-bc36-489d-bdfa-4d25dc027c85"
+      },
+      {
+        "id": "5c04ea84-995a-4e7e-803d-75f15c55ca8b",
+        "name": "Pine South slope 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -41.637,
+          6.254,
+          111.509
+        ],
+        "rotation": 0,
+        "scale": [
+          1.696,
+          2.713,
+          1.696
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0802fb0f-bc36-489d-bdfa-4d25dc027c85"
+      },
+      {
+        "id": "3bd15afc-8316-4871-abda-6b6226322433",
+        "name": "Pine South slope 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -25.417,
+          2.973,
+          101.563
+        ],
+        "rotation": 0,
+        "scale": [
+          1.259,
+          2.014,
+          1.259
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0802fb0f-bc36-489d-bdfa-4d25dc027c85"
+      },
+      {
+        "id": "25e2bdce-c218-43d3-a5dd-bf3db8173df9",
+        "name": "Pine South slope 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -23.332,
+          3.28,
+          103.504
+        ],
+        "rotation": 0,
+        "scale": [
+          1.352,
+          2.163,
+          1.352
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0802fb0f-bc36-489d-bdfa-4d25dc027c85"
+      },
+      {
+        "id": "cc251a36-a4e6-4b29-9f5f-2f49d77289b1",
+        "name": "Pine South slope 7",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -36.661,
+          3.262,
+          100.789
+        ],
+        "rotation": 0,
+        "scale": [
+          1.18,
+          1.887,
+          1.18
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "0802fb0f-bc36-489d-bdfa-4d25dc027c85"
+      },
+      {
+        "id": "0802fb0f-bc36-489d-bdfa-4d25dc027c85",
+        "name": "Pines · South slope",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          -32.789857142857144,
+          0,
+          101.81685714285713
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "b5132cde-80f5-4938-b7e9-b2225371a954",
+        "name": "Pine East slope 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          123.1,
+          17.413,
+          105.664
+        ],
+        "rotation": 0,
+        "scale": [
+          1.637,
+          2.62,
+          1.637
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4b489421-cce3-4fdb-9d5c-8b49012ca7eb"
+      },
+      {
+        "id": "aac5a5ab-52bc-4444-b5a4-d7c9414107f0",
+        "name": "Pine East slope 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          103.53,
+          8.733,
+          95.824
+        ],
+        "rotation": 0,
+        "scale": [
+          1.673,
+          2.677,
+          1.673
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4b489421-cce3-4fdb-9d5c-8b49012ca7eb"
+      },
+      {
+        "id": "96a20b2c-dc06-4eae-bf56-a38705f96906",
+        "name": "Pine East slope 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          116.582,
+          13.035,
+          98.917
+        ],
+        "rotation": 0,
+        "scale": [
+          1.579,
+          2.526,
+          1.579
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4b489421-cce3-4fdb-9d5c-8b49012ca7eb"
+      },
+      {
+        "id": "cd5ddb37-3cce-443d-abfb-53721443c799",
+        "name": "Pine East slope 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          108.726,
+          16.954,
+          113.095
+        ],
+        "rotation": 0,
+        "scale": [
+          1.338,
+          2.141,
+          1.338
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4b489421-cce3-4fdb-9d5c-8b49012ca7eb"
+      },
+      {
+        "id": "6637842e-07ac-4369-b7bf-c2ec7063aa91",
+        "name": "Pine East slope 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          112.215,
+          11.32,
+          97.549
+        ],
+        "rotation": 0,
+        "scale": [
+          1.07,
+          1.712,
+          1.07
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4b489421-cce3-4fdb-9d5c-8b49012ca7eb"
+      },
+      {
+        "id": "e183c471-f18c-400d-b187-a2c6fd6913e6",
+        "name": "Pine East slope 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          119.155,
+          19.388,
+          112.96
+        ],
+        "rotation": 0,
+        "scale": [
+          1.184,
+          1.894,
+          1.184
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": "e9ca300e-8eaa-4416-a889-b3467b35370f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "4b489421-cce3-4fdb-9d5c-8b49012ca7eb"
+      },
+      {
+        "id": "4b489421-cce3-4fdb-9d5c-8b49012ca7eb",
+        "name": "Pines · East slope",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          113.88466666666666,
+          0,
+          104.00150000000001
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "8e5b536f-98f2-4951-967c-4cd601a67175",
+        "name": "Hiker",
+        "kind": "character",
+        "shape": "person",
+        "model": "/director-refs/00000000-0000-0000-0000-000000000000/6bb27548-9c53-42e3-b243-08e17a979bca.glb",
+        "position": [
+          8.007050198188768,
+          -0.044739268558104915,
+          54.97297424027639
+        ],
+        "rotation": 0,
+        "scale": [
+          1.0639999999999998,
+          1.0014444584647815,
+          0.9142856938498362
+        ],
+        "color": "#c8ccd4",
+        "notes": "An adult hiker in a teal waterproof shell jacket, charcoal trekking trousers, a rust-red daypack and brown leather boots; short dark hair, steady easy stride",
+        "lookFrom": null,
+        "styleNotes": "Plain outdoor clothing without logos or lettering",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              8.007,
+              -0.045,
+              54.973
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 1,
+            "p": [
+              8.328,
+              -0.028,
+              53.744
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 2,
+            "p": [
+              8.648,
+              -0.011,
+              52.515
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 3,
+            "p": [
+              8.969,
+              0.005,
+              51.286
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 4,
+            "p": [
+              9.289,
+              0.021,
+              50.057
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 5,
+            "p": [
+              9.61,
+              0.037,
+              48.829
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 6,
+            "p": [
+              9.931,
+              0.053,
+              47.6
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 7,
+            "p": [
+              10.251,
+              0.067,
+              46.371
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 8,
+            "p": [
+              10.572,
+              0.081,
+              45.142
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 9,
+            "p": [
+              10.892,
+              0.094,
+              43.913
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 10,
+            "p": [
+              11.213,
+              0.105,
+              42.684
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 11,
+            "p": [
+              11.533,
+              0.116,
+              41.455
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 12,
+            "p": [
+              11.854,
+              0.125,
+              40.226
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 13,
+            "p": [
+              12.175,
+              0.133,
+              38.998
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 14,
+            "p": [
+              12.495,
+              0.14,
+              37.769
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 15,
+            "p": [
+              12.816,
+              0.145,
+              36.54
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 16,
+            "p": [
+              13.136,
+              0.148,
+              35.311
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 17,
+            "p": [
+              13.457,
+              0.15,
+              34.082
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 18,
+            "p": [
+              13.777,
+              0.15,
+              32.853
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 19,
+            "p": [
+              14.112,
+              0.149,
+              31.628
+            ],
+            "ease": "linear"
+          },
+          {
+            "t": 20,
+            "p": [
+              14.476,
+              0.147,
+              30.412
+            ],
+            "ease": "linear"
+          }
+        ],
+        "parent": null,
+        "source": {
+          "file": "mannequin-sand.glb",
+          "format": "glb",
+          "licence": "MIT — original procedural mannequin (scripts/starters/mannequin.mjs)",
+          "attribution": "Comfy Previs starters",
+          "triangles": 1992,
+          "bytes": 112384,
+          "units": "glTF metres",
+          "clips": [
+            {
+              "name": "Walk",
+              "duration": 1.1
+            },
+            {
+              "name": "Idle",
+              "duration": 3
+            },
+            {
+              "name": "Wave",
+              "duration": 2
+            }
+          ],
+          "skinned": true,
+          "rig": {
+            "humanoid": true,
+            "joints": {
+              "body": 1,
+              "spine": 2,
+              "neck": 4,
+              "head": 5,
+              "armL": 8,
+              "forearmL": 9,
+              "handL": 10,
+              "armR": 13,
+              "forearmR": 14,
+              "handR": 15,
+              "thighL": 17,
+              "shinL": 18,
+              "footL": 19,
+              "thighR": 21,
+              "shinR": 22,
+              "footR": 23
+            },
+            "parents": {
+              "body": null,
+              "spine": "body",
+              "neck": "spine",
+              "head": "neck",
+              "armL": "spine",
+              "forearmL": "armL",
+              "handL": "forearmL",
+              "armR": "spine",
+              "forearmR": "armR",
+              "handR": "forearmR",
+              "thighL": "body",
+              "shinL": "thighL",
+              "footL": "shinL",
+              "thighR": "body",
+              "shinR": "thighR",
+              "footR": "shinR"
+            },
+            "rest": {
+              "body": [
+                0,
+                0.54366,
+                -0.09375
+              ],
+              "spine": [
+                0,
+                0.61023,
+                -0.09375
+              ],
+              "neck": [
+                0,
+                0.83213,
+                -0.09375
+              ],
+              "head": [
+                0,
+                0.87651,
+                -0.09375
+              ],
+              "armL": [
+                0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmL": [
+                0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handL": [
+                1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "armR": [
+                -0.35714,
+                0.79885,
+                -0.09375
+              ],
+              "forearmR": [
+                -0.88346,
+                0.79885,
+                -0.09375
+              ],
+              "handR": [
+                -1.35338,
+                0.79885,
+                -0.09375
+              ],
+              "thighL": [
+                0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinL": [
+                0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footL": [
+                0.18797,
+                0.04438,
+                -0.09375
+              ],
+              "thighR": [
+                -0.18797,
+                0.51592,
+                -0.09375
+              ],
+              "shinR": [
+                -0.18797,
+                0.27738,
+                -0.09375
+              ],
+              "footR": [
+                -0.18797,
+                0.04438,
+                -0.09375
+              ]
+            }
+          }
+        },
+        "perform": {
+          "clip": "Walk",
+          "offset": 0,
+          "speed": 1
+        }
+      }
+    ],
+    "references": []
+  },
+  "shots": [
+    {
+      "id": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
+      "title": "Ridge reveal",
+      "description": "@hiker walks the trail across the open meadow toward the lake and the cabin, small in the wide valley; morning light rakes across the moraine boulders.",
+      "duration": 5,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "8e5b536f-98f2-4951-967c-4cd601a67175",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 32,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              72,
+              2.569,
+              52
+            ],
+            "look": [
+              8.007,
+              1.487,
+              54.973
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.025,
+            "p": [
+              71.959,
+              2.574,
+              52.011
+            ],
+            "look": [
+              8.026,
+              1.49,
+              54.772
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.05,
+            "p": [
+              71.841,
+              2.597,
+              52.044
+            ],
+            "look": [
+              8.004,
+              1.495,
+              54.482
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.075,
+            "p": [
+              71.647,
+              2.645,
+              52.096
+            ],
+            "look": [
+              7.944,
+              1.501,
+              54.106
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.1,
+            "p": [
+              71.384,
+              2.721,
+              52.168
+            ],
+            "look": [
+              7.847,
+              1.508,
+              53.65
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.125,
+            "p": [
+              71.055,
+              2.828,
+              52.258
+            ],
+            "look": [
+              7.715,
+              1.517,
+              53.119
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.15,
+            "p": [
+              70.664,
+              2.967,
+              52.365
+            ],
+            "look": [
+              7.551,
+              1.527,
+              52.519
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.175,
+            "p": [
+              70.215,
+              3.14,
+              52.487
+            ],
+            "look": [
+              7.356,
+              1.539,
+              51.855
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.2,
+            "p": [
+              69.712,
+              3.347,
+              52.624
+            ],
+            "look": [
+              7.132,
+              1.551,
+              51.131
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.225,
+            "p": [
+              69.16,
+              3.589,
+              52.775
+            ],
+            "look": [
+              6.882,
+              1.564,
+              50.353
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.25,
+            "p": [
+              68.563,
+              3.863,
+              52.938
+            ],
+            "look": [
+              6.608,
+              1.578,
+              49.526
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.275,
+            "p": [
+              67.924,
+              4.171,
+              53.112
+            ],
+            "look": [
+              6.311,
+              1.593,
+              48.654
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.3,
+            "p": [
+              67.248,
+              4.51,
+              53.296
+            ],
+            "look": [
+              5.994,
+              1.609,
+              47.743
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.325,
+            "p": [
+              66.539,
+              4.879,
+              53.489
+            ],
+            "look": [
+              5.659,
+              1.625,
+              46.797
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.35,
+            "p": [
+              65.802,
+              5.276,
+              53.691
+            ],
+            "look": [
+              5.308,
+              1.642,
+              45.822
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.375,
+            "p": [
+              65.039,
+              5.699,
+              53.898
+            ],
+            "look": [
+              4.943,
+              1.66,
+              44.822
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.4,
+            "p": [
+              64.256,
+              6.146,
+              54.112
+            ],
+            "look": [
+              4.567,
+              1.677,
+              43.801
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.425,
+            "p": [
+              63.456,
+              6.614,
+              54.33
+            ],
+            "look": [
+              4.181,
+              1.695,
+              42.766
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.45,
+            "p": [
+              62.645,
+              7.101,
+              54.552
+            ],
+            "look": [
+              3.787,
+              1.713,
+              41.72
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.475,
+            "p": [
+              61.824,
+              7.603,
+              54.775
+            ],
+            "look": [
+              3.389,
+              1.732,
+              40.668
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.5,
+            "p": [
+              61,
+              8.119,
+              55
+            ],
+            "look": [
+              2.987,
+              1.75,
+              39.615
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.525,
+            "p": [
+              60.176,
+              8.644,
+              55.225
+            ],
+            "look": [
+              2.585,
+              1.768,
+              38.566
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.55,
+            "p": [
+              59.356,
+              9.176,
+              55.449
+            ],
+            "look": [
+              2.183,
+              1.786,
+              37.525
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.575,
+            "p": [
+              58.544,
+              9.71,
+              55.67
+            ],
+            "look": [
+              1.786,
+              1.804,
+              36.496
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.6,
+            "p": [
+              57.744,
+              10.244,
+              55.888
+            ],
+            "look": [
+              1.393,
+              1.822,
+              35.484
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.625,
+            "p": [
+              56.961,
+              10.775,
+              56.102
+            ],
+            "look": [
+              1.009,
+              1.839,
+              34.494
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.65,
+            "p": [
+              56.198,
+              11.297,
+              56.31
+            ],
+            "look": [
+              0.635,
+              1.856,
+              33.53
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.675,
+            "p": [
+              55.461,
+              11.809,
+              56.511
+            ],
+            "look": [
+              0.273,
+              1.872,
+              32.596
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.7,
+            "p": [
+              54.752,
+              12.306,
+              56.704
+            ],
+            "look": [
+              -0.074,
+              1.887,
+              31.698
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.725,
+            "p": [
+              54.076,
+              12.784,
+              56.888
+            ],
+            "look": [
+              -0.405,
+              1.902,
+              30.838
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.75,
+            "p": [
+              53.438,
+              13.24,
+              57.063
+            ],
+            "look": [
+              -0.716,
+              1.916,
+              30.022
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.775,
+            "p": [
+              52.84,
+              13.669,
+              57.225
+            ],
+            "look": [
+              -1.006,
+              1.93,
+              29.254
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.8,
+            "p": [
+              52.288,
+              14.069,
+              57.376
+            ],
+            "look": [
+              -1.272,
+              1.942,
+              28.538
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.825,
+            "p": [
+              51.785,
+              14.436,
+              57.513
+            ],
+            "look": [
+              -1.512,
+              1.953,
+              27.878
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.85,
+            "p": [
+              51.337,
+              14.765,
+              57.636
+            ],
+            "look": [
+              -1.724,
+              1.964,
+              27.278
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.875,
+            "p": [
+              50.945,
+              15.053,
+              57.742
+            ],
+            "look": [
+              -1.905,
+              1.973,
+              26.744
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.9,
+            "p": [
+              50.616,
+              15.296,
+              57.832
+            ],
+            "look": [
+              -2.054,
+              1.981,
+              26.277
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.925,
+            "p": [
+              50.353,
+              15.492,
+              57.904
+            ],
+            "look": [
+              -2.167,
+              1.987,
+              25.884
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.95,
+            "p": [
+              50.16,
+              15.635,
+              57.957
+            ],
+            "look": [
+              -2.243,
+              1.993,
+              25.567
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.975,
+            "p": [
+              50.041,
+              15.724,
+              57.989
+            ],
+            "look": [
+              -2.279,
+              1.996,
+              25.331
+            ],
+            "mm": 32
+          },
+          {
+            "t": 1,
+            "p": [
+              50,
+              15.754,
+              58
+            ],
+            "look": [
+              -2.273,
+              1.998,
+              25.18
+            ],
+            "mm": 32
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "8e5b536f-98f2-4951-967c-4cd601a67175"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "drone flyover",
+          "crane up"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm natural"
+        ],
+        "filter": [
+          "golden hour light",
+          "no logos or lettering"
+        ]
+      },
+      "references": [
+        {
+          "id": "5e0d9e0d-7abf-552b-a974-29f5937e8f18",
+          "name": "Shot 01 Ridge reveal · GPT Image 2.5 · 477287",
+          "file": "5e0d9e0d-7abf-552b-a974-29f5937e8f18.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-03T17:57:41.530Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 477287,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 32mm normal lens; wide shot, Hiker small in frame; camera 15.7 m high, well above Hiker's head and 41.4 m from Hiker, looking slightly down; we see Hiker side-on, from its right side (a side profile, not a three-quarter or chase view); horizon near the top edge.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Hiker walks the trail across the open meadow toward the lake and the cabin, small in the wide valley; morning light rakes across the moraine boulders. An adult hiker in a teal waterproof shell jacket, charcoal trekking trousers, a rust-red daypack and brown leather boots. Short dark hair, steady easy stride. Plain outdoor clothing without logos or lettering. Set: A wide alpine valley on an early-autumn morning: green-gold meadows, a still blue-green lake, dark pine stands, a lone timber cabin, a packed-dirt trail and granite ridges with fresh snow on the summits; Alpine valley floor of green-gold meadow grass and late wildflowers, granite ridges and scree slopes, fresh snow on the highest summits; Lichen-grey granite boulders piled into a low moraine ridge; Still glacial lake, deep blue-green, mirror reflections of the peaks; Tall dark-green subalpine firs and pines; Narrow packed-dirt hiking trail worn into the meadow. Look: Photoreal outdoor adventure film. Low morning sun, crisp clear air, light haze on the distant ridges, natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 32mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. Filter: golden hour light, no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "b283f3e2"
+          }
+        },
+        {
+          "id": "669f9e5c-ac2b-521b-a565-2e9005538ed0",
+          "name": "Shot 01 Ridge reveal · GPT Image 2.5 · 300625",
+          "file": "669f9e5c-ac2b-521b-a565-2e9005538ed0.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-03T17:57:42.520Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 300625,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 32mm normal lens; wide shot, Hiker small in frame; camera 2.6 m high, just above Hiker's eye line and 64.1 m from Hiker, level; we see Hiker side-on, from its right side (a side profile, not a three-quarter or chase view); horizon across the middle.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Hiker walks the trail across the open meadow toward the lake and the cabin, small in the wide valley; morning light rakes across the moraine boulders. An adult hiker in a teal waterproof shell jacket, charcoal trekking trousers, a rust-red daypack and brown leather boots. Short dark hair, steady easy stride. Plain outdoor clothing without logos or lettering. Set: A wide alpine valley on an early-autumn morning: green-gold meadows, a still blue-green lake, dark pine stands, a lone timber cabin, a packed-dirt trail and granite ridges with fresh snow on the summits; Alpine valley floor of green-gold meadow grass and late wildflowers, granite ridges and scree slopes, fresh snow on the highest summits; Lichen-grey granite boulders piled into a low moraine ridge; Still glacial lake, deep blue-green, mirror reflections of the peaks; Tall dark-green subalpine firs and pines; Narrow packed-dirt hiking trail worn into the meadow. Look: Photoreal outdoor adventure film. Low morning sun, crisp clear air, light haze on the distant ridges, natural colour. No logos, brand names, badges, signage or lettering anywhere. Framing: 32mm lens, match the supplied blockout frame's composition. Lens: 35mm natural. Filter: golden hour light, no logos or lettering.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "b283f3e2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "a5297234-f4a5-456d-9372-9072d70cefc5",
+      "title": "Slope dive",
+      "description": "@hiker strides along the trail at an easy pace at the foot of a steep grassy slope scattered with stones.",
+      "duration": 5,
+      "start": 5,
+      "camera": {
+        "move": "custom",
+        "target": "8e5b536f-98f2-4951-967c-4cd601a67175",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 20,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -4,
+              19.903,
+              140
+            ],
+            "look": [
+              9.61,
+              1.569,
+              48.829
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.02,
+            "p": [
+              -3.404,
+              17.728,
+              136.039
+            ],
+            "look": [
+              9.642,
+              1.571,
+              48.706
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.04,
+            "p": [
+              -2.822,
+              15.593,
+              132.174
+            ],
+            "look": [
+              9.674,
+              1.572,
+              48.583
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.06,
+            "p": [
+              -2.255,
+              13.736,
+              128.404
+            ],
+            "look": [
+              9.706,
+              1.574,
+              48.46
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.08,
+            "p": [
+              -1.702,
+              12.078,
+              124.729
+            ],
+            "look": [
+              9.738,
+              1.576,
+              48.337
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.1,
+            "p": [
+              -1.163,
+              10.476,
+              121.149
+            ],
+            "look": [
+              9.77,
+              1.577,
+              48.215
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.12,
+            "p": [
+              -0.638,
+              8.939,
+              117.663
+            ],
+            "look": [
+              9.803,
+              1.579,
+              48.092
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.14,
+            "p": [
+              -0.128,
+              7.789,
+              114.271
+            ],
+            "look": [
+              9.835,
+              1.58,
+              47.969
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.16,
+            "p": [
+              0.369,
+              6.927,
+              110.972
+            ],
+            "look": [
+              9.867,
+              1.582,
+              47.846
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.18,
+            "p": [
+              0.851,
+              6.099,
+              107.766
+            ],
+            "look": [
+              9.899,
+              1.584,
+              47.723
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.2,
+            "p": [
+              1.32,
+              5.334,
+              104.653
+            ],
+            "look": [
+              9.931,
+              1.585,
+              47.6
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.22,
+            "p": [
+              1.774,
+              4.66,
+              101.632
+            ],
+            "look": [
+              9.963,
+              1.587,
+              47.477
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.24,
+            "p": [
+              2.215,
+              4.061,
+              98.702
+            ],
+            "look": [
+              9.995,
+              1.588,
+              47.354
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.26,
+            "p": [
+              2.643,
+              3.523,
+              95.863
+            ],
+            "look": [
+              10.027,
+              1.589,
+              47.231
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.28,
+            "p": [
+              3.056,
+              3.038,
+              93.115
+            ],
+            "look": [
+              10.059,
+              1.591,
+              47.108
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.3,
+            "p": [
+              3.456,
+              2.621,
+              90.457
+            ],
+            "look": [
+              10.091,
+              1.592,
+              46.986
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.32,
+            "p": [
+              3.843,
+              2.273,
+              87.888
+            ],
+            "look": [
+              10.123,
+              1.594,
+              46.863
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.34,
+            "p": [
+              4.216,
+              1.995,
+              85.409
+            ],
+            "look": [
+              10.155,
+              1.595,
+              46.74
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.36,
+            "p": [
+              4.576,
+              1.785,
+              83.018
+            ],
+            "look": [
+              10.187,
+              1.596,
+              46.617
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.38,
+            "p": [
+              4.922,
+              1.635,
+              80.715
+            ],
+            "look": [
+              10.219,
+              1.598,
+              46.494
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.4,
+            "p": [
+              5.256,
+              1.547,
+              78.5
+            ],
+            "look": [
+              10.251,
+              1.599,
+              46.371
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.42,
+            "p": [
+              5.576,
+              1.521,
+              76.372
+            ],
+            "look": [
+              10.283,
+              1.601,
+              46.248
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.44,
+            "p": [
+              5.883,
+              1.521,
+              74.329
+            ],
+            "look": [
+              10.315,
+              1.602,
+              46.125
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.46,
+            "p": [
+              6.178,
+              1.53,
+              72.373
+            ],
+            "look": [
+              10.347,
+              1.603,
+              46.002
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.48,
+            "p": [
+              6.46,
+              1.545,
+              70.501
+            ],
+            "look": [
+              10.379,
+              1.605,
+              45.879
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.5,
+            "p": [
+              6.729,
+              1.566,
+              68.714
+            ],
+            "look": [
+              10.412,
+              1.606,
+              45.757
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.52,
+            "p": [
+              6.985,
+              1.595,
+              67.011
+            ],
+            "look": [
+              10.444,
+              1.608,
+              45.634
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.54,
+            "p": [
+              7.229,
+              1.631,
+              65.391
+            ],
+            "look": [
+              10.476,
+              1.609,
+              45.511
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.56,
+            "p": [
+              7.46,
+              1.67,
+              63.853
+            ],
+            "look": [
+              10.508,
+              1.61,
+              45.388
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.58,
+            "p": [
+              7.679,
+              1.713,
+              62.397
+            ],
+            "look": [
+              10.54,
+              1.612,
+              45.265
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.6,
+            "p": [
+              7.886,
+              1.757,
+              61.021
+            ],
+            "look": [
+              10.572,
+              1.613,
+              45.142
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.62,
+            "p": [
+              8.081,
+              1.801,
+              59.726
+            ],
+            "look": [
+              10.604,
+              1.615,
+              45.019
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.64,
+            "p": [
+              8.264,
+              1.845,
+              58.51
+            ],
+            "look": [
+              10.636,
+              1.616,
+              44.896
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.66,
+            "p": [
+              8.435,
+              1.888,
+              57.373
+            ],
+            "look": [
+              10.668,
+              1.617,
+              44.773
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.68,
+            "p": [
+              8.595,
+              1.93,
+              56.313
+            ],
+            "look": [
+              10.7,
+              1.618,
+              44.65
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.7,
+            "p": [
+              8.743,
+              1.969,
+              55.33
+            ],
+            "look": [
+              10.732,
+              1.62,
+              44.528
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.72,
+            "p": [
+              8.88,
+              2.006,
+              54.422
+            ],
+            "look": [
+              10.764,
+              1.621,
+              44.405
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.74,
+            "p": [
+              9.005,
+              2.04,
+              53.589
+            ],
+            "look": [
+              10.796,
+              1.622,
+              44.282
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.76,
+            "p": [
+              9.119,
+              2.072,
+              52.829
+            ],
+            "look": [
+              10.828,
+              1.624,
+              44.159
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.78,
+            "p": [
+              9.223,
+              2.101,
+              52.142
+            ],
+            "look": [
+              10.86,
+              1.625,
+              44.036
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.8,
+            "p": [
+              9.315,
+              2.127,
+              51.526
+            ],
+            "look": [
+              10.892,
+              1.626,
+              43.913
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.82,
+            "p": [
+              9.398,
+              2.15,
+              50.979
+            ],
+            "look": [
+              10.924,
+              1.627,
+              43.79
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.84,
+            "p": [
+              9.47,
+              2.17,
+              50.501
+            ],
+            "look": [
+              10.956,
+              1.628,
+              43.667
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.86,
+            "p": [
+              9.532,
+              2.187,
+              50.089
+            ],
+            "look": [
+              10.988,
+              1.63,
+              43.544
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.88,
+            "p": [
+              9.584,
+              2.202,
+              49.743
+            ],
+            "look": [
+              11.02,
+              1.631,
+              43.421
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.9,
+            "p": [
+              9.626,
+              2.214,
+              49.459
+            ],
+            "look": [
+              11.052,
+              1.632,
+              43.299
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.92,
+            "p": [
+              9.66,
+              2.223,
+              49.236
+            ],
+            "look": [
+              11.085,
+              1.633,
+              43.176
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.94,
+            "p": [
+              9.685,
+              2.23,
+              49.071
+            ],
+            "look": [
+              11.117,
+              1.634,
+              43.053
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.96,
+            "p": [
+              9.701,
+              2.234,
+              48.961
+            ],
+            "look": [
+              11.149,
+              1.635,
+              42.93
+            ],
+            "mm": 20
+          },
+          {
+            "t": 0.98,
+            "p": [
+              9.71,
+              2.237,
+              48.901
+            ],
+            "look": [
+              11.181,
+              1.636,
+              42.807
+            ],
+            "mm": 20
+          },
+          {
+            "t": 1,
+            "p": [
+              9.713,
+              2.238,
+              48.884
+            ],
+            "look": [
+              11.213,
+              1.637,
+              42.684
+            ],
+            "mm": 20
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [
+          "8e5b536f-98f2-4951-967c-4cd601a67175"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "FPV drone chase"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "24mm wide"
+        ],
+        "filter": [
+          "golden hour light",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "df3c85ca-5634-4591-b92f-1c918c104690",
+      "title": "Trail track",
+      "description": "@hiker walks steadily along the packed-dirt trail, boots scuffing a little dust, the daypack swaying with each step; the lake and the pines lie beyond.",
+      "duration": 5,
+      "start": 10,
+      "camera": {
+        "move": "custom",
+        "target": "8e5b536f-98f2-4951-967c-4cd601a67175",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 28,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              15.479,
+              0.738,
+              42.97
+            ],
+            "look": [
+              11.213,
+              1.387,
+              42.684
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.04,
+            "p": [
+              15.543,
+              0.74,
+              42.724
+            ],
+            "look": [
+              11.277,
+              1.389,
+              42.438
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.08,
+            "p": [
+              15.607,
+              0.742,
+              42.478
+            ],
+            "look": [
+              11.341,
+              1.392,
+              42.192
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.12,
+            "p": [
+              15.671,
+              0.744,
+              42.233
+            ],
+            "look": [
+              11.405,
+              1.394,
+              41.947
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.16,
+            "p": [
+              15.735,
+              0.746,
+              41.987
+            ],
+            "look": [
+              11.469,
+              1.396,
+              41.701
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.2,
+            "p": [
+              15.799,
+              0.748,
+              41.741
+            ],
+            "look": [
+              11.533,
+              1.398,
+              41.455
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.24,
+            "p": [
+              15.863,
+              0.75,
+              41.495
+            ],
+            "look": [
+              11.597,
+              1.4,
+              41.209
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.28,
+            "p": [
+              15.927,
+              0.752,
+              41.249
+            ],
+            "look": [
+              11.661,
+              1.402,
+              40.963
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.32,
+            "p": [
+              15.992,
+              0.753,
+              41.004
+            ],
+            "look": [
+              11.726,
+              1.404,
+              40.718
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.36,
+            "p": [
+              16.056,
+              0.755,
+              40.758
+            ],
+            "look": [
+              11.79,
+              1.405,
+              40.472
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.4,
+            "p": [
+              16.12,
+              0.757,
+              40.512
+            ],
+            "look": [
+              11.854,
+              1.407,
+              40.226
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.44,
+            "p": [
+              16.184,
+              0.758,
+              40.266
+            ],
+            "look": [
+              11.918,
+              1.409,
+              39.98
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.48,
+            "p": [
+              16.248,
+              0.76,
+              40.021
+            ],
+            "look": [
+              11.982,
+              1.41,
+              39.735
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.52,
+            "p": [
+              16.313,
+              0.761,
+              39.775
+            ],
+            "look": [
+              12.047,
+              1.412,
+              39.489
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.56,
+            "p": [
+              16.377,
+              0.763,
+              39.53
+            ],
+            "look": [
+              12.111,
+              1.414,
+              39.244
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.6,
+            "p": [
+              16.441,
+              0.764,
+              39.284
+            ],
+            "look": [
+              12.175,
+              1.415,
+              38.998
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.64,
+            "p": [
+              16.505,
+              0.766,
+              39.038
+            ],
+            "look": [
+              12.239,
+              1.417,
+              38.752
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.68,
+            "p": [
+              16.569,
+              0.767,
+              38.792
+            ],
+            "look": [
+              12.303,
+              1.418,
+              38.506
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.72,
+            "p": [
+              16.633,
+              0.768,
+              38.547
+            ],
+            "look": [
+              12.367,
+              1.419,
+              38.261
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.76,
+            "p": [
+              16.697,
+              0.769,
+              38.301
+            ],
+            "look": [
+              12.431,
+              1.421,
+              38.015
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.8,
+            "p": [
+              16.761,
+              0.771,
+              38.055
+            ],
+            "look": [
+              12.495,
+              1.422,
+              37.769
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.84,
+            "p": [
+              16.825,
+              0.772,
+              37.809
+            ],
+            "look": [
+              12.559,
+              1.423,
+              37.523
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.88,
+            "p": [
+              16.889,
+              0.773,
+              37.563
+            ],
+            "look": [
+              12.623,
+              1.424,
+              37.277
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.92,
+            "p": [
+              16.954,
+              0.774,
+              37.318
+            ],
+            "look": [
+              12.688,
+              1.425,
+              37.032
+            ],
+            "mm": 28
+          },
+          {
+            "t": 0.96,
+            "p": [
+              17.018,
+              0.775,
+              37.072
+            ],
+            "look": [
+              12.752,
+              1.426,
+              36.786
+            ],
+            "mm": 28
+          },
+          {
+            "t": 1,
+            "p": [
+              17.082,
+              0.776,
+              36.826
+            ],
+            "look": [
+              12.816,
+              1.427,
+              36.54
+            ],
+            "mm": 28
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "tracking shot"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "24mm wide",
+          "deep focus"
+        ],
+        "filter": [
+          "golden hour light",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "0a305449-bfbd-4014-8ff4-603c26610266",
+      "title": "Valley wide",
+      "description": "@hiker crosses the meadow on the trail toward the cabin; the lake lies still and the peaks stand clear beyond.",
+      "duration": 5,
+      "start": 15,
+      "camera": {
+        "move": "custom",
+        "target": "8e5b536f-98f2-4951-967c-4cd601a67175",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 24,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -9,
+              5.839,
+              92
+            ],
+            "look": [
+              -2,
+              1,
+              -10
+            ],
+            "mm": 24
+          },
+          {
+            "t": 1,
+            "p": [
+              -9,
+              5.839,
+              92
+            ],
+            "look": [
+              -2,
+              1,
+              -10
+            ],
+            "mm": 24
+          }
+        ]
+      },
+      "cast": {
+        "include": [
+          "8e5b536f-98f2-4951-967c-4cd601a67175"
+        ],
+        "exclude": []
+      },
+      "style": {
+        "movement": [
+          "static locked-off shot"
+        ],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "24mm wide",
+          "deep focus"
+        ],
+        "filter": [
+          "golden hour light",
+          "no logos or lettering"
+        ]
+      },
+      "references": []
+    }
+  ],
+  "media": [
+    {
+      "path": "media/refs/6bb27548-9c53-42e3-b243-08e17a979bca.glb",
+      "kind": "model",
+      "bytes": 112384,
+      "sha256": "6ca519b3e3dc9c1dba7a4881f75ab121865c0a2673bf7ef97d8f2c7fe879a845",
+      "sourceSha256": "6ca519b3e3dc9c1dba7a4881f75ab121865c0a2673bf7ef97d8f2c7fe879a845"
+    },
+    {
+      "path": "media/refs/5e0d9e0d-7abf-552b-a974-29f5937e8f18.webp",
+      "kind": "image",
+      "bytes": 252248,
+      "sha256": "3c58a352c71c3de71e84ba4a2118b6176dfbaf6b3502c67cfcf95581f92d6f9c",
+      "sourceSha256": "c521aa0e8bd09b3c7c11d200e8951975382f1c203c18127ceb13dfa7b9c55187",
+      "width": 1280,
+      "height": 720,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
+    },
+    {
+      "path": "media/refs/669f9e5c-ac2b-521b-a565-2e9005538ed0.webp",
+      "kind": "image",
+      "bytes": 218152,
+      "sha256": "03859240ed65fd086bac7764d0eba484b20e532b186f66592f40dc3d98e945b8",
+      "sourceSha256": "56a7fb57699f44ce65655392f2392c18155d747b235b145d83eec9a6dcfc2886",
+      "width": 1280,
+      "height": 720,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
+    },
+    {
+      "path": "media/assets/2aee0ec1-93ed-48cb-8a31-eddfd3ca7683.mp4",
+      "kind": "video",
+      "bytes": 1095982,
+      "sha256": "0504e4de88d3fba4e99768bfc14cc8542922e26a4d13c0cb2f3eb4029fceb574",
+      "sourceSha256": "cb45e9a96d20e2434a4134b8037f1215ab97b01b39442282a2dc7c0263658c5e",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
+    },
+    {
+      "path": "media/assets/089144bc-51ac-54bc-ae1d-c74e276b1d50.mp4",
+      "kind": "video",
+      "bytes": 1068155,
+      "sha256": "87f4ac86aee101f755a7b3a4cc18574ab303c82d08189bc057139613c4e2c0c9",
+      "sourceSha256": "746fe55042cc8bf7a5a305465d9e75feea7465cf512068af81b06d47a2e169ef",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
+    },
+    {
+      "path": "media/assets/e99acbe7-2aa2-4cd6-81eb-67b820f0eeeb.mp4",
+      "kind": "video",
+      "bytes": 1009784,
+      "sha256": "a8cb2083225e57babba5e557dcaa190d02526994c48d8171c898b2f4e95dac29",
+      "sourceSha256": "8a4a24ec58a56f870444a27b4dfb8530822099459320e4bb17cbb23bf3047839",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
+    },
+    {
+      "path": "media/assets/e0bb6939-8cf0-4c4c-acb2-355bdec3b786.mp4",
+      "kind": "video",
+      "bytes": 996719,
+      "sha256": "31d8149d53665434c97a55303b12dda74d2b11fa7b6bdb433950eb10935217e9",
+      "sourceSha256": "4a695da7a29bc9652c00b9e0f1b00cbca03930878b756cd2437fc3c2d95cdcc9",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
+    },
+    {
+      "path": "media/assets/0019a9b4-ee55-4efd-b043-662c3cb16d6b.mp4",
+      "kind": "video",
+      "bytes": 128196,
+      "sha256": "fe7851fc7b6ecbb218e560b09386b77db7e3fb054a24f77ac5ef9b3d1c21bc54",
+      "sourceSha256": "8f1aec747c7de20ad946b2a176b02e3a7e2d6a960ce7768adb87ff0092da1be7",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5,
+      "encode": {
+        "imageMaxPx": 1280,
+        "imageQuality": 76
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "2aee0ec1-93ed-48cb-8a31-eddfd3ca7683",
+      "kind": "camera-render",
+      "shotId": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
+      "file": "assets/2aee0ec1-93ed-48cb-8a31-eddfd3ca7683.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-03T17:57:00.168Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "b283f3e2"
+      }
+    },
+    {
+      "id": "089144bc-51ac-54bc-ae1d-c74e276b1d50",
+      "kind": "workflow-result",
+      "shotId": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
+      "file": "assets/089144bc-51ac-54bc-ae1d-c74e276b1d50.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-11-03T18:01:24.881Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 2 reference images",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. Hiker walks the trail across the open meadow toward the lake and the cabin, small in the wide valley; morning light rakes across the moraine boulders. An adult hiker in a teal waterproof shell jacket, charcoal trekking trousers, a rust-red daypack and brown leather boots. Set: Tall dark-green subalpine firs and pines. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 35mm natural. Filter: golden hour light, no logos or lettering.\nReference images: 1 = start still; 2 = end still.",
+        "sourceAssetId": "2aee0ec1-93ed-48cb-8a31-eddfd3ca7683"
+      }
+    },
+    {
+      "id": "e99acbe7-2aa2-4cd6-81eb-67b820f0eeeb",
+      "kind": "camera-render",
+      "shotId": "a5297234-f4a5-456d-9372-9072d70cefc5",
+      "file": "assets/e99acbe7-2aa2-4cd6-81eb-67b820f0eeeb.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-03T01:31:21.370Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "93a3d2cc"
+      }
+    },
+    {
+      "id": "e0bb6939-8cf0-4c4c-acb2-355bdec3b786",
+      "kind": "camera-render",
+      "shotId": "df3c85ca-5634-4591-b92f-1c918c104690",
+      "file": "assets/e0bb6939-8cf0-4c4c-acb2-355bdec3b786.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-03T01:31:24.300Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "9ce84035"
+      }
+    },
+    {
+      "id": "0019a9b4-ee55-4efd-b043-662c3cb16d6b",
+      "kind": "camera-render",
+      "shotId": "0a305449-bfbd-4014-8ff4-603c26610266",
+      "file": "assets/0019a9b4-ee55-4efd-b043-662c3cb16d6b.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-03T01:31:26.767Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "6b72b345"
+      }
+    }
+  ],
+  "edit": {
+    "clips": [
+      {
+        "shotId": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
+        "assetId": "089144bc-51ac-54bc-ae1d-c74e276b1d50",
+        "in": 0,
+        "out": null
+      }
+    ]
+  }
+}

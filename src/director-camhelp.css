@@ -1,0 +1,45 @@
+/* Camera help: animated preview cards for camera moves and style terms (director-camhelp.ts). */
+.ch-card { position: fixed; z-index: 90; width: 312px; box-sizing: border-box; padding: 10px 12px 12px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); box-shadow: var(--sh-3); color: var(--ink); pointer-events: none; display: flex; flex-direction: column; gap: 8px; }
+.ch-card[hidden] { display: none; }
+.ch-card.is-in { animation: ch-in var(--t-base) var(--ease-out); }
+@keyframes ch-in { from { opacity: 0; transform: translateY(4px) scale(.985); } }
+.ch-head { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.ch-kind { display: inline-flex; align-items: center; gap: 5px; flex: none; font-size: var(--fs-2xs); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-3); }
+.ch-kind i, .ch-menu-head i { width: 7px; height: 7px; border-radius: 2px; background: var(--c); }
+.ch-title { font-size: var(--fs-md); font-weight: 650; letter-spacing: var(--track-tight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-title::first-letter { text-transform: uppercase; }
+
+.ch-stage { position: relative; width: 288px; height: 162px; border-radius: 10px; overflow: hidden; background: #F1EDE5; box-shadow: inset 0 0 0 1px var(--line); }
+.ch-stage canvas { position: absolute; display: block; }
+.ch-stage .ch-set, .ch-stage.is-sees .ch-sees { inset: 0; width: 100%; height: 100%; border-radius: 0; box-shadow: none; z-index: 0; }
+.ch-stage.is-set .ch-sees, .ch-stage.is-sees .ch-set { inset: auto 7px 7px auto; width: 112px; height: 63px; border-radius: 6px; box-shadow: 0 0 0 2px var(--card), 0 6px 16px -6px rgba(21,19,15,.45); z-index: 1; }
+.ch-lab { position: absolute; z-index: 2; font: 600 9.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); background: color-mix(in srgb, var(--card) 86%, transparent); padding: 3px 5px; border-radius: 4px; }
+.ch-stage.is-set .ch-lab-set { left: 7px; top: 7px; }
+.ch-stage.is-set .ch-lab-sees { right: 7px; bottom: 74px; color: var(--accent); }
+.ch-stage.is-sees .ch-lab-sees { left: 7px; bottom: 7px; }
+.ch-stage.is-sees .ch-lab-set { right: 7px; bottom: 74px; }
+.ch-stage.no-inset .ch-set, .ch-stage.no-inset .ch-lab-set { display: none; }
+.ch-line { margin: 0; font-size: var(--fs-sm); line-height: var(--lh-snug); color: var(--ink); }
+.ch-use { margin: 0; font-size: var(--fs-xs); line-height: var(--lh-snug); color: var(--ink-3); }
+.ch-use span { font-weight: 600; color: var(--ink-2); }
+
+/* Picker button (style tags) — sits where the old select was. */
+.ch-pick { height: 26px; padding: 0 8px; border-radius: 7px; border: 1px dashed var(--line-2); background: var(--card); color: var(--ink-3); font: inherit; font-size: var(--fs-xs); cursor: pointer; white-space: nowrap; transition: border-color var(--t-fast), color var(--t-fast); }
+.ch-pick:hover, .ch-pick[aria-expanded="true"] { border-color: var(--ink-4); border-style: solid; color: var(--ink); }
+/* ⓘ beside the Move label. */
+.ch-labrow { display: inline-flex; align-items: center; gap: 5px; }
+.ch-info { width: 16px; height: 16px; padding: 0; border-radius: 50%; border: 1.2px solid var(--ink-4); background: var(--card); display: inline-grid; place-items: center; font: italic 600 10px/1 var(--serif); color: var(--ink-3); cursor: pointer; transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast); }
+.ch-info:hover, .ch-info[aria-expanded="true"], .ch-info:focus-visible { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+.ch-menu { position: fixed; z-index: 89; width: 264px; max-height: min(360px, 70vh); overflow: auto; padding: 4px; border-radius: 11px; background: var(--card); border: 1px solid var(--line); box-shadow: var(--sh-pop); outline: none; overscroll-behavior: contain; scroll-padding-block: 36px 4px; }
+.ch-menu-head { position: sticky; top: -4px; z-index: 1; display: flex; align-items: center; gap: 6px; margin: -4px -4px 2px; padding: 8px 10px 6px; background: var(--card); border-bottom: 1px solid var(--line); font-size: var(--fs-2xs); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-3); }
+.ch-menu-head small { margin-left: auto; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--ink-4); }
+.ch-opt { display: grid; gap: 1px; padding: 6px 8px; border-radius: 7px; cursor: pointer; }
+.ch-opt-t { font-size: var(--fs-sm); color: var(--ink); }
+.ch-opt-t::first-letter { text-transform: uppercase; }
+.ch-opt-h { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-opt.is-active { background: color-mix(in srgb, var(--c) 10%, var(--card)); box-shadow: inset 2px 0 0 var(--c); }
+.ch-opt.is-current .ch-opt-t::after { content: ' ✓'; color: var(--c); font-weight: 600; }
+.ch-menu:focus-visible .ch-opt.is-active { box-shadow: inset 2px 0 0 var(--c), inset 0 0 0 1px color-mix(in srgb, var(--c) 45%, transparent); }
+
+@media (prefers-reduced-motion: reduce) { .ch-card.is-in { animation: none; } .ch-pick, .ch-info { transition: none; } }

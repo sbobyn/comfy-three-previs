@@ -6,6 +6,7 @@ export type FlightInput = {
   lateral: number;
   vertical: number;
   yaw: number;
+  pitch?: number;
 };
 
 export type FlightSettings = {
@@ -38,6 +39,7 @@ export class Drone {
   readonly position = new THREE.Vector3(0, 6, 20);
   heading = 0;
   bankAngle = 0;
+  private pitch: number | null = null;
 
   private readonly velocity = new THREE.Vector3();
   private readonly demand = new THREE.Vector3();
@@ -46,14 +48,30 @@ export class Drone {
     return this.velocity.length();
   }
 
+  adopt(position: THREE.Vector3, quaternion: THREE.Quaternion): void {
+    this.position.copy(position);
+    euler.setFromQuaternion(quaternion, "YXZ");
+    this.heading = euler.y; this.pitch = euler.x; this.bankAngle = euler.z; this.halt();
+  }
+
+  look(yaw: number, pitch: number): void {
+    this.heading += yaw;
+    this.pitch = THREE.MathUtils.clamp((this.pitch ?? 0) + pitch, -Math.PI * 85 / 180, Math.PI * 85 / 180);
+  }
+
+  halt(): void { this.velocity.set(0, 0, 0); }
+
   reset(): void {
     this.position.set(0, 6, 20);
     this.heading = 0;
+    this.pitch = null;
     this.bankAngle = 0;
     this.velocity.set(0, 0, 0);
   }
 
   update(input: FlightInput, dt: number, settings: FlightSettings): void {
+    dt = Math.min(0.05, Math.max(0, dt));
+    if (this.pitch !== null) this.pitch = THREE.MathUtils.clamp(this.pitch + (input.pitch || 0) * THREE.MathUtils.degToRad(60) * dt, -Math.PI * 85 / 180, Math.PI * 85 / 180);
     this.heading -= input.yaw * THREE.MathUtils.degToRad(settings.yawRate) * dt;
 
     // Heading basis: a camera looks down its own -Z.
@@ -86,7 +104,7 @@ export class Drone {
   }
 
   orientation(out: THREE.Quaternion, settings: FlightSettings): THREE.Quaternion {
-    euler.set(THREE.MathUtils.degToRad(settings.tilt), this.heading, this.bankAngle, "YXZ");
+    euler.set(this.pitch ?? THREE.MathUtils.degToRad(settings.tilt), this.heading, this.bankAngle, "YXZ");
     return out.setFromEuler(euler);
   }
 }

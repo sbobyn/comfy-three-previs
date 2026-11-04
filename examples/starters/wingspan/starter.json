@@ -1,0 +1,5575 @@
+{
+  "format": "comfy-previs-starter",
+  "version": 2,
+  "slug": "wingspan",
+  "order": 1,
+  "title": "Wingspan",
+  "description": "An eagle descends through an open alpine valley and settles into a majestic low glide across the lake toward the ridge.",
+  "scene": {
+    "name": "Alpine valley",
+    "environment": {
+      "preset": "stage",
+      "description": "A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.",
+      "style": "Photoreal nature documentary. Low golden sun, crisp air, layered atmospheric haze, natural colour."
+    },
+    "entities": [
+      {
+        "id": "910451e8-e15e-4907-ac3a-a388cba96e01",
+        "name": "Alpine lake",
+        "kind": "environment",
+        "shape": "cylinder",
+        "model": "lake",
+        "position": [
+          0,
+          0.45,
+          -35
+        ],
+        "rotation": 0,
+        "scale": [
+          50,
+          0.05,
+          50
+        ],
+        "color": "#368f9f",
+        "notes": "Clear turquoise glacial lake reflecting the peaks.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null,
+        "look": "8a65ed8d-12d4-4243-9750-2c6038e522a7"
+      },
+      {
+        "id": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+        "name": "River 1",
+        "kind": "environment",
+        "shape": "box",
+        "model": "river",
+        "position": [
+          18,
+          0.3,
+          30
+        ],
+        "rotation": 74,
+        "scale": [
+          10,
+          0.05,
+          4
+        ],
+        "color": "#368f9f",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c",
+        "look": "b089b9cd-c5e7-4214-9bde-8737cc988302"
+      },
+      {
+        "id": "83c26dc9-e3a6-48d9-bb88-ed6e8359d030",
+        "name": "River 2",
+        "kind": "environment",
+        "shape": "box",
+        "model": "river",
+        "position": [
+          15.4,
+          0.3,
+          21
+        ],
+        "rotation": 74,
+        "scale": [
+          10,
+          0.05,
+          4
+        ],
+        "color": "#368f9f",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "947a503d-f221-439e-aa92-6540ede5cc32",
+        "name": "River 3",
+        "kind": "environment",
+        "shape": "box",
+        "model": "river",
+        "position": [
+          12.8,
+          0.3,
+          12
+        ],
+        "rotation": 74,
+        "scale": [
+          10,
+          0.05,
+          4
+        ],
+        "color": "#368f9f",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "353a0feb-b328-41be-bebe-6788175954b7",
+        "name": "River 4",
+        "kind": "environment",
+        "shape": "box",
+        "model": "river",
+        "position": [
+          10.2,
+          0.3,
+          3
+        ],
+        "rotation": 74,
+        "scale": [
+          10,
+          0.05,
+          4
+        ],
+        "color": "#368f9f",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "85bbe9ab-a681-4c2c-9b5f-471b5e175bdf",
+        "name": "River 5",
+        "kind": "environment",
+        "shape": "box",
+        "model": "river",
+        "position": [
+          7.6,
+          0.3,
+          -6
+        ],
+        "rotation": 74,
+        "scale": [
+          10,
+          0.05,
+          4
+        ],
+        "color": "#368f9f",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "2414bb8c-0206-468a-b65e-331feabdb678",
+        "name": "River 6",
+        "kind": "environment",
+        "shape": "box",
+        "model": "river",
+        "position": [
+          5,
+          0.3,
+          -15
+        ],
+        "rotation": 74,
+        "scale": [
+          10,
+          0.05,
+          4
+        ],
+        "color": "#368f9f",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "10a9a848-8da4-43ee-95d9-d33975e4419c"
+      },
+      {
+        "id": "82a23174-4a95-47ce-b8d5-9ce856f186f7",
+        "name": "Pine 30,40 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          39.8,
+          0.085,
+          33.2
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9601630635824202,
+          1.5362609017318725,
+          0.9601630635824202
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "b2c4252c-3e42-40a1-84d7-0512b3a3ea3a",
+        "name": "Pine 30,40 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          28,
+          0.076,
+          33.8
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2857330776539702,
+          2.0571729242463523,
+          1.2857330776539702
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "6b12bc98-093a-4f45-bc5c-869a95bc1405",
+        "name": "Pine 30,40 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          19.4,
+          0.09,
+          41.6
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5632147904952411,
+          2.501143664792386,
+          1.5632147904952411
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "6c6a111c-041a-48b8-b747-28ad16b82347",
+        "name": "Pine 30,40 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          33.1,
+          0.129,
+          42
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9433034338352984,
+          1.5092854941364775,
+          0.9433034338352984
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "c85189ad-ce30-4df1-bb56-14db334a3f1c",
+        "name": "Pine 30,40 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          32.1,
+          0.049,
+          29.2
+        ],
+        "rotation": 0,
+        "scale": [
+          1.0547572764203539,
+          1.6876116422725662,
+          1.0547572764203539
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "c11992cc-c705-4af1-b9e3-a8257ac1d2ef",
+        "name": "Pine 30,40 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          31.4,
+          0.063,
+          31.2
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1933973305000256,
+          1.909435728800041,
+          1.1933973305000256
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "9775db1d-db9d-49fc-9abc-71d0a4faa77b",
+        "name": "Pine 30,40 · 7",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          31,
+          0.123,
+          41.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.292180093908969,
+          2.0674881502543503,
+          1.292180093908969
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "520d360e-02ff-4a53-8c7b-bc5545c3e889",
+        "name": "Pine -25,-10 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -20.6,
+          -0.039,
+          -19.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2998430739882547,
+          2.0797489183812075,
+          1.2998430739882547
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "b64c0e83-eeda-48c6-9610-0424c410985d",
+        "name": "Pine -25,-10 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -32.5,
+          -0.026,
+          -19.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.3984775360223076,
+          2.237564057635692,
+          1.3984775360223076
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "81f45ec9-0ae2-4012-8c77-01ce5af2f909",
+        "name": "Pine -25,-10 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -23.5,
+          -0.009,
+          -7.1
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2474901465794443,
+          1.995984234527111,
+          1.2474901465794443
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "98a8e209-fbcc-4a83-8372-266a13c3b667",
+        "name": "Pine -25,-10 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -24.2,
+          -0.006,
+          -3.3
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2259213060877718,
+          1.961474089740435,
+          1.2259213060877718
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "7e4d775d-be32-4e28-8892-b157e868bf16",
+        "name": "Pine -25,-10 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -14.8,
+          -0.022,
+          -13.3
+        ],
+        "rotation": 0,
+        "scale": [
+          1.0738986094002845,
+          1.7182377750404552,
+          1.0738986094002845
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "55498705-af3a-4c3e-8cb3-88b489496eb2",
+        "name": "Pine -25,-10 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -32.7,
+          -0.013,
+          -3.3
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9572985075570389,
+          1.5316776120912623,
+          0.9572985075570389
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "918b4a0d-2989-4100-8410-cc2bea69e2a3",
+        "name": "Pine -25,-10 · 7",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -29.8,
+          -0.016,
+          -10.1
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1404329829708613,
+          1.8246927727533782,
+          1.1404329829708613
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "2892f942-4050-4fd5-9600-b97c692f3e39",
+        "name": "Pine -25,-10 · 8",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -26.2,
+          -0.011,
+          -7.4
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9512406072217676,
+          1.5219849715548284,
+          0.9512406072217676
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "c9e3c3ac-ed62-4284-8262-ebcaeab27a3d",
+        "name": "Pine 20,-20 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          27,
+          -0.044,
+          -28
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1394390643119006,
+          1.823102502899041,
+          1.1394390643119006
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "f028ef6d-33e7-49ea-a59a-5b829cd96c15",
+        "name": "Pine 20,-20 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          30.4,
+          -0.055,
+          -21.9
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5734133583884768,
+          2.517461373421563,
+          1.5734133583884768
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "2b046f26-461a-4950-83c9-4330f5ee829d",
+        "name": "Pine 20,-20 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          27,
+          -0.064,
+          -18.6
+        ],
+        "rotation": 0,
+        "scale": [
+          1.4523659200432486,
+          2.323785472069198,
+          1.4523659200432486
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "fa6977c1-c9f1-4353-ac94-9efeee05709e",
+        "name": "Pine 20,-20 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          27.6,
+          -0.052,
+          -23.8
+        ],
+        "rotation": 0,
+        "scale": [
+          1.145124871403418,
+          1.8321997942454686,
+          1.145124871403418
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "d9a01948-a5e8-4530-b789-e63a5def8821",
+        "name": "Pine 20,-20 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          19.9,
+          -0.054,
+          -12.9
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9481340645848024,
+          1.5170145033356839,
+          0.9481340645848024
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "e36e50cd-4b29-4ca9-aefd-3d0db58042a1",
+        "name": "Pine 20,-20 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          27,
+          -0.049,
+          -25.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.3879294474788497,
+          2.2206871159661596,
+          1.3879294474788497
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "e258d808-40cc-4d52-a100-961a930ce6c4",
+        "name": "Pine -45,-60 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -55.4,
+          -0.012,
+          -54.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1167251635565623,
+          1.7867602616904996,
+          1.1167251635565623
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "150cacac-c987-40d1-b0bc-3dd674b6df21",
+        "name": "Pine -45,-60 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -43.1,
+          -0.018,
+          -55.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2119485370756453,
+          1.9391176593210326,
+          1.2119485370756453
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "13f4eb4d-9fd8-44da-8e5d-694d0dbf682b",
+        "name": "Pine -45,-60 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -39.8,
+          -0.024,
+          -50.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1429036789819156,
+          1.828645886371065,
+          1.1429036789819156
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "8d3b1304-acee-485d-a208-20782e7d7fc9",
+        "name": "Pine -45,-60 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -34.4,
+          -0.052,
+          -63.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.327643680438154,
+          2.1242298887010462,
+          1.327643680438154
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "1beb6f3c-d216-43ac-b689-cba24e83a9aa",
+        "name": "Pine -45,-60 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -45.2,
+          -0.037,
+          -66.8
+        ],
+        "rotation": 0,
+        "scale": [
+          1.1012023485492033,
+          1.7619237576787254,
+          1.1012023485492033
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "e37b2f0a-b276-467b-ac7d-abdcc7e8e4ce",
+        "name": "Pine -45,-60 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -39.3,
+          -0.037,
+          -62.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.541771358326043,
+          2.466834173321669,
+          1.541771358326043
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "fa8e4f34-eb14-45fe-b37a-c2c209333e0d",
+        "name": "Pine -45,-60 · 7",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -45.1,
+          -0.04,
+          -68
+        ],
+        "rotation": 0,
+        "scale": [
+          1.181150979434013,
+          1.8898415670944209,
+          1.181150979434013
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "47194363-1e1a-4aea-bac5-48445f204e28",
+        "name": "Pine 45,-65 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          39.7,
+          0.037,
+          -73.7
+        ],
+        "rotation": 0,
+        "scale": [
+          1.201365155762353,
+          1.922184249219765,
+          1.201365155762353
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "7fd3e21f-2c40-4a08-bb94-7e77e5722ec5",
+        "name": "Pine 45,-65 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          46.2,
+          0.094,
+          -60
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5905269567008302,
+          2.5448431307213286,
+          1.5905269567008302
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "35d23ef3-0157-4b08-9472-d27c4a035b17",
+        "name": "Pine 45,-65 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          49.4,
+          0.074,
+          -67.9
+        ],
+        "rotation": 0,
+        "scale": [
+          1.0615260556760775,
+          1.698441689081724,
+          1.0615260556760775
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "d3cfec51-e0d1-4ad2-859c-abe5aac5500b",
+        "name": "Pine 45,-65 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          35,
+          0.023,
+          -73.4
+        ],
+        "rotation": 0,
+        "scale": [
+          1.3609616738806312,
+          2.17753867820901,
+          1.3609616738806312
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "6ae671b4-a8d8-48a9-a386-91cb162e916c",
+        "name": "Pine 45,-65 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          33.3,
+          0.035,
+          -57.1
+        ],
+        "rotation": 0,
+        "scale": [
+          1.027640011786838,
+          1.644224018858941,
+          1.027640011786838
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "3743d56a-947d-4d67-b0b3-272197050ae4",
+        "name": "Pine 45,-65 · 6",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          39.8,
+          0.038,
+          -73.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2742136736100727,
+          2.038741877776116,
+          1.2742136736100727
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "71c8eda8-820e-47f6-b753-d274cb46d70d",
+        "name": "Pine 60,80 · 1",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          48.9,
+          0.177,
+          54.69
+        ],
+        "rotation": 0,
+        "scale": [
+          0.987844058747184,
+          1.5805504939954944,
+          0.987844058747184
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "005d2470-1aa7-418d-841c-26a28c06c680",
+        "name": "Pine 60,80 · 2",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          46.49,
+          0.175,
+          55.09
+        ],
+        "rotation": 0,
+        "scale": [
+          1.35847652460143,
+          2.1735624393622883,
+          1.35847652460143
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "a726b1a2-87cb-4f2b-9b56-c4d97880cfc3",
+        "name": "Pine 60,80 · 3",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          49.19,
+          0.177,
+          54.02
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5096856508104404,
+          2.415497041296705,
+          1.5096856508104404
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "aa749c97-3146-47d5-afc4-7ff6ba5fdf48",
+        "name": "Pine 60,80 · 4",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          50.02,
+          0.178,
+          53.69
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2914902185996266,
+          2.0663843497594026,
+          1.2914902185996266
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "c76b6dbf-ef9d-4436-b42b-0d08ded2f6e4",
+        "name": "Pine 60,80 · 5",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          44.88,
+          0.173,
+          55.98
+        ],
+        "rotation": 0,
+        "scale": [
+          1.2370659727156363,
+          1.9793055563450181,
+          1.2370659727156363
+        ],
+        "color": "#2f5d3a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee"
+      },
+      {
+        "id": "f8e76546-d2f0-4caf-9276-cbde518ae391",
+        "name": "Pine tree",
+        "kind": "environment",
+        "shape": "tree",
+        "model": "pine",
+        "position": [
+          -30,
+          0.013,
+          20
+        ],
+        "rotation": 0,
+        "scale": [
+          1.4,
+          2.2,
+          1.4
+        ],
+        "color": "#2f5d3a",
+        "notes": "Tall subalpine fir and pine trees, dark green, dense.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "206c50a1-c23a-4cd1-be52-92d976ee68ee",
+        "look": "51b2c693-ffb7-4a99-872d-27760f502590"
+      },
+      {
+        "id": "311a48d9-648a-4672-ba4e-1e047baf087f",
+        "name": "Elk 1",
+        "kind": "prop",
+        "shape": "box",
+        "model": "elk",
+        "position": [
+          -27,
+          -0.033,
+          -20
+        ],
+        "rotation": 40,
+        "scale": [
+          0.9,
+          1.5,
+          2.3
+        ],
+        "color": "#7a5534",
+        "notes": "A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest.",
+        "lookFrom": null,
+        "styleNotes": "Wildlife photograph of the living animal in natural light, no studio props",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -27,
+              -0.033,
+              -20
+            ],
+            "r": 40,
+            "pose": {
+              "head": [
+                28,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 3,
+            "p": [
+              -27,
+              -0.033,
+              -20
+            ],
+            "r": 40,
+            "pose": {
+              "head": [
+                34,
+                4,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 7,
+            "p": [
+              -27,
+              -0.033,
+              -20
+            ],
+            "r": 40,
+            "pose": {
+              "head": [
+                25,
+                -3,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 11,
+            "p": [
+              -27,
+              -0.033,
+              -20
+            ],
+            "r": 40,
+            "pose": {
+              "head": [
+                -6,
+                8,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 15,
+            "p": [
+              -27,
+              -0.033,
+              -20
+            ],
+            "r": 40,
+            "pose": {
+              "head": [
+                0,
+                5,
+                0
+              ]
+            },
+            "ease": "linear"
+          }
+        ],
+        "parent": "3197eeea-90f6-47db-86d8-15d534e592fe",
+        "look": "5f0b0e59-0cb7-442d-a1b7-c8cea8d03467"
+      },
+      {
+        "id": "b97a657b-5608-4482-a5a2-cad13f6eaab3",
+        "name": "Elk 2",
+        "kind": "character",
+        "shape": "box",
+        "model": "elk",
+        "position": [
+          -27,
+          -0.042,
+          -24
+        ],
+        "rotation": 70,
+        "scale": [
+          0.9,
+          1.5,
+          2.3
+        ],
+        "color": "#7a5534",
+        "notes": "",
+        "lookFrom": "311a48d9-648a-4672-ba4e-1e047baf087f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -27,
+              -0.042,
+              -24
+            ],
+            "r": 70,
+            "pose": {
+              "head": [
+                28,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 4,
+            "p": [
+              -27,
+              -0.042,
+              -24
+            ],
+            "r": 70,
+            "pose": {
+              "head": [
+                34,
+                4,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 8,
+            "p": [
+              -27,
+              -0.042,
+              -24
+            ],
+            "r": 70,
+            "pose": {
+              "head": [
+                25,
+                -3,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 11.3,
+            "p": [
+              -27,
+              -0.042,
+              -24
+            ],
+            "r": 70,
+            "pose": {
+              "head": [
+                -6,
+                8,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 15,
+            "p": [
+              -27,
+              -0.042,
+              -24
+            ],
+            "r": 70,
+            "pose": {
+              "head": [
+                0,
+                5,
+                0
+              ]
+            },
+            "ease": "linear"
+          }
+        ],
+        "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+      },
+      {
+        "id": "784d7710-1963-47c5-8176-78f3363c2d6e",
+        "name": "Elk 3",
+        "kind": "character",
+        "shape": "box",
+        "model": "elk",
+        "position": [
+          -27,
+          -0.044,
+          -25
+        ],
+        "rotation": 10,
+        "scale": [
+          0.9,
+          1.5,
+          2.3
+        ],
+        "color": "#7a5534",
+        "notes": "",
+        "lookFrom": "311a48d9-648a-4672-ba4e-1e047baf087f",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -27,
+              -0.044,
+              -25
+            ],
+            "r": 10,
+            "pose": {
+              "head": [
+                28,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 5,
+            "p": [
+              -27,
+              -0.044,
+              -25
+            ],
+            "r": 10,
+            "pose": {
+              "head": [
+                34,
+                4,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 9,
+            "p": [
+              -27,
+              -0.044,
+              -25
+            ],
+            "r": 10,
+            "pose": {
+              "head": [
+                25,
+                -3,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 11.6,
+            "p": [
+              -27,
+              -0.044,
+              -25
+            ],
+            "r": 10,
+            "pose": {
+              "head": [
+                -6,
+                8,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 15,
+            "p": [
+              -27,
+              -0.044,
+              -25
+            ],
+            "r": 10,
+            "pose": {
+              "head": [
+                0,
+                5,
+                0
+              ]
+            },
+            "ease": "linear"
+          }
+        ],
+        "parent": "3197eeea-90f6-47db-86d8-15d534e592fe"
+      },
+      {
+        "id": "bcec0c59-096d-472b-9218-b6af40adae68",
+        "name": "Bald eagle",
+        "kind": "prop",
+        "shape": "bird",
+        "model": "eagle",
+        "position": [
+          20,
+          22,
+          28
+        ],
+        "rotation": 198,
+        "scale": [
+          1.3,
+          1.3,
+          1.3
+        ],
+        "color": "#3b2a1e",
+        "notes": "Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons; no clothing.",
+        "lookFrom": null,
+        "styleNotes": "Wildlife photograph of the living animal in natural light, feathers sharp, no studio props",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              20,
+              22,
+              28
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -8,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                6.731767878463172
+              ],
+              "tipR": [
+                0,
+                0,
+                -6.731767878463172
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 0.25,
+            "p": [
+              19.762,
+              21.767,
+              27.227
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -8.437,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -1.9792316740361835
+              ],
+              "tipR": [
+                0,
+                0,
+                1.9792316740361835
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 0.5,
+            "p": [
+              19.456,
+              21.472,
+              26.232
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -8.871,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.979959892832436
+              ],
+              "tipR": [
+                0,
+                0,
+                7.979959892832436
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 0.75,
+            "p": [
+              19.094,
+              21.126,
+              25.056
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -9.297,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -3.0532879364186534
+              ],
+              "tipR": [
+                0,
+                0,
+                3.0532879364186534
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 1,
+            "p": [
+              18.688,
+              20.736,
+              23.736
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -9.714,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                6.054419962463426
+              ],
+              "tipR": [
+                0,
+                0,
+                -6.054419962463426
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 1.25,
+            "p": [
+              18.25,
+              20.313,
+              22.313
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -10.118,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                -28.531695488854606
+              ],
+              "wingR": [
+                0,
+                0,
+                28.531695488854606
+              ],
+              "tipL": [
+                0,
+                0,
+                6.871475947412736
+              ],
+              "tipR": [
+                0,
+                0,
+                -6.871475947412736
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 1.5,
+            "p": [
+              17.792,
+              19.864,
+              20.824
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -10.506,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                -17.633557568774197
+              ],
+              "wingR": [
+                0,
+                0,
+                17.633557568774197
+              ],
+              "tipL": [
+                0,
+                0,
+                -1.7209599047025241
+              ],
+              "tipR": [
+                0,
+                0,
+                1.7209599047025241
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 1.75,
+            "p": [
+              17.326,
+              19.4,
+              19.309
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -10.875,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                17.63355756877419
+              ],
+              "wingR": [
+                0,
+                0,
+                -17.63355756877419
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.956790232889409
+              ],
+              "tipR": [
+                0,
+                0,
+                7.956790232889409
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 2,
+            "p": [
+              16.864,
+              18.928,
+              17.808
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -11.221,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                28.53169548885461
+              ],
+              "wingR": [
+                0,
+                0,
+                -28.53169548885461
+              ],
+              "tipL": [
+                0,
+                0,
+                -3.2969478819340527
+              ],
+              "tipR": [
+                0,
+                0,
+                3.2969478819340527
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 2.25,
+            "p": [
+              16.418,
+              18.458,
+              16.359
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -11.543,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                7.34788079488412e-15
+              ],
+              "wingR": [
+                0,
+                0,
+                -7.34788079488412e-15
+              ],
+              "tipL": [
+                0,
+                0,
+                5.8775874432383635
+              ],
+              "tipR": [
+                0,
+                0,
+                -5.8775874432383635
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 2.5,
+            "p": [
+              16,
+              18,
+              15
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -11.838,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                -28.531695488854606
+              ],
+              "wingR": [
+                0,
+                0,
+                28.531695488854606
+              ],
+              "tipL": [
+                0,
+                0,
+                7.003617397507428
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.003617397507428
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 2.75,
+            "p": [
+              15.598,
+              17.54,
+              13.698
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.103,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                -17.6335575687742
+              ],
+              "wingR": [
+                0,
+                0,
+                17.6335575687742
+              ],
+              "tipL": [
+                0,
+                0,
+                -1.460793077049072
+              ],
+              "tipR": [
+                0,
+                0,
+                1.460793077049072
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 3,
+            "p": [
+              15.192,
+              17.064,
+              12.392
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.337,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                17.633557568774183
+              ],
+              "wingR": [
+                0,
+                0,
+                -17.633557568774183
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.924858845558963
+              ],
+              "tipR": [
+                0,
+                0,
+                7.924858845558963
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 3.25,
+            "p": [
+              14.784,
+              16.574,
+              11.084
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.538,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                28.531695488854613
+              ],
+              "wingR": [
+                0,
+                0,
+                -28.531695488854613
+              ],
+              "tipL": [
+                0,
+                0,
+                -3.5369773486123153
+              ],
+              "tipR": [
+                0,
+                0,
+                3.5369773486123153
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 3.5,
+            "p": [
+              14.376,
+              16.072,
+              9.776
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.704,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                1.469576158976824e-14
+              ],
+              "wingR": [
+                0,
+                0,
+                -1.469576158976824e-14
+              ],
+              "tipL": [
+                0,
+                0,
+                5.694282738952984
+              ],
+              "tipR": [
+                0,
+                0,
+                -5.694282738952984
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 3.75,
+            "p": [
+              13.969,
+              15.563,
+              8.469
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.834,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                7.128046719398827
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.128046719398827
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 4,
+            "p": [
+              13.564,
+              15.048,
+              7.164
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.927,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -1.1990176773036187
+              ],
+              "tipR": [
+                0,
+                0,
+                1.1990176773036187
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 4.25,
+            "p": [
+              13.163,
+              14.532,
+              5.863
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.983,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.8842008925209575
+              ],
+              "tipR": [
+                0,
+                0,
+                7.8842008925209575
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 4.5,
+            "p": [
+              12.768,
+              14.016,
+              4.568
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -13,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -3.773112024753569
+              ],
+              "tipR": [
+                0,
+                0,
+                3.773112024753569
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 4.75,
+            "p": [
+              12.38,
+              13.504,
+              3.28
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.979,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                5.504707698066375
+              ],
+              "tipR": [
+                0,
+                0,
+                -5.504707698066375
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 5,
+            "p": [
+              12,
+              13,
+              2
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.92,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                7.24462689605299
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.24462689605299
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 5.25,
+            "p": [
+              11.63,
+              12.496,
+              0.73
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.823,
+            "pose": {
+              "wingL": [
+                0,
+                -5.606192129629631,
+                -1.681857638888889
+              ],
+              "wingR": [
+                0,
+                5.606192129629631,
+                1.681857638888889
+              ],
+              "tipL": [
+                0,
+                0,
+                -0.9359219629949124
+              ],
+              "tipR": [
+                0,
+                0,
+                0.9359219629949124
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 5.5,
+            "p": [
+              11.268,
+              11.984,
+              -0.532
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.69,
+            "pose": {
+              "wingL": [
+                0,
+                -18.807870370370374,
+                -5.642361111111112
+              ],
+              "wingR": [
+                0,
+                18.807870370370374,
+                5.642361111111112
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.834861144831336
+              ],
+              "tipR": [
+                0,
+                0,
+                7.834861144831336
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 5.75,
+            "p": [
+              10.913,
+              11.469,
+              -1.787
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.52,
+            "pose": {
+              "wingL": [
+                0,
+                -34.1796875,
+                -10.25390625
+              ],
+              "wingR": [
+                0,
+                34.1796875,
+                10.25390625
+              ],
+              "tipL": [
+                0,
+                0,
+                -4.00509188745932
+              ],
+              "tipR": [
+                0,
+                0,
+                4.00509188745932
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 6,
+            "p": [
+              10.564,
+              10.952,
+              -3.036
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.316,
+            "pose": {
+              "wingL": [
+                0,
+                -46.296296296296305,
+                -13.888888888888891
+              ],
+              "wingR": [
+                0,
+                46.296296296296305,
+                13.888888888888891
+              ],
+              "tipL": [
+                0,
+                0,
+                5.30907107370374
+              ],
+              "tipR": [
+                0,
+                0,
+                -5.30907107370374
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 6.25,
+            "p": [
+              10.219,
+              10.438,
+              -4.281
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -12.079,
+            "pose": {
+              "wingL": [
+                0,
+                -50,
+                -15
+              ],
+              "wingR": [
+                0,
+                50,
+                15
+              ],
+              "tipL": [
+                0,
+                0,
+                7.353229553628618
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.353229553628618
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 6.5,
+            "p": [
+              9.876,
+              9.928,
+              -5.524
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -11.811,
+            "pose": {
+              "wingL": [
+                0,
+                -50,
+                -15
+              ],
+              "wingR": [
+                0,
+                50,
+                15
+              ],
+              "tipL": [
+                0,
+                0,
+                -0.6717956455339746
+              ],
+              "tipR": [
+                0,
+                0,
+                0.6717956455339746
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 6.75,
+            "p": [
+              9.534,
+              9.427,
+              -6.766
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -11.513,
+            "pose": {
+              "wingL": [
+                0,
+                -50,
+                -15
+              ],
+              "wingR": [
+                0,
+                50,
+                15
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.7768939336218725
+              ],
+              "tipR": [
+                0,
+                0,
+                7.7768939336218725
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 7,
+            "p": [
+              9.192,
+              8.936,
+              -8.008
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -11.189,
+            "pose": {
+              "wingL": [
+                0,
+                -50,
+                -15
+              ],
+              "wingR": [
+                0,
+                50,
+                15
+              ],
+              "tipL": [
+                0,
+                0,
+                -4.232661488960191
+              ],
+              "tipR": [
+                0,
+                0,
+                4.232661488960191
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 7.25,
+            "p": [
+              8.848,
+              8.46,
+              -9.252
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -10.84,
+            "pose": {
+              "wingL": [
+                0,
+                -50,
+                -15
+              ],
+              "wingR": [
+                0,
+                50,
+                15
+              ],
+              "tipL": [
+                0,
+                0,
+                5.107588293785067
+              ],
+              "tipR": [
+                0,
+                0,
+                -5.107588293785067
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 7.5,
+            "p": [
+              8.5,
+              8,
+              -10.5
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -10.47,
+            "pose": {
+              "wingL": [
+                0,
+                -50,
+                -15
+              ],
+              "wingR": [
+                0,
+                50,
+                15
+              ],
+              "tipL": [
+                0,
+                0,
+                7.453735102837644
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.453735102837644
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 7.75,
+            "p": [
+              8.155,
+              7.543,
+              -11.768
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -10.08,
+            "pose": {
+              "wingL": [
+                0,
+                -50,
+                -15
+              ],
+              "wingR": [
+                0,
+                50,
+                15
+              ],
+              "tipL": [
+                0,
+                0,
+                -0.40692957119445355
+              ],
+              "tipR": [
+                0,
+                0,
+                0.40692957119445355
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 8,
+            "p": [
+              7.816,
+              7.078,
+              -13.064
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -9.675,
+            "pose": {
+              "wingL": [
+                0,
+                -50,
+                -15
+              ],
+              "wingR": [
+                0,
+                50,
+                15
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.710363090272702
+              ],
+              "tipR": [
+                0,
+                0,
+                7.710363090272702
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 8.25,
+            "p": [
+              7.482,
+              6.613,
+              -14.376
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -9.257,
+            "pose": {
+              "wingL": [
+                0,
+                -47.8515625,
+                -14.35546875
+              ],
+              "wingR": [
+                0,
+                47.8515625,
+                14.35546875
+              ],
+              "tipL": [
+                0,
+                0,
+                -4.455570237905691
+              ],
+              "tipR": [
+                0,
+                0,
+                4.455570237905691
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 8.5,
+            "p": [
+              7.148,
+              6.155,
+              -15.692
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -8.829,
+            "pose": {
+              "wingL": [
+                0,
+                -42.1875,
+                -12.65625
+              ],
+              "wingR": [
+                0,
+                42.1875,
+                12.65625
+              ],
+              "tipL": [
+                0,
+                0,
+                4.900481223803758
+              ],
+              "tipR": [
+                0,
+                0,
+                -4.900481223803758
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 8.75,
+            "p": [
+              6.813,
+              5.712,
+              -17
+            ],
+            "r": 198,
+            "pitch": 16,
+            "roll": -8.395,
+            "pose": {
+              "wingL": [
+                0,
+                -34.1796875,
+                -10.25390625
+              ],
+              "wingR": [
+                0,
+                34.1796875,
+                10.25390625
+              ],
+              "tipL": [
+                0,
+                0,
+                7.546032870632608
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.546032870632608
+              ],
+              "tail": [
+                -4.8,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 9,
+            "p": [
+              6.472,
+              5.293,
+              -18.288
+            ],
+            "r": 198,
+            "pitch": 13,
+            "roll": -7.958,
+            "pose": {
+              "wingL": [
+                0,
+                -25,
+                -7.5
+              ],
+              "wingR": [
+                0,
+                25,
+                7.5
+              ],
+              "tipL": [
+                0,
+                0,
+                -0.14161540084330862
+              ],
+              "tipR": [
+                0,
+                0,
+                0.14161540084330862
+              ],
+              "tail": [
+                -3.9,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 9.25,
+            "p": [
+              6.124,
+              4.904,
+              -19.544
+            ],
+            "r": 198,
+            "pitch": 12.313,
+            "roll": -7.521,
+            "pose": {
+              "wingL": [
+                0,
+                -15.8203125,
+                -4.74609375
+              ],
+              "wingR": [
+                0,
+                15.8203125,
+                4.74609375
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.6353418761235385
+              ],
+              "tipR": [
+                0,
+                0,
+                7.6353418761235385
+              ],
+              "tail": [
+                -3.6937499999999996,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 9.5,
+            "p": [
+              5.764,
+              4.554,
+              -20.756
+            ],
+            "r": 198,
+            "pitch": 10.5,
+            "roll": -7.088,
+            "pose": {
+              "wingL": [
+                0,
+                -7.8125,
+                -2.34375
+              ],
+              "wingR": [
+                0,
+                7.8125,
+                2.34375
+              ],
+              "tipL": [
+                0,
+                0,
+                -4.673572675306285
+              ],
+              "tipR": [
+                0,
+                0,
+                4.673572675306285
+              ],
+              "tail": [
+                -3.15,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 9.75,
+            "p": [
+              5.39,
+              4.25,
+              -21.912
+            ],
+            "r": 198,
+            "pitch": 7.938,
+            "roll": -6.662,
+            "pose": {
+              "wingL": [
+                0,
+                -2.1484375,
+                -0.64453125
+              ],
+              "wingR": [
+                0,
+                2.1484375,
+                0.64453125
+              ],
+              "tipL": [
+                0,
+                0,
+                4.68797792251643
+              ],
+              "tipR": [
+                0,
+                0,
+                -4.68797792251643
+              ],
+              "tail": [
+                -2.38125,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 10,
+            "p": [
+              5,
+              4,
+              -23
+            ],
+            "r": 208,
+            "pitch": 5,
+            "roll": -6.246,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                7.630021222075775
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.630021222075775
+              ],
+              "tail": [
+                -1.5,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 10.25,
+            "p": [
+              4.591,
+              3.811,
+              -24.012
+            ],
+            "r": 208,
+            "pitch": 2.063,
+            "roll": -5.844,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                0.12385471122550538
+              ],
+              "tipR": [
+                0,
+                0,
+                -0.12385471122550538
+              ],
+              "tail": [
+                -0.61875,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 10.5,
+            "p": [
+              4.164,
+              3.677,
+              -24.956
+            ],
+            "r": 208,
+            "pitch": -0.5,
+            "roll": -5.458,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.5519129018009545
+              ],
+              "tipR": [
+                0,
+                0,
+                7.5519129018009545
+              ],
+              "tail": [
+                0.15,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 10.75,
+            "p": [
+              3.724,
+              3.59,
+              -25.844
+            ],
+            "r": 208,
+            "pitch": -2.312,
+            "roll": -5.091,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -4.886428744823876
+              ],
+              "tipR": [
+                0,
+                0,
+                4.886428744823876
+              ],
+              "tail": [
+                0.69375,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 11,
+            "p": [
+              3.272,
+              3.542,
+              -26.688
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -4.747,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                4.47031239081293
+              ],
+              "tipR": [
+                0,
+                0,
+                -4.47031239081293
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 11.25,
+            "p": [
+              2.813,
+              3.525,
+              -27.5
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -4.428,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                7.705607672255826
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.705607672255826
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 11.5,
+            "p": [
+              2.348,
+              3.53,
+              -28.292
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -4.135,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                -17.200292614296657
+              ],
+              "wingR": [
+                0,
+                0,
+                17.200292614296657
+              ],
+              "tipL": [
+                0,
+                0,
+                0.3891884390006981
+              ],
+              "tipR": [
+                0,
+                0,
+                -0.3891884390006981
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 11.75,
+            "p": [
+              1.882,
+              3.548,
+              -29.076
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.873,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                -21.44841406800012
+              ],
+              "wingR": [
+                0,
+                0,
+                21.44841406800012
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.460168036250572
+              ],
+              "tipR": [
+                0,
+                0,
+                7.460168036250572
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 12,
+            "p": [
+              1.416,
+              3.571,
+              -29.864
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.642,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                -9.545442260586281
+              ],
+              "wingR": [
+                0,
+                0,
+                9.545442260586281
+              ],
+              "tipL": [
+                0,
+                0,
+                -5.093904057113103
+              ],
+              "tipR": [
+                0,
+                0,
+                5.093904057113103
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 12.25,
+            "p": [
+              0.954,
+              3.591,
+              -30.668
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.445,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                9.545442260586276
+              ],
+              "wingR": [
+                0,
+                0,
+                -9.545442260586276
+              ],
+              "tipL": [
+                0,
+                0,
+                4.247724314043077
+              ],
+              "tipR": [
+                0,
+                0,
+                -4.247724314043077
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 12.5,
+            "p": [
+              0.5,
+              3.6,
+              -31.5
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.282,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                21.44841406800012
+              ],
+              "wingR": [
+                0,
+                0,
+                -21.44841406800012
+              ],
+              "tipL": [
+                0,
+                0,
+                7.772708988128874
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.772708988128874
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 12.75,
+            "p": [
+              0.048,
+              3.6,
+              -32.357
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.155,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                17.200292614296657
+              ],
+              "wingR": [
+                0,
+                0,
+                -17.200292614296657
+              ],
+              "tipL": [
+                0,
+                0,
+                0.6540936066523922
+              ],
+              "tipR": [
+                0,
+                0,
+                -0.6540936066523922
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 13,
+            "p": [
+              -0.408,
+              3.603,
+              -33.224
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.066,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                5.3884459162483544e-15
+              ],
+              "wingR": [
+                0,
+                0,
+                -5.3884459162483544e-15
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.360208305574325
+              ],
+              "tipR": [
+                0,
+                0,
+                7.360208305574325
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 13.25,
+            "p": [
+              -0.866,
+              3.611,
+              -34.097
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.014,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -5.295770147922339
+              ],
+              "tipR": [
+                0,
+                0,
+                5.295770147922339
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 13.5,
+            "p": [
+              -1.324,
+              3.626,
+              -34.972
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                4.020458798083898
+              ],
+              "tipR": [
+                0,
+                0,
+                -4.020458798083898
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 13.75,
+            "p": [
+              -1.781,
+              3.65,
+              -35.844
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.025,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                7.831251280171655
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.831251280171655
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 14,
+            "p": [
+              -2.236,
+              3.686,
+              -36.708
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.088,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                0.9182785102654978
+              ],
+              "tipR": [
+                0,
+                0,
+                -0.9182785102654978
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 14.25,
+            "p": [
+              -2.687,
+              3.737,
+              -37.56
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.188,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -7.252143781784205
+              ],
+              "tipR": [
+                0,
+                0,
+                7.252143781784205
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 14.5,
+            "p": [
+              -3.132,
+              3.805,
+              -38.396
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.325,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                -5.491804729670204
+              ],
+              "tipR": [
+                0,
+                0,
+                5.491804729670204
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 14.75,
+            "p": [
+              -3.57,
+              3.892,
+              -39.211
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.498,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                3.7887660994379675
+              ],
+              "tipR": [
+                0,
+                0,
+                -3.7887660994379675
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          },
+          {
+            "t": 15,
+            "p": [
+              -4,
+              4,
+              -40
+            ],
+            "r": 208,
+            "pitch": -3,
+            "roll": -3.705,
+            "pose": {
+              "wingL": [
+                0,
+                0,
+                0
+              ],
+              "wingR": [
+                0,
+                0,
+                0
+              ],
+              "tipL": [
+                0,
+                0,
+                7.881170083745979
+              ],
+              "tipR": [
+                0,
+                0,
+                -7.881170083745979
+              ],
+              "tail": [
+                0.8999999999999999,
+                0,
+                0
+              ]
+            },
+            "ease": "linear"
+          }
+        ],
+        "parent": null,
+        "look": "ac6e3af5-b365-461c-9e1b-dbbb01f59d26"
+      },
+      {
+        "id": "10a9a848-8da4-43ee-95d9-d33975e4419c",
+        "name": "River",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          31.666666666666668,
+          0,
+          31.75
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "206c50a1-c23a-4cd1-be52-92d976ee68ee",
+        "name": "Forest",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          9.1325,
+          0,
+          -9.045
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "3197eeea-90f6-47db-86d8-15d534e592fe",
+        "name": "Elk herd",
+        "kind": "character",
+        "shape": "group",
+        "position": [
+          -27,
+          -0.04,
+          -23
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "a0f8b196-e985-42f2-bec8-96b8208980e5",
+        "name": "Alpine terrain",
+        "kind": "environment",
+        "shape": "terrain",
+        "model": "terrain",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          2,
+          0.3,
+          2
+        ],
+        "color": "#6f8f4e",
+        "notes": "Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null,
+        "look": "5612c99c-a5b2-4013-adee-f32dd9948f13"
+      }
+    ],
+    "references": [
+      {
+        "id": "8a65ed8d-12d4-4243-9750-2c6038e522a7",
+        "name": "Alpine lake · Flux.2 [pro] · 753132",
+        "file": "8a65ed8d-12d4-4243-9750-2c6038e522a7.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "910451e8-e15e-4907-ac3a-a388cba96e01",
+        "note": "",
+        "createdAt": "2026-10-30T17:13:27.565Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 753132,
+          "prompt": "Reference photo of Alpine lake, Clear turquoise glacial lake reflecting the peaks. in A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.."
+        }
+      },
+      {
+        "id": "b089b9cd-c5e7-4214-9bde-8737cc988302",
+        "name": "River 1 · Flux.2 [pro] · 879637",
+        "file": "b089b9cd-c5e7-4214-9bde-8737cc988302.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "67f6bf88-244c-4b48-97df-db5c88ab2da1",
+        "note": "",
+        "createdAt": "2026-10-30T17:06:59.175Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 879637,
+          "prompt": "Reference photo of River 1 in A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.."
+        }
+      },
+      {
+        "id": "51b2c693-ffb7-4a99-872d-27760f502590",
+        "name": "Pine tree · FLUX 3 Image · 7301",
+        "file": "51b2c693-ffb7-4a99-872d-27760f502590.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "f8e76546-d2f0-4caf-9276-cbde518ae391",
+        "note": "",
+        "createdAt": "2026-10-30T15:26:57.678Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Reference photo of Pine tree, Tall subalpine fir and pine trees, dark green, dense. in A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.."
+        }
+      },
+      {
+        "id": "5f0b0e59-0cb7-442d-a1b7-c8cea8d03467",
+        "name": "Elk 1 · Flux.2 [pro] · 620611",
+        "file": "5f0b0e59-0cb7-442d-a1b7-c8cea8d03467.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "311a48d9-648a-4672-ba4e-1e047baf087f",
+        "note": "",
+        "createdAt": "2026-10-30T17:41:09.056Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 620611,
+          "prompt": "Product reference photo of Elk 1, A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest., brown. Whole object in frame, three-quarter view, plain studio background, soft even lighting, photorealistic. Look: Wildlife photograph of the living animal in natural light, no studio props. Show exactly one object. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.."
+        }
+      },
+      {
+        "id": "ac6e3af5-b365-461c-9e1b-dbbb01f59d26",
+        "name": "Bald eagle · Flux.2 [pro] · 332619",
+        "file": "ac6e3af5-b365-461c-9e1b-dbbb01f59d26.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "bcec0c59-096d-472b-9218-b6af40adae68",
+        "note": "",
+        "createdAt": "2026-10-30T17:41:01.929Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 332619,
+          "prompt": "Product reference photo of Bald eagle, A real wild bald eagle, a living bird photographed in flight: dark brown body, broad wings with splayed primary feathers, white head and tail, yellow hooked beak and talons. Not a person, not a costume, not a mascot, no harness, no clothing., black. Whole object in frame, three-quarter view, plain studio background, soft even lighting, photorealistic. Look: Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. Show exactly one object. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.."
+        }
+      },
+      {
+        "id": "5612c99c-a5b2-4013-adee-f32dd9948f13",
+        "name": "Alpine terrain · Flux.2 [pro] · 187585",
+        "file": "5612c99c-a5b2-4013-adee-f32dd9948f13.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "a0f8b196-e985-42f2-bec8-96b8208980e5",
+        "note": "",
+        "createdAt": "2026-10-30T17:12:52.217Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 187585,
+          "prompt": "Reference photo of Alpine terrain, Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. in A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal nature documentary. Golden late-morning sun, crisp air, deep focus on wides, natural colour.."
+        }
+      }
+    ]
+  },
+  "shots": [
+    {
+      "id": "b59a89ad-13b3-4978-949c-e4eb450147be",
+      "title": "The valley",
+      "description": "@bald-eagle glides for one second, makes two deep wing beats, then spreads its wings again. Feather tips lag the shoulders; the head stays steady. Elk graze on shore. Keep the same bird, plumage and landscape.",
+      "duration": 5,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 35,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              28,
+              24.5,
+              44
+            ],
+            "look": [
+              20,
+              22.2,
+              28
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.05,
+            "p": [
+              27.662,
+              24.267,
+              43.227
+            ],
+            "look": [
+              19.762,
+              21.967,
+              27.227
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.1,
+            "p": [
+              27.256,
+              23.972,
+              42.232
+            ],
+            "look": [
+              19.456,
+              21.672,
+              26.232
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.15,
+            "p": [
+              26.794,
+              23.626,
+              41.056
+            ],
+            "look": [
+              19.094,
+              21.325,
+              25.056
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.2,
+            "p": [
+              26.288,
+              23.236,
+              39.736
+            ],
+            "look": [
+              18.688,
+              20.936,
+              23.736
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.25,
+            "p": [
+              25.75,
+              22.813,
+              38.313
+            ],
+            "look": [
+              18.25,
+              20.513,
+              22.313
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.3,
+            "p": [
+              25.192,
+              22.364,
+              36.824
+            ],
+            "look": [
+              17.792,
+              20.064,
+              20.824
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.35,
+            "p": [
+              24.626,
+              21.9,
+              35.31
+            ],
+            "look": [
+              17.326,
+              19.6,
+              19.309
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.4,
+            "p": [
+              24.064,
+              21.428,
+              33.808
+            ],
+            "look": [
+              16.864,
+              19.128,
+              17.808
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.45,
+            "p": [
+              23.518,
+              20.958,
+              32.359
+            ],
+            "look": [
+              16.418,
+              18.658,
+              16.359
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.5,
+            "p": [
+              23,
+              20.5,
+              31
+            ],
+            "look": [
+              16,
+              18.2,
+              15
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.55,
+            "p": [
+              22.498,
+              20.04,
+              29.698
+            ],
+            "look": [
+              15.598,
+              17.74,
+              13.698
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.6,
+            "p": [
+              21.992,
+              19.564,
+              28.392
+            ],
+            "look": [
+              15.192,
+              17.264,
+              12.392
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.65,
+            "p": [
+              21.484,
+              19.074,
+              27.084
+            ],
+            "look": [
+              14.784,
+              16.774,
+              11.084
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.7,
+            "p": [
+              20.976,
+              18.572,
+              25.776
+            ],
+            "look": [
+              14.376,
+              16.272,
+              9.776
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.75,
+            "p": [
+              20.469,
+              18.063,
+              24.469
+            ],
+            "look": [
+              13.969,
+              15.763,
+              8.469
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.8,
+            "p": [
+              19.964,
+              17.548,
+              23.164
+            ],
+            "look": [
+              13.564,
+              15.248,
+              7.164
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.85,
+            "p": [
+              19.463,
+              17.032,
+              21.863
+            ],
+            "look": [
+              13.163,
+              14.731,
+              5.863
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.9,
+            "p": [
+              18.968,
+              16.516,
+              20.568
+            ],
+            "look": [
+              12.768,
+              14.216,
+              4.568
+            ],
+            "mm": 35
+          },
+          {
+            "t": 0.95,
+            "p": [
+              18.48,
+              16.005,
+              19.28
+            ],
+            "look": [
+              12.38,
+              13.704,
+              3.28
+            ],
+            "mm": 35
+          },
+          {
+            "t": 1,
+            "p": [
+              18,
+              15.5,
+              18
+            ],
+            "look": [
+              12,
+              13.2,
+              2
+            ],
+            "mm": 35
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "35mm"
+        ],
+        "filter": [
+          "golden hour light",
+          "deep focus"
+        ]
+      },
+      "prompts": {},
+      "references": [
+        {
+          "id": "2da91de2-8325-5e19-ab66-ff7cbf138e78",
+          "name": "Shot 01 The valley · GPT Image 2.5 · 493787",
+          "file": "2da91de2-8325-5e19-ab66-ff7cbf138e78.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-01T16:28:17.117Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 493787,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 35mm normal lens; wide shot, Bald eagle small in frame; camera 15.6 m high, above Bald eagle and 17.1 m from Bald eagle, looking slightly down; we see Bald eagle from directly behind; horizon in the upper third.\nIn frame: Bald eagle: centre of frame, about a quarter of the frame width wide, front facing away from the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Bald eagle glides for one second, makes two deep wing beats, then spreads its wings again. Feather tips lag the shoulders; the head stays steady. Elk graze on shore. Keep the same bird, plumage and landscape. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. No clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in natural light, no studio props. Set: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds; Clear turquoise glacial lake reflecting the peaks; Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Look: Photoreal nature documentary. Low golden sun, crisp air, layered atmospheric haze, natural colour. Framing: 35mm lens, match the supplied blockout frame's composition.…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Images 2–3 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "53fab7c4"
+          }
+        },
+        {
+          "id": "c25383cc-5088-51eb-a2b5-098031dd5d22",
+          "name": "Shot 01 The valley · GPT Image 2.5 · 146826",
+          "file": "c25383cc-5088-51eb-a2b5-098031dd5d22.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-01T16:28:17.137Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 146826,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 35mm normal lens; wide shot, Bald eagle small in frame; camera 24.5 m high, above Bald eagle and 17.9 m from Bald eagle, looking slightly down; we see Bald eagle from directly behind; horizon in the upper third.\nIn frame: Bald eagle: centre of frame, about a quarter of the frame width wide, front facing away from the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Bald eagle glides for one second, makes two deep wing beats, then spreads its wings again. Feather tips lag the shoulders; the head stays steady. Elk graze on shore. Keep the same bird, plumage and landscape. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. No clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in natural light, no studio props. Set: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds; Clear turquoise glacial lake reflecting the peaks; Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Look: Photoreal nature documentary. Low golden sun, crisp air, layered atmospheric haze, natural colour. Framing: 35mm lens, match the supplied blockout…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Images 2–3 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "53fab7c4"
+          }
+        }
+      ]
+    },
+    {
+      "id": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "title": "The dive",
+      "description": "@bald-eagle draws its wings inward in second one and descends, then opens them progressively to arrest the dive by second five. The tail fans and body levels under lift. Preserve the bird and shoreline.",
+      "duration": 5,
+      "start": 5,
+      "camera": {
+        "move": "custom",
+        "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+        "distance": 7,
+        "height": 2.5,
+        "angle": 180,
+        "mm": 32,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              17,
+              14.6,
+              12
+            ],
+            "look": [
+              12,
+              13.2,
+              2
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.05,
+            "p": [
+              16.53,
+              14.096,
+              10.73
+            ],
+            "look": [
+              11.63,
+              12.696,
+              0.73
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.1,
+            "p": [
+              16.068,
+              13.584,
+              9.468
+            ],
+            "look": [
+              11.268,
+              12.184,
+              -0.532
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.15,
+            "p": [
+              15.613,
+              13.069,
+              8.213
+            ],
+            "look": [
+              10.913,
+              11.669,
+              -1.787
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.2,
+            "p": [
+              15.164,
+              12.552,
+              6.964
+            ],
+            "look": [
+              10.564,
+              11.152,
+              -3.036
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.25,
+            "p": [
+              14.719,
+              12.038,
+              5.719
+            ],
+            "look": [
+              10.219,
+              10.638,
+              -4.281
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.3,
+            "p": [
+              14.276,
+              11.528,
+              4.476
+            ],
+            "look": [
+              9.876,
+              10.128,
+              -5.524
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.35,
+            "p": [
+              13.834,
+              11.027,
+              3.234
+            ],
+            "look": [
+              9.534,
+              9.627,
+              -6.766
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.4,
+            "p": [
+              13.392,
+              10.536,
+              1.992
+            ],
+            "look": [
+              9.192,
+              9.136,
+              -8.008
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.45,
+            "p": [
+              12.948,
+              10.06,
+              0.748
+            ],
+            "look": [
+              8.848,
+              8.66,
+              -9.252
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.5,
+            "p": [
+              12.5,
+              9.6,
+              -0.5
+            ],
+            "look": [
+              8.5,
+              8.2,
+              -10.5
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.55,
+            "p": [
+              12.055,
+              9.143,
+              -1.768
+            ],
+            "look": [
+              8.155,
+              7.743,
+              -11.768
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.6,
+            "p": [
+              11.616,
+              8.678,
+              -3.064
+            ],
+            "look": [
+              7.816,
+              7.278,
+              -13.064
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.65,
+            "p": [
+              11.182,
+              8.213,
+              -4.376
+            ],
+            "look": [
+              7.482,
+              6.813,
+              -14.376
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.7,
+            "p": [
+              10.748,
+              7.755,
+              -5.692
+            ],
+            "look": [
+              7.148,
+              6.355,
+              -15.692
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.75,
+            "p": [
+              10.313,
+              7.313,
+              -7
+            ],
+            "look": [
+              6.813,
+              5.913,
+              -17
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.8,
+            "p": [
+              9.872,
+              6.893,
+              -8.288
+            ],
+            "look": [
+              6.472,
+              5.493,
+              -18.288
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.85,
+            "p": [
+              9.424,
+              6.504,
+              -9.544
+            ],
+            "look": [
+              6.124,
+              5.104,
+              -19.544
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.9,
+            "p": [
+              8.964,
+              6.154,
+              -10.756
+            ],
+            "look": [
+              5.764,
+              4.754,
+              -20.756
+            ],
+            "mm": 32
+          },
+          {
+            "t": 0.95,
+            "p": [
+              8.49,
+              5.85,
+              -11.912
+            ],
+            "look": [
+              5.39,
+              4.45,
+              -21.912
+            ],
+            "mm": 32
+          },
+          {
+            "t": 1,
+            "p": [
+              8,
+              5.6,
+              -13
+            ],
+            "look": [
+              5,
+              4.2,
+              -23
+            ],
+            "mm": 32
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "32mm"
+        ],
+        "filter": [
+          "golden hour light"
+        ]
+      },
+      "prompts": {},
+      "references": [
+        {
+          "id": "a9e7d0fa-ec4d-57e2-a14a-de1c8a4dd981",
+          "name": "Shot 02 The dive · FLUX 3 Image · 421090",
+          "file": "a9e7d0fa-ec4d-57e2-a14a-de1c8a4dd981.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-01T15:50:32.696Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 421090,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 32mm normal lens; medium shot of Bald eagle; camera 5.6 m high, above Bald eagle and 10.4 m from Bald eagle, looking slightly down; we see Bald eagle from directly behind; horizon in the upper third.\nIn frame: Bald eagle: centre of frame, about a third of the frame width wide, front facing away from the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Bald eagle draws its wings inward in second one and descends, then opens them progressively to arrest the dive by second five. The tail fans and body levels under lift. Preserve the bird and shoreline. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. No clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in natural light, no studio props. Set: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds; Clear turquoise glacial lake reflecting the peaks; Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Look: Photoreal nature documentary. Low golden sun, crisp air, layered atmospheric haze, natural colour. Framing:…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "d75d6b3"
+          }
+        },
+        {
+          "id": "56f448ba-62e3-5bb2-a5b5-a424aa2470eb",
+          "name": "Shot 02 The dive · FLUX 3 Image · 497421",
+          "file": "56f448ba-62e3-5bb2-a5b5-a424aa2470eb.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-01T15:50:42.953Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 497421,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 32mm normal lens; medium shot of Bald eagle; camera 14.6 m high, above Bald eagle and 11.2 m from Bald eagle, looking slightly down; we see Bald eagle from directly behind; horizon in the upper third.\nIn frame: Bald eagle: centre of frame, about a quarter of the frame width wide, front facing away from the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Bald eagle draws its wings inward in second one and descends, then opens them progressively to arrest the dive by second five. The tail fans and body levels under lift. Preserve the bird and shoreline. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. No clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in natural light, no studio props. Set: A high alpine valley in summer: granite peaks with snowfields, a river winding through green meadows into a turquoise lake, pine forest, clear sky with soft clouds; Clear turquoise glacial lake reflecting the peaks; Summer alpine valley: green meadows and wildflowers on the valley floor, pine forest on the lower slopes, grey granite ridges and peaks with snowfields above. Look: Photoreal nature documentary. Low golden sun, crisp air, layered atmospheric haze,…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "d75d6b3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+      "title": "The glide",
+      "description": "@bald-eagle skims above the lake with broad wings, gives one slow recovery beat in seconds two to three and settles into a glide. Tips flex after the shoulders; elk lift their heads. Preserve plumage and waterline.",
+      "duration": 5,
+      "start": 10,
+      "camera": {
+        "move": "custom",
+        "target": "bcec0c59-096d-472b-9218-b6af40adae68",
+        "distance": 12,
+        "height": 2,
+        "angle": 80,
+        "mm": 40,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              14.063,
+              4.65,
+              -18.774
+            ],
+            "look": [
+              5,
+              4.25,
+              -23
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.05,
+            "p": [
+              13.796,
+              4.461,
+              -20.105
+            ],
+            "look": [
+              4.591,
+              4.061,
+              -24.012
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.1,
+            "p": [
+              13.5,
+              4.327,
+              -21.372
+            ],
+            "look": [
+              4.164,
+              3.927,
+              -24.956
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.15,
+            "p": [
+              13.179,
+              4.24,
+              -22.588
+            ],
+            "look": [
+              3.724,
+              3.84,
+              -25.844
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.2,
+            "p": [
+              12.835,
+              4.192,
+              -23.764
+            ],
+            "look": [
+              3.272,
+              3.792,
+              -26.688
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.25,
+            "p": [
+              12.472,
+              4.175,
+              -24.912
+            ],
+            "look": [
+              2.813,
+              3.775,
+              -27.5
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3,
+            "p": [
+              12.092,
+              4.18,
+              -26.042
+            ],
+            "look": [
+              2.348,
+              3.78,
+              -28.292
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.35,
+            "p": [
+              11.698,
+              4.198,
+              -27.168
+            ],
+            "look": [
+              1.882,
+              3.798,
+              -29.076
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4,
+            "p": [
+              11.293,
+              4.221,
+              -28.3
+            ],
+            "look": [
+              1.416,
+              3.821,
+              -29.864
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.45,
+            "p": [
+              10.88,
+              4.241,
+              -29.449
+            ],
+            "look": [
+              0.954,
+              3.841,
+              -30.668
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5,
+            "p": [
+              10.462,
+              4.25,
+              -30.628
+            ],
+            "look": [
+              0.5,
+              3.85,
+              -31.5
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.55,
+            "p": [
+              10.034,
+              4.25,
+              -31.833
+            ],
+            "look": [
+              0.048,
+              3.85,
+              -32.357
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6,
+            "p": [
+              9.59,
+              4.253,
+              -33.049
+            ],
+            "look": [
+              -0.408,
+              3.853,
+              -33.224
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.65,
+            "p": [
+              9.133,
+              4.261,
+              -34.272
+            ],
+            "look": [
+              -0.866,
+              3.861,
+              -34.097
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.7,
+            "p": [
+              8.662,
+              4.276,
+              -35.495
+            ],
+            "look": [
+              -1.324,
+              3.876,
+              -34.972
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.75,
+            "p": [
+              8.181,
+              4.3,
+              -36.715
+            ],
+            "look": [
+              -1.781,
+              3.9,
+              -35.844
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.8,
+            "p": [
+              7.689,
+              4.336,
+              -37.927
+            ],
+            "look": [
+              -2.236,
+              3.936,
+              -36.708
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.85,
+            "p": [
+              7.19,
+              4.387,
+              -39.125
+            ],
+            "look": [
+              -2.687,
+              3.987,
+              -37.56
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9,
+            "p": [
+              6.684,
+              4.455,
+              -40.304
+            ],
+            "look": [
+              -3.132,
+              4.055,
+              -38.396
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.95,
+            "p": [
+              6.173,
+              4.542,
+              -41.46
+            ],
+            "look": [
+              -3.57,
+              4.142,
+              -39.211
+            ],
+            "mm": 40
+          },
+          {
+            "t": 1,
+            "p": [
+              5.659,
+              4.65,
+              -42.588
+            ],
+            "look": [
+              -4,
+              4.25,
+              -40
+            ],
+            "mm": 40
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "40mm"
+        ],
+        "filter": [
+          "golden hour light"
+        ]
+      },
+      "prompts": {},
+      "references": [
+        {
+          "id": "8c5e2493-92d2-53f8-a38f-dded1e846c94",
+          "name": "Shot 03 The glide · GPT Image 2.5 · 350673",
+          "file": "8c5e2493-92d2-53f8-a38f-dded1e846c94.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-01T15:52:26.750Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 350673,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 40mm normal lens; wide shot, Bald eagle small in frame; camera 4.6 m high, about level with Bald eagle's top and 10 m from Bald eagle, level; we see Bald eagle side-on, from its right side (a side profile, not a three-quarter or chase view); horizon across the middle.\nIn frame: Bald eagle: centre of frame, about a quarter of the frame width wide, front facing screen-right: a flat side profile, back at the left end, front at the right end. Elk 2: left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing toward the camera and screen-left (three-quarter front view). Elk 3: left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing screen-left (profile). Elk 1: far left of frame, a small part of the frame height tall, behind Bald eagle to the left.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. Bald eagle skims above the lake with broad wings, gives one slow recovery beat in seconds two to three and settles into a glide. Tips flex after the shoulders; elk lift their heads. Preserve plumage and waterline. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. No clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "a439acac"
+          }
+        },
+        {
+          "id": "7a768674-328d-5341-ad74-6b811c9f82cd",
+          "name": "Shot 03 The glide · GPT Image 2.5 · 340585",
+          "file": "7a768674-328d-5341-ad74-6b811c9f82cd.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-01T15:52:32.627Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 340585,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; medium shot of Bald eagle; camera 4.7 m high, about level with Bald eagle's top and 10 m from Bald eagle, level; we see Bald eagle from the rear three-quarter, its right side; horizon across the middle.\nIn frame: Bald eagle: centre of frame, about a third of the frame width wide, front facing away from the camera and screen-right (three-quarter rear view). Elk 3: far left of frame, a small part of the frame height tall, behind Bald eagle to the left, partly hidden by Elk 2, facing toward the camera and screen-left (three-quarter front view). Elk 1: far left of frame, a small part of the frame height tall, cut off by the left edge, behind Bald eagle to the left. Elk 2: far left of frame, a small part of the frame height tall, behind Bald eagle to the left, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. Bald eagle skims above the lake with broad wings, gives one slow recovery beat in seconds two to three and settles into a glide. Tips flex after the shoulders; elk lift their heads. Preserve plumage and waterline. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. No clothing. Wildlife photograph of the living animal in natural light, feathers sharp, no studio props. A real wild bull elk, a living animal on four legs grazing at a lakeshore: tan body, dark brown neck mane, large antlers. Not a person, not a costume, no clothing, no vest. Wildlife photograph of the living animal in…\nThe Bald eagle looks exactly like image 2. The Alpine lake looks exactly like image 3. Image 4 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–4 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "a439acac"
+          }
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "path": "media/refs/8a65ed8d-12d4-4243-9750-2c6038e522a7.webp",
+      "kind": "image",
+      "bytes": 184566,
+      "sha256": "59e247ca03c512ae09bc630bc7e1e5f1b42e70d5aefd4b73eac6c2990e764f61",
+      "sourceSha256": "e72e94d1986f70529799a061cd1656115a9e5e29aef5a161c3d06867abb56c6c",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/b089b9cd-c5e7-4214-9bde-8737cc988302.webp",
+      "kind": "image",
+      "bytes": 234388,
+      "sha256": "c5b4b82d5b38e52a4e8989c5bd6a05798018600764f35b1996f739caa4c439a5",
+      "sourceSha256": "79c671ff95284fba6a4afa58660870c2f76afd4f0d806be39e32ca2afbff4885",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/51b2c693-ffb7-4a99-872d-27760f502590.webp",
+      "kind": "image",
+      "bytes": 328536,
+      "sha256": "6c634493468968691c097ec283640579b2d69931f1d92932f9f61fc4b329fbfb",
+      "sourceSha256": "19a3b0c2e6821c664efbb4e15e95df80dde2b4bbcee656409d9abb7d92f50d40",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/refs/5f0b0e59-0cb7-442d-a1b7-c8cea8d03467.webp",
+      "kind": "image",
+      "bytes": 154190,
+      "sha256": "bff955ddc9fa4e87f3dd9f6f6dabf876d2beaa5249675ee0a29d23796afad905",
+      "sourceSha256": "5c0338246b87d8b33829874ea030d01fd59510dd57a0a6e023e7d4674b48ccf2",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/ac6e3af5-b365-461c-9e1b-dbbb01f59d26.webp",
+      "kind": "image",
+      "bytes": 46294,
+      "sha256": "8eef8d477c909d6a1bd08d0a509df5627f6ead49f44cdde0f3333da5a2576f48",
+      "sourceSha256": "8ef7450f0a26e2a6f502d58d44ac3c29f6cc5353976100e07304e5a317ee3868",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/5612c99c-a5b2-4013-adee-f32dd9948f13.webp",
+      "kind": "image",
+      "bytes": 238980,
+      "sha256": "5980f1cf92751d763e7e6b72ecb8bf0bee5182ec9f813aef1c07386c1deb550d",
+      "sourceSha256": "f4fd53eabb7281f2f7803d6729d5cc1b57f3b317352402629bc4a31dee418247",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/2da91de2-8325-5e19-ab66-ff7cbf138e78.webp",
+      "kind": "image",
+      "bytes": 286212,
+      "sha256": "75bf0731d279fd7aa4465c23131287da35d4e9fb3e1bca1dac8ffc957e14cce4",
+      "sourceSha256": "8af38fba7afda7419e1cb370f617e70a7700c559e7fb5606e3a6d780ebfb7e87",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/c25383cc-5088-51eb-a2b5-098031dd5d22.webp",
+      "kind": "image",
+      "bytes": 333746,
+      "sha256": "a753ed9daf46e8e5cea6874252590213c81b2c19806fc60150ee256506af4b3d",
+      "sourceSha256": "3b8381a64dd4d7028ec439a564690bcedb4f86db2b28a949f9aa1311d2027576",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/1ef92084-bfad-4d9b-a171-8851988c034f.mp4",
+      "kind": "video",
+      "bytes": 1106272,
+      "sha256": "b11e99e18c4c86eb462bf726a86adf60d28186c8f41be44e37b68ef8b68d7800",
+      "sourceSha256": "870efb50c866c49f19f191d6d0583966c384cb9b678bcdd03d57494ef4686fd8",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/13df4e83-4a69-573f-a912-63c8ed096a13.mp4",
+      "kind": "video",
+      "bytes": 974919,
+      "sha256": "10a150b3f2ef8c0fd7dcc3ead5cb03f2cf94b7e9442e96391cb6229b4406fe11",
+      "sourceSha256": "c6abbdf9d798811c2abd24f5aae9f99710eeccb0eff7ad31936bbe440caf1a33",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708
+    },
+    {
+      "path": "media/refs/a9e7d0fa-ec4d-57e2-a14a-de1c8a4dd981.webp",
+      "kind": "image",
+      "bytes": 185254,
+      "sha256": "9c5a50dd6f9f3ea075b7dcc6f11611c71ab44f1c538e18bf9e42f387fabad19d",
+      "sourceSha256": "f580e6fe5b8b4414bf1ca0d08d1611193facc9aae2ca6177f5e96b63ebabf72b",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/refs/56f448ba-62e3-5bb2-a5b5-a424aa2470eb.webp",
+      "kind": "image",
+      "bytes": 264250,
+      "sha256": "50e9ddcf2092841aa90888a837ab3f0de31ade172f9a828c06735c132fb836f8",
+      "sourceSha256": "13b098a1f982b92936e1e7c979dc1c078cc4c9fbc2648cc66f361c79fa531b4d",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/e5c34e3d-8068-4263-b899-000e6b0601de.mp4",
+      "kind": "video",
+      "bytes": 928874,
+      "sha256": "3487fe41de03a8f248c859b803ebcb3684b81e3e5badf1f4ebf95b23cf42ab49",
+      "sourceSha256": "fbd4a5c5f98ffa1fdae90143a5dbd270413e0051bca45b3d1746d0d83fb2cbf6",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/3a85ece0-025c-5756-a9df-4cf058910019.mp4",
+      "kind": "video",
+      "bytes": 1025293,
+      "sha256": "1d3e2f9e3d3fa08987ade8950a2ed64230f396c5e8db85c62e88c582c7373811",
+      "sourceSha256": "385c06740123a497f28e20262515520d7f0bdaa8826e892dc55b3e628e6c7993",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708
+    },
+    {
+      "path": "media/refs/8c5e2493-92d2-53f8-a38f-dded1e846c94.webp",
+      "kind": "image",
+      "bytes": 260656,
+      "sha256": "d7ce3490ea55df178879a80c5ac20b313e4e5f1e4d8fdb85de8d1b15fff1e0dd",
+      "sourceSha256": "3a116a49609ea3ced2ede5b0b6ed73e7e908b29b517e965ed8e5ff794e8df785",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/7a768674-328d-5341-ad74-6b811c9f82cd.webp",
+      "kind": "image",
+      "bytes": 261046,
+      "sha256": "1bce9adda39083c40e580daf09a08cce73e6010b040fa613dcb97a8f91d54c6d",
+      "sourceSha256": "fa5ccd8c5e4401dad286cd5d2608bd840b019b08eed8d971569618bf5a816489",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/d31d515b-8719-421b-ad56-1a344d211776.mp4",
+      "kind": "video",
+      "bytes": 1101797,
+      "sha256": "7a55ba442081f9c8a4f63cd25492726707fc579787a241b66cb814ed9706d3df",
+      "sourceSha256": "27f210a24170e4ce74769ae9718d17c723c06db9c3384a1cbfa0a94d76e0dd35",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/de694a1d-8ca3-5114-a833-78901d164692.mp4",
+      "kind": "video",
+      "bytes": 1080031,
+      "sha256": "bb51e0a6fecee4d579cb109faf2cfe5e1429473dd757303ceef5784d507e5da9",
+      "sourceSha256": "70f4782369817501f8991ca65505c51532f512778039b0ba1d8d8bb00173d108",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708
+    }
+  ],
+  "assets": [
+    {
+      "id": "1ef92084-bfad-4d9b-a171-8851988c034f",
+      "kind": "camera-render",
+      "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
+      "file": "assets/1ef92084-bfad-4d9b-a171-8851988c034f.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-01T07:34:21.321Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "53fab7c4"
+      }
+    },
+    {
+      "id": "13df4e83-4a69-573f-a912-63c8ed096a13",
+      "kind": "workflow-result",
+      "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
+      "file": "assets/13df4e83-4a69-573f-a912-63c8ed096a13.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-11-01T16:37:37.858Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 6 reference images",
+        "backend": "cloud",
+        "prompt": "Bald eagle glides for one second, makes two deep wing beats, then spreads its wings again. Feather tips lag the shoulders; the head stays steady. Elk graze on shore. Keep the same bird, plumage and landscape. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 35mm. Filter: golden hour light, deep focus.\nReference images: 1 = start still; 2 = end still; 3 = Bald eagle; 4 = Elk 1; 5 = Alpine lake; 6 = Alpine terrain.",
+        "sourceAssetId": "1ef92084-bfad-4d9b-a171-8851988c034f"
+      }
+    },
+    {
+      "id": "e5c34e3d-8068-4263-b899-000e6b0601de",
+      "kind": "camera-render",
+      "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "file": "assets/e5c34e3d-8068-4263-b899-000e6b0601de.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-01T07:34:25.221Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "d75d6b3"
+      }
+    },
+    {
+      "id": "3a85ece0-025c-5756-a9df-4cf058910019",
+      "kind": "workflow-result",
+      "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+      "file": "assets/3a85ece0-025c-5756-a9df-4cf058910019.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-11-01T16:33:04.730Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 6 reference images",
+        "backend": "cloud",
+        "prompt": "Bald eagle draws its wings inward in second one and descends, then opens them progressively to arrest the dive by second five. The tail fans and body levels under lift. Preserve the bird and shoreline. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 32mm. Filter: golden hour light.\nReference images: 1 = start still; 2 = end still; 3 = Bald eagle; 4 = Elk 3; 5 = Alpine lake; 6 = Alpine terrain.",
+        "sourceAssetId": "e5c34e3d-8068-4263-b899-000e6b0601de"
+      }
+    },
+    {
+      "id": "d31d515b-8719-421b-ad56-1a344d211776",
+      "kind": "camera-render",
+      "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+      "file": "assets/d31d515b-8719-421b-ad56-1a344d211776.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-01T07:34:29.588Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "a439acac"
+      }
+    },
+    {
+      "id": "de694a1d-8ca3-5114-a833-78901d164692",
+      "kind": "workflow-result",
+      "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+      "file": "assets/de694a1d-8ca3-5114-a833-78901d164692.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-11-01T16:01:29.474Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 6 reference images",
+        "backend": "cloud",
+        "prompt": "Bald eagle skims above the lake with broad wings, gives one slow recovery beat in seconds two to three and settles into a glide. Tips flex after the shoulders; elk lift their heads. Preserve plumage and waterline. Wild bald eagle: broad brown feathered wings, white head and tail, yellow beak and talons. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 40mm. Filter: golden hour light.\nReference images: 1 = start still; 2 = end still; 3 = Bald eagle; 4 = Elk 3; 5 = Alpine lake; 6 = Alpine terrain.",
+        "sourceAssetId": "d31d515b-8719-421b-ad56-1a344d211776"
+      }
+    }
+  ],
+  "edit": {
+    "clips": [
+      {
+        "shotId": "b59a89ad-13b3-4978-949c-e4eb450147be",
+        "assetId": "13df4e83-4a69-573f-a912-63c8ed096a13",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "3fa5f3ef-ff2d-4905-a7ea-d5afc9e5dd1a",
+        "assetId": "3a85ece0-025c-5756-a9df-4cf058910019",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+        "assetId": "de694a1d-8ca3-5114-a833-78901d164692",
+        "in": 0,
+        "out": null
+      }
+    ]
+  }
+}

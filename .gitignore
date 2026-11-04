@@ -2,7 +2,16 @@ node_modules/
 dist/
 *.log
 .vite/
-.claude/
+.claude/*
+!.claude/skills/
 .DS_Store
 .env*
 !.env.example
+
+.previs/
+dist-server/
+.evidence/
+phone-cert/
+
+/node_modules
+dist-demo/

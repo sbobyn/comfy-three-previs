@@ -1,0 +1,235 @@
+{
+  "source": "scripts/home-media.mjs",
+  "pairs": [
+    {
+      "slug": "breaking-news",
+      "shot": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "title": "Breaking News · The headline",
+      "model": "Seedance 2.5 · edit the complete video · 6 reference images",
+      "frames": 113,
+      "fps": 24,
+      "duration": 4.708333333333333,
+      "blockout": {
+        "file": "breaking-news-s2-blockout.mp4",
+        "poster": "breaking-news-s2-blockout.webp",
+        "asset": "9a56b722-9521-48ee-9245-b9cc0eeb23b7",
+        "source": "examples/starters/breaking-news/media/assets/9a56b722-9521-48ee-9245-b9cc0eeb23b7.mp4",
+        "sourceSha256": "d0ab9d5b74879481631522ef533b7b377dafdbdd8186781034e1cfa56b8ed907",
+        "sha256": "6b487b2e9b6ceff28b25a0e74f5758841cbe9b0bcf1274a0b01cd3bc6c7858c5"
+      },
+      "generated": {
+        "file": "breaking-news-s2-generated.mp4",
+        "poster": "breaking-news-s2-generated.webp",
+        "asset": "6b864020-2490-5f40-ad5f-39b82eef2791",
+        "source": "examples/starters/breaking-news/media/assets/6b864020-2490-5f40-ad5f-39b82eef2791.mp4",
+        "sourceSha256": "ab7c8c77ad7964655bb9e5f88e8d9eb04b60d1fc7d6df9ebab68733c461aeb3b",
+        "sha256": "4474e85416883a873fb511a021ba879311fb4286a9f6ac5c027efd96aac042c7"
+      }
+    },
+    {
+      "slug": "final-lap",
+      "hero": "race",
+      "shot": "33d276ed-a90c-41ff-b6d7-b6f2f977041e",
+      "title": "Final Lap · Checkered flag",
+      "model": "Seedance 2.5 · edit the complete video · 7 reference images",
+      "frames": 88,
+      "fps": 24,
+      "duration": 3.6666666666666665,
+      "blockout": {
+        "file": "final-lap-s4-blockout.mp4",
+        "poster": "final-lap-s4-blockout.webp",
+        "asset": "9b168b69-f524-4a0f-8941-af40f48b27bb",
+        "source": "examples/starters/final-lap/media/assets/9b168b69-f524-4a0f-8941-af40f48b27bb.mp4",
+        "sourceSha256": "773feb7d621b68b4cea1b1958b0f5a1e0f511130514a7d82d7f08f782f56a30d",
+        "sha256": "b08a3483a4b5628d39e59ce1361163d9a07845a29b6ee4484a2634b2c43c4e5a"
+      },
+      "generated": {
+        "file": "final-lap-s4-generated.mp4",
+        "poster": "final-lap-s4-generated.webp",
+        "asset": "fd570334-567b-5c3c-a0c4-bb59d0f0bcd4",
+        "source": "examples/starters/final-lap/media/assets/fd570334-567b-5c3c-a0c4-bb59d0f0bcd4.mp4",
+        "sourceSha256": "b2582e5127c9a1fd9391c720893559e201ca396ac52cdc99597582c28f7fe82c",
+        "sha256": "d12fe2cf8bf3359316ac3a3e4128b77dc922f149bdbede3b6cc2568037978e5f"
+      }
+    },
+    {
+      "slug": "wingspan",
+      "hero": "eagle",
+      "shot": "2c4b00d0-4453-42f2-8af7-a058616d2a3e",
+      "title": "Wingspan · The glide",
+      "model": "Seedance 2.5 · edit the complete video · 6 reference images",
+      "frames": 113,
+      "fps": 24,
+      "duration": 4.708333333333333,
+      "blockout": {
+        "file": "wingspan-s3-blockout.mp4",
+        "poster": "wingspan-s3-blockout.webp",
+        "asset": "d31d515b-8719-421b-ad56-1a344d211776",
+        "source": "examples/starters/wingspan/media/assets/d31d515b-8719-421b-ad56-1a344d211776.mp4",
+        "sourceSha256": "7a55ba442081f9c8a4f63cd25492726707fc579787a241b66cb814ed9706d3df",
+        "sha256": "6a01b5db7b5a0ba2e53040f807464b1d4f055516f6a2ea17f39b4950bf6056db"
+      },
+      "generated": {
+        "file": "wingspan-s3-generated.mp4",
+        "poster": "wingspan-s3-generated.webp",
+        "asset": "de694a1d-8ca3-5114-a833-78901d164692",
+        "source": "examples/starters/wingspan/media/assets/de694a1d-8ca3-5114-a833-78901d164692.mp4",
+        "sourceSha256": "bb51e0a6fecee4d579cb109faf2cfe5e1429473dd757303ceef5784d507e5da9",
+        "sha256": "279c85bd955ee59ca913127635cff954944cc7645a45cc34448dbbfba23dd350"
+      }
+    },
+    {
+      "slug": "posterized",
+      "hero": "dunk",
+      "shot": "755f685b-a74e-4c80-8ffd-8dc9cbdfd450",
+      "title": "Posterized · Posterized",
+      "model": "Kling O1 · edit the complete video · 4 reference images",
+      "frames": 120,
+      "fps": 24,
+      "duration": 5,
+      "blockout": {
+        "file": "posterized-s3-blockout.mp4",
+        "poster": "posterized-s3-blockout.webp",
+        "asset": "130c0442-e1c0-420e-94e6-30dbbbbdf315",
+        "source": "examples/starters/posterized/media/assets/130c0442-e1c0-420e-94e6-30dbbbbdf315.mp4",
+        "sourceSha256": "0f892a76147637aaa58204e5828d6e9644dcb2eb5dc1315e11d20f9e07e1e118",
+        "sha256": "bdbed3dd6e7ba2fbb6ee99baa57b29e87d060729a0db14295b241da849d1732b"
+      },
+      "generated": {
+        "file": "posterized-s3-generated.mp4",
+        "poster": "posterized-s3-generated.webp",
+        "asset": "c001d644-3a02-5a2e-adf4-97c3862930e8",
+        "source": "examples/starters/posterized/media/assets/c001d644-3a02-5a2e-adf4-97c3862930e8.mp4",
+        "sourceSha256": "8e6b58ca519bde403b92f16f1259f2edd357e50bb70681f074b49afc5b83ff13",
+        "sha256": "b92974d46607afe57362fb6108531e5e963fa9b4ca3cfcae0ff363f845d9d786"
+      }
+    },
+    {
+      "slug": "camera-moves",
+      "hero": "lighthouse",
+      "shot": "92d7eef9-22b0-426f-bc11-4d0aeb3adac3",
+      "title": "Lighthouse · Camera Moves · Orbit right",
+      "model": "Seedance 2.5 · edit the complete video · 1 reference image",
+      "frames": 89,
+      "fps": 24,
+      "duration": 3.7083333333333335,
+      "blockout": {
+        "file": "camera-moves-s9-blockout.mp4",
+        "poster": "camera-moves-s9-blockout.webp",
+        "asset": "c6c0d34d-a8b4-4bd7-8e9c-919c0bdc97f3",
+        "source": "examples/starters/camera-moves/media/assets/c6c0d34d-a8b4-4bd7-8e9c-919c0bdc97f3.mp4",
+        "sourceSha256": "ea4f05ba8ec6c360de34fa1a4c43820417b7648499dc13b5bf9f43e023356951",
+        "sha256": "41349dbbad3f397527a19bb08ad5559d4b759651e7b946713d64248542e2ec3b"
+      },
+      "generated": {
+        "file": "camera-moves-s9-generated.mp4",
+        "poster": "camera-moves-s9-generated.webp",
+        "asset": "d0d0fa25-1b53-5df0-a679-3cbca9cfd01a",
+        "source": "examples/starters/camera-moves/media/assets/d0d0fa25-1b53-5df0-a679-3cbca9cfd01a.mp4",
+        "sourceSha256": "4b2fb6be7a6fe0b9f851bbcbea2c63786a7c25b56cae7e950ec93ea8cd62036c",
+        "sha256": "19683a32bb0c7fb8a6db2d89dc97f0fe22ff8b60a30ae4310a37410e79ab56a8"
+      }
+    },
+    {
+      "slug": "look-lab",
+      "hero": "street",
+      "shot": "267508f3-8fff-4143-a7d3-beb7fbb361b8",
+      "title": "Look Lab · Cyberpunk city",
+      "model": "Seedance 2.5 · edit the complete video · 1 reference image",
+      "frames": 89,
+      "fps": 24,
+      "duration": 3.7083333333333335,
+      "blockout": {
+        "file": "look-lab-s35-blockout.mp4",
+        "poster": "look-lab-s35-blockout.webp",
+        "asset": "2ad69aaf-6a00-4f9d-831f-17041e5f45c0",
+        "source": "examples/starters/look-lab/media/assets/2ad69aaf-6a00-4f9d-831f-17041e5f45c0.mp4",
+        "sourceSha256": "ca075a01af1a95a0d6806d2997a4035841550796393fc4cf9c6af11a220ad231",
+        "sha256": "4280de7fe74da08f3e9c631c37cdd7c7b8c01dbe443b4096198f4ca964cd6173"
+      },
+      "generated": {
+        "file": "look-lab-s35-generated.mp4",
+        "poster": "look-lab-s35-generated.webp",
+        "asset": "61177788-4041-58f7-a7fe-0e9e2e8011fe",
+        "source": "examples/starters/look-lab/media/assets/61177788-4041-58f7-a7fe-0e9e2e8011fe.mp4",
+        "sourceSha256": "d070aef4f4b6c8755372fe3d0b0827bdc56b5add94db55008c61152ec55ebefa",
+        "sha256": "39bdcede71d332bc8e65d499f8c7ab43e5110d28d54853e83a877d47f6737211"
+      }
+    },
+    {
+      "slug": "mountain-trail",
+      "shot": "1e5f0377-44c6-41ad-babf-d1826609e7e6",
+      "title": "Mountain Trail · Ridge reveal",
+      "model": "Seedance 2.5 · edit the complete video · 2 reference images",
+      "frames": 113,
+      "fps": 24,
+      "duration": 4.708333333333333,
+      "blockout": {
+        "file": "mountain-trail-s1-blockout.mp4",
+        "poster": "mountain-trail-s1-blockout.webp",
+        "asset": "2aee0ec1-93ed-48cb-8a31-eddfd3ca7683",
+        "source": "examples/starters/mountain-trail/media/assets/2aee0ec1-93ed-48cb-8a31-eddfd3ca7683.mp4",
+        "sourceSha256": "0504e4de88d3fba4e99768bfc14cc8542922e26a4d13c0cb2f3eb4029fceb574",
+        "sha256": "d91c7f17e6f43f82a97a7e4c498766f0cc06781d6d1296ae83ed15ae34ef5073"
+      },
+      "generated": {
+        "file": "mountain-trail-s1-generated.mp4",
+        "poster": "mountain-trail-s1-generated.webp",
+        "asset": "089144bc-51ac-54bc-ae1d-c74e276b1d50",
+        "source": "examples/starters/mountain-trail/media/assets/089144bc-51ac-54bc-ae1d-c74e276b1d50.mp4",
+        "sourceSha256": "87f4ac86aee101f755a7b3a4cc18574ab303c82d08189bc057139613c4e2c0c9",
+        "sha256": "f4e62af356ece08e925d4a766d058a6d107971a184b618079a7f2218852f39a0"
+      }
+    },
+    {
+      "slug": "city-blocks",
+      "shot": "f41f40d8-3180-4e50-9a79-5028a05195f1",
+      "title": "City Blocks · Drone rise",
+      "model": "Seedance 2.5 · edit the complete video · 2 reference images",
+      "frames": 113,
+      "fps": 24,
+      "duration": 4.708333333333333,
+      "blockout": {
+        "file": "city-blocks-s1-blockout.mp4",
+        "poster": "city-blocks-s1-blockout.webp",
+        "asset": "9570cb99-508d-40fa-8167-990ec78f7ca2",
+        "source": "examples/starters/city-blocks/media/assets/9570cb99-508d-40fa-8167-990ec78f7ca2.mp4",
+        "sourceSha256": "4ddfa80034814d595b0264077b6f21430b7aab44b0cf009d82603a2705f52d15",
+        "sha256": "c1f5d4c11ca8335bb34be3d21f338141ea6155ac69f98ea3735a4bd009916d6b"
+      },
+      "generated": {
+        "file": "city-blocks-s1-generated.mp4",
+        "poster": "city-blocks-s1-generated.webp",
+        "asset": "5744fef8-7425-510e-addd-4e24c271d831",
+        "source": "examples/starters/city-blocks/media/assets/5744fef8-7425-510e-addd-4e24c271d831.mp4",
+        "sourceSha256": "445691ec70153f9497afa7bdf26f76946960c4db38c0e2f80d604f55f52498d9",
+        "sha256": "010eb25c33a04ef6c59dd7669a84551beda5cfc6a4fc5df6467f2bef19d8ef4e"
+      }
+    },
+    {
+      "slug": "two-hander",
+      "shot": "d1c91695-cac9-4893-9812-8b9e813434b0",
+      "title": "Two-Hander · Master",
+      "model": "Seedance 2.5 · edit the complete video · 2 reference images",
+      "frames": 113,
+      "fps": 24,
+      "duration": 4.708333333333333,
+      "blockout": {
+        "file": "two-hander-s1-blockout.mp4",
+        "poster": "two-hander-s1-blockout.webp",
+        "asset": "bc0e02b8-0b57-4e4d-bbcd-b016dff94de0",
+        "source": "examples/starters/two-hander/media/assets/bc0e02b8-0b57-4e4d-bbcd-b016dff94de0.mp4",
+        "sourceSha256": "5cda6d129be62d692cbabb7f740244a52ba56731b0f75d3373ae12130f14b603",
+        "sha256": "32c91f9be3cd3c44ccebb9fe18ea02ed307f456a71c4e032d34b0e3bee4eb729"
+      },
+      "generated": {
+        "file": "two-hander-s1-generated.mp4",
+        "poster": "two-hander-s1-generated.webp",
+        "asset": "9c325193-195b-532b-ac03-7059d921e0dd",
+        "source": "examples/starters/two-hander/media/assets/9c325193-195b-532b-ac03-7059d921e0dd.mp4",
+        "sourceSha256": "de5e444099188bb0bb77a111f2c586bde8278871e3f653a4cbfb4f86e7b81377",
+        "sha256": "f128a2b6c7def9721d5848fe03b9ca7df22fee322bdbebfd7cc3ed1ddfc94487"
+      }
+    }
+  ]
+}

@@ -1,0 +1,4961 @@
+{
+  "format": "comfy-previs-starter",
+  "version": 2,
+  "slug": "breaking-news",
+  "order": 0,
+  "title": "Breaking News",
+  "description": "A composed news bulletin: the studio, a headline delivered by the anchor, and a confident sign-off.",
+  "scene": {
+    "name": "News studio",
+    "environment": {
+      "preset": "interior",
+      "description": "A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.",
+      "style": "Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+    },
+    "entities": [
+      {
+        "id": "21c28a69-7b8d-4067-92e7-1f4e7ac9ad0c",
+        "name": "Studio floor",
+        "kind": "environment",
+        "shape": "box",
+        "model": "studio-floor",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          22,
+          0.05,
+          16
+        ],
+        "color": "#1b2230",
+        "notes": "Glossy dark blue studio floor with soft reflections.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null,
+        "look": "1aa40561-9161-404b-98ac-8cd91dc5220f"
+      },
+      {
+        "id": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+        "name": "Video wall",
+        "kind": "prop",
+        "shape": "wall",
+        "model": "video-wall",
+        "position": [
+          0,
+          0,
+          -4.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1.5,
+          1.4,
+          1
+        ],
+        "color": "#183e69",
+        "notes": "Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall.",
+        "lookFrom": null,
+        "styleNotes": "Clean broadcast motion graphics, crisp, no small type",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null,
+        "look": "c75bd63b-2e06-465a-bc0c-e04c285f15da",
+        "sheets": [
+          {
+            "id": "svfgnlsje",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:45:28.336Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "kso0ubef",
+                    "requestId": null,
+                    "referenceId": "23a01b5d-fafb-4e97-a25f-358e4fc16272",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 143002,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:45:28.336Z"
+                  }
+                ],
+                "selected": "kso0ubef",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "pxujf8jz",
+                    "requestId": null,
+                    "referenceId": "49b8be91-c3c1-4182-8ac5-b663d066114a",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 347770,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:45:28.336Z"
+                  }
+                ],
+                "selected": "pxujf8jz",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "bkl2moau",
+                    "requestId": null,
+                    "referenceId": "96ec359d-4146-4262-a3b5-b5415be28793",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 574477,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:45:28.336Z"
+                  }
+                ],
+                "selected": "bkl2moau",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "1i3gg62z",
+                    "requestId": null,
+                    "referenceId": "42b5a05d-6a4b-457c-aa06-d6a26a608fac",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 617436,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:45:28.336Z"
+                  }
+                ],
+                "selected": "1i3gg62z",
+                "accepted": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "05487127-2ec2-4198-a1e5-5deb7b109044",
+        "name": "Anchor desk",
+        "kind": "prop",
+        "shape": "table",
+        "model": "desk",
+        "position": [
+          0,
+          0,
+          -1
+        ],
+        "rotation": 0,
+        "scale": [
+          1.6,
+          1.4,
+          1.1
+        ],
+        "color": "#dce4e9",
+        "notes": "Sleek white news desk with a glowing blue and yellow front panel strip.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null,
+        "look": "fd2f4ad8-f728-4dd9-becb-41fe750eda5f",
+        "sheets": [
+          {
+            "id": "s9uf5vgri",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:03:41.478Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "r9zs4ruy",
+                    "requestId": null,
+                    "referenceId": "f72f9d1a-2e29-4c18-8306-479c850a83b4",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 469273,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "r9zs4ruy",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "jmeb4clz",
+                    "requestId": null,
+                    "referenceId": "49946eed-2b38-43ab-bba2-24ae9226b78d",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 821755,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "jmeb4clz",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "aqrkcn3w",
+                    "requestId": null,
+                    "referenceId": "707c6d55-c4e5-4101-80b0-45cc77549626",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 464369,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "aqrkcn3w",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "sznyyoxo",
+                    "requestId": null,
+                    "referenceId": "5611b966-172d-4ac0-bf5c-f7820a10dc2d",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 525662,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "sznyyoxo",
+                "accepted": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "name": "News anchor",
+        "kind": "character",
+        "shape": "person",
+        "model": "anchor",
+        "position": [
+          0,
+          0,
+          -1.9
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#617f9d",
+        "notes": "News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression.",
+        "lookFrom": null,
+        "styleNotes": "Same face in every shot: the man from the primary reference",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                4,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 0.8,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.8608273090794273,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 1.6,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                1.1994883236498062,
+                0
+              ],
+              "head": [
+                -2,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -22,
+                0,
+                4.199999999999999
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -48.6,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 2.3,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.8948462546120642,
+                0
+              ],
+              "head": [
+                1,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -28,
+                0,
+                6.3
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -50.4,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 3.4,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.30664932243219745,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 5,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -1.150709129595766,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 5.6,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.7575199654467859,
+                0
+              ],
+              "head": [
+                4,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 6.2,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.09970728338099567,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 7.1,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.8747628481510511,
+                0
+              ],
+              "head": [
+                -1,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -34,
+                0,
+                8.399999999999999
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -52.2,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 7.7,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                1.1858018806524004,
+                0
+              ],
+              "head": [
+                1,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -26,
+                0,
+                5.6
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -49.8,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 8.8,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.7019006314701141,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 10,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.6528253330672437,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 11.1,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -1.1934631058447869,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -20,
+                0,
+                3.5
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -48,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 12.2,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                -0.4298751386841944,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 13.7,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                1.0871456907701542,
+                0
+              ],
+              "head": [
+                3,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 14.3,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                1.184126357129536,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 15,
+            "p": [
+              0,
+              0,
+              -1.9
+            ],
+            "r": 0,
+            "pose": {
+              "body": [
+                0,
+                0.7803454081885401,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -10,
+                0,
+                0
+              ],
+              "armR": [
+                -10,
+                0,
+                0
+              ],
+              "forearmL": [
+                -45,
+                0,
+                0
+              ],
+              "forearmR": [
+                -45,
+                0,
+                0
+              ],
+              "thighL": [
+                -75,
+                0,
+                0
+              ],
+              "thighR": [
+                -75,
+                0,
+                0
+              ],
+              "shinL": [
+                80,
+                0,
+                0
+              ],
+              "shinR": [
+                80,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          }
+        ],
+        "parent": null,
+        "look": "d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8",
+        "sheets": [
+          {
+            "id": "s3isfd1xq",
+            "setId": "turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:03:41.478Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "full",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "ojr41ihv",
+                    "requestId": null,
+                    "referenceId": "d7cc8cbb-fad9-4cea-ac60-eaefe94aa3b5",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 339311,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "ojr41ihv",
+                "accepted": null
+              },
+              {
+                "id": "left",
+                "label": "Left",
+                "spec": {
+                  "framing": "full",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "335dyn1p",
+                    "requestId": null,
+                    "referenceId": "3c1c1d07-682c-45c9-a894-a52c7ff56e6d",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 343513,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "335dyn1p",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "full",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "sifsnvwd",
+                    "requestId": null,
+                    "referenceId": "9297cd14-5d9f-47b2-8f41-48bd4cf370c4",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 206706,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "sifsnvwd",
+                "accepted": null
+              },
+              {
+                "id": "right",
+                "label": "Right",
+                "spec": {
+                  "framing": "full",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "3a88kp90",
+                    "requestId": null,
+                    "referenceId": "0e8ddbbb-f20b-456b-8c0e-0ede0cc4bd1c",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 501492,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "3a88kp90",
+                "accepted": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "name": "Studio camera 1",
+        "kind": "environment",
+        "shape": "cylinder",
+        "model": "studio-camera",
+        "position": [
+          -3.2,
+          0,
+          7.5
+        ],
+        "rotation": 20,
+        "scale": [
+          0.9,
+          1.3,
+          1.4
+        ],
+        "color": "#2a2d33",
+        "notes": "Broadcast studio camera on a pedestal with a teleprompter hood.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5e9a4e39-fece-4f22-bb65-ac6946f124f5",
+        "look": "3b52e08b-434a-40a2-aa95-308acd555e3f",
+        "sheets": [
+          {
+            "id": "sp0y8cdux",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:03:41.478Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "uemj90c0",
+                    "requestId": null,
+                    "referenceId": "75ec092b-781c-4068-9138-782630d4497c",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 294345,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "uemj90c0",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "krpfeza0",
+                    "requestId": null,
+                    "referenceId": "f0db3f10-6e31-4170-aa4c-ad9505acc33f",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 39326,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "krpfeza0",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "6suosypa",
+                    "requestId": null,
+                    "referenceId": "3239b061-b080-42e8-af46-42e9d864ba64",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 822299,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "6suosypa",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "pil8y3g6",
+                    "requestId": null,
+                    "referenceId": "0f388fb2-4b81-4b20-8f3a-f30f31e08639",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 12367,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:03:41.478Z"
+                  }
+                ],
+                "selected": "pil8y3g6",
+                "accepted": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "13ac6cbd-a7fe-4a15-b160-763e2680bc53",
+        "name": "Studio camera 2",
+        "kind": "environment",
+        "shape": "cylinder",
+        "model": "studio-camera",
+        "position": [
+          0,
+          0,
+          7.5
+        ],
+        "rotation": 0,
+        "scale": [
+          0.9,
+          1.3,
+          1.4
+        ],
+        "color": "#2a2d33",
+        "notes": "",
+        "lookFrom": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5e9a4e39-fece-4f22-bb65-ac6946f124f5"
+      },
+      {
+        "id": "df108bab-b049-4442-8151-3dfcec5cd4ea",
+        "name": "Studio camera 3",
+        "kind": "environment",
+        "shape": "cylinder",
+        "model": "studio-camera",
+        "position": [
+          3.4,
+          0,
+          7.5
+        ],
+        "rotation": 340,
+        "scale": [
+          0.9,
+          1.3,
+          1.4
+        ],
+        "color": "#2a2d33",
+        "notes": "",
+        "lookFrom": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "5e9a4e39-fece-4f22-bb65-ac6946f124f5"
+      },
+      {
+        "id": "33a23d8a-2cc1-42e8-af89-dd7b5c644a98",
+        "name": "Light rig 1",
+        "kind": "environment",
+        "shape": "lamp",
+        "model": "light",
+        "position": [
+          -7,
+          0,
+          7
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1.4,
+          1
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717"
+      },
+      {
+        "id": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+        "name": "Light rig 2",
+        "kind": "environment",
+        "shape": "lamp",
+        "model": "light",
+        "position": [
+          -3.5,
+          0,
+          7
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1.4,
+          1
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717",
+        "look": "19fdc35f-dd4e-4621-ae1e-0bd9d5a2892b"
+      },
+      {
+        "id": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+        "name": "Light rig 3",
+        "kind": "environment",
+        "shape": "lamp",
+        "model": "light",
+        "position": [
+          3.5,
+          0,
+          7
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1.4,
+          1
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717",
+        "sheets": [
+          {
+            "id": "sy3gxz4ll",
+            "setId": "obj-turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:18:28.658Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "iioiv4nq",
+                    "requestId": null,
+                    "referenceId": "9b120724-d2d7-40ba-91f5-8c9825775824",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 402920,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:18:28.658Z"
+                  }
+                ],
+                "selected": "iioiv4nq",
+                "accepted": null
+              },
+              {
+                "id": "left-side",
+                "label": "Left side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "xr9wr24h",
+                    "requestId": null,
+                    "referenceId": "213e79f0-1aff-4d5b-8dd0-642a7cfbb2e6",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 595458,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:18:28.658Z"
+                  }
+                ],
+                "selected": "xr9wr24h",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "7bshg3gw",
+                    "requestId": null,
+                    "referenceId": "ad2c3324-622f-415c-8cf7-4b827cf69ce5",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 519949,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:18:28.658Z"
+                  }
+                ],
+                "selected": "7bshg3gw",
+                "accepted": null
+              },
+              {
+                "id": "right-side",
+                "label": "Right side",
+                "spec": {
+                  "framing": "whole",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "j1dmw1uj",
+                    "requestId": null,
+                    "referenceId": "50e8c58e-f0c4-463b-b107-4ab1175edfe1",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 799521,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:18:28.658Z"
+                  }
+                ],
+                "selected": "j1dmw1uj",
+                "accepted": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "66052317-dbc0-4912-b281-cbdd00b7cfb5",
+        "name": "Light rig 4",
+        "kind": "environment",
+        "shape": "lamp",
+        "model": "light",
+        "position": [
+          7,
+          0,
+          7
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1.4,
+          1
+        ],
+        "color": "#c9c27a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "c7197e5f-3169-454a-aae3-e4cfcfe20717"
+      },
+      {
+        "id": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+        "name": "Camera operator",
+        "kind": "character",
+        "shape": "person",
+        "model": "operator",
+        "position": [
+          -3.5,
+          0,
+          8.5
+        ],
+        "rotation": 180,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#2f3640",
+        "notes": "Studio camera operator in black, headset on, watching the viewfinder.",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": [
+          {
+            "t": 0,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 2,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                2,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                4,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -35,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 3,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 4,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 7,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                2,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                4,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -35,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 8,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 10,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 12,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                2,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                4,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -35,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 13,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          },
+          {
+            "t": 15,
+            "p": [
+              -3.5,
+              0,
+              8.5
+            ],
+            "r": 180,
+            "pose": {
+              "body": [
+                0,
+                0,
+                0
+              ],
+              "head": [
+                0,
+                0,
+                0
+              ],
+              "armL": [
+                -22,
+                0,
+                0
+              ],
+              "armR": [
+                -25,
+                0,
+                0
+              ],
+              "forearmL": [
+                -20,
+                0,
+                0
+              ],
+              "forearmR": [
+                -20,
+                0,
+                0
+              ],
+              "thighL": [
+                0,
+                0,
+                0
+              ],
+              "thighR": [
+                0,
+                0,
+                0
+              ],
+              "shinL": [
+                0,
+                0,
+                0
+              ],
+              "shinR": [
+                0,
+                0,
+                0
+              ]
+            },
+            "ease": "smoothstep"
+          }
+        ],
+        "parent": null,
+        "look": "47334e07-2256-4750-8686-6f6b6fff4730",
+        "sheets": [
+          {
+            "id": "shtfj0z2c",
+            "setId": "turn4",
+            "label": "Turnaround · 4",
+            "options": {},
+            "presetId": "flux-2-pro",
+            "createdAt": "2026-10-30T17:14:51.790Z",
+            "slots": [
+              {
+                "id": "front",
+                "label": "Front",
+                "spec": {
+                  "framing": "full",
+                  "angle": "front"
+                },
+                "attempts": [
+                  {
+                    "id": "xy5dea70",
+                    "requestId": null,
+                    "referenceId": "df6d53d6-7515-436a-a83f-af54b8f5f9ce",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 77322,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:14:51.790Z"
+                  }
+                ],
+                "selected": "xy5dea70",
+                "accepted": null
+              },
+              {
+                "id": "left",
+                "label": "Left",
+                "spec": {
+                  "framing": "full",
+                  "angle": "left"
+                },
+                "attempts": [
+                  {
+                    "id": "anpe6vzf",
+                    "requestId": null,
+                    "referenceId": "9a34d65c-3de8-4d37-8b5a-97da082d0a38",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 305784,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:14:51.790Z"
+                  }
+                ],
+                "selected": "anpe6vzf",
+                "accepted": null
+              },
+              {
+                "id": "back",
+                "label": "Back",
+                "spec": {
+                  "framing": "full",
+                  "angle": "back"
+                },
+                "attempts": [
+                  {
+                    "id": "en1hr7xo",
+                    "requestId": null,
+                    "referenceId": "5c110746-4a9b-4303-8664-1c02bfa6bf98",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 402855,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:14:51.790Z"
+                  }
+                ],
+                "selected": "en1hr7xo",
+                "accepted": null
+              },
+              {
+                "id": "right",
+                "label": "Right",
+                "spec": {
+                  "framing": "full",
+                  "angle": "right"
+                },
+                "attempts": [
+                  {
+                    "id": "ygv8kuwu",
+                    "requestId": null,
+                    "referenceId": "b5a2d343-a9c2-42d1-8656-4c347fec5c9c",
+                    "mode": "generate",
+                    "note": "",
+                    "from": null,
+                    "presetId": "flux-2-pro",
+                    "seed": 178812,
+                    "error": "",
+                    "createdAt": "2026-10-30T17:14:51.790Z"
+                  }
+                ],
+                "selected": "ygv8kuwu",
+                "accepted": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "5e9a4e39-fece-4f22-bb65-ac6946f124f5",
+        "name": "Studio cameras",
+        "kind": "environment",
+        "shape": "group",
+        "position": [
+          0.06666666666666658,
+          0,
+          7.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "c7197e5f-3169-454a-aae3-e4cfcfe20717",
+        "name": "Lighting",
+        "kind": "prop",
+        "shape": "group",
+        "position": [
+          0,
+          0,
+          3.5
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "color": "#9aa7b8",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": null
+      },
+      {
+        "id": "13443489-30b8-4ea2-a2de-82a1639d5025",
+        "name": "Desk front panel",
+        "kind": "environment",
+        "shape": "box",
+        "model": "desk-panel",
+        "position": [
+          0,
+          0.08,
+          -0.49
+        ],
+        "rotation": 0,
+        "scale": [
+          2.55,
+          0.9,
+          0.12
+        ],
+        "color": "#24729a",
+        "notes": "",
+        "lookFrom": null,
+        "styleNotes": "",
+        "pitch": 0,
+        "roll": 0,
+        "path": null,
+        "parent": "05487127-2ec2-4198-a1e5-5deb7b109044"
+      }
+    ],
+    "references": [
+      {
+        "id": "1aa40561-9161-404b-98ac-8cd91dc5220f",
+        "name": "Studio floor · Flux.2 [pro] · 942605",
+        "file": "1aa40561-9161-404b-98ac-8cd91dc5220f.webp",
+        "mime": "image/webp",
+        "role": "environment",
+        "entityId": "21c28a69-7b8d-4067-92e7-1f4e7ac9ad0c",
+        "note": "",
+        "createdAt": "2026-10-30T17:15:25.834Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 942605,
+          "prompt": "Reference photo of Studio floor, Glossy dark blue studio floor with soft reflections. in A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.. Wide view, no people, natural light, photorealistic. Visual style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.."
+        }
+      },
+      {
+        "id": "c75bd63b-2e06-465a-bc0c-e04c285f15da",
+        "name": "Video wall · Flux.2 [pro] · 345311",
+        "file": "c75bd63b-2e06-465a-bc0c-e04c285f15da.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+        "note": "",
+        "createdAt": "2026-10-30T17:41:43.664Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 345311,
+          "prompt": "Product reference photo of Video wall, Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall., blue. Whole object in frame, three-quarter view, plain studio background, soft even lighting, photorealistic. Look: Clean broadcast motion graphics, crisp, no small type. Show exactly one object. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.."
+        }
+      },
+      {
+        "id": "23a01b5d-fafb-4e97-a25f-358e4fc16272",
+        "name": "Video wall · Front",
+        "file": "23a01b5d-fafb-4e97-a25f-358e4fc16272.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+        "note": "sheet:svfgnlsje:front",
+        "createdAt": "2026-10-30T17:46:29.054Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 143002,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from the front, the front of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall.\n\nLook: Clean broadcast motion graphics, crisp, no small type\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "49b8be91-c3c1-4182-8ac5-b663d066114a",
+        "name": "Video wall · Left side",
+        "file": "49b8be91-c3c1-4182-8ac5-b663d066114a.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+        "note": "sheet:svfgnlsje:left-side",
+        "createdAt": "2026-10-30T17:47:17.405Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 347770,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the left edge of the image (viewer’s left). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall.\n\nLook: Clean broadcast motion graphics, crisp, no small type\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "96ec359d-4146-4262-a3b5-b5415be28793",
+        "name": "Video wall · Back",
+        "file": "96ec359d-4146-4262-a3b5-b5415be28793.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+        "note": "sheet:svfgnlsje:back",
+        "createdAt": "2026-10-30T17:47:34.912Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 574477,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from behind, the back of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall.\n\nLook: Clean broadcast motion graphics, crisp, no small type\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "42b5a05d-6a4b-457c-aa06-d6a26a608fac",
+        "name": "Video wall · Right side",
+        "file": "42b5a05d-6a4b-457c-aa06-d6a26a608fac.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+        "note": "sheet:svfgnlsje:right-side",
+        "createdAt": "2026-10-30T17:48:10.744Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 617436,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the right edge of the image (viewer’s right). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall.\n\nLook: Clean broadcast motion graphics, crisp, no small type\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "374faec4-942c-4968-ac96-da6beb121da1",
+        "name": "Video wall · design sheet",
+        "file": "374faec4-942c-4968-ac96-da6beb121da1.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d20c7792-ac33-47cb-8878-f2e4caf4a67a",
+        "note": "sheet:svfgnlsje:composed",
+        "createdAt": "2026-10-30T17:48:14.999Z"
+      },
+      {
+        "id": "fd2f4ad8-f728-4dd9-becb-41fe750eda5f",
+        "name": "Anchor desk · FLUX 3 Image · 7301",
+        "file": "fd2f4ad8-f728-4dd9-becb-41fe750eda5f.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+        "note": "",
+        "createdAt": "2026-10-30T15:23:32.060Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Product reference photo of Anchor desk, Sleek white news desk with a glowing blue and yellow front panel strip., white. Whole object in frame, three-quarter view, plain studio background, soft even lighting, photorealistic. Show exactly one object. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.."
+        }
+      },
+      {
+        "id": "f72f9d1a-2e29-4c18-8306-479c850a83b4",
+        "name": "Anchor desk · Front",
+        "file": "f72f9d1a-2e29-4c18-8306-479c850a83b4.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+        "note": "sheet:s9uf5vgri:front",
+        "createdAt": "2026-10-30T17:04:42.646Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 469273,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from the front, the front of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Sleek white news desk with a glowing blue and yellow front panel strip.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "49946eed-2b38-43ab-bba2-24ae9226b78d",
+        "name": "Anchor desk · Left side",
+        "file": "49946eed-2b38-43ab-bba2-24ae9226b78d.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+        "note": "sheet:s9uf5vgri:left-side",
+        "createdAt": "2026-10-30T17:06:12.049Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 821755,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the left edge of the image (viewer’s left). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Sleek white news desk with a glowing blue and yellow front panel strip.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "707c6d55-c4e5-4101-80b0-45cc77549626",
+        "name": "Anchor desk · Back",
+        "file": "707c6d55-c4e5-4101-80b0-45cc77549626.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+        "note": "sheet:s9uf5vgri:back",
+        "createdAt": "2026-10-30T17:06:21.984Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 464369,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from behind, the back of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Sleek white news desk with a glowing blue and yellow front panel strip.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "5611b966-172d-4ac0-bf5c-f7820a10dc2d",
+        "name": "Anchor desk · Right side",
+        "file": "5611b966-172d-4ac0-bf5c-f7820a10dc2d.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+        "note": "sheet:s9uf5vgri:right-side",
+        "createdAt": "2026-10-30T17:08:08.300Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 525662,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the right edge of the image (viewer’s right). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Sleek white news desk with a glowing blue and yellow front panel strip.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "ec9997a8-9d8a-48ad-9361-26ae36bd2649",
+        "name": "Anchor desk · design sheet",
+        "file": "ec9997a8-9d8a-48ad-9361-26ae36bd2649.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "05487127-2ec2-4198-a1e5-5deb7b109044",
+        "note": "sheet:s9uf5vgri:composed",
+        "createdAt": "2026-10-30T17:08:08.677Z"
+      },
+      {
+        "id": "d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8",
+        "name": "News anchor · FLUX 3 Image · 7301",
+        "file": "d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "note": "",
+        "createdAt": "2026-10-30T15:22:23.591Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Character reference photo of News anchor, Confident news anchor in a tailored navy suit with a small yellow Comfy lapel pin, neat hair, warm expression, speaking to camera.. Full body, standing, front three-quarter view, black accents in the wardrobe. Plain light grey studio background, soft even lighting, photorealistic, sharp focus. Wardrobe suits A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.. Show exactly one person. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.."
+        }
+      },
+      {
+        "id": "d7cc8cbb-fad9-4cea-ac60-eaefe94aa3b5",
+        "name": "News anchor · Front",
+        "file": "d7cc8cbb-fad9-4cea-ac60-eaefe94aa3b5.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "note": "sheet:s3isfd1xq:front",
+        "createdAt": "2026-10-30T17:04:52.291Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 339311,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character facing the viewer, front view. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Confident news anchor in a tailored navy suit with a small yellow Comfy lapel pin, neat hair, warm expression, speaking to camera.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "3c1c1d07-682c-45c9-a894-a52c7ff56e6d",
+        "name": "News anchor · Left",
+        "file": "3c1c1d07-682c-45c9-a894-a52c7ff56e6d.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "note": "sheet:s3isfd1xq:left",
+        "createdAt": "2026-10-30T17:06:20.822Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 343513,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the left edge of the image (viewer’s left). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Confident news anchor in a tailored navy suit with a small yellow Comfy lapel pin, neat hair, warm expression, speaking to camera.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "9297cd14-5d9f-47b2-8f41-48bd4cf370c4",
+        "name": "News anchor · Back",
+        "file": "9297cd14-5d9f-47b2-8f41-48bd4cf370c4.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "note": "sheet:s3isfd1xq:back",
+        "createdAt": "2026-10-30T17:08:06.262Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 206706,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character back view, facing directly away from the viewer. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Confident news anchor in a tailored navy suit with a small yellow Comfy lapel pin, neat hair, warm expression, speaking to camera.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "0e8ddbbb-f20b-456b-8c0e-0ede0cc4bd1c",
+        "name": "News anchor · Right",
+        "file": "0e8ddbbb-f20b-456b-8c0e-0ede0cc4bd1c.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "note": "sheet:s3isfd1xq:right",
+        "createdAt": "2026-10-30T17:08:13.738Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 501492,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the right edge of the image (viewer’s right). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Confident news anchor in a tailored navy suit with a small yellow Comfy lapel pin, neat hair, warm expression, speaking to camera.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "f53b450c-3f0f-4eef-97e6-0bf2d58a9d12",
+        "name": "News anchor · design sheet",
+        "file": "f53b450c-3f0f-4eef-97e6-0bf2d58a9d12.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "note": "sheet:s3isfd1xq:composed",
+        "createdAt": "2026-10-30T17:08:14.163Z"
+      },
+      {
+        "id": "3b52e08b-434a-40a2-aa95-308acd555e3f",
+        "name": "Studio camera 1 · FLUX 3 Image · 7301",
+        "file": "3b52e08b-434a-40a2-aa95-308acd555e3f.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "note": "",
+        "createdAt": "2026-10-30T15:24:47.803Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Product reference photo of Studio camera 1, Broadcast studio camera on a pedestal with a teleprompter hood., black. Whole object in frame, three-quarter view, plain studio background, soft even lighting, photorealistic. Show exactly one object. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.."
+        }
+      },
+      {
+        "id": "75ec092b-781c-4068-9138-782630d4497c",
+        "name": "Studio camera 1 · Front",
+        "file": "75ec092b-781c-4068-9138-782630d4497c.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "note": "sheet:sp0y8cdux:front",
+        "createdAt": "2026-10-30T17:05:04.647Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 294345,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from the front, the front of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Broadcast studio camera on a pedestal with a teleprompter hood.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "f0db3f10-6e31-4170-aa4c-ad9505acc33f",
+        "name": "Studio camera 1 · Left side",
+        "file": "f0db3f10-6e31-4170-aa4c-ad9505acc33f.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "note": "sheet:sp0y8cdux:left-side",
+        "createdAt": "2026-10-30T17:08:18.600Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 39326,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the left edge of the image (viewer’s left). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Broadcast studio camera on a pedestal with a teleprompter hood.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "3239b061-b080-42e8-af46-42e9d864ba64",
+        "name": "Studio camera 1 · Back",
+        "file": "3239b061-b080-42e8-af46-42e9d864ba64.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "note": "sheet:sp0y8cdux:back",
+        "createdAt": "2026-10-30T17:15:14.029Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 822299,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from behind, the back of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Broadcast studio camera on a pedestal with a teleprompter hood.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "0f388fb2-4b81-4b20-8f3a-f30f31e08639",
+        "name": "Studio camera 1 · Right side",
+        "file": "0f388fb2-4b81-4b20-8f3a-f30f31e08639.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "note": "sheet:sp0y8cdux:right-side",
+        "createdAt": "2026-10-30T17:15:17.581Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 12367,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the right edge of the image (viewer’s right). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nObject notes: Broadcast studio camera on a pedestal with a teleprompter hood.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "6e1b23d9-86cb-4e69-bf73-94c16cba3653",
+        "name": "Studio camera 1 · design sheet",
+        "file": "6e1b23d9-86cb-4e69-bf73-94c16cba3653.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "d5c5ec02-1a18-4798-ab0f-013ba629eb0d",
+        "note": "sheet:sp0y8cdux:composed",
+        "createdAt": "2026-10-30T17:15:22.256Z"
+      },
+      {
+        "id": "19fdc35f-dd4e-4621-ae1e-0bd9d5a2892b",
+        "name": "Light rig 2 · Flux.2 [pro] · 58720",
+        "file": "19fdc35f-dd4e-4621-ae1e-0bd9d5a2892b.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "b01b8e52-cc50-4730-aeac-73adf88a3c07",
+        "note": "",
+        "createdAt": "2026-10-30T17:15:50.316Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 58720,
+          "prompt": "Product reference photo of Light rig 2, amber. Whole object in frame, three-quarter view, plain studio background, soft even lighting, photorealistic. Show exactly one object. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.."
+        }
+      },
+      {
+        "id": "9b120724-d2d7-40ba-91f5-8c9825775824",
+        "name": "Light rig 3 · Front",
+        "file": "9b120724-d2d7-40ba-91f5-8c9825775824.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+        "note": "sheet:sy3gxz4ll:front",
+        "createdAt": "2026-10-30T17:19:38.213Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 402920,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from the front, the front of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "213e79f0-1aff-4d5b-8dd0-642a7cfbb2e6",
+        "name": "Light rig 3 · Left side",
+        "file": "213e79f0-1aff-4d5b-8dd0-642a7cfbb2e6.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+        "note": "sheet:sy3gxz4ll:left-side",
+        "createdAt": "2026-10-30T17:20:08.834Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 595458,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the left edge of the image (viewer’s left). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "ad2c3324-622f-415c-8cf7-4b827cf69ce5",
+        "name": "Light rig 3 · Back",
+        "file": "ad2c3324-622f-415c-8cf7-4b827cf69ce5.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+        "note": "sheet:sy3gxz4ll:back",
+        "createdAt": "2026-10-30T17:20:23.181Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 519949,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object seen straight from behind, the back of the object facing the viewer. Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "50e8c58e-f0c4-463b-b107-4ab1175edfe1",
+        "name": "Light rig 3 · Right side",
+        "file": "50e8c58e-f0c4-463b-b107-4ab1175edfe1.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+        "note": "sheet:sy3gxz4ll:right-side",
+        "createdAt": "2026-10-30T17:20:45.794Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 799521,
+          "prompt": "Draw the exact same object as the first reference image: identical identity, shape, proportions, materials, colours, markings and rendering style.\n\nShow the object exact side view, the front of the object pointing toward the right edge of the image (viewer’s right). Framing: the whole object inside the frame with a little space around it.\n\nPlain white background, soft even studio lighting. One single view of exactly one object, no other objects. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "aa22ba26-e773-4666-a0ee-5d50b7030a26",
+        "name": "Light rig 3 · design sheet",
+        "file": "aa22ba26-e773-4666-a0ee-5d50b7030a26.webp",
+        "mime": "image/webp",
+        "role": "prop",
+        "entityId": "dcb5fae7-ec61-43e0-a678-790d61c830f5",
+        "note": "sheet:sy3gxz4ll:composed",
+        "createdAt": "2026-10-30T17:20:49.916Z"
+      },
+      {
+        "id": "47334e07-2256-4750-8686-6f6b6fff4730",
+        "name": "Camera operator · FLUX 3 Image · 7301",
+        "file": "47334e07-2256-4750-8686-6f6b6fff4730.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+        "note": "",
+        "createdAt": "2026-10-30T15:22:58.429Z",
+        "generated": {
+          "presetId": "flux-3",
+          "model": "FLUX 3 Image (BFL)",
+          "seed": 7301,
+          "prompt": "Character reference photo of Camera operator, Studio camera operator in black, headset on, watching the viewfinder.. Full body, standing, front three-quarter view, black accents in the wardrobe. Plain light grey studio background, soft even lighting, photorealistic, sharp focus. Wardrobe suits A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs.. Show exactly one person. No text, numbers, names or lettering anywhere in the image. Visual style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean.."
+        }
+      },
+      {
+        "id": "df6d53d6-7515-436a-a83f-af54b8f5f9ce",
+        "name": "Camera operator · Front",
+        "file": "df6d53d6-7515-436a-a83f-af54b8f5f9ce.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+        "note": "sheet:shtfj0z2c:front",
+        "createdAt": "2026-10-30T17:15:32.612Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 77322,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character facing the viewer, front view. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Studio camera operator in black, headset on, watching the viewfinder.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "9a34d65c-3de8-4d37-8b5a-97da082d0a38",
+        "name": "Camera operator · Left",
+        "file": "9a34d65c-3de8-4d37-8b5a-97da082d0a38.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+        "note": "sheet:shtfj0z2c:left",
+        "createdAt": "2026-10-30T17:19:29.895Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 305784,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the left edge of the image (viewer’s left). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Studio camera operator in black, headset on, watching the viewfinder.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "5c110746-4a9b-4303-8664-1c02bfa6bf98",
+        "name": "Camera operator · Back",
+        "file": "5c110746-4a9b-4303-8664-1c02bfa6bf98.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+        "note": "sheet:shtfj0z2c:back",
+        "createdAt": "2026-10-30T17:19:34.164Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 402855,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character back view, facing directly away from the viewer. Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Studio camera operator in black, headset on, watching the viewfinder.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "b5a2d343-a9c2-42d1-8656-4c347fec5c9c",
+        "name": "Camera operator · Right",
+        "file": "b5a2d343-a9c2-42d1-8656-4c347fec5c9c.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+        "note": "sheet:shtfj0z2c:right",
+        "createdAt": "2026-10-30T17:20:46.789Z",
+        "generated": {
+          "presetId": "flux-2-pro",
+          "model": "Flux.2 [pro] (BFL)",
+          "seed": 178812,
+          "prompt": "Draw the exact same character as the first reference image: identical identity, face, proportions, outfit, materials, colours, markings and rendering style.\n\nShow the character side view in profile, the whole body turned to face the right edge of the image (viewer’s right). Framing: full body from head to feet, the whole figure inside the frame with a little space around it.\n\nPose: neutral standing pose, arms relaxed.\n\nPlain white background, soft even studio lighting. One single view of exactly one character, no other people. Do not add captions, labels, names, watermarks, borders or frames. Keep any lettering or logos that are part of the design itself (for example printed on clothing or bodywork) exactly as in the reference.\n\nCharacter notes: Studio camera operator in black, headset on, watching the viewfinder.\n\nRendering style: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean."
+        }
+      },
+      {
+        "id": "f7cd2a6e-bc1a-4761-8774-2c9fa9cf8018",
+        "name": "Camera operator · design sheet",
+        "file": "f7cd2a6e-bc1a-4761-8774-2c9fa9cf8018.webp",
+        "mime": "image/webp",
+        "role": "character",
+        "entityId": "cd9cc0ed-ea82-4160-831e-80a2f2fe5cfe",
+        "note": "sheet:shtfj0z2c:composed",
+        "createdAt": "2026-10-30T17:20:50.402Z"
+      }
+    ]
+  },
+  "shots": [
+    {
+      "id": "a015ef8e-809e-4492-93ef-675772aba797",
+      "title": "Breaking",
+      "description": "@news-anchor settles at the desk in the first second, lifts the chin, then opens one palm briefly and rests it again. Breathing is subtle; suit, face and studio graphics stay consistent.",
+      "duration": 5,
+      "start": 0,
+      "camera": {
+        "move": "custom",
+        "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "distance": 7,
+        "height": 4.5,
+        "angle": 10,
+        "mm": 40,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              1.2,
+              2.5,
+              6
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.05,
+            "p": [
+              1.14,
+              2.465,
+              5.925
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.1,
+            "p": [
+              1.08,
+              2.43,
+              5.85
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.15,
+            "p": [
+              1.02,
+              2.395,
+              5.775
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.2,
+            "p": [
+              0.96,
+              2.36,
+              5.7
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.25,
+            "p": [
+              0.9,
+              2.325,
+              5.625
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.3,
+            "p": [
+              0.84,
+              2.29,
+              5.55
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.35,
+            "p": [
+              0.78,
+              2.255,
+              5.475
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.4,
+            "p": [
+              0.72,
+              2.22,
+              5.4
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.45,
+            "p": [
+              0.66,
+              2.185,
+              5.325
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.5,
+            "p": [
+              0.6,
+              2.15,
+              5.25
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.55,
+            "p": [
+              0.54,
+              2.115,
+              5.175
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.6,
+            "p": [
+              0.48,
+              2.08,
+              5.1
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.65,
+            "p": [
+              0.42,
+              2.045,
+              5.025
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.7,
+            "p": [
+              0.36,
+              2.01,
+              4.95
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.75,
+            "p": [
+              0.3,
+              1.975,
+              4.875
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.8,
+            "p": [
+              0.24,
+              1.94,
+              4.8
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.85,
+            "p": [
+              0.18,
+              1.905,
+              4.725
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.9,
+            "p": [
+              0.12,
+              1.87,
+              4.65
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 0.95,
+            "p": [
+              0.06,
+              1.835,
+              4.575
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          },
+          {
+            "t": 1,
+            "p": [
+              0,
+              1.8,
+              4.5
+            ],
+            "look": [
+              0,
+              1.25,
+              -1.9
+            ],
+            "mm": 40
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "40mm"
+        ],
+        "filter": [
+          "deep blue dusk"
+        ]
+      },
+      "prompts": {},
+      "references": [
+        {
+          "id": "08ffcece-2746-5d9a-a9ec-9ff715559165",
+          "name": "Shot 01 Breaking · FLUX 3 Image · 869834",
+          "file": "08ffcece-2746-5d9a-a9ec-9ff715559165.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-01T07:40:45.714Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 869834,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 40mm normal lens; full shot, News anchor head to toe; camera 1.8 m high, at eye level and 6.4 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, the full frame width wide, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, over half the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, over half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor settles at the desk in the first second, lifts the chin, then opens one palm briefly and rests it again. Breathing is subtle; suit, face and studio graphics stay consistent. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections.…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "6853173a"
+          }
+        },
+        {
+          "id": "aa7429fb-ee57-5808-a186-6adec8671c06",
+          "name": "Shot 01 Breaking · FLUX 3 Image · 254835",
+          "file": "aa7429fb-ee57-5808-a186-6adec8671c06.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-01T07:39:22.723Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 254835,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 40mm normal lens; full shot, News anchor head to toe; camera 2.5 m high, just above News anchor's eye line and 8 m from News anchor, looking slightly down; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, the full frame width wide, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, about a third of the frame height tall, in front of News anchor. News anchor: centre of frame, about half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor settles at the desk in the first second, lifts the chin, then opens one palm briefly and rests it again. Breathing is subtle; suit, face and studio graphics stay consistent. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "6853173a"
+          }
+        }
+      ]
+    },
+    {
+      "id": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "title": "The headline",
+      "description": "@news-anchor delivers the headline: a small nod in second one, one measured hand emphasis in seconds two to three, then stillness. Keep the same face and suit; shoulders follow the gesture softly.",
+      "duration": 5,
+      "start": 5,
+      "camera": {
+        "move": "custom",
+        "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "distance": 3,
+        "height": 1.4,
+        "angle": 0,
+        "mm": 55,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              0,
+              1.6,
+              1.9
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.05,
+            "p": [
+              0,
+              1.6,
+              1.86
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.1,
+            "p": [
+              0,
+              1.6,
+              1.82
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.15,
+            "p": [
+              0,
+              1.6,
+              1.78
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.2,
+            "p": [
+              0,
+              1.6,
+              1.74
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.25,
+            "p": [
+              0,
+              1.6,
+              1.7
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.3,
+            "p": [
+              0,
+              1.6,
+              1.66
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.35,
+            "p": [
+              0,
+              1.6,
+              1.62
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.4,
+            "p": [
+              0,
+              1.6,
+              1.58
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.45,
+            "p": [
+              0,
+              1.6,
+              1.54
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.5,
+            "p": [
+              0,
+              1.6,
+              1.5
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.55,
+            "p": [
+              0,
+              1.6,
+              1.46
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.6,
+            "p": [
+              0,
+              1.6,
+              1.42
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.65,
+            "p": [
+              0,
+              1.6,
+              1.38
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.7,
+            "p": [
+              0,
+              1.6,
+              1.34
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.75,
+            "p": [
+              0,
+              1.6,
+              1.3
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.8,
+            "p": [
+              0,
+              1.6,
+              1.26
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.85,
+            "p": [
+              0,
+              1.6,
+              1.22
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.9,
+            "p": [
+              0,
+              1.6,
+              1.18
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 0.95,
+            "p": [
+              0,
+              1.6,
+              1.14
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          },
+          {
+            "t": 1,
+            "p": [
+              0,
+              1.6,
+              1.1
+            ],
+            "look": [
+              0,
+              1.5,
+              -1.9
+            ],
+            "mm": 55
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "55mm"
+        ],
+        "filter": [
+          "high contrast"
+        ]
+      },
+      "prompts": {},
+      "references": [
+        {
+          "id": "29c31b1b-d11a-55bf-a099-65cd33c3d727",
+          "name": "Shot 02 The headline · GPT Image 2.5 · 161780",
+          "file": "29c31b1b-d11a-55bf-a099-65cd33c3d727.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-01T07:40:43.052Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 161780,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 55mm normal lens; medium shot, News anchor from the waist up; camera 1.6 m high, at eye level and 3 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: fills the whole background. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor delivers the headline: a small nod in second one, one measured hand emphasis in seconds two to three, then stillness. Keep the same face and suit; shoulders follow the gesture softly. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Framing: 55mm lens, match the…\nThe Video wall looks exactly like image 2. The News anchor looks exactly like image 3. The Studio floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "cae0bba"
+          }
+        },
+        {
+          "id": "61342f1c-a584-5eb9-acaf-464d8a111122",
+          "name": "Shot 02 The headline · GPT Image 2.5 · 832930",
+          "file": "61342f1c-a584-5eb9-acaf-464d8a111122.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-01T07:40:17.978Z",
+          "generated": {
+            "presetId": "gpt-image-25",
+            "model": "GPT Image 2.5 (OpenAI)",
+            "seed": 832930,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 55mm normal lens; medium shot, News anchor from the waist up; camera 1.6 m high, at eye level and 3.8 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: fills the whole background. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor delivers the headline: a small nod in second one, one measured hand emphasis in seconds two to three, then stillness. Keep the same face and suit; shoulders follow the gesture softly. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED video wall, white anchor desk, studio cameras and lighting rigs; Glossy dark blue studio floor with soft reflections. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Framing:…\nThe Video wall looks exactly like image 2. The News anchor looks exactly like image 3. The Studio floor looks exactly like image 4. Image 5 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–5 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "cae0bba"
+          }
+        }
+      ]
+    },
+    {
+      "id": "597912bb-6c6f-4f3b-9274-c203578c538e",
+      "title": "On air",
+      "description": "@news-anchor finishes speaking, lowers both hands, settles the shoulders and gives a restrained nod in the last second. Hold the same face, suit and studio graphics.",
+      "duration": 5,
+      "start": 10,
+      "camera": {
+        "move": "custom",
+        "target": "cbdca989-5c9d-4078-8a5e-7915a6aa6386",
+        "distance": 6,
+        "height": 1.6,
+        "angle": 0,
+        "mm": 45,
+        "keys": [
+          {
+            "t": 0,
+            "p": [
+              -1,
+              1.9,
+              4.3
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.05,
+            "p": [
+              -0.975,
+              1.89,
+              4.235
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.1,
+            "p": [
+              -0.95,
+              1.88,
+              4.17
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.15,
+            "p": [
+              -0.925,
+              1.87,
+              4.105
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.2,
+            "p": [
+              -0.9,
+              1.86,
+              4.04
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.25,
+            "p": [
+              -0.875,
+              1.85,
+              3.975
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.3,
+            "p": [
+              -0.85,
+              1.84,
+              3.91
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.35,
+            "p": [
+              -0.825,
+              1.83,
+              3.845
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.4,
+            "p": [
+              -0.8,
+              1.82,
+              3.78
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.45,
+            "p": [
+              -0.775,
+              1.81,
+              3.715
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.5,
+            "p": [
+              -0.75,
+              1.8,
+              3.65
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.55,
+            "p": [
+              -0.725,
+              1.79,
+              3.585
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.6,
+            "p": [
+              -0.7,
+              1.78,
+              3.52
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.65,
+            "p": [
+              -0.675,
+              1.77,
+              3.455
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.7,
+            "p": [
+              -0.65,
+              1.76,
+              3.39
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.75,
+            "p": [
+              -0.625,
+              1.75,
+              3.325
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.8,
+            "p": [
+              -0.6,
+              1.74,
+              3.26
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.85,
+            "p": [
+              -0.575,
+              1.73,
+              3.195
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.9,
+            "p": [
+              -0.55,
+              1.72,
+              3.13
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 0.95,
+            "p": [
+              -0.525,
+              1.71,
+              3.065
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          },
+          {
+            "t": 1,
+            "p": [
+              -0.5,
+              1.7,
+              3
+            ],
+            "look": [
+              0,
+              1.35,
+              -1.9
+            ],
+            "mm": 45
+          }
+        ],
+        "timing": "linear"
+      },
+      "cast": {
+        "include": [],
+        "exclude": []
+      },
+      "style": {
+        "movement": [],
+        "cuts": [
+          "continuous take, no cuts"
+        ],
+        "lens": [
+          "45mm"
+        ],
+        "filter": [
+          "deep blue dusk"
+        ]
+      },
+      "prompts": {},
+      "references": [
+        {
+          "id": "e7ef0050-afae-54d8-a26c-65c870cb3ee3",
+          "name": "Shot 03 On air · FLUX 3 Image · 400609",
+          "file": "e7ef0050-afae-54d8-a26c-65c870cb3ee3.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame end",
+          "createdAt": "2026-11-01T07:42:46.458Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 400609,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: Last frame of a hand-operated camera move, 45mm normal lens; medium long shot, News anchor from the knees up; camera 1.7 m high, at eye level and 4.9 m from News anchor, level; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, about three-quarters of the frame height tall, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, about three-quarters of the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, about three-quarters of the frame height tall, cut off by the bottom edge, partly hidden by Anchor desk, facing the camera.\nMoment: the last instant of the shot. The action described below has just happened; show the poses in image 1.\nCinematic film still, single frame. News anchor finishes speaking, lowers both hands, settles the shoulders and gives a restrained nod in the last second. Hold the same face, suit and studio graphics. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night:…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "11ffc962"
+          }
+        },
+        {
+          "id": "e0129786-5314-5d40-a36f-b4bb8eaa9a77",
+          "name": "Shot 03 On air · FLUX 3 Image · 506293",
+          "file": "e0129786-5314-5d40-a36f-b4bb8eaa9a77.webp",
+          "mime": "image/webp",
+          "role": "frame",
+          "entityId": null,
+          "note": "key frame start",
+          "createdAt": "2026-11-01T07:43:00.126Z",
+          "generated": {
+            "presetId": "flux-3",
+            "model": "FLUX 3 Image (BFL)",
+            "seed": 506293,
+            "prompt": "Image 1 is a grey 3D blockout of this exact frame. Match its camera position, lens, framing, horizon and every object's position, size, heading and pose exactly.\nCamera: First frame of a hand-operated camera move, 45mm normal lens; full shot, News anchor head to toe; camera 1.9 m high, at eye level and 6.3 m from News anchor, looking slightly down; we see News anchor from straight in front.\nIn frame: Video wall: centre of frame, about three-quarters of the frame height tall, cut off by the left and right and top edges, behind News anchor. Anchor desk: lower centre of frame, over half the frame width wide, cut off by the bottom edge, in front of News anchor. News anchor: centre of frame, over half the frame height tall, partly hidden by Anchor desk, facing the camera.\nMoment: the first instant of the shot. The action described below is only beginning; show the poses in image 1, not the climax.\nCinematic film still, single frame. News anchor finishes speaking, lowers both hands, settles the shoulders and gives a restrained nod in the last second. Hold the same face, suit and studio graphics. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Huge curved LED video wall in electric blue with a glowing world map and abstract broadcast graphics, the yellow Comfy wordmark top left, and a single yellow lower-third bar that reads only the word BREAKING. No other text, no faces on the wall. Clean broadcast motion graphics, crisp, no small type. Sleek white news desk with a glowing blue and yellow front panel strip. Set: A modern broadcast news studio at night: glossy dark floor, huge blue LED…\nThe Video wall looks exactly like image 2. The Anchor desk looks exactly like image 3. The News anchor looks exactly like image 4. The Studio floor looks exactly like image 5. Image 6 is the previous shot: keep lighting, colour grade and designs continuous. Images 2–6 show only what things look like: take their design, livery and colours, never their pose, angle, direction or framing; those come from image 1.\nReading image 1: bright yellow-white marks are headlights (a vehicle's front), red marks are tail lights (its rear), a pale oval is a face, and pale ground wedges point the way things face. Do not copy those markers, the flat grey colours, the grid lines or the plain sky. One single photographic frame; no text, captions, labels, split panels or watermarks.",
+            "signature": "11ffc962"
+          }
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "path": "media/refs/1aa40561-9161-404b-98ac-8cd91dc5220f.webp",
+      "kind": "image",
+      "bytes": 84958,
+      "sha256": "89e7b3edbff6caf7b0a3a1770d02bcaedea2400d2fd9d0cc75ab56fcf2474fea",
+      "sourceSha256": "9fd53c3a4903c9b34aa53e8b5eb8985a117ff5451893ea333f48a34a8f756146",
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "path": "media/refs/c75bd63b-2e06-465a-bc0c-e04c285f15da.webp",
+      "kind": "image",
+      "bytes": 44848,
+      "sha256": "08c4236362c50d39daaf1472bf7a968ba76f4e72c26e48f5ce03b9db21860b6f",
+      "sourceSha256": "17ccf65d8dbe97e49fdce3862217d5cd76bac03961272bae52700beb294853b0",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/23a01b5d-fafb-4e97-a25f-358e4fc16272.webp",
+      "kind": "image",
+      "bytes": 57600,
+      "sha256": "ad0191b8495c47ca9e4b230f8710e62b286b068b0795bb1aae8c5737cb29e86e",
+      "sourceSha256": "e2c5d3f63873dd40ba30f55008167567b93b8f28d2d8edd7cdc4bc18cdc48b0a",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/49b8be91-c3c1-4182-8ac5-b663d066114a.webp",
+      "kind": "image",
+      "bytes": 77402,
+      "sha256": "778d21967b4dcff65272653098803b2a76a5e3d72f5e3f2281d965e7fe7fc3a1",
+      "sourceSha256": "219692d88fdacc4ee7cd831b1687db4aba3476211eab1f022235a20dc01ea833",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/96ec359d-4146-4262-a3b5-b5415be28793.webp",
+      "kind": "image",
+      "bytes": 19476,
+      "sha256": "7137db03d69bff8dba64de96c5d3377e61663857aeb1e08b70b55ca323e8f501",
+      "sourceSha256": "60ddf2f75be52c8cfe66eae1230753f68927a146c9eece78a079d790b2a2f328",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/42b5a05d-6a4b-457c-aa06-d6a26a608fac.webp",
+      "kind": "image",
+      "bytes": 52038,
+      "sha256": "94a7ff824b0e0ba3792dfbe3533883a2c0f990e88fdadaa902b61982af9cf3d5",
+      "sourceSha256": "58b92d62e62bd93eb9538ab7c410879598c6e4ba256816de74214922f21da66a",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/374faec4-942c-4968-ac96-da6beb121da1.webp",
+      "kind": "image",
+      "bytes": 47638,
+      "sha256": "f81f414efbf2f21abf715bc6a540409d1d89051ae29fa7200b710f1a51874a5a",
+      "sourceSha256": "95f211514e6ada41a4f24cf5b79bc66fb51c6557559026f524c62d05d2844ed1",
+      "width": 1600,
+      "height": 427
+    },
+    {
+      "path": "media/refs/fd2f4ad8-f728-4dd9-becb-41fe750eda5f.webp",
+      "kind": "image",
+      "bytes": 19302,
+      "sha256": "e2023bceff54c4f0a28d3a901276f5d406e98a4a6c1242d31dfa10051cd60c54",
+      "sourceSha256": "91f03f7c9cf2076a21432904371b987fcea82c6f0250c6928ff14b93002adefe",
+      "width": 1184,
+      "height": 880
+    },
+    {
+      "path": "media/refs/f72f9d1a-2e29-4c18-8306-479c850a83b4.webp",
+      "kind": "image",
+      "bytes": 6092,
+      "sha256": "c6c957f516f146c87774a696929e9075d241131ebcadd76cbd4e78e81b1449fc",
+      "sourceSha256": "5dfeafad254b8bec857735ca463657312725949e5de04d0e9c976c5b69ad0257",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/49946eed-2b38-43ab-bba2-24ae9226b78d.webp",
+      "kind": "image",
+      "bytes": 6248,
+      "sha256": "131544192705c38ba25cf8aad6c803b4a8a3f55855380e41fa473cb728306cb1",
+      "sourceSha256": "6991fc11a8a4433512a949125ab91035f2e66ad0dcfead7472ffd9684d6c454c",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/707c6d55-c4e5-4101-80b0-45cc77549626.webp",
+      "kind": "image",
+      "bytes": 7084,
+      "sha256": "5661a16600c774c4236196a2fb771e26d4a63f1d6946ecd5ceeff52ee9a1d1dd",
+      "sourceSha256": "844ff65543a9f31d346ff36aacaae1f5a932b09a853279a50113ff97fa55745d",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/5611b966-172d-4ac0-bf5c-f7820a10dc2d.webp",
+      "kind": "image",
+      "bytes": 6320,
+      "sha256": "6660816fd0e61473961f28fcce6fd9e691522f6f8d593120e73bc360afce9779",
+      "sourceSha256": "30a1894b6def1462133e3dcbf30a04a54e3d668b4f2a1bcae9a0cd476ddfd052",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/ec9997a8-9d8a-48ad-9361-26ae36bd2649.webp",
+      "kind": "image",
+      "bytes": 11392,
+      "sha256": "3019d9dc10bd6bbb182765fa0cdee9b36d01eedfc37e14d12d86b9b6082adef9",
+      "sourceSha256": "50acf222b5704d809cb9137712aa6881f8ffceb31254f6fee8b97d7f58c3e8e3",
+      "width": 1600,
+      "height": 333
+    },
+    {
+      "path": "media/refs/d7b4aa8d-8c84-4530-a8b1-7fec8d8a51c8.webp",
+      "kind": "image",
+      "bytes": 64270,
+      "sha256": "76ae9b8320d5de41e3ef4082d0342d7b1d578e3d02d025aebb9d2a1698bb5839",
+      "sourceSha256": "b0c5c71b166ea09d929c9c30d00806263acf6c51364c9b4bc8b961a8356591b0",
+      "width": 880,
+      "height": 1184
+    },
+    {
+      "path": "media/refs/d7cc8cbb-fad9-4cea-ac60-eaefe94aa3b5.webp",
+      "kind": "image",
+      "bytes": 17656,
+      "sha256": "8e02dc8fba36b5a9c61e6225a4e7e9331cf1c6e207bfd4cc00012d838963b1e9",
+      "sourceSha256": "ec77c36a8ff94f7e4b5c0b00aaf6da26f1c0ae480856ac0b2da73330b8ea65d8",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/3c1c1d07-682c-45c9-a894-a52c7ff56e6d.webp",
+      "kind": "image",
+      "bytes": 18324,
+      "sha256": "708a6ed2826ad8d4f61f189f04668ebcfe368e60891e4a0753e3c14f12dcc4d8",
+      "sourceSha256": "49ae338541f26de5ba0e7d872c48d09da80326fa17bd80b7cceae5acec5c4e74",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/9297cd14-5d9f-47b2-8f41-48bd4cf370c4.webp",
+      "kind": "image",
+      "bytes": 15038,
+      "sha256": "67fcb32e78cf9e495e35839c77f20aa065dda76a65dfbf7ed956ebf8a4ac662d",
+      "sourceSha256": "fe04849dfab4ed2f69a544f6d7589fb9274421afe728dd6982cd62ef4cb43a32",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/0e8ddbbb-f20b-456b-8c0e-0ede0cc4bd1c.webp",
+      "kind": "image",
+      "bytes": 14958,
+      "sha256": "4e5b502d1dc1543caecb13945708c9c8d9ddda4adefe940d21555995b0325646",
+      "sourceSha256": "981dd9215f1652e5be14989b37f69a3864dea918ea113fd1d57a51b179894941",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/f53b450c-3f0f-4eef-97e6-0bf2d58a9d12.webp",
+      "kind": "image",
+      "bytes": 37332,
+      "sha256": "34079c804a16612c00367434c3cc80a74f571fd3ac4cb747b9a26027b48c4d25",
+      "sourceSha256": "a582f0a7c9d46aa30330b664ef1328ca6f82bcafe58d9b484068c10f6746a773",
+      "width": 1600,
+      "height": 817
+    },
+    {
+      "path": "media/refs/3b52e08b-434a-40a2-aa95-308acd555e3f.webp",
+      "kind": "image",
+      "bytes": 33234,
+      "sha256": "d318451cda67a2a3a5659431302504732c4ed523ecebb7d10990b7ba3bc01b02",
+      "sourceSha256": "166b3c2e3d6b948e13d52dbf28b450c5a6350f4b610645b8d8045e08c0e40f74",
+      "width": 1184,
+      "height": 880
+    },
+    {
+      "path": "media/refs/75ec092b-781c-4068-9138-782630d4497c.webp",
+      "kind": "image",
+      "bytes": 20390,
+      "sha256": "0541717d4a8683f0748cc82a44815d661567bd58b5b329b73a8e57cd2767e2e7",
+      "sourceSha256": "53a0388b52cfdabb2d22509ab7459d1d3055491f73dd79abccfb0594559202cf",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/f0db3f10-6e31-4170-aa4c-ad9505acc33f.webp",
+      "kind": "image",
+      "bytes": 26098,
+      "sha256": "01e8e4fd42fc4706de73cca68926ccc4cfd0d0e87a6d9265aa7f209c5b0a282d",
+      "sourceSha256": "240492e2ea8327e58c31589a3fa8972bc866561e0832301c5b27b97b899f6c7e",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/3239b061-b080-42e8-af46-42e9d864ba64.webp",
+      "kind": "image",
+      "bytes": 18634,
+      "sha256": "af9b760d232a7d175259ad72a777b837c0a55fc7e27e8c84554393016cd18ebf",
+      "sourceSha256": "7f61a1824b367cdb6a5f1fde24c49c88b38c4709500fbd4faddaa45de07ef028",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/0f388fb2-4b81-4b20-8f3a-f30f31e08639.webp",
+      "kind": "image",
+      "bytes": 32330,
+      "sha256": "9062fa1f25fa72058978a77925609221caa1cda5616dd1c1f8875a3fed105e90",
+      "sourceSha256": "9eb37f3b346190d721ff7d1afbdc220a7c57cd4fc6d033d5811e804d0219aa02",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/6e1b23d9-86cb-4e69-bf73-94c16cba3653.webp",
+      "kind": "image",
+      "bytes": 35668,
+      "sha256": "20eb9aca40224ad73445e3b9bb4ca03096810fff189f3aee398cc66ebc86ddc5",
+      "sourceSha256": "5455288a003d662b78e1ea33bf3d0fea881c34b6f124211a114040022f40b3a5",
+      "width": 1600,
+      "height": 534
+    },
+    {
+      "path": "media/refs/19fdc35f-dd4e-4621-ae1e-0bd9d5a2892b.webp",
+      "kind": "image",
+      "bytes": 15966,
+      "sha256": "7634d827bc4e1ba22376a24e83bcd22c0f5267c9163d9406ac4ef750e38b5051",
+      "sourceSha256": "393a6730429ce8afc372ec74663bec6183f73db6c36be4cc799d9408cf1fa15a",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/9b120724-d2d7-40ba-91f5-8c9825775824.webp",
+      "kind": "image",
+      "bytes": 38494,
+      "sha256": "fdc161821e0108ae2959cb4ff682d2e8944db25d7a3f9f7c339545e6a7e9887f",
+      "sourceSha256": "3e7ffeb7610dcb6f473df0c991a9e6e1230224d9cf2691f0072e39d8a625b458",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/213e79f0-1aff-4d5b-8dd0-642a7cfbb2e6.webp",
+      "kind": "image",
+      "bytes": 12434,
+      "sha256": "d1e77a7e2b9d71a04ab39b79e1c7c63b95d681466a8047618b00d6a218eb6a15",
+      "sourceSha256": "8c0f2abde8b69695bbdfe459e9e4721f146d83be8f90a8c77e120652698560c2",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/ad2c3324-622f-415c-8cf7-4b827cf69ce5.webp",
+      "kind": "image",
+      "bytes": 22130,
+      "sha256": "5d76482a76c19f6ba4599c149b18ed40d3ff12c29b5b8809bf40a8aa4bc368e7",
+      "sourceSha256": "8fd0f104d4165f7ade32fd2354355e9c2ca059e5edcc2ee740825d167e59b492",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/50e8c58e-f0c4-463b-b107-4ab1175edfe1.webp",
+      "kind": "image",
+      "bytes": 40032,
+      "sha256": "93ae9b4a9b5bda38af6c644581c28573dc00ec541f53acc3769690eefeced684",
+      "sourceSha256": "eed67cfaaefd8460a9929508774809d54c97ad15c8cfcafb17a2115a0d27e71f",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "media/refs/aa22ba26-e773-4666-a0ee-5d50b7030a26.webp",
+      "kind": "image",
+      "bytes": 21964,
+      "sha256": "40c2944a2fa166b93bb39e2f5dc68ea0ec0a5c931727546f4c75a0849d674c0c",
+      "sourceSha256": "230a68bd3d2f62c45ed77878be63946ac0d265546b8b487cd99cf131f7331305",
+      "width": 1600,
+      "height": 379
+    },
+    {
+      "path": "media/refs/47334e07-2256-4750-8686-6f6b6fff4730.webp",
+      "kind": "image",
+      "bytes": 42288,
+      "sha256": "7caec028c5541c1e322bd1982f97631a18274ccf45388da38684de235a66d360",
+      "sourceSha256": "fceb0669ce67b4e099f39228c8cf89aa59d4f5a9fb7993d8d38b3334e83faa4d",
+      "width": 880,
+      "height": 1184
+    },
+    {
+      "path": "media/refs/df6d53d6-7515-436a-a83f-af54b8f5f9ce.webp",
+      "kind": "image",
+      "bytes": 24816,
+      "sha256": "6dfc8be517378ca073534c50dcfec19ed7737a11033c338258aeb918c53fb28b",
+      "sourceSha256": "4791f87c7f26373cfab164721e6c04e4835aa346051a1a1fb598139d507aa1dc",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/9a34d65c-3de8-4d37-8b5a-97da082d0a38.webp",
+      "kind": "image",
+      "bytes": 24338,
+      "sha256": "d4f3bb006e4953b2966ebf74233028b4f8d963adc1096158f8382abb44e15512",
+      "sourceSha256": "39a7abede5a64320919ee7726ec958a6405570caf34ed4a623bd4a325cfc51e9",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/5c110746-4a9b-4303-8664-1c02bfa6bf98.webp",
+      "kind": "image",
+      "bytes": 23622,
+      "sha256": "e4b1c30b46800200ab37645dfa9f2b8894a4e47f107701879ac88685427c7bc9",
+      "sourceSha256": "1ccee77936d1766078ee80a84d1c72b2dbbdbd22bf12ac81ed03158e0119c20b",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/b5a2d343-a9c2-42d1-8656-4c347fec5c9c.webp",
+      "kind": "image",
+      "bytes": 19376,
+      "sha256": "9be7ad249e6e783f295eb0ec6e72702a14b8cc5b52479ef7167a2ce52c485f4e",
+      "sourceSha256": "2efa2fe7284f375dfefe6114a163578e3c0ebacac2ffa2c583fbab88857869f3",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "media/refs/f7cd2a6e-bc1a-4761-8774-2c9fa9cf8018.webp",
+      "kind": "image",
+      "bytes": 46734,
+      "sha256": "fdb32f82cf1455d23b4c2f8ec3e26de3468d213f88d089198f4fc4bf2a185a70",
+      "sourceSha256": "6149b8a6dacae941a2e7bd89c0470ee27da51844abfd9e01c63d9ef891a87098",
+      "width": 1600,
+      "height": 817
+    },
+    {
+      "path": "media/refs/08ffcece-2746-5d9a-a9ec-9ff715559165.webp",
+      "kind": "image",
+      "bytes": 73060,
+      "sha256": "b137b0d142a30af74de070fb8af8dc2ac63371f3f6756b07de66b516c8b50845",
+      "sourceSha256": "d1f8afb2074d3371ed41330d0fa81b3be4d9d188b8870e83179e87a4e9913007",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/refs/aa7429fb-ee57-5808-a186-6adec8671c06.webp",
+      "kind": "image",
+      "bytes": 72246,
+      "sha256": "871d404c3d2fbcd0bd881a55419c2fe73e4bb9f66641ad8318b35dccaad29bf6",
+      "sourceSha256": "376a4355b501a0af2f28511b646afce567e1016c36e3353f2844ef92f3b12beb",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/01b3e3ae-c489-4b0b-bbca-a28c1e59a87d.mp4",
+      "kind": "video",
+      "bytes": 1107093,
+      "sha256": "292d04c9df2e062ee884c06ce4da9c8ae6b36a0326c59cd8810d9ec0b05ae398",
+      "sourceSha256": "66d550de9adc2a1b0e5e3e406f5a064e6f4ff6c1176d213a22fdffdd5aa25767",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/54e27751-d91f-5586-a1c6-0ff314e9b989.mp4",
+      "kind": "video",
+      "bytes": 853230,
+      "sha256": "91ebb82c256c3c92e53bb227b71484c1456cddb13bec9dd6421bbd2056c2661b",
+      "sourceSha256": "fb4264b36df829995606a197532afef699b5403e24f18b4ac1eacb6f9efa6a1c",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 121,
+      "duration": 5.042
+    },
+    {
+      "path": "media/refs/29c31b1b-d11a-55bf-a099-65cd33c3d727.webp",
+      "kind": "image",
+      "bytes": 104500,
+      "sha256": "a7dc9d2c690997e23e621b37c4d1146e98c970413b173085143c617a01321599",
+      "sourceSha256": "c2a887cd703eef46367457ca62e67f3dcc8698681981145448961f0d69191204",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/refs/61342f1c-a584-5eb9-acaf-464d8a111122.webp",
+      "kind": "image",
+      "bytes": 123682,
+      "sha256": "3564b3425e259d5a31ece4e748db1f71efdc8f72e0698bcb079e49f3f98dd191",
+      "sourceSha256": "737f03d3f9738d3a02bf44adad512aac64da0b91f1f34264ff4e748d4d1b9a9b",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "path": "media/assets/9a56b722-9521-48ee-9245-b9cc0eeb23b7.mp4",
+      "kind": "video",
+      "bytes": 1047013,
+      "sha256": "d0ab9d5b74879481631522ef533b7b377dafdbdd8186781034e1cfa56b8ed907",
+      "sourceSha256": "84e8f94bd492339317ede3a923c22ad4af63057525a35f815e534223ea3dabea",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/6b864020-2490-5f40-ad5f-39b82eef2791.mp4",
+      "kind": "video",
+      "bytes": 941419,
+      "sha256": "ab7c8c77ad7964655bb9e5f88e8d9eb04b60d1fc7d6df9ebab68733c461aeb3b",
+      "sourceSha256": "693651ed0c0fbccd33fd21e0f7835fee5110bfc53468bb1230eee3b134421805",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 113,
+      "duration": 4.708
+    },
+    {
+      "path": "media/refs/e7ef0050-afae-54d8-a26c-65c870cb3ee3.webp",
+      "kind": "image",
+      "bytes": 91924,
+      "sha256": "1bdafa7e91ec05eff730f0212f6aa9fd715166fda604d5298a84a6735503103d",
+      "sourceSha256": "78a659c1b7ce5e7578afe98cdede9969e57d83acb14e06e71da4f9e70b26eefb",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/refs/e0129786-5314-5d40-a36f-b4bb8eaa9a77.webp",
+      "kind": "image",
+      "bytes": 89044,
+      "sha256": "598b4d779e95367ab16754670337111d619b777559f344f94fbda53d917e6ae5",
+      "sourceSha256": "44b3198d76aad79d456eb9946fafde06c3b3c1a3d67c18ace782b26e3d04997c",
+      "width": 1360,
+      "height": 768
+    },
+    {
+      "path": "media/assets/27fa7ff1-fc3a-45aa-b2b1-1cc7d4f56155.mp4",
+      "kind": "video",
+      "bytes": 1096285,
+      "sha256": "e68f3f85ede4004bbfff675f50f9a66a4aa3d164630b1e3ea487ba09cdace492",
+      "sourceSha256": "3f3123feb0136d5c2dff1b7b1d8b1db5c6ab246123ee1a5215b54f2ab70f7f57",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 120,
+      "duration": 5
+    },
+    {
+      "path": "media/assets/ca766852-fbd1-5ca8-ada6-921b25a01ee5.mp4",
+      "kind": "video",
+      "bytes": 1166228,
+      "sha256": "9971a7516463976cba71b0fedcc4b0ff241e827fb40e67eb01603bdf1e4f8d8b",
+      "sourceSha256": "34f068d003f6ab18b19b803691fd9a5bd125cfb64d4e499dd12fae0a41d465c7",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "frameCount": 121,
+      "duration": 5.042
+    }
+  ],
+  "assets": [
+    {
+      "id": "01b3e3ae-c489-4b0b-bbca-a28c1e59a87d",
+      "kind": "camera-render",
+      "shotId": "a015ef8e-809e-4492-93ef-675772aba797",
+      "file": "assets/01b3e3ae-c489-4b0b-bbca-a28c1e59a87d.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-01T07:34:06.064Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "6853173a"
+      }
+    },
+    {
+      "id": "54e27751-d91f-5586-a1c6-0ff314e9b989",
+      "kind": "workflow-result",
+      "shotId": "a015ef8e-809e-4492-93ef-675772aba797",
+      "file": "assets/54e27751-d91f-5586-a1c6-0ff314e9b989.mp4",
+      "mime": "video/mp4",
+      "duration": 5.041667,
+      "createdAt": "2026-11-01T07:51:41.030Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. News anchor settles at the desk in the first second, lifts the chin, then opens one palm briefly and rests it again. Breathing is subtle; suit, face and studio graphics stay consistent. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 40mm. Filter: deep blue dusk.",
+        "sourceAssetId": "01b3e3ae-c489-4b0b-bbca-a28c1e59a87d"
+      }
+    },
+    {
+      "id": "9a56b722-9521-48ee-9245-b9cc0eeb23b7",
+      "kind": "camera-render",
+      "shotId": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "file": "assets/9a56b722-9521-48ee-9245-b9cc0eeb23b7.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-01T07:34:11.552Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "cae0bba"
+      }
+    },
+    {
+      "id": "6b864020-2490-5f40-ad5f-39b82eef2791",
+      "kind": "workflow-result",
+      "shotId": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+      "file": "assets/6b864020-2490-5f40-ad5f-39b82eef2791.mp4",
+      "mime": "video/mp4",
+      "duration": 4.708333,
+      "createdAt": "2026-11-01T07:50:47.292Z",
+      "source": {
+        "workflow": "Seedance 2.5 · edit the complete video · 6 reference images",
+        "backend": "cloud",
+        "prompt": "News anchor delivers the headline: a small nod in second one, one measured hand emphasis in seconds two to three, then stillness. Keep the same face and suit; shoulders follow the gesture softly. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Follow the camera motion and framing of the blockout video exactly; it is the camera. Repaint it photoreal in the look of the still. Lens: 55mm. Filter: high contrast.\nReference images: 1 = start still; 2 = end still; 3 = News anchor; 4 = Video wall; 5 = Anchor desk; 6 = Studio floor.",
+        "sourceAssetId": "9a56b722-9521-48ee-9245-b9cc0eeb23b7"
+      }
+    },
+    {
+      "id": "27fa7ff1-fc3a-45aa-b2b1-1cc7d4f56155",
+      "kind": "camera-render",
+      "shotId": "597912bb-6c6f-4f3b-9274-c203578c538e",
+      "file": "assets/27fa7ff1-fc3a-45aa-b2b1-1cc7d4f56155.mp4",
+      "mime": "video/mp4",
+      "duration": 5,
+      "createdAt": "2026-11-01T07:34:17.176Z",
+      "source": {
+        "engineShotId": null,
+        "signature": "11ffc962"
+      }
+    },
+    {
+      "id": "ca766852-fbd1-5ca8-ada6-921b25a01ee5",
+      "kind": "workflow-result",
+      "shotId": "597912bb-6c6f-4f3b-9274-c203578c538e",
+      "file": "assets/ca766852-fbd1-5ca8-ada6-921b25a01ee5.mp4",
+      "mime": "video/mp4",
+      "duration": 5.041667,
+      "createdAt": "2026-11-01T07:51:48.442Z",
+      "source": {
+        "workflow": "LTX 2.5 Fast · animate the key frame (draft)",
+        "backend": "cloud",
+        "prompt": "Cinematic live-action shot. News anchor finishes speaking, lowers both hands, settles the shoulders and gives a restrained nod in the last second. Hold the same face, suit and studio graphics. News anchor: navy suit, white shirt, blue tie, yellow Comfy pin, neat dark hair and warm expression. Same face in every shot: the man from the primary reference. Look: Photoreal live broadcast. Bright key light on the anchor, cool blue studio ambience, crisp and clean. Hold the still’s framing; keep the camera move subtle and consistent with it. Lens: 45mm. Filter: deep blue dusk.",
+        "sourceAssetId": "27fa7ff1-fc3a-45aa-b2b1-1cc7d4f56155"
+      }
+    }
+  ],
+  "edit": {
+    "clips": [
+      {
+        "shotId": "a015ef8e-809e-4492-93ef-675772aba797",
+        "assetId": "54e27751-d91f-5586-a1c6-0ff314e9b989",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "3014d6d1-f093-4e8f-b791-aed102116cf3",
+        "assetId": "6b864020-2490-5f40-ad5f-39b82eef2791",
+        "in": 0,
+        "out": null
+      },
+      {
+        "shotId": "597912bb-6c6f-4f3b-9274-c203578c538e",
+        "assetId": "ca766852-fbd1-5ca8-ada6-921b25a01ee5",
+        "in": 0,
+        "out": null
+      }
+    ]
+  }
+}
