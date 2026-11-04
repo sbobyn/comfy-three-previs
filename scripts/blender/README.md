@@ -2,15 +2,15 @@
 
 These authored, texture-free low-poly GLBs upgrade all 189 visible objects in the four
 starter scenes. Empty groups remain editor pivots. There are 32 reusable assets, about
-1.3 MB combined, each below 5,000 triangles (most below 1,500). No downloaded or generated
+1.45 MB combined, each below 5,000 triangles (most below 1,500). No downloaded or generated
 third-party art, paid generation, textures, skinning, animation clips or Blender runtime dependency.
 
-**25 of the 32 come from the [beret-parts](https://github.com/sbobyn/beret-parts) parametric library**
+**29 of the 32 come from the [beret-parts](https://github.com/sbobyn/beret-parts) parametric library**
 (desk, light, basketball, race-car, pine, studio-camera, the court/track/floor surfaces, stands, panels, hoop parts,
-circle, lake, flag-stand). Each is a named preset of an editable family, baked in Node with no Blender.
+circle, lake, flag-stand, and the people: player, anchor, operator, fan). Each is a named preset of an editable family, baked in Node with no Blender.
 `scripts/blender/library-blockouts.json` lists them with family, preset, Previs shape and `minScale`. `minScale` is
 the smallest starter scale per axis; the bake sizes decal gaps for it, so the coplanar lint holds at every starter scale.
-People, animals and terrain (player, anchor, operator, fan, eagle, elk, terrain) stay on `generate-blockouts.py`,
+Animals and terrain (eagle, elk, terrain) stay on `generate-blockouts.py`,
 which skips the library ids. `PREVIS_BLOCKOUTS_ALL=1` rebuilds all 32 from the old Blender builders as a fallback.
 
 The animation pass lives in the library too. race-car's recipe has a `rig`, which makes the bake emit the `joint_body`,
@@ -19,9 +19,16 @@ wheel spin reads on camera. The rig names sides like the Blender rigs (-X is L),
 `wheelFL`. The backboard preset uses the hoop family's clear glass: a see-through, alpha-blended `backboard-glass` pane in
 a dark frame.
 
+The people are presets of the `beret/human` family, baked at `"lod": "proxy"` (about 1,000–1,100 triangles each). Their
+recipes carry Previs's person rig (`joint_body`, `joint_head`, `joint_armL/R`, `joint_forearmL/R`, `joint_thighL/R`,
+`joint_shinL/R`), pivoting at the human's own joints (`at: "joint:<id>"`), with the same -X-is-L side naming. Only the top
+uses `entity-color`; skin, hair, trousers and shoes keep the family's own materials, so a starter's entity colour tints
+the jersey or jacket, not the whole figure.
+
 ## Rebuild the library-built blockouts
 
-With a beret-parts checkout that has blockout `rig` support, car `spokes` and hoop `glass` (Node ≥ 23.6, `pnpm install`
+With a beret-parts checkout that has blockout `rig` support (including `joint:` pivots), car `spokes`, hoop `glass` and
+human `lod` (beret-parts `84cb2af` or later; Node ≥ 23.6, `pnpm install`
 done there):
 
 ```sh
@@ -111,7 +118,7 @@ The Blender generator fits the neutral hierarchy once to its original proxy; pos
 anchor and operator limbs bend at named pivots; eagle feathers overlap the wing beats; elk nod; race-car wheels
 rotate and steer independently of the body (the library rig above). The backboard is framed transparent arena glass
 so the fixed dunk camera can see the score. Glass does not cast an opaque shadow. All meshes remain under 5,000 triangles and the
-library remains under 1.5 MB. A targeted rebuild is supported after Blender's `--`, for example `-- eagle player`.
+library remains under 1.5 MB. A targeted rebuild is supported after Blender's `--`, for example `-- eagle elk`.
 
 `shared/blockout-pose.mjs` validates and evaluates joint angles. `Entity.pose` and `PathKey.pose` store local XYZ
 degrees; `PathKey.ease` selects linear or smoothstep interpolation for the outgoing segment. Omitted ease retains
