@@ -273,18 +273,55 @@ export function openMaskedEdit(dataRoot, director, { log = () => {}, generation 
     };
   }
 
-  async function status({ projectId, editId } = {}) {
-    assertUuid(projectId, 'projectId');
-    const receipt = await loadReceipt(editId);
-    if (receipt.projectId !== projectId) fail('Edit belongs to another project', 404);
-    await director.get(projectId);
-    let job = null;
-    if (receipt.jobId && generation?.listForSync) {
-      try {
-        const listed = generation.state?.()?.jobs || [];
-        job = listed.find(j => j.id === receipt.jobId) || null;
-      } catch { /* status is best-effort */ }
+  function findJob(jobId) {
+    if (!jobId || !generation) return null;
+    try {
+      if (typeof generation.list === 'function') {
+        return generation.list().find(j => j.id === jobId) || null;
+      }
+      const listed = generation.state?.()?.jobs || [];
+      return listed.find(j => j.id === jobId) || null;
+    } catch {
+      return null;
     }
+  }
+
+  async function decodeRgbFrames(filePath, width, height, frameCount) {
+    const raw = await run('ffmpeg', [
+      '-hide_banner', '-loglevel', 'error', '-i', filePath,
+      '-frames:v', String(frameCount), '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1',
+    ], 300000);
+    const stride = width * height * 3;
+    if (raw.length !== stride * frameCount) {
+      fail(`Expected ${frameCount}×${width}×${height} rgb24 (${stride * frameCount} B), got ${raw.length}`, 422, 'timing');
+    }
+    const frames = [];
+    for (let i = 0; i < frameCount; i++) frames.push(raw.subarray(i * stride, (i + 1) * stride));
+    return frames;
+  }
+
+  async function writeCandidatePreview(receipt) {
+    const dir = editDir(receipt.editId);
+    const outMp4 = safeEditPath(dir, 'candidate.mp4');
+    await run('ffmpeg', [
+      '-hide_banner', '-loglevel', 'error', '-y',
+      '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', `${ELIGIBLE_WIDTH}x${ELIGIBLE_HEIGHT}`,
+      '-r', String(receipt.sourceTiming.fps || 24),
+      '-i', safeEditPath(dir, 'composite.rgb'),
+      '-frames:v', String(receipt.sourceTiming.frameCount),
+      '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p',
+      '-movflags', '+faststart', outMp4,
+    ]);
+    return outMp4;
+  }
+
+  function statusPayload(receipt, job = null) {
+    const terminalFail = job && ['failed', 'closed', 'orphaned', 'recovery-required'].includes(job.status);
+    const uncertain = receipt.state === 'uncertain' || job?.status === 'uncertain';
+    const needsResume = (receipt.state === 'submitted' || receipt.state === 'failed-local' || receipt.state === 'compositing')
+      && Boolean(receipt.jobId)
+      && (job?.status === 'completed' || receipt.state === 'failed-local')
+      && !receipt.candidateSha256;
     return {
       editId: receipt.editId,
       state: receipt.state,
@@ -303,8 +340,147 @@ export function openMaskedEdit(dataRoot, director, { log = () => {}, generation 
       inputKey: receipt.inputKey,
       providerDispatch: Boolean(receipt.jobId),
       jobId: receipt.jobId || null,
+      patchJobId: receipt.patchJobId || null,
+      patchResultId: receipt.patchResultId || null,
+      patchSha256: receipt.patchSha256 || null,
       job,
+      needsResume,
+      canGenerate: receipt.state === 'prepared' && !uncertain && !terminalFail,
+      canResume: needsResume || receipt.state === 'failed-local',
+      canReview: receipt.state === 'ready-for-review' || receipt.state === 'accepted',
+      canAccept: receipt.state === 'ready-for-review' && Boolean(receipt.review?.id),
+      uncertain: Boolean(uncertain),
+      media: {
+        candidate: receipt.candidateSha256 ? `masked-edit/media?projectId=${receipt.projectId}&editId=${receipt.editId}&file=candidate.mp4` : null,
+        mask: `masked-edit/media?projectId=${receipt.projectId}&editId=${receipt.editId}&file=mask.png`,
+      },
     };
+  }
+
+  async function status({ projectId, editId } = {}) {
+    assertUuid(projectId, 'projectId');
+    const receipt = await loadReceipt(editId);
+    if (receipt.projectId !== projectId) fail('Edit belongs to another project', 404);
+    await director.get(projectId);
+    const job = findJob(receipt.jobId);
+    return statusPayload(receipt, job);
+  }
+
+  /**
+   * Local-only advance after a quarantined Cloud patch completes (or after failed-local).
+   * Never calls generation quote/submit/bind — no Cloud POST.
+   */
+  async function resume({ projectId, editId } = {}) {
+    assertUuid(projectId, 'projectId');
+    assertUuid(editId, 'editId');
+    let receipt = await loadReceipt(editId);
+    if (receipt.projectId !== projectId) fail('Edit belongs to another project', 404);
+    await director.get(projectId);
+
+    if (receipt.state === 'ready-for-review' || receipt.state === 'accepted') {
+      return statusPayload(receipt, findJob(receipt.jobId));
+    }
+    if (receipt.state === 'uncertain') {
+      fail('Model outcome is uncertain. Do not generate again; wait for a terminal job status or operator close.', 409, 'uncertain');
+    }
+    if (!['submitted', 'failed-local', 'compositing', 'verifying'].includes(receipt.state)) {
+      fail(`Cannot resume composite from state ${receipt.state}`, 409);
+    }
+
+    const dir = editDir(editId);
+    const crop = receipt.cropRect;
+    const frameCount = receipt.sourceTiming.frameCount;
+    let sourceFrames;
+    let patchFrames;
+    let patchMeta = {
+      patchJobId: receipt.patchJobId || receipt.jobId || null,
+      patchResultId: receipt.patchResultId || null,
+      patchSha256: receipt.patchSha256 || null,
+    };
+
+    const patchRgbPath = join(dir, 'patch.rgb');
+    let havePatchRgb = false;
+    try {
+      await access(patchRgbPath);
+      havePatchRgb = true;
+    } catch { /* decode from job result */ }
+
+    if (havePatchRgb && receipt.state === 'failed-local') {
+      const stride = crop.w * crop.h * 3;
+      const flat = await readFile(patchRgbPath);
+      if (flat.length !== stride * frameCount) fail('Stored patch.rgb length mismatch', 422, 'timing');
+      patchFrames = [];
+      for (let i = 0; i < frameCount; i++) patchFrames.push(flat.subarray(i * stride, (i + 1) * stride));
+      const resolved = await resolveSource(projectId, receipt.shotId, receipt.sourceAssetId, receipt.sourceSha256);
+      sourceFrames = await decodeRgbFrames(resolved.file, ELIGIBLE_WIDTH, ELIGIBLE_HEIGHT, frameCount);
+    } else {
+      const job = findJob(receipt.jobId);
+      if (!job) fail('Patch job receipt is missing locally; open Jobs to refresh tracking first', 409, 'job-missing');
+      if (job.status === 'uncertain') {
+        receipt.state = 'uncertain';
+        receipt.updatedAt = now();
+        await saveReceipt(receipt);
+        fail('Model outcome is uncertain. Do not generate again.', 409, 'uncertain');
+      }
+      if (['failed', 'closed', 'orphaned', 'recovery-required'].includes(job.status)) {
+        fail(`Patch job ended ${job.status}; nothing to composite`, 409, 'job-failed');
+      }
+      if (job.status !== 'completed') {
+        return statusPayload(receipt, job);
+      }
+      const patch = (job.results || []).find(r => r.kind === 'video' || String(r.mime || '').startsWith('video/'));
+      if (!patch?.filename) fail('Completed patch job has no video result', 422);
+      const patchPath = join(root, 'assets', patch.filename);
+      const patchBytes = await readFile(patchPath);
+      patchMeta = {
+        patchJobId: job.id,
+        patchResultId: patch.id || null,
+        patchSha256: patch.sha256 || sha(patchBytes),
+      };
+      if (patch.width && patch.height && (patch.width !== crop.w || patch.height !== crop.h)) {
+        fail(`Patch ${patch.width}×${patch.height} does not match crop ${crop.w}×${crop.h}`, 422, 'timing');
+      }
+      if (patch.frameCount && patch.frameCount !== frameCount) {
+        fail(`Patch frame count ${patch.frameCount} ≠ ${frameCount}`, 422, 'timing');
+      }
+      const resolved = await resolveSource(projectId, receipt.shotId, receipt.sourceAssetId, receipt.sourceSha256);
+      sourceFrames = await decodeRgbFrames(resolved.file, ELIGIBLE_WIDTH, ELIGIBLE_HEIGHT, frameCount);
+      patchFrames = await decodeRgbFrames(patchPath, crop.w, crop.h, frameCount);
+      const flatPatch = Buffer.concat(patchFrames);
+      await writeFile(safeEditPath(dir, 'patch.rgb'), flatPatch, { mode: 0o600 });
+    }
+
+    receipt.patchJobId = patchMeta.patchJobId;
+    receipt.patchResultId = patchMeta.patchResultId;
+    receipt.patchSha256 = patchMeta.patchSha256;
+    receipt.updatedAt = now();
+    await saveReceipt(receipt);
+
+    const ready = await compositeFromFrames({ editId, projectId, sourceFrames, patchFrames });
+    receipt = await loadReceipt(editId);
+    receipt.patchJobId = patchMeta.patchJobId;
+    receipt.patchResultId = patchMeta.patchResultId;
+    receipt.patchSha256 = patchMeta.patchSha256;
+    await saveReceipt(receipt);
+    try { await writeCandidatePreview(receipt); } catch (e) {
+      log(`[masked-edit] preview encode skipped: ${e.message}`);
+    }
+    log(`[masked-edit] resumed composite ${editId} (local only; no Cloud POST)`);
+    return statusPayload(await loadReceipt(editId), findJob(receipt.jobId));
+  }
+
+  /** Serve quarantined review media (candidate.mp4 / mask.png) after project ownership check. */
+  async function mediaFile({ projectId, editId, file } = {}) {
+    assertUuid(projectId, 'projectId');
+    assertUuid(editId, 'editId');
+    const name = String(file || '');
+    if (!['candidate.mp4', 'mask.png', 'mask-frame.png'].includes(name)) fail('Unknown masked-edit media file', 404);
+    const receipt = await loadReceipt(editId);
+    if (receipt.projectId !== projectId) fail('Edit belongs to another project', 404);
+    await director.get(projectId);
+    const path = safeEditPath(editDir(editId), name);
+    try { await access(path); } catch { fail('Media not ready', 404); }
+    return { path, contentType: name.endsWith('.png') ? 'image/png' : 'video/mp4' };
   }
 
   /** Build crop plate + mask video for Cloud upload; register as engine support assets (not takes). */
@@ -720,11 +896,12 @@ export function openMaskedEdit(dataRoot, director, { log = () => {}, generation 
       estimateUsd: receipt.quote?.estimate ?? null,
       reviewId,
       preservationReportId: receipt.preservation?.candidateSha256 || candidateSha256,
-      patchJobId: null,
-      patchResultId: null,
-      patchSha256: null,
+      patchJobId: receipt.patchJobId || receipt.jobId || null,
+      patchResultId: receipt.patchResultId || null,
+      patchSha256: receipt.patchSha256 || null,
     });
     maskedEdit.acceptedAt = now();
+    if (maskedEdit.patchJobId) maskedEdit.costStatus = 'cloud-patch+local-composite';
 
     // Publish project-owned bytes without touching winner/cut (no director.mjs hook in foundation).
     const fileName = `${assetId}.mp4`;
@@ -810,13 +987,18 @@ export function openMaskedEdit(dataRoot, director, { log = () => {}, generation 
     if (method === 'GET' && (sub === '/status' || sub === 'status')) {
       return status({ projectId: url.searchParams.get('projectId'), editId: url.searchParams.get('editId') });
     }
+    // Binary media is handled by server.mjs via mediaFile(); routes stays JSON-only.
+    if (method === 'GET' && (sub === '/media' || sub === 'media')) {
+      fail('Use the mediaFile helper from the HTTP server', 404);
+    }
     if (method !== 'POST') fail('Method not allowed', 405);
     if (sub === '/prepare' || sub === 'prepare') return prepare(input);
     if (sub === '/submit' || sub === 'submit') return submit(input);
+    if (sub === '/resume' || sub === 'resume') return resume(input);
     if (sub === '/review' || sub === 'review') return review(input);
     if (sub === '/accept' || sub === 'accept') return accept(input);
     fail('Unknown masked-edit route', 404);
   }
 
-  return { prepare, submit, status, review, accept, compositeFromFrames, routes, editDir, loadReceipt, grayPng };
+  return { prepare, submit, status, resume, review, accept, compositeFromFrames, mediaFile, routes, editDir, loadReceipt, grayPng, findJob };
 }

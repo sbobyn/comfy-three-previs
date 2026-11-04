@@ -187,8 +187,9 @@ test('masked-edit submit refuses without generation wiring and bad fingerprints'
   assert.equal(calls.length, 0);
 });
 
-test('UI helpers: eligibility, crop envelope, client estimate mirrors server', () => {
+test('UI helpers: eligibility, crop envelope, client estimate mirrors server; reopen export present', () => {
   const ui = loadMaskedEditUi();
+  assert.equal(typeof ui.openMaskedEdit, 'function');
   assert.equal(ui.maskedEditEligibility({ kind: 'workflow-result', width: 1280, height: 720, fps: 24, frameCount: 81 }).ok, true);
   assert.equal(ui.maskedEditEligibility({ kind: 'workflow-result', width: 1280, height: 720, fps: 24, frameCount: 88 }).ok, false);
   assert.equal(ui.maskedEditEligibility(null).ok, false);

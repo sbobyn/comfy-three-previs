@@ -1,5 +1,5 @@
-// Fixed-mask region edit UI for Take lab (experimental). Authoring + quote review only here;
-// prepare/status/review/accept go through /api/director/masked-edit; paid submit remains gated.
+// Fixed-mask region edit UI for Take lab. Authoring → quote → submit → local resume/composite →
+// review lanes → accept. Paid submit stays gated; resume never POSTs to Cloud.
 import { api, h, toast, DEMO } from './director-common';
 import type { DirectorProject, Asset, Shot } from '../shared/director.mjs';
 import type { VideoTake } from '../shared/takes.mjs';
@@ -9,6 +9,7 @@ export const MASKED_EDIT_SIZE: { width: number; height: number; fps: number } = 
 const FEATHER_DEFAULT = 8;
 const MAX_STROKES = 64;
 const MAX_POINTS = 4000;
+const POLL_MS = 2500;
 
 export type MaskStroke = { tool: 'brush' | 'erase'; size: number; points: { x: number; y: number }[] };
 export type FixedMask = {
@@ -21,6 +22,36 @@ export type MaskedEditCtx = {
   project(): DirectorProject;
   assetUrl(a: Asset): string;
   focusReturn?: HTMLElement | null;
+  onAccepted?: (assetId: string) => void;
+};
+
+type Phase = 'paint' | 'quote' | 'active' | 'review';
+type ReviewLane = 'original' | 'edited' | 'mask' | 'outside';
+
+type StatusPayload = {
+  editId: string;
+  state: string;
+  sourceAssetId: string;
+  sourceSha256: string;
+  candidateSha256?: string | null;
+  cropRect?: { x: number; y: number; w: number; h: number };
+  review?: { id: string } | null;
+  acceptance?: { assetId: string } | null;
+  preservation?: { outsideExact?: boolean } | null;
+  inputKey?: string;
+  quoteFingerprint?: string;
+  jobId?: string | null;
+  job?: { status?: string; message?: string } | null;
+  needsResume?: boolean;
+  canGenerate?: boolean;
+  canResume?: boolean;
+  canReview?: boolean;
+  canAccept?: boolean;
+  uncertain?: boolean;
+  media?: { candidate?: string | null; mask?: string | null };
+  patchJobId?: string | null;
+  patchResultId?: string | null;
+  patchSha256?: string | null;
 };
 
 /** Offline-safe eligibility for the fixed-mask envelope (UX-AND-TESTS.md). */
@@ -94,9 +125,12 @@ export function emptyMask(width = MASKED_EDIT_SIZE.width, height = MASKED_EDIT_S
   return { v: 1, mode: 'fixed', width, height, coordinateSpace: 'source-pixels', strokes: [], featherPx: FEATHER_DEFAULT };
 }
 
-type Phase = 'paint' | 'quote' | 'active' | 'review';
+function mediaUrl(path: string | null | undefined) {
+  if (!path) return '';
+  return path.startsWith('/') ? path : `/api/director/${path}`;
+}
 
-export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: VideoTake) {
+export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: VideoTake, reopen?: { editId: string }) {
   document.getElementById('masked-edit-dialog')?.remove();
   const P = () => ctx.project();
   const shot = (): Shot | null => P().shots.find(s => s.id === shotId) || null;
@@ -123,9 +157,14 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
   let unknownAck = false;
   let allowance = 0.5;
   let quote: { estimate: number; reservationRequiredUsd: number } | null = null;
-  let editId: string | null = null;
+  let editId: string | null = reopen?.editId || null;
   let fingerprint: string | null = null;
   let crop: { x: number; y: number; w: number; h: number } | null = null;
+  let statusInfo: StatusPayload | null = null;
+  let reviewLane: ReviewLane = 'edited';
+  let reviewedScope = false;
+  let pollTimer = 0;
+  let busy = false;
 
   const title = h('h2', { id: 'masked-edit-title' });
   const status = h('p', { class: 'note tk-edit-status', role: 'status' });
@@ -136,6 +175,7 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
     body, status);
   close.onclick = () => dlg.close();
   dlg.addEventListener('close', () => {
+    if (pollTimer) window.clearInterval(pollTimer);
     dlg.remove();
     ctx.focusReturn?.focus?.();
   });
@@ -155,6 +195,7 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
   function paintOverlay() {
     const c = overlay.getContext('2d')!;
     c.clearRect(0, 0, overlay.width, overlay.height);
+    if (phase === 'review') return;
     c.fillStyle = 'rgba(20, 120, 200, 0.35)';
     if (mask.rect) { c.fillRect(mask.rect.x, mask.rect.y, mask.rect.w, mask.rect.h); c.strokeStyle = 'rgba(0,0,0,0.85)'; c.setLineDash([6, 4]); c.strokeRect(mask.rect.x, mask.rect.y, mask.rect.w, mask.rect.h); c.setLineDash([]); }
     for (const s of mask.strokes) {
@@ -204,6 +245,77 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
   };
   overlay.onpointercancel = () => { drawing = false; rectStart = null; stroke = null; };
 
+  function stopPoll() {
+    if (pollTimer) { window.clearInterval(pollTimer); pollTimer = 0; }
+  }
+
+  async function refreshStatus() {
+    if (!editId) return null;
+    const st = await api<StatusPayload>(`director/masked-edit/status?projectId=${encodeURIComponent(P().id)}&editId=${encodeURIComponent(editId)}`);
+    statusInfo = st;
+    if (st.cropRect) crop = st.cropRect;
+    if (st.state === 'ready-for-review' || st.state === 'accepted') {
+      phase = 'review';
+      stopPoll();
+      if (st.acceptance?.assetId) say(`Saved as take ${st.acceptance.assetId.slice(0, 8)}. Cut unchanged.`);
+      else if (st.preservation?.outsideExact) say('Ready for review. Outside-mask pixels match the original (exact).');
+      else say('Ready for review.');
+    } else if (st.uncertain) {
+      phase = 'active';
+      stopPoll();
+      say('Model finished with an uncertain outcome. Do not Generate again. Wait for Jobs to settle, then Resume local composite if a patch appears.');
+    } else if (st.needsResume || st.canResume) {
+      say('Cloud patch ready. Running local composite (no Cloud POST)…');
+      await runResume();
+    } else if (st.state === 'submitted' || st.state === 'compositing' || st.state === 'verifying') {
+      phase = 'active';
+      const jobBit = st.job?.status ? ` · job ${st.job.status}` : '';
+      say(`Generating one edit${jobBit}. Original and cut are unchanged.`);
+    }
+    draw();
+    return st;
+  }
+
+  function startPoll() {
+    stopPoll();
+    pollTimer = window.setInterval(() => { void refreshStatus().catch(e => say((e as Error).message || 'Status failed')); }, POLL_MS);
+  }
+
+  async function runResume() {
+    if (!editId || busy) return;
+    busy = true;
+    try {
+      const st = await api<StatusPayload>('director/masked-edit/resume', { projectId: P().id, editId });
+      statusInfo = st;
+      if (st.state === 'ready-for-review') {
+        phase = 'review';
+        stopPoll();
+        say(st.preservation?.outsideExact
+          ? 'Local composite ready. Outside-mask pixels match exactly. Review Original vs Edited, then save.'
+          : 'Local composite ready. Review carefully before saving.');
+      } else if (st.uncertain) {
+        say('Still uncertain — nothing billed again. Do not Generate.');
+      } else {
+        say(`Resume returned state ${st.state}${st.job?.status ? ` · job ${st.job.status}` : ''}.`);
+        if (st.state === 'submitted') startPoll();
+      }
+      draw();
+    } catch (e) {
+      const msg = (e as Error).message || '';
+      if (/uncertain/i.test(msg)) {
+        say('Model outcome is uncertain. Do not Generate again.');
+      } else if (/job-missing|refresh tracking/i.test(msg)) {
+        say('Patch job not in local Jobs yet. Open Jobs once, then Resume — still no Cloud POST.');
+      } else {
+        say(msg);
+        toast(msg, true);
+      }
+      draw();
+    } finally {
+      busy = false;
+    }
+  }
+
   async function reviewQuote() {
     const cropped = cropAroundMask(mask);
     if (!cropped) { say('Paint what may change. The region stays fixed on screen.'); return; }
@@ -216,7 +328,6 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
     allowance = Math.max(allowance, quote.reservationRequiredUsd);
     phase = 'quote';
     say('Preparing your crop and quote locally. Nothing submitted.');
-    // Preferred path: foundation prepare route. Offline-safe fallback keeps the trusted local estimate.
     try {
       const r = await api('director/masked-edit/prepare', {
         projectId: P().id, shotId, sourceAssetId: take.id, sourceSha256: asset()?.sha256,
@@ -228,17 +339,14 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
       say('Estimated cost ready. Review scope & allowance before Generate.');
     } catch (e) {
       const msg = (e as Error).message || '';
-      if (/Unknown|404|not found|masked-edit/i.test(msg)) {
-        const c = crop || cropNow;
-        fingerprint = `local:${take.id}:${c.x},${c.y},${c.w},${c.h}:${prompt}:${seed}`;
-        say('Estimated $' + quote!.estimate.toFixed(2) + ' · reserves $' + quote!.reservationRequiredUsd.toFixed(2) + ' (local planning estimate; foundation prepare not mounted yet).');
-      } else { say(msg); toast(msg); phase = 'paint'; }
+      say(msg); toast(msg, true); phase = 'paint';
     }
     draw();
   }
 
   async function generate() {
-    if (!quote || !fingerprint || !unknownAck) return;
+    if (!quote || !fingerprint || !unknownAck || !editId) return;
+    if (statusInfo?.uncertain) { say('Outcome is uncertain — Generate is disabled.'); return; }
     if (allowance < quote.reservationRequiredUsd) { say('The required reservation exceeds your run allowance or remaining project/account budget. Nothing submitted.'); return; }
     phase = 'active';
     say('Generating one edit… Original and cut are unchanged.');
@@ -250,22 +358,130 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
         approval: { approved: true, fingerprint, allowance: { currency: 'USD', maxAmount: allowance, allowUnknownCharges: true } },
       });
       say(submitted?.jobId
-        ? `Generating one edit (job ${String(submitted.jobId).slice(0, 8)}…). Check Jobs for progress. Original and cut are unchanged.`
-        : 'Generating one edit… Check Jobs for progress. Original and cut are unchanged.');
+        ? `Generating one edit (job ${String(submitted.jobId).slice(0, 8)}…). Polling status…`
+        : 'Generating one edit… Polling status…');
+      startPoll();
+      await refreshStatus();
     } catch (e) {
       const msg = (e as Error).message || '';
       if (/Paid and unknown|disabled at this checkpoint|generation authority|PREVIS_ALLOW_PAID/i.test(msg)) {
         say('Paid Cloud submit is disabled here (needs PREVIS_ALLOW_PAID=1 and an approved budget). Draft kept; nothing was billed.');
         phase = 'quote';
-      } else { say(msg); toast(msg); phase = 'quote'; }
+      } else { say(msg); toast(msg, true); phase = 'quote'; }
       draw();
     }
+  }
+
+  async function markReviewed() {
+    if (!editId || !statusInfo?.candidateSha256 || !statusInfo.sourceSha256) return;
+    try {
+      const r = await api('director/masked-edit/review', {
+        projectId: P().id,
+        editId,
+        candidateSha256: statusInfo.candidateSha256,
+        sourceSha256: statusInfo.sourceSha256,
+        fingerprint: statusInfo.inputKey || statusInfo.quoteFingerprint || fingerprint,
+        reviewedScope: true,
+      });
+      reviewedScope = true;
+      statusInfo = { ...statusInfo, review: { id: r.reviewId }, canAccept: true };
+      say('Review recorded. You can save as a new take — cut stays unchanged.');
+      draw();
+    } catch (e) {
+      const msg = (e as Error).message || '';
+      say(msg); toast(msg, true);
+    }
+  }
+
+  async function acceptEdit() {
+    if (!editId || !statusInfo?.candidateSha256 || !statusInfo.review?.id) return;
+    busy = true;
+    try {
+      const r = await api('director/masked-edit/accept', {
+        projectId: P().id,
+        editId,
+        candidateSha256: statusInfo.candidateSha256,
+        reviewId: statusInfo.review.id,
+        acceptanceId: crypto.randomUUID(),
+        expectedRevision: P().revision,
+      });
+      say(`Saved as new take ${String(r.assetId).slice(0, 8)}. Winner and cut unchanged.`);
+      toast('Region edit saved as a new take');
+      ctx.onAccepted?.(r.assetId);
+      statusInfo = { ...statusInfo, state: 'accepted', acceptance: { assetId: r.assetId } };
+      draw();
+    } catch (e) {
+      const msg = (e as Error).message || '';
+      say(msg); toast(msg, true);
+    } finally {
+      busy = false;
+    }
+  }
+
+  function reviewStage() {
+    const src = asset() ? ctx.assetUrl(asset()!) : '';
+    const candidate = mediaUrl(statusInfo?.media?.candidate || null);
+    const maskSrc = mediaUrl(statusInfo?.media?.mask || null);
+    const main = h('video', {
+      class: 'tk-edit-video',
+      src: reviewLane === 'edited' && candidate ? candidate : src,
+      muted: true, playsinline: true, controls: true, preload: 'auto',
+      'aria-label': reviewLane === 'edited' ? 'Edited candidate' : 'Original take',
+    }) as HTMLVideoElement;
+    const maskImg = reviewLane === 'mask' || reviewLane === 'outside'
+      ? h('img', { class: 'tk-edit-mask', src: maskSrc, alt: 'Fixed mask alpha' }) as HTMLImageElement
+      : null;
+    const wrap = h('div', { class: `tk-edit-stage tk-edit-review tk-lane-${reviewLane}` },
+      main,
+      maskImg,
+      reviewLane === 'outside' ? h('p', { class: 'tk-edit-lane-note' }, 'Outside-only: mask shows the region that was allowed to change; outside stayed exact before encode.') : null,
+      reviewLane === 'mask' ? h('p', { class: 'tk-edit-lane-note' }, 'Mask lane: white = may change; black = preserved.') : null,
+    );
+    return wrap;
   }
 
   function draw() {
     const s = shot(); if (!s) { dlg.close(); return; }
     const no = String(P().shots.indexOf(s) + 1).padStart(2, '0');
     title.textContent = `Edit region · Shot ${no} · ${take.label}`;
+
+    if (phase === 'review' && statusInfo?.candidateSha256) {
+      const lanes = h('div', { class: 'tk-edit-lanes', role: 'tablist', 'aria-label': 'Review lanes' },
+        ...(['original', 'edited', 'mask', 'outside'] as ReviewLane[]).map(lane => h('button', {
+          type: 'button', role: 'tab', class: `btn sm${reviewLane === lane ? ' on' : ''}`,
+          'aria-selected': String(reviewLane === lane),
+          onclick: () => { reviewLane = lane; draw(); },
+        }, lane === 'original' ? 'Original' : lane === 'edited' ? 'Edited' : lane === 'mask' ? 'Mask' : 'Outside-only')));
+      const reviewChk = h('label', { class: 'tk-check' },
+        h('input', {
+          type: 'checkbox', checked: reviewedScope || Boolean(statusInfo.review?.id),
+          onchange: (ev: Event) => {
+            const on = (ev.target as HTMLInputElement).checked;
+            if (on) void markReviewed();
+            else { reviewedScope = false; draw(); }
+          },
+        }),
+        'I reviewed Original vs Edited (and Mask / Outside-only).');
+      const resumeBtn = statusInfo.canResume || statusInfo.state === 'failed-local'
+        ? h('button', { type: 'button', class: 'btn', disabled: busy, onclick: () => void runResume() }, 'Resume local composite')
+        : null;
+      const acceptBtn = h('button', {
+        type: 'button', class: 'btn primary',
+        disabled: busy || !(statusInfo.review?.id || reviewedScope) || statusInfo.state === 'accepted',
+        onclick: () => void acceptEdit(),
+      }, statusInfo.state === 'accepted' ? 'Saved as take' : 'Save as new take');
+      body.replaceChildren(
+        h('p', { class: 'note' }, 'Original is kept. Saving adds a child take; it does not change your cut.'),
+        h('p', { class: 'note tk-edit-meta mono' },
+          `${take.id.slice(0, 8)} · edit ${editId?.slice(0, 8) || '—'} · ${statusInfo.preservation?.outsideExact ? 'outsideExact' : 'review'} · patch ${statusInfo.patchJobId?.slice(0, 8) || statusInfo.jobId?.slice(0, 8) || '—'}`),
+        lanes,
+        reviewStage(),
+        reviewChk,
+        h('div', { class: 'tk-edit-acts' }, resumeBtn, acceptBtn),
+      );
+      return;
+    }
+
     const tools = h('div', { class: 'tk-edit-tools', role: 'toolbar', 'aria-label': 'Mask tools' },
       ...(['rect', 'brush', 'erase'] as const).map(t => h('button', { type: 'button', class: `btn sm${tool === t ? ' on' : ''}`, 'aria-pressed': String(tool === t), onclick: () => { tool = t; draw(); } }, t === 'rect' ? 'Rectangle' : t === 'brush' ? 'Brush' : 'Erase')),
       h('label', { class: 'tk-edit-field' }, 'Brush', h('input', { type: 'range', min: 8, max: 96, value: brushSize, oninput: (ev: Event) => { brushSize = Number((ev.target as HTMLInputElement).value); } })),
@@ -288,10 +504,13 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
     const scope = h('label', { class: 'tk-check' }, h('input', { type: 'checkbox', checked: scopeChecked, onchange: (ev: Event) => { scopeChecked = (ev.target as HTMLInputElement).checked; } }), 'I checked this region through the whole clip.');
     const ack = h('label', { class: 'tk-check' }, h('input', { type: 'checkbox', checked: unknownAck, onchange: (ev: Event) => { unknownAck = (ev.target as HTMLInputElement).checked; draw(); } }), 'I understand Cloud runtime charges may exceed this estimate; this allowance is not a provider billing cap.');
     const allow = h('label', { class: 'tk-edit-field' }, 'Run allowance (USD)', h('input', { class: 'field sm', type: 'number', min: 0, step: 0.01, value: allowance, onchange: (ev: Event) => { allowance = Number((ev.target as HTMLInputElement).value); draw(); } }));
-    const reviewBtn = h('button', { type: 'button', class: 'btn', disabled: phase === 'active', onclick: () => void reviewQuote() }, 'Review scope & quote');
+    const reviewBtn = h('button', { type: 'button', class: 'btn', disabled: phase === 'active' || Boolean(statusInfo?.uncertain), onclick: () => void reviewQuote() }, 'Review scope & quote');
     const genLabel = quote ? `Generate edit · estimated $${quote.estimate.toFixed(2)}` : 'Generate edit';
-    const canGenerate = phase === 'quote' && !!quote && unknownAck && allowance >= (quote?.reservationRequiredUsd ?? Infinity);
+    const canGenerate = phase === 'quote' && !!quote && unknownAck && allowance >= (quote?.reservationRequiredUsd ?? Infinity) && !statusInfo?.uncertain;
     const genBtn = h('button', { type: 'button', class: 'btn primary', disabled: !canGenerate, onclick: () => void generate() }, genLabel);
+    const resumeBtn = (phase === 'active' && (statusInfo?.canResume || statusInfo?.needsResume || statusInfo?.state === 'failed-local'))
+      ? h('button', { type: 'button', class: 'btn', disabled: busy || Boolean(statusInfo?.uncertain), onclick: () => void runResume() }, 'Resume local composite')
+      : null;
 
     const quoteBlock = quote ? h('div', { class: 'tk-edit-quote' },
       h('p', {}, `Estimated $${quote.estimate.toFixed(2)} · reserves $${quote.reservationRequiredUsd.toFixed(2)} · run allowance $${allowance.toFixed(2)}`),
@@ -307,7 +526,7 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
       h('p', { class: 'note' }, 'Everything inside the region may change. Faces, identity and exact colors are not guaranteed.'),
       scope,
       ...(quoteBlock ? [quoteBlock] : []),
-      h('div', { class: 'tk-edit-acts' }, reviewBtn, genBtn),
+      h('div', { class: 'tk-edit-acts' }, reviewBtn, genBtn, resumeBtn),
     );
     paintOverlay();
   }
@@ -315,5 +534,14 @@ export async function openMaskedEdit(ctx: MaskedEditCtx, shotId: string, take: V
   document.body.append(dlg);
   draw();
   dlg.showModal();
-  say('Paint what may change. The region stays fixed on screen.');
+  if (reopen?.editId) {
+    say('Reopening saved receipt…');
+    phase = 'active';
+    void refreshStatus().then(st => {
+      if (st?.state === 'prepared') { phase = 'quote'; say('Prepared draft reopened. Review quote or Generate.'); draw(); }
+      else if (st?.state === 'submitted' || st?.needsResume) startPoll();
+    }).catch(e => say((e as Error).message || 'Could not reopen'));
+  } else {
+    say('Paint what may change. The region stays fixed on screen.');
+  }
 }
