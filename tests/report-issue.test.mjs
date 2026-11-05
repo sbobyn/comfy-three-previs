@@ -77,8 +77,8 @@ test('URL bounds handle Unicode, malformed surrogates, long titles and tight val
 
 test('diagnostics keep the last 10 errors, sanitized, and the body has the template sections', () => {
   const errors = Array.from({ length: 14 }, (_, i) => `error ${i} token=x${i}`);
-  const d = diagnosticsText({ App: 'Comfy Previs 0.1.0', Empty: '', 'Project id': null }, errors);
-  assert.match(d, /^App: Comfy Previs 0\.1\.0\n/);
+  const d = diagnosticsText({ App: 'video-lab 0.1.0', Empty: '', 'Project id': null }, errors);
+  assert.match(d, /^App: video-lab 0\.1\.0\n/);
   assert.ok(!d.includes('Empty') && !d.includes('Project id'), 'empty fields are left out');
   assert.equal((d.match(/^- error/gm) || []).length, 10);
   assert.ok(!d.includes('error 3 ') && d.includes('error 13'), 'oldest dropped');

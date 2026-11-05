@@ -59,7 +59,7 @@ export function setupBody(s: Setup | null, phone: { available: boolean } | null)
     h('section', {}, h('h3', {}, 'Appearance'), themeControl()),
     h('section', {}, h('h3', {}, 'This machine'),
       // The read-only web demo has no server to check: say so instead of an empty list and "Projects live in ."
-      DEMO ? h('p', { class: 'note' }, 'This is the read-only web demo, so there is nothing to check here. Run Comfy Previs on your computer to see what works there.') :
+      DEMO ? h('p', { class: 'note' }, 'This is the read-only web demo, so there is nothing to check here. Run video-lab on your computer to see what works there.') :
       s ? checkList(s.checks) : h('p', { class: 'note' }, 'Could not read the setup checks. Is the server running?'),
       s && !DEMO ? h('p', { class: 'note' }, 'Projects live in ', h('code', {}, s.dataDir), '.') : null),
     h('section', {}, h('h3', {}, 'What you can do'),
@@ -77,7 +77,7 @@ export function setupBody(s: Setup | null, phone: { available: boolean } | null)
         h('dd', {}, 'Make a certificate once, then set the PREVIS_PHONE_* variables and restart. Pair the phone from the workspace’s Phone button.', code('node scripts/phone-certificate.mjs ./phone-cert YOUR_MAC_LAN_IP')))),
     h('section', {}, h('h3', {}, 'Settings (.env)'),
       h('table', { class: 'setup-env' }, h('tbody', {}, ...ENV.map(([k, v]) => h('tr', {}, h('th', { scope: 'row' }, h('code', {}, k)), h('td', {}, v))))),
-      h('p', { class: 'note' }, 'Shell variables override .env. Restart Comfy Previs after changes (pnpm start).')),
+      h('p', { class: 'note' }, 'Shell variables override .env. Restart video-lab after changes (pnpm start).')),
     h('footer', { class: 'setup-foot note' }, 'Something not working? ', reportLink('setup-report')));
 }
 

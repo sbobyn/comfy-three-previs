@@ -1,3 +1,5 @@
+> Historical snapshot. For current decisions and limitations, see [status](status.md).
+
 # Historical standalone transport checkpoint
 
 Historical baseline through 0ad0cde, October 22, 2026. The corrected video release requirements and current qualification are in [video-checkpoint.md](video-checkpoint.md). The standalone app is the product; future Otter integration would be a separate consumer. Preserved Otter work remains on hold.

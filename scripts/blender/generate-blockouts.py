@@ -1,6 +1,6 @@
 """Rebuild bundled, texture-free GLBs: blender -b --python scripts/blender/generate-blockouts.py.
-Geometry helpers use Previs metres (Y up, +Z forward, bottom-centre pivot).
-Blender stores (x,-z,y); glTF's standard Y-up export restores the Previs axes.
+Geometry helpers use video-lab metres (Y up, +Z forward, bottom-centre pivot).
+Blender stores (x,-z,y); glTF's standard Y-up export restores the video-lab axes.
 Run from the repository root with Node 22+ on PATH (terrain samples share the app's heightfield).
 """
 import bpy
@@ -59,7 +59,7 @@ def starter_scales():
 SCALES = starter_scales()
 current = None
 def gap(axis):
-    # Model units for DECAL metres along Previs axis 0/1/2 of the model being built (never below DECAL itself).
+    # Model units for DECAL metres along video-lab axis 0/1/2 of the model being built (never below DECAL itself).
     world = [s * (SIZES[BUILDERS[current][0]][i] if current in UNIT_CUBE else 1) for i, s in enumerate(SCALES.get(current, [1, 1, 1]))]
     return DECAL / min(1, world[axis])
 

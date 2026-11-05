@@ -39,7 +39,7 @@ export function cardGlb(bytes) {
   const chunks = [...parts.map(pad), pad(bytes)], offsets = []; let at = 0;
   for (const c of chunks) { offsets.push(at); at += c.length; }
   const json = {
-    asset: { version: '2.0', generator: 'Comfy Previs backdrop card' }, extensionsUsed: ['KHR_materials_unlit', ...(mime === 'image/webp' ? ['EXT_texture_webp'] : [])],
+    asset: { version: '2.0', generator: 'video-lab backdrop card' }, extensionsUsed: ['KHR_materials_unlit', ...(mime === 'image/webp' ? ['EXT_texture_webp'] : [])],
     scene: 0, scenes: [{ nodes: [0] }], nodes: [{ name: 'previs-import', mesh: 0 }],
     meshes: [{ name: 'Card', primitives: [{ attributes: { POSITION: 0, NORMAL: 1, TEXCOORD_0: 2 }, indices: 3, material: 0 }] }],
     materials: [{ name: 'card', doubleSided: true, pbrMetallicRoughness: { baseColorTexture: { index: 0 }, metallicFactor: 0, roughnessFactor: 1 }, extensions: { KHR_materials_unlit: {} } }],

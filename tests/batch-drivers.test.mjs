@@ -1,4 +1,4 @@
-// Real batch drivers (loopbackDrivers) against a mocked Previs HTTP server: request shapes, ids recorded before submit,
+// Real batch drivers (loopbackDrivers) against a mocked video-lab HTTP server: request shapes, ids recorded before submit,
 // busy/refusal handling, budget allowance, the LTX start→end fallback and the sheet partial-slot policy. Nothing is sent anywhere.
 import test from 'node:test';
 import { frameCount } from '../shared/keyframes.mjs';

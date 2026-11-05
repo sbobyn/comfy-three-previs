@@ -10,7 +10,7 @@ reachable from the network — never project APIs or assets.
 
 1. `node scripts/phone-certificate.mjs ./phone-cert YOUR_MAC_LAN_IP`
    (new local files only; changes no trust settings).
-2. Set in `.env` and restart Comfy Previs:
+2. Set in `.env` and restart video-lab:
    `PREVIS_PHONE_HOST=YOUR_MAC_LAN_IP`, `PREVIS_PHONE_PORT=5443`,
    `PREVIS_PHONE_CERT=…/server.crt`, `PREVIS_PHONE_KEY=…/server.key`,
    `PREVIS_PHONE_CA=…/ca.crt`. Use another port if 5443 is taken.

@@ -210,7 +210,7 @@ test('headless Chromium renders a frame and a blockout on the GPU (PREVIS_HEADLE
   const port = Number(process.env.PREVIS_HEADLESS_TEST_PORT || 15362), base = `http://127.0.0.1:${port}`;
   const env = { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_AGENT: 'off', PREVIS_HEADLESS: '1' }; delete env.PREVIS_ALLOW_PAID;
   const server = spawn(process.execPath, ['server/previs/server.mjs'], { env, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   const post = async (path, body) => { const r = await fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); return { status: r.status, data: await r.json() }; };
   try {
     const health = await (await fetch(base + '/api/director/headless')).json();

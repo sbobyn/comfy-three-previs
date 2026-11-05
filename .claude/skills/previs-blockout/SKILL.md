@@ -1,9 +1,9 @@
 ---
 name: previs-blockout
-description: Build or edit Comfy Previs blockouts (scene objects through the MCP tools, Blender scenes for import, or the bundled GLB generator) without z-fighting or shadow artefacts. Use when placing floors, lines, decals, signs, caps or trims, or when an edit result returns coplanar warnings.
+description: Build or edit video-lab blockouts (scene objects through the MCP tools, Blender scenes for import, or the bundled GLB generator) without z-fighting or shadow artefacts. Use when placing floors, lines, decals, signs, caps or trims, or when an edit result returns coplanar warnings.
 ---
 
-# Previs blockouts without z-fighting
+# video-lab blockouts without z-fighting
 
 Blockout frames are camera truth: image and video models copy any flicker or striped shadow. Full rules and
 the reasons for them: `docs/blockout-modeling-rules.md`.

@@ -15,7 +15,7 @@ test('simulated MCP: stale source refusal, known render failures and crash-safe 
   let server;
   async function start() {
     server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: '15192', PREVIS_LEGACY_ROUTES: '1', PREVIS_DATA_DIR: root, PREVIS_BLENDER_MCP_COMMAND: process.execPath, PREVIS_BLENDER_MCP_ARGS: JSON.stringify([resolve('tests/fixtures/blender-mcp.mjs')]), FIXTURE_STATE: file, FIXTURE_CALLS: calls }, stdio: ['ignore','pipe','pipe'] });
-    await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+    await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   }
   async function stop(signal = 'SIGTERM') { const ended = once(server, 'exit'); server.kill(signal); await ended; }
   const post = async (path, body = {}) => { const response = await fetch(base + '/api/' + path, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) }); return { status: response.status, data: await response.json() }; };

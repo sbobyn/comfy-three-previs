@@ -46,8 +46,8 @@ export async function openComfy(root, project, options = {}) {
   const persist = async job => { await atomicJson(join(dir, job.id + '.json'), job); jobs.set(job.id.toLowerCase(), job); return structuredClone(job); };
   for (const file of await readdir(dir)) if (/^[a-f0-9-]{36}\.json$/i.test(file)) {
     const job = JSON.parse(await readFile(join(dir, file), 'utf8'));
-    if (job.status === 'preparing') { job.status = 'failed'; job.message = 'Previs stopped before prompt submission. No prompt was dispatched.'; }
-    if (job.status === 'submitting') { job.status = 'uncertain'; job.message = 'Previs stopped during submission. Check this exact prompt ID; no automatic retry.'; }
+    if (job.status === 'preparing') { job.status = 'failed'; job.message = 'video-lab stopped before prompt submission. No prompt was dispatched.'; }
+    if (job.status === 'submitting') { job.status = 'uncertain'; job.message = 'video-lab stopped during submission. Check this exact prompt ID; no automatic retry.'; }
     await persist(job);
   }
   async function request(path, init = {}) {
@@ -87,7 +87,7 @@ export async function openComfy(root, project, options = {}) {
     if (!render || !shot || !render.binding) fail('Source render provenance is unavailable');
     const checked = await inspect();
     if (!checked.compatible) fail(checked.message);
-    if (checked.queue.running || checked.queue.pending) fail('Local Comfy queue is busy. Wait for its owner; Previs will not interrupt or clear it.', 409);
+    if (checked.queue.running || checked.queue.pending) fail('Local Comfy queue is busy. Wait for its owner; video-lab will not interrupt or clear it.', 409);
     const bytes = await readFile(join(root, 'renders', render.id + '.png'));
     let job = await persist({ id: input.requestId, promptId: input.requestId, projectId: p.id, shotId: shot.id, workflowBindingId: binding.id, renderId: render.id, sourceBinding: render.binding, sourceHash: digest(bytes), graphHash: binding.graphHash, requestRevision: p.revision, origin, kind: 'passthrough', status: 'preparing', createdAt: new Date().toISOString(), outputNodeIds: binding.outputNodeIds, results: [] });
     try {

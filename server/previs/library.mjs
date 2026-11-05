@@ -104,7 +104,7 @@ function cleanReference(r) {
   return { id: str(r.id, 36), name: str(r.name, 80), file: str(r.file, 60), mime: str(r.mime, 20), role: ROLES.includes(r.role) ? r.role : 'prop', entityId: str(r.entityId, 36), note: str(r.note, 500), createdAt: str(r.createdAt, 40), ...(g ? { generated: g } : {}) };
 }
 const cleanMedia = m => ({ path: str(m.path, 60), size: Number.isInteger(m.size) ? m.size : 0, sha256: str(m.sha256, 64), width: Number.isInteger(m.width) ? m.width : null, height: Number.isInteger(m.height) ? m.height : null });
-const cleanOrigin = o => ({ projectId: str(o?.projectId, 36), projectTitle: str(o?.projectTitle, 120), entityId: str(o?.entityId, 36), app: 'comfy-three-previs', source: ['project', 'project-export', 'blender', 'parametric'].includes(o?.source) ? o.source : 'project' });
+const cleanOrigin = o => ({ projectId: str(o?.projectId, 36), projectTitle: str(o?.projectTitle, 120), entityId: str(o?.entityId, 36), app: 'video-lab', source: ['project', 'project-export', 'blender', 'parametric'].includes(o?.source) ? o.source : 'project' });
 const SPDX = /^[A-Za-z0-9][A-Za-z0-9.+-]{0,63}$/;
 const PARAM_KEY = /^[A-Za-z][A-Za-z0-9_]{0,39}$/;
 /** v2: generator recipe. Params are flat scalars only; anything else makes the manifest differ and is refused. */
@@ -174,8 +174,8 @@ export function assertNoLocalPaths(m) {
  * checked separately (checkMedia). Returns the manifest.
  */
 export function validateManifest(m, limits = LIMITS) {
-  if (!m || typeof m !== 'object' || Array.isArray(m) || m.format !== ASSET_FORMAT) fail('Not a Comfy Previs asset (asset.json format)');
-  if (!Number.isInteger(m.formatVersion) || m.formatVersion < 1 || m.formatVersion > ASSET_FORMAT_VERSION) fail(`This asset needs a newer Comfy Previs (format version ${m.formatVersion})`);
+  if (!m || typeof m !== 'object' || Array.isArray(m) || m.format !== ASSET_FORMAT) fail('Not a video-lab asset (asset.json format)');
+  if (!Number.isInteger(m.formatVersion) || m.formatVersion < 1 || m.formatVersion > ASSET_FORMAT_VERSION) fail(`This asset needs a newer video-lab (format version ${m.formatVersion})`);
   if (m.formatVersion < 2 && (m.license !== undefined || m.authors !== undefined || m.parametric !== undefined || m.origin?.source === 'parametric')) fail('asset.json uses license, authors or parametric, which need format version 2');
   const diff = firstDiff(m, cleanManifest(m));
   if (diff) fail(`asset.json has a field outside the asset format, or an invalid value: ${diff}`);
@@ -239,7 +239,7 @@ export function checkMedia(m, get, limits = LIMITS) {
 export function readAssetBundle(files, limits = LIMITS) {
   for (const name of files.keys()) if (!ENTRY.test(name)) fail(`Unexpected file in asset bundle: ${name.slice(0, 80)}`);
   const raw = files.get('asset.json');
-  if (!raw) fail('Not a Comfy Previs asset (no asset.json)');
+  if (!raw) fail('Not a video-lab asset (no asset.json)');
   let m; try { m = JSON.parse(raw.toString('utf8')); } catch { fail('asset.json is not valid JSON'); }
   validateManifest(m, limits);
   checkMedia(m, path => files.get(path), limits);
@@ -470,7 +470,7 @@ function stableId(text) {
 /**
  * One object of a validated Blender handoff as a one-object project: its first frame record gives shape, kind
  * (cast objects keep theirs, the rest are environment), colour and size (scale = size / the shape's size); the name
- * is the one Previs uses (the cast: prefix already dropped). No images and no sheet: a sized proxy to fill in.
+ * is the one video-lab uses (the cast: prefix already dropped). No images and no sheet: a sized proxy to fill in.
  */
 export function blenderObject(manifest, object) {
   const objects = Array.isArray(manifest?.objects) ? manifest.objects : [];
@@ -533,7 +533,7 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
   /** One object out of a whole-project export (.previs.zip), checked like a project import, saved as an asset. */
   async function fromProjectExport(files, object, input) {
     let manifest; try { manifest = JSON.parse(files.get('previs-export.json')?.toString('utf8')); } catch {}
-    if (manifest?.format !== PROJECT_EXPORT || manifest.version !== 1 || !Array.isArray(manifest.files)) fail('Not a Comfy Previs project export');
+    if (manifest?.format !== PROJECT_EXPORT || manifest.version !== 1 || !Array.isArray(manifest.files)) fail('Not a video-lab project export');
     for (const f of manifest.files) { const data = files.get(f.name); if (!data || sha(data) !== f.sha256) fail(`Export is incomplete or changed: ${f.name}`); }
     for (const name of files.keys()) if (name !== 'previs-export.json' && !manifest.files.some(f => f.name === name)) fail(`Unexpected file in export: ${name}`);
     let p; try { p = JSON.parse(files.get('project.json').toString('utf8')); } catch { fail('Export project.json is invalid'); }
@@ -664,7 +664,7 @@ export function openLibrary(dir, { limits = LIMITS, ffmpeg = 'ffmpeg', log = () 
       if (names.includes('asset.json')) return api.importZip(buffer);
       if (names.includes('previs-export.json')) return fromProjectExport(readZip(buffer, { maxTotal: MAX_PROJECT_EXPORT }), object, input);
       if (names.some(n => n.split('/').pop() === BLENDER_SIDECAR)) return fromBlender(r => r.readZip(buffer), object, input);
-      fail('Not a Comfy Previs asset bundle (.previs-asset.zip), asset folder, project export (.previs.zip) or Blender export');
+      fail('Not a video-lab asset bundle (.previs-asset.zip), asset folder, project export (.previs.zip) or Blender export');
     },
   };
   return api;

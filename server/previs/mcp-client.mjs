@@ -34,7 +34,7 @@ export class BlenderMcp {
       session.pending.delete(message.id);
       message.error ? entry.reject(Error(message.error.message)) : entry.resolve(message.result);
     });
-    const info = await this.request('initialize', { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'comfy-previs', version: '0.1.0' } }, this.handshakeTimeout);
+    const info = await this.request('initialize', { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'video-lab', version: '0.1.0' } }, this.handshakeTimeout);
     child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
     const list = await this.request('tools/list', {}, this.handshakeTimeout);
     if (!list.tools?.some(t => t.name === 'execute_blender_code')) throw Error('Blender MCP must expose execute_blender_code');
@@ -73,6 +73,6 @@ export class BlenderMcp {
   reconcile() { this.close(); this.uncertain = false; }
   close() {
     const session = this.session; this.session = null; this.ready = null; this.serverInfo = null;
-    if (session) { for (const entry of session.pending.values()) entry.reject(Error('Previs disconnected; Blender may still be working.')); session.pending.clear(); session.child.kill(); }
+    if (session) { for (const entry of session.pending.values()) entry.reject(Error('video-lab disconnected; Blender may still be working.')); session.pending.clear(); session.child.kill(); }
   }
 }

@@ -29,7 +29,7 @@ test('Take lab: axe-clean on videos and stills (desktop, phone); lanes step toge
   const port = await freePort(), base = `http://127.0.0.1:${port}`;
   // No credentials and no ComfyUI: nothing here can reach a paid provider.
   const server = spawn(process.execPath, ['server/previs/server.mjs'], { cwd: new URL('..', import.meta.url), env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: join(dir, 'data'), PREVIS_BUDGET_DIR: join(dir, 'budget'), PREVIS_COMFY_URL: 'http://127.0.0.1:9', PREVIS_ALLOW_PAID: '0', COMFY_CLOUD_API_KEY: '', COMFY_API_KEY: '', PREVIS_HEADLESS: '', PREVIS_AGENT: 'off' }, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   const browser = await chromium.launch({ executablePath: chrome, headless: true, args: ['--disable-background-networking'] });
   const found = {}, errors = [];
   try {

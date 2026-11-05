@@ -4,7 +4,7 @@ Operator commands. None of them prints credential values. Paid or cloud work is 
 
 | Command | What it does |
 |---|---|
-| `pnpm run doctor` | Checks this machine can run Comfy Previs (`--quick` is what `pnpm start` runs). |
+| `pnpm run doctor` | Checks this machine can run video-lab (`--quick` is what `pnpm start` runs). |
 | `pnpm starters:import` | Loads the bundles in `examples/starters` into a data directory as the canonical source projects, ids kept. |
 | `pnpm starters:export` | Writes the bundles from the source projects. `--check` verifies the round trip and writes nothing. |
 | `node scripts/pipeline/regenerate-starters.mjs` | Regenerates starter looks, sheets, stills and videos through the batch API. Paid when run without `--dry-run`. |

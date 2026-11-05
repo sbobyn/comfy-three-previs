@@ -18,7 +18,7 @@ the Blender scripts that make the bundled meshes.
 2. **Lift decals, lines and inset panels at least 2 mm off the surface under them, along its normal.** On a floor
    whose top is at `y`, put the bottom of a rug or line at `y + 0.002`. On a wall, push a sign out 2 mm. The bundled
    meshes use 3 mm.
-3. **Measure the gap in world metres at the scale the object is shown.** Previs stretches models non-uniformly: a
+3. **Measure the gap in world metres at the scale the object is shown.** video-lab stretches models non-uniformly: a
    court is a 1 m model shown 5 cm tall. A gap of 0.003 in model units becomes 0.15 mm there. Author the gap
    as `0.003 m ÷ smallest scale on that axis`; `generate-blockouts.py` does this with `gap(axis)`.
 4. **Caps and trims sit on the body or overhang it; they are never exactly as wide as it.** Stop the body under

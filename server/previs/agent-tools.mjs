@@ -1,7 +1,7 @@
 // [agent] The stdio MCP server the built-in agent runner hands to Claude Code. One project, one
 // message: every tool is scoped by PREVIS_PROJECT / PREVIS_MESSAGE, edits become a proposal the user
 // reviews in the workspace (nothing is applied here), and nothing can render or spend money.
-// Loopback only; the Previs server is the sole authority.
+// Loopback only; the video-lab server is the sole authority.
 import { createInterface } from 'node:readline';
 
 const base = process.env.PREVIS_URL || 'http://127.0.0.1:5190';
@@ -49,7 +49,7 @@ async function handle(message) {
   if (message.method === 'tools/call') {
     const tool = tools.find(t => t.name === message.params?.name); if (!tool) throw Error('Unknown tool');
     try { return await call(tool, message.params.arguments || {}); }
-    catch { return { isError: true, content: [{ type: 'text', text: 'Comfy Previs server unavailable.' }] }; }
+    catch { return { isError: true, content: [{ type: 'text', text: 'video-lab server unavailable.' }] }; }
   }
   throw Error('Unknown method');
 }

@@ -250,7 +250,7 @@ test('HTTP routes, /library-refs and the previs_library_* MCP tools: "put @red-r
   await withDir(async dir => {
     const port = 15297, base = `http://127.0.0.1:${port}`;
     const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_AGENT: 'off', PREVIS_LIBRARY_DIR: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
-    await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+    await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
     const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_URL: base, PREVIS_MCP_LEGACY: '' }, stdio: ['pipe', 'pipe', 'ignore'] });
     const pending = new Map(); let n = 0;
     createInterface({ input: agent.stdout }).on('line', l => { const m = JSON.parse(l); pending.get(m.id)?.(m); });

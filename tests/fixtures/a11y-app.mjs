@@ -1,4 +1,4 @@
-// A throwaway Previs server holding one bundled starter, plus headless Chrome, for the browser accessibility tests
+// A throwaway video-lab server holding one bundled starter, plus headless Chrome, for the browser accessibility tests
 // (launch-a11y-screens, launch-keyboard). Comfy Cloud is mocked by tests/fixtures/mock-cloud.mjs and paid generation is off,
 // so quotes can be prepared and read but nothing leaves the machine or is charged.
 import { readFileSync, existsSync } from 'node:fs';
@@ -73,7 +73,7 @@ export async function startApp({ starter = 'breaking-news', mock = true } = {}) 
     server.stderr.on('data', d => { stderr = (stderr + d).slice(-2000); });
     await new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(Error(`the server did not start in 60 s: ${stderr}`)), 60_000);
-      server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) { clearTimeout(timer); resolve(); } });
+      server.stdout.on('data', d => { if (String(d).includes('video-lab:')) { clearTimeout(timer); resolve(); } });
       exited.then(({ code, signal }) => { clearTimeout(timer); reject(Error(`the server exited (${code ?? signal}): ${stderr}`)); });
     });
     browser = await chromium.launch({ executablePath: chrome, headless: true, args: ['--disable-background-networking'], timeout: 60_000 });

@@ -29,7 +29,7 @@ test('MCP generate_video registers the preset and submits from clean storage (mo
   const env = { ...process.env, PORT: String(port), PREVIS_DATA_DIR: join(dir, 'data'), PREVIS_BUDGET_DIR: join(dir, 'budget'), PREVIS_AGENT: 'off', PREVIS_HEADLESS: '', PREVIS_ALLOW_PAID: '1', PREVIS_ALLOW_UNKNOWN_COST: '0', PREVIS_BUDGET_CAP_USD: '20', COMFY_CLOUD_API_KEY: 'mock-key-not-real', MOCK_CLOUD_LOG: log };
   const server = spawn(process.execPath, ['--import', './tests/fixtures/mock-cloud.mjs', 'server/previs/server.mjs'], { env, stdio: ['ignore', 'pipe', 'pipe'] });
   let stderr = ''; server.stderr.on('data', d => { stderr += d; });
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error(`server exited ${c}: ${stderr}`))); });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error(`server exited ${c}: ${stderr}`))); });
   const call = async (method, path, body) => { const r = await fetch(base + path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined }); const j = await r.json(); if (!r.ok) throw Error(`${path}: ${j.error}`); return j; };
   const post = (path, body) => call('POST', path, body), get = path => call('GET', path);
   const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_URL: base, PREVIS_MCP_LEGACY: '' }, stdio: ['pipe', 'pipe', 'inherit'] });

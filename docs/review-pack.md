@@ -1,3 +1,5 @@
+> Historical snapshot. For current decisions and limitations, see [status](status.md).
+
 # First-use review checkpoint · 23 October 2026
 
 **Current:** [Tuesday October 27 review candidate](tuesday-review.md). This page preserves the preceding checkpoint and its evidence; its preview/library are separate.

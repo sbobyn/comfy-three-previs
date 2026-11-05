@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Snapshot the starter projects from a running Comfy Previs server into
+// Snapshot the starter projects from a running video-lab server into
 // a static read-only demo (dist-demo/demo-data + dist-demo/demo-media).
 // GET requests only. Run after `VITE_DEMO=1 vite build ... --outDir dist-demo`
 // (or just `pnpm run demo:build`).
@@ -388,7 +388,7 @@ async function main() {
   // demo:build reads a running server and its data dir. Without one, say how to get one instead of a fetch stack trace.
   const howTo = 'To build the demo from the bundled starters with nothing running, use: pnpm run demo:local';
   try { await fetch(server + '/api/director/projects'); } catch {
-    throw new UsageError(`No Previs server at ${server}. demo:build snapshots a running server (PREVIS_URL) and its data dir (PREVIS_DATA). ${howTo}`);
+    throw new UsageError(`No video-lab server at ${server}. demo:build snapshots a running server (PREVIS_URL) and its data dir (PREVIS_DATA). ${howTo}`);
   }
   if (!existsSync(data)) throw new UsageError(`PREVIS_DATA ${data} not found: set it to the data dir of the server at ${server}. ${howTo}`);
   const get = async path => {

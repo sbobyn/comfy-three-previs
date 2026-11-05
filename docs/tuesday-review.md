@@ -1,3 +1,5 @@
+> Historical snapshot. For current decisions and limitations, see [status](status.md).
+
 # Tuesday review candidate · 27 October 2026
 
 Prepared privately from reviewed `086f216`, with the original October 22 and 23 candidates and libraries preserved. The current candidate is `candidate/standalone-previs-release-20261027`; exact SHA, verification, asset/request identities and runtime ownership are stamped in [checkpoint.json](../.evidence/release-20261027/checkpoint.json). The new review build uses a disposable full-library copy at **http://127.0.0.1:5197**. The original previews remain separate.

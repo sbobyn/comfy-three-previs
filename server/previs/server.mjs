@@ -84,7 +84,7 @@ async function refreshBlender() {
     connectionError = null; return { catalog, serverInfo };
   } catch (error) { catalog = null; connectionError = error.message; throw error; }
 }
-function blenderReadiness() { return { configured: Boolean(process.env.PREVIS_BLENDER_MCP_COMMAND), process: blender.serverInfo || null, addon: catalog ? 'inspected' : 'not-inspected', error: connectionError, operation: operations.get(), ownership: 'Blender owns its source file; Previs stores shot bindings and previews.' }; }
+function blenderReadiness() { return { configured: Boolean(process.env.PREVIS_BLENDER_MCP_COMMAND), process: blender.serverInfo || null, addon: catalog ? 'inspected' : 'not-inspected', error: connectionError, operation: operations.get(), ownership: 'Blender owns its source file; video-lab stores shot bindings and previews.' }; }
 let catalog = null;
 let operation = Promise.resolve();
 const serial = fn => { const next = operation.then(fn); operation = next.catch(() => {}); return next; };
@@ -111,7 +111,7 @@ const server = createServer(async (req, res) => {
     if (req.headers.host !== `127.0.0.1:${port}` && req.headers.host !== `localhost:${port}`) fail('Loopback host required', 403);
     if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(req.headers.origin)) fail('Cross-origin request refused', 403);
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
-    if (!legacyRoutes && LEGACY_ROUTE.test(url.pathname)) fail('Retired route (Blender/workbench pages); start Previs with PREVIS_LEGACY_ROUTES=1 to use it', 404);
+    if (!legacyRoutes && LEGACY_ROUTE.test(url.pathname)) fail('Retired route (Blender/workbench pages); start video-lab with PREVIS_LEGACY_ROUTES=1 to use it', 404);
     if (await progressRoutes.handle(req, res)) return; // [live-progress] GET /api/jobs/stream, /api/jobs/{source}/{id}/preview
     if (req.method === 'GET' && url.pathname === '/api/director/agent/stream') { const id = url.searchParams.get('id') || ''; if (!/^[a-f0-9-]{36}$/.test(id)) fail('Unknown project', 404); return agentRunner.stream(req, res, id); } // [agent] live steps + reply text (SSE)
     if (req.method === 'GET' && url.pathname === '/api/director/setup') return send({ ...(await setupChecks({ root, data })), agent: director.agentStatus(), dataDir: data });
@@ -349,6 +349,6 @@ const server = createServer(async (req, res) => {
 });
 const relay = attachRelay(server);
 const phoneLan = await startPhoneLan({root,relay});
-server.listen(port, '127.0.0.1', () => { console.log(`Comfy Previs: http://127.0.0.1:${port}`); batches.start(); });
+server.listen(port, '127.0.0.1', () => { console.log(`video-lab: http://127.0.0.1:${port}`); batches.start(); });
 async function stop() { progressRoutes.stop(); progress.stop(); tracker.stop(); batches.close(); agentRunner.close(); phoneLan.close();relay.close();blender.close(); server.close(); await headless.close(); await releaseLock(); process.exit(0); }
 process.on('SIGTERM', stop); process.on('SIGINT', stop);

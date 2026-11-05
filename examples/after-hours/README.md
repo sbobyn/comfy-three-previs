@@ -49,6 +49,6 @@ The owner approved **one H3 request, $3 USD allowance, explicitly accepting unre
 
 ## Rights and sources
 
-Scene, prompt, graph and vector board composition are original Previs work under the repository's MIT scope. The unmodified yellow Comfy wordmark used in local boards was obtained from <https://comfy.org/icons/logo.svg>; its trademark rights remain with Comfy Org. It is not relicensed under MIT. Follow <https://comfy.org/brand/> and do not imply official endorsement. The logo itself is not bundled in this tracked example. Existing inherited three-vcam distribution questions remain separate.
+Scene, prompt, graph and vector board composition are original video-lab work under the repository's MIT scope. The unmodified yellow Comfy wordmark used in local boards was obtained from <https://comfy.org/icons/logo.svg>; its trademark rights remain with Comfy Org. It is not relicensed under MIT. Follow <https://comfy.org/brand/> and do not imply official endorsement. The logo itself is not bundled in this tracked example. Existing inherited three-vcam distribution questions remain separate.
 
 Model and node references: <https://www.minimax.io/blog/minimax-h3> and <https://github.com/Comfy-Org/ComfyUI/blob/master/comfy_api_nodes/nodes_minimax.py>. Validate the selected backend's live schema before every submission.

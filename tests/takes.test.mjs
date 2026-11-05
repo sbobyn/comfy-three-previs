@@ -169,7 +169,7 @@ test('MCP: list_takes shows every take with its labels; set_winner picks videos 
   const f = await takeFixture(join(dir, 'data'));
   const port = await freePort(), base = `http://127.0.0.1:${port}`;
   const server = spawn(process.execPath, ['server/previs/server.mjs'], { cwd: new URL('..', import.meta.url), env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: join(dir, 'data'), PREVIS_BUDGET_DIR: join(dir, 'budget'), PREVIS_COMFY_URL: 'http://127.0.0.1:9', PREVIS_ALLOW_PAID: '0', COMFY_CLOUD_API_KEY: '', COMFY_API_KEY: '', PREVIS_HEADLESS: '', PREVIS_AGENT: 'off' }, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { cwd: new URL('..', import.meta.url), env: { ...process.env, PREVIS_URL: base, PREVIS_MCP_LEGACY: '' }, stdio: ['pipe', 'pipe', 'inherit'] });
   const pending = new Map(); let n = 0;
   createInterface({ input: agent.stdout }).on('line', l => { const m = JSON.parse(l); pending.get(m.id)?.(m); });

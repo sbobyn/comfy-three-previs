@@ -107,7 +107,7 @@ const ICON = {
 };
 // Preview and Generate live in the action bar pinned to the bottom of the right panel (Build and Shoot).
 const previewBtn = h('button', { class: 'btn act-preview', type: 'button', title: 'Play the shot through the camera (Space)' }, '▶ Preview');
-// A blockout clip imported from Blender (server/previs/blender-import.mjs). A Previs edit hands the shot back to the proxies.
+// A blockout clip imported from Blender (server/previs/blender-import.mjs). A video-lab edit hands the shot back to the proxies.
 const fromBlender = (s: Shot) => s.render?.origin === 'blender';
 const BLENDER_STALE = 'Edited since the Blender import: re-import from Blender to keep its clip; generating now renders the viewport geometry instead';
 const renderBtn = h('button', { class: 'btn cta act-go', type: 'button', title: 'Make the blockout and generate this shot’s video' }, 'Generate video ▸');
@@ -173,7 +173,7 @@ const claudeChip = h('button', { class: 'top-claude', type: 'button', hidden: tr
 const topGo = h('button', { class: 'btn cta top-go', type: 'button' });
 const top = h('header', { class: 'ws-top' },
   h('div', { class: 'top-left' },
-    h('a', { class: 'brand', href: '/', title: 'Comfy Previs · all projects', 'aria-label': 'Comfy Previs · all projects' }, h('span', { class: 'brand-mark' })),
+    h('a', { class: 'brand', href: '/', title: 'video-lab · all projects', 'aria-label': 'video-lab · all projects' }, h('span', { class: 'brand-mark' })),
     h('div', { class: 'crumbs' }, h('a', { href: '/', class: 'muted hide-md', style: 'text-decoration:none' }, 'Projects'), h('span', { class: 'sep hide-md' }, '/'), titleInput),
     h('div', { class: 'undo-group' }, undoBtn, redoBtn)),
   modeSwitch,
@@ -480,7 +480,7 @@ function apply(next: DirectorProject) {
   selection.retain(new Set(project.scene.entities.map(e => e.id)));
   if (document.activeElement !== titleInput) titleInput.value = project.title;
   titleInput.title = project.title;
-  document.title = `${project.title} · Comfy Previs`;
+  document.title = `${project.title} · video-lab`;
   scrub.max = String(shot().duration);
   if (playhead > shot().duration) playhead = shot().duration;
   scene.sync(project, shot());

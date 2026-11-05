@@ -1,5 +1,5 @@
 // MCP parity for prompt transparency (server/previs/agent-prompt-tools.mjs): the stdio agent reads the assembled prompt by
-// section, sets overrides and locks, diffs versions and saves model settings, against a fake Previs server whose edit route
+// section, sets overrides and locks, diffs versions and saves model settings, against a fake video-lab server whose edit route
 // applies ops with the real director logic. Nothing is generated.
 import test from 'node:test';
 import assert from 'node:assert/strict';

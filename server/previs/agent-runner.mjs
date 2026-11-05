@@ -1,5 +1,5 @@
 // [agent] Built-in agent runner: answers Direct-tab messages by running the locally installed Claude
-// Code CLI headless (`claude -p … --output-format stream-json`) with Previs's own MCP tools and
+// Code CLI headless (`claude -p … --output-format stream-json`) with video-lab's own MCP tools and
 // nothing else. Uses the machine's existing Claude login (no API keys handled here); one turn per
 // user message; multi-turn context through the CLI's session resume; live steps and reply text are
 // streamed to the browser over SSE. Scene edits never apply directly: they arrive as a proposal.
@@ -11,7 +11,7 @@ import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
-const SYSTEM_PROMPT = `You are the director agent built into Comfy Previs: a tool for blocking out a 3D scene (objects with Cast Cards), planning shots with camera moves and keyframe animation, and composing per-shot generation prompts. You talk with a filmmaker inside the app. Be brief, concrete and warm; no preamble, no markdown headings, no bullet lists longer than five items.
+const SYSTEM_PROMPT = `You are the director agent built into video-lab: a tool for blocking out a 3D scene (objects with Cast Cards), planning shots with camera moves and keyframe animation, and composing per-shot generation prompts. You talk with a filmmaker inside the app. Be brief, concrete and warm; no preamble, no markdown headings, no bullet lists longer than five items.
 
 The scene: objects (characters, vehicles, props, environment) with position in metres (ground y=0, +z toward the default camera, -x is screen left), yaw rotation in degrees (0 faces the camera), scale, colour, and a Cast Card (description + style notes) that feeds every prompt. Shots have a title, description (mention objects as @handle), duration 0.5–5 s, a start time on the scene timeline, and a camera: a preset move (static, dolly-in/out, truck-left/right, pan-left/right, orbit-left/right, crane-up/down, tilt-up) around a target object with distance, height, angle and lens mm. Objects can be keyframe-animated on the timeline.
 
@@ -69,7 +69,7 @@ export async function openAgentRunner({ root, dataDir, port, director }) {
   }
 
   function turnPrompt({ text, shotNumber, shotTitle, attachments, hint }) {
-    const head = [`[Previs] Current shot: ${shotNumber} “${shotTitle}”.`, attachments.length ? `Attached reference images (open with Read): ${attachments.join(', ')}.` : '', hint || ''].filter(Boolean).join(' ');
+    const head = [`[video-lab] Current shot: ${shotNumber} “${shotTitle}”.`, attachments.length ? `Attached reference images (open with Read): ${attachments.join(', ')}.` : '', hint || ''].filter(Boolean).join(' ');
     return `${head}\n\n${text}`;
   }
 

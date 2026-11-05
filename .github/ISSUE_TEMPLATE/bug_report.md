@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Something in Comfy Previs is not working as expected
+about: Something in video-lab is not working as expected
 title: 'Bug: '
 ---
 

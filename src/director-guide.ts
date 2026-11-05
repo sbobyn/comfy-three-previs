@@ -91,14 +91,14 @@ export function openJourney({ stage, context, actions = {} }: GuideOptions = {})
       stageVisual(step.id, disposers));
   });
   const dlg = h('dialog', { id: 'journey-dialog', class: 'journey-dialog', 'aria-labelledby': 'journey-title' },
-    h('div', { class: 'dialog-head' }, h('h2', { id: 'journey-title' }, 'How Comfy Previs works'), h('button', { class: 'btn ghost sm', type: 'button', 'aria-label': 'Close guide', onclick: () => dlg.close() }, 'Close')),
+    h('div', { class: 'dialog-head' }, h('h2', { id: 'journey-title' }, 'How video-lab works'), h('button', { class: 'btn ghost sm', type: 'button', 'aria-label': 'Close guide', onclick: () => dlg.close() }, 'Close')),
     h('div', { class: 'dialog-body' },
       h('p', { class: 'journey-intro' }, 'Build → Cast → Shoot → Generate → Cut. Start anywhere. This guide only opens controls: it never edits your project or starts a generation.'),
       context ? h('p', { class: 'journey-context' }, context) : null,
       h('ol', { class: 'journey-steps' }, ...rows),
       h('details', { class: 'journey-boundaries' }, h('summary', {}, 'Other ways to work, costs and limits'),
         h('dl', {},
-          h('dt', {}, 'Claude'), h('dd', {}, 'Add Comfy Previs to Claude Code as an MCP server (see “Works with Claude” on the home page) and direct the scene in chat. Claude edits the same project you see.'),
+          h('dt', {}, 'Claude'), h('dd', {}, 'Add video-lab to Claude Code as an MCP server (see “Works with Claude” on the home page) and direct the scene in chat. Claude edits the same project you see.'),
           h('dt', {}, 'Gamepad and phone'), h('dd', {}, 'Fly camera works with the keyboard, any standard gamepad (two stick layouts) or your phone held like a camera. Pair the phone once by scanning a QR code.'),
           h('dt', {}, 'Costs'), h('dd', {}, 'Blockouts are free. A still is a few cents; a 5 s video is about a dollar. Nothing is charged without the approval box, and the dialog shows the estimate first.'),
           h('dt', {}, 'Limits'), h('dd', {}, 'Models that animate from stills do not see your camera move, so check each result against its blockout in Cut. Your work saves automatically; project export keeps the project and its media together.')),

@@ -6,7 +6,7 @@ export function defaultStickSettings(): StickSettings {
   return { deadzone: 0.08, expo: 0.45 };
 }
 
-// Existing Previs response curve, applied radially to a movement/look pair.
+// Existing video-lab response curve, applied radially to a movement/look pair.
 export function shape(
   value: number,
   { deadzone, expo }: StickSettings,

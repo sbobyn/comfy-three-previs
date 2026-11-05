@@ -10,7 +10,7 @@ export async function openOperations(root, persist = atomicJson) {
   let state = null;
   try { state = JSON.parse(await readFile(file, 'utf8')); } catch (e) { if (e.code !== 'ENOENT') throw e; }
   if (state?.status === 'running') {
-    state = { ...state, status: 'uncertain', reason: 'Previs stopped before this operation was resolved. Blender may have continued.' };
+    state = { ...state, status: 'uncertain', reason: 'video-lab stopped before this operation was resolved. Blender may have continued.' };
     await persist(file, state);
   }
   const blocked = () => state && ['running', 'uncertain'].includes(state.status);

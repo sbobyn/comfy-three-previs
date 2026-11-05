@@ -3,8 +3,8 @@
 #   pnpm run demo:local
 # Loads examples/starters into a temporary data dir, starts a temporary server on it (no credentials, no paid
 # execution), runs `pnpm run demo:build` against it, then stops the server and removes the temp dir.
-# Serve the result under /comfy-three-previs/, e.g.:
-#   mkdir -p www && ln -s "$PWD/dist-demo" www/comfy-three-previs && (cd www && python3 -m http.server 5393)
+# Serve the result under /video-lab/, e.g.:
+#   mkdir -p www && ln -s "$PWD/dist-demo" www/video-lab && (cd www && python3 -m http.server 5393)
 # Needs ffmpeg and ffprobe on PATH (or PREVIS_FFMPEG / PREVIS_FFPROBE). DEMO_PORT picks the server port.
 set -euo pipefail
 cd "$(dirname "$0")/.."

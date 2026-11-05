@@ -75,7 +75,7 @@ test('a receipt already stopped as recovery-required by "Unknown project" become
 // and check /api/jobs. Set PREVIS_MIGRATION_DATA=<dev-data> to also run it on an APFS clone of a real data directory.
 async function bootServer(dir, port) {
   const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_ALLOW_PAID: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   const base = `http://127.0.0.1:${port}`, json = async (path, body) => (await fetch(base + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {})).json();
   return { json, stop: async () => { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; } };
 }

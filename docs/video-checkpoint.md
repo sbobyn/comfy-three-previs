@@ -1,3 +1,5 @@
+> Historical snapshot. For current decisions and limitations, see [status](status.md).
+
 # Video workflow checkpoint — private candidate
 
 The standalone app is the product; Otter remains a separate possible consumer. Current first-use candidate: `candidate/standalone-previs-first-use-20261023`, extending preserved review baseline `candidate/standalone-previs-video-20261022` at `1d08fd0`. MIT applies to original Previs code; see THIRD_PARTY_NOTICES.md for inherited ownership exceptions. One separately approved paid Cloud request completed. No push, publication or new model download has occurred.

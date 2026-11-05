@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Steven Bobyn. SPDX-License-Identifier: MIT
-// Blender → Previs, the thin import (docs/blender-import.md). Reads the folder (or a zip of it) that
+// Blender → video-lab, the thin import (docs/blender-import.md). Reads the folder (or a zip of it) that
 // scripts/blender/previs_export.py writes: blender-previs.json plus frames/frame-000000.png… at 24 fps. The sidecar
 // becomes ordinary Director edit ops (proxies sized from Blender's bounds, a custom camera from Blender's camera) and
 // the PNGs go through the browser capture pipeline, so the shot's blockout clip is Blender's render and every video
@@ -22,7 +22,7 @@ import { parseGlb } from '../../shared/blockout-lint.mjs';
 export const HANDOFF_FORMAT = 'comfy-previs-blender-handoff';
 export const SIDECAR = 'blender-previs.json';
 export const frameName = i => `frames/frame-${String(i).padStart(6, '0')}.png`;
-const SIZES = ['1280x720', '640x360']; // the deliveries Previs plays (shared/browser-delivery.mjs)
+const SIZES = ['1280x720', '640x360']; // the deliveries video-lab plays (shared/browser-delivery.mjs)
 const FITS = ['AUTO', 'HORIZONTAL', 'VERTICAL'];
 const MAX_OBJECTS = 198; // one edit op each, plus the shot's ops, within one 200-op edit
 const MAX_SIDECAR = 8 * 1024 * 1024;
@@ -43,13 +43,13 @@ const wrap = d => ((d % 360) + 360) % 360;
 const samples = n => { const step = Math.ceil(n / 64), out = []; for (let i = 0; i < n; i += step) out.push(i); if (out.at(-1) !== n - 1) out.push(n - 1); return out; };
 
 /**
- * Blender lens → Previs mm. Previs (three.js setFocalLength) fits a 35 mm gauge to the frame width of a landscape
+ * Blender lens → video-lab mm. video-lab (three.js setFocalLength) fits a 35 mm gauge to the frame width of a landscape
  * frame; Blender fits sensorWidth to the width under AUTO/HORIZONTAL and sensorHeight to the height under VERTICAL.
  */
 export function lensMm(lens, camera, aspect = 16 / 9) {
   return camera.sensorFit === 'VERTICAL' ? (lens * (35 / aspect)) / camera.sensorHeight : (lens * 35) / camera.sensorWidth;
 }
-/** Degrees the camera's up leans from the level (world-up) camera Previs uses. */
+/** Degrees the camera's up leans from the level (world-up) camera video-lab uses. */
 export function rollOf(fwd, up) {
   const f = unit(fwd), right = cross(f, [0, 1, 0]);
   if (Math.hypot(...right) < 1e-6) return 0;
@@ -82,13 +82,13 @@ const nameOf = o => (typeof o?.name === 'string' ? o.name.trim().slice(0, 60) : 
 
 /** Throws the user-facing reason an export cannot be imported. `frames` (Map index → PNG bytes) is checked when given. */
 export function validateHandoff(m, frames = null, meshes = null) {
-  if (!m || typeof m !== 'object' || m.format !== HANDOFF_FORMAT) fail(`Not a Blender export for Previs: ${SIDECAR} needs format "${HANDOFF_FORMAT}" (write it with scripts/blender/previs_export.py)`);
-  if (m.version !== 1) fail(`Unsupported Blender export version ${m.version}; this Previs reads version 1`);
+  if (!m || typeof m !== 'object' || m.format !== HANDOFF_FORMAT) fail(`Not a Blender export for video-lab: ${SIDECAR} needs format "${HANDOFF_FORMAT}" (write it with scripts/blender/previs_export.py)`);
+  if (m.version !== 1) fail(`Unsupported Blender export version ${m.version}; this video-lab reads version 1`);
   if (m.fps !== 24) fail(`The export is ${m.fps} fps; set the scene to 24 fps (the helper does this with --fps24)`);
   const n = m.frameCount;
-  if (!Number.isInteger(n) || n < 12 || n > 120) fail(`${n} frames; Previs shots are 12–120 frames (0.5–5 s at 24 fps)`);
+  if (!Number.isInteger(n) || n < 12 || n > 120) fail(`${n} frames; video-lab shots are 12–120 frames (0.5–5 s at 24 fps)`);
   if (Number.isInteger(m.source?.frameStart) && Number.isInteger(m.source?.frameEnd) && m.source.frameEnd - m.source.frameStart + 1 !== n) fail('frameCount must equal frameEnd − frameStart + 1');
-  if (!SIZES.includes(`${m.width}x${m.height}`)) fail(`Frames are ${m.width}×${m.height}; Previs plays 1280×720 or 640×360 (the helper's --size)`);
+  if (!SIZES.includes(`${m.width}x${m.height}`)) fail(`Frames are ${m.width}×${m.height}; video-lab plays 1280×720 or 640×360 (the helper's --size)`);
   if (m.axes !== 'blender-z-up') fail('axes must be "blender-z-up"');
   const c = m.camera, pos = v => Number.isFinite(v) && v > 0;
   if (!c || !pos(c.sensorWidth) || !pos(c.sensorHeight) || !FITS.includes(c.sensorFit)) fail('camera needs sensorWidth, sensorHeight and sensorFit (AUTO, HORIZONTAL or VERTICAL)');
@@ -99,7 +99,7 @@ export function validateHandoff(m, frames = null, meshes = null) {
   for (const o of m.objects) {
     const name = nameOf(o); if (!name) fail('Every object needs a name');
     const h = handleOf(name);
-    if (seen.has(h)) fail(`Two Blender objects both become “${name}” in Previs (${seen.get(h)} and ${o.blenderName || name}); rename one or set previs_name`);
+    if (seen.has(h)) fail(`Two Blender objects both become “${name}” in video-lab (${seen.get(h)} and ${o.blenderName || name}); rename one or set previs_name`);
     seen.set(h, o.blenderName || name);
     if (o.mesh !== undefined && (typeof o.mesh !== 'string' || !MESH_PATH.test(o.mesh))) fail(`${name}: invalid mesh path`);
     if (!Array.isArray(o.frames) || !o.frames.length || !o.frames.every(f => vec(f?.position) && Number.isFinite(f.yaw) && vec(f.size) && f.size.every(s => s >= 0))) fail(`${name}: frames must be a list of {position, yaw, size}`);
@@ -124,7 +124,7 @@ export function validateHandoff(m, frames = null, meshes = null) {
 }
 
 // ---------- Mapping (pure) ----------
-/** Where Previs puts each Blender landmark (camera.checks) through the imported camera, against Blender's pixel. */
+/** Where video-lab puts each Blender landmark (camera.checks) through the imported camera, against Blender's pixel. */
 export function projectionChecks(m, keys, duration) {
   const shot = { start: 0, duration, camera: normalizeCamera({ move: 'custom', timing: 'linear', keys }) };
   const first = m.source?.frameStart ?? m.camera.keys[0].frame ?? 0;
@@ -149,7 +149,7 @@ export function handoffToOps(project, m, { shotId = null, title = null, retitle 
   const start = shot?.start || 0, duration = clampDuration(n / 24);
   const entities = project.scene.entities, byHandle = new Map(entities.map(e => [handleOf(e.name), e]));
   const adds = m.objects.filter(o => !byHandle.has(handleOf(nameOf(o)))).length;
-  if (entities.length + adds > 200) fail(`The scene would hold ${entities.length + adds} objects; Previs holds 200. Set previs_ignore on set dressing in Blender, or import into a new project`);
+  if (entities.length + adds > 200) fail(`The scene would hold ${entities.length + adds} objects; video-lab holds 200. Set previs_ignore on set dressing in Blender, or import into a new project`);
   const ops = [], mapping = [], placed = new Map(), clamped = [];
   for (const o of m.objects) {
     const name = nameOf(o), existing = byHandle.get(handleOf(name));
@@ -181,7 +181,7 @@ export function handoffToOps(project, m, { shotId = null, title = null, retitle 
     }
     placed.set(id, { shape, cast: !!o.cast, recs: recs.map(r => ({ ...r, scale: fit(r.scale) })) });
   }
-  // Objects on one plane z-fight in the viewport and every Previs capture: lift thin, static imported objects 2 mm
+  // Objects on one plane z-fight in the viewport and every video-lab capture: lift thin, static imported objects 2 mm
   // off the surface they share (the Blender clip is unaffected), and report what could not be lifted.
   const coplanar = fixCoplanar(sceneAfterOps(entities, ops), { meshOf, movable: new Set(ops.map(o => o.entity?.id || o.id)) });
   for (const op of ops) {
@@ -209,14 +209,14 @@ export function handoffToOps(project, m, { shotId = null, title = null, retitle 
     }
   }
   const lens = keys0.map(mmAt);
-  if (lens.some(v => v < 8 || v > 300)) warnings.push(`The lens maps to ${Math.round(Math.min(...lens))}–${Math.round(Math.max(...lens))} mm; Previs camera keys hold 8–300 mm, so camera words and boxes use the clamped lens`);
+  if (lens.some(v => v < 8 || v > 300)) warnings.push(`The lens maps to ${Math.round(Math.min(...lens))}–${Math.round(Math.max(...lens))} mm; video-lab camera keys hold 8–300 mm, so camera words and boxes use the clamped lens`);
   const keys = samples(n).map(i => {
     const k = keys0[i], p = three(k.p), f = unit(three(k.fwd)), fp = target ? focusOf(target, i) : null;
     let d = fp ? dot(sub(fp, p), f) : 10; if (!(d > 0.5)) d = 10;
     return { t: Math.min(1, round(i / 24 / duration, 1e6)), p: r3(p), look: r3(add(p, mul(f, d))), mm: round(Math.max(8, Math.min(300, lens[i]))) };
   });
   const roll = Math.max(...keys0.map(k => Math.abs(rollOf(three(k.fwd), three(k.up)))));
-  if (roll > 2 && !warnings.some(w => /roll/i.test(w))) warnings.push(`The camera rolls up to ${roll.toFixed(1)}°; the clip keeps it, Previs camera words and boxes assume a level camera`);
+  if (roll > 2 && !warnings.some(w => /roll/i.test(w))) warnings.push(`The camera rolls up to ${roll.toFixed(1)}°; the clip keeps it, video-lab camera words and boxes assume a level camera`);
   const camera = { move: 'custom', timing: 'linear', keys, target, mm: keys[0].mm }; // mm: the lens the prompt and camera words name
   const newShotId = shot ? shot.id : randomUUID();
   const named = String(title || m.source?.camera || 'Blender shot').slice(0, 120);
@@ -226,7 +226,7 @@ export function handoffToOps(project, m, { shotId = null, title = null, retitle 
   const subject = target ? focusOf(target, 0) : add(three(keys0[0].p), mul(unit(three(keys0[0].fwd)), 10));
   const checks = projectionChecks(m, keys, duration);
   const off = checks.filter(c => c.error > 0.01);
-  if (off.length) warnings.push(`${off.length} of ${checks.length} Blender landmarks land more than 1% of the frame width away in Previs (worst ${(Math.max(...off.map(c => c.error)) * 100).toFixed(1)}%); camera words and overlay boxes may not match the clip`);
+  if (off.length) warnings.push(`${off.length} of ${checks.length} Blender landmarks land more than 1% of the frame width away in video-lab (worst ${(Math.max(...off.map(c => c.error)) * 100).toFixed(1)}%); camera words and overlay boxes may not match the clip`);
   return { ops, shotId: newShotId, duration, motion, subject: r3(subject), mapping, warnings, checks };
 }
 
@@ -257,7 +257,7 @@ export async function readHandoffDir(path) {
   const dir = await lstat(join(real, 'frames')).catch(() => null);
   if (!dir?.isDirectory()) fail(`No frames/ folder in ${real}`);
   const names = (await readdir(join(real, 'frames'))).filter(x => /^frame-\d{6}\.png$/.test(x)).sort();
-  if (names.length > VIDEO_LIMITS.maxFrames) fail(`frames/ holds ${names.length} frames; Previs shots are at most 120`);
+  if (names.length > VIDEO_LIMITS.maxFrames) fail(`frames/ holds ${names.length} frames; video-lab shots are at most 120`);
   const frames = new Map();
   for (const name of names) frames.set(Number(name.slice(6, 12)), await read(`frames/${name}`, VIDEO_LIMITS.maxFrameBytes));
   validateHandoff(manifest);

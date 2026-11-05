@@ -4,7 +4,7 @@
 # publish-public.sh) and launch-film*.mp4 from the `films` release (uploaded by publish-films.sh), and deploys them.
 # Called by both publish scripts; run it by hand to redeploy without changing anything.
 #
-#   PUBLIC_REMOTE  remote of the public repo (default public)
+#   PUBLIC_REMOTE  remote of the public repo (default origin)
 #   DEMO_SHA256    the workflow fails unless demo-site.tar.gz has this SHA-256 (default: deploy whatever is there)
 #
 # The first run switches the repo's Pages source from a branch to GitHub Actions (`build_type=workflow`). The
@@ -12,7 +12,7 @@
 set -euo pipefail
 
 ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
-PUBLIC_REMOTE=${PUBLIC_REMOTE:-public}
+PUBLIC_REMOTE=${PUBLIC_REMOTE:-origin}
 WORKFLOW=pages.yml
 die() { printf 'publish-pages: %s\n' "$*" >&2; exit 1; }
 

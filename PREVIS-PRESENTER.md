@@ -1,6 +1,6 @@
 # Presenter notes
 
-Operator notes for a live demo of Comfy Previs. For setup see the [README](README.md); for the user guide see [docs/director.md](docs/director.md).
+Operator notes for a live demo of video-lab. For setup see the [README](README.md); for the user guide see [docs/director.md](docs/director.md).
 
 ## Before you start
 

@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Steven Bobyn. SPDX-License-Identifier: MIT
-// A minimal MCP stdio client for the authoring scripts: it starts server/previs/agent.mjs against a running Previs
+// A minimal MCP stdio client for the authoring scripts: it starts server/previs/agent.mjs against a running video-lab
 // server (PREVIS_URL) and calls its tools exactly as Claude or another agent would. Tool errors throw.
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';

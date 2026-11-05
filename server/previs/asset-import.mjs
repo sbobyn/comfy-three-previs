@@ -147,7 +147,7 @@ export function validateGlb(g, bin) {
   for (const img of g.images || []) if (img.uri !== undefined) fail('The model points to separate image files. Import the folder as a .zip, or export a .glb');
   const required = (g.extensionsRequired || []).filter(x => !EXTENSIONS_OK.has(x));
   if (required.includes('KHR_draco_mesh_compression') || required.includes('EXT_meshopt_compression')) fail('Compressed meshes (Draco/meshopt) are not supported yet. Export without mesh compression');
-  if (required.length) fail(`The model needs ${required.join(', ')}, which Previs does not load`);
+  if (required.length) fail(`The model needs ${required.join(', ')}, which video-lab does not load`);
   for (const v of g.bufferViews || []) if (!Number.isInteger(v.byteLength) || (v.byteOffset || 0) < 0 || (v.byteOffset || 0) + v.byteLength > binLength) fail('A buffer view runs past the file');
   if ((g.nodes || []).length > IMPORT_LIMITS.nodes) fail(`The model has more than ${IMPORT_LIMITS.nodes} nodes`);
   if ((g.animations || []).length > IMPORT_LIMITS.animations) fail(`The model has more than ${IMPORT_LIMITS.animations} animations`);
@@ -292,7 +292,7 @@ export async function prepareImport(src, { convert, file, projectId, name = null
   const shape = humanoid ? 'person' : Math.max(...size) > 50 ? 'building' : 'box';
   const scale = size.map((v, i) => v / SHAPES[shape].size[i]);
   const warnings = [];
-  if (scale.some(v => v > 50 || v < 0.05)) warnings.push(`The model is ${size.map(v => Math.round(v * 100) / 100).join(' × ')} m; Previs objects are at most 50× their shape (${shape}), so it was clamped. Scale it in the inspector or pass height`);
+  if (scale.some(v => v > 50 || v < 0.05)) warnings.push(`The model is ${size.map(v => Math.round(v * 100) / 100).join(' × ')} m; video-lab objects are at most 50× their shape (${shape}), so it was clamped. Scale it in the inspector or pass height`);
   const objectKind = KINDS.includes(kind) ? kind : humanoid ? 'character' : Math.max(...size) > 8 ? 'environment' : 'prop';
   const clips = info.clips;
   const firstClip = clips.find(c => c.duration > 0.1)?.name || null;

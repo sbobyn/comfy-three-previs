@@ -1,4 +1,4 @@
-/* Comfy Previs — workspace and home styles (ComfyUI brand palette).
+/* video-lab — workspace and home styles (ComfyUI brand palette).
    Order: tokens · base · controls · dialogs · home · top bar · rail · viewport · transport · side panel · dialogs · reduced motion.
    Responsive rules sit at the end of the component they adjust. */
 :root {

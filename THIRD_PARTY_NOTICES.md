@@ -1,6 +1,6 @@
 # License scope and third-party notices
 
-The standalone Comfy Previs original code and documentation contributed by Steven Bobyn are MIT licensed under LICENSE, following the owner's explicit October 22, 2026 instruction. Package metadata describes that license. This grant does not replace any third-party copyright or license.
+The standalone video-lab original code and documentation contributed by Steven Bobyn are MIT licensed under LICENSE, following the owner's explicit October 22, 2026 instruction. Package metadata describes that license. This grant does not replace any third-party copyright or license.
 
 ## Inherited three-vcam material
 

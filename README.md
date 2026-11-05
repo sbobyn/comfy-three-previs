@@ -1,18 +1,18 @@
 <p align="center">
-  <img src="assets/brand/readme-header-dark.svg" alt="Comfy Previs" width="600" />
+  <img src="assets/brand/readme-header-dark.svg" alt="video-lab" width="600" />
 </p>
 
-# Comfy Previs
+# video-lab
 
 **Direct AI video in 3D.**
 
-AI video takes a prompt. Comfy Previs takes direction. Block out a scene, cast your characters, frame the camera and turn your shots into storyboard stills and AI video. Open source, MIT licensed, and built on [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
+AI video takes a prompt. video-lab takes direction. Block out a scene, cast your characters, frame the camera and turn your shots into storyboard stills and AI video. Open source, MIT licensed, and built on [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
 
-[**Try the live demo**](https://sbobyn.github.io/comfy-three-previs/) · [**Watch the launch film**](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film.mp4) · [**Get started**](#quick-start) · [**Read the guide**](docs/director.md)
+[**Try the live demo**](https://sbobyn.github.io/video-lab/) · [**Watch the launch film**](https://github.com/sbobyn/video-lab/releases/download/films/launch-film.mp4) · [**Get started**](#quick-start) · [**Read the guide**](docs/director.md)
 
 The demo is read-only: explore the scenes and watch their existing media. Install locally to edit and generate.
 
-[![Comfy Previs workspace: direct a scene in 3D](docs/media/workspace.png)](https://sbobyn.github.io/comfy-three-previs/)
+[![video-lab workspace: direct a scene in 3D](docs/media/workspace.png)](https://sbobyn.github.io/video-lab/)
 
 ### Your blockout becomes the shot
 
@@ -42,17 +42,19 @@ The demo is read-only: explore the scenes and watch their existing media. Instal
 
 ### Masked edits — fixed region (Cloud)
 
-[Watch a masked edit in the launch film](https://github.com/sbobyn/comfy-three-previs/releases/download/films/launch-film.mp4).
+[Watch a masked edit in the launch film](https://github.com/sbobyn/video-lab/releases/download/films/launch-film.mp4).
 
 From an eligible video take in the Take lab, **Edit region…** paints a fixed mask, quotes a trusted Cloud estimate, regenerates only that crop (Wan 2.1 VACE 14B on Comfy Cloud), then composites locally so outside-mask pixels stay exact before encode. First shipping limits: silent **1280×720 / 24 fps / 81-frame** takes, one fixed mask (not tracked), no chained edits, and the cut does not switch to the edit unless you mark it. The quote is a historical GPU planning envelope — not a provider bill cap — and needs `PREVIS_ALLOW_PAID=1` plus a Comfy Cloud key. The wardrobe example still landed near **$0.15 versus $1.52** for full regeneration; your crop size and Cloud runtime decide the real charge.
+
+> Masked-edit post-Cloud review/resume remains an unmerged draft; see [current status](docs/status.md). This baseline has limited verification.
 
 ## Quick start
 
 You need **Node.js 22.12+** and **pnpm 10**. FFmpeg is needed to encode blockout videos and export films; `pnpm run doctor` checks your machine.
 
 ```sh
-git clone --depth 1 --single-branch https://github.com/sbobyn/comfy-three-previs.git
-cd comfy-three-previs
+git clone --depth 1 --single-branch https://github.com/sbobyn/video-lab.git
+cd video-lab
 corepack enable
 pnpm install
 pnpm build
@@ -94,10 +96,10 @@ The first four include generated media and a cut. The blockout starters focus on
 Start the app, then open **⋯ More → Direct with Claude** to copy a command with your actual Node and checkout paths, or a Claude Desktop configuration. For Claude Code, the command is:
 
 ```sh
-claude mcp add comfy-previs -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to/comfy-three-previs/server/previs/agent.mjs
+claude mcp add video-lab -e PREVIS_URL=http://127.0.0.1:5190 -- node /path/to/video-lab/server/previs/agent.mjs
 ```
 
-Replace `/path/to/comfy-three-previs` with your checkout. Other MCP clients can launch the same `node` process with `PREVIS_URL` pointing to the running app.
+Replace `/path/to/video-lab` with your checkout. Other MCP clients can launch the same `node` process with `PREVIS_URL` pointing to the running app.
 
 Try: “Build a two-person conversation in a café. Give me a wide shot, two over-the-shoulders and a close-up. Quote the stills before generating.”
 
@@ -204,7 +206,7 @@ pnpm test      # full Node test suite
 
 The browser app is Vite + three.js (`src/`), the server is plain Node (`server/previs/`), and scene logic is shared in `shared/`.
 
-To build the read-only demo locally, run `pnpm run demo:local`. It imports the bundled starters into temporary storage and writes `dist-demo/`, to be served under `/comfy-three-previs/`. Publishing is documented in [the public publish script](scripts/publish-public.sh); [film publishing](scripts/publish-films.sh) keeps the launch-film release URLs stable. The demo and films are release assets, rather than build outputs committed to the repo.
+To build the read-only demo locally, run `pnpm run demo:local`. It imports the bundled starters into temporary storage and writes `dist-demo/`, to be served under `/video-lab/`. Publishing is documented in [the public publish script](scripts/publish-public.sh); [film publishing](scripts/publish-films.sh) keeps the launch-film release URLs stable. The demo and films are release assets, rather than build outputs committed to the repo.
 
 ## License and credits
 

@@ -19,7 +19,7 @@ test('HTTP boundary, shared stdio MCP and restart recovery', async () => {
   let server;
   async function start() {
     server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_LEGACY_ROUTES: '1' }, stdio: ['ignore', 'pipe', 'pipe'] });
-    await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+    await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   }
   async function stop() { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; }
   await start();
@@ -51,7 +51,7 @@ test('retired Blender/workbench routes answer 404 by default; the director\'s ro
   const dir = await mkdtemp(join(tmpdir(), 'previs-retired-'));
   const port = 15194, base = `http://127.0.0.1:${port}`;
   const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_LEGACY_ROUTES: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   const post = (path, body = {}) => fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   try {
     for (const path of ['/api/transfer', '/api/comfy/inspect', '/api/comfy/submit', '/api/blender/refresh', '/api/render', '/api/shots', '/api/video/blender']) {
@@ -77,7 +77,7 @@ test('media is streamed by byte range (206, 416 and full 200) without reading th
   const bytes = Buffer.from(Array.from({ length: 3 * 1024 * 1024 }, (_, i) => i % 251));
   await mkdir(join(dir, 'assets'), { recursive: true }); await writeFile(join(dir, 'assets', `${id}.mp4`), bytes);
   const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   const url = `${base}/assets/${id}.mp4`;
   try {
     const part = await fetch(url, { headers: { Range: 'bytes=1000-1999' } });

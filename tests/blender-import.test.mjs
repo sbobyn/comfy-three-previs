@@ -55,14 +55,14 @@ test('mapping: yaw keeps its sign, so the car’s nose points where Blender driv
   const p = empty(), m = await sidecar();
   applyOps(p, handoffToOps(p, m).ops);
   const car = p.scene.entities.find(e => e.name === 'Comfy Car'), r = (car.rotation * Math.PI) / 180;
-  const nose = [Math.sin(r), 0, Math.cos(r)]; // Previs front (+z at yaw 0)
+  const nose = [Math.sin(r), 0, Math.cos(r)]; // video-lab front (+z at yaw 0)
   const travel = three([10, 6, 0]), len = Math.hypot(...travel); // Blender: (-6,-2) → (4,4)
   close(nose[0], travel[0] / len, 1e-4, 'x'); close(nose[2], travel[2] / len, 1e-4, 'z');
   const [a, b] = [car.path[0].p, car.path.at(-1).p];
   close(Math.atan2(b[0] - a[0], b[2] - a[2]), r > Math.PI ? r - 2 * Math.PI : r, 1e-3, 'path heading = facing');
 });
 
-test('mapping: lens gauge (35 mm Previs vs Blender sensor) and the engine camera quaternion', () => {
+test('mapping: lens gauge (35 mm video-lab vs Blender sensor) and the engine camera quaternion', () => {
   close(lensMm(50, { sensorFit: 'AUTO', sensorWidth: 36, sensorHeight: 24 }), 48.611, 1e-3, 'AUTO 36 mm');
   close(lensMm(50, { sensorFit: 'VERTICAL', sensorWidth: 36, sensorHeight: 24 }), 50 * (35 / (16 / 9)) / 24, 1e-9, 'VERTICAL');
   // A level camera looking down three −Z is the identity; looking along +X is a −90° yaw.
@@ -98,7 +98,7 @@ test('mapping: long shots sample at most 64 camera and path keys; too many objec
   const full = empty();
   for (let i = 0; i < 190; i++) full.scene.entities.push({ ...p.scene.entities[0], id: `e${i}`, name: `Thing ${i}` });
   const many = structuredClone(m); many.objects = Array.from({ length: 11 }, (_, i) => ({ ...m.objects[0], name: `Box ${i}` }));
-  assert.throws(() => handoffToOps(full, many), /would hold 201 objects; Previs holds 200/);
+  assert.throws(() => handoffToOps(full, many), /would hold 201 objects; video-lab holds 200/);
 });
 
 // ---------- 2. Projection proof ----------
@@ -119,11 +119,11 @@ test('rejections: each a clear message', async () => {
   const m = await sidecar(), frames = (await readHandoffDir(FIXTURE)).frames;
   const bad = (change, re) => { const x = structuredClone(m); change(x); assert.throws(() => validateHandoff(x, frames), re); };
   bad(x => { x.fps = 25; }, /set the scene to 24 fps/);
-  bad(x => { x.frameCount = 121; }, /121 frames; Previs shots are 12–120 frames/);
+  bad(x => { x.frameCount = 121; }, /121 frames; video-lab shots are 12–120 frames/);
   bad(x => { x.frameCount = 6; x.source.frameEnd = 6; }, /6 frames/);
-  bad(x => { x.width = 1281; }, /1281×360; Previs plays 1280×720 or 640×360/);
+  bad(x => { x.width = 1281; }, /1281×360; video-lab plays 1280×720 or 640×360/);
   bad(x => { x.width = 641; x.height = 361; }, /641×361/);
-  bad(x => { x.format = 'gltf'; }, /Not a Blender export for Previs/);
+  bad(x => { x.format = 'gltf'; }, /Not a Blender export for video-lab/);
   bad(x => { x.camera.keys.pop(); }, /one \{p, fwd, up, lens\} per frame \(12\)/);
   bad(x => { x.objects[1].name = 'crate'; }, /both become “crate”/);
   const missing = new Map(frames); missing.delete(7);
@@ -152,7 +152,7 @@ async function startServer() {
   const port = probe.address().port; await new Promise(r => probe.close(r));
   const dir = await mkdtemp(join(tmpdir(), 'previs-blender-import-'));
   const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_HEADLESS: '', PREVIS_BATCH_FAKE: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   const base = `http://127.0.0.1:${port}`;
   const call = async (path, body, headers = { 'Content-Type': 'application/json' }) => { const r = await fetch(base + path, body === undefined ? {} : { method: 'POST', headers, body: Buffer.isBuffer(body) ? body : JSON.stringify(body) }); return { status: r.status, json: await r.json() }; };
   return { dir, base, call, stop: async () => { const ended = once(server, 'exit'); server.kill('SIGTERM'); await ended; await rm(dir, { recursive: true, force: true }); } };
@@ -218,7 +218,7 @@ test('server round trip: import, downstream consumers, refresh, stale hand-over 
     assert.deepEqual(versions, [1, 2]); assert.equal(s.render.assetId, again.assetId); assert.equal(p.shots.length, 2);
     assert.equal(p.scene.references.length, 1);
 
-    // 6. A Previs edit hands the shot back to the proxies: stale, so render-blockout renders again, and a proxy capture clears origin.
+    // 6. A video-lab edit hands the shot back to the proxies: stale, so render-blockout renders again, and a proxy capture clears origin.
     p = (await call('/api/director/edit', { projectId: p.id, ops: [{ op: 'update_entity', id: 'Crate', patch: { position: [6, 0, -2] } }] })).json.project;
     s = p.shots.find(x => x.id === s.id);
     assert.equal(blockoutStale(p, s), true); assert.equal(blenderBlockout(p, s), false);

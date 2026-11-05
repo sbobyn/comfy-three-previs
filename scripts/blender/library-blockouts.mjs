@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Rebuild the starter blockouts that come from the beret-parts parametric library (no Blender needed).
 //   BERET_PARTS=/path/to/beret-parts node scripts/blender/library-blockouts.mjs
-// Bakes every id in scripts/blender/library-blockouts.json (family, preset/params, seed, Previs shape, minScale) into
+// Bakes every id in scripts/blender/library-blockouts.json (family, preset/params, seed, video-lab shape, minScale) into
 // public/models/blockouts, updates those manifest entries, then runs the coplanar lint. People, animals and terrain
 // stay on generate-blockouts.py, which skips the ids listed here.
 import { execFileSync } from 'node:child_process';

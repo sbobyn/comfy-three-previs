@@ -49,6 +49,6 @@ if selected:
 helper = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'previs_export.py')
 exec(compile(open(helper).read(), helper, 'exec'), {'__name__': 'previs_export', 'PREVIS_EXPORT': {'out': out, 'size': '640x360', 'meshes': True, 'triangles': 2500, 'selected': selected}})
 
-assert not any(ob.name.startswith('Previs export temporary') for ob in scene.objects)
+assert not any(ob.name.startswith('video-lab export temporary') for ob in scene.objects)
 assert scene.frame_current == 1
 assert monkey.modifiers['Smooth source'].levels == 3

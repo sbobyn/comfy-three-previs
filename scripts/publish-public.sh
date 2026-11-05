@@ -2,16 +2,16 @@
 # Publish this checkout to the public repo and its GitHub Pages demo, in one go:
 #   1. preflight: clean tree, pushed to $SOURCE_REMOTE, the `films` release exists, `pnpm check && pnpm test`,
 #      secret/path scan
-#   2. code: the current tree (not history) as one new commit on $PUBLIC_REMOTE/$PUBLIC_BRANCH
+#   2. verify HEAD is the existing canonical remote branch tip; never create or rewrite code history
 #   3. demo: `pnpm run demo:build` against a temporary read-only server on a copy of the data with the bundled
 #      starters imported into it, uploaded as demo-site.tar.gz to the `demo-site` release (not git), then deployed
 #      by the Pages workflow (scripts/publish-pages.sh), which adds launch-film*.mp4 from the `films` release
 #   4. verify: every demo file on the live site matches dist-demo, the films are served, headless Chrome loads
 #      every starter with no console errors and plays the films
-# Idempotent: no new code makes no commit. Never force-pushes. The films are published separately by
+# Never creates code commits or pushes code. The films are published separately by
 # scripts/publish-films.sh TRAILER_DIR VERSION.
 #
-#   PUBLIC_REMOTE   remote to publish to (default public)
+#   PUBLIC_REMOTE   remote to publish to (default origin)
 #   PUBLIC_BRANCH   code branch (default main)
 #   SOURCE_REMOTE   HEAD must already be on a branch of this remote (default origin; ALLOW_UNPUSHED=1 skips)
 #   SOURCE_DATA     server data dir to snapshot the demo from (default .evidence/dev-data; copied, never written).
@@ -20,11 +20,11 @@
 #   PAGES_URL       demo URL (default https://<owner>.github.io/<repo>/ from the remote)
 #   DEMO_PORT       port for the temporary server (default: first free port from 5320)
 #   COMMIT_TRAILER  optional line appended to the publish commit message
-#   DRY_RUN=1       build, commit in a temporary worktree and pack the demo, but push, upload and deploy nothing
+#   DRY_RUN=1       build and pack the demo, but upload and deploy nothing
 set -euo pipefail
 
 ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
-PUBLIC_REMOTE=${PUBLIC_REMOTE:-public}
+PUBLIC_REMOTE=${PUBLIC_REMOTE:-origin}
 PUBLIC_BRANCH=${PUBLIC_BRANCH:-main}
 DEMO_TAG=demo-site
 FILMS_TAG=films
@@ -47,8 +47,6 @@ TMP=$(mktemp -d "${TMPDIR:-/tmp}/publish-public.XXXXXX")
 SERVER_PID=
 cleanup() {
   [ -n "$SERVER_PID" ] && kill "$SERVER_PID" 2>/dev/null || true
-  [ -d "$TMP/main" ] && git worktree remove --force "$TMP/main" 2>/dev/null || true
-  git worktree prune
   rm -rf "$TMP"
 }
 trap cleanup EXIT
@@ -99,30 +97,11 @@ hits=$(git grep -n -I -E -e "$SECRET_RE" -e "$PATH_RE" "$SHA" | cut -c1-200 || t
 [ -z "${hits//[[:space:]]/}" ] || { printf '%s\n' "$hits" >&2; die "secret/path scan hit in tracked files"; }
 echo "clean ($(git ls-files | wc -l | tr -d ' ') files)"
 
+# The canonical repository already contains the release commit. Never create snapshot commits.
+[ "$PUBLIC_REMOTE" = "$SOURCE_REMOTE" ] || die "Use one canonical remote for source and publication"
 git fetch -q "$PUBLIC_REMOTE"
-push() { # $1 = worktree, $2 = branch
-  if [ "$DRY_RUN" = 1 ]; then echo "DRY_RUN: would push $(git -C "$1" rev-parse --short HEAD) to $PUBLIC_REMOTE/$2"; return; fi
-  git -C "$1" push "$PUBLIC_REMOTE" "HEAD:refs/heads/$2"
-}
-message() { printf '%s\n\n%s\n' "$1" "$2"; [ -z "$COMMIT_TRAILER" ] || printf '\n%s\n' "$COMMIT_TRAILER"; }
-
-# ---------------------------------------------------------------- 2. public code
-say "code: $SHORT → $PUBLIC_REMOTE/$PUBLIC_BRANCH"
-git worktree add -q --detach "$TMP/main" "$PUBLIC_REMOTE/$PUBLIC_BRANCH"
-git -C "$TMP/main" rm -rq --ignore-unmatch .
-git archive "$SHA" | tar -x -C "$TMP/main"
-git -C "$TMP/main" add -A -f .
-if ! grep -qs export-ignore .gitattributes && [ "$(git -C "$TMP/main" write-tree)" != "$(git rev-parse "$SHA^{tree}")" ]; then
-  die "exported tree differs from the source tree"
-fi
-if git -C "$TMP/main" diff --cached --quiet; then
-  echo "public $PUBLIC_BRANCH already has this tree — nothing to commit"
-else
-  git -C "$TMP/main" diff --cached --shortstat
-  git -C "$TMP/main" commit -q -m "$(message "Publish $SHORT" "Snapshot of the current tree at $SHA ($BRANCH). History is not published.")"
-  push "$TMP/main" "$PUBLIC_BRANCH"
-fi
-MAIN_SHA=$(git -C "$TMP/main" rev-parse HEAD)
+[ "$(git rev-parse "$PUBLIC_REMOTE/$PUBLIC_BRANCH")" = "$SHA" ] || die "Push the intended commit to $PUBLIC_REMOTE/$PUBLIC_BRANCH before publishing"
+MAIN_SHA=$SHA
 
 # ---------------------------------------------------------------- 3. demo
 [ -d "$SOURCE_DATA" ] || die "SOURCE_DATA $SOURCE_DATA not found"

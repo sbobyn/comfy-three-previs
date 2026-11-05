@@ -1,4 +1,4 @@
-# Standalone Comfy Previs — setup and architecture
+# Standalone video-lab — setup and architecture
 
 This topic branch extends the existing three-vcam application from `b37ebb01d1232165f48a718673f9d6b4cf2836be`. It does not use Otter's server, editor, library, assistant, account, or launcher. The code, including the inherited three-vcam baseline, is MIT licensed (see THIRD_PARTY_NOTICES.md).
 
@@ -15,15 +15,15 @@ The server locks its project folder. Graceful shutdown releases that lock. After
 3. Stop and restart the app with `pnpm start`, retaining the same `PREVIS_DATA_DIR` and Blender settings. A running server does not reload credentials automatically. Existing shell variables override `.env`; unset an outdated shell value if you intend to use the file instead.
 4. Open **Setup & readiness → Check Cloud access**. This reads Cloud's node schemas without uploading media or submitting a job. A missing key is reported locally; HTTP401 means the configured credential was not accepted.
 
-`.env` is ignored by Git; `.env.example` contains only empty credentials and safe defaults. Only the server consumes `COMFY_CLOUD_API_KEY`; it is injected into authenticated requests, never returned in project/job records. The Node22 startup command uses `--env-file-if-exists=.env`, so installation remains usable without Cloud. `pnpm dev` uses the same startup path. Launching `node server/previs/server.mjs` directly does **not** load the file; use `pnpm start`, or supply the same Node flag from the checkout root. Agent clients connect to the running Previs server and do not need the Cloud key.
+`.env` is ignored by Git; `.env.example` contains only empty credentials and safe defaults. Only the server consumes `COMFY_CLOUD_API_KEY`; it is injected into authenticated requests, never returned in project/job records. The Node22 startup command uses `--env-file-if-exists=.env`, so installation remains usable without Cloud. `pnpm dev` uses the same startup path. Launching `node server/previs/server.mjs` directly does **not** load the file; use `pnpm start`, or supply the same Node flag from the checkout root. Agent clients connect to the running video-lab server and do not need the Cloud key.
 
 A valid credential does not authorize charges. Keep paid execution disabled until the exact backend, source assets, workflow, settings, known/unknown costs and spending allowance have been reviewed. Deliberately enabling `PREVIS_ALLOW_PAID=1` after approval still requires a matching per-request approval fingerprint. Do not enable it merely to test connectivity. Local Partner Nodes use the separate optional `COMFY_API_KEY`; ordinary local computation needs no key.
 
 ## Blender MCP
 
-Most Blender work does not need this. To bring a Blender shot into the Director, use the headless helper in [blender-import.md](blender-import.md#choose-a-route). It needs no add-on and no arbitrary-code server, and Blender Agent (Agent Link) users should use it too. This section covers Previs driving a running Blender for camera previews.
+Most Blender work does not need this. To bring a Blender shot into the Director, use the headless helper in [blender-import.md](blender-import.md#choose-a-route). It needs no add-on and no arbitrary-code server, and Blender Agent (Agent Link) users should use it too. This section covers video-lab driving a running Blender for camera previews.
 
-Selected upstream: https://github.com/ahujasid/mcp-for-blender (formerly ahujasid/blender-mcp), package **2.2.2**, commit **5a3618fccb2d982d0dd61e7a1879912c3100073b**, MIT. This is the one pin for every Previs Blender MCP route. blender-import.md uses the same version, and the PyPI `mcp-for-blender==2.2.2` wheel bundles an `addon.py` byte-identical to this commit's. This route was tested with Blender 4.5.4 LTS (GUI); see Evidence and limits below. Python >=3.10; upstream dependencies mcp >=1.26,<2 and httpx >=0.27. Use matching `addon.py` from that commit, installed using Blender's addon UI, and enable its server. Upstream supports a running GUI Blender, not background `-b` mode.
+Selected upstream: https://github.com/ahujasid/mcp-for-blender (formerly ahujasid/blender-mcp), package **2.2.2**, commit **5a3618fccb2d982d0dd61e7a1879912c3100073b**, MIT. This is the one pin for every video-lab Blender MCP route. blender-import.md uses the same version, and the PyPI `mcp-for-blender==2.2.2` wheel bundles an `addon.py` byte-identical to this commit's. This route was tested with Blender 4.5.4 LTS (GUI); see Evidence and limits below. Python >=3.10; upstream dependencies mcp >=1.26,<2 and httpx >=0.27. Use matching `addon.py` from that commit, installed using Blender's addon UI, and enable its server. Upstream supports a running GUI Blender, not background `-b` mode.
 
 Example with uv installed:
 
@@ -35,7 +35,7 @@ export BLENDER_PORT=9876
 pnpm start
 ```
 
-The first uv invocation downloads the small Python package/dependencies. Pin is source identity, not a claim of a fully locked Python dependency graph. Previs disables upstream telemetry in its child environment. Upstream addon update checks can be disabled with `BLENDERMCP_NO_UPDATE_CHECK=1` in Blender's environment. No global agent configuration is edited.
+The first uv invocation downloads the small Python package/dependencies. Pin is source identity, not a claim of a fully locked Python dependency graph. video-lab disables upstream telemetry in its child environment. Upstream addon update checks can be disabled with `BLENDERMCP_NO_UPDATE_CHECK=1` in Blender's environment. No global agent configuration is edited.
 
 Architecture: browser → standalone Node HTTP server → actual upstream MCP stdio process → actual upstream Blender addon → Blender. The app uses MCP initialize, tools/list and tools/call (`execute_blender_code`) with fixed inspection/render scripts. The previous custom Otter subprocess bridge is not reused or described as MCP.
 
@@ -45,7 +45,7 @@ App operations serialize. Refresh after external edits. File, scene, camera, FPS
 
 ## Browser-only path
 
-Open camera studio. Existing three-vcam rendering, flight, lens, smoothing, gamepad and phone-relay primitives are retained. The Previs adapter lets you move the existing subject, record resolved camera motion (up to 60 seconds, sampled at up to 24 Hz), and save a beauty PNG plus camera/subject/motion state as a shot. Reopen the saved camera/motion from the shot list. Reopening holds the saved capture pose; Replay motion plays the recorded motion, and the scrubber can inspect it. Beauty PNG previews remain 640×360. Video delivery is saved with the shot: 640×360 or genuinely rendered 1280×720, 16:9 at 24 fps. The workspace offers new unsaved three-second dolly/crane sequences (72 frames); see first-use.md. Reopening retains delivery settings. Changing them requires a new shot save; historical captures remain immutable.
+Open camera studio. Existing three-vcam rendering, flight, lens, smoothing, gamepad and phone-relay primitives are retained. The video-lab adapter lets you move the existing subject, record resolved camera motion (up to 60 seconds, sampled at up to 24 Hz), and save a beauty PNG plus camera/subject/motion state as a shot. Reopen the saved camera/motion from the shot list. Reopening holds the saved capture pose; Replay motion plays the recorded motion, and the scrubber can inspect it. Beauty PNG previews remain 640×360. Video delivery is saved with the shot: 640×360 or genuinely rendered 1280×720, 16:9 at 24 fps. The workspace offers new unsaved three-second dolly/crane sequences (72 frames); see first-use.md. Reopening retains delivery settings. Changing them requires a new shot save; historical captures remain immutable.
 
 This is a fixed editable camera-study set, not a general world editor. Existing phone and gamepad code is present; no hardware qualification was performed. The default host is loopback and does not make phone LAN/HTTPS connectivity work automatically. Existing world-import, splat, text/image/video-to-world refinement and depth/pose rendering are not included.
 
@@ -61,7 +61,7 @@ Start the app and point any stdio MCP client at `node <checkout>/server/previs/a
 
 ## Inventory and licensing
 
-- three-vcam: existing independent Three.js/Vite/TypeScript/ws camera prototype; no tracked inherited source license. Steven owns it and it is MIT licensed with the rest of Previs.
+- three-vcam: existing independent Three.js/Vite/TypeScript/ws camera prototype; no tracked inherited source license. Steven owns it and it is MIT licensed with the rest of video-lab.
 - Story Studio: already independently extracted, MIT (Steven Bobyn). Its storage/MCP patterns informed the boundary; no Story Studio files were copied and its active worktree was untouched.
 - Otter: FSL-1.1-ALv2; no editor/render source copied. Prior branch and evidence retained on hold.
 - Blender MCP: MIT, external pinned dependency; retain its license if redistributed.
@@ -94,7 +94,7 @@ Real evidence: Comfy UI 0.38.0 at a coordinated local instance accepted the nati
 
 ## Deliberate browser → Blender camera transfer
 
-Use **Transfer supported content**. Choose a saved browser shot, inspect a saved disposable Blender project through the same MCP connection, acknowledge that target, and create a new camera scene. This intentionally transfers **camera only**, not geometry. Blender owns the new scene; the browser shot is unchanged. Existing Blender scenes and the active window scene are preserved. Previs never saves or overwrites the `.blend` file. Save the disposable project yourself in Blender to persist the new scene across Blender restarts.
+Use **Transfer supported content**. Choose a saved browser shot, inspect a saved disposable Blender project through the same MCP connection, acknowledge that target, and create a new camera scene. This intentionally transfers **camera only**, not geometry. Blender owns the new scene; the browser shot is unchanged. Existing Blender scenes and the active window scene are preserved. video-lab never saves or overwrites the `.blend` file. Save the disposable project yourself in Blender to persist the new scene across Blender restarts.
 
 Supported fields: resolved position, quaternion orientation and focal length; a captured pose or recorded motion sampled on integer frames at 24 fps. Coordinates map `(x,y,z)` to `(x,-z,y)` (Y-up to Z-up); one unit is one meter. Camera local forward/up remain −Z/+Y. The camera uses a 36 mm horizontal sensor, 16:9, 640×360, square pixels and 0.5–300 meter clipping. Frame 1 is time zero. The last frame rounds upward to the 24 fps grid and retains the exact recorded endpoint, extending timing by less than one frame where needed. Integer-frame poses are verified; subframe interpolation is not qualified.
 

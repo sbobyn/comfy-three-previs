@@ -7,12 +7,12 @@
 # never change; the release notes record VERSION and each file's SHA-256. Then the live demo is redeployed
 # (scripts/publish-pages.sh), which serves the same films as <demo>/launch-film*.mp4.
 #
-#   PUBLIC_REMOTE  remote of the public repo (default public)
+#   PUBLIC_REMOTE  remote of the public repo (default origin)
 #   NO_DEPLOY=1    upload only; the demo keeps its old film copies until the next deploy
 set -euo pipefail
 
 ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
-PUBLIC_REMOTE=${PUBLIC_REMOTE:-public}
+PUBLIC_REMOTE=${PUBLIC_REMOTE:-origin}
 TAG=films
 die() { printf 'publish-films: %s\n' "$*" >&2; exit 1; }
 
@@ -40,7 +40,7 @@ for pair in $FILES; do
   table+="| \`$name\` | $(wc -c <"$src" | tr -d ' ') | \`$(shasum -a 256 "$src" | cut -d' ' -f1)\` |"$'\n'
 done
 cat >"$TMP/notes.md" <<EOF
-The launch films for [Comfy Previs](https://github.com/$SLUG), trailer **$VERSION**. Not a software release.
+The launch films for [video-lab](https://github.com/$SLUG), trailer **$VERSION**. Not a software release.
 
 They are kept here rather than in git so the repo stays small to clone. Each new cut replaces these files under the same names, so links stay valid.
 

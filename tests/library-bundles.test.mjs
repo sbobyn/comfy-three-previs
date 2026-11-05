@@ -120,7 +120,7 @@ test('imports refuse files outside the allowlist, undeclared or changed files an
       ['a home path', tamper(data, m => { m.origin.projectTitle = '~/films/final-lap'; }), /must not contain local paths \(origin\.projectTitle/],
       ['a file name that escapes refs/', tamper(data, m => { m.references[0].file = '../asset.json'; }), /field outside the asset format|invalid id, file or type/],
       ['a changed manifest without a new hash', tamper(data, m => { m.entities[0].notes = 'edited'; }, { rehash: false }), /content hash does not match/],
-      ['a newer format', tamper(data, m => { m.formatVersion = 3; }), /needs a newer Comfy Previs/],
+      ['a newer format', tamper(data, m => { m.formatVersion = 3; }), /needs a newer video-lab/],
       ['v2 fields in a version-1 manifest', tamper(data, m => { m.license = 'CC0-1.0'; }), /need format version 2/],
       ['a look shared from outside', tamper(data, m => { m.entities[0].lookFrom = '00000000-0000-4000-8000-000000000000'; }), /shares a look from outside the asset/],
       ['a parent outside the asset', tamper(data, m => { m.entities[0].parent = '00000000-0000-4000-8000-000000000000'; }), /must come after its parent, inside the asset/],
@@ -200,7 +200,7 @@ test('import from a path: absolute and real only, folders read only declared fil
     await assert.rejects(b.library.importPath({ path: join(root, 'link.zip') }), /real path/);
     await assert.rejects(b.library.importPath({ path: join(root, 'missing.zip') }), e => e.status === 404);
     await writeFile(join(root, 'notes.zip'), 'not a zip');
-    await assert.rejects(b.library.importPath({ path: join(root, 'notes.zip') }), /Not a Comfy Previs asset bundle/);
+    await assert.rejects(b.library.importPath({ path: join(root, 'notes.zip') }), /Not a video-lab asset bundle/);
 
     // A folder: the library's own asset folder (with versions/ and a stray file beside it) imports; strays are never read.
     const folder = join(root, 'a', 'library', 'assets', asset.id);
@@ -244,7 +244,7 @@ test('HTTP: export route, raw zip import, the home page drop sniffs asset bundle
   await withDir(async dir => {
     const port = 15298, base = `http://127.0.0.1:${port}`;
     const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: join(dir, 'data'), PREVIS_AGENT: 'off', PREVIS_LIBRARY_DIR: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
-    await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+    await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
     const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_URL: base, PREVIS_MCP_LEGACY: '' }, stdio: ['pipe', 'pipe', 'ignore'] });
     const pending = new Map(); let n = 0;
     createInterface({ input: agent.stdout }).on('line', l => { const m = JSON.parse(l); pending.get(m.id)?.(m); });

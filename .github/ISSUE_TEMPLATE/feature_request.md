@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an improvement to Comfy Previs
+about: Suggest an improvement to video-lab
 title: 'Feature: '
 ---
 

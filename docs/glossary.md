@@ -38,7 +38,7 @@ One name per thing, used the same way in the app, the docs and the film. When a 
 |---|---|---|
 | **Shot camera** | The camera that films the shot. "Director view" is the free camera for building. | Render camera |
 | **Fly camera** | Drive the shot camera live (keys, gamepad, phone) and record a take. | Live camera |
-| **Blockout** | The grey clip filmed through the shot camera at 24 fps: the motion every video model follows. **Make blockout** the first time, **Remake blockout** after a change. | Render, Capture, Previs clip, "Make again" |
+| **Blockout** | The grey clip filmed through the shot camera at 24 fps: the motion every video model follows. **Make blockout** the first time, **Remake blockout** after a change. | Render, Capture, video-lab clip, "Make again" |
 | **Still** | A generated image of one moment of a shot. A **start still** and an **end still** are the key frames some video models animate between. | Key frame image, Frame |
 | **Auto-prompt** | The prompt the app writes from the story, cast, world and camera. You can edit it. | Generated prompt |
 | **Video model** | The model that makes the shot's video (LTX, Seedance, Kling …). **Runs on** says where: Comfy Cloud or local ComfyUI. | Workflow (code only), Preset |

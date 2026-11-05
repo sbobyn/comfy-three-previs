@@ -125,10 +125,10 @@ test('refusals: unknown formats, compressed meshes, over-limit triangles and bad
 test('project: import stores the GLB, adds one object with its rights; perform keys clips and poses; export and duplicate keep it', async () => withDir(async dir => {
   const director = await openDirector(dir), p = await director.create({ template: 'empty' });
   const importer = openAssetImport({ director, convert: convertToGlb });
-  const r = await importer.fromUpload(await riggedFigureGlb(), { projectId: p.id, file: 'figure.glb', licence: 'CC0', attribution: 'Previs tests', place: { position: [2, 0, -1] } });
+  const r = await importer.fromUpload(await riggedFigureGlb(), { projectId: p.id, file: 'figure.glb', licence: 'CC0', attribution: 'video-lab tests', place: { position: [2, 0, -1] } });
   const e = r.project.scene.entities.find(x => x.id === r.entityId);
   assert.equal(e.name, 'Figure'); assert.deepEqual(e.position, [2, 0, -1]);
-  assert.equal(e.source.licence, 'CC0'); assert.equal(e.source.attribution, 'Previs tests');
+  assert.equal(e.source.licence, 'CC0'); assert.equal(e.source.attribution, 'video-lab tests');
   assert.equal((await readdir(join(dir, 'director', p.id, 'refs'))).length, 1);
   assert.deepEqual(entityTriangles(e), [], 'imported models are not linted as blockout surfaces');
   // Rights can be edited; the file facts and rig cannot.

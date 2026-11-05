@@ -340,7 +340,7 @@ export async function openGeneration(root, project, options = {}) {
     async function requireIdle() {
       if (saved.backend.kind !== 'local') return;
       const queue = await adapter.queue();
-      if (queue.queue_running.length || queue.queue_pending.length) fail('Local Comfy queue is busy; Previs will not interrupt it', 409);
+      if (queue.queue_running.length || queue.queue_pending.length) fail('Local Comfy queue is busy; video-lab will not interrupt it', 409);
     }
     await requireIdle();
     // Durable reservation before any upload or dispatch; refused (402, code 'budget') over a cap or at an unknown price.

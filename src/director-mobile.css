@@ -1,4 +1,4 @@
-/* Comfy Previs — mobile layer (phones and small tablets). Everything is scoped to body.m-compact / body.m-medium / body.m-touch,
+/* video-lab — mobile layer (phones and small tablets). Everything is scoped to body.m-compact / body.m-medium / body.m-touch,
    set by src/director-mobile.ts; desktop (≥ 1024 px, or a mouse window ≥ 880 px) never gets these classes. Ported from .evidence/mobile-design/mockups/mobile.css. */
 :root {
   --m-bar: 44px; --m-tab: 49px; --m-tap: 44px; --m-gutter: 16px;

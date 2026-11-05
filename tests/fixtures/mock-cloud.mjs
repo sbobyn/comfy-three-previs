@@ -1,4 +1,4 @@
-// Preload (node --import) for a real Previs server in tests: Comfy Cloud is mocked and nothing leaves the machine.
+// Preload (node --import) for a real video-lab server in tests: Comfy Cloud is mocked and nothing leaves the machine.
 // fetch to https://cloud.comfy.org answers from the captured partner schemas (plus LoadVideo) and records every call
 // as a JSON line in MOCK_CLOUD_LOG; submissions are accepted with a fake prompt id and never finish. The `ws` package
 // (the server's live-progress sockets; the phone relay keeps the real one) is swapped for a socket that fails at once. Loopback calls use the real fetch.

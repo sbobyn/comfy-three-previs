@@ -1,5 +1,5 @@
 import { loadBlockoutModels } from './director-models';
-// Home / launch page: what Comfy Previs does, how it works in three steps, starters, and your projects.
+// Home / launch page: what video-lab does, how it works in three steps, starters, and your projects.
 import './director-home.css';
 import './director-home-mobile.css'; // [mobile]
 import { TEMPLATES, makeEntity, makeShot } from '../shared/director.mjs';
@@ -24,7 +24,7 @@ type Summary = { id: string; title: string; template: string; updatedAt: string;
 export type Starter = { key: string; title: string; description: string; scene: DirectorProject['scene']; shot: Shot; shots?: number; projectId?: string };
 /** The demo's "Explore a demo scene" opens this starter's project (the one the hero seam shows), else the first. */
 const FEATURED = 'final-lap';
-/** A workspace URL under the deploy base (the demo lives under /comfy-three-previs/). */
+/** A workspace URL under the deploy base (the demo lives under /video-lab/). */
 const projectUrl = (id: string) => `${import.meta.env.BASE_URL}director.html?project=${encodeURIComponent(id)}`;
 
 const app = document.getElementById('app')!;
@@ -325,12 +325,12 @@ function ask(title: string, body: string, ok: string, field?: string): Promise<s
 
 /** The demo's secondary action: how to run the real thing. Mirrors the README's Quick start. */
 function runLocally() {
-  const commands = ['git clone --depth 1 --single-branch https://github.com/sbobyn/comfy-three-previs.git', 'cd comfy-three-previs', 'pnpm install && pnpm build', 'pnpm start   # → http://127.0.0.1:5190'].join('\n');
+  const commands = ['git clone --depth 1 --single-branch https://github.com/sbobyn/video-lab.git', 'cd video-lab', 'pnpm install && pnpm build', 'pnpm start   # → http://127.0.0.1:5190'].join('\n');
   const copy = h('button', { class: 'btn', type: 'button', onclick: () => { void navigator.clipboard?.writeText(commands).then(() => { copy.textContent = 'Copied'; }, () => toast('Copy failed: select the commands instead.', true)); } }, 'Copy commands');
   const done = h('button', { class: 'btn primary', type: 'submit' }, 'Done');
   const dlg = h('dialog', { class: 'confirm home-run', 'aria-labelledby': 'run-title' },
     h('form', { class: 'dialog-body', method: 'dialog' },
-      h('h2', { id: 'run-title', style: 'margin:0;font-size:15px' }, 'Run Comfy Previs locally'),
+      h('h2', { id: 'run-title', style: 'margin:0;font-size:15px' }, 'Run video-lab locally'),
       h('p', { class: 'muted', style: 'margin:0' }, 'Free and open source. You need Node.js 22.12+ and pnpm 10 (', h('code', {}, 'corepack enable'), '), and FFmpeg to export videos.'),
       h('pre', { class: 'home-run-code', tabindex: 0, 'aria-label': 'Install commands' }, h('code', {}, commands)),
       h('p', { class: 'muted', style: 'margin:0' }, 'Scenes, blockouts and the cut work without an account. To generate stills and video, add a Comfy Cloud API key to ', h('code', {}, '.env'), ' as the README explains.'),
@@ -411,7 +411,7 @@ async function render() {
 
   app.replaceChildren(
     h('header', { class: 'home-top' },
-      h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Previs'),
+      h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'video-lab'),
       h('nav', {}, DEMO ? demoBadge() : null, jobsHost,
         h('button', { class: 'home-link', type: 'button', onclick: () => openJourney() }, 'Guide'),
         h('button', { class: 'home-link', type: 'button', onclick: () => openSetup() }, 'Setup'))),
@@ -447,7 +447,7 @@ function shell() {
   if (app.childElementCount) return;
   shellShown = true;
   app.replaceChildren(
-    h('header', { class: 'home-top' }, h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'Comfy Previs')),
+    h('header', { class: 'home-top' }, h('a', { class: 'brand', href: '/' }, h('span', { class: 'brand-mark' }), 'video-lab')),
     h('main', { class: 'home is-new' }, h('section', { class: 'home-hero' }, h('div', { class: 'home-hero-copy is-shown' }, ...heroHead()), h('div', { class: 'home-hero-seam' }, h('div', { class: 'home-reel is-empty' })))));
 }
 

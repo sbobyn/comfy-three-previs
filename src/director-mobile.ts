@@ -306,7 +306,7 @@ export function initMobile(host: MobileHost): MobileApi | null {
   // ---------- Menus ----------
   function openMenu(withSteps = false) {
     const p = P();
-    actionSheet(p?.title || 'Comfy Previs', [
+    actionSheet(p?.title || 'video-lab', [
       ...(withSteps ? (['build', 'shoot', 'cut'] as Step[]).map(k => ({ label: STEP_LABEL[k] + (k === step ? ' ✓' : ''), icon: k, onPick: () => host.setStep(k) })) : []),
       { label: 'Redo', icon: 'redo', disabled: host.redoBtn.disabled, onPick: () => void host.redo() },
       { label: 'Library', icon: 'library', onPick: () => void host.openAssets() },

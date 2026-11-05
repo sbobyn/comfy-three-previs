@@ -29,7 +29,7 @@ export function diagnostics() {
   const version = typeof __PREVIS_VERSION__ === 'string' ? __PREVIS_VERSION__ : 'unknown';
   const commit = typeof __PREVIS_COMMIT__ === 'string' && __PREVIS_COMMIT__ ? ` (${__PREVIS_COMMIT__})` : '';
   return diagnosticsText({
-    'App': `Comfy Previs ${version}${commit} · ${DEMO ? 'read-only web demo' : 'local'}`,
+    'App': `video-lab ${version}${commit} · ${DEMO ? 'read-only web demo' : 'local'}`,
     'Browser': navigator.userAgent,
     'Screen': `${screen.width}×${screen.height} · window ${innerWidth}×${innerHeight} @${devicePixelRatio}x`,
     'Theme': `${root.dataset.theme || '?'} (setting: ${root.dataset.themePref || '?'})`,

@@ -1,15 +1,15 @@
 {
-  "name": "comfy-three-previs",
+  "name": "video-lab",
   "version": "0.1.0",
   "description": "Open-source AI previs: 3D blockouts, consistent cast images, gamepad & phone camera, AI video.",
   "author": "Steven Bobyn",
-  "homepage": "https://sbobyn.github.io/comfy-three-previs/",
+  "homepage": "https://sbobyn.github.io/video-lab/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sbobyn/comfy-three-previs.git"
+    "url": "git+https://github.com/sbobyn/video-lab.git"
   },
   "bugs": {
-    "url": "https://github.com/sbobyn/comfy-three-previs/issues"
+    "url": "https://github.com/sbobyn/video-lab/issues"
   },
   "private": true,
   "type": "module",
@@ -31,7 +31,7 @@
     "starters:export": "node scripts/export-starters.mjs",
     "starters:import": "node scripts/import-starters.mjs",
     "lint:blockouts": "node scripts/blender/lint-blockouts.mjs",
-    "demo:build": "VITE_DEMO=1 vite build --base=/comfy-three-previs/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs",
+    "demo:build": "VITE_DEMO=1 vite build --base=/video-lab/ --outDir dist-demo --emptyOutDir && node scripts/snapshot-demo.mjs",
     "demo:local": "bash scripts/demo-local.sh"
   },
   "devDependencies": {

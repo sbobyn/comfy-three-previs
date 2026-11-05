@@ -1,6 +1,6 @@
 # Regenerating only what changed
 
-Every blockout, still, cast image and video records what it was made from. When you change something, Previs works
+Every blockout, still, cast image and video records what it was made from. When you change something, video-lab works
 out which outputs it really affects, says why, and a batch makes only those again. It works like ComfyUI's
 cache: each step's inputs are hashed, and a step with the same inputs as a kept output is skipped.
 

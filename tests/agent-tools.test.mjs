@@ -10,7 +10,7 @@ import { setsFor } from '../shared/sheet-presets.mjs';
 import { frameArgs, frameRoutes, imageSize } from '../server/previs/frames.mjs';
 import { builtInPresets } from '../server/previs/presets.mjs';
 
-// The stdio MCP agent (server/previs/agent.mjs) against a fake Previs HTTP server: the C4 tools, their schemas and
+// The stdio MCP agent (server/previs/agent.mjs) against a fake video-lab HTTP server: the C4 tools, their schemas and
 // what they send. Contracts C1 (GET /api/jobs), C2 (render routes) and C3 (batch) are faked here.
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==', 'base64');
 const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x2d, 0x00, 0x50, 0x03, 0x01, 0x22, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01, 0xff, 0xd9]); // SOF0 80×45
@@ -233,7 +233,7 @@ test('jobs_dashboard lists stuck and uncertain jobs first with advice, and copes
   });
   await withAgent(fakePrevis(p, { jobs: 'missing' }), async ({ raw }) => {
     const [block] = await raw('previs_director_jobs_dashboard', {});
-    assert.match(block.text, /not available on this Previs server yet/);
+    assert.match(block.text, /not available on this video-lab server yet/);
   });
 });
 

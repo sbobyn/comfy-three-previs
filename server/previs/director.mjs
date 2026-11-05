@@ -665,8 +665,8 @@ export async function openDirector(root, options = {}) {
     },
     importZip: buffer => serial(async () => {
       const files = readZip(buffer);
-      let manifest; try { manifest = JSON.parse(files.get('previs-export.json')?.toString('utf8')); } catch { fail('Not a Comfy Previs project export'); }
-      if (manifest?.format !== EXPORT_FORMAT || manifest.version !== 1 || !Array.isArray(manifest.files)) fail('Not a Comfy Previs project export');
+      let manifest; try { manifest = JSON.parse(files.get('previs-export.json')?.toString('utf8')); } catch { fail('Not a video-lab project export'); }
+      if (manifest?.format !== EXPORT_FORMAT || manifest.version !== 1 || !Array.isArray(manifest.files)) fail('Not a video-lab project export');
       for (const f of manifest.files) { const data = files.get(f.name); if (!data || sha(data) !== f.sha256) fail(`Export is incomplete or changed: ${f.name}`); }
       for (const name of files.keys()) if (name !== 'previs-export.json' && !manifest.files.some(f => f.name === name)) fail(`Unexpected file in export: ${name}`);
       let p; try { p = JSON.parse(files.get('project.json').toString('utf8')); } catch { fail('Export project.json is invalid'); }
@@ -751,7 +751,7 @@ export async function openDirector(root, options = {}) {
     recordRender: (id, input, previs) => serial(async () => {
       const p = structuredClone(await load(id));
       const shot = resolveShot(p, input.shotId); if (!shot) fail('Unknown shot');
-      const origin = input.origin === 'blender' ? { origin: 'blender' } : {}; // a clip imported from Blender (blender-import.mjs), not the Previs proxies
+      const origin = input.origin === 'blender' ? { origin: 'blender' } : {}; // a clip imported from Blender (blender-import.mjs), not the video-lab proxies
       const main = previs.get();
       const asset = main.assets?.find(a => a.id === input.assetId && a.shotId === input.previsShotId && a.kind === 'video');
       if (!asset) fail('Exported video not found in the project');

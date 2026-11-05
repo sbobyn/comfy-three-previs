@@ -14,7 +14,7 @@ test('demo home: demo scenes open their projects, Run locally explains the insta
   const home = read('src/director-home.ts');
   assert.match(home, /'Explore a demo scene'/);
   assert.match(home, /'Run locally'/);
-  assert.match(home, /git clone --depth 1 --single-branch https:\/\/github\.com\/sbobyn\/comfy-three-previs\.git/, 'the README’s Quick start');
+  assert.match(home, /git clone --depth 1 --single-branch https:\/\/github\.com\/sbobyn\/video-lab\.git/, 'the README’s Quick start');
   assert.match(home, /DEMO \? h\('p', \{ class: 'home-demo-note', role: 'note' \}/, 'read-only is said before any action');
   assert.match(home, /DEMO \? null : h\('section', \{ class: 'home-section', 'aria-labelledby': 'projects-title' \}/, 'the demo has no Your projects');
   assert.match(home, /'Explore the demo scenes'/);

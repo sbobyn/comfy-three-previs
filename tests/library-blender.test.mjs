@@ -15,7 +15,7 @@ import { SHAPES } from '../shared/director.mjs';
 const FIXTURE = new URL('./fixtures/blender-handoff/shot.previs-blender/', import.meta.url);
 const withDir = async fn => { const root = await realpath(await mkdtemp(join(tmpdir(), 'previs-library-blender-'))); try { return await fn(root); } finally { await rm(root, { recursive: true, force: true }); } };
 
-/** The sidecar fields the library reads, in the export's format (objects already in Previs names; positions Z-up). */
+/** The sidecar fields the library reads, in the export's format (objects already in video-lab names; positions Z-up). */
 const sidecar = (carSize = [1.9, 1.45, 4.5]) => ({
   format: 'comfy-previs-blender-handoff', version: 1, source: { file: null, scene: 'Scene', camera: 'ShotCam', frameStart: 1, frameEnd: 12 }, fps: 24, frameCount: 12, width: 640, height: 360, axes: 'blender-z-up',
   objects: [
@@ -27,7 +27,7 @@ const sidecar = (carSize = [1.9, 1.45, 4.5]) => ({
 /** A stand-in with blender-import.mjs's reader API: readDir(path) / readZip(buffer) → { manifest }, validate(m). */
 const fakeReader = { calls: [], async readDir(path) { this.calls.push('dir'); return { manifest: JSON.parse(await readFile(join(path, BLENDER_SIDECAR), 'utf8')), frames: new Map() }; },
   readZip(buffer) { this.calls.push('zip'); return { manifest: JSON.parse(String(buffer.subarray(buffer.indexOf('{'), buffer.lastIndexOf('}') + 1))), frames: new Map() }; },
-  validate(m) { if (m?.format !== 'comfy-previs-blender-handoff') throw Object.assign(Error('Not a Blender export for Previs'), { status: 400 }); return m; } };
+  validate(m) { if (m?.format !== 'comfy-previs-blender-handoff') throw Object.assign(Error('Not a Blender export for video-lab'), { status: 400 }); return m; } };
 
 test('the library reads Blender exports with the Blender importer’s own reader, which refuses an incomplete export with a plain reason', async () => {
   assert.deepEqual(await blenderHandoffReader(), { readDir: readHandoffDir, readZip: readHandoffZip, validate: validateHandoff });
@@ -68,7 +68,7 @@ test('a Blender object becomes a sized proxy asset: shape, kind, colour, yaw and
     assert.deepEqual(fakeReader.calls, ['dir', 'dir', 'dir', 'dir', 'dir', 'zip']);
     // A sidecar the reader refuses never reaches the library.
     await writeFile(join(shot, BLENDER_SIDECAR), JSON.stringify({ ...sidecar(), format: 'something-else' }));
-    await assert.rejects(lib.importPath(shot, { object: 'Runner' }), /Not a Blender export for Previs/);
+    await assert.rejects(lib.importPath(shot, { object: 'Runner' }), /Not a Blender export for video-lab/);
   });
 });
 

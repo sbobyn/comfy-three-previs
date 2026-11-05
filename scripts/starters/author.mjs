@@ -51,7 +51,7 @@ function context(m, projectId, glbs) {
     /** Import a mannequin as a character; returns its entity (with model, source and perform). */
     async mannequin(name, { colour = 'sand', position = [0, 0, 0], rotation = 0 } = {}) {
       await h.flush();
-      await m.call('previs_import_asset', { projectId, path: glbs[colour], name, kind: 'character', place: { position, rotation }, licence: 'MIT — original procedural mannequin (scripts/starters/mannequin.mjs)', attribution: 'Comfy Previs starters' });
+      await m.call('previs_import_asset', { projectId, path: glbs[colour], name, kind: 'character', place: { position, rotation }, licence: 'MIT — original procedural mannequin (scripts/starters/mannequin.mjs)', attribution: 'video-lab starters' });
       return (await h.project()).scene.entities.find(e => e.name === name);
     },
     /** Another figure sharing an imported mannequin's file (same model, rig and clips). */

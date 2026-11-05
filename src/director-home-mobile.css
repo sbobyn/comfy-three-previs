@@ -1,4 +1,4 @@
-/* Comfy Previs — Projects page on phones and small tablets (MOBILE-DESIGN.md §3.1). Desktop (≥ 1024 px) is untouched. */
+/* video-lab — Projects page on phones and small tablets (MOBILE-DESIGN.md §3.1). Desktop (≥ 1024 px) is untouched. */
 @media (max-width: 1023px) {
   html, body { overflow-x: hidden; }
   .home-top { height: auto; min-height: 52px; padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }

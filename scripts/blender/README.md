@@ -8,7 +8,7 @@ third-party art, paid generation, textures, skinning, animation clips or Blender
 **29 of the 32 come from the [beret-parts](https://github.com/sbobyn/beret-parts) parametric library**
 (desk, light, basketball, race-car, pine, studio-camera, the court/track/floor surfaces, stands, panels, hoop parts,
 circle, lake, flag-stand, and the people: player, anchor, operator, fan). Each is a named preset of an editable family, baked in Node with no Blender.
-`scripts/blender/library-blockouts.json` lists them with family, preset, Previs shape and `minScale`. `minScale` is
+`scripts/blender/library-blockouts.json` lists them with family, preset, video-lab shape and `minScale`. `minScale` is
 the smallest starter scale per axis; the bake sizes decal gaps for it, so the coplanar lint holds at every starter scale.
 Animals and terrain (eagle, elk, terrain) stay on `generate-blockouts.py`,
 which skips the library ids. `PREVIS_BLOCKOUTS_ALL=1` rebuilds all 32 from the old Blender builders as a fallback.
@@ -20,7 +20,7 @@ wheel spin reads on camera. The rig names sides like the Blender rigs (-X is L),
 a dark frame.
 
 The people are presets of the `beret/human` family, baked at `"lod": "proxy"` (about 1,000–1,100 triangles each). Their
-recipes carry Previs's person rig (`joint_body`, `joint_head`, `joint_armL/R`, `joint_forearmL/R`, `joint_thighL/R`,
+recipes carry video-lab's person rig (`joint_body`, `joint_head`, `joint_armL/R`, `joint_forearmL/R`, `joint_thighL/R`,
 `joint_shinL/R`), pivoting at the human's own joints (`at: "joint:<id>"`), with the same -X-is-L side naming. Only the top
 uses `entity-color`; skin, hair, trousers and shoes keep the family's own materials, so a starter's entity colour tints
 the jersey or jacket, not the whole figure.
@@ -71,9 +71,9 @@ Use a private data directory with no running server, as for any starter export.
 incompatible model. Legacy projects and new primitives still render as before.
 
 Models use metres, Y up, +Z forward, a bottom-centre pivot, and the same unscaled bounds
-as `SHAPES[entity.shape]`. The generator authors in Previs axes, stores Blender `(x,-z,y)`,
+as `SHAPES[entity.shape]`. The generator authors in video-lab axes, stores Blender `(x,-z,y)`,
 and exports glTF Y up. This agrees with the thin-import pipeline's Blender `(x,y,z)` →
-Previs `(x,z,-y)` convention. No dependency on that separate rendered-frame importer.
+video-lab `(x,z,-y)` convention. No dependency on that separate rendered-frame importer.
 Terrain is the exception to proxy-box fitting: it samples `shared/terrain.mjs` on a 49×49
 grid, keeping the original heights/coordinates and applying flat slope materials.
 

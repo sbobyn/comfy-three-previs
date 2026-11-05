@@ -88,7 +88,7 @@ test('HTTP director routes and the stdio MCP agent loop', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'previs-director-'));
   const port = 15291, base = `http://127.0.0.1:${port}`;
   const server = spawn(process.execPath, ['server/previs/server.mjs'], { env: { ...process.env, PORT: String(port), PREVIS_DATA_DIR: dir, PREVIS_AGENT: 'off' }, stdio: ['ignore', 'pipe', 'pipe'] }); // [agent] test the parser/MCP paths, not the built-in runner
-  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('Comfy Previs:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
+  await new Promise((resolve, reject) => { server.stdout.on('data', d => { if (String(d).includes('video-lab:')) resolve(); }); server.once('exit', c => reject(Error('server exited ' + c))); });
   const post = async (path, body) => { const r = await fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); return { status: r.status, data: await r.json() }; };
   const agent = spawn(process.execPath, ['server/previs/agent.mjs'], { env: { ...process.env, PREVIS_URL: base }, stdio: ['pipe', 'pipe', 'ignore'] });
   try {

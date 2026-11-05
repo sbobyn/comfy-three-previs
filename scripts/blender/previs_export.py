@@ -1,9 +1,9 @@
 # Copyright (c) 2026 Steven Bobyn. SPDX-License-Identifier: MIT
-"""previs_export.py: export one Blender shot for Comfy Previs (the "thin import").
+"""previs_export.py: export one Blender shot for video-lab (the "thin import").
 
 Writes <out>/blender-previs.json (the sidecar, format "comfy-previs-blender-handoff" version 1) and
 <out>/frames/frame-000000.png ... (one 24 fps PNG per frame, rendered through the shot camera).
-Previs reads that folder with `previs_director_import_blender`, POST /api/director/import-blender, or a zip of it
+video-lab reads that folder with `previs_director_import_blender`, POST /api/director/import-blender, or a zip of it
 dropped on the home screen. See docs/blender-import.md.
 
 Run it headless:
@@ -48,7 +48,7 @@ def options():
             if i + 1 >= len(args): raise ExportError(f'previs_export: {args[i]} needs a value')
             o[key] = args[i + 1]; i += 2
     if not o['out']: raise ExportError('previs_export: pass --out /absolute/folder (or PREVIS_EXPORT = {"out": ...})')
-    if o['size'] not in ('1280x720', '640x360'): raise ExportError('previs_export: --size must be 1280x720 or 640x360 (the sizes Previs plays)')
+    if o['size'] not in ('1280x720', '640x360'): raise ExportError('previs_export: --size must be 1280x720 or 640x360 (the sizes video-lab plays)')
     for k in ('start', 'end'): o[k] = int(o[k]) if o[k] not in (None, '') else None
     o['triangles'] = int(o['triangles'])
     if not 4 <= o['triangles'] <= 20000: raise ExportError('previs_export: --triangles must be 4–20000')
@@ -114,7 +114,7 @@ def bounds_of(ob, dg):
 
 def coplanar_warnings(objects, dg, limit=6):
     """Pairs of objects with surfaces on one plane (same facing, within 1 mm, overlapping by 1 mm2 or more) and different
-    colours: they z-fight in Previs. The same check as shared/blockout-lint.mjs (rules: docs/blockout-modeling-rules.md).
+    colours: they z-fight in video-lab. The same check as shared/blockout-lint.mjs (rules: docs/blockout-modeling-rules.md).
     Two downward faces that are both the bottom of their objects (standing on one floor) are not reported."""
     tol, min_area = 0.001, 1e-6
     buckets, found = {}, {}
@@ -170,7 +170,7 @@ def coplanar_warnings(objects, dg, limit=6):
                 buckets.setdefault(key + (round(d / tol),), []).append(rec)
         finally: ev.to_mesh_clear()
     worst = sorted(found.items(), key=lambda x: -x[1])[:limit]
-    return [f'"{name_of(bpy.data.objects[a])}" and "{name_of(bpy.data.objects[b])}" share a surface ({x:.2f} m2 on one plane): they will z-fight in Previs. Never put two surfaces on the same plane: lift the decal or line 2 mm along its normal, or cut the overlap (Previs lifts a thin static one 2 mm on import)' for (a, b), x in worst]
+    return [f'"{name_of(bpy.data.objects[a])}" and "{name_of(bpy.data.objects[b])}" share a surface ({x:.2f} m2 on one plane): they will z-fight in video-lab. Never put two surfaces on the same plane: lift the decal or line 2 mm along its normal, or cut the overlap (video-lab lifts a thin static one 2 mm on import)' for (a, b), x in worst]
 
 
 def camera_key(cam, f):
@@ -182,7 +182,7 @@ def camera_key(cam, f):
 
 
 def roll_of(key):
-    """Degrees the camera's up leans away from the world-up look-at Previs uses."""
+    """Degrees the camera's up leans away from the world-up look-at video-lab uses."""
     fwd, up = Vector(key['fwd']), Vector(key['up'])
     right = fwd.cross(Vector((0, 0, 1)))
     if right.length < 1e-6: return 0.0
@@ -231,11 +231,11 @@ def prepare_out(out):
 def export_mesh(ob, dg, bounds, path, triangle_cap):
     """Bake evaluated first-frame geometry, decimate a temporary copy, write a bounded GLB without dependencies.
 
-    Coordinates are unit yaw-aligned bounds, bottom-centred, Y-up. Previs scales by its proxy base size then the
+    Coordinates are unit yaw-aligned bounds, bottom-centred, Y-up. video-lab scales by its proxy base size then the
     entity scale. Baking world transforms first preserves parents, negative scale, pitch, roll and modifiers.
     """
     mesh = bpy.data.meshes.new_from_object(ob.evaluated_get(dg), depsgraph=dg)
-    temp = bpy.data.objects.new('Previs export temporary', mesh)
+    temp = bpy.data.objects.new('video-lab export temporary', mesh)
     bpy.context.scene.collection.objects.link(temp)
     try:
         mesh.transform(ob.evaluated_get(dg).matrix_world)
@@ -245,7 +245,7 @@ def export_mesh(ob, dg, bounds, path, triangle_cap):
         mesh.calc_loop_triangles()
         count = len(mesh.loop_triangles)
         if count > triangle_cap:
-            decimate = temp.modifiers.new('Previs triangle cap', 'DECIMATE')
+            decimate = temp.modifiers.new('video-lab triangle cap', 'DECIMATE')
             decimate.ratio = max(0.00001, triangle_cap / count * 0.95)
             decimate.use_collapse_triangulate = True
         ev = temp.evaluated_get(bpy.context.evaluated_depsgraph_get())
@@ -271,7 +271,7 @@ def export_mesh(ob, dg, bounds, path, triangle_cap):
                         if bsdf: rgba = tuple(bsdf.inputs['Base Color'].default_value)
                     break
             size = len(points) * 12
-            g = {'asset': {'version': '2.0', 'generator': 'Comfy Previs'}, 'scene': 0,
+            g = {'asset': {'version': '2.0', 'generator': 'video-lab'}, 'scene': 0,
                  'scenes': [{'nodes': [0]}], 'nodes': [{'mesh': 0}],
                  'meshes': [{'primitives': [{'attributes': {'POSITION': 0, 'NORMAL': 1}, 'material': 0, 'mode': 4}]}],
                  'materials': [{'pbrMetallicRoughness': {'baseColorFactor': [max(0, min(1, v)) for v in rgba], 'metallicFactor': 0, 'roughnessFactor': 0.8}, 'doubleSided': True}],
@@ -302,13 +302,13 @@ def main():
     if abs(r.fps / r.fps_base - 24) > 1e-9: raise ExportError('previs_export: set the scene to 24 fps (or pass --fps24)')
     start, end = o['start'] or scene.frame_start, o['end'] or scene.frame_end
     n = end - start + 1
-    if not 12 <= n <= 120: raise ExportError(f'previs_export: {n} frames; Previs shots are 12-120 frames (0.5-5 s at 24 fps)')
+    if not 12 <= n <= 120: raise ExportError(f'previs_export: {n} frames; video-lab shots are 12-120 frames (0.5-5 s at 24 fps)')
     width, height = map(int, o['size'].split('x'))
     frames_dir = prepare_out(o['out'])
-    out = os.path.realpath(o['out'])  # the path Previs accepts (no symlinks, e.g. /private/tmp rather than /tmp)
+    out = os.path.realpath(o['out'])  # the path video-lab accepts (no symlinks, e.g. /private/tmp rather than /tmp)
     warnings = []
     if abs(scene.unit_settings.scale_length - 1) > 1e-6: warnings.append(f'Unit scale is {scene.unit_settings.scale_length}, not 1 m; sizes are read as metres')
-    if abs(cam.data.shift_x) > 1e-4 or abs(cam.data.shift_y) > 1e-4: warnings.append('The camera uses lens shift; Previs camera words and boxes ignore it')
+    if abs(cam.data.shift_x) > 1e-4 or abs(cam.data.shift_y) > 1e-4: warnings.append('The camera uses lens shift; video-lab camera words and boxes ignore it')
     view_layer = bpy.context.view_layer
     objects = [ob for ob in scene.objects if ob.type == 'MESH' and not ob.hide_render and ob.name in view_layer.objects and not ob.get('previs_ignore') and (not o['selected'] or ob.select_get())]
     if len(objects) > MAX_OBJECTS:
@@ -373,8 +373,8 @@ def main():
         finally: scene.frame_set(frame0)
         warnings.append('Viewport meshes are static first-frame shapes with one material; deformation stays in the Blender clip')
     rolls = [abs(roll_of(k)) for k in keys]
-    if max(rolls) > 2: warnings.append(f'The camera rolls up to {max(rolls):.1f}°; the clip keeps it, Previs camera words and boxes assume a level camera')
-    if len({k['lens'] for k in keys}) > 1: warnings.append('The lens is animated; Previs follows it per frame')
+    if max(rolls) > 2: warnings.append(f'The camera rolls up to {max(rolls):.1f}°; the clip keeps it, video-lab camera words and boxes assume a level camera')
+    if len({k['lens'] for k in keys}) > 1: warnings.append('The lens is animated; video-lab follows it per frame')
     sidecar = {
         'format': 'comfy-previs-blender-handoff', 'version': VERSION,
         'exporter': {'name': 'previs_export.py', 'version': VERSION, 'blender': bpy.app.version_string},

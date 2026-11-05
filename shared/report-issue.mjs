@@ -1,6 +1,6 @@
 // "Report a problem": the sanitizer, the diagnostics block and the prefilled GitHub issue URL, shared by the app
 // (src/director-report.ts) and the MCP tool previs_report_issue (server/previs/agent.mjs). Nothing here sends anything.
-export const REPO_URL = 'https://github.com/sbobyn/comfy-three-previs';
+export const REPO_URL = 'https://github.com/sbobyn/video-lab';
 export const NEW_ISSUE_URL = `${REPO_URL}/issues/new`;
 /** GitHub accepts long URLs, but browsers and proxies get unreliable past ~8 kB. */
 export const MAX_ISSUE_URL = 7000;
@@ -41,7 +41,7 @@ export function diagnosticsText(fields, errors = [], opts = {}) {
 export const ISSUE_TEMPLATE = '### What happened\n\n\n### What you expected\n\n\n### Steps to reproduce\n1. \n2. \n\n';
 
 export function issueBody(diagnostics, summary = '') {
-  return `${ISSUE_TEMPLATE.replace('### What happened\n\n', `### What happened\n${summary ? sanitize(summary).slice(0, 1000) + '\n' : ''}\n`)}### Diagnostics\n<!-- Collected by Comfy Previs. Review it before submitting; remove anything you do not want to share. -->\n\`\`\`\n${sanitize(diagnostics).trim().slice(0, MAX_DIAGNOSTICS)}\n\`\`\`\n`;
+  return `${ISSUE_TEMPLATE.replace('### What happened\n\n', `### What happened\n${summary ? sanitize(summary).slice(0, 1000) + '\n' : ''}\n`)}### Diagnostics\n<!-- Collected by video-lab. Review it before submitting; remove anything you do not want to share. -->\n\`\`\`\n${sanitize(diagnostics).trim().slice(0, MAX_DIAGNOSTICS)}\n\`\`\`\n`;
 }
 
 /** The prefilled new-issue URL, under max characters: the body (logs last) is cut first, then the title. */

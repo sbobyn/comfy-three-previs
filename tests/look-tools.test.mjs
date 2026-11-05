@@ -1,6 +1,6 @@
 // MCP parity for look presets (server/previs/agent-look-tools.mjs and the batch `variants` option): the stdio agent lists the
 // presets, sets a shot's or the project's look, adds single-axis variants and asks the batch for one quote, against a fake
-// Previs server whose edit route applies ops with the real director logic. Nothing is generated.
+// video-lab server whose edit route applies ops with the real director logic. Nothing is generated.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
