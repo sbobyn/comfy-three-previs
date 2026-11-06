@@ -1,4 +1,6 @@
-# Standalone video-lab — setup and architecture
+# Standalone video-lab — historical setup and architecture
+
+Historical prototype record, retained for context. For the current multi-scene Director, use the [README](../README.md), [first-use guide](first-use.md) and [maintained architecture](status.md#maintained-architecture-and-repo-map). The one-project-per-folder and fixed camera-study descriptions below refer to the legacy engine, not the current Director collection.
 
 This topic branch extends the existing three-vcam application from `b37ebb01d1232165f48a718673f9d6b4cf2836be`. It does not use Otter's server, editor, library, assistant, account, or launcher. The code, including the inherited three-vcam baseline, is MIT licensed (see THIRD_PARTY_NOTICES.md).
 

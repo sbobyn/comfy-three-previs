@@ -1,6 +1,6 @@
 # video-lab guide
 
-Build → Cast → Shoot → Generate → Cut. Open a starter on the home page to explore a finished example (cast images, design sheets, stills, a video per shot and a cut, all already made; if the blocking changed after they were made, the starter says so and marks those videos "older"), or create an empty scene. The in-app **Guide** has interactive examples; opening it never edits a project or starts a generation.
+Build → Cast → Shoot → Generate → Cut. Open a starter on the home page: some include finished media and a cut, while others focus on blockouts with selected generated showcases. If blocking changed, media may be marked "older". See the [starter inventory](../examples/starters/README.md), or create an empty scene. For a bounded review, follow [first use](first-use.md). The in-app **Guide** has interactive examples; opening it never edits a project or starts a generation.
 
 ![Home and starter projects](../public/guide/home.webp)
 
@@ -164,7 +164,7 @@ Save a cast member or a set piece once and place it in any project on this compu
 
 ## Other ways to work
 
-You can direct the same project through Claude using the MCP connector; see the [README setup](../README.md#direct-scenes-from-claude-mcp). A shot built in Blender can become a shot's blockout, with its camera, objects and rendered frames; see [Import a Blender shot](blender-import.md). Phone aiming requires local HTTPS and a trusted certificate. The public demo is read-only; generation needs a local installation.
+You can direct the same project through Claude using the MCP connector; see the [README setup](agent-setup.md). A shot built in Blender can become a shot's blockout, with its camera, objects and rendered frames; see [Import a Blender shot](blender-import.md). Phone aiming requires local HTTPS and a trusted certificate. The public demo is read-only; generation needs a local installation.
 
 ## Guide media and maintenance
 

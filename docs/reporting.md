@@ -1,0 +1,8 @@
+# Report a problem
+
+Choose **Report a problem** in the home footer, **Setup**, or the workspace's **⋯ More** menu. This works in the local app and the read-only demo. The dialog shows the sanitized text before you share it. **Copy details** copies that preview; **Open GitHub issue** opens a bounded, prefilled draft on GitHub. Opening the link sends the draft text to GitHub, but does not submit an issue. Nothing is sent automatically.
+
+Diagnostics include the app version/build, browser and screen, theme, current view, project/shot IDs when present, and up to ten recent errors or failed-request method/path/status lines. Request bodies, project content and environment values are not collected. A shared sanitizer removes recognizable keys/tokens, authorization/cookie headers, emails, URL credentials/query strings/fragments, file URLs and home-directory usernames. Redaction is best-effort: review the preview and remove anything else private. Details are bounded to 12,000 characters (with per-field/error limits); GitHub links are at most 7,000 characters and may shorten the diagnostics. Copy details retains the full bounded preview.
+
+An MCP client can call **`previs_report_issue`** with an optional `summary`. It returns sanitized diagnostics and a prefilled URL, without opening a browser or submitting anything. It includes version, OS, Node, the **names only** of configured `PREVIS_*` / `COMFY_*` settings and setup-check statuses (or “app not reachable”). No GitHub token is needed. Without a GitHub account, copy the details into an email or community chat yourself. Bug-report and feature-request templates are also available on the repository's Issues page.
+
